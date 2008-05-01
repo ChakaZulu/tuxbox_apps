@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.37 2007/10/16 10:53:13 seife Exp $
+	$Id: epgplus.cpp,v 1.38 2008/05/01 00:08:22 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -210,6 +210,8 @@ void EpgPlus::Header::paint()
 		, this->width
 		, this->font->getHeight()
 		, this->color
+		, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0
+		, CORNER_TOP
 		);
 
 	// display new text
@@ -902,7 +904,8 @@ struct button_label buttonLabels[] =
 	{ NEUTRINO_ICON_BUTTON_RED    , LOCALE_EPGPLUS_ACTIONS},
 	{ NEUTRINO_ICON_BUTTON_GREEN  , LOCALE_EPGPLUS_PAGE_DOWN},
 	{ NEUTRINO_ICON_BUTTON_YELLOW , LOCALE_EPGPLUS_PAGE_UP},
-	{ NEUTRINO_ICON_BUTTON_BLUE   , LOCALE_EPGPLUS_OPTIONS}
+	{ NEUTRINO_ICON_BUTTON_BLUE   , LOCALE_EPGPLUS_OPTIONS},
+	{ NEUTRINO_ICON_BUTTON_HELP_SMALL   , LOCALE_EPGMENU_EVENTINFO}
 };
 
 void EpgPlus::Footer::paintButtons
@@ -912,15 +915,14 @@ void EpgPlus::Footer::paintButtons
 {
   int yPos = this->y + this->getUsedHeight() - this->fontButtons->getHeight();
 
-  int buttonWidth = (this->width - 20) / 4;
+  int buttonWidth = 40;
 
-	int buttonHeight = 7 + std::min(16, this->fontButtons->getHeight());
+  int buttonHeight = 16;
 
-  this->frameBuffer->paintBoxRel(this->x, yPos, this->width, this->fontButtons->getHeight(), COL_MENUHEAD_PLUS_0);
+  this->frameBuffer->paintBoxRel(this->x, yPos, this->width, this->fontButtons->getHeight(), COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 
-  ::paintButtons(this->frameBuffer, this->fontButtons, g_Locale, this->x + 10, yPos + this->fontButtons->getHeight() - buttonHeight + 3, buttonWidth, numberOfButtons, buttonLabels);
+  ::paintButtons(this->frameBuffer, this->fontButtons, g_Locale, this->x + 10, yPos , buttonWidth, numberOfButtons, buttonLabels);
 
-  this->frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, this->x + this->width - 30, yPos - this->fontButtons->getHeight() );
 }
 
 EpgPlus::EpgPlus()

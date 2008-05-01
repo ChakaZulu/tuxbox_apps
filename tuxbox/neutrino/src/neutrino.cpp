@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.888 2008/03/13 09:45:32 dbt Exp $
+	$Id: neutrino.cpp,v 1.889 2008/05/01 00:08:19 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -304,7 +304,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.epg_old_events 	= configfile.getString("epg_old_events", "1");
 	g_settings.epg_max_events 	= configfile.getString("epg_max_events", "6000");
 	g_settings.epg_dir 		= configfile.getString("epg_dir", "");
-        // NTP-Server for sectionsd
+    
+    // NTP-Server for sectionsd
 	g_settings.network_ntpserver	= configfile.getString("network_ntpserver", "de.pool.ntp.org");
 	g_settings.network_ntprefresh	= configfile.getString("network_ntprefresh", "30" );
 	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", false);
@@ -323,6 +324,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.virtual_zap_mode		= configfile.getBool("virtual_zap_mode"          , false);
 	g_settings.infobar_show			= configfile.getInt32("infobar_show"             , 0);
 	g_settings.show_mute_icon		= configfile.getInt32("show_mute_icon"		,1);
+	g_settings.channellist_epgtext_align_right		= configfile.getBool("channellist_epgtext_align_right"          , false);
 
 	//audio
 	g_settings.audio_AnalogMode 		= configfile.getInt32( "audio_AnalogMode"        , 0 );
@@ -398,7 +400,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_Text_blue = configfile.getInt32( "infobar_Text_blue", 0x64 );
 	
 	//corners
-	g_settings.rounded_corners = configfile.getBool("rounded_corners", false);
+	g_settings.rounded_corners = configfile.getBool("rounded_corners", true);
 
 	//network
 	char cfg_key[81];
@@ -539,9 +541,9 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_channelList_pagedown = configfile.getInt32( "key_channelList_pagedown", CRCInput::RC_plus );
 	g_settings.key_channelList_cancel = configfile.getInt32( "key_channelList_cancel",  CRCInput::RC_home );
 	g_settings.key_channelList_sort = configfile.getInt32( "key_channelList_sort",  CRCInput::RC_blue );
-	g_settings.key_channelList_addrecord = configfile.getInt32( "key_channelList_addrecord",  CRCInput::RC_nokey );
-	g_settings.key_channelList_addremind = configfile.getInt32( "key_channelList_addremind",  CRCInput::RC_nokey );
-	g_settings.key_channelList_reload = configfile.getInt32( "key_channelList_reload",  CRCInput::RC_nokey );
+	g_settings.key_channelList_addrecord = configfile.getInt32( "key_channelList_addrecord",  CRCInput::RC_red );
+	g_settings.key_channelList_addremind = configfile.getInt32( "key_channelList_addremind",  CRCInput::RC_yellow );
+	g_settings.key_channelList_reload = configfile.getInt32( "key_channelList_reload",  CRCInput::RC_setup );
 
 	g_settings.key_quickzap_up = configfile.getInt32( "key_quickzap_up",  CRCInput::RC_up );
 	g_settings.key_quickzap_down = configfile.getInt32( "key_quickzap_down",  CRCInput::RC_down );
@@ -803,6 +805,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool("virtual_zap_mode"          , g_settings.virtual_zap_mode);
 	configfile.setInt32("infobar_show"             , g_settings.infobar_show);
 	configfile.setInt32("show_mute_icon"			, g_settings.show_mute_icon);
+	configfile.setBool("channellist_epgtext_align_right"                 , g_settings.channellist_epgtext_align_right);
+	
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode" , g_settings.audio_AnalogMode);
@@ -2996,14 +3000,14 @@ bool CNeutrinoApp::doShowMuteIcon()
 
 void CNeutrinoApp::paintMuteIcon( bool is_visible )
 {
-	int dx = 40;
-	int dy = 40;
+	int dx =  40;
+	int dy =  40;
 	int x = g_settings.screen_EndX-dx;
 	int y = g_settings.screen_StartY;
 
 	if ( is_visible )
 			{
-				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0);
+				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0);
 				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+4, y+4);
 			}
 			else
@@ -3053,7 +3057,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 	const int dy = 28; 	// height
 	// if you want a non-rounded volumebar, set r=0 here...
-	const int r = 12;	// radius, (about dy/2, but should be an even number)
+	const int r = g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0;	// radius
 	const int b = 4;	// border
 	const int w = 200;	// volume bar width
 	const int nw = 36;	// numbers width

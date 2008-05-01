@@ -40,6 +40,8 @@
 #include <gui/infoviewer.h>
 
 #include <gui/widget/menue.h>
+#include <gui/widget/icons.h>
+#include <gui/widget/buttons.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/screen_max.h>
@@ -49,7 +51,6 @@
 
 #include <global.h>
 #include <neutrino.h>
-
 
 CBouquetList::CBouquetList()
 {
@@ -170,7 +171,7 @@ int CBouquetList::show()
 	listmaxshow = (height-theight-0)/fheight;
 	height      = theight + listmaxshow * fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	y=(((g_settings.screen_EndY - g_settings.screen_StartY) - height) / 2) + g_settings.screen_StartY - theight/2;
 
 	if(Bouquets.size()==0)
 	{
@@ -323,13 +324,14 @@ int CBouquetList::show()
 
 void CBouquetList::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	frameBuffer->paintBackgroundBoxRel(x, y, width, height + theight);
 }
 
 
 void CBouquetList::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
+	int c_rad_small;
 
 	uint8_t    color;
 	fb_pixel_t bgcolor;
@@ -337,14 +339,16 @@ void CBouquetList::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 	}
 	else
 	{
 		color   = COL_MENUCONTENT;
 		bgcolor = COL_MENUCONTENT_PLUS_0;
+		c_rad_small = 0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor, c_rad_small);
 	if(liststart+pos<Bouquets.size())
 	{
 		CBouquet* bouq = Bouquets[liststart+pos];
@@ -361,9 +365,19 @@ void CBouquetList::paintItem(int pos)
 
 void CBouquetList::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x, y, width, theight, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, g_Locale->getText(LOCALE_BOUQUETLIST_HEAD), COL_MENUHEAD, 0, true); // UTF-8
 }
+
+struct button_label CBouquetListButtons[] =
+{
+	{ NEUTRINO_ICON_BUTTON_OKAY, LOCALE_BOUQUETLIST_BOUQUETSELECT },
+	{ NEUTRINO_ICON_BUTTON_HOME, LOCALE_LISTSCROLL_EXIT },
+	{ NEUTRINO_ICON_BUTTON_TOP,  },
+	{ NEUTRINO_ICON_BUTTON_PLUS,  },
+	{ NEUTRINO_ICON_BUTTON_DOWN,  },
+	{ NEUTRINO_ICON_BUTTON_MINUS,  }
+};
 
 void CBouquetList::paint()
 {
@@ -393,5 +407,12 @@ void CBouquetList::paint()
 	int sbc= ((Bouquets.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+
+	//footbar
+	int fy = y + theight + listmaxshow * fheight ;
+	int ButtonWith = width/3;
+	int icony = fy + theight / 2 - 12;
+	frameBuffer->paintBoxRel(x, fy, width, theight, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 4, icony, ButtonWith, sizeof(CBouquetListButtons)/sizeof(CBouquetListButtons[0]), CBouquetListButtons, width);
 }

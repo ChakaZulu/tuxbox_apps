@@ -1154,6 +1154,7 @@ void CFileBrowser::hide()
 void CFileBrowser::paintItem(unsigned int pos)
 {
 	int colwidth1, colwidth2, colwidth3, colwidth1_dir, colwidth2_dir;
+	int c_rad_small;
 	uint8_t color;
 	fb_pixel_t bgcolor;
 	int ypos = y+ theight+0 + pos*fheight;
@@ -1167,12 +1168,14 @@ void CFileBrowser::paintItem(unsigned int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 // 		paintFoot();
 	}
 	else
 	{
 		color   = COL_MENUCONTENT;//DARK;
 		bgcolor = COL_MENUCONTENT_PLUS_0;//DARK;
+		c_rad_small = 0;
 	}
 
 	if( (liststart + pos) < filelist.size() )
@@ -1196,7 +1199,7 @@ void CFileBrowser::paintItem(unsigned int pos)
 		}
 		colwidth1 = width - 35 - colwidth2 - colwidth3 - 10;
 
-		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
+		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor, c_rad_small);
 
 		if ( actual_file->Name.length() > 0 )
 		{
@@ -1287,8 +1290,7 @@ void CFileBrowser::paintItem(unsigned int pos)
 void CFileBrowser::paintHead()
 {
 	char l_name[100];
-
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
 	if(m_Mode == ModeSC)
 		snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_AUDIOPLAYER_ADD_SC), FILESYSTEM_ENCODING_TO_UTF8_STRING(name).c_str()); // UTF-8
 	else
@@ -1319,7 +1321,7 @@ void CFileBrowser::paintFoot()
 	int ty2 = by2 + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
 
 	//Background
-	frameBuffer->paintBoxRel(x, y + height - (2 * foheight ), width, (2 * foheight ), COL_INFOBAR_SHADOW_PLUS_1);
+	frameBuffer->paintBoxRel(x, y + height - (2 * foheight ), width, (2 * foheight ), COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 
 	if (!(filelist.empty()))
 	{
@@ -1376,7 +1378,7 @@ void CFileBrowser::paint()
 	int sbc= ((filelist.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 }
 
 //------------------------------------------------------------------------

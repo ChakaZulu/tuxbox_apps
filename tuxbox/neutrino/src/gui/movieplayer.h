@@ -110,6 +110,7 @@ class CMoviePlayerGui : public CMenuTarget
     ~CMoviePlayerGui();
     int exec(CMenuTarget* parent, const std::string & actionKey);
     void fileInfoStale(){if(moviebrowser != NULL)moviebrowser->fileInfoStale();};
+	std::string getMoviePlayerVersion(void);
 };
 
 

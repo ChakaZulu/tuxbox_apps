@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.16 2007/11/16 16:54:55 ecosys Exp $
+	$Id: moviebrowser.cpp,v 1.17 2008/05/01 00:08:24 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,29 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.17  2008/05/01 00:08:24  dbt
+	- add optional rounded corners in menues and most other windows, configurable in color menue, saved with themes
+	- revised buttonbars with uniformed background colors and more accurate captions
+	- revised image informations with more version informations about some modules
+	- comment lines for image infos, usefull stuff for image makers (get from ./version)
+	- motorsetup revised
+	- channel logos in infobar now possible
+	- record, swtch, epg load buttons now default activated in epglist
+	- message if is no record directory definied when using record button in epglist and epgview
+	- add more icons for user menue
+	
+	- optional abgerundete Ecken in Menues und den meisten Fenstern, schaltbar im Farbmenue, mit Themes speichebar
+	- Buttonleisten vereinhetlicht mit gleichen Hintergrundfarben und besser angepasste Beschriftungen
+	- mehr Versionsinformationen in Image Informationen
+	- Kommentarzeilen fuer Zusatzinfos bei Image Image-Informationen (geholt aus ./version)
+	- Motorsetup ueberarbeitet
+	- Senderlogos im Infobar möglich
+	- Aufnahme-, Umschalt- und aktualisierungs-Buttons jetzt standardmaessig in der EPG-Vorschau aktiviert
+	- Warnmeldung, falls kein Aufnahmeverzeichnis angegeben wurde, wenn  Aufnahme vorgemerkt werden soll
+	- weitere Icons für das Usermnue jetzt nutzbar
+	
+	special THX to Ingrid and PaulFoul for some inputs ;-)
+	
 	Revision 1.16  2007/11/16 16:54:55  ecosys
 	changed cursor focus, thx to ingrid
 	http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=346678#346678
@@ -115,6 +138,7 @@
 #include "stdlib.h"
 #include <gui/moviebrowser.h>
 #include <gui/filebrowser.h>
+#include <gui/imageinfo.h>
 #include <gui/widget/hintbox.h>
 #include <gui/widget/helpbox.h>
 #include <gui/widget/messagebox.h>
@@ -417,7 +441,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.16 2007/11/16 16:54:55 ecosys Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.17 2008/05/01 00:08:24 dbt Exp $\r\n");
 	init();
 }
 
@@ -1619,14 +1643,20 @@ void CMovieBrowser::refreshTitle(void)
 	if( m_pcWindow == NULL) return;
 	//Paint Text Background
 	//TRACE("[mb]->refreshTitle : %s\r\n",m_textTitle.c_str());
-	m_pcWindow->paintBoxRel(	m_cBoxFrameTitleRel.iX, 
+	m_pcWindow->paintBoxRel(	m_cBoxFrameTitleRel.iX , 
 								m_cBoxFrameTitleRel.iY, 
 								m_cBoxFrameTitleRel.iWidth, 
 								m_cBoxFrameTitleRel.iHeight, 
-								TITLE_BACKGROUND_COLOR);
+								TITLE_BACKGROUND_COLOR, 
+								g_settings.rounded_corners ? CORNER_RADIUS_MID : 0,
+								CORNER_TOP);
+	
+	m_pcWindow->paintIcon(NEUTRINO_ICON_EPGINFO, 
+								m_cBoxFrameTitleRel.iX+6, 
+								m_cBoxFrameTitleRel.iY+m_cBoxFrameTitleRel.iHeight/2 - 12);
 									
 	m_pcWindow->RenderString(	m_pcFontTitle,
-								m_cBoxFrameTitleRel.iX + TEXT_BORDER_WIDTH, 
+								m_cBoxFrameTitleRel.iX + TEXT_BORDER_WIDTH +30, 
 								m_cBoxFrameTitleRel.iY + m_cBoxFrameTitleRel.iHeight, 
 								m_cBoxFrameTitleRel.iWidth - TEXT_BORDER_WIDTH<<1, 
 								m_textTitle.c_str(), 
@@ -1638,12 +1668,13 @@ void CMovieBrowser::refreshTitle(void)
 /************************************************************************
 
 ************************************************************************/
-#define ADD_FOOT_HEIGHT 4
 void CMovieBrowser::refreshFoot(void) 
 {
 	//TRACE("[mb]->refreshButtonLine \r\n");
 	int	color   = (CFBWindow::color_t)COL_INFOBAR_SHADOW;
-	int	bgcolor = (CFBWindow::color_t)COL_MENUHEAD_PLUS_0;
+	int	bgcolor = (CFBWindow::color_t)COL_INFOBAR_SHADOW_PLUS_0;
+	int	c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int	footheight = m_cBoxFrameFootRel.iHeight + 4;
 
 	std::string filter_text = g_Locale->getText(LOCALE_MOVIEBROWSER_FOOT_FILTER);
 	filter_text += m_settings.filter.optionString;
@@ -1655,8 +1686,11 @@ void CMovieBrowser::refreshFoot(void)
 	m_pcWindow->paintBoxRel(	m_cBoxFrameFootRel.iX, 
 								m_cBoxFrameFootRel.iY, 
 								m_cBoxFrameFootRel.iWidth, 
-								m_cBoxFrameFootRel.iHeight,  
-								(CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
+								footheight,  
+								(CFBWindow::color_t)bgcolor,
+								c_rad_mid, 
+								CORNER_BOTTOM); 
+
 
 	int width = m_cBoxFrameFootRel.iWidth>>2;
 	
@@ -1666,24 +1700,22 @@ void CMovieBrowser::refreshFoot(void)
 	int width2 = width + width;
 	int xpos4 = xpos2 + width2;
 	int width4 = width;
-	//int xpos4 = xpos3 + width3;
-	//int width4 = width;
+	int ypos_icon = m_cBoxFrameFootRel.iY+5;
+	int ypos_buttontext = m_cBoxFrameFootRel.iY + m_cBoxFrameFootRel.iHeight + 2;
 
-	// draw Button blue (filter)
-	//xpos += ButtonWidth + ButtonSpacing;
 	// draw yellow (sort)
 	if (m_settings.gui != MB_GUI_LAST_PLAY && m_settings.gui != MB_GUI_LAST_RECORD)
 	{
-		m_pcWindow->paintBoxRel(xpos1, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), width1, m_cBoxFrameFootRel.iHeight + 4, (CFBWindow::color_t)bgcolor);
-		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos1, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1));
-		m_pcWindow->RenderString(m_pcFontFoot, xpos1 + 20, m_cBoxFrameFootRel.iY + m_cBoxFrameFootRel.iHeight + 4 , width1-30, sort_text.c_str(), (CFBWindow::color_t)color, 0, true); // UTF-8
+		m_pcWindow->paintBoxRel(xpos1, m_cBoxFrameFootRel.iY, width1, footheight, (CFBWindow::color_t)bgcolor, c_rad_mid, CORNER_BOTTOM_LEFT);
+		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos1+4, ypos_icon);
+		m_pcWindow->RenderString(m_pcFontFoot, xpos1 + 24, ypos_buttontext , width1-30, sort_text.c_str(), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
 
 	if (m_settings.gui != MB_GUI_LAST_PLAY && m_settings.gui != MB_GUI_LAST_RECORD)
 	{
-		m_pcWindow->paintBoxRel(xpos2, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), width2, m_cBoxFrameFootRel.iHeight + 4, (CFBWindow::color_t)bgcolor);
-		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, xpos2, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1));
-		m_pcWindow->RenderString(m_pcFontFoot, xpos2 + 20, m_cBoxFrameFootRel.iY + m_cBoxFrameFootRel.iHeight + 4 , width2 -30, filter_text.c_str(), (CFBWindow::color_t)color, 0, true); // UTF-8
+		m_pcWindow->paintBoxRel(xpos2, m_cBoxFrameFootRel.iY, width2, footheight, (CFBWindow::color_t)bgcolor);
+		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, xpos2, ypos_icon);
+		m_pcWindow->RenderString(m_pcFontFoot, xpos2 + 20, ypos_buttontext , width2 -30, filter_text.c_str(), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
 	//xpos += ButtonWidth + ButtonSpacing;
 	// draw 
@@ -1698,9 +1730,9 @@ void CMovieBrowser::refreshFoot(void)
 		{
 			ok_text = g_Locale->getText(LOCALE_MOVIEBROWSER_FOOT_PLAY);
 		}
-		m_pcWindow->paintBoxRel(xpos4, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), width4, m_cBoxFrameFootRel.iHeight + 4, (CFBWindow::color_t)bgcolor);
-		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, xpos4, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1));
-		m_pcWindow->RenderString(m_pcFontFoot, xpos4 + 30, m_cBoxFrameFootRel.iY + m_cBoxFrameFootRel.iHeight + 4 , width4-30, ok_text.c_str(), (CFBWindow::color_t)color, 0, true); // UTF-8
+		m_pcWindow->paintBoxRel(xpos4, m_cBoxFrameFootRel.iY, width4, footheight, (CFBWindow::color_t)bgcolor, c_rad_mid, CORNER_BOTTOM_RIGHT);
+		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, xpos4, ypos_icon-4);
+		m_pcWindow->RenderString(m_pcFontFoot, xpos4 + 30, ypos_buttontext , width4-30, ok_text.c_str(), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}	
 }
 
@@ -3632,11 +3664,14 @@ int CMenuSelector::paint(bool selected)
 }
 
 
+
 /************************************************************************
 
 ************************************************************************/
 int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 {
+	CMovieBrowser mb;
+	std::string version = "Moviebrowser: " + mb.getMovieBrowserVersion();
 	Helpbox helpbox;
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, "Sortierung Ã¤ndern");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_GREEN, "Filterfenster einblenden");
@@ -3651,7 +3686,7 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausfÃ¼hren");
 	helpbox.addLine("");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.16 $");
+	helpbox.addLine(version);
 	helpbox.addLine("by GÃ¼nther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
@@ -3828,6 +3863,13 @@ void CDirMenu::updateDirState(void)
     }
 }
 
+/************************************************************************/
+std::string CMovieBrowser::getMovieBrowserVersion(void)
+/************************************************************************/
+{	
+	static CImageInfo imageinfo;
+	return imageinfo.getModulVersion("","$Revision: 1.17 $");
+}
 
 /************************************************************************/
 void CDirMenu::show(void)
@@ -3852,9 +3894,3 @@ void CDirMenu::show(void)
   return;
 
 }
-
-
-
-
-
-

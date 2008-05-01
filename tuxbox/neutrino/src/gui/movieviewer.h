@@ -56,25 +56,28 @@ class CMovieViewer
  private:  // Variables
 	CFrameBuffer * frameBuffer;
 	
-	bool           gotTime;
+	bool			gotTime;
 	
-	int            InfoHeightY;
-	int            InfoHeightY_Info;
-	bool           isButtonBar;
-	bool           isButtonBarExtended;
+	int				InfoHeightY;
+	int				InfoHeightY_Info;
+	bool			isButtonBar;
+	bool			isButtonBarExtended;
 
-	int            BoxEndX;
-	int            BoxEndY;
-	int            BoxStartX;
-	int            BoxStartY;
-	int            BoxEndInfoY;
-	int            ButtonWidth;
+	int				BoxEndX;
+	int				BoxEndY;
+	int				BoxStartX;
+	int				BoxStartY;
+	int				BoxEndInfoY;
+	int				ButtonWidth;
+ 	int				c_rad_small;
+	int				c_rad_mid;
+	int				c_rad_large;
 
-	int            ChanWidth;
-	int            ChanHeight;
-	int            ChanInfoX;
+	int				ChanWidth;
+	int				ChanHeight;
+	int				ChanInfoX;
 
-	char           aspectRatio;
+	char			aspectRatio;
 
 	uint           sec_timer_id;
 	uint           fadeTimer;

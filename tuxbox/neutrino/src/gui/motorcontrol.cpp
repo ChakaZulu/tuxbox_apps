@@ -1,4 +1,6 @@
 /*
+	$Id: motorcontrol.cpp,v 1.21 2008/05/01 00:08:24 dbt Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Homepage: http://dbox.cyberphoria.org/
@@ -27,11 +29,16 @@
 #include <gui/motorcontrol.h>
 
 #include <driver/rcinput.h>
+#include <driver/screen_max.h>
 
 #include <gui/color.h>
 
 #include <gui/widget/menue.h>
 #include <gui/widget/messagebox.h>
+#include <gui/widget/icons.h>
+#include <gui/widget/buttons.h>
+
+#include <zapit/client/zapittools.h>
 
 #include <system/settings.h>
 
@@ -40,6 +47,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <cstring>
 #include <sys/wait.h>
 
 
@@ -48,12 +56,17 @@ CMotorControl::CMotorControl()
 	frameBuffer = CFrameBuffer::getInstance();
 	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	sheight		= g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
 
-	satfindpid = -1;
+	satfindpid = -1;	
+
+	head_height = hheight + 4;
+	status_height =  6*mheight + 4;
+	menue_height = 13*sheight;
 	
-	width = 430;
-	height = hheight + (19 * mheight) + 5;
-	if (height > 576) height = 576;
+	width = w_max (550, 30);
+	height = h_max (head_height + status_height + menue_height, 30);
+	
 	x = ((720 - width) >> 1);
 	y = (576 - height) >> 1;
 	
@@ -81,8 +94,8 @@ int CMotorControl::exec(CMenuTarget* parent, const std::string &)
 	startSatFind();
 		
 	paint();
-	paintMenu();
-	paintStatus();
+	//paintMenu();
+	//paintStatus();
 
 	while (!istheend)
 	{
@@ -334,34 +347,49 @@ void CMotorControl::hide()
 	stopSatFind();
 }
 
-void CMotorControl::paintLine(int x, int * y, int width, char * txt)
+void CMotorControl::paintLine(int x, int * y, int width, const char * txt, uint8_t color = COL_MENUCONTENT, uint8_t bgcolor = COL_MENUCONTENT_PLUS_0 )
 {
 	*y += mheight;
-	frameBuffer->paintBoxRel(x, *y - mheight, width, mheight, COL_MENUCONTENT_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, *y, width, txt, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, *y - mheight, width, mheight, bgcolor);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, *y, width, txt, color);
 }
 
-void CMotorControl::paintLine(int x, int y, int width, char * txt)
+void CMotorControl::paintLine(int x, int y, int width, const char * txt, uint8_t color = COL_MENUCONTENT)
 {
 	//frameBuffer->paintBoxRel(x, y - mheight, width, mheight, COL_MENUCONTENT_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y, width, txt, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y, width, txt, color);
 }
 
-void CMotorControl::paintSeparator(int xpos, int * ypos, int width, char * txt)
+void CMotorControl::paintSeparator(int xpos, int * ypos, int width, const char * txt)
 {
 	int stringwidth = 0;
 	int stringstartposX = 0;
+	int offset = 20;
 	
 	*ypos += mheight;
-	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1), COL_MENUCONTENT_PLUS_3);
-	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1) + 1, COL_MENUCONTENT_PLUS_1);
+	frameBuffer->paintHLineRel(xpos, width - offset, *ypos - (mheight >> 1), COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintHLineRel(xpos, width - offset, *ypos - (mheight >> 1) + 1, COL_MENUCONTENT_PLUS_1);
 	
 	stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(txt);
-	stringstartposX = 0;
-	stringstartposX = (xpos + (width >> 1)) - (stringwidth >> 1);
+	stringstartposX = (xpos + (width >> 1)) - (stringwidth >> 1)- (offset >> 1);
 	frameBuffer->paintBoxRel(stringstartposX - 5, *ypos - mheight, stringwidth + 10, mheight, COL_MENUCONTENT_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, *ypos, stringwidth, txt, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, *ypos, stringwidth, txt, COL_MENUCONTENTINACTIVE);
 }
+
+void CMotorControl::paint()
+{
+	paintHead();
+	paintStatus();
+	paintMenu();
+}
+
+void CMotorControl::paintHead()
+{
+	ypos = y;
+	frameBuffer->paintBoxRel(x, ypos, width, head_height, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x + 10, ypos + head_height-2, width, g_Locale->getText(LOCALE_MOTORCONTROL_HEAD), COL_MENUHEAD, 0, true); // UTF-8
+}
+
 
 void CMotorControl::paintStatus()
 {
@@ -372,15 +400,23 @@ void CMotorControl::paintStatus()
 	int xpos2 = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth("(a) Motor Position:");
 	int width2 = width - (xpos2 - xpos1) - 10;
 	int width1 = width - 10;
+		
+	int ypos_status = y + head_height;
 	
-	ypos = ypos_status;
-	paintSeparator(xpos1, &ypos, width, "Motor Control Settings");
+	// status background
+	frameBuffer->paintBoxRel(x, ypos_status , width, status_height, COL_MENUCONTENT_PLUS_0);
 	
-	paintLine(xpos1, &ypos, width1, "(a) Motor Position:");
+	// separator
+	paintSeparator(xpos1, &ypos_status, width, ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_MOTORCONTROL_SETTINGS)).c_str());
+	
+	// settings
+	ypos_status += mheight+2;
+	paintLine(xpos1, ypos_status, width1, "(a) Motor Position:", COL_MENUCONTENTINACTIVE);
+
 	sprintf(buf, "%d", motorPosition);
-	paintLine(xpos2, ypos, width2 , buf);
+	paintLine(xpos2, ypos_status, width2 , buf);
 	
-	paintLine(xpos1, &ypos, width1, "(b) Movement:");
+	paintLine(xpos1, &ypos_status, width1, "(b) Movement:", COL_MENUCONTENTINACTIVE);
 	switch(stepMode)
 	{
 		case STEP_MODE_ON:
@@ -393,9 +429,9 @@ void CMotorControl::paintStatus()
 			strcpy(buf, "Timed Step Mode");
 			break;
 	}
-	paintLine(xpos2, ypos, width2, buf);
+	paintLine(xpos2, ypos_status, width2, buf);
 	
-	paintLine(xpos1, &ypos, width1, "(c) Step Size:");
+	paintLine(xpos1, &ypos_status, width1, "(c) Step Size:", COL_MENUCONTENTINACTIVE);
 	switch(stepMode)
 	{
 		case STEP_MODE_ON:
@@ -409,90 +445,106 @@ void CMotorControl::paintStatus()
 			strcat(buf, " milliseconds");
 			break;
 	}
-	paintLine(xpos2, ypos, width2, buf);
+	paintLine(xpos2, ypos_status, width2, buf);
 	
-	paintSeparator(xpos1, &ypos, width, "Status");
+	
+	// status
+	paintSeparator(xpos1, &ypos_status, width, "Status");
 	strcpy(buf, "Satellite Position (Step Mode): ");
 	sprintf(buf2, "%d", satellitePosition);
 	strcat(buf, buf2);
-	paintLine(xpos1, &ypos, width1, buf);
-	
+	paintLine(xpos1, &ypos_status, width1, buf, COL_MENUCONTENTINACTIVE);
 }
 
-void CMotorControl::paint()
+struct button_label CMotorControlMenueButtons1[3] =
 {
-	ypos = y;
-	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x + 10, ypos + hheight, width, g_Locale->getText(LOCALE_MOTORCONTROL_HEAD), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0);
+	{ NEUTRINO_ICON_BUTTON_0			,	 }, // empty caption
+	{ NEUTRINO_ICON_BUTTON_OKAY		,  LOCALE_MOTORCONTROL_USER_MENUE },
+	{ NEUTRINO_ICON_BUTTON_HOME	,  LOCALE_MOTORCONTROL_EXIT }
+};
 
-	ypos += hheight + (mheight >> 1) - 10;
-	ypos_menue = ypos;
-}
+const struct button_label CMotorControlMenueButtons2[2] =
+{
+	{ NEUTRINO_ICON_BUTTON_LEFT  ,	LOCALE_MOTORCONTROL_STEP_DRIVE_MOTOR_EAST },
+	{ NEUTRINO_ICON_BUTTON_RIGHT, 	LOCALE_MOTORCONTROL_STEP_DRIVE_MOTOR_WEST }
+};
+
+const struct button_label CMotorControlMenueButtons3[1] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED   ,		LOCALE_MOTORCONTROL_STEP_DRIVE_MOTOR_HALT }
+};
+
+struct button_label CMotorControlMenueButtons4[9] =
+{
+	{ NEUTRINO_ICON_BUTTON_4       ,		LOCALE_MOTORCONTROL_SET_WEST_SOFT_LIMIT },
+	{ NEUTRINO_ICON_BUTTON_5       ,		LOCALE_MOTORCONTROL_DISABLE_SOFT_LIMITS },
+	{ NEUTRINO_ICON_BUTTON_6       ,		LOCALE_MOTORCONTROL_SET_EAST_SOFT_LIMIT },
+	{ NEUTRINO_ICON_BUTTON_7       ,		LOCALE_MOTORCONTROL_GOTO_REFERENCE_POSITION },
+	{ NEUTRINO_ICON_BUTTON_8       ,		LOCALE_MOTORCONTROL_ENABLE_SOFT_LIMITS },
+	{ NEUTRINO_ICON_BUTTON_9       ,		LOCALE_MOTORCONTROL_RE_CALCULATE_POSITIONS }
+};
+
+const struct button_label CMotorControlMenueButtons5[3] =
+{
+	{ NEUTRINO_ICON_BUTTON_TOP	  ,		LOCALE_MOTORCONTROL_INCREASE_MOTOR_POSITION},
+	{ NEUTRINO_ICON_BUTTON_DOWN ,	LOCALE_MOTORCONTROL_DECREASE_MOTOR_POSITION},
+	{ NEUTRINO_ICON_BUTTON_BLUE  ,		LOCALE_MOTORCONTROL_SWITCH_STEP_DRIVE_MODE}
+};
 
 void CMotorControl::paintMenu()
 {
+	ypos_menue = y + head_height + status_height;
+	int buttonwidth = width/2;
+	int xposButton = x + 10;
+	int font = SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL;
 	
-	ypos = ypos_menue;
+	// rc menue head 
+	frameBuffer->paintBoxRel(x, ypos_menue, width, mheight, COL_MENUHEAD_PLUS_0);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x + 10, ypos_menue+mheight, width, g_Locale->getText(LOCALE_MOTORCONTROL_RC_MENUEHEAD), COL_MENUHEAD, 0, true); // UTF-8
+
+	// rc menue background
+	ypos_menue += mheight;
+	frameBuffer->paintBoxRel(x, ypos_menue , width, menue_height-mheight, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 	
-	int xpos1 = x + 10;
-	int xpos2 = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth("(7/yellow)");
-	int width2 = width - (xpos2 - xpos1) - 10;
-	int width1 = width - 10;
+	// paint 0/OK and menue caption user menue usr installer menue
+	CMotorControlMenueButtons1[1].locale = (installerMenue ? LOCALE_MOTORCONTROL_USER_MENUE : LOCALE_MOTORCONTROL_INSTALLER_MENUE);
+	ypos_menue += 10;
 	
-	paintLine(xpos1, &ypos, width1, "(0/OK)");
-	(installerMenue ? paintLine(xpos2, ypos, width2, "User Menue") : paintLine(xpos2, ypos, width2, "Installer Menue"));
-	paintLine(xpos1, &ypos, width1, "(1/right)");
-	paintLine(xpos2, ypos, width2, "Step/Drive Motor West (b,c)");
-	paintLine(xpos1, &ypos, width1, "(2/red)");
-	paintLine(xpos2, ypos, width2, "Halt Motor");
-	paintLine(xpos1, &ypos, width1, "(3/left)");
-	paintLine(xpos2, ypos, width2, "Step/Drive Motor East (b,c)");
+	// buttons 0 / Ok / home
+	::paintButtons(frameBuffer, g_Font[font], g_Locale, xposButton, ypos_menue, buttonwidth-28, 3, CMotorControlMenueButtons1);
 	
+	// buttons left / right
+	ypos_menue += mheight;
+	::paintButtons(frameBuffer, g_Font[font], g_Locale, xposButton, ypos_menue, buttonwidth,2, CMotorControlMenueButtons2);
+	
+	// button red
+	ypos_menue += mheight;
+	::paintButtons(frameBuffer, g_Font[font], g_Locale, xposButton, ypos_menue, buttonwidth,1, CMotorControlMenueButtons3);
+	
+	// variant buttons	
 	if (installerMenue)
-	{
-		paintLine(xpos1, &ypos, width1, "(4)");
-		paintLine(xpos2, ypos, width2, "Set West (soft) Limit");
-		paintLine(xpos1, &ypos, width1, "(5)");
-		paintLine(xpos2, ypos, width2, "Disable (soft) Limits");
-		paintLine(xpos1, &ypos, width1, "(6)");
-		paintLine(xpos2, ypos, width2, "Set East (soft) Limit");
-		paintLine(xpos1, &ypos, width1, "(7)");
-		paintLine(xpos2, ypos, width2, "Goto Reference Position");
-		paintLine(xpos1, &ypos, width1, "(8)");
-		paintLine(xpos2, ypos, width2, "Enable (soft) Limits");
-		paintLine(xpos1, &ypos, width1, "(9)");
-		paintLine(xpos2, ypos, width2, "(Re)-Calculate Positions");
-		paintLine(xpos1, &ypos, width1, "(+/up)");
-		paintLine(xpos2, ypos, width2, "Increase Motor Position (a)");
-		paintLine(xpos1, &ypos, width1, "(-/down)");
-		paintLine(xpos2, ypos, width2, "Decrease Motor Position (a)");
-		paintLine(xpos1, &ypos, width1, "(blue)");
-		paintLine(xpos2, ypos, width2, "Switch Step/Drive Mode (b)");
-	}
+	 {
+		 CMotorControlMenueButtons4[0].locale = LOCALE_MOTORCONTROL_SET_WEST_SOFT_LIMIT;
+		 CMotorControlMenueButtons4[1].locale = LOCALE_MOTORCONTROL_DISABLE_SOFT_LIMITS;
+		 CMotorControlMenueButtons4[2].locale = LOCALE_MOTORCONTROL_ENABLE_SOFT_LIMITS;
+		 CMotorControlMenueButtons4[3].locale = LOCALE_MOTORCONTROL_GOTO_REFERENCE_POSITION;
+		 CMotorControlMenueButtons4[4].locale = LOCALE_MOTORCONTROL_ENABLE_SOFT_LIMITS;		 
+		 CMotorControlMenueButtons4[5].locale = LOCALE_MOTORCONTROL_RE_CALCULATE_POSITIONS;		 
+	 }
 	else
 	{
-		paintLine(xpos1, &ypos, width1, "(4)");
-		paintLine(xpos2, ypos, width2, "not defined");
-		paintLine(xpos1, &ypos, width1, "(5/green)");
-		paintLine(xpos2, ypos, width2, "Store Motor Position (a)");
-		paintLine(xpos1, &ypos, width1, "(6)");
-		paintLine(xpos2, ypos, width2, "Increase Step Size (c)");
-		paintLine(xpos1, &ypos, width1, "(7/yellow)");
-		paintLine(xpos2, ypos, width2, "Goto Motor Position (a)");
-		paintLine(xpos1, &ypos, width1, "(8)");
-		paintLine(xpos2, ypos, width2, "not defined");
-		paintLine(xpos1, &ypos, width1, "(9)");
-		paintLine(xpos2, ypos, width2, "Decrease Step Size (c)");
-		paintLine(xpos1, &ypos, width1, "(+/up)");
-		paintLine(xpos2, ypos, width2, "Increase Motor Position (a)");
-		paintLine(xpos1, &ypos, width1, "(-/down)");
-		paintLine(xpos2, ypos, width2, "Decrease Motor Position (a)");
-		paintLine(xpos1, &ypos, width1, "(blue)");
-		paintLine(xpos2, ypos, width2, "Switch Step/Drive Mode (b)");	
-	}
-	
-	ypos_status = ypos;
+		CMotorControlMenueButtons4[0].locale = LOCALE_MOTORCONTROL_NOT_DEFINED;
+		CMotorControlMenueButtons4[1].locale = LOCALE_MOTORCONTROL_STORE_MOTOR_POSITION;
+		CMotorControlMenueButtons4[2].locale = LOCALE_MOTORCONTROL_INCREASE_STEP_SIZE;
+		CMotorControlMenueButtons4[3].locale = LOCALE_MOTORCONTROL_GOTO_MOTOR_POSITION;
+		CMotorControlMenueButtons4[4].locale = LOCALE_MOTORCONTROL_NOT_DEFINED;		
+		CMotorControlMenueButtons4[5].locale = LOCALE_MOTORCONTROL_DECREASE_STEP_SIZE;
+	 }
+	ypos_menue += mheight;
+ 	::paintButtons(frameBuffer, g_Font[font], g_Locale, xposButton, ypos_menue, buttonwidth, 6, CMotorControlMenueButtons4, width, true); //vertical	 
+	 
+	//ypos_menue += mheight;
+	::paintButtons(frameBuffer, g_Font[font], g_Locale, xposButton+buttonwidth, ypos_menue, buttonwidth, 3, CMotorControlMenueButtons5, width, true); //vertical
 }
 
 void CMotorControl::startSatFind(void)
@@ -529,7 +581,3 @@ void CMotorControl::stopSatFind(void)
 		satfindpid = -1;
 	}
 }
-
-
-
-

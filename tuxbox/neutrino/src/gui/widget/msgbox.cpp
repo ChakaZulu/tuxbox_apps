@@ -1,4 +1,6 @@
 /*
+	$id$
+	
 	Neutrino-GUI  -   DBoxII-Project
 
  	Homepage: http://dbox.cyberphoria.org/
@@ -53,8 +55,8 @@
 #include <gui/widget/icons.h>
 #include <neutrino.h>
 
-#define WINDOW_FRAME_BORDER_WIDTH	4
-#define ADD_FOOT_HEIGHT	 		20
+#define WINDOW_FRAME_BORDER_WIDTH	SHADOW_OFFSET
+#define ADD_FOOT_HEIGHT	 		14
 #define	TEXT_BORDER_WIDTH		8
 #define	TITLE_ICON_WIDTH		(40 - TEXT_BORDER_WIDTH)
 
@@ -333,7 +335,9 @@ void CMsgBox::refreshFoot(void)
 					m_cBoxFrameFootRel.iY,
 					m_cBoxFrameFootRel.iWidth,
 					m_cBoxFrameFootRel.iHeight,
-					(CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
+					COL_INFOBAR_SHADOW_PLUS_1,
+					g_settings.rounded_corners ? CORNER_RADIUS_MID : 0,
+					CORNER_BOTTOM);
 
 	// 	const char* text;//unused variable
 
@@ -341,6 +345,7 @@ void CMsgBox::refreshFoot(void)
 	int ButtonWidth = 20 + 33 + MaxButtonTextWidth;
 	int ButtonSpacing = (m_cBoxFrameFootRel.iWidth - 20- (ButtonWidth*3) ) / 2;
 	int xpos = m_cBoxFrameFootRel.iX;
+	int corner = CORNER_TOP+CORNER_BOTTOM;
 
 	// draw Button mbYes
 	if (m_nFootButtons & mbYes)
@@ -355,7 +360,7 @@ void CMsgBox::refreshFoot(void)
 			color   = COL_INFOBAR_SHADOW;
 			bgcolor = COL_INFOBAR_SHADOW_PLUS_0;
 		}
-		m_pcWindow->paintBoxRel(xpos, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), ButtonWidth, m_nFontFootHeight + 4, (CFBWindow::color_t)bgcolor);
+		m_pcWindow->paintBoxRel(xpos, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), ButtonWidth, m_nFontFootHeight + 2, (CFBWindow::color_t)bgcolor, CORNER_RADIUS_SMALL, corner);
 		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos + 14, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1));
 		m_pcWindow->RenderString(m_pcFontFoot, xpos + 43, m_cBoxFrameFootRel.iY + m_nFontFootHeight + 4 + (ADD_FOOT_HEIGHT>>1), ButtonWidth - 53, g_Locale->getText(LOCALE_MESSAGEBOX_YES), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
@@ -376,7 +381,7 @@ void CMsgBox::refreshFoot(void)
 			bgcolor = COL_INFOBAR_SHADOW_PLUS_0;
 		}
 
-		m_pcWindow->paintBoxRel(xpos, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), ButtonWidth, m_nFontFootHeight + 4, (CFBWindow::color_t)bgcolor);
+		m_pcWindow->paintBoxRel(xpos, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), ButtonWidth, m_nFontFootHeight + 2, (CFBWindow::color_t)bgcolor, CORNER_RADIUS_SMALL, corner);
 		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, xpos + 14, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1));
 		m_pcWindow->RenderString(m_pcFontFoot, xpos + 43, m_cBoxFrameFootRel.iY + m_nFontFootHeight + 4 + (ADD_FOOT_HEIGHT>>1), ButtonWidth- 53, g_Locale->getText(LOCALE_MESSAGEBOX_NO), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
@@ -397,7 +402,7 @@ void CMsgBox::refreshFoot(void)
 			bgcolor = COL_INFOBAR_SHADOW_PLUS_0;
 		}
 
-		m_pcWindow->paintBoxRel(xpos, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), ButtonWidth, m_nFontFootHeight + 4, (CFBWindow::color_t)bgcolor);
+		m_pcWindow->paintBoxRel(xpos, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1), ButtonWidth, m_nFontFootHeight + 2, (CFBWindow::color_t)bgcolor, CORNER_RADIUS_SMALL, corner);
 		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_HOME, xpos+10, m_cBoxFrameFootRel.iY + (ADD_FOOT_HEIGHT>>1));
 		m_pcWindow->RenderString(m_pcFontFoot, xpos + 43, m_cBoxFrameFootRel.iY + m_nFontFootHeight + 2 + (ADD_FOOT_HEIGHT>>1), ButtonWidth- 53, g_Locale->getText((m_nFootButtons & mbCancel) ? LOCALE_MESSAGEBOX_CANCEL : LOCALE_MESSAGEBOX_BACK), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
@@ -421,7 +426,9 @@ void CMsgBox::refreshTitle(void)
 					m_cBoxFrameTitleRel.iY,
 					m_cBoxFrameTitleRel.iWidth,
 					m_cBoxFrameTitleRel.iHeight,
-					(CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
+					(CFBWindow::color_t)COL_MENUHEAD_PLUS_0,
+					g_settings.rounded_corners ? CORNER_RADIUS_MID : 0,
+					CORNER_TOP);
 
 	if (!m_cIcon.empty())
 	{
@@ -602,8 +609,9 @@ void CMsgBox::refresh(void)
 	
 	//re-draw message box window
 	refreshTitle();
+	//refreshBorder();
 	refreshFoot();
-	refreshBorder();
+	
 
 	// rep-draw textbox if there is one
 	if(m_pcTextBox != NULL)

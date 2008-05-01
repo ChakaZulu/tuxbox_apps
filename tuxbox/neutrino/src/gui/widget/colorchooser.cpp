@@ -72,7 +72,7 @@ CColorChooser::CColorChooser(const neutrino_locale_t Name, unsigned char *R, uns
 	observer = Observer;
 	name = Name;
 	width = 360;
-	height = hheight+ mheight* 4;
+	height = hheight + mheight * 4 + 4;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 
@@ -219,9 +219,10 @@ void CColorChooser::hide()
 
 void CColorChooser::paint()
 {
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD_PLUS_0);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad_mid,  CORNER_BOTTOM);
 
 	for (int i = 0; i < 4; i++)
 		paintSlider(x + 10, y + hheight + mheight * i, value[i], colorchooser_names[i], iconnames[i], (i == 0));

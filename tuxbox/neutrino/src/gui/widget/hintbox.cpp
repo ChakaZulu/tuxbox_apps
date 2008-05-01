@@ -39,8 +39,6 @@
 #include <global.h>
 #include <neutrino.h>
 
-#define borderwidth 4
-
 #define HINTBOX_MAX_HEIGHT 420
 
 
@@ -135,8 +133,8 @@ void CHintBox::paint(void)
 
 	window = new CFBWindow((((g_settings.screen_EndX- g_settings.screen_StartX) - width ) >> 1) + g_settings.screen_StartX,
 			       (((g_settings.screen_EndY- g_settings.screen_StartY) - height) >> 2) + g_settings.screen_StartY,
-			       width + borderwidth,
-			       height + borderwidth);
+			       width + SHADOW_OFFSET,
+			       height + SHADOW_OFFSET);
 	refresh();
 }
 
@@ -147,10 +145,10 @@ void CHintBox::refresh(void)
 		return;
 	}
 
-	window->paintBoxRel(borderwidth, height, width, borderwidth, COL_INFOBAR_SHADOW);
-	window->paintBoxRel(width, borderwidth, borderwidth, height - borderwidth, COL_INFOBAR_SHADOW);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 
-	window->paintBoxRel(0, 0, width, theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
+	window->paintBoxRel(SHADOW_OFFSET, SHADOW_OFFSET, width, (entries_per_page + 1) * fheight + theight, (CFBWindow::color_t)COL_INFOBAR_SHADOW, c_rad_mid);
+	window->paintBoxRel(0, 0, width, theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0, c_rad_mid , CORNER_TOP);
 
 	if (!iconfile.empty())
 	{
@@ -159,8 +157,7 @@ void CHintBox::refresh(void)
 	}
 	else
 		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE], 10, theight, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
-
-	window->paintBoxRel(0, theight, width, (entries_per_page + 1) * fheight, (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0);
+		window->paintBoxRel(0, theight, width, (entries_per_page + 1) * fheight, (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0, c_rad_mid , CORNER_BOTTOM);
 
 	int count = entries_per_page;
 	int ypos  = theight + (fheight >> 1);
@@ -171,8 +168,8 @@ void CHintBox::refresh(void)
 	if (entries_per_page < line.size())
 	{
 		ypos = theight + (fheight >> 1);
-		window->paintBoxRel(width - 15, ypos                             , 15, entries_per_page * fheight, COL_MENUCONTENT_PLUS_1);
-		unsigned int marker_size = (entries_per_page * fheight) / ((line.size() + entries_per_page - 1) / entries_per_page);
+		window->paintBoxRel(width - 15, ypos, 15, (entries_per_page * fheight) + 16, COL_MENUCONTENT_PLUS_1);
+		unsigned int marker_size = ((entries_per_page * fheight) + 16) / ((line.size() + entries_per_page - 1) / entries_per_page);
 		window->paintBoxRel(width - 13, ypos + current_page * marker_size, 11, marker_size               , COL_MENUCONTENT_PLUS_3);
 	}
 }

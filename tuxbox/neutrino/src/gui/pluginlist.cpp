@@ -243,13 +243,15 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 
 void CPluginList::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x,y, width+15,height);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	frameBuffer->paintBackgroundBoxRel(x, y, width + 15, height + ((c_rad_mid * 2) + 1));
 }
 
 void CPluginList::paintItem(int pos)
 {
 	int ypos = (y+theight) + pos*fheight;
 	int itemheight = fheight;
+	int c_rad_small;
 
 	uint8_t    color   = COL_MENUCONTENT;
 	fb_pixel_t bgcolor = COL_MENUCONTENT_PLUS_0;
@@ -257,6 +259,7 @@ void CPluginList::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 	}
 
 	if(liststart+pos==0)
@@ -273,7 +276,7 @@ void CPluginList::paintItem(int pos)
 			frameBuffer->paintBoxRel(x,ypos+itemheight, width, (fheight / 2)-15, COL_MENUCONTENT_PLUS_0);
 
 	}
-	frameBuffer->paintBoxRel(x, ypos, width, itemheight, bgcolor);
+	frameBuffer->paintBoxRel(x, ypos, width, itemheight, bgcolor, c_rad_small);
 
 
 	if(liststart+pos<pluginlist.size())
@@ -286,10 +289,14 @@ void CPluginList::paintItem(int pos)
 
 void CPluginList::paintHead()
 {
-	if(listmaxshow > pluginlist.size()+1)
-		frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD_PLUS_0);
-	else
-		frameBuffer->paintBoxRel(x,y, width+15,theight, COL_MENUHEAD_PLUS_0);
+	int sb_width = 0;
+	if(listmaxshow <= pluginlist.size()+1)
+		sb_width=15;
+
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+
+	frameBuffer->paintBoxRel(x, y + height - ((c_rad_mid * 2) + 1) + (c_rad_mid / 3 * 2), width + sb_width, ((c_rad_mid * 2) + 1), COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x, y, width + sb_width, theight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 
 	if(pluginlisttype == CPlugins::P_TYPE_GAME)
 	{
@@ -333,7 +340,7 @@ void CPluginList::paintItems()
 		int nrOfPages = ((pluginlist.size()-1) / listmaxshow)+1; 
 		int currPage  = (liststart/listmaxshow) +1;
 		frameBuffer->paintBoxRel(x+width, y+theight, 15, height-theight,  COL_MENUCONTENT_PLUS_1);
-		frameBuffer->paintBoxRel(x+ width +2, y+theight+2+(currPage-1)*(height-theight-4)/nrOfPages, 11, (height-theight-4)/nrOfPages, COL_MENUCONTENT_PLUS_3);
+		frameBuffer->paintBoxRel(x+ width +2, y+theight+2+(currPage-1)*(height-theight-4)/nrOfPages, 11, (height-theight-4)/nrOfPages, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 	}
 	
    for(unsigned int count=0;count<listmaxshow;count++)
@@ -365,4 +372,3 @@ CPluginList::result_ CPluginChooser::pluginSelected()
 	strcpy(selected_plugin,g_PluginList->getFileName(pluginlist[selected]->number));
 	return CPluginList::close;
 }
-

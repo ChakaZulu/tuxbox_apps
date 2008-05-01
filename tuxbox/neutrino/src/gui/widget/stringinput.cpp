@@ -431,10 +431,10 @@ const char * CStringInput::getHint1(void)
 
 void CStringInput::paint()
 {
-	int iconoffset;
+	int iconoffset, c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 
-	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0);
-	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 
 	if (!(iconfile.empty()))
 	{
@@ -481,8 +481,9 @@ void CStringInput::paintChar(int pos, const char c)
 		bgcolor = COL_MENUCONTENT_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT_PLUS_4);
-	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, bgcolor);
+	int c_rad_small =g_settings.rounded_corners ? 3 : 0;
+	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT_PLUS_4, c_rad_small);
+	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, bgcolor, c_rad_small);
 
 	int xfpos = xpos + ((xs- g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(ch))>>1);
 
@@ -646,10 +647,10 @@ void CStringInputSMS::paint()
 
 	frameBuffer->paintIcon("numericpad.raw", x+20+140, y+ hheight+ mheight+ iheight* 3+ 30, COL_MENUCONTENT);
 
-	frameBuffer->paintBoxRel(x,y+height-25, width,25, COL_INFOBAR_SHADOW_PLUS_1);
-	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW_PLUS_0);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	frameBuffer->paintBoxRel(x, y + height - 25, width, 25, COL_INFOBAR_SHADOW_PLUS_1, c_rad_mid, CORNER_BOTTOM);
 
-	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 8, y+height-25+4, 230, 2, CStringInputSMSButtons);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 8, y+height-25, 230, 2, CStringInputSMSButtons);
 }
 
 void CPINInput::paintChar(int pos)

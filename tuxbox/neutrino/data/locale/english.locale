@@ -197,6 +197,7 @@ bouqueteditor.add Add
 bouqueteditor.bouquetname Name of bouquets
 bouqueteditor.delete Delete
 bouqueteditor.discardingchanges Discarding changes. Please be patient.
+bouqueteditor.head Bouqueteditor
 bouqueteditor.hide Hide
 bouqueteditor.lock Lock
 bouqueteditor.move Move
@@ -207,9 +208,13 @@ bouqueteditor.return ready
 bouqueteditor.savechanges? Do you want to save the changes?
 bouqueteditor.savingchanges Saving changes. Please wait...
 bouqueteditor.switch add/remove
+bouqueteditor.switch_to_channel Switch to channel
 bouqueteditor.switchmode TV/Radio
+bouquetlist.bouquetselect Bouquet select
 bouquetlist.head Bouquets
 cablesetup.provider cable provider
+channellist.epgtext_align_left left
+channellist.epgtext_align_right right
 channellist.head All Services
 channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
 channellist.since since %02d:%02d
@@ -226,7 +231,7 @@ colormenu.gtx_alpha Transparency (GTX)
 colormenu.head Color Settings
 colormenu.menucolors Menu Colors
 colormenu.rounded_corners Shape of corners
-colormenu.rounded_corners_off default
+colormenu.rounded_corners_off angular
 colormenu.rounded_corners_on rounded
 colormenu.statusbar Infobar
 colormenu.textcolor Textcolor
@@ -283,6 +288,7 @@ epgextended.guests Guests
 epgextended.original_title Original Title
 epgextended.presenter Presenter
 epgextended.year_of_production Year of Production
+epglist.error_no_recorddir_msg Timer can not be saved. \nNo record directory definied!
 epglist.head Event-list - %s
 epglist.noevents EPG is not available...
 epgviewer.More_Screenings More Screenings on this Channel
@@ -351,6 +357,7 @@ flashupdate.getupdatefile getting update
 flashupdate.getupdatefileerror can't get update
 flashupdate.globalprogress Global Progress:
 flashupdate.head Software Update
+flashupdate.imagename Image
 flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors
 flashupdate.msgbox Found the following new update:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to download and install this version now?
@@ -425,12 +432,12 @@ imageinfo.cvslevel CVS-Level:
 imageinfo.date Date:
 imageinfo.details revisions
 imageinfo.dokumentation Documentation:
+imageinfo.exit Exit
 imageinfo.forum Forum:
 imageinfo.head Image Information
 imageinfo.homepage Homepage:
 imageinfo.image Image:
 imageinfo.imagetype Imagetype:
-imageinfo.info Info:
 imageinfo.license license
 imageinfo.noteflashtype Consider the necessary flashtype for your d-box (1x or 2x)
 imageinfo.partitions partitions
@@ -488,7 +495,7 @@ keybindingmenu.pagedown_head Keysetup page down
 keybindingmenu.pageup page up
 keybindingmenu.pageup_head Keysetup page up
 keybindingmenu.quickzap Quickzap
-keybindingmenu.reload reload
+keybindingmenu.reload Refresh
 keybindingmenu.reload_head reload EPG
 keybindingmenu.repeatblock Repeat Delay
 keybindingmenu.repeatblockgeneric Generic Delay
@@ -526,6 +533,9 @@ lcdmenu.statusline.both volume / playtime
 lcdmenu.statusline.both_audio volume / playtime / audio
 lcdmenu.statusline.playtime playtime
 lcdmenu.statusline.volume volume
+listscroll.down down
+listscroll.exit exit
+listscroll.up up
 mainmenu.audioplayer Audioplayer
 mainmenu.clearsectionsd Clear EPG Cache
 mainmenu.games Games
@@ -568,6 +578,8 @@ messagebox.error Error
 messagebox.info Information
 messagebox.no No
 messagebox.yes Yes
+miscsettings.channellist Channellist
+miscsettings.channellist_epgtext_align Programtext Align
 miscsettings.epg_cache EPG-Cache (Days)
 miscsettings.epg_cache_hint1 How long will EPG-Data in the future cached?
 miscsettings.epg_cache_hint2 Set in days.
@@ -600,7 +612,30 @@ miscsettings.shutdown_real_rcdelay Delayed Shutdown
 miscsettings.tuxtxt_cache TuxText Cache
 miscsettings.virtual_zap_mode Virtual zap by infobar
 miscsettings.volumebar_disp_pos Volumebar
+motorcontrol.decrease_motor_position Decrease Motor Position (a)
+motorcontrol.decrease_step_size Decrease Step Size (c)
+motorcontrol.disable_soft_limits Disable (soft) Limits
+motorcontrol.enable_soft_limits Enable (soft) Limits
+motorcontrol.exit Exit
+motorcontrol.goto_motor_position Goto Motor Position (a)
+motorcontrol.goto_reference_position Goto Reference Position
 motorcontrol.head Motor-Setup
+motorcontrol.increase_motor_position Increase Motor Position (a)
+motorcontrol.increase_step_size Increase Step Size (c)
+motorcontrol.installer_menue Installer Menue
+motorcontrol.not_defined Not Defined
+motorcontrol.rc_menuehead RC-Menue
+motorcontrol.re_calculate_positions (Re)-Calculate Positions
+motorcontrol.set_east_soft_limit Set East (soft) Limit
+motorcontrol.set_west_soft_limit Set West (soft) Limit
+motorcontrol.settings Settings Motorcontrol
+motorcontrol.status Status
+motorcontrol.step_drive_motor_east Step/Drive Motor Ost (b,c)
+motorcontrol.step_drive_motor_halt Halt Motor
+motorcontrol.step_drive_motor_west Step/Drive Motor West (b,c)
+motorcontrol.store_motor_position Store Motor Position
+motorcontrol.switch_step_drive_mode Switch Step/Drive Mode (b)
+motorcontrol.user_menue User Menue
 moviebrowser.book_clear_all Clear all
 moviebrowser.book_head Bookmarks
 moviebrowser.book_lastmoviestop Last play stop:

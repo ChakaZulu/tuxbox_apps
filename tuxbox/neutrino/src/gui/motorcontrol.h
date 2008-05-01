@@ -52,7 +52,10 @@ class CMotorControl : public CMenuTarget
 		int y;
 		int width;
 		int height;
-		int hheight,mheight; // head/menu font height
+		int hheight,mheight,sheight; // head/menu font height
+		int head_height;
+		int menue_height;
+		int status_height;
 		int ypos;
 		int ypos_status;
 		int ypos_menue;
@@ -66,11 +69,12 @@ class CMotorControl : public CMenuTarget
 		int satfindpid;
 
 		void paint();
+		void paintHead();
 		void paintMenu(void);
 		void paintStatus(void);
-		void paintLine(int x, int * y, int width, char * txt);
-		void paintLine(int x, int y, int width, char * txt);
-		void paintSeparator(int xpos, int * ypos, int width, char * txt);
+		void paintLine(int x, int * y, int width, const char * txt, uint8_t color, uint8_t bgcolor);
+		void paintLine(int x, int y, int width, const char * txt, uint8_t color);
+		void paintSeparator(int xpos, int * ypos, int width, const char * txt);
 		void motorStepEast(void);
 		void motorStepWest(void);
 		void startSatFind(void);

@@ -28,13 +28,35 @@
 //#include <driver/rcinput.h>
 
 
-#define BUTTONMAX 4
+#define BUTTONMAX 26
 static const neutrino_msg_t key_helper_msg_def[BUTTONMAX]=
 {
 	CRCInput::RC_red,
 	CRCInput::RC_green,
 	CRCInput::RC_yellow,
-	CRCInput::RC_blue
+	CRCInput::RC_blue,
+	CRCInput::RC_setup,
+	CRCInput::RC_help,
+	CRCInput::RC_home,
+	CRCInput::RC_spkr,
+	CRCInput::RC_ok,
+	CRCInput::RC_up,
+	CRCInput::RC_down,
+	CRCInput::RC_plus,
+	CRCInput::RC_minus,
+	CRCInput::RC_right,
+	CRCInput::RC_left,
+	CRCInput::RC_0,
+	CRCInput::RC_1,
+	CRCInput::RC_2,
+	CRCInput::RC_3,
+	CRCInput::RC_4,
+	CRCInput::RC_5,
+	CRCInput::RC_6,
+	CRCInput::RC_7,
+	CRCInput::RC_8,
+	CRCInput::RC_9,
+	CRCInput::RC_help
 };
 
 static const char * key_helper_icon_def[BUTTONMAX]=
@@ -42,8 +64,30 @@ static const char * key_helper_icon_def[BUTTONMAX]=
 	NEUTRINO_ICON_BUTTON_RED,
 	NEUTRINO_ICON_BUTTON_GREEN,
 	NEUTRINO_ICON_BUTTON_YELLOW,
-	NEUTRINO_ICON_BUTTON_BLUE}
-;
+	NEUTRINO_ICON_BUTTON_BLUE,
+	NEUTRINO_ICON_BUTTON_DBOX,
+	NEUTRINO_ICON_BUTTON_HELP,
+	NEUTRINO_ICON_BUTTON_HOME,
+	NEUTRINO_ICON_BUTTON_MUTE_SMALL,
+	NEUTRINO_ICON_BUTTON_OKAY_SMALL,
+	NEUTRINO_ICON_BUTTON_TOP,
+	NEUTRINO_ICON_BUTTON_DOWN,
+	NEUTRINO_ICON_BUTTON_PLUS,
+	NEUTRINO_ICON_BUTTON_MINUS,
+	NEUTRINO_ICON_BUTTON_RIGHT,
+	NEUTRINO_ICON_BUTTON_LEFT,	
+	NEUTRINO_ICON_BUTTON_0,
+	NEUTRINO_ICON_BUTTON_1,
+	NEUTRINO_ICON_BUTTON_2,
+	NEUTRINO_ICON_BUTTON_3,
+	NEUTRINO_ICON_BUTTON_4,
+	NEUTRINO_ICON_BUTTON_5,
+	NEUTRINO_ICON_BUTTON_6,
+	NEUTRINO_ICON_BUTTON_7,
+	NEUTRINO_ICON_BUTTON_8,
+	NEUTRINO_ICON_BUTTON_9,
+	NEUTRINO_ICON_BUTTON_HELP_SMALL
+};
 
 // USERMENU
 // This is just a quick helper for the usermenu only. I already made it a class for future use.
@@ -64,7 +108,7 @@ class CKeyHelper
 
 		/* Returns the next available button, to be used in menu as 'direct' keys. Appropriate
 		 * definitions are returnd in msp and icon
-		 * A color button could be requested as prefered button (other buttons are not supported yet). 
+		 * A color button could be requested as prefered button (not all buttons are supported yet). 
 		 * If the appropriate button is already in used, the next number_key button is returned instead 
 		 * (first 1-9 and than 0). */
 		bool get(neutrino_msg_t* msg, const char** icon, neutrino_msg_t prefered_key = CRCInput::RC_nokey)
@@ -79,6 +123,50 @@ class CKeyHelper
 				button = 2;
 			if(prefered_key == CRCInput::RC_blue)
 				button = 3;
+			if(prefered_key == CRCInput::RC_setup)
+				button = 4;
+			if(prefered_key == CRCInput::RC_help)
+				button = 5;
+			if(prefered_key == CRCInput::RC_home)
+				button = 6;
+			if(prefered_key == CRCInput::RC_spkr)
+				button = 7;
+			if(prefered_key == CRCInput::RC_ok)
+				button = 8;
+			if(prefered_key == CRCInput::RC_up)
+				button = 9;
+			if(prefered_key == CRCInput::RC_down)
+				button = 10;
+			if(prefered_key == CRCInput::RC_plus)
+				button = 11;
+			if(prefered_key == CRCInput::RC_minus)
+				button = 12;	
+			if(prefered_key == CRCInput::RC_right)
+				button = 13;
+			if(prefered_key == CRCInput::RC_left)
+				button = 14;
+			if(prefered_key == CRCInput::RC_0)
+				button = 15;
+			if(prefered_key == CRCInput::RC_1)
+				button = 16;
+			if(prefered_key == CRCInput::RC_2)
+				button = 17;
+			if(prefered_key == CRCInput::RC_3)
+				button = 18;
+			if(prefered_key == CRCInput::RC_4)
+				button = 19;
+			if(prefered_key == CRCInput::RC_5)
+				button = 20;
+			if(prefered_key == CRCInput::RC_6)
+				button = 21;
+			if(prefered_key == CRCInput::RC_7)
+				button = 22;
+			if(prefered_key == CRCInput::RC_8)
+				button = 23;
+			if(prefered_key == CRCInput::RC_9)
+				button = 24;
+			if(prefered_key == CRCInput::RC_help)
+				button = 25;			
 		
 			if((button >= 0) && (button < BUTTONMAX) && (color_key_used[button] == true)) {
 				button = -1;

@@ -34,7 +34,7 @@
 #define __bouquetlist__
 
 #include <gui/channellist.h>
-
+#include <driver/fontrenderer.h>
 #include <driver/framebuffer.h>
 #include <system/lastchannel.h>
 

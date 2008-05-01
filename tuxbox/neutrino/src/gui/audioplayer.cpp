@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.52 2008/04/06 19:17:57 houdini Exp $
+  $Id: audioplayer.cpp,v 1.53 2008/05/01 00:08:21 dbt Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -1519,12 +1519,13 @@ void CAudioPlayerGui::paintHead()
 	if (!m_show_playlist)
 		return;
 
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 	std::string strCaption;
 	if (m_inetmode)
 		strCaption = g_Locale->getText(LOCALE_INETRADIO_NAME);
 	else 
 		strCaption = g_Locale->getText(LOCALE_AUDIOPLAYER_HEAD);
-	m_frameBuffer->paintBoxRel(m_x, m_y + m_title_height, m_width, m_theight, COL_MENUHEAD_PLUS_0);
+	m_frameBuffer->paintBoxRel(m_x, m_y + m_title_height, m_width, m_theight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	m_frameBuffer->paintIcon("mp3.raw",m_x + 7, m_y + m_title_height + 10);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(m_x + 35, m_y + m_theight + m_title_height + 0,
 									m_width - 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
@@ -1594,6 +1595,7 @@ void CAudioPlayerGui::paintFoot()
 {
 	//	printf("paintFoot{\n");
 	int top;
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 	if (m_show_playlist)
 		top = m_y + (m_height - m_info_height - 2 * m_buttonHeight);
 	else
@@ -1601,7 +1603,7 @@ void CAudioPlayerGui::paintFoot()
 
 	int ButtonWidth = (m_width - 20) / 4;
 	int ButtonWidth2 = (m_width - 50) / 2;
-	m_frameBuffer->paintBoxRel(m_x, top, m_width, 2 * m_buttonHeight, COL_INFOBAR_SHADOW_PLUS_1);
+	m_frameBuffer->paintBoxRel(m_x, top, m_width, 2 * m_buttonHeight, COL_INFOBAR_SHADOW_PLUS_1, c_rad_mid, CORNER_BOTTOM);
 	m_frameBuffer->paintHLine(m_x, m_x + m_width, top, COL_INFOBAR_SHADOW_PLUS_1);
 
 	if (!m_playlist.empty())
@@ -1679,6 +1681,7 @@ void CAudioPlayerGui::paintFoot()
 //------------------------------------------------------------------------
 void CAudioPlayerGui::paintInfo()
 {
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 	if(m_state == CAudioPlayerGui::STOP && m_show_playlist)
 		m_frameBuffer->paintBackgroundBoxRel(m_x, m_y, m_width, m_title_height);
 	else
@@ -1686,15 +1689,13 @@ void CAudioPlayerGui::paintInfo()
 		if (!m_show_playlist)
 		{
 			// no playlist -> smaller Info-Box
-			m_frameBuffer->paintBoxRel(m_x, m_y, m_width, m_title_height - 10 - m_fheight, COL_MENUCONTENT_PLUS_6);
-			m_frameBuffer->paintBoxRel(m_x + 2, m_y + 2 , m_width - 4, m_title_height - 14 - m_fheight,
-					COL_MENUCONTENTSELECTED_PLUS_0);
+			m_frameBuffer->paintBoxRel(m_x, m_y, m_width, m_title_height - 10 - m_fheight, COL_MENUCONTENT_PLUS_6, c_rad_mid);
+			m_frameBuffer->paintBoxRel(m_x + 2, m_y + 2 , m_width - 4, m_title_height - 14 - m_fheight, COL_MENUCONTENTSELECTED_PLUS_0, c_rad_mid);
 		}
 		else
 		{
-			m_frameBuffer->paintBoxRel(m_x, m_y, m_width, m_title_height - 10, COL_MENUCONTENT_PLUS_6);
-			m_frameBuffer->paintBoxRel(m_x + 2, m_y + 2 , m_width - 4, m_title_height - 14, 
-					COL_MENUCONTENTSELECTED_PLUS_0);
+			m_frameBuffer->paintBoxRel(m_x, m_y, m_width, m_title_height - 10, COL_MENUCONTENT_PLUS_6, c_rad_mid);
+			m_frameBuffer->paintBoxRel(m_x + 2, m_y + 2 , m_width - 4, m_title_height - 14, COL_MENUCONTENTSELECTED_PLUS_0, c_rad_mid);
 		}
 
 		// first line (Track number)
@@ -1773,7 +1774,7 @@ void CAudioPlayerGui::paint()
 		int sbc = ((m_playlist.size() - 1) / m_listmaxshow) + 1;
 		int sbs = (m_selected / m_listmaxshow);
 
-		m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + sbs*(sb-4)/sbc , 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
+		m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + sbs*(sb-4)/sbc , 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 	}
 
 	paintFoot();

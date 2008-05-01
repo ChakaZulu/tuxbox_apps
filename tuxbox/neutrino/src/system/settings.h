@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.189 2008/03/21 12:14:54 houdini Exp $
+  $Id: settings.h,v 1.190 2008/05/01 00:08:49 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -65,6 +65,7 @@ struct SNeutrinoSettings
 	int virtual_zap_mode;
 	int infobar_show;
 	int show_mute_icon;
+	int channellist_epgtext_align_right;
 
 	// EPG
 	std::string epg_cache;
@@ -453,8 +454,11 @@ struct SNeutrinoSettings
 
 // corners
 #define CORNER_RADIUS_LARGE		12
-#define CORNER_RADIUS_MID		6
-#define CORNER_RADIUS_SMALL		3
+#define CORNER_RADIUS_MID		9
+#define CORNER_RADIUS_SMALL		4
+
+// shadow
+#define SHADOW_OFFSET			6
 
 /* some default Values */
 

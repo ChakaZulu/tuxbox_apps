@@ -2,7 +2,7 @@
 #define __gui_widget_icons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.14 2007/08/30 21:30:55 dbt Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.15 2008/05/01 00:08:35 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -39,6 +39,7 @@
 #define NEUTRINO_ICON_BUTTON_POWER	"power.raw"
 
 #define NEUTRINO_ICON_BUTTON_OKAY	"ok.raw"
+#define NEUTRINO_ICON_BUTTON_OKAY_SMALL	"ok_small.raw"
 
 #define NEUTRINO_ICON_BUTTON_0		"0.raw"
 #define NEUTRINO_ICON_BUTTON_1		"1.raw"
@@ -52,9 +53,14 @@
 #define NEUTRINO_ICON_BUTTON_9		"9.raw"
 
 #define NEUTRINO_ICON_BUTTON_TOP	"up.raw"
+#define NEUTRINO_ICON_BUTTON_TOP_SMALL	"up_small.raw"
 #define NEUTRINO_ICON_BUTTON_RIGHT	"right.raw"
 #define NEUTRINO_ICON_BUTTON_DOWN	"down.raw"
+#define NEUTRINO_ICON_BUTTON_DOWN_SMALL	"down_small.raw"
 #define NEUTRINO_ICON_BUTTON_LEFT	"left.raw"
+
+#define NEUTRINO_ICON_BUTTON_PLUS	"plus.raw"
+#define NEUTRINO_ICON_BUTTON_MINUS	"minus.raw"
 
 #define NEUTRINO_ICON_ERROR		"error.raw"
 #define NEUTRINO_ICON_FILE		"file.raw"
@@ -67,6 +73,9 @@
 #define NEUTRINO_ICON_SHELL		"shell.raw"
 #define NEUTRINO_ICON_UPNP		"upnp.raw"
 #define NEUTRINO_ICON_PROTECTING		"protecting.raw"
+#define NEUTRINO_ICON_EPGINFO		"epginfo.raw"
+
+#define DUMMY_ICON		"dummy.raw"
 
 
 /* icon widths */
@@ -75,6 +84,7 @@
 #define NEUTRINO_ICON_BUTTON_GREEN_WIDTH	16
 #define NEUTRINO_ICON_BUTTON_RED_WIDTH		16
 #define NEUTRINO_ICON_BUTTON_YELLOW_WIDTH	16
+
 
 /* misc */
 

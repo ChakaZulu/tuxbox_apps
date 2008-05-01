@@ -42,8 +42,6 @@
 
 #include <iostream>
 
-#define borderwidth 4
-
 #define HINTBOXEXT_MAX_HEIGHT 420
 
 CHintBoxExt::CHintBoxExt(const neutrino_locale_t Caption, const char * const Text, const int Width, const char * const Icon)
@@ -164,7 +162,7 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 // 	printf("pages: %d, startEntryVec: %d\n",page+1,m_startEntryOfPage.size()-1);
 // 	printf("maxEntries: %d\n", m_maxEntriesPerPage);
 
-	m_width = w_max(maxWidth,borderwidth); 
+	m_width = w_max(maxWidth, SHADOW_OFFSET); 
 	m_currentPage = 0;
 	m_pages = page + 1;
 	unsigned int additional_width;
@@ -205,8 +203,8 @@ void CHintBoxExt::paint(void)
 
 	m_window = new CFBWindow((((g_settings.screen_EndX- g_settings.screen_StartX) - m_width ) >> 1) + g_settings.screen_StartX,
 			       (((g_settings.screen_EndY- g_settings.screen_StartY) - m_height) >> 2) + g_settings.screen_StartY,
-			       m_width + borderwidth,
-			       m_height + borderwidth);
+			       m_width + SHADOW_OFFSET,
+			       m_height + SHADOW_OFFSET);
 	refresh();
 }
 
@@ -216,13 +214,12 @@ void CHintBoxExt::refresh(void)
 	{
 		return;
 	}
-	// bottom shadow
-	m_window->paintBoxRel(borderwidth, m_height, m_width, borderwidth, COL_INFOBAR_SHADOW);
-	// right shadow
-	m_window->paintBoxRel(m_width, borderwidth, borderwidth, m_height - borderwidth, COL_INFOBAR_SHADOW);
 	
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	// shadow
+	m_window->paintBoxRel(SHADOW_OFFSET, SHADOW_OFFSET, m_width, m_height, COL_INFOBAR_SHADOW, c_rad_mid);
 	// title
-	m_window->paintBoxRel(0, 0, m_width, m_theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
+	m_window->paintBoxRel(0, 0, m_width, m_theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 
 	if (!m_iconfile.empty())
 	{
@@ -266,8 +263,8 @@ void CHintBoxExt::refresh(void)
 	{
 //		yPos = m_theight + (m_fheight >> 1);
 		yPos = m_theight;
-		m_window->paintBoxRel(m_width - 15, yPos, 15, m_maxEntriesPerPage * m_fheight, COL_MENUCONTENT_PLUS_1);
-		unsigned int marker_size = (m_maxEntriesPerPage * m_fheight) / m_pages;
+		m_window->paintBoxRel(m_width - 15, yPos, 15, (m_maxEntriesPerPage * m_fheight) + 16, COL_MENUCONTENT_PLUS_1);
+		unsigned int marker_size = ((m_maxEntriesPerPage * m_fheight) + 16) / m_pages;
 		m_window->paintBoxRel(m_width - 13, yPos + m_currentPage * marker_size, 11, marker_size, COL_MENUCONTENT_PLUS_3);
 	}
 }

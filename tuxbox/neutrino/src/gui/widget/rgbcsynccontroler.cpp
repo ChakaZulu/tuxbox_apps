@@ -54,7 +54,7 @@ CRGBCSyncControler::CRGBCSyncControler(const neutrino_locale_t Name, unsigned ch
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
-	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight() + 6;
 	observer = Observer;
 	name = Name;
 	width = 390;
@@ -160,9 +160,11 @@ void CRGBCSyncControler::hide()
 
 void CRGBCSyncControler::paint()
 {
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD_PLUS_0);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 
 	paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, LOCALE_VIDEOMENU_CSYNC, true);
 

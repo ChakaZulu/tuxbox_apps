@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.215 2008/01/04 13:58:35 seife Exp $
+	$Id: infoviewer.cpp,v 1.216 2008/05/01 00:08:23 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -62,12 +62,11 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #define ICON_LARGE_WIDTH 26
 #define ICON_SMALL_WIDTH 16
 #ifndef SKIP_CA_STATUS
-#define ICON_OFFSET (2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2)
+#define ICON_OFFSET (2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6)
 #else
-#define ICON_OFFSET (2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2)
+#define ICON_OFFSET (2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6)
 #endif
 #define BOTTOM_BAR_OFFSET 0
-#define SHADOW_OFFSET 6
 #define borderwidth 4
 
 // in us
@@ -183,6 +182,7 @@ void CInfoViewer::showRecordIcon(const bool show)
 	}
 }
 
+
 void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap, int epgpos)
 {
 	showButtonBar = !calledFromNumZap;
@@ -224,7 +224,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		fadeValue= g_settings.infobar_alpha;
 
 	// kill linke seite
-	frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth/3), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
+	frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY + ChanHeight - 6, BoxStartX + (ChanWidth/3), BoxStartY + ChanHeight + InfoHeightY_Info + 10 + 6);
 	// kill progressbar
 	frameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
 
@@ -262,9 +262,25 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		channel_id = new_channel_id;
 	}
 
+	//infobox
+	ChanInfoX = BoxStartX + (ChanWidth / 3);
+	int ChanInfoY = BoxStartY + ChanHeight+ SHADOW_OFFSET;
+	
+	int ChanNameX = BoxStartX + ChanWidth + SHADOW_OFFSET;
+	int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
+	int c_rad_large = g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0;
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_shadow_width = (c_rad_large * 2) + 1;
+
+	// Schatten
+	frameBuffer->paintBoxRel(BoxEndX - c_shadow_width, ChanNameY + SHADOW_OFFSET, SHADOW_OFFSET + c_shadow_width, BoxEndY - ChanNameY, COL_INFOBAR_SHADOW_PLUS_0, c_rad_large, CORNER_RIGHT);
+	frameBuffer->paintBoxRel(ChanInfoX + SHADOW_OFFSET, BoxEndY - c_shadow_width, BoxEndX - ChanInfoX - SHADOW_OFFSET - c_shadow_width, SHADOW_OFFSET + c_shadow_width, COL_INFOBAR_SHADOW_PLUS_0, c_rad_large, CORNER_BOTTOM_LEFT);
+
+	frameBuffer->paintBoxRel(ChanNameX - SHADOW_OFFSET, ChanNameY, BoxEndX - ChanNameX + SHADOW_OFFSET, BoxEndInfoY - ChanNameY, COL_INFOBAR_PLUS_0, c_rad_large, CORNER_TOP_RIGHT | (showButtonBar ? 0 :  CORNER_BOTTOM_RIGHT ));
+
 	//number box
-	frameBuffer->paintBoxRel(BoxStartX+SHADOW_OFFSET, BoxStartY+SHADOW_OFFSET, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
-	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, col_NumBox);
+	frameBuffer->paintBoxRel(BoxStartX + SHADOW_OFFSET, BoxStartY + SHADOW_OFFSET, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0, c_rad_mid);
+	frameBuffer->paintBoxRel(BoxStartX, BoxStartY, ChanWidth, ChanHeight, col_NumBox, c_rad_mid);
 
 	int ChanNumYPos = BoxStartY + ChanHeight;
 
@@ -284,28 +300,36 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 				break;
 			}
 	}
-
+	
+	char strChanId[16];
+	sprintf((char*) strChanId, "%llx", channel_id);	
+	std::string strIconName = (std::string)strChanId +".raw";
+	std::string strAbsIconPath = NEUTRINO_ICON_VARPATH + strIconName;
+	
 	char strChanNum[10];
-	sprintf( (char*) strChanNum, "%d", ChanNum);
+	sprintf((char*) strChanNum, "%d", ChanNum);
 
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, col_NumBoxText);
-
-	//infobox
-	int ChanNameX = BoxStartX + ChanWidth + SHADOW_OFFSET;
-	int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
-
-	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
-
-	paintTime( false, true );
-
+	if (access(strAbsIconPath.c_str(), 00) != -1)
+	{
+		// paint channel icon
+		frameBuffer->paintIcon(strIconName, BoxStartX, BoxStartY); 
+	}
+	else
+	{
+		// paint channel number
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, col_NumBoxText);
+	}
+	
 	// ... with channel name
 	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, ChannelName, COL_INFOBAR, 0, subChannelNameIsUTF); // UTF-8
 
-	ChanInfoX = BoxStartX + (ChanWidth / 3);
-	int ChanInfoY = BoxStartY + ChanHeight+ SHADOW_OFFSET;
+	
+	paintTime( false, true );
+	
+	
 	ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
 
-	frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
+	frameBuffer->paintBoxRel(ChanInfoX, ChanInfoY, ChanNameX - ChanInfoX, BoxEndInfoY - ChanInfoY, COL_INFOBAR_PLUS_0, c_rad_large, (showButtonBar ? 0 : 1) * CORNER_BOTTOM_LEFT);
 
 	if ( showButtonBar )
 	{
@@ -314,7 +338,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		if ( BOTTOM_BAR_OFFSET> 0 )
 			frameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
 
-		frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS_BACKGROUND);
+		frameBuffer->paintBoxRel(ChanInfoX, BoxEndInfoY + BOTTOM_BAR_OFFSET, BoxEndX - ChanInfoX, BoxEndY - BoxEndInfoY - BOTTOM_BAR_OFFSET, COL_INFOBAR_BUTTONS_BACKGROUND, c_rad_large, CORNER_BOTTOM);
 
 		// show blue button
 		// USERMENU
@@ -408,10 +432,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		// EVENT anfordern!
 		g_Sectionsd->setServiceChanged(channel_id, true );
 	}
-
-	// Schatten
-	frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW_PLUS_0);
-	frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW_PLUS_0);
 
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
@@ -715,13 +735,13 @@ void CInfoViewer::showSubchan()
 
 void CInfoViewer::showIcon_16_9() const
 {
-	frameBuffer->paintIcon((aspectRatio != 0) ? "16_9.raw" : "16_9_gray.raw", BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
+	frameBuffer->paintIcon((aspectRatio != 0) ? "16_9.raw" : "16_9_gray.raw", BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
 }
 
 void CInfoViewer::showIcon_VTXT() const
 {
 	int vtpid=g_RemoteControl->current_PIDs.PIDs.vtxtpid;
-	frameBuffer->paintIcon((vtpid != 0) ? "vtxt.raw" : "vtxt_gray.raw", BoxEndX - (ICON_SMALL_WIDTH + 2), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
+	frameBuffer->paintIcon((vtpid != 0) ? "vtxt.raw" : "vtxt_gray.raw", BoxEndX - (ICON_SMALL_WIDTH + 6), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
 #ifndef TUXTXT_CFG_STANDALONE
 	if(g_settings.tuxtxt_cache && !CNeutrinoApp::getInstance ()->recordingstatus)
 	{
@@ -973,9 +993,9 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 		}
 		else
 		{
-			runningPercent=(jetzt-info_CurrentNext.current_zeit.startzeit) * 100 / info_CurrentNext.current_zeit.dauer;
-			if (runningPercent > 100)	// this would lead to negative value in paintBoxRel
-				runningPercent = 100;	// later on which can be fatal...
+			runningPercent=(jetzt-info_CurrentNext.current_zeit.startzeit) * 112 / info_CurrentNext.current_zeit.dauer;
+			if (runningPercent > 112)	// this would lead to negative value in paintBoxRel
+				runningPercent = 112;	// later on which can be fatal...
 			sprintf((char*)&runningRest, "%d / %d min", seit, rest);
 		}
 		struct tm *pStartZeit = localtime(&info_CurrentNext.current_zeit.startzeit);
@@ -992,6 +1012,7 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 
 	int height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getHeight()/3;
 	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
+	int c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 
 	if (showButtonBar)
 	{
@@ -1000,12 +1021,9 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 		//percent
 		if (info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 		{
-			frameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW_PLUS_0); //border
-			frameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR_PLUS_7);//fill(active)
-			frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR_PLUS_3);//fill passive
+			frameBuffer->paintBoxRel(BoxEndX - 112, posy + 2, 112, height2 - 4, COL_INFOBAR_PLUS_3, c_rad_small);	// fill passive
+			frameBuffer->paintBoxRel(BoxEndX - 112, posy + 2, runningPercent + 2, height2 - 4, COL_INFOBAR_PLUS_7, c_rad_small, CORNER_LEFT);	// fill(active)
 		}
-		else
-			frameBuffer->paintBackgroundBoxRel(BoxEndX-114, posy,   2+100+2, height2);
 
 		// show red button
 		// USERMENU
@@ -1137,7 +1155,7 @@ void CInfoViewer::showButton_Audio()
 	else
 		dd_icon = "dd_gray.raw";
 
-	frameBuffer->paintIcon(dd_icon, BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
+	frameBuffer->paintIcon(dd_icon, BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
 }
 
 void CInfoViewer::killTitle()
@@ -1152,7 +1170,7 @@ void CInfoViewer::killTitle()
 #ifndef SKIP_CA_STATUS
 void CInfoViewer::showIcon_CA_Status() const
 {
-	frameBuffer->paintIcon( ( CA_Status)?"ca.raw":"fta.raw", BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2), BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	frameBuffer->paintIcon((CA_Status) ? "ca.raw" : "fta.raw", BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
 }
 
 void CInfoViewer::Set_CA_Status(int Status)

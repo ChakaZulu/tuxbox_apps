@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.165 2008/03/21 12:16:17 houdini Exp $
+	$Id: setting_helpers.cpp,v 1.166 2008/05/01 00:08:49 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -408,8 +408,7 @@ bool CColorSetupNotifier::changeNotify(const neutrino_locale_t, void *)
 	                              convertSetupColor2RGB(int(g_settings.infobar_red*0.4), int(g_settings.infobar_green*0.4), int(g_settings.infobar_blue*0.4)),
 	                              convertSetupColor2RGB(g_settings.infobar_Text_red, g_settings.infobar_Text_green, g_settings.infobar_Text_blue),
 	                              8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-
-
+	
 	frameBuffer->paletteSet();
 	return false;
 }

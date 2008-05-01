@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.15 2008/01/13 11:54:04 seife Exp $
+	$Id: imageinfo.cpp,v 1.16 2008/05/01 00:08:23 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -26,7 +26,16 @@
 #endif
 
 #include <gui/imageinfo.h>
+
+#define MOVIEBROWSER
+#ifdef MOVIEBROWSER
+#include <gui/moviebrowser.h>
+#endif /* MOVIEBROWSER */
+#include <gui/pictureviewer.h>
+#include <gui/streaminfo2.h>
+
 #include <gui/widget/icons.h>
+#include <gui/widget/buttons.h>
 
 #include <cstring>
 #include <iostream>
@@ -54,15 +63,12 @@ CImageInfo::CImageInfo()
 	font_head 	= SNeutrinoSettings::FONT_TYPE_MENU_TITLE;
 	font_small 	= SNeutrinoSettings::FONT_TYPE_IMAGEINFO_SMALL;
 	font_info 	= SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO;
+	font_small_text 	= SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL;
 
 	hheight		= g_Font[font_head]->getHeight();
 	iheight		= g_Font[font_info]->getHeight();
 	sheight		= g_Font[font_small]->getHeight();
-	
-	//~ startX 	= g_settings.screen_StartX; //mainwindow position
-	//~ startY 	= g_settings.screen_StartY;
-	//~ endX 	= g_settings.screen_EndX;
-	//~ endY 	= g_settings.screen_EndY;
+	ssheight		= g_Font[font_small_text]->getHeight();
 	
 	startX 	= 45; //mainwindow position
 	startY 	= 35;
@@ -176,53 +182,59 @@ void CImageInfo::paint_pig(int x, int y, int w, int h)
 	pig->show (xPig, yPig, w, h);
 }
 
-void CImageInfo::paintLine(int xpos, int font, const char* text)
+void CImageInfo::paintLine(int xpos, int font, const char* text, uint8_t    color = COL_MENUCONTENT )
 {
-	g_Font[font]->RenderString(xpos, ypos, width-10, text, COL_MENUCONTENT, 0, true);
+	g_Font[font]->RenderString(xpos, ypos, width-10, text, color, 0, true);
 }
 
-void CImageInfo::paintContent(int fontSize, int xpos, int ypos, const char *text)
+void CImageInfo::paintContent(int fontSize, int xposC, int yposC, const char *text, uint8_t    color = COL_MENUCONTENT)
 {
-	g_Font[fontSize]->RenderString(xpos, ypos, width-10, text, COL_MENUCONTENT, 0, true);
+	g_Font[fontSize]->RenderString(xposC, yposC, width-10, text, color, 0, true);
 }
 
 void CImageInfo::paintSupport(int y_startposition)
 {
 	clearContentBox();
 	
-	//paint info only if present in /.version
-	if (info.length())
+	//paint comment lines only if present in /.version
+	if (comment1.length())
 		 {
-			paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_INFO));
-			paintContent(font_info, xpos+x_offset_large+30, y_startposition, info.c_str());
-			y_startposition += hheight; 
+			paintContent(font_info, xpos, y_startposition, comment1.c_str());
+			y_startposition += sheight; 
 		 }
+		 
+	if (comment2.length())
+		{
+			paintContent(font_info, xpos, y_startposition,  comment2.c_str());
+			y_startposition += iheight+5; 
+		}
+		
+	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_SUPPORTHERE), COL_MENUCONTENTINACTIVE);
 	
-	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_SUPPORTHERE));
-	
-	y_startposition += hheight;	
-	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_HOMEPAGE));
-	paintContent(font_info, xpos+x_offset_large+30, y_startposition, homepage.c_str());
+	y_startposition += iheight;	
+	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_HOMEPAGE), COL_MENUCONTENTINACTIVE);
+	paintContent(font_info, xpos+x_offset_large, y_startposition, homepage.c_str());
 	
 	y_startposition += iheight;
-	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_DOKUMENTATION));
-	paintContent(font_info, xpos+x_offset_large+30, y_startposition, "http://wiki.godofgta.de");
+	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_DOKUMENTATION), COL_MENUCONTENTINACTIVE);
+	paintContent(font_info, xpos+x_offset_large, y_startposition, "http://wiki.dbox2-tuning.net");
 	
 	y_startposition += iheight;
-	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_FORUM));
-	paintContent(font_info, xpos+x_offset_large+30, y_startposition, "http://forum.tuxbox.org");
-	
-	y_startposition += sheight;
-	frameBuffer->paintLine(xpos, y_startposition, max_width, y_startposition, COL_MENUCONTENT_PLUS_3);
+	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_FORUM), COL_MENUCONTENTINACTIVE);
+	paintContent(font_info, xpos+x_offset_large, y_startposition, "http://forum.tuxbox.org");
 	
 #ifndef HAVE_DREAMBOX_HARDWARE	
-	y_startposition += hheight;
+	y_startposition += ssheight/2;
+	frameBuffer->paintLine(xpos, y_startposition, max_width, y_startposition, COL_GRAY);	
+		
+	y_startposition += ssheight+ ssheight/2;
 	paintContent(font_info, xpos, y_startposition,g_Locale->getText(LOCALE_IMAGEINFO_NOTEFLASHTYPE));
 	
-	y_startposition += iheight;
+	y_startposition += sheight;
 	paintContent(font_info, xpos, y_startposition, g_Locale->getText(LOCALE_IMAGEINFO_CHIPSET) );
-	paintContent(font_info, xpos+x_offset_large+60,y_startposition, getChipInfo().c_str());
+	paintContent(font_info, xpos+x_offset_large+60,y_startposition, getChipInfo().c_str());		
 #endif
+
 }
 
 void CImageInfo::paintPartitions(int y_startposition)
@@ -261,10 +273,10 @@ void CImageInfo::paintLicense(int y_startposition)
 	
 	clearContentBox();
 	
-	int fh = sheight+12;
+	int fh = ssheight+12;
 	for (int i = 0; i<13; i++) // paint all lines
 		{
-			g_Font[font_small]->RenderString(xpos,  y_startposition, width-10, LLine[i].c_str(), COL_MENUCONTENT, 0, true);
+			g_Font[font_small_text]->RenderString(xpos,  y_startposition, width-10, LLine[i].c_str(), COL_MENUCONTENT, 0, true);
 			y_startposition += (fh >>1);
 		}
 
@@ -276,35 +288,42 @@ void CImageInfo::paintRevisionInfos(int y_startposition)
 
 	clearContentBox();
 	
-	paintContent(font_info, xpos, y_startposition, "Kernel:" );
+	paintContent(font_info, xpos, y_startposition, "Kernel:", COL_MENUCONTENTINACTIVE );
 	if (!uname(&u))	// no idea what could go wrong here, but u would be uninitialized.
 		paintContent(font_info, xpos+x_offset_large, y_startposition, u.release);
 	
 	y_startposition += iheight;
-	paintContent(font_info, xpos, y_startposition, "BusyBox:" );
+	paintContent(font_info, xpos, y_startposition, "BusyBox:", COL_MENUCONTENTINACTIVE );
 	paintContent(font_info, xpos+x_offset_large, y_startposition, getSysInfo("BusyBox v", false).c_str());
 	
-	//~ CNeutrinoInfo neutrinoinfo;
-	//~ y_startposition += iheight;
-	//~ paintContent(font_info, xpos, y_startposition, "Neutrino:" );
-	//~ paintContent(font_info, xpos+x_offset_large, y_startposition, neutrinoinfo.getNeutrinoVersion().c_str());
-	
-	//~ CMoviePlayerInfo mplayer;
-	//~ y_startposition += iheight;
-	//~ paintContent(font_info, xpos, y_startposition, "Movieplayer:" );
-	//~ paintContent(font_info, xpos+x_offset_large, y_startposition, mplayer.getMoviePlayerVersion().c_str());
-	
 	y_startposition += iheight;
-	paintContent(font_info, xpos, y_startposition, "Imageinfo:" );
-	paintContent(font_info, xpos+x_offset_large, y_startposition, getImageInfoVersion().c_str());
-		
-	y_startposition += iheight;
-	paintContent(font_info, xpos, y_startposition, "JFFS2:" );
+	paintContent(font_info, xpos, y_startposition, "JFFS2:", COL_MENUCONTENTINACTIVE );
 	paintContent(font_info, xpos+x_offset_large, y_startposition, getSysInfo("JFFS2 version ", false).c_str());
 	
 	y_startposition += iheight;
-	paintContent(font_info, xpos, y_startposition, "Squashfs:" );
+	paintContent(font_info, xpos, y_startposition, "Squashfs:", COL_MENUCONTENTINACTIVE );
 	paintContent(font_info, xpos+x_offset_large, y_startposition, getSysInfo("squashfs: version ", false).c_str());
+	
+	y_startposition += iheight;
+	paintContent(font_info, xpos, y_startposition, "Imageinfo:", COL_MENUCONTENTINACTIVE );
+	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.16 $").c_str());
+	
+#ifdef MOVIEBROWSER
+	y_startposition += iheight;
+	static CMovieBrowser mb;
+	paintContent(font_info, xpos, y_startposition, "Moviebrowser:", COL_MENUCONTENTINACTIVE );
+	paintContent(font_info, xpos+x_offset_large, y_startposition, mb.getMovieBrowserVersion().c_str());
+#endif /* MOVIEBROWSER */
+
+	y_startposition += iheight;
+	static CPictureViewerGui pv;
+	paintContent(font_info, xpos, y_startposition, "Pictureviewer:", COL_MENUCONTENTINACTIVE );
+	paintContent(font_info, xpos+x_offset_large, y_startposition, pv.getPictureViewerVersion().c_str());
+	
+	y_startposition += iheight;
+	static CStreamInfo2 si;
+	paintContent(font_info, xpos, y_startposition, "Streaminfo:", COL_MENUCONTENTINACTIVE );
+	paintContent(font_info, xpos+x_offset_large, y_startposition, si.getStreamInfoVersion().c_str());
 	
 }
 
@@ -419,13 +438,14 @@ void CImageInfo::LoadImageInfo(void)
 	CConfigFile config('\t');
 	config.loadConfig("/.version");
 	
-	homepage 	= config.getString("homepage", "http://www.tuxbox.org");
-	creator 	= config.getString("creator", "");
-	imagename 	= config.getString("imagename", "self compiled");
-	version 	= config.getString("version", "");
-	subversion 	= config.getString("subversion", "");
-	cvstime 	= config.getString("cvs", "");
-	info 		= config.getString("info", "");
+	homepage		= config.getString("homepage", "http://www.tuxbox.org");
+	creator		= config.getString("creator", "");
+	imagename		= config.getString("imagename", "self compiled");
+	version		= config.getString("version", "");
+	subversion		= config.getString("subversion", "");
+	cvstime		= config.getString("cvs", "");
+	comment1		= config.getString("comment1", "");
+	comment2		=config.getString("comment2","");
 	distribution 	= imagename + " " + subversion;
 	
 	CFlashVersionInfo versionInfo(version); //get from flashtool.cpp
@@ -435,95 +455,145 @@ void CImageInfo::LoadImageInfo(void)
 	imagetype 	= versionInfo.getType();
 }
 
-string CImageInfo::getImageInfoVersion()
+const char* CImageInfo::getImageInfo (int InfoType)
 {
-/* 	Note: revision (revstr) will change automaticly on cvs-commits, 
- * 	if you made some changes without cvs-commit, you must change it before by yourself
- */
-	string revstr = "$Revision: 1.15 $";
-	while (revstr.find("$") !=string::npos)
-	{
-		revstr.replace(revstr.find("$"),1 ,""); //normalize output, remove "$"	
-	}
-	return revstr;
+	LoadImageInfo();	
+	switch (InfoType)
+ 	{
+    case IMAGENAME :  //imagename
+		return imagename.c_str();
+		break;
+	case DISTRIBUTION :  //imagename + subversion
+		return distribution.c_str();
+		break;
+	case IMAGEVERSION :  //raw version info 
+		return version.c_str();
+		break;
+	case SUBVERSION :  //subversion
+		return subversion.c_str();
+		break;
+	case CVSTIME :  //date of cvs if present
+		return cvstime.c_str();
+		break;
+	case CREATOR :   //name of imagebuilder
+		return creator.c_str();
+		break;
+	case HOMEPAGE :   //support hompage
+		return homepage.c_str();
+		break;
+	case COMMENT1 :   //firt comment if present
+		return comment1.c_str();
+		break;
+	case COMMENT2 :   //second comment if present
+		return comment2.c_str();
+		break;
+ 	default : return "n/a";
+  }
 }
+
+void CImageInfo::paintHead(int x, int y, const char *localetext)
+{
+	int headheight = hheight;
+	frameBuffer->paintBoxRel(x, y, max_width, headheight + 4, COL_MENUHEAD, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0 , CORNER_TOP);
+	g_Font[font_head]->RenderString(x+5, y + headheight + 4, width, localetext, COL_MENUHEAD, 0, true);}
+	
+const struct button_label CImageInfoButtons[5] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_IMAGEINFO_LICENSE },
+	{ NEUTRINO_ICON_BUTTON_GREEN  , LOCALE_IMAGEINFO_SUPPORT },
+	{ NEUTRINO_ICON_BUTTON_YELLOW,  LOCALE_IMAGEINFO_DETAILS },
+	{ NEUTRINO_ICON_BUTTON_BLUE, LOCALE_IMAGEINFO_PARTITIONS },
+	{ NEUTRINO_ICON_BUTTON_HOME, LOCALE_IMAGEINFO_EXIT }
+};
+
+void CImageInfo::paintFoot(int x, int y)
+{
+	int ButtonHeight = ssheight;
+	frameBuffer->paintBoxRel(x, y, max_width, ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0 , CORNER_BOTTOM);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 5, y, max_width/6, 5, CImageInfoButtons, width);
+}	
 
 void CImageInfo::paint()
 {
-	const char * head_string;
-	
 	xpos = startX + 10;
-	ypos = startY + 5;
+	ypos = startY + 10;
 
 	LoadImageInfo();
-	head_string = g_Locale->getText(LOCALE_IMAGEINFO_HEAD);
+	const char *head_string = g_Locale->getText(LOCALE_IMAGEINFO_HEAD);
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, head_string);
 	
+	//paint head
+	paintHead (startX, startY, head_string);
+	
 	//paint main window
-	frameBuffer->paintBoxRel(startX,startY, max_width, max_height, COL_MENUCONTENT_PLUS_0);
-	//paint title bar
-	frameBuffer->paintBoxRel(startX, startY, max_width, hheight+7, COL_MENUHEAD_PLUS_0);
-	//paint title
-	g_Font[font_head]->RenderString(xpos, startY + hheight + 4, width, head_string, COL_MENUHEAD, 0, true);
+	frameBuffer->paintBoxRel(startX, startY+hheight+4, max_width, max_height-hheight-ssheight-4, COL_MENUCONTENT_PLUS_0);
 
 	ypos += hheight;
 	ypos += (iheight >>1);
 	
 	//paint head infos
 	ypos += iheight;
-	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_IMAGE)); //imagename
+	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_IMAGE), COL_MENUCONTENTINACTIVE); //imagename
 	paintLine(xpos + x_offset_large, font_info, distribution.c_str());
 	ypos += iheight;
-	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_VERSION));
+	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_VERSION), COL_MENUCONTENTINACTIVE);
 	paintLine(xpos + x_offset_large, font_info, releaseCycle.c_str()); //releaseCycle
 	ypos += iheight;
-	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_IMAGETYPE));
+	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_IMAGETYPE), COL_MENUCONTENTINACTIVE);
 	paintLine(xpos + x_offset_large, font_info, imagetype.c_str()); //imagetype
 	ypos += iheight;
-	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_DATE));
+	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_DATE), COL_MENUCONTENTINACTIVE);
 	paintLine(xpos + x_offset_large, font_info, imagedate.c_str()); //date of generation 
 	
-	//paint creator, cvslevel, info only if present in /.version
+	//paint creator, cvslevel, info, comment only if present in /.version
 	ypos += iheight;
 	if (creator.length())
 		{
-			paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_CREATOR));
+			paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_CREATOR), COL_MENUCONTENTINACTIVE);
 			paintLine(xpos + x_offset_large, font_info, creator.c_str());
 		}
 		
 	ypos += iheight;
 	if (cvstime.length())
 		{
-			paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_CVSLEVEL));
+			paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_CVSLEVEL), COL_MENUCONTENTINACTIVE);
 			paintLine(xpos + x_offset_large, font_info, cvstime.c_str());
-		}	
+		}
 
-	//paint separator
 	ypos += iheight;
-	frameBuffer->paintLine(xpos, ypos-10, x-10  , ypos-10, COL_MENUCONTENT_PLUS_3);
-	
+
 	//license lines
-	ypos += iheight;
+	ypos += sheight;
 	paintLicense(ypos);
 
-	//paint buttonbar
-	frameBuffer->paintBoxRel(startX, endY-32, max_width, 32, COL_MENUCONTENT_PLUS_0);
-	
-	//paint icons and captions
-	int yIconPos = endY-26, xIconOffset = max_width/5;
-	
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos ,yIconPos+3); //License
-	g_Font[font_small]->RenderString(xpos+20, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_IMAGEINFO_LICENSE), COL_MENUCONTENT, 0, true);
-	
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, (xpos + xIconOffset) ,yIconPos+3); //Support
-	g_Font[font_small]->RenderString(xpos+xIconOffset+20, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_IMAGEINFO_SUPPORT), COL_MENUCONTENT, 0, true);
-	
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, (xpos + xIconOffset*2) ,yIconPos+3); //Revision
-	g_Font[font_small]->RenderString(xpos+(xIconOffset*2)+20, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_IMAGEINFO_DETAILS), COL_MENUCONTENT, 0, true);
-	
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, (xpos + xIconOffset*3) ,yIconPos+3); //Partitions
-	g_Font[font_small]->RenderString(xpos+(xIconOffset*3)+20, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_IMAGEINFO_PARTITIONS), COL_MENUCONTENT, 0, true);
+	//paint foot		
+	paintFoot(startX, startY+max_height-ssheight);
+		
+}
 
-	frameBuffer->paintIcon("home.raw",(xpos + xIconOffset*4) ,yIconPos-3); //Home 
-	g_Font[font_small]->RenderString(xpos+(xIconOffset*4)+36, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_MENU_BACK), COL_MENUCONTENT, 0, true);
+/* 	useful stuff for version informations * getModulVersion()
+ * 	returns a numeric version string for better version handling from any module without 	
+ * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.16 $" becomes "1.146", 
+ * 	argument prefix can be empty or a replacement for "Revision"-string eg. "Version: " or "v." as required,
+ * 	argument ID_string must be a CVS-keyword like "$Revision: 1.16 $", used and changed by 
+ * 	cvs-committs or a version data string eg: "1.xxx" by yourself
+ * 	some examples:
+ * 	getModulVersion("Version: ","$Revision: 1.16 $")	 returns "Version: 1.153"	
+ * 	getModulVersion("v.","$Revision: 1.16 $")			 returns "v.1.153"
+ *  	getModulVersion("","$Revision: 1.16 $")		 		 returns "1.153"
+ */
+ std::string CImageInfo::getModulVersion(const std::string &prefix_string, std::string ID_string)
+{
+	string revstr = ID_string;
+	while (revstr.find("$") !=string::npos)
+	{
+		revstr.replace(revstr.find("$"),1 ,""); //normalize output, remove "$"	
+	}
+	
+	while (revstr.find("Revision: ") !=string::npos)
+	{
+		revstr.replace(revstr.find("Revision: "),10 ,""); //normalize output, remove "Revision:"	
+	}
+	
+	return revstr;
 }

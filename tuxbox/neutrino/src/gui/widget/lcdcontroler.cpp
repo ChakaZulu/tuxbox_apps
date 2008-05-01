@@ -80,6 +80,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 	int selected, res = menu_return::RETURN_REPAINT;
 	unsigned int contrast_alt, brightness_alt, brightnessstandby_alt, autodimm_alt;
 
@@ -129,7 +130,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 					CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 					break;
 				case 3:
-					frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENTSELECTED_PLUS_0);
+					frameBuffer->paintBoxRel(x, y + hheight + mheight * 3 + mheight / 2, width, mheight, COL_MENUCONTENTSELECTED_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText(LOCALE_OPTIONS_DEFAULT), COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 					break;
 				}
@@ -155,7 +156,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 				case 2:
 					paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, true);
 					CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
-					frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENT_PLUS_0);
+					frameBuffer->paintBoxRel(x, y + hheight + mheight * 3 + mheight / 2, width, mheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText(LOCALE_OPTIONS_DEFAULT), COL_MENUCONTENT, 0, true); // UTF-8
 					break;
 				case 3:
@@ -303,9 +304,10 @@ void CLcdControler::paint()
 {
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD_PLUS_0);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 
 	paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, LOCALE_LCDCONTROLER_CONTRAST, true);
 	paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS, false);

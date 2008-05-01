@@ -25,6 +25,8 @@
 
 #include <gui/widget/menue.h>
 
+
+
 #include <driver/framebuffer.h>
 #include <driver/pig.h>
 #include <driver/BitrateCalculator.h>
@@ -46,6 +48,8 @@ class CStreamInfo2
 
 		int  max_height;	// Frambuffer 0.. max
 		int  max_width;	
+	
+		int  c_rad_mid;
 
 		CPIG *pig;
 
@@ -97,6 +101,7 @@ class CStreamInfo2
 		CStreamInfo2();
 		 ~CStreamInfo2();
 		int exec();
+		std::string getStreamInfoVersion(void);
 };
 class CStreamInfo2Handler : public CMenuTarget
 {

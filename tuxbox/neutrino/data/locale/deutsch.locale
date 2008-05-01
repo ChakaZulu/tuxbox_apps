@@ -197,6 +197,7 @@ bouqueteditor.add Hinzufügen
 bouqueteditor.bouquetname Name des Bouquets
 bouqueteditor.delete Löschen
 bouqueteditor.discardingchanges Änderungen werden verworfen. Bitte warten...
+bouqueteditor.head Bouquets bearbeiten
 bouqueteditor.hide Verstecken
 bouqueteditor.lock Sperren
 bouqueteditor.move Verschieben
@@ -207,9 +208,13 @@ bouqueteditor.return Fertig
 bouqueteditor.savechanges? Sollen die Änderungen gespeichert werden?
 bouqueteditor.savingchanges Änderungen werden gespeichert. Bitte warten...
 bouqueteditor.switch Kanal aufnehmen/entfernen
+bouqueteditor.switch_to_channel auf Kanal schalten
 bouqueteditor.switchmode TV/Radio
+bouquetlist.bouquetselect Bouquet auswählen
 bouquetlist.head Bouquets
 cablesetup.provider Kabelanbieter
+channellist.epgtext_align_left links
+channellist.epgtext_align_right rechts
 channellist.head Alle Kanäle
 channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte eine Kanalsuche durch\n(dbox-Taste -> Service)
 channellist.since seit %02d:%02d
@@ -226,7 +231,7 @@ colormenu.gtx_alpha Transparenz (GTX)
 colormenu.head Farb-Einstellungen
 colormenu.menucolors Menüfarben
 colormenu.rounded_corners Eckendarstellung
-colormenu.rounded_corners_off standard
+colormenu.rounded_corners_off eckig
 colormenu.rounded_corners_on abgerundet
 colormenu.statusbar Statusbalken
 colormenu.textcolor Textfarbe
@@ -283,6 +288,7 @@ epgextended.guests Gäste
 epgextended.original_title Originaltitel
 epgextended.presenter Moderator
 epgextended.year_of_production Produktionsjahr
+epglist.error_no_recorddir_msg Aufnahme kann nicht vorgemekt werden! \ndKein Aufnahmeverzeichnis festgelegt!
 epglist.head Vorschau - %s
 epglist.noevents Keine EPG-Information verfügbar.
 epgviewer.More_Screenings Weitere Termine auf diesem Kanal
@@ -351,6 +357,7 @@ flashupdate.getupdatefile lade Update
 flashupdate.getupdatefileerror kann Update nicht laden
 flashupdate.globalprogress Gesamtstatus:
 flashupdate.head Aktualisierung
+flashupdate.imagename Image
 flashupdate.md5check Imageprüfung
 flashupdate.md5sumerror Das Image ist fehlerhaft
 flashupdate.msgbox Es wurde folgendes neues Update gefunden:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWollen Sie diese Version jetzt herunterladen\nund installieren?
@@ -425,12 +432,12 @@ imageinfo.cvslevel CVS-Stand:
 imageinfo.date Datum:
 imageinfo.details Versionen
 imageinfo.dokumentation Anleitung:
+imageinfo.exit verlassen
 imageinfo.forum Forum:
 imageinfo.head Image Informationen
 imageinfo.homepage Homepage:
 imageinfo.image Image:
 imageinfo.imagetype Image-Typ:
-imageinfo.info Info:
 imageinfo.license Lizenz
 imageinfo.noteflashtype für Flashupdates beachten Sie bitte Ihren Chip-Typ (1x bzw. 2x)
 imageinfo.partitions Partitionen
@@ -488,7 +495,7 @@ keybindingmenu.pagedown_head Seite runterblättern
 keybindingmenu.pageup Seite hochblättern
 keybindingmenu.pageup_head Seite hochblättern
 keybindingmenu.quickzap Schnellumschaltung
-keybindingmenu.reload neu laden
+keybindingmenu.reload aktualisieren
 keybindingmenu.reload_head EPG Infos neu laden
 keybindingmenu.repeatblock Wiederholungsverzögerung
 keybindingmenu.repeatblockgeneric Anfangsverzögerung
@@ -526,6 +533,9 @@ lcdmenu.statusline.both Lautstärke / Fortschritt
 lcdmenu.statusline.both_audio Laut. / Fort. / Audio
 lcdmenu.statusline.playtime Sendungsfortschritt
 lcdmenu.statusline.volume Lautstärke
+listscroll.down ab
+listscroll.exit verlassen
+listscroll.up auf
 mainmenu.audioplayer Audioplayer
 mainmenu.clearsectionsd EPG neu laden
 mainmenu.games Spiele
@@ -568,6 +578,8 @@ messagebox.error Fehler
 messagebox.info Information
 messagebox.no Nein
 messagebox.yes Ja
+miscsettings.channellist Kanalliste
+miscsettings.channellist_epgtext_align Ausrichtung des Programmtextes
 miscsettings.epg_cache EPG-Cache (Tage)
 miscsettings.epg_cache_hint1 EPG-Daten im Voraus cachen?
 miscsettings.epg_cache_hint2 Angabe in Tagen
@@ -600,7 +612,30 @@ miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.tuxtxt_cache Videotext zwischenspeichern
 miscsettings.virtual_zap_mode Virtual zap bei Infobar
 miscsettings.volumebar_disp_pos Lautstärkeanzeige
+motorcontrol.decrease_motor_position verringere Motor Position (a)
+motorcontrol.decrease_step_size Decrease Step Size (c)
+motorcontrol.disable_soft_limits Disable (soft) Limits
+motorcontrol.enable_soft_limits Enable (soft) Limits
+motorcontrol.exit verlassen
+motorcontrol.goto_motor_position Goto Motor Position (a)
+motorcontrol.goto_reference_position Gehe zu Referenzposition
 motorcontrol.head Motor-Setup
+motorcontrol.increase_motor_position erhöhe Motor Position (a)
+motorcontrol.increase_step_size Increase Step Size (c)
+motorcontrol.installer_menue Installationsmenü
+motorcontrol.not_defined nicht definiert
+motorcontrol.rc_menuehead Fernbedienungs-Menü
+motorcontrol.re_calculate_positions (Re)-Calculate Positions
+motorcontrol.set_east_soft_limit Set East (soft) Limit
+motorcontrol.set_west_soft_limit Set West (soft) Limit
+motorcontrol.settings Einstellungen Motorsteuerung
+motorcontrol.status Status
+motorcontrol.step_drive_motor_east Step/Drive Motor Ost (b,c)
+motorcontrol.step_drive_motor_halt Halt Motor
+motorcontrol.step_drive_motor_west Step/Drive Motor West (b,c)
+motorcontrol.store_motor_position Store Motor Position
+motorcontrol.switch_step_drive_mode Switch Step/Drive Mode (b)
+motorcontrol.user_menue Benutzermenü
 moviebrowser.book_clear_all Lösche alle
 moviebrowser.book_head Markierungen
 moviebrowser.book_lastmoviestop letzter Wiedergabestop:

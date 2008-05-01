@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.21 2008/04/13 14:55:25 houdini Exp $
+	$Id: neutrino_menu.cpp,v 1.22 2008/05/01 00:08:25 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -725,7 +725,9 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		dprintf(DEBUG_INFO, "current flash-version: %s\n", versionString);
 
 		static CFlashVersionInfo versionInfo(versionString);
-
+		static CImageInfo imageinfo;
+ 
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_IMAGENAME , false, imageinfo.getImageInfo(DISTRIBUTION)));
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONDATE    , false, versionInfo.getDate()));
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONTIME    , false, versionInfo.getTime()));
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTRELEASECYCLE   , false, versionInfo.getReleaseCycle()));
@@ -871,6 +873,13 @@ const CMenuOptionChooser::keyval  SHOW_MUTE_ICON_OPTIONS[SHOW_MUTE_ICON_OPTIONS_
 	{ 2 , LOCALE_MISCSETTINGS_SHOW_MUTE_ICON_NOT_IN_AC3MODE }
 };
 
+#define CHANNELLIST_EPGTEXT_ALIGN_RIGHT_OPTIONS_COUNT 2
+const CMenuOptionChooser::keyval  CHANNELLIST_EPGTEXT_ALIGN_RIGHT_OPTIONS[CHANNELLIST_EPGTEXT_ALIGN_RIGHT_OPTIONS_COUNT]=
+{
+	{ 0 , LOCALE_CHANNELLIST_EPGTEXT_ALIGN_LEFT },
+	{ 1 , LOCALE_CHANNELLIST_EPGTEXT_ALIGN_RIGHT }
+};
+
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
@@ -909,6 +918,10 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VIRTUAL_ZAP_MODE, &g_settings.virtual_zap_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SHOW, &g_settings.infobar_show, INFOBAR_EPG_SHOW_OPTIONS, INFOBAR_EPG_SHOW_OPTIONS_COUNT, true));
 
+	//channellist
+	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_CHANNELLIST));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_CHANNELLIST_EPGTEXT_ALIGN, &g_settings.channellist_epgtext_align_right, CHANNELLIST_EPGTEXT_ALIGN_RIGHT_OPTIONS, CHANNELLIST_EPGTEXT_ALIGN_RIGHT_OPTIONS_COUNT, true));
+	
 	//epg settings
 	CSectionsdConfigNotifier* sectionsdConfigNotifier = new CSectionsdConfigNotifier;
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_EPG_HEAD));
@@ -1640,12 +1653,8 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 		colorSettings.addItem( new CMenuForwarder(LOCALE_COLORMENU_GTX_ALPHA, true, NULL, chAlphaSetup, NULL, CRCInput::RC_2));
 	}
 #endif
-	bool mn_corner; // for testing	
-	if (mn_corner ==  true)
-	{
-		CMenuOptionChooser* ojc = new CMenuOptionChooser(LOCALE_COLORMENU_ROUNDED_CORNERS, &g_settings.rounded_corners, COLORMENU_CORNERSETTINGS_TYPE_OPTIONS, COLORMENU_CORNERSETTINGS_TYPE_OPTION_COUNT, true );
-		colorSettings.addItem(ojc);
-	}
+	CMenuOptionChooser* ojc = new CMenuOptionChooser(LOCALE_COLORMENU_ROUNDED_CORNERS, &g_settings.rounded_corners, COLORMENU_CORNERSETTINGS_TYPE_OPTIONS, COLORMENU_CORNERSETTINGS_TYPE_OPTION_COUNT, true );
+	colorSettings.addItem(ojc);
 }
 
 

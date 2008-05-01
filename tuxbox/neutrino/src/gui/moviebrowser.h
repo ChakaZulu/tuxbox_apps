@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.h,v 1.7 2007/01/24 02:22:22 guenther Exp $
+	$Id: moviebrowser.h,v 1.8 2008/05/01 00:08:24 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -42,6 +42,29 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.h,v $
+	Revision 1.8  2008/05/01 00:08:24  dbt
+	- add optional rounded corners in menues and most other windows, configurable in color menue, saved with themes
+	- revised buttonbars with uniformed background colors and more accurate captions
+	- revised image informations with more version informations about some modules
+	- comment lines for image infos, usefull stuff for image makers (get from ./version)
+	- motorsetup revised
+	- channel logos in infobar now possible
+	- record, swtch, epg load buttons now default activated in epglist
+	- message if is no record directory definied when using record button in epglist and epgview
+	- add more icons for user menue
+	
+	- optional abgerundete Ecken in Menues und den meisten Fenstern, schaltbar im Farbmenue, mit Themes speichebar
+	- Buttonleisten vereinhetlicht mit gleichen Hintergrundfarben und besser angepasste Beschriftungen
+	- mehr Versionsinformationen in Image Informationen
+	- Kommentarzeilen fuer Zusatzinfos bei Image Image-Informationen (geholt aus ./version)
+	- Motorsetup ueberarbeitet
+	- Senderlogos im Infobar möglich
+	- Aufnahme-, Umschalt- und aktualisierungs-Buttons jetzt standardmaessig in der EPG-Vorschau aktiviert
+	- Warnmeldung, falls kein Aufnahmeverzeichnis angegeben wurde, wenn  Aufnahme vorgemerkt werden soll
+	- weitere Icons für das Usermnue jetzt nutzbar
+	
+	special THX to Ingrid and PaulFoul for some inputs ;-)
+	
 	Revision 1.7  2007/01/24 02:22:22  guenther
 	update recording directory menu to support IDE and NFS
 	
@@ -322,6 +345,8 @@ class CMovieBrowser : public CMenuTarget
 		bool delFile(CFile& file);
 		bool delFile_vlc(CFile& file);
 		bool delFile_std(CFile& file);
+		
+		std::string getMovieBrowserVersion(void);
 		
 	private: //Functions
 		///// MovieBrowser init /////////////// 

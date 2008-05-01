@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.32 2007/09/03 08:41:06 dbt Exp $
+	$Id: streaminfo2.cpp,v 1.33 2008/05/01 00:08:25 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -36,6 +36,7 @@
 #include <iostream>
 
 #include <gui/streaminfo2.h>
+#include <gui/imageinfo.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -45,6 +46,7 @@
 #include <driver/screen_max.h>
 #include <gui/color.h>
 #include <gui/widget/icons.h>
+#include <gui/widget/buttons.h>
 
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
@@ -62,6 +64,8 @@ CStreamInfo2::CStreamInfo2()
 	hheight     = g_Font[font_head]->getHeight();
 	iheight     = g_Font[font_info]->getHeight();
 	sheight     = g_Font[font_small]->getHeight();
+	
+	c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 
 	if (w_max (710, 5) < 540)	{
 		width = 540;
@@ -415,6 +419,12 @@ void CStreamInfo2::SignalRenderStr (unsigned int value, int x, int y)
 	g_Font[font_small]->RenderString(x, y+5, 60, str, COL_MENUCONTENT, 0, true);
 }
 
+const struct button_label StreamInfoButtons[2] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_STREAMINFO_MAXIMIZE	},
+	{ NEUTRINO_ICON_BUTTON_HOME , LOCALE_STREAMINFO_CLOSE	}
+};
+
 void CStreamInfo2::paint(int mode)
 {
 	const char * head_string;
@@ -430,12 +440,12 @@ void CStreamInfo2::paint(int mode)
 		// paint backround, title pig, etc.
 		int background_x = xpos-10;
 		int background_w = width+10; 
-		int background_h = height - hheight;
+		int background_h = height-(y + hheight) ;
 		int pigboxes_x = xpos+width-260;
 		
-		frameBuffer->paintBoxRel(background_x, y, background_w, hheight, COL_MENUHEAD_PLUS_0);
-		g_Font[font_head]->RenderString(xpos, 0 + hheight + y, width, head_string, COL_MENUHEAD, 0, true); // UTF-8	
-		frameBuffer->paintBoxRel(background_x, y + hheight, background_w, background_h , COL_MENUCONTENT_PLUS_0);
+		frameBuffer->paintBoxRel(background_x, y, background_w, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
+		g_Font[font_head]->RenderString(xpos, y + hheight , width, head_string, COL_MENUHEAD, 0, true); // UTF-8	
+		frameBuffer->paintBoxRel(background_x, y + hheight, background_w, background_h, COL_MENUCONTENT_PLUS_0);
 		ypos = y+hheight+8;
 
 		// paint PIG
@@ -447,13 +457,11 @@ void CStreamInfo2::paint(int mode)
 		paint_signal_fe_box ( pigboxes_x,(ypos + 175), 240, 190);
 		
 		// buttons
-		int button_y = y+height;
-
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos , button_y-20 );
-		g_Font[font_small]->RenderString(xpos+25, button_y-2, 120, g_Locale->getText(LOCALE_STREAMINFO_MAXIMIZE), COL_MENUCONTENT_PLUS_0, 0, true); // UTF-8
+		int button_y = ypos+background_h-8;
+		int ButtonWidth = background_w/2;
 		
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HOME, pigboxes_x , button_y-25 );
-		g_Font[font_small]->RenderString(pigboxes_x+30, button_y-2, 120, g_Locale->getText(LOCALE_STREAMINFO_CLOSE), COL_MENUCONTENT_PLUS_0, 0, true); // UTF-8
+		frameBuffer->paintBoxRel(background_x, button_y, background_w, sheight , COL_INFOBAR_SHADOW_PLUS_1, c_rad_mid, CORNER_BOTTOM);
+		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, xpos + 4, button_y, ButtonWidth, 2, StreamInfoButtons);
 
 	} else {
 
@@ -765,6 +773,13 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	std::cout<<"[streaminfo] "<< buf<<std::endl;
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
+}
+
+/************************************************************************/
+std::string CStreamInfo2::getStreamInfoVersion(void)
+{	
+	static CImageInfo imageinfo;
+	return imageinfo.getModulVersion("","$Revision: 1.33 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)

@@ -58,7 +58,7 @@ CBEBouquetWidget::CBEBouquetWidget()
 	// width  = 500;
 	// height = 440;
 	// ButtonHeight = 25;
-	width  = w_max (500, 0);
+	width  = w_max (550, 0);
 	height = h_max (440, 50);
 	ButtonHeight = 25;
 	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
@@ -75,6 +75,7 @@ CBEBouquetWidget::CBEBouquetWidget()
 void CBEBouquetWidget::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
+	int c_rad_small;
 
 	uint8_t    color;
 	fb_pixel_t bgcolor;
@@ -82,19 +83,22 @@ void CBEBouquetWidget::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;	
 	}
 	else
 	{
 		color   = COL_MENUCONTENT;
 		bgcolor = COL_MENUCONTENT_PLUS_0;
+		c_rad_small = 0;
 	}
 
 	if (liststart+pos==selected)
 	{
 		color = COL_MENUCONTENTSELECTED;
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor, c_rad_small);
 	if ((liststart+pos==selected) && (state == beMoving))
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + 8, ypos+4);
@@ -129,48 +133,43 @@ void CBEBouquetWidget::paint()
 	int sbc= ((Bouquets.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 
 }
 
 void CBEBouquetWidget::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, g_Locale->getText(LOCALE_BOUQUETLIST_HEAD), COL_MENUHEAD, 0, true); // UTF-8
 }
 
-const struct button_label CBEBouquetWidgetButtons[3] =
+struct button_label CBEBouquetWidgetButtons1[5] =
 {
 	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_BOUQUETEDITOR_DELETE },
 	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_BOUQUETEDITOR_ADD    },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_BOUQUETEDITOR_MOVE   }
+	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_BOUQUETEDITOR_MOVE   },
+	{ NEUTRINO_ICON_BUTTON_BLUE,  }, // button without caption  
+	{ NEUTRINO_ICON_BUTTON_DBOX, LOCALE_BOUQUETEDITOR_RENAME }
 };
 
 void CBEBouquetWidget::paintFoot()
 {
-	struct button_label Button[4];
-	Button[0] = CBEBouquetWidgetButtons[0];
-	Button[1] = CBEBouquetWidgetButtons[1];
-	Button[2] = CBEBouquetWidgetButtons[2];
-	Button[3].button = NEUTRINO_ICON_BUTTON_BLUE;
-
-	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1);
+	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW_PLUS_0);
 
 	switch( blueFunction)
 	{
 		case beRename:
-			Button[3].locale = LOCALE_BOUQUETEDITOR_RENAME;
+			CBEBouquetWidgetButtons1[4].locale = LOCALE_BOUQUETEDITOR_RENAME;
 		break;
 		case beHide:
-			Button[3].locale = LOCALE_BOUQUETEDITOR_HIDE;
+			CBEBouquetWidgetButtons1[4].locale = LOCALE_BOUQUETEDITOR_HIDE;
 		break;
 		case beLock:
-			Button[3].locale = LOCALE_BOUQUETEDITOR_LOCK;
+			CBEBouquetWidgetButtons1[4].locale = LOCALE_BOUQUETEDITOR_LOCK;
 		break;
 	}
-	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 5, y + height + 4, (width - 28 - 10) / 4, 4, Button);
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+width - 28, y+height);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 5, y + height+2, (width-20)/5, 5, CBEBouquetWidgetButtons1, width-20);
 }
 
 void CBEBouquetWidget::hide()

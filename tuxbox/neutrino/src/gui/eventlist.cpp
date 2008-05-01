@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.111 2007/11/18 20:11:10 dbt Exp $
+	$Id: eventlist.cpp,v 1.112 2008/05/01 00:08:22 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -91,7 +91,7 @@ EventList::EventList()
 
 	//width  = 580;
 	//height = 480;
-	width  = w_max (580, 20);
+	width  = w_max (590, 20);
 	height = h_max (480, 20);
 
 	iheight = 30;	// info bar height (see below, hard coded at this time)
@@ -420,6 +420,12 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 						recDir = recDirs.get_selected_dir();
 					}
 					
+					if ((recDir == "") && (RECORDING_FILE == g_settings.recording_type))
+					{
+						printf("set zapto timer failed, no record directory...\n");
+						ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_EPGLIST_ERROR_NO_RECORDDIR_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "error.raw");
+					}
+
 					if ((recDir != "") || (RECORDING_FILE != g_settings.recording_type))
 					{
 //						if (timerdclient.addRecordTimerEvent(channel_id,
@@ -585,9 +591,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 
 void EventList::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
-	showFunctionBar (false);
-
+	frameBuffer->paintBackgroundBoxRel(x, y, width, height - 3);
 }
 
 void EventList::paintItem(unsigned int pos)
@@ -686,7 +690,8 @@ void EventList::paintHead()
 	char l_name[100];
 	snprintf(l_name, sizeof(l_name), g_Locale->getText(LOCALE_EPGLIST_HEAD), name.c_str()); // UTF-8
 
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x, y, width, theight, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-36, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
 
@@ -713,92 +718,133 @@ void EventList::paint()
 
 }
 
-
-
-
-
 //
 // -- Just display/hide function bar
 // -- 2004-04-12 rasc
 //
-
 void  EventList::showFunctionBar (bool show)
 {
 	int  bx,by,bw,bh;
-	int  cellwidth;		// 4 cells
-	int  h_offset, pos;
-	int  bdx;
+	int  cellwidth[4];		// 5 cells
+	int  h_offset;
+	int  h_iconoffset;
+	int  space = 8;		// space between buttons
+	int  iconw = 0; //16+4;	// buttonwidht + space between icon and caption
+	int  h_maxoffset = 5, h_minoffset = 2;
 
 	CKeyHelper keyhelper;
 	neutrino_msg_t key = CRCInput::RC_nokey;
-	const char * icon = NULL; 
+	const char * icon = NULL;
+	std::string btncaption[5];	
 
 	bw = width;
 	bh = iheight;
-	bx = x;
+	bx = x+4;
 	by = y + height-iheight;
 	h_offset = 5;
-	cellwidth = bw / 4;
-	bdx = iheight-1;
+	h_iconoffset = 0;
 
-	frameBuffer->paintBackgroundBoxRel(bx,by,bw,bh);
 	// -- hide only?
-	if (!show) return;
+	if (!show)
+	{
+		frameBuffer->paintBackgroundBoxRel(bx, by, bw, bh - 3);
+		return;
+	}
 
-	//frameBuffer->paintBoxRel(bx,by-2,bw,bh+2, COL_MENUHEAD);
-	frameBuffer->paintBoxRel(bx,by,bw,bh-3, COL_INFOBAR_SHADOW_PLUS_1);
+	frameBuffer->paintBoxRel(x, by, bw, bh - 3, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 
-	pos = 0;
-//	unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].startTime + evtlist[selected].duration,evtlist[selected].eventID);
+
 	unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].startTime + evtlist[selected].duration,evtlist[selected].get_channel_id());
+	
 	// -- Button: Timer Record & Channelswitch
 	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
 		(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_addrecord);
-		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
+		
 		if(is_timer & EventList::TIMER_RECORD )
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_TIMERLIST_DELETE), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+			btncaption[0] = g_Locale->getText(LOCALE_TIMERLIST_DELETE);
 		else
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_RECORDEVENT), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
-		pos++;
+			btncaption[0] = g_Locale->getText(LOCALE_EVENTLISTBAR_RECORDEVENT);
+		
+		iconw = frameBuffer->getIconWidth(icon)+4;
+		cellwidth[0] = iconw + space +g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption[0]);
+
+		// paint 1st button
+		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
+		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[0], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+
+		bx += cellwidth[0];
 	}
 
 	if (1)
 	{
+
 		keyhelper.get(&key, &icon, CRCInput::RC_green);
-		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTFINDER_SEARCH), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
-		pos++;
+		
+		btncaption[1] = g_Locale->getText(LOCALE_EVENTFINDER_SEARCH);
+		
+		iconw = frameBuffer->getIconWidth(icon)+4;
+		cellwidth[1] = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption[1]);
+	
+		// paint second button
+		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
+		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[1], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		
+		bx += cellwidth[1];
 	}
 
 	// Button: Timer Channelswitch
 	if (g_settings.key_channelList_addremind != (int)CRCInput::RC_nokey)
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_addremind);
-		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
+
 		if(is_timer & EventList::TIMER_ZAPTO)
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_TIMERLIST_DELETE), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+			btncaption[2] =  g_Locale->getText(LOCALE_TIMERLIST_DELETE);
 		else
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_CHANNELSWITCH), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
-		pos++;
+			btncaption[2] =  g_Locale->getText(LOCALE_EVENTLISTBAR_CHANNELSWITCH);
+		
+		iconw = frameBuffer->getIconWidth(icon)+4;
+		cellwidth[2] = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption[2]);
+
+		// paint 3rd button
+		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
+		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[2], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8	
+
+		bx += cellwidth[2];
 	}
 
 	// Button: Event Re-Sort
 	if (g_settings.key_channelList_sort != (int)CRCInput::RC_nokey)
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_sort);
-		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_EVENTSORT), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
-		pos++;
+		
+		btncaption[3] =  g_Locale->getText(LOCALE_EVENTLISTBAR_EVENTSORT);
+		
+		iconw = frameBuffer->getIconWidth(icon)+4;
+		cellwidth[3] = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption[3]);
+	
+		// paint 4th button
+		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
+		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[3], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		bx += cellwidth[3];
 	}
 
-	// Button: Event Reload
+	// Button: Event Reload/Refresh
 	if (g_settings.key_channelList_reload != (int)CRCInput::RC_nokey)
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_reload);
-		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_KEYBINDINGMENU_RELOAD), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+
+		// paint 5th button
+		btncaption[4] =  g_Locale->getText(LOCALE_KEYBINDINGMENU_RELOAD);
+		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
+		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
+		iconw = frameBuffer->getIconWidth(icon)+4;
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[4], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 	}
 
 }

@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.64 2008/02/29 11:14:06 ecosys Exp $
+	$Id: framebuffer.cpp,v 1.65 2008/05/01 00:08:21 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -466,6 +466,54 @@ const char  *CFrameBuffer::getIconFilePath(const std::string & filename)
 		}		
 }	
 
+int CFrameBuffer::getIconHeight(const char * const filename)
+{
+	struct rawHeader header;
+	uint16_t         height;
+	int              fd;
+	const char *     iconfile = getIconFilePath(filename);
+
+	fd = open(iconfile, O_RDONLY);
+
+	if (fd == -1)
+	{
+		printf("Framebuffer getIconHeight: error while loading icon: %s\n", iconfile);
+		return 0;
+	}
+	else
+	{	
+		read(fd, &header, sizeof(struct rawHeader));
+		height = (header.height_hi << 8) | header.height_lo;
+	}
+
+	close(fd);
+	return height;
+}
+
+int CFrameBuffer::getIconWidth(const char * const filename)
+{
+	struct rawHeader header;
+	uint16_t         width;
+	int              fd;
+	const char *     iconfile = getIconFilePath(filename);
+
+	fd = open(iconfile, O_RDONLY);
+
+	if (fd == -1)
+	{
+		printf("Framebuffer getIconWidth: error while loading icon: %s\n", iconfile);
+		width = 0;
+	}
+	else
+	{	
+		read(fd, &header, sizeof(struct rawHeader));
+		width = (header.width_hi << 8) | header.width_lo;
+	}
+	
+	close(fd);
+	return width;
+}
+
 bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const int y, const unsigned char offset)
 {
 	if (!getActive())
@@ -480,7 +528,7 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s\n", iconfile);
+		printf("Framebuffer paintIcon8: error while loading icon: %s\n", iconfile);
 		return false;
 	}
 	
@@ -528,7 +576,7 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s\n", iconfile);
+		printf("Framebuffer paintIcon: error while loading icon: %s\n", iconfile);
 		return false;
 	}
 
@@ -536,7 +584,7 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 
 	width  = (header.width_hi  << 8) | header.width_lo;
 	height = (header.height_hi << 8) | header.height_lo;
-
+	
 	unsigned char pixbuf[768];
 	uint8_t * d = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 	fb_pixel_t * d2;

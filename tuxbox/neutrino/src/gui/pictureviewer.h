@@ -84,12 +84,14 @@ class CPictureViewerGui : public CMenuTarget
 		CViewList			playlist;
 		std::string			Path;
 
-		int 			width;
-		int 			height;
-		int 			x;
+		int			width;
+		int			height;
+		int			x;
 		int 			y;
-		int         m_title_w;
-		long        m_time;
+		int			m_title_w;
+		long		m_time;
+		
+		int			c_rad_mid;
 
 		int         m_LastMode;
 
@@ -112,9 +114,8 @@ class CPictureViewerGui : public CMenuTarget
 		CPictureViewerGui();
 		~CPictureViewerGui();
 		int  exec(CMenuTarget* parent, const std::string & actionKey);
+		std::string getPictureViewerVersion(void);
 };
 
 
 #endif
-
-

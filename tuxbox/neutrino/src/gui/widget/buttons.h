@@ -2,7 +2,7 @@
 #define __gui_widget_buttons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/buttons.h,v 1.2 2004/05/25 07:44:16 thegoodguy Exp $
+ * $Id: buttons.h,v 1.3 2008/05/01 00:08:35 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -21,7 +21,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
-
+ 
 #include <driver/fontrenderer.h>
 #include <driver/framebuffer.h>
 #include <system/localize.h>
@@ -32,6 +32,16 @@ typedef struct button_label
 	neutrino_locale_t locale;
 } button_label_struct;
 
-void paintButtons(CFrameBuffer * const frameBuffer, Font * const font, const CLocaleManager * const localemanager, const int x, const int y, const unsigned int buttonwidth, const unsigned int count, const struct button_label * const content);
-
+void paintButtons(CFrameBuffer * const frameBuffer, 
+							Font * const font, 
+							const CLocaleManager * const localemanager,
+							const int x, 
+							const int y, 
+							const unsigned int buttonwidth, 
+							const unsigned int count, 
+							const struct button_label * const content, 
+							const unsigned int maxwitdth = 720,
+							bool vertical_paint = false);
+											
+					
 #endif /* __gui_widget_buttons_h__ */

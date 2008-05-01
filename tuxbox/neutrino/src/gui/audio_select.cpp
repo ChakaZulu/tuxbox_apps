@@ -119,9 +119,6 @@ int CAudioSelectMenuHandler::doMenu ()
 
 	}
 
-
-	AudioSelector.addItem(GenericMenuSeparator);
-
 	return AudioSelector.exec(NULL, "");
 }
 

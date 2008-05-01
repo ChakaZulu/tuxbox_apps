@@ -50,6 +50,7 @@ class CBEChannelSelectWidget : public CListBox
 
 		uint	getItemCount();
 		void paintItem(uint itemNr, int paintNr, bool selected);
+		void paintHead();
 		void paintFoot();
 		void onOkKeyPressed();
 
@@ -64,4 +65,3 @@ class CBEChannelSelectWidget : public CListBox
 };
 
 #endif
-

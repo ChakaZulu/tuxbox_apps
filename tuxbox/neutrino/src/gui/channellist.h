@@ -2,7 +2,7 @@
 #define __channellist__
 
 /*
-	$Id: channellist.h,v 1.74 2008/02/15 22:32:21 houdini Exp $
+	$Id: channellist.h,v 1.75 2008/05/01 00:08:22 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -100,6 +100,7 @@ class CChannelList
 		void paintItem(int pos);
 		void paint();
 		void paintHead();
+		void paintFoot();
 		void hide();
 
 	public:

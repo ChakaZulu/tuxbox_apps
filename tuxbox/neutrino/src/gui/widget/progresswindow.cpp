@@ -1,5 +1,5 @@
 /*
-	$Id: progresswindow.cpp,v 1.17 2007/10/16 10:53:15 seife Exp $
+	$Id: progresswindow.cpp,v 1.18 2008/05/01 00:08:35 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -73,7 +73,8 @@ void CProgressWindow::showGlobalStatus(const unsigned int prog)
 	global_progress = prog;
 
 	int pos = x + 10;
-
+	int c_rad_small =  g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+	
 	if(global_progress != 0)
 	{
 		if (global_progress > 100)
@@ -81,10 +82,10 @@ void CProgressWindow::showGlobalStatus(const unsigned int prog)
 
 		pos += (width-20) * global_progress / 100;
 		//vordergrund
-		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT_PLUS_7);
+		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT_PLUS_7, c_rad_small);
 	}
 	//hintergrund
-	frameBuffer->paintBox(pos, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT_PLUS_2);
+	frameBuffer->paintBox(pos, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT_PLUS_2, c_rad_small);
 
 #ifdef LCD_UPDATE
 	CLCD::getInstance()->showProgressBar2(-1,NULL,global_progress);
@@ -99,6 +100,7 @@ void CProgressWindow::showLocalStatus(const unsigned int prog)
 	local_progress = prog;
 
 	int pos = x + 10;
+	int c_rad_small =  g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 
 	if (local_progress != 0)
 	{
@@ -107,10 +109,10 @@ void CProgressWindow::showLocalStatus(const unsigned int prog)
 
 		pos += (width-20) * local_progress / 100;
 		//vordergrund
-		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT_PLUS_7);
+		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT_PLUS_7, c_rad_small);
 	}
 	//hintergrund
-	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT_PLUS_2);
+	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT_PLUS_2, c_rad_small);	
 
 #ifdef LCD_UPDATE
 	CLCD::getInstance()->showProgressBar2(local_progress);
@@ -143,10 +145,12 @@ void CProgressWindow::hide()
 void CProgressWindow::paint()
 {
 	int ypos=y;
-	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	if (caption != NONEXISTANT_LOCALE)
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 
 	ypos+= hheight + (mheight >>1);
 	statusTextY = ypos+mheight;

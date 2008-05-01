@@ -1,5 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
+	
+	$Id: pictureviewer.cpp,v 1.62 2008/05/01 00:08:25 dbt Exp $
 
 	MP3Player by Dirch
 	
@@ -35,6 +37,7 @@
 #endif
 
 #include <gui/pictureviewer.h>
+#include <gui/imageinfo.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -45,6 +48,7 @@
 #include <driver/rcinput.h>
 
 #include <gui/nfs.h>
+#include <gui/infoviewer.h>
 
 #include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
@@ -123,6 +127,8 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	fheight      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	listmaxshow = (height-theight-2*buttonHeight)/(fheight);
 	height = theight+2*buttonHeight+listmaxshow*fheight;	// recalc height
+	
+	c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height)/ 2) + g_settings.screen_StartY;
@@ -160,7 +166,7 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
-
+	
 	// Restore last mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 
@@ -535,6 +541,7 @@ void CPictureViewerGui::paintItem(int pos)
 {
 //	printf("paintItem{\n");
 	int ypos = y+ theight + 0 + pos*fheight;
+	int c_rad_small;
 
 	uint8_t    color;
 	fb_pixel_t bgcolor;
@@ -543,20 +550,23 @@ void CPictureViewerGui::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTDARK;
 		bgcolor = COL_MENUCONTENTDARK_PLUS_0;
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 	}
 	else
 	{
 		color	= COL_MENUCONTENT;
 		bgcolor = COL_MENUCONTENT_PLUS_0;
+		c_rad_small =0;
 	}
 
 	if (liststart+pos == selected)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, bgcolor);
+	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, bgcolor, c_rad_small);
 	if(liststart+pos<playlist.size())
 	{
 		std::string tmp = playlist[liststart+pos].Name;
@@ -568,7 +578,6 @@ void CPictureViewerGui::paintItem(int pos)
 		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(timestring);
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,ypos+fheight, width-30 - w, tmp, color, fheight);
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-20-w,ypos+fheight, w, timestring, color, fheight);
-
 	}
 //	printf("paintItem}\n");
 }
@@ -579,7 +588,7 @@ void CPictureViewerGui::paintHead()
 {
 //	printf("paintHead{\n");
 	std::string strCaption = g_Locale->getText(LOCALE_PICTUREVIEWER_HEAD);
-	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+10);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
 	int ypos=y+0;
@@ -604,7 +613,7 @@ void CPictureViewerGui::paintFoot()
 //	printf("paintFoot{\n");
 	int ButtonWidth = (width-20) / 4;
 	int ButtonWidth2 = (width-50) / 2;
-	frameBuffer->paintBoxRel(x,y+(height-2*buttonHeight), width,2*buttonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x,y+(height-2*buttonHeight), width,2*buttonHeight, COL_INFOBAR_SHADOW_PLUS_1, c_rad_mid, CORNER_BOTTOM);
 	frameBuffer->paintHLine(x, x+width,  y+(height-2*buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
 
 	if (!playlist.empty())
@@ -651,7 +660,7 @@ void CPictureViewerGui::paint()
 	int sbc= ((playlist.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 
 	paintFoot();
 	paintInfo();
@@ -704,8 +713,16 @@ void CPictureViewerGui::endView()
 	}
 }
 
+/************************************************************************/
+std::string CPictureViewerGui::getPictureViewerVersion(void)
+{	
+	static CImageInfo imageinfo;
+	return imageinfo.getModulVersion("","$Revision: 1.62 $");
+}
+
 void CPictureViewerGui::showHelp()
 {
+	std::string version = "Version: " + getPictureViewerVersion();
 	Helpbox helpbox;
 	helpbox.addLine(g_Locale->getText(LOCALE_PICTUREVIEWER_HELP1));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP2));
@@ -732,7 +749,7 @@ void CPictureViewerGui::showHelp()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP22));
 
-	helpbox.addLine("Version: $Revision: 1.61 $");
+	helpbox.addLine(version);
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 }

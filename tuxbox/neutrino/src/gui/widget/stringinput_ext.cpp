@@ -250,8 +250,10 @@ void CExtendedInput::hide()
 
 void CExtendedInput::paint()
 {
-	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0);
-	frameBuffer->paintBoxRel(x, y + hheight-3, width, height - hheight, COL_MENUCONTENT);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT, c_rad_mid, CORNER_BOTTOM);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10, y+ hheight, width- 10, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 
@@ -313,8 +315,9 @@ void CExtendedInput_Item_Char::paint(int x, int y, bool focusGained )
 		bgcolor = COL_MENUCONTENT_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel( startx, starty, idx, idy, COL_MENUCONTENT_PLUS_4);
-	frameBuffer->paintBoxRel( startx+1, starty+1, idx-2, idy-2, bgcolor);
+	int c_rad_small =g_settings.rounded_corners ? 3 : 0;
+	frameBuffer->paintBoxRel( startx, starty, idx, idy, COL_MENUCONTENT_PLUS_4, c_rad_small);
+	frameBuffer->paintBoxRel( startx+1, starty+1, idx-2, idy-2, bgcolor, c_rad_small);
 
 	char text[2];
 	text[0] = *data;

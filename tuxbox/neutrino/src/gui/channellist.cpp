@@ -1,6 +1,8 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
+	$Id: channellist.cpp,v 1.190 2008/05/01 00:08:21 dbt Exp $
+	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
@@ -250,7 +252,7 @@ int CChannelList::show()
 
 	int res = -1;
 
-	width  = w_max (560, 0);
+	width  = w_max (590, 0);
 	height = h_max (420 + (1+3+16+3), 60);
 
 
@@ -1081,6 +1083,7 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 void CChannelList::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
+	int c_rad_small;
 
 	uint8_t    color;
 	fb_pixel_t bgcolor;
@@ -1090,14 +1093,16 @@ void CChannelList::paintItem(int pos)
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 		paintDetails(liststart+pos);
 		paintItem2DetailsLine (pos, liststart+pos);
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 	}
 	else
 	{
-		color   = COL_MENUCONTENT;
-		bgcolor = COL_MENUCONTENT_PLUS_0;
+		color   = !displayNext ? COL_MENUCONTENT : COL_MENUCONTENTINACTIVE;
+		bgcolor = !displayNext ? COL_MENUCONTENT_PLUS_0 : COL_MENUCONTENTINACTIVE_PLUS_0;
+		c_rad_small = 0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor, c_rad_small, CORNER_RIGHT);
 	if(liststart+pos<chanlist.size())
 	{
 		CChannel* chan = chanlist[liststart+pos];
@@ -1141,11 +1146,15 @@ void CChannelList::paintItem(int pos)
 
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
 
-			// align right - auskommentiert
-			// g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
-
-			// align left
-			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, p_event->description, color);
+			if (g_settings.channellist_epgtext_align_right){
+				// align right
+				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
+			}
+			else{
+				// align left
+				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, p_event->description, color);
+			}
+			
 		}
 		else
 			//name
@@ -1153,32 +1162,40 @@ void CChannelList::paintItem(int pos)
 	}
 }
 
+void CChannelList::paintHead()
+{
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width- 65, name, COL_MENUHEAD, 0, true); // UTF-8
+	paintFoot();
+}
+
 struct button_label CChannelListButtons[] =
 {
 	{ NEUTRINO_ICON_BUTTON_RED, LOCALE_INFOVIEWER_EVENTLIST},
-	{ NEUTRINO_ICON_BUTTON_BLUE, LOCALE_INFOVIEWER_NEXT}
+	{ NEUTRINO_ICON_BUTTON_BLUE, LOCALE_INFOVIEWER_NEXT},
+	{ NEUTRINO_ICON_BUTTON_HELP_SMALL, LOCALE_EPGMENU_EVENTINFO},
+	{ "", } // icon for bouquet list button
 };
 
-void CChannelList::paintHead()
+void CChannelList::paintFoot()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width- 65, name, COL_MENUHEAD, 0, true); // UTF-8
-
 	int ButtonWidth = (width - 20) / 4;
 	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());
 	frameBuffer->paintHLineRel(x, width, y + (height - buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
-	//footbar
+	
 	if (displayNext) {
 		CChannelListButtons[1].locale = LOCALE_INFOVIEWER_NOW;
 	} else {
 		CChannelListButtons[1].locale = LOCALE_INFOVIEWER_NEXT;
 	}
-	frameBuffer->paintBoxRel(x, y + (height - buttonHeight), width, buttonHeight - 1, COL_INFOBAR_SHADOW_PLUS_1);
-	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight) + 3, ButtonWidth, sizeof(CChannelListButtons)/sizeof(CChannelListButtons[0]), CChannelListButtons);
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
-	if (bouquetList != NULL)
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x + width - 60, y + 5); // icon for bouquet list button
+	
+	if (bouquetList != NULL) {
+		CChannelListButtons[3].locale = LOCALE_BOUQUETLIST_HEAD; 
+		CChannelListButtons[3].button = NEUTRINO_ICON_BUTTON_DBOX;
+	}
+		
+	frameBuffer->paintBoxRel(x, y + (height - buttonHeight), width, buttonHeight - 1, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight), ButtonWidth, sizeof(CChannelListButtons)/sizeof(CChannelListButtons[0]), CChannelListButtons, width-20);
 }
 
 void CChannelList::paint()
@@ -1212,7 +1229,7 @@ void CChannelList::paint()
 	int sbc= ((chanlist.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 
 	g_Sectionsd->setPauseSorting( false );
 }

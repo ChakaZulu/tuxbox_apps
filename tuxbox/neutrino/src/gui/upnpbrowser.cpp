@@ -974,14 +974,15 @@ void CUpnpBrowserGui::paintDevice()
 {
 	std::string tmp;
 	int w, xstart, xpos, ypos, top;
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 
 	// LCD
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, "Select UPnP Device");
 	CLCD::getInstance()->showMenuText(0, m_devices[m_selecteddevice].friendlyname.c_str(), -1, true);
 
 	// Info
-	m_frameBuffer->paintBoxRel(m_x, m_y, m_width, m_title_height - 10, COL_MENUCONTENT_PLUS_6);
-	m_frameBuffer->paintBoxRel(m_x + 2, m_y + 2, m_width - 4, m_title_height - 14, COL_MENUCONTENTSELECTED_PLUS_0);
+	m_frameBuffer->paintBoxRel(m_x, m_y, m_width, m_title_height - 10, COL_MENUCONTENT_PLUS_6, c_rad_mid);
+	m_frameBuffer->paintBoxRel(m_x + 2, m_y + 2, m_width - 4, m_title_height - 14, COL_MENUCONTENTSELECTED_PLUS_0, c_rad_mid);
 
 	// first line
 	tmp = m_devices[m_selecteddevice].manufacturer + " " +
@@ -1014,7 +1015,7 @@ void CUpnpBrowserGui::paintDevice()
 
 	// Head
 	tmp = g_Locale->getText(LOCALE_UPNPBROWSER_HEAD);
-	m_frameBuffer->paintBoxRel(m_x, m_y + m_title_height, m_width, m_theight, COL_MENUHEAD_PLUS_0);
+	m_frameBuffer->paintBoxRel(m_x, m_y + m_title_height, m_width, m_theight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	m_frameBuffer->paintIcon(NEUTRINO_ICON_UPNP, m_x + 7, m_y + m_title_height + 6);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(m_x + 35, m_y + m_theight + m_title_height + 0,
 		m_width - 45, tmp, COL_MENUHEAD, 0, true); // UTF-8
@@ -1048,7 +1049,7 @@ void CUpnpBrowserGui::paintDevice()
 	top = m_y + (m_height - m_info_height - 2 * m_buttonHeight);
 
 	int ButtonWidth = (m_width - 20) / 4;
-	m_frameBuffer->paintBoxRel(m_x, top, m_width, 1 * m_buttonHeight, COL_MENUHEAD_PLUS_0);
+	m_frameBuffer->paintBoxRel(m_x, top, m_width, 1 * m_buttonHeight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 	m_frameBuffer->paintHLine(m_x, m_x + m_width, top, COL_INFOBAR_SHADOW_PLUS_0);
 	::paintButtons(m_frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale,
 		m_x + 10, top + 4, ButtonWidth, 1, &RescanButton);

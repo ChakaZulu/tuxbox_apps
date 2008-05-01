@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.141 2008/04/05 21:05:51 houdini Exp $
+	$Id: menue.cpp,v 1.142 2008/05/01 00:08:35 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -305,7 +305,7 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 
 void CMenuWidget::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x, y, width+15,height );
+	frameBuffer->paintBackgroundBoxRel(x, y, width + 15, height + CORNER_RADIUS_MID * 2 + 1);
 }
 
 void CMenuWidget::paint()
@@ -368,7 +368,11 @@ void CMenuWidget::paint()
 	else
 		sb_width=0;
 
-	frameBuffer->paintBoxRel(x,y, width+sb_width,hheight, COL_MENUHEAD_PLUS_0);
+	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	
+	frameBuffer->paintBoxRel(x, y + height - ((c_rad_mid * 2) + 1) + (c_rad_mid / 3 * 2), width + sb_width, ((c_rad_mid * 2) + 1), COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x, y, width + sb_width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
+
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+38,y+hheight+1, width-40, l_name, COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintIcon(iconfile, x + 8, y + 5);
 
@@ -393,7 +397,7 @@ void CMenuWidget::paintItems()
 	if(total_pages>1)
 	{
 		frameBuffer->paintBoxRel(x+ width,item_start_y, 15, item_height, COL_MENUCONTENT_PLUS_1);
-		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ current_page*(item_height-4)/total_pages, 11, (item_height-4)/total_pages, COL_MENUCONTENT_PLUS_3);
+		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ current_page*(item_height-4)/total_pages, 11, (item_height-4)/total_pages, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 	}
 	frameBuffer->paintBoxRel(x,item_start_y, width,item_height, COL_MENUCONTENT_PLUS_0);
 	int ypos=item_start_y;
@@ -471,7 +475,7 @@ int CMenuOptionNumberChooser::paint(bool selected)
 		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor);
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 
 	const char * l_option;
 	char option_value[11];
@@ -590,7 +594,7 @@ int CMenuOptionChooser::paint( bool selected )
 		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor);
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 
 	neutrino_locale_t option = NONEXISTANT_LOCALE;
 
@@ -778,7 +782,7 @@ int CMenuOptionLanguageChooser::paint( bool selected )
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
 
-	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor);
+	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 
 	// 	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(optionValue);//unused variable
 	int stringstartposOption = x + offx + 10;
@@ -886,7 +890,7 @@ int CMenuForwarder::paint(bool selected)
 		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor);
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x), l_text, color, 0, true); // UTF-8
 
 	if (!iconName.empty())

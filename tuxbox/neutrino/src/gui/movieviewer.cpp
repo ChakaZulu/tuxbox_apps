@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.3 2007/09/07 07:11:34 dbt Exp $
+	$Id: movieviewer.cpp,v 1.4 2008/05/01 00:08:25 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -109,7 +109,9 @@ void CMovieViewer::init()
 	time_left_width = 2* g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(widest_number);
 	time_dot_width = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(":");
 	time_width = time_left_width* 2+ time_dot_width;
-
+	c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+	c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	c_rad_large = g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0;
 	getData();
 }
 
@@ -354,14 +356,28 @@ void CMovieViewer::show()
 	frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth/3), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
 	// kill progressbar
 	frameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
+	
+	int ChanNameX = BoxStartX + ChanWidth;
+	int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 
-	int col_NumBox = COL_INFOBAR_PLUS_0;
 
 	///////////////////////////
-	// paint number box 
-	frameBuffer->paintBoxRel(BoxStartX+SHADOW_OFFSET, BoxStartY+SHADOW_OFFSET, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
-	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, col_NumBox);
+	// paint shadow right 
+	int c_shadow_width = (c_rad_large * 2) + 1;	
+	frameBuffer->paintBoxRel(BoxEndX - c_shadow_width, ChanNameY + SHADOW_OFFSET, SHADOW_OFFSET + c_shadow_width, BoxEndY - ChanNameY, COL_INFOBAR_SHADOW_PLUS_0, c_rad_mid, CORNER_RIGHT);
+	
+	///////////////////////////
+	//paint infobox
+	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR_PLUS_0, c_rad_mid, CORNER_TOP_RIGHT);
+	
+	///////////////////////////
+	// paint number box
+	int col_NumBox = COL_INFOBAR_PLUS_0;
 
+	frameBuffer->paintBoxRel(BoxStartX+SHADOW_OFFSET, BoxStartY+SHADOW_OFFSET, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0, c_rad_mid);
+	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, col_NumBox, c_rad_mid);
+
+	///////////////////////////
 	//paint play state icon
 	bool res;
 	const char * dd_icon;
@@ -370,13 +386,6 @@ void CMovieViewer::show()
 	else 
 		dd_icon = "play.raw";
 	res = frameBuffer->paintIcon(dd_icon, BoxStartX , BoxStartY );
-
-	///////////////////////////
-	//paint infobox
-	int ChanNameX = BoxStartX + ChanWidth + SHADOW_OFFSET;
-	int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
-
-	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
 
 	paintTime( false, true );
 
@@ -389,7 +398,11 @@ void CMovieViewer::show()
 	ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
 
 	frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
-
+		
+	///////////////////////////	
+	// paint shadow bottom
+	frameBuffer->paintBoxRel(ChanInfoX + SHADOW_OFFSET, BoxEndY - c_shadow_width, BoxEndX - ChanInfoX - c_shadow_width, SHADOW_OFFSET + c_shadow_width, COL_INFOBAR_SHADOW_PLUS_0, c_rad_mid, CORNER_BOTTOM_LEFT);
+	
 	///////////////////////////
 	//paint button bar
 	if ( isButtonBar )
@@ -405,9 +418,7 @@ void CMovieViewer::show()
 	showIcon_16_9();
 	showIcon_VTXT();
 	showLcdPercentOver();
-	// Schatten
-	frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW_PLUS_0);
-	frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW_PLUS_0);
+		
 }
 
 
@@ -430,9 +441,11 @@ void CMovieViewer::showData( )
 		int posy = BoxStartY+12;
 		int height2= 20;
 
-		frameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW_PLUS_0); //border
-		frameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR_PLUS_7);//fill(active)
-		frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR_PLUS_3);//fill passive
+		if (!g_settings.rounded_corners) 
+			frameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW_PLUS_0); //border
+		
+		frameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR_PLUS_7, c_rad_small, CORNER_LEFT);//fill(active)
+		frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR_PLUS_3, c_rad_small, CORNER_RIGHT);//fill passive
 
 		int height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getHeight()/3;
 		int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
@@ -585,11 +598,11 @@ void CMovieViewer::showIcon_VTXT() const
  
 ************************************************************************/
 void CMovieViewer::showButtonBar()
-{
+{ 
 	if ( BOTTOM_BAR_OFFSET> 0 )
 		frameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
 
-	frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndInfoY + InfoHeightY_Info, COL_INFOBAR_BUTTONS_BACKGROUND);
+	frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndInfoY + InfoHeightY_Info, COL_INFOBAR_BUTTONS_BACKGROUND, c_rad_mid, CORNER_BOTTOM);
 
 	const char* txt= NULL;
 	//////////////////

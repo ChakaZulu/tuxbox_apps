@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.138 2007/11/18 20:11:10 dbt Exp $
+	$Id: epgview.cpp,v 1.139 2008/05/01 00:08:22 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -546,9 +546,8 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 		FollowScreenings(channel_id, epgData.title);
 	}
 
-
 	//show the epg
-	frameBuffer->paintBoxRel(sx, sy- toph, ox, toph, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(sx, sy - toph, ox, toph, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy- toph+ topheight+ 3, ox-15, text1, COL_MENUHEAD);
 	if (!(text2.empty()))
 		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy- toph+ 2* topheight+ 3, ox-15, text2, COL_MENUHEAD);
@@ -582,11 +581,11 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 		{
 			if( tags[i].streamContent == 1 && (tags[i].componentType == 2 || tags[i].componentType == 3) )
 			{
-				frameBuffer->paintIcon("16_9.raw" ,ox+sx-(ICON_LARGE_WIDTH+2)-(ICON_LARGE_WIDTH+2),sy + oy+5 );
+				frameBuffer->paintIcon("16_9.raw", ox + sx - (ICON_LARGE_WIDTH + 2 ) - (ICON_LARGE_WIDTH + 2) - 4, sy + oy + 7);
 			}
 			else if( tags[i].streamContent == 2 && tags[i].componentType == 5 )
 			{
-				frameBuffer->paintIcon("dd.raw", ox+sx-(ICON_LARGE_WIDTH+2), sy + oy+5);
+				frameBuffer->paintIcon("dd.raw", ox + sx - (ICON_LARGE_WIDTH + 2) - 4, sy + oy + 7);
 			}
 		}
 	}
@@ -686,7 +685,13 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 								show(channel_id,epgData.eventID,&epgData.epg_times.startzeit,false);
 								recDir = recDirs.get_selected_dir();
 							}
-						
+							
+							if ((recDir == "") && (RECORDING_FILE == g_settings.recording_type))
+							{
+								printf("set zapto timer failed, no record directory...\n");
+								ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_EPGLIST_ERROR_NO_RECORDDIR_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "error.raw");
+							}
+								
 							if ((recDir != "") || (RECORDING_FILE != g_settings.recording_type))
 							{
 								if (timerdclient.addRecordTimerEvent(channel_id,
@@ -947,25 +952,26 @@ void CEpgData::showTimerEventBar (bool show)
   cellwidth = w / 4;
 
 
-    frameBuffer->paintBackgroundBoxRel(x,y,w,h);
     // hide only?
-    if (! show) return;
+	if (! show)
+	{
+		frameBuffer->paintBackgroundBoxRel(x, y, w, h);
+		return;
+	}
 
-    frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW_PLUS_1);
-
-
+    frameBuffer->paintBoxRel(x, y, w, h, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 
     // Button: Timer Record & Channelswitch
 	if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)
 	{
 		pos = 0;
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+8+cellwidth*pos, y+h_offset+3 );
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+29+cellwidth*pos, y+h-h_offset+3, w-30, g_Locale->getText(LOCALE_TIMERBAR_RECORDEVENT), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x + 8 + cellwidth * pos, y + h_offset + 2);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 29 + cellwidth * pos, y + h - h_offset + 2, w - 30, g_Locale->getText(LOCALE_TIMERBAR_RECORDEVENT), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 	}
     // Button: Timer Channelswitch
     pos = 2;
-    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+8+cellwidth*pos, y+h_offset+3 );
-    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+29+cellwidth*pos, y+h-h_offset+3, w-30, g_Locale->getText(LOCALE_TIMERBAR_CHANNELSWITCH), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + 8 + cellwidth * pos, y + h_offset + 2);
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 29 + cellwidth * pos, y + h - h_offset + 2, w - 30, g_Locale->getText(LOCALE_TIMERBAR_CHANNELSWITCH), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 }
 
 
