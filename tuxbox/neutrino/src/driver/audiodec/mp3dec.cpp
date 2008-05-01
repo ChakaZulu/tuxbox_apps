@@ -205,8 +205,7 @@ void CMP3Dec::CreateInfo(CAudioMetaData* m, int FrameNumber)
 	if ( !m->hasInfoOrXingTag )
 	{
 		m->total_time = m->avg_bitrate != 0 ?
-			static_cast<int>( round( static_cast<double>( m->filesize )
-									 / m->avg_bitrate ) )
+			m->filesize / m->avg_bitrate
 			: 0;
 	}
 
@@ -967,8 +966,7 @@ bool CMP3Dec::GetMP3Info( FILE* input, const bool nice,
 		{
 			meta->vbr = true;
 			meta->avg_bitrate = meta->total_time != 0
-				? static_cast<int>( round( static_cast<double>(meta->filesize)
-										   / meta->total_time ) )
+				? meta->filesize / meta->total_time
 				: 0;
 		}
 		else /* we do not know wether the file is vbr or not */
