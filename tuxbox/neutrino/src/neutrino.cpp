@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.889 2008/05/01 00:08:19 dbt Exp $
+	$Id: neutrino.cpp,v 1.890 2008/05/01 19:57:28 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2010,11 +2010,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Controld->registerEvent(CControldClient::EVT_MODECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_VCRCHANGED, 222, NEUTRINO_UDS_NAME);
 
-	g_Sectionsd->registerEvent(CSectionsdClient::EVT_TIMESET, 222, NEUTRINO_UDS_NAME);
-	g_Sectionsd->registerEvent(CSectionsdClient::EVT_GOT_CN_EPG, 222, NEUTRINO_UDS_NAME);
-	g_Sectionsd->registerEvent(CSectionsdClient::EVT_SERVICES_UPDATE, 222, NEUTRINO_UDS_NAME);
-	g_Sectionsd->registerEvent(CSectionsdClient::EVT_BOUQUETS_UPDATE, 222, NEUTRINO_UDS_NAME);
-	g_Sectionsd->registerEvent(CSectionsdClient::EVT_WRITE_SI_FINISHED, 222, NEUTRINO_UDS_NAME);
+	g_Sectionsd->RegisterNeutrino();
 
 #ifndef SKIP_CA_STATUS
 #define ZAPIT_EVENT_COUNT 26
@@ -3738,6 +3734,13 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	else if(actionKey == "clearSectionsd")
 	{
 		g_Sectionsd->freeMemory();
+	}
+	else if(actionKey == "EPGrestart")
+	{
+		g_Sectionsd->Restart();
+		g_Sectionsd->RegisterNeutrino();
+		g_Sectionsd->setPauseScanning(false);
+		SendSectionsdConfig();
 	}
 	
 	return returnval;

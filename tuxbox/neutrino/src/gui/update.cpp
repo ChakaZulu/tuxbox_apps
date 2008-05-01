@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.127 2008/03/02 17:57:55 seife Exp $
+	$Id: update.cpp,v 1.128 2008/05/01 19:57:29 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -479,6 +479,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	printf("+++++++++++++++++++ NOT flashing, just testing\n");
 	hide();
 	unlink(filename.c_str());
+	sd.RegisterNeutrino();
 	sd.setPauseScanning(!sd_scan);
 	return menu_return::RETURN_REPAINT;
 #endif
@@ -488,6 +489,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	{
 		hide();
 		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, ft.getErrorMessage().c_str()); // UTF-8
+		sd.RegisterNeutrino();
 		sd.setPauseScanning(!sd_scan);
 		return menu_return::RETURN_REPAINT;
 	}
@@ -603,6 +605,7 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 #ifdef TESTING
 	printf("+++++++++++++++++++ NOT flashing, just testing\n");
 	hide();
+	sd.RegisterNeutrino();
 	sd.setPauseScanning(!sd_scan);
 	unlink(filename.c_str());
 	return;
@@ -610,6 +613,7 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 	if(!ft.program( "/tmp/" + filename, 50, 100))
 	{
 		showStatusMessageUTF(ft.getErrorMessage()); // UTF-8
+		sd.RegisterNeutrino();
 		sd.setPauseScanning(!sd_scan);
 		sleep(10);
 	}
