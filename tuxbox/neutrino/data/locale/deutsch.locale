@@ -288,7 +288,7 @@ epgextended.guests Gäste
 epgextended.original_title Originaltitel
 epgextended.presenter Moderator
 epgextended.year_of_production Produktionsjahr
-epglist.error_no_recorddir_msg Aufnahme kann nicht vorgemekt werden! \ndKein Aufnahmeverzeichnis festgelegt!
+epglist.error_no_recorddir_msg Aufnahme kann nicht vorgemekt werden! \nKein Aufnahmeverzeichnis festgelegt!
 epglist.head Vorschau - %s
 epglist.noevents Keine EPG-Information verfügbar.
 epgviewer.More_Screenings Weitere Termine auf diesem Kanal
