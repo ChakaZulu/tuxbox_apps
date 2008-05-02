@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.190 2008/05/01 00:08:21 dbt Exp $
+	$Id: channellist.cpp,v 1.191 2008/05/02 21:49:18 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -1135,7 +1135,8 @@ void CChannelList::paintItem(int pos)
 		if (!(chan->currentEvent.description.empty()))
 		{
 			// add " · " separator between name and description
-			strncat(nameAndDescription, " · ", sizeof(nameAndDescription) - (strlen(nameAndDescription) + 1));
+			const char *sep= g_settings.channellist_epgtext_align_right ? "   " :  " · " ;
+			strncat(nameAndDescription, sep, sizeof(nameAndDescription) - (strlen(nameAndDescription) + 1));
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(p_event->description);
 
@@ -1148,7 +1149,7 @@ void CChannelList::paintItem(int pos)
 
 			if (g_settings.channellist_epgtext_align_right){
 				// align right
-				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
+				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, p_event->description, color);
 			}
 			else{
 				// align left
