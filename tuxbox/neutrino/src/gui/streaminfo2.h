@@ -46,6 +46,9 @@ class CStreamInfo2
 		int height;
 		int hheight,iheight,sheight; 	// head/info/small font height
 
+		int endX;
+		int endY;
+	
 		int  max_height;	// Frambuffer 0.. max
 		int  max_width;	
 	

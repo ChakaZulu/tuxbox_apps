@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: imageinfo.h,v 1.6 2008/05/01 00:08:23 dbt Exp $
+	$Id: imageinfo.h,v 1.7 2008/05/03 15:48:49 dbt Exp $
 
 	License: GPL
 
@@ -62,8 +62,8 @@ class CImageInfo : public CMenuTarget
 		int startX, startY; //boxposition
 		int endX, endY;
 	
-		int max_height;	// Frambuffer 0.. max
-		int max_width;
+		//~ int max_height;	// Frambuffer 0.. max
+		//~ int max_width;
 		
 		int pigw; //picbox dimensions
 		int pigh;

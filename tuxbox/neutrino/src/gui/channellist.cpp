@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.191 2008/05/02 21:49:18 dbt Exp $
+	$Id: channellist.cpp,v 1.192 2008/05/03 15:48:49 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -426,10 +426,26 @@ int CChannelList::show()
 		}
 		else if ( msg == CRCInput::RC_help )
 		{
+			CChannelEvent *p_event=NULL;
+
 			hide();
+
+			if (displayNext)
+			{
+			p_event = &(chanlist[selected]->nextEvent);
+			}
+
+			if(p_event && p_event->eventID)
+			{
+				g_EpgData->show(chanlist[selected]->channel_id,p_event->eventID,&(p_event->startTime));
+			}
+			else
+			{
 			g_EpgData->show(chanlist[selected]->channel_id);
-			paintHead();
-			paint();
+			}
+
+		paintHead();
+		paint();
 
 		}
 		else
@@ -466,7 +482,7 @@ void CChannelList::hide()
 {
 	frameBuffer->paintBackgroundBoxRel(x, y, width, height+ info_height+ 5);
 	clearItem2DetailsLine ();
-	displayNext = 0; // always start with current events
+	//displayNext = 0; // always start with current events
 }
 
 bool CChannelList::showInfo(int pos, int epgpos)
@@ -680,7 +696,7 @@ int CChannelList::numericZap(int key)
 		{
 			sprintf((char*) &valstr, "%d", chn);
 			while(strlen(valstr)<4)
-				strcat(valstr,"·");   //"_"
+				strcat(valstr,"\xB7");   //MIDDLE DOT 
 
 			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR_PLUS_0);
 
@@ -994,7 +1010,7 @@ void CChannelList::paintDetails(unsigned int index)
 
 			std::string text3 = p_event->description.substr(text1.length()+ 1);
 			if (!(text2.empty()))
-				text3 += " · ";
+				text3 += "\xB7"; //MIDDLE DOT
 
 			xstart += g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text3);
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3, COL_MENUCONTENTDARK);
@@ -1134,8 +1150,8 @@ void CChannelList::paintItem(int pos)
 
 		if (!(chan->currentEvent.description.empty()))
 		{
-			// add " · " separator between name and description
-			const char *sep= g_settings.channellist_epgtext_align_right ? "   " :  " · " ;
+			// add MIDDLE DOT separator between name and description
+			const char *sep= g_settings.channellist_epgtext_align_right ? "   " :  " \xB7 " ;
 			strncat(nameAndDescription, sep, sizeof(nameAndDescription) - (strlen(nameAndDescription) + 1));
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(p_event->description);
