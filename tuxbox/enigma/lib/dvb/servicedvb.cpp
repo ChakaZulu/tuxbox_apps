@@ -749,6 +749,8 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			offset-=pauseBufferFullness;	// calc buffersize ( of driver and enigma buffer )
 			buffer.clear();  	// clear enigma dvr buffer
 			dvrFlush();			// clear audio and video rate buffer
+			if (!playingPermanentTimeshift)
+				FillSliceSizes();
 			seekTo(offset);
 			inputsn->start();
 			outputsn->start();
