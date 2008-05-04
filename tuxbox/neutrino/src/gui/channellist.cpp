@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.192 2008/05/03 15:48:49 dbt Exp $
+	$Id: channellist.cpp,v 1.193 2008/05/04 22:36:21 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -432,7 +432,7 @@ int CChannelList::show()
 
 			if (displayNext)
 			{
-			p_event = &(chanlist[selected]->nextEvent);
+				p_event = &(chanlist[selected]->nextEvent);
 			}
 
 			if(p_event && p_event->eventID)
@@ -441,7 +441,7 @@ int CChannelList::show()
 			}
 			else
 			{
-			g_EpgData->show(chanlist[selected]->channel_id);
+				g_EpgData->show(chanlist[selected]->channel_id);
 			}
 
 		paintHead();
@@ -698,7 +698,7 @@ int CChannelList::numericZap(int key)
 			while(strlen(valstr)<4)
 				strcat(valstr,"\xB7");   //MIDDLE DOT 
 
-			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR_PLUS_0);
+			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0);
 
 			for (int i=3; i>=0; i--)
 			{
@@ -1051,6 +1051,7 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 	int ypos2a = ypos2 + (info_height/2)-2;
 	fb_pixel_t col1 = COL_MENUCONTENT_PLUS_6;
 	fb_pixel_t col2 = COL_MENUCONTENT_PLUS_1;
+	int c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 
 	CChannelEvent *p_event;
 	if (displayNext) {
@@ -1066,7 +1067,9 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 	if (pos >= 0 &&  ch_index < chanlist.size() && p_event->description != "")
 	{
 		// 1. col thick line
-		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight, col2, c_rad_small, CORNER_LEFT); // item marker
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-3, ypos1, 8,fheight, col1, c_rad_small, CORNER_LEFT); 
+		
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 4,info_height, col1);
 
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 4,ypos2a-ypos1a, col1);
@@ -1074,8 +1077,7 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,4, col1);
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos2a, 12,4, col1);
 
-		// 2. col small line
-		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 1,fheight,     col2);
+		// 2. col small line		
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 1,info_height, col2);
 
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a+4, col2);
@@ -1118,7 +1120,7 @@ void CChannelList::paintItem(int pos)
 		c_rad_small = 0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor, c_rad_small, CORNER_RIGHT);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor, c_rad_small);
 	if(liststart+pos<chanlist.size())
 	{
 		CChannel* chan = chanlist[liststart+pos];
@@ -1196,7 +1198,7 @@ struct button_label CChannelListButtons[] =
 
 void CChannelList::paintFoot()
 {
-	int ButtonWidth = (width - 20) / 4;
+	int ButtonWidth = width/4;
 	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());
 	frameBuffer->paintHLineRel(x, width, y + (height - buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
 	
@@ -1212,7 +1214,7 @@ void CChannelList::paintFoot()
 	}
 		
 	frameBuffer->paintBoxRel(x, y + (height - buttonHeight), width, buttonHeight - 1, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
-	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight), ButtonWidth, sizeof(CChannelListButtons)/sizeof(CChannelListButtons[0]), CChannelListButtons, width-20);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight), ButtonWidth, sizeof(CChannelListButtons)/sizeof(CChannelListButtons[0]), CChannelListButtons, width);
 }
 
 void CChannelList::paint()

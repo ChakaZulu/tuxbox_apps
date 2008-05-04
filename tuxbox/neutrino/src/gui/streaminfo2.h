@@ -104,12 +104,17 @@ class CStreamInfo2
 		CStreamInfo2();
 		 ~CStreamInfo2();
 		int exec();
-		std::string getStreamInfoVersion(void);
 };
 class CStreamInfo2Handler : public CMenuTarget
 {
 	public:
 		int exec( CMenuTarget* parent,  const std::string &actionKey);
+};
+
+class CStreamInfo2Misc
+{
+	public:
+		std::string getStreamInfoVersion(void);
 };
 
 

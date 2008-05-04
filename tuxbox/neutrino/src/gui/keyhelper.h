@@ -28,7 +28,7 @@
 //#include <driver/rcinput.h>
 
 
-#define BUTTONMAX 26
+#define BUTTONMAX 16
 static const neutrino_msg_t key_helper_msg_def[BUTTONMAX]=
 {
 	CRCInput::RC_red,
@@ -46,16 +46,6 @@ static const neutrino_msg_t key_helper_msg_def[BUTTONMAX]=
 	CRCInput::RC_minus,
 	CRCInput::RC_right,
 	CRCInput::RC_left,
-	CRCInput::RC_0,
-	CRCInput::RC_1,
-	CRCInput::RC_2,
-	CRCInput::RC_3,
-	CRCInput::RC_4,
-	CRCInput::RC_5,
-	CRCInput::RC_6,
-	CRCInput::RC_7,
-	CRCInput::RC_8,
-	CRCInput::RC_9,
 	CRCInput::RC_help
 };
 
@@ -76,16 +66,6 @@ static const char * key_helper_icon_def[BUTTONMAX]=
 	NEUTRINO_ICON_BUTTON_MINUS,
 	NEUTRINO_ICON_BUTTON_RIGHT,
 	NEUTRINO_ICON_BUTTON_LEFT,	
-	NEUTRINO_ICON_BUTTON_0,
-	NEUTRINO_ICON_BUTTON_1,
-	NEUTRINO_ICON_BUTTON_2,
-	NEUTRINO_ICON_BUTTON_3,
-	NEUTRINO_ICON_BUTTON_4,
-	NEUTRINO_ICON_BUTTON_5,
-	NEUTRINO_ICON_BUTTON_6,
-	NEUTRINO_ICON_BUTTON_7,
-	NEUTRINO_ICON_BUTTON_8,
-	NEUTRINO_ICON_BUTTON_9,
 	NEUTRINO_ICON_BUTTON_HELP_SMALL
 };
 
@@ -145,28 +125,8 @@ class CKeyHelper
 				button = 13;
 			if(prefered_key == CRCInput::RC_left)
 				button = 14;
-			if(prefered_key == CRCInput::RC_0)
-				button = 15;
-			if(prefered_key == CRCInput::RC_1)
-				button = 16;
-			if(prefered_key == CRCInput::RC_2)
-				button = 17;
-			if(prefered_key == CRCInput::RC_3)
-				button = 18;
-			if(prefered_key == CRCInput::RC_4)
-				button = 19;
-			if(prefered_key == CRCInput::RC_5)
-				button = 20;
-			if(prefered_key == CRCInput::RC_6)
-				button = 21;
-			if(prefered_key == CRCInput::RC_7)
-				button = 22;
-			if(prefered_key == CRCInput::RC_8)
-				button = 23;
-			if(prefered_key == CRCInput::RC_9)
-				button = 24;
 			if(prefered_key == CRCInput::RC_help)
-				button = 25;			
+				button = 15;			
 		
 			if((button >= 0) && (button < BUTTONMAX) && (color_key_used[button] == true)) {
 				button = -1;

@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.216 2008/05/01 00:08:23 dbt Exp $
+	$Id: infoviewer.cpp,v 1.217 2008/05/04 22:36:21 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -141,7 +141,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 
 		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
 		{
-			if ( show_dot )
+			if ( show_dot ) // top dot
 				frameBuffer->paintBoxRel(BoxEndX- time_width+ time_left_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR_PLUS_0);
 			else
 				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
@@ -151,9 +151,10 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 		{
 			strcpy( old_timestr, timestr );
 
-			if ( !firstPaint )
+			if ( !firstPaint ) // background
 			{
-				frameBuffer->paintBoxRel(BoxEndX- time_width- 10, ChanNameY, time_width+ 10, time_height, COL_INFOBAR_PLUS_0);
+				// must also be painted with rounded corner on top right, if infobar have also a rounded corner on top right
+				frameBuffer->paintBoxRel(BoxEndX- time_width- 10, ChanNameY, time_width+ 10, time_height, COL_INFOBAR_PLUS_0, CORNER_RADIUS_LARGE, CORNER_TOP_RIGHT);
 			}
 
 			timestr[2]= 0;
@@ -678,7 +679,7 @@ void CInfoViewer::showSubchan()
 			
 			{			
 			// show default small infobar for subchannel
-			frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0);
+			frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT, 0, subChannelNameIsUTF); // UTF-8
 			
 			// show yellow button

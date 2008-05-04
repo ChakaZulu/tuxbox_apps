@@ -1,5 +1,5 @@
 /*
- * $Id: buttons.cpp,v 1.4 2008/05/01 00:08:35 dbt Exp $
+ * $Id: buttons.cpp,v 1.5 2008/05/04 22:36:22 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -52,43 +52,35 @@ void paintButtons(CFrameBuffer * const frameBuffer, Font * const font,
 			bool vertical_paint)
 {
 	int fheight = font->getHeight();
-	unsigned int bwidth, bcalwidth, fwidth;
+	unsigned int bwidth, fwidth;
 	int ybase, yicon_start, ytext_start;
 	int iconh, iconw, max_iconw = 0;
 	int xstart  = x, ystart = y;
 	int space = 4;
-	int maxcount = count;
+	unsigned int bestButtonwidth = maxwidth/count;
+	unsigned int maxButtonwidth = bestButtonwidth > buttonwidth ? bestButtonwidth : buttonwidth;
+
 	
 	for (unsigned int i = 0; i < count; i++)
 	{
 		const char * buttontext =  content[i].locale ? localemanager->getText(content[i].locale) : "";
-		const char * icon = content[i].button ? content[i].button : ""; 
-
+		const char * icon = content[i].button ? content[i].button : "";
+		
+		// real rendered textwidth		
+		unsigned int real_textwidth = font->getRenderWidth(buttontext);
+		
 		// get height/width of icon
 		iconh =  frameBuffer->getIconHeight(icon);
 		iconw = frameBuffer->getIconWidth(icon);
 		
 		// calculate maximal witdh of icons
 		max_iconw = max_iconw>iconw ? max_iconw : iconw; 
-
+	
+		// get width of  buttontext
+		unsigned int fwidth = ((max_iconw+2*space+real_textwidth) > (maxButtonwidth)) ? maxButtonwidth : real_textwidth;
 		
-		// get width of rendered buttontext
-		unsigned int textwidth =  font->getRenderWidth(buttontext);
-		
-		// calculate max width of buttons depends of maxwidth, textwidth, buttonwidth and count of buttons
-		if ((textwidth > buttonwidth) || (textwidth*maxcount > maxwidth))
-		{
-			fwidth = maxwidth/maxcount;
-		}
-		else
-		{
-			fwidth =  textwidth;
-		}
-
-		// calculate finally buttonwidth depends from maximal text width, icon width and space between icon and text
-		bcalwidth = max_iconw + space + fwidth;
-		bwidth = bcalwidth > buttonwidth ? bcalwidth : buttonwidth;
-		
+		// calculate finally buttonwidth
+		bwidth = max_iconw + 2*space + fwidth;	
 			
 		// calculate baseline startposition of icon and text in y
 		ybase = ystart + fheight - fheight / 2;

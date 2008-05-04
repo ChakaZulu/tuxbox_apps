@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.34 2008/05/03 15:48:49 dbt Exp $
+	$Id: streaminfo2.cpp,v 1.35 2008/05/04 22:36:21 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -766,10 +766,10 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 }
 
 /************************************************************************/
-std::string CStreamInfo2::getStreamInfoVersion(void)
+std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.34 $");
+	return imageinfo.getModulVersion("","$Revision: 1.35 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
