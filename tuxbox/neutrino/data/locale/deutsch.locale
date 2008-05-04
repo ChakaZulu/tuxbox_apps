@@ -3,7 +3,7 @@ EPGMenu.epgplus Vorschau Komplettübersicht
 EPGMenu.eventinfo Info zur Sendung
 EPGMenu.eventlist Vorschau
 EPGMenu.head EPG - Programm Information
-EPGMenu.streaminfo technische Informationen
+EPGMenu.streaminfo Technische Informationen
 EPGPlus.actions Aktionen
 EPGPlus.bybouquet_mode bouquetweise
 EPGPlus.bypage_mode seitenweise
@@ -335,7 +335,7 @@ filebrowser.sort.type (Typ)
 filesystem.is.utf8 Dateisystem
 filesystem.is.utf8.option.iso8859.1 ISO-8859-1
 filesystem.is.utf8.option.utf8 UTF-8
-flashupdate.actionreadflash lese flash
+flashupdate.actionreadflash lese Flash
 flashupdate.cantopenfile kann Datei nicht öffnen
 flashupdate.cantopenmtd kann das MTD-Device nicht öffnen
 flashupdate.checkupdate nach neuer Version suchen
@@ -868,7 +868,7 @@ options.ntp_on NTP
 options.null null
 options.off aus
 options.on ein
-options.on.without_messages (keine info) ein
+options.on.without_messages (keine Info) ein
 options.serial seriell
 parentallock.changepin PIN-Code festlegen
 parentallock.changepin_hint1 Geben Sie hier Ihren neuen PIN-Code ein!
