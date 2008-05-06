@@ -33,7 +33,7 @@ EPGPlus.page_down Page down
 EPGPlus.page_up Page up
 EPGPlus.prev_bouquet Previous bouquet
 EPGPlus.record Record
-EPGPlus.refresh_epg Refresh
+EPGPlus.refresh_epg Refresh EPG
 EPGPlus.remind Schedule
 EPGPlus.reset_settings Reset settings
 EPGPlus.save_settings Save settings
