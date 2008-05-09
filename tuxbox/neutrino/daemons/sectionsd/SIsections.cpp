@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.52 2007/10/02 21:47:41 houdini Exp $
+// $Id: SIsections.cpp,v 1.53 2008/05/09 21:42:49 houdini Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -439,7 +439,7 @@ void SIsectionPPT::parsePrivateContentOrderDescriptor(const char *buf, SIevent &
   struct descr_short_event_header *evt=(struct descr_short_event_header *)buf;
   if((evt->descriptor_length+sizeof(descr_generic_header)>maxlen) || (evt->descriptor_length<sizeof(struct descr_short_event_header)-sizeof(descr_generic_header)))
     return; // defekt
-    
+
 #if 0
 // to be done    
     unsigned char Order_number_length;
@@ -452,7 +452,7 @@ void SIsectionPPT::parsePrivateContentOrderDescriptor(const char *buf, SIevent &
     char SMS_order_information[SMS_order_information_length];
     unsigned char URL_order_information_length;
     char URL_order_information[URL_order_information_length];
-#endif    
+#endif
 }
 
 void SIsectionPPT::parsePrivateParentalInformationDescriptor(const char *buf, SIevent &e, unsigned maxlen)
@@ -464,7 +464,7 @@ void SIsectionPPT::parsePrivateParentalInformationDescriptor(const char *buf, SI
   buf+=sizeof(struct descr_generic_header);
 
   if (sizeof(struct descr_generic_header)+1 < evt->descriptor_length) {
-    e.ratings.insert(SIparentalRating(std::string("", 0), *(buf+1)));
+    e.ratings.insert(SIparentalRating(std::string("", 0), *(buf)));
   }
 #if 0
     unsigned char rating;
