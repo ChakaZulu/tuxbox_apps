@@ -36,7 +36,7 @@
 void ePermanentTimeshift::Start()
 {
 	lock.lock();
-	eDebug("[PERM] starting permanent timeshift");
+	eDebug("[PERM] starting permanent timeshift:%d",IsTimeshifting);
 	slicelist.clear();
 	slicelist.push_back(std::pair<int,off64_t>(0,0));
 	current_slice_playing = slicelist.end();
@@ -47,15 +47,18 @@ void ePermanentTimeshift::Start()
 void ePermanentTimeshift::Stop()
 {
 	lock.lock();
-	eDebug("[PERM] stopping permanent timeshift");
+	eDebug("[PERM] stopping permanent timeshift:%d",IsTimeshifting);
 	IsTimeshifting = 0;
-	int slice = slicelist.back().first;
-	struct stat64 s;
-	eString filename = (slice ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, slice) : eString(PERMANENT_TIMESHIFT_FILE));
-	if (!stat64(filename.c_str(), &s))
+	if (slicelist.size() > 0)
 	{
-		slicelist.back().second=s.st_size;
-		eDebug("[PERM] remember slice:%d,%d",slicelist.back().first,s.st_size);
+		int slice = slicelist.back().first;
+		struct stat64 s;
+		eString filename = (slice ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, slice) : eString(PERMANENT_TIMESHIFT_FILE));
+		if (!stat64(filename.c_str(), &s))
+		{
+			slicelist.back().second=s.st_size;
+			eDebug("[PERM] remember slice:%d,%d",slicelist.back().first,s.st_size);
+		}
 	}
 	lock.unlock();
 
@@ -621,7 +624,7 @@ void eDVRPlayerThread::seekTo(off64_t offset)
 		{
 			if (openFile(newslice))
 			{
-				eDebug("open slice %d failed\n", slice);
+				eDebug("open slice %d failed\n", newslice);
 				state=stateError;
 			}
 		}
@@ -630,8 +633,8 @@ void eDVRPlayerThread::seekTo(off64_t offset)
 	else
 	{
 		off64_t sliceoffset = 0;
-		uint newslice = 0;
-		while  (newslice < slicesizes.size())
+		int newslice = 0;
+		while  (newslice < (int)slicesizes.size())
 		{
 			if (offset > (sliceoffset + slicesizes[newslice]))
 			{
@@ -645,7 +648,7 @@ void eDVRPlayerThread::seekTo(off64_t offset)
 		{
 			if (openFile(newslice))
 			{
-				eDebug("open slice %d failed\n", slice);
+				eDebug("open slice %d failed\n", newslice);
 				state=stateError;
 			}
 		}
