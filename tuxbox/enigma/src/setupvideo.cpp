@@ -246,11 +246,11 @@ int eZapVideoSetup::eventHandler( const eWidgetEvent &e)
 
 void eZapVideoSetup::CFormatChanged( eListBoxEntryText * e )
 {
-	int old = 1;
+	unsigned int old = 1;
 	eConfig::getInstance()->getKey("/elitedvb/video/colorformat", old);
 	if ( e )
 	{
-		v_colorformat = (int) e->getKey();
+		v_colorformat = (unsigned int) e->getKey();
 		eConfig::getInstance()->setKey("/elitedvb/video/colorformat", v_colorformat );
 		eAVSwitch::getInstance()->reloadSettings();
 		eConfig::getInstance()->setKey("/elitedvb/video/colorformat", old );
@@ -259,12 +259,12 @@ void eZapVideoSetup::CFormatChanged( eListBoxEntryText * e )
 
 void eZapVideoSetup::VPin8Changed( eListBoxEntryText * e)
 {
-	int old = 0;
+	unsigned int old = 0;
 	eConfig::getInstance()->getKey("/elitedvb/video/pin8", old);
 
 	if ( e )
 	{
-		v_pin8 = (int) e->getKey();
+		v_pin8 = (unsigned int) e->getKey();
 		eConfig::getInstance()->setKey("/elitedvb/video/pin8", v_pin8 );
 		eStreamWatchdog::getInstance()->reloadSettings();
 		eConfig::getInstance()->setKey("/elitedvb/video/pin8", old );

@@ -1,5 +1,5 @@
 /*
- * $Id: showlogo.cpp,v 1.5 2006/01/12 20:27:31 digi_casi Exp $
+ * $Id: showlogo.cpp,v 1.6 2008/05/11 14:22:17 seife Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -102,7 +102,7 @@ int getKey(eString findkey)
 				break;
 			if (strlen(buffer) < 4)
 				break;
-			if (buffer[0] == 'i')
+			if (buffer[0] == 'u')
 			{
 				eString b = eString(buffer);
 				b = b.right(b.length() - 2);
