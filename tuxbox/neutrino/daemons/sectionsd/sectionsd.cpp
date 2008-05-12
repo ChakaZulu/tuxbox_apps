@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.261 2008/05/01 18:06:46 seife Exp $
+//  $Id: sectionsd.cpp,v 1.262 2008/05/12 11:06:37 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -87,16 +87,16 @@
 //#include "../timermanager.h"
 
 // 60 Minuten Zyklus...
-// #define TIME_EIT_SCHEDULED_PAUSE 60* 60
+#define TIME_EIT_SCHEDULED_PAUSE 60 * 60
 // -- 5 Minutes max. pause should improve behavior  (rasc, 2005-05-02)
-#define TIME_EIT_SCHEDULED_PAUSE 5* 60
+// #define TIME_EIT_SCHEDULED_PAUSE 5* 60
 // Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
-#define TIME_EIT_SKIPPING 60
+#define TIME_EIT_SKIPPING 90
 
 //#define MAX_EVENTS 6000
 static unsigned int max_events;
 // sleep 5 minutes
-#define HOUSEKEEPING_SLEEP (5 * 60)
+#define HOUSEKEEPING_SLEEP (30 * 60)
 // meta housekeeping after XX housekeepings - every 24h -
 #define META_HOUSEKEEPING (24 * 60 * 60) / HOUSEKEEPING_SLEEP
 
@@ -208,8 +208,11 @@ static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 // Houdini: changed sizes, EIT thread no more receives POLLER, saves some mem in sdt
 //static DMX dmxEIT(0x12, 256);
 //static DMX dmxSDT(0x11, 256);
-static DMX dmxEIT(0x12, 384);
-static DMX dmxSDT(0x11, 256);
+/* no matter how big the buffer, we will receive spurious POLLERR's in table 0x60,
+   but those are not a big deal, so let's save some memory */
+static DMX dmxEIT(0x12, 256);
+static DMX dmxCN(0x12, 32);
+static DMX dmxSDT(0x11, 128);
 static DMX dmxNIT(0x10, 128);
 
 // Houdini: added for Premiere Private EPG section for Sport/Direkt Portal
@@ -294,12 +297,14 @@ inline void unlockBouquets(void)
 inline int EITThreadsPause(void)
 {
 	return(	dmxEIT.pause() ||
+		dmxCN.pause() ||
 		dmxPPT.pause());
 }
 
 inline int EITThreadsUnPause(void)
 {
-	return(	dmxEIT.unpause() ||
+	return(	dmxCN.unpause() ||
+		dmxEIT.unpause() ||
 		dmxPPT.unpause());
 } 
 
@@ -1944,6 +1949,7 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 
 	if (scanning && pause)
 	{
+		dmxCN.request_pause();
 		dmxEIT.request_pause();
 		dmxNIT.request_pause();
 		dmxSDT.request_pause();
@@ -1952,6 +1958,7 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 	}
 	else if (!pause && !scanning)
 	{
+		dmxCN.request_unpause();
 		dmxNIT.request_unpause();
 		dmxSDT.request_unpause();
 		dmxEIT.request_unpause();
@@ -2364,7 +2371,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.261 2008/05/01 18:06:46 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.262 2008/05/12 11:06:37 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2698,8 +2705,8 @@ static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
 */
 static unsigned char 	messaging_current_version_number = 0xff;
 //static unsigned char 	messaging_current_section_number = 0;
-static bool		EITCheckAllFilters = true;
 static bool		messaging_eit_is_busy = false;
+static bool		messaging_need_eit_version = false;
 
 //std::vector<long long>	messaging_sdt_skipped_sections_ID [2];			// 0x42, 0x46
 //static long long 	messaging_sdt_sections_max_ID [2];			// 0x42, 0x46
@@ -2759,14 +2766,14 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 	if ( (messaging_current_servicekey >> 16) == (*uniqueServiceKey >> 16) )
 		transponderChanged = false;
 
-	if ( ( messaging_current_servicekey != *uniqueServiceKey ) ||
-	        ( zeit > ( messaging_last_requested + 5 ) ) )
+	if (messaging_current_servicekey != *uniqueServiceKey)
 	{
 		unlockMessaging();
 		writeLockMessaging();
 		messaging_current_servicekey = *uniqueServiceKey;
 		messaging_zap_detected = true;
 		dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
+		dmxCN.setCurrentService(messaging_current_servicekey & 0xffff);
 
 		doWakeUp = true;
 
@@ -2811,9 +2818,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 	writeLockMessaging();
 	messaging_last_requested = zeit;
 	messaging_current_version_number = 0xff;
-	dmxEIT.reset_eit_version();
+	dmxCN.reset_eit_version();
 	unlockMessaging();
-	EITCheckAllFilters = true;
 
 	if ( doWakeUp )
 	{
@@ -2826,6 +2832,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		}
 		unlockMessaging();
 
+#if 0
+/* just comment out for now, can delete later -- seife */
 		if (ServiceUniqueKeyHasCurrentNext(*uniqueServiceKey))
 		{
 			readLockMessaging();
@@ -2842,8 +2850,16 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 			unlockMessaging();
 		}
 		else
+#endif
 		{
 			sched_yield();
+#ifdef PAUSE_EQUALS_STOP
+			dmxCN.real_unpause();
+#endif
+			writeLockMessaging();
+			messaging_need_eit_version = false;
+			unlockMessaging();
+			dmxCN.change(0);
 #ifdef PAUSE_EQUALS_STOP
 			dmxEIT.real_unpause();
 #endif
@@ -2884,14 +2900,17 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	SItime zeitEvt1(0, 0);
 
 	unsigned flag = 0;
+	/* ugly hack: retry fetching current/next by restarting dmxCN if this is true */
+	bool change = false;
 
 	const SIevent &evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag);
-	readLockMessaging();
-	if(evt.getName().empty() && flag != 0 && !messaging_eit_is_busy)
+
+	if(evt.getName().empty() && flag != 0)
 	{
-		dmxEIT.change( 0 );
+		dprintf("commandCurrentNextInfoChannelID change1\n");
+		change = true;
 	}
-	unlockMessaging();
+
 	if (evt.service_id == 0)
 	{
 		readLockServices();
@@ -2967,6 +2986,11 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		dprintf("[sectionsd] next EPG found.\n");
 		flag |= CSectionsdClient::epgflags::has_next;
 	}
+	else if (flag != 0)
+	{
+		dprintf("commandCurrentNextInfoChannelID change2 flag: 0x%02x\n", flag);
+		change = true;
+	}
 
 	nResultDataSize =
 	    sizeof(event_id_t) +                        // Unique-Key
@@ -3015,6 +3039,15 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 
 	unlockEvents();
 	EITThreadsUnPause(); // -> unlock
+
+	/* if we do this earlier, with eit threads paused, we deadlock */
+	readLockMessaging();
+	if (change && !messaging_eit_is_busy && (time(NULL) - messaging_last_requested) < 6) {
+		/* restart dmxCN, but only if it is not already running, and only for 5 seconds */
+		dprintf("change && !messaging_eit_is_busy => dmxCN.change(0)\n");
+		dmxCN.change(0);
+	}
+	unlockMessaging();
 
 	// response
 
@@ -3717,13 +3750,7 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 			if (t->startzeit == *startzeit)
 				break;
 
-		if (t == evt.times.end())
-		{
-			dputs("EPG not found!");
-			unlockEvents();
-			EITThreadsUnPause(); // -> unlock
-		}
-		else
+		if (t != evt.times.end())
 		{
 			dputs("EPG found.");
 			// Sendet ein EPG, unlocked die events, unpaused dmxEIT
@@ -3731,20 +3758,19 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 // these 2 calls are made in sendEPG()
 //			unlockEvents();
 //			EITThreadsUnPause(); // -> unlock
+			return;
 		}
 	}
-	else
-	{
-		dputs("EPG not found!");
-		unlockEvents();
-		EITThreadsUnPause(); // -> unlock
-		// response
 
-		struct sectionsd::msgResponseHeader pmResponse;
-		pmResponse.dataLength = 0;
+	dputs("EPG not found!");
+	unlockEvents();
+	EITThreadsUnPause(); // -> unlock
+	// response
 
-		writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
-	}
+	struct sectionsd::msgResponseHeader pmResponse;
+	pmResponse.dataLength = 0;
+
+	writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
 }
 
 static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLength)
@@ -4064,6 +4090,7 @@ static void deleteSIexceptEPG()
 	dmxNIT.dropCachedSectionIDs();
 	dmxSDT.dropCachedSectionIDs();
 	dmxEIT.dropCachedSectionIDs();
+	dmxCN.dropCachedSectionIDs();
 }
 
 static void commandFreeMemory(int connfd, char * /*data*/, const unsigned /*dataLength*/)
@@ -5965,7 +5992,7 @@ static void *nitThread(void *)
 
 	try
 	{
-		dprintf("[%sThread] pid %d start\n", "nit", getpid());
+		dprintf("[%sThread] pid %d (%lu) start\n", "nit", getpid(), pthread_self());
 
 		int timeoutsDMX = 0;
 		writeLockMessaging();
@@ -6170,7 +6197,7 @@ static void *sdtThread(void *)
 
 	try
 	{
-		dprintf("[%sThread] pid %d start\n", "sdt", getpid());
+		dprintf("[%sThread] pid %d (%lu) start\n", "sdt", getpid(), pthread_self());
 
 		int timeoutsDMX = 0;
 		writeLockMessaging();
@@ -6499,7 +6526,7 @@ static void *timeThread(void *)
 
 	try
 	{
-		dprintf("[%sThread] pid %d start\n", "time", getpid());
+		dprintf("[%sThread] pid %d (%lu) start\n", "time", getpid(), pthread_self());
 
 		while(1)
 		{
@@ -6622,15 +6649,22 @@ int eit_set_update_filter(int *fd)
 
 	memset((void*)&dsfp, 0, sizeof(struct dmx_sct_filter_params));
 	readLockMessaging();
-	dprintf("eit_set_update_filter, servicekey = 0x"
+	/* tone down to dprintf later */
+	printdate_ms(stderr);
+	fprintf(stderr, "eit_set_update_filter, servicekey = 0x"
 			PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 			", current version %d\n",
 			messaging_current_servicekey,
 			messaging_current_version_number);
+
 	if (messaging_current_version_number == 0xff) {
+		if (*fd >= 0)
+			close(*fd);
+		*fd = -1;
 		unlockMessaging();
 		return -1;
 	}
+
 	dsfp.filter.filter[0] = 0x4e;	/* table_id */
 	dsfp.filter.filter[1] = (unsigned char)(messaging_current_servicekey >> 8);
 	dsfp.filter.filter[2] = (unsigned char)messaging_current_servicekey;
@@ -6676,7 +6710,7 @@ int eit_set_update_filter(int *fd)
 int eit_stop_update_filter(int *fd)
 {
 	if ((*fd == -1)) {
-		fprintf(stderr,"check your code - nothing to stop\n");
+		dprintf("eit_stop_update_filter: nothing to stop\n");
 		return 0;
 	}
 	dprintf("eit_stop_update_filter\n");
@@ -6703,36 +6737,21 @@ static void *eitThread(void *)
 	bool sendToSleepNow = false;
 
 	/* These filters are a bit tricky (index numbers):
-	   - 0/1 the first two are for getting the current channel quickly
-	   - 2   then get this and other TS's current/next
-	   - 3   then get scheduled events on this TS
-	   - 0a  check if current/next have changed
+	   - 0   Dummy filter, to make this thread sleep for some seconds
+	   - 1   then get other TS's current/next (this TS's cur/next are
+		 handled in dmxCN)
+	   - 2/3 then get scheduled events on this TS
 	   - 4   then get the other TS's scheduled events,
 	   - 4ab (in two steps to reduce the POLLERRs on the DMX device)
-	   - 0b  again filter on the current channel, just to make sure we
-		 have the current version number of the EIT for the EIT
-		 update filter and maybe catch changed current/next.
-	   * There may be more tricks hidden in this setup, this is how i
-	     understood the code. I might be wrong :-) -- seife
-	   * I added the "0a" to catch changed current/next events between
-	     the other filters. Those type 0 filters take less than 2 seconds,
-	     the other filters can take up to TIME_EIT_SKIPPING (60) seconds.
-	     So with this setup, we should notice a changed EIT version and
-	     new cur/next events after max. 60 seconds. The better, but more
-	     complicated solution would be to handle now/next in a dedicated
-	     thread.
 	 */
 	// -- set EIT filter  0x4e-0x6F
-	dmxEIT.addfilter(0x4e, 0xff); //0  actual TS, current/next
+	dmxEIT.addfilter(0x00, 0x00); //0 dummy filter
 	dmxEIT.addfilter(0x50, 0xff); //1  actual TS, scheduled
-	dmxEIT.addfilter(0x4e, 0xfe); //2  actual and other TS, cur/next
-	dmxEIT.addfilter(0x50, 0xf0); //3  actual TS, scheduled
-	dmxEIT.addfilter(0x4e, 0xff); //0a actual TS, current/next
-	dmxEIT.addfilter(0x60, 0xf0); //4  other TS, scheduled
-//	dmxEIT.addfilter(0x60, 0xf1); //4a other TS, scheduled, even
-//	dmxEIT.addfilter(0x4e, 0xff); //0a actual TS, current/next
-//	dmxEIT.addfilter(0x61, 0xf1); //4b other TS, scheduled, odd
-	dmxEIT.addfilter(0x4e, 0xff); //0b actual TS, cur/next (collect EIT version)
+	dmxEIT.addfilter(0x4f, 0xff); //2  other TS, current/next
+	dmxEIT.addfilter(0x50, 0xf0); //3  actual TS, scheduled later
+//	dmxEIT.addfilter(0x60, 0xf0); //4  other TS, scheduled
+	dmxEIT.addfilter(0x60, 0xf1); //4a other TS, scheduled, even
+	dmxEIT.addfilter(0x61, 0xf1); //4b other TS, scheduled, odd
 
 	if (debug) {
 		int policy;
@@ -6743,20 +6762,14 @@ static void *eitThread(void *)
 
 	try
 	{
-		/*d*/printf("[%sThread] pid %d start\n", "eit", getpid());
+		dprintf("[%sThread] pid %d (%lu) start\n", "eit", getpid(), pthread_self());
 		int timeoutsDMX = 0;
 		time_t lastChanged = time(NULL);
 		dmxEIT.start(); // -> unlock
 		if (!scanning)
 			dmxEIT.request_pause();
-		writeLockMessaging();
-		messaging_eit_is_busy = true;
-		unlockMessaging();
 
 		waitForTimeset();
-
-		bool wait_for_eit_version = false;
-		time_t eit_waiting_since = time(NULL);
 
 		for (;;)
 		{
@@ -6765,6 +6778,8 @@ static void *eitThread(void *)
 				sleep(1);
 
 			buf = dmxEIT.getSection(timeoutInMSeconds, timeoutsDMX);
+#if 0
+/* comment out for now - will be removed later -- seife */
 			if (update_eit) {
 				writeLockMessaging();
 				messaging_current_version_number = dmxEIT.get_eit_version();
@@ -6799,9 +6814,11 @@ static void *eitThread(void *)
 					continue;
 				}
 			} // if (update_eit)
+#endif
 
 			if (timeoutsDMX < 0)
 			{
+#if 0
 				writeLockMessaging();
 				if (update_eit){
 					if (dmxEIT.filters[dmxEIT.filter_index].filter == 0x4e) { 
@@ -6818,6 +6835,7 @@ static void *eitThread(void *)
 					}
 				}
 				unlockMessaging();
+#endif
 
 				if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 				{
@@ -6848,8 +6866,10 @@ static void *eitThread(void *)
 
 				if (si != mySIservicesOrderUniqueKey.end())
 				{
-					if ( ( (( dmxEIT.filter_index == 0 ) || (dmxEIT.filter_index == 2)) && ( !si->second->eitPresentFollowingFlag() ) ) ||
-					        ( ((dmxEIT.filter_index == 1) || (dmxEIT.filter_index == 3)) && ( !si->second->eitScheduleFlag() ) ) )
+					// 1 and 3 == scheduled
+					// 2 == current/next
+					if ((dmxEIT.filter_index == 2 && !si->second->eitPresentFollowingFlag()) ||
+					   ((dmxEIT.filter_index == 1 || dmxEIT.filter_index == 3) && !si->second->eitScheduleFlag()))
 					{
 						timeoutsDMX = 0;
 						dprintf("[eitThread] timeoutsDMX for 0x"
@@ -6861,7 +6881,7 @@ static void *eitThread(void *)
 						lastChanged = time(NULL);
 					}
 					else
-						if ( dmxEIT.filter_index > 1 )
+						if (dmxEIT.filter_index >= 1)
 						{
 							if (dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 							{
@@ -6880,10 +6900,6 @@ static void *eitThread(void *)
 				}
 				unlockMessaging();
 				unlockServices();
-			}
-			else {
-				if ( dmxEIT.filter_index < 2 && timeoutsDMX > 0)
-					usleep(timeoutsDMX*1000);
 			}
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
@@ -6907,11 +6923,9 @@ static void *eitThread(void *)
 				dmxEIT.real_pause();
 				pthread_mutex_lock( &dmxEIT.start_stop_mutex );
 				writeLockMessaging();
-				messaging_eit_is_busy = false;
 				messaging_zap_detected = false;
 				unlockMessaging();
 
-				readLockMessaging();
 				if (auto_scanning) {
 					pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
 #ifdef PAUSE_EQUALS_STOP
@@ -6922,20 +6936,12 @@ static void *eitThread(void *)
 
 				struct timespec abs_wait;
 				struct timeval now;
-				int rel_wait;
 				gettimeofday(&now, NULL);
 				TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-				if (update_eit && messaging_current_version_number != 0xff)
-					rel_wait = (TIME_EIT_SCHEDULED_PAUSE * 12);
-				else	
-					rel_wait = (TIME_EIT_SCHEDULED_PAUSE);
-				abs_wait.tv_sec += rel_wait;
-				unlockMessaging();
-				dprintf("dmxEIT: going to sleep for %d seconds...\n", rel_wait);
+				abs_wait.tv_sec += TIME_EIT_SCHEDULED_PAUSE;
+				dprintf("dmxEIT: going to sleep for %d seconds...\n", TIME_EIT_SCHEDULED_PAUSE);
 
-				if (update_eit) eit_set_update_filter(&eit_update_fd);
 				int rs = pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
-				if (update_eit) eit_stop_update_filter(&eit_update_fd);
 
 				pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
 
@@ -6949,11 +6955,8 @@ static void *eitThread(void *)
 // dmxEIT.lastChanged will not be set, and filter is advanced the next iteration
 // maybe .change should imply .real_unpause()? -- seife
 					dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxEIT.filters.size() );
-					dmxEIT.change( 2 ); // -> restart
+					dmxEIT.change(1); // -> restart
 					lastChanged = time(NULL);
-					writeLockMessaging();
-					messaging_eit_is_busy = true;
-					unlockMessaging();
 				}
 				else if (rs == 0)
 				{
@@ -6962,17 +6965,11 @@ static void *eitThread(void *)
 					dmxEIT.real_unpause();
 					lastChanged = time(NULL);
 #endif
-					writeLockMessaging();
-					messaging_eit_is_busy = true;
-					unlockMessaging();
 				}
 				else
 				{
 					dprintf("dmxEIT:  waking up again - unknown reason %d\n",rs);
 					dmxEIT.real_unpause();
-					writeLockMessaging();
-					messaging_eit_is_busy = true;
-					unlockMessaging();
 				}
 				// update zeit after sleep
 				zeit = time(NULL);
@@ -7025,6 +7022,7 @@ static void *eitThread(void *)
 							if ( ( e->times.begin()->startzeit < zeit + secondsToCache ) &&
 							        ( ( e->times.begin()->startzeit + (long)e->times.begin()->dauer ) > zeit - oldEventsAre ) )
 							{
+								//fprintf(stderr, "%02x ", header.table_id);
 								addEvent(*e, header.table_id, zeit);
 							}
 						}
@@ -7074,6 +7072,241 @@ static void *eitThread(void *)
 	pthread_exit(NULL);
 }
 
+//---------------------------------------------------------------------
+// CN-thread: eit thread, but only current/next
+//---------------------------------------------------------------------
+static void *cnThread(void *)
+{
+
+	struct SI_section_header *header;
+	char *buf;
+	/* we are holding the start_stop lock during this timeout, so don't
+	   make it too long... */
+	unsigned timeoutInMSeconds = EIT_READ_TIMEOUT;
+	bool sendToSleepNow = false;
+
+	// -- set EIT filter  0x4e
+	dmxCN.addfilter(0x4e, 0xff); //0  actual TS, current/next
+
+	try
+	{
+		dprintf("[%sThread] pid %d (%lu) start\n", "cn", getpid(), pthread_self());
+		int timeoutsDMX = 0;
+		time_t lastChanged = time(NULL);
+		dmxCN.start(); // -> unlock
+		if (!scanning)
+			dmxCN.request_pause();
+
+		writeLockMessaging();
+		messaging_eit_is_busy = true;
+		messaging_need_eit_version = false;
+		unlockMessaging();
+
+		waitForTimeset();
+
+		time_t eit_waiting_since = time(NULL);
+
+		for (;;)
+		{
+			time_t zeit = time(NULL);
+			while (!scanning)
+				sleep(1);
+
+			buf = dmxCN.getSection(timeoutInMSeconds, timeoutsDMX);
+			if (update_eit) {
+				writeLockMessaging();
+				messaging_current_version_number = dmxCN.get_eit_version();
+
+				if (messaging_current_version_number != 0xff) {
+					messaging_need_eit_version = false;
+				} else {
+					if (!messaging_need_eit_version) {
+						dprintf("waiting for eit_version...\n");
+						eit_waiting_since = zeit;
+						messaging_need_eit_version = true;
+					}
+					if (zeit - eit_waiting_since > TIME_EIT_VERSION_WAIT) {
+						dprintf("waiting for more than %d seconds - bail out...\n", TIME_EIT_VERSION_WAIT);
+						messaging_need_eit_version = false;
+						sendToSleepNow = true;
+					} else if (timeoutsDMX >= TIMEOUTS_EIT_VERSION_WAIT) {
+						dprintf("more than %d EIT DMX timeouts - bail out...\n", TIMEOUTS_EIT_VERSION_WAIT);
+						messaging_need_eit_version = false;
+						sendToSleepNow = true;
+					}
+				}
+				unlockMessaging();
+
+			} // if (update_eit)
+
+			if (timeoutsDMX < -1)
+			{
+				writeLockMessaging();
+				dprintf("[cnThread] got all current_next - sending event!\n");
+				messaging_wants_current_next_Event = false;
+				eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG,
+							CEventServer::INITID_SECTIONSD,
+							&messaging_current_servicekey,
+							sizeof(messaging_current_servicekey));
+				unlockMessaging();
+
+				sendToSleepNow = true;
+				timeoutsDMX = 0;
+			}
+
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
+			{
+				readLockServices();
+				readLockMessaging();
+
+				MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
+				//dprintf("timeoutsDMX %x\n",currentServiceKey);
+
+				if (messaging_current_servicekey)
+					si = mySIservicesOrderUniqueKey.find(messaging_current_servicekey);
+
+				if (si != mySIservicesOrderUniqueKey.end())
+				{
+					if (!si->second->eitPresentFollowingFlag())
+					{
+						timeoutsDMX = 0;
+						printf("[cnThread] timeoutsDMX for 0x"
+							PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+							" reset to 0 (not broadcast)\n", messaging_current_servicekey );
+
+					}
+					else
+					{
+						sendToSleepNow = true;
+						dputs("sendToSleepNow = true");
+					}
+				}
+				unlockMessaging();
+				unlockServices();
+			}
+			else {
+				if (timeoutsDMX > 0)
+					usleep(timeoutsDMX*1000);
+			}
+
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
+			{
+				sendToSleepNow = true;
+				timeoutsDMX = 0;
+			}
+
+			if (sendToSleepNow && !messaging_need_eit_version)
+			{
+				sendToSleepNow = false;
+
+				dmxCN.real_pause();
+				pthread_mutex_lock( &dmxCN.start_stop_mutex );
+				printdate_ms(stderr);fprintf(stderr,"dmxCN: going to sleep...\n");
+
+				writeLockMessaging();
+				messaging_eit_is_busy = false;
+				unlockMessaging();
+
+				eit_set_update_filter(&eit_update_fd);
+				int rs = pthread_cond_wait(&dmxCN.change_cond, &dmxCN.start_stop_mutex);
+				eit_stop_update_filter(&eit_update_fd);
+
+				pthread_mutex_unlock(&dmxCN.start_stop_mutex);
+
+				writeLockMessaging();
+				messaging_need_eit_version = false;
+				messaging_eit_is_busy = true;
+				unlockMessaging();
+
+				if (rs == 0)
+				{
+					printdate_ms(stderr); fprintf(stderr,"dmxCN: waking up again - requested from .change()\n");
+#ifdef PAUSE_EQUALS_STOP
+					dmxCN.real_unpause();
+					lastChanged = time(NULL);
+#endif
+				}
+				else
+				{
+					printf("dmxCN:  waking up again - unknown reason %d\n",rs);
+					dmxCN.real_unpause();
+				}
+				zeit = time(NULL);
+			}
+			else if (zeit > lastChanged + TIME_EIT_SKIPPING && !messaging_need_eit_version)
+			{
+				readLockMessaging();
+				sendToSleepNow = true;
+				unlockMessaging();
+			}
+
+			if (buf == NULL)
+				continue;
+
+			header = (SI_section_header *)buf; 
+			unsigned short section_length = (header->section_length_hi << 8) | header->section_length_lo;
+			unsigned table_id = header->table_id;
+
+			if (!header->current_next_indicator || dmxCN.pauseCounter)
+			{
+				// Wir wollen nur aktuelle sections
+				delete[] buf;
+				buf = NULL;
+				//dprintf("[cnThread] skipped sections for table 0x%x\n", table_id);
+				continue;
+			}
+
+			SIsectionEIT eit(section_length + 3, buf);
+// Houdini: if section is not parsed (too short) -> no need to check events
+			if (!eit.is_parsed() || !eit.header())
+				continue;
+
+			// == 0 -> kein event
+			//dprintf("[cnThread] adding %d events [table 0x%x] (begin)\n", eit.events().size(), table_id);
+			zeit = time(NULL);
+			// Nicht alle Events speichern
+			for (SIevents::iterator e = eit.events().begin(); e != eit.events().end(); e++)
+			{
+				if (!(e->times.empty()))
+				{
+					addEvent(*e, table_id, zeit);
+				}
+				else
+				{
+printdate_ms(stderr); fprintf(stderr, "e->times.empty in CN-THREAD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+					// pruefen ob nvod event
+					readLockServices();
+					MySIservicesNVODorderUniqueKey::iterator si = mySIservicesNVODorderUniqueKey.find(e->get_channel_id());
+					if (si != mySIservicesNVODorderUniqueKey.end())
+					{
+printdate_ms(stderr); fprintf(stderr, "NVOD-EVENT in CN-THREAD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+						// Ist ein nvod-event
+						writeLockEvents();
+						for (SInvodReferences::iterator i = si->second->nvods.begin(); i != si->second->nvods.end(); i++)
+							mySIeventUniqueKeysMetaOrderServiceUniqueKey.insert(std::make_pair(i->uniqueKey(), e->uniqueKey()));
+						unlockEvents();
+						addNVODevent(*e);
+					}
+					unlockServices();
+				}
+			} // for
+			//dprintf("[cnThread] added %d events (end)\n",  eit.events().size());
+		} // for
+	} // try
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "[cnThread] Caught std-exception %s!\n", e.what());
+	}
+	catch (...)
+	{
+		fprintf(stderr, "[cnThread] Caught exception!\n");
+	}
+
+	dputs("[cnThread] end");
+
+	pthread_exit(NULL);
+}
+
 
 //---------------------------------------------------------------------
 // Premiere Private EPG Thread
@@ -7097,7 +7330,7 @@ static void *pptThread(void *)
 	dmxPPT.addfilter( 0xa0, (0xff));
 	try
 	{
-		dprintf("[%sThread] pid %d start\n", "ppt", getpid());
+		dprintf("[%sThread] pid %d (%lu) start\n", "ppt", getpid(), pthread_self());
 		int timeoutsDMX = 0;
 		time_t lastRestarted = time(NULL);
 		time_t lastData = time(NULL);
@@ -7743,12 +7976,12 @@ static void signalHandler(int signum)
 
 int main(int argc, char **argv)
 {
-	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
+	pthread_t threadTOT, threadEIT, threadCN, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.261 2008/05/01 18:06:46 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.262 2008/05/12 11:06:37 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -7874,6 +8107,14 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 
+		// EIT-Thread2 starten
+		rc = pthread_create(&threadCN, 0, cnThread, 0);
+
+		if (rc) {
+			fprintf(stderr, "[sectionsd] failed to create eit-thread (rc=%d)\n", rc);
+			return EXIT_FAILURE;
+		}
+
 		// premiere private epg -Thread starten
 		rc = pthread_create(&threadPPT, 0, pptThread, 0);
 
@@ -7927,22 +8168,21 @@ int main(int argc, char **argv)
 					pfd.fd = eit_update_fd;
 					pfd.events = (POLLIN | POLLPRI);
 					if (poll(&pfd, 1, 0) > 0 && pfd.fd == eit_update_fd){
-						dprintf("EIT Update Filter: Activate EitThread\n");
+						printdate_ms(stdout);printf("EIT Update Filter: Activate cnThread\n");
 						writeLockMessaging();
 //						messaging_skipped_sections_ID[0].clear();
 //						messaging_sections_max_ID[0] = -1;
 //						messaging_sections_got_all[0] = false;
 						messaging_wants_current_next_Event = true;
 						messaging_last_requested = time(NULL);
-//						dmxEIT.reset_eit_version();
+						dmxCN.reset_eit_version();
 						unlockMessaging();
 						sched_yield();
 #ifdef PAUSE_EQUALS_STOP
-						dmxEIT.real_unpause();
+						dmxCN.real_unpause();
 #endif
-						dmxEIT.change(0);
+						dmxCN.change(0);
 						sched_yield();
-						EITCheckAllFilters = false;
 					}
 				}
 				sched_yield();
