@@ -624,6 +624,12 @@ void eDVRPlayerThread::seekTo(off64_t offset)
 		{
 			if (openFile(newslice))
 			{
+				if (livemode)
+				{
+					// end of timeshifted recording reached
+					state=stateFileEnd;
+					return;
+				}
 				eDebug("open slice %d failed\n", newslice);
 				state=stateError;
 			}
@@ -648,6 +654,12 @@ void eDVRPlayerThread::seekTo(off64_t offset)
 		{
 			if (openFile(newslice))
 			{
+				if (livemode)
+				{
+					// end of timeshifted recording reached
+					state=stateFileEnd;
+					return;
+				}
 				eDebug("open slice %d failed\n", newslice);
 				state=stateError;
 			}
