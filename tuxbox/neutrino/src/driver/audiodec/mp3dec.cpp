@@ -2,8 +2,8 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2002 Bjoern Kalkbrenner <terminar@cyberphoria.org>
-   (C) 2002,2003,2004 Zwen <Zwen@tuxbox.org>
-   
+	(C) 2002,2003,2004 Zwen <Zwen@tuxbox.org>
+
 	libmad MP3 low-level core
 	Homepage: http://www.cyberphoria.org/
 
@@ -34,7 +34,7 @@
 
 
 /****************************************************************************
- * Includes																	*
+ * Includes
  ****************************************************************************/
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -60,23 +60,26 @@
    finish_file function. */
 extern "C"
 {
-void id3_tag_addref(struct id3_tag *);
-void id3_tag_delref(struct id3_tag *);
-struct filetag {
-	struct id3_tag *tag;
-	unsigned long location;
-	id3_length_t length;
-};
-struct id3_file {
-	FILE *iofile;
-	enum id3_file_mode mode;
-	char *path;
-	int flags;
-	struct id3_tag *primary;
-	unsigned int ntags;
-	struct filetag *tags;
-};
-void id3_finish_file(struct id3_file* file);
+	void id3_tag_addref(struct id3_tag *);
+	void id3_tag_delref(struct id3_tag *);
+
+	struct filetag {
+		struct id3_tag *tag;
+		unsigned long location;
+		id3_length_t length;
+	};
+
+	struct id3_file {
+		FILE *iofile;
+		enum id3_file_mode mode;
+		char *path;
+		int flags;
+		struct id3_tag *primary;
+		unsigned int ntags;
+		struct filetag *tags;
+	};
+
+	void id3_finish_file(struct id3_file* file);
 }
 
 // Frames to skip in ff/rev mode
@@ -87,11 +90,11 @@ void id3_finish_file(struct id3_file* file);
 #define ProgName "CMP3Dec"
 
 /****************************************************************************
- * Global variables.														*
+ * Global variables.
  ****************************************************************************/
 
 /****************************************************************************
- * Return an error string associated with a mad error code.					*
+ * Return an error string associated with a mad error code.
  ****************************************************************************/
 /* Mad version 0.14.2b introduced the mad_stream_errorstr() function.
  * For previous library versions a replacement is provided below.
@@ -214,67 +217,67 @@ void CMP3Dec::CreateInfo(CAudioMetaData* m, int FrameNumber)
 		using namespace std;
 		string Layer, Mode;
 
-	/* Convert the layer number to it's printed representation. */
+		/* Convert the layer number to it's printed representation. */
 		switch(m->layer)
-	{
-		case MAD_LAYER_I:
-			Layer="I";
-			break;
-		case MAD_LAYER_II:
-			Layer="II";
-			break;
-		case MAD_LAYER_III:
-			Layer="III";
-			break;
-		default:
-			Layer="?";
-			break;
-	}
+		{
+			case MAD_LAYER_I:
+				Layer="I";
+				break;
+			case MAD_LAYER_II:
+				Layer="II";
+				break;
+			case MAD_LAYER_III:
+				Layer="III";
+				break;
+			default:
+				Layer="?";
+				break;
+		}
 
 	/* Convert the audio mode to it's printed representation. */
 		switch(m->mode)
-	{
-		case MAD_MODE_SINGLE_CHANNEL:
-			Mode="single channel";
-			break;
-		case MAD_MODE_DUAL_CHANNEL:
-			Mode="dual channel";
-			break;
-		case MAD_MODE_JOINT_STEREO:
-			Mode="joint stereo";
-			break;
-		case MAD_MODE_STEREO:
-			Mode="normal stereo";
-			break;
-		default:
-			Mode="unkn. mode";
-			break;
-	}
+		{
+			case MAD_MODE_SINGLE_CHANNEL:
+				Mode="single channel";
+				break;
+			case MAD_MODE_DUAL_CHANNEL:
+				Mode="dual channel";
+				break;
+			case MAD_MODE_JOINT_STEREO:
+				Mode="joint stereo";
+				break;
+			case MAD_MODE_STEREO:
+				Mode="normal stereo";
+				break;
+			default:
+				Mode="unkn. mode";
+				break;
+		}
 
 #ifdef INCLUDE_UNUSED_STUFF
 		const char *Emphasis, *Vbr;
 
 	/* Convert the emphasis to it's printed representation. */
 		switch(m->emphasis)
-	{
-		case MAD_EMPHASIS_NONE:
-			Emphasis="no";
-			break;
-		case MAD_EMPHASIS_50_15_US:
-			Emphasis="50/15 us";
-			break;
-		case MAD_EMPHASIS_CCITT_J_17:
-			Emphasis="CCITT J.17";
-			break;
-		default:
-			Emphasis="(unexpected emphasis value)";
-			break;
-	}
+		{
+			case MAD_EMPHASIS_NONE:
+				Emphasis="no";
+				break;
+			case MAD_EMPHASIS_50_15_US:
+				Emphasis="50/15 us";
+				break;
+			case MAD_EMPHASIS_CCITT_J_17:
+				Emphasis="CCITT J.17";
+				break;
+			default:
+				Emphasis="(unexpected emphasis value)";
+				break;
+		}
 
 		if(m->vbr)
-      Vbr="VBR ";
-   else
-      Vbr="";
+			Vbr="VBR ";
+		else
+			Vbr="";
 #endif /* INCLUDE_UNUSED_STUFF */
 
 		m->type_info = string("MPEG Layer ") + Layer + string(" / ") + Mode;
@@ -297,13 +300,13 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
 	struct mad_synth	Synth;
-	mad_timer_t			Timer;
+	mad_timer_t		Timer;
 	unsigned char		InputBuffer[INPUT_BUFFER_SIZE],
-						OutputBuffer[OUTPUT_BUFFER_SIZE],
-						*OutputPtr=OutputBuffer;
+				OutputBuffer[OUTPUT_BUFFER_SIZE],
+				*OutputPtr=OutputBuffer;
 	const unsigned char	*OutputBufferEnd=OutputBuffer+OUTPUT_BUFFER_SIZE;
-	RetCode				Status=OK;
-	int 					ret;
+	RetCode			Status=OK;
+	int 			ret;
 	unsigned long		FrameCount=0;
 
 	/* First the structures used by libmad must be initialized. */
@@ -337,8 +340,8 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 		 */
 		if(Stream.buffer==NULL || Stream.error==MAD_ERROR_BUFLEN)
 		{
-			size_t			ReadSize,
-							Remaining;
+			size_t		ReadSize,
+					Remaining;
 			unsigned char	*ReadStart;
 
 			/* {1} libmad may not consume all bytes of the input
@@ -389,8 +392,7 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 				break;
 			}
 
-			/* Pipe the new buffer content to libmad's stream decoder
-             * facility.
+			/* Pipe the new buffer content to libmad's stream decoder facility.
 			 */
 			mad_stream_buffer(&Stream,InputBuffer,ReadSize+Remaining);
 			Stream.error=(mad_error)0;
@@ -437,9 +439,8 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 		 * skip the faulty part and re-sync to the next frame.
 		 */
 		// decode 'FRAMES_TO_PLAY' frames each 'FRAMES_TO_SKIP' frames in ff/rev mode 
-		if( (*state!=FF && 
-			  *state!=REV) || 
-		    FrameCount % actFramesToSkip < FRAMES_TO_PLAY )
+		if( (*state!=FF && *state!=REV) || 
+				(FrameCount % actFramesToSkip < FRAMES_TO_PLAY) )
 			ret=mad_frame_decode(&Frame,&Stream);
 		else if(*state==FF) // in FF mode just decode the header, this sets bufferptr to next frame and also gives stats about the frame for totals
 			if (secondsToJump != 0 && !jumpDone)
@@ -538,14 +539,16 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 		{
 			if(MAD_RECOVERABLE(Stream.error))
 			{
-				// no errrors in FF mode
+#if 0
+				// no errors in FF mode
 				if(*state!=FF && 
 					*state!=REV)
 				{
 					fprintf(stderr,"%s: recoverable frame level error (%s)\n",
 						ProgName,MadErrorString(&Stream));
 					fflush(stderr);
-				 }
+				}
+#endif
 				continue;
 			}
 			else
@@ -618,7 +621,7 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 		 */
 		mad_timer_add(&Timer,Frame.header.duration);
 		//mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
-      //                 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
+		//                 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
 		*time_played = Timer.seconds;
 
 				
@@ -705,21 +708,21 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 	}while(*state!=STOP_REQ);
 
 	/* Mad is no longer used, the structures that were initialized must
-     * now be cleared.
+	 * now be cleared.
 	 */
 	mad_synth_finish(&Synth);
 	mad_frame_finish(&Frame);
 	mad_stream_finish(&Stream);
 
 	/* If the output buffer is not empty and no error occured during
-     * the last write, then flush it.
+	 * the last write, then flush it.
 	 */
 	if(OutputPtr!=OutputBuffer && Status!=WRITE_ERR)
 	{
 		ssize_t	BufferSize=OutputPtr-OutputBuffer;
 
 		if(write(OutputFd, OutputBuffer, BufferSize)!=BufferSize)
-  		{
+		{
 			fprintf(stderr,"%s: PCM write error (%s).\n",
 					ProgName,strerror(errno));
 			Status=WRITE_ERR;
@@ -745,12 +748,12 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 		 * of the available units, fraction of units, their meanings,
 		 * the format arguments, etc.
 		 */
-	   //		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
-		//				 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
+//		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
+//				 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
 		*time_played = Timer.seconds;
 
-//		      fprintf(stderr,"%s: %lu frames decoded (%s).\n",
-//				ProgName,FrameCount,Buffer);
+//		fprintf(stderr,"%s: %lu frames decoded (%s).\n",
+//			ProgName,FrameCount,Buffer);
 	}
 
 	/* That's the end of the world (in the H. G. Wells way). */
@@ -793,16 +796,17 @@ bool CMP3Dec::GetMetaData(FILE* in, const bool nice, CAudioMetaData* const m)
  *
  * Based on scan_header() from Robert Leslie's "MAD Plug-in for Winamp".
  */
-#define BUFFER_SIZE (5*8192) // big enough to skip id3 tags containing jpegs
+#define MAX_REFILL_CNT	15
+#define BUFFER_SIZE ((MAX_REFILL_CNT+1)*8192) // big enough to skip id3 tags containing jpegs
 long CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
-						  struct tag* const ftag, const bool nice )
+			  struct tag* const ftag, const bool nice )
 {
 	struct mad_stream stream;
 	struct mad_frame frame;
 	unsigned char buffer[BUFFER_SIZE];
 	unsigned int buflen = 0;
 	int count = 0;
-	short refillCount = 4; /* buffer may be refilled refillCount times */
+	short refillCount = MAX_REFILL_CNT; /* buffer may be refilled refillCount times */
 	long filePos = 0; /* return value */
 
 	mad_stream_init( &stream );
@@ -908,7 +912,6 @@ long CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
 
 	mad_frame_finish( &frame );
 	mad_stream_finish( &stream );
-
 	return filePos;
 }
 
@@ -919,7 +922,7 @@ long CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
  * decode_filter() from Robert Leslie's "madplay".
  */
 bool CMP3Dec::GetMP3Info( FILE* input, const bool nice,
-						  CAudioMetaData* const meta )
+			  CAudioMetaData* const meta )
 {
 	struct mad_header header;
 	struct tag ftag;
@@ -999,8 +1002,7 @@ void CMP3Dec::GetID3(FILE* in, CAudioMetaData* const m)
 	id3_utf8_t *utf8;
 	char const spaces[] = "          ";
 	
-	struct 
-		{
+	struct {
 		char const *id;
 		char const *name;
 	} const info[] = 
@@ -1201,5 +1203,4 @@ void id3_finish_file(struct id3_file* file)
 		free(file->tags);
 	
 	free(file);
-}	
-
+}
