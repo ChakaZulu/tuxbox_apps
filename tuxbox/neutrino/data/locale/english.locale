@@ -497,8 +497,8 @@ keybindingmenu.pageup_head Keysetup page up
 keybindingmenu.quickzap Quickzap
 keybindingmenu.reload Refresh EPG
 keybindingmenu.reload_head reload EPG
-keybindingmenu.repeatblock Repeat Delay
-keybindingmenu.repeatblockgeneric Generic Delay
+keybindingmenu.repeatblock Generic Delay
+keybindingmenu.repeatblockgeneric Repeat Delay
 keybindingmenu.sort change sort order
 keybindingmenu.sort_head change sort order
 keybindingmenu.subchanneldown subchannel down
