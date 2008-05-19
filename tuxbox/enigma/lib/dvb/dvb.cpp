@@ -175,10 +175,12 @@ void eServiceDVB::set(cacheID c, short v)
 	}
 	else if (c > cachevalues[0]-2)
 	{
+		if (v == -1)
+			return;
 		/* setting is higher than cAC3PID, so we "realloc" the settings */
 		short* p = cachevalues;
 		makeCache(c);
-		memcpy(cachevalues,p, p[0]);
+		memcpy(cachevalues,p, p[0]*sizeof(short));              
 		cachevalues[0]=c+2;
 
 		delete p;
