@@ -3067,7 +3067,7 @@ void eZapMain::pause()
 			{
 				Decoder::Pause(2);  // freeze frame
 				Decoder::setAutoFlushScreen(0);
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, -1));
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 				Decoder::setAutoFlushScreen(1);
 			}
 			else if (eSystemInfo::getInstance()->canTimeshift())
