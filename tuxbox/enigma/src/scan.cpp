@@ -2004,8 +2004,16 @@ void ManualPIDWindow::store()
 			transponder.satellite.orbital_position,
 			transponder.satellite.frequency,
 			transponder.satellite.polarisation);
-	else
-		dvb_namespace=0;
+	else if (transponder.cable.valid)
+		dvb_namespace=eTransponder::buildNamespace(onid, tsid,
+			0xFFFF,
+			transponder.cable.frequency,
+			0);
+	else if (transponder.terrestrial.valid)
+		dvb_namespace=eTransponder::buildNamespace(onid, tsid,
+			0xEEEE,
+			transponder.terrestrial.centre_frequency/1000, // centre_freq is in hz
+			0);
 
 	transponder.dvb_namespace=dvb_namespace;
 

@@ -244,11 +244,15 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 							break;
 						}
 					}
-					
+
 					eDVBNamespace dvb_namespace =
 						tp.satellite.isValid()
 						?eTransponder::buildNamespace(onid,tsid,tp.satellite.orbital_position,tp.satellite.frequency, tp.satellite.polarisation)
-						:-1;
+						:tp.cable.isValid()
+						?eTransponder::buildNamespace(onid,tsid, 0xFFFF, tp.cable.frequency, 0)
+						:tp.terrestrial.isValid()
+						?eTransponder::buildNamespace(onid,tsid, 0xEEEE, tp.terrestrial.centre_frequency/1000, 0)
+						:-1; // should not happen
 
 					tp.dvb_namespace=dvb_namespace;
 
@@ -390,14 +394,17 @@ void eDVBScanController::handleSDT(const SDT *sdt)
 		// build "namespace" to work around buggy satellites
 	if (transponder->satellite.valid)
 		dvb_namespace=eTransponder::buildNamespace(onid, tsid, transponder->satellite.orbital_position, transponder->satellite.frequency, transponder->satellite.polarisation);
+	else if (transponder->cable.valid)
+		dvb_namespace=eTransponder::buildNamespace(onid, tsid, 0xFFFF, transponder->cable.frequency, 0);
+	else if (transponder->terrestrial.valid)
+		dvb_namespace=eTransponder::buildNamespace(onid, tsid, 0xEEEE, transponder->terrestrial.centre_frequency/1000, 0);
 	else
-		dvb_namespace=0;
+		dvb_namespace=0; // should not happen!
 
 	transponder->dvb_namespace=dvb_namespace;
 
 	eTransponder *tmp = 0;
-	if ( transponder->satellite.valid &&
-		dvb_namespace.get() & 0xFFFF )  // feeds.. scpc.. or muxxers with default values
+	if ( dvb_namespace.get() & 0xFFFF )  // feeds.. scpc.. or muxxers with default values
 	{
 		eDebug("[SCAN] SCPC detected... compare complete transponder");
 		// we must search transponder via freq pol usw..
