@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.891 2008/05/01 21:55:27 houdini Exp $
+	$Id: neutrino.cpp,v 1.892 2008/05/23 00:46:43 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -306,7 +306,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.epg_dir 		= configfile.getString("epg_dir", "");
     
     // NTP-Server for sectionsd
-	g_settings.network_ntpserver	= configfile.getString("network_ntpserver", "de.pool.ntp.org");
+	g_settings.network_ntpserver	= configfile.getString("network_ntpserver", "130.60.7.42");
 	g_settings.network_ntprefresh	= configfile.getString("network_ntprefresh", "30" );
 	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", false);
 
@@ -325,6 +325,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_show			= configfile.getInt32("infobar_show"             , 0);
 	g_settings.show_mute_icon		= configfile.getInt32("show_mute_icon"		,1);
 	g_settings.channellist_epgtext_align_right		= configfile.getBool("channellist_epgtext_align_right"          , false);
+	g_settings.show_channel_logo		= configfile.getInt32("show_channel_logo"		,0);
+	
 
 	//audio
 	g_settings.audio_AnalogMode 		= configfile.getInt32( "audio_AnalogMode"        , 0 );
@@ -807,6 +809,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32("infobar_show"             , g_settings.infobar_show);
 	configfile.setInt32("show_mute_icon"			, g_settings.show_mute_icon);
 	configfile.setBool("channellist_epgtext_align_right"                 , g_settings.channellist_epgtext_align_right);
+	configfile.setInt32("show_channel_logo"			, g_settings.show_channel_logo);
 	
 
 	//audio
@@ -1955,12 +1958,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 420);
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 450);
-	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD           , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD              , "streaming.raw"       );
+	
+
 
 	InitMainMenu(	mainMenu,
 					mainSettings,
@@ -1993,8 +1998,23 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//driver Setup
 	InitDriverSettings(driverSettings);
 
-	//misc Setup
-	InitMiscSettings(miscSettings);
+	// misc settings
+	CMenuWidget    miscSettingsGeneral        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
+	CMenuWidget    miscSettingsInfobar        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
+	CMenuWidget    miscSettingsOSDExtras        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
+	CMenuWidget    miscSettingsChannellist        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
+	CMenuWidget    miscSettingsEPGSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
+	CMenuWidget    miscSettingsRemoteControl        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
+	CMenuWidget    miscSettingsFilebrowser        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
+	
+	InitMiscSettings(miscSettings,
+							miscSettingsGeneral,
+							miscSettingsOSDExtras,
+							miscSettingsInfobar,
+							miscSettingsChannellist,
+							miscSettingsEPGSettings,
+							miscSettingsRemoteControl,
+							miscSettingsFilebrowser);	
 
 	//audio Setup
 	InitAudioSettings(audioSettings, audioSetupNotifier);
@@ -2086,7 +2106,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	}
 #endif
 
-	//settins
+	//settings
 	if(loadSettingsErg==1)
 	{
 		dprintf(DEBUG_INFO, "config file missing\n");

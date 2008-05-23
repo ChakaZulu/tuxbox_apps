@@ -1,5 +1,5 @@
 /*
- * $Id: buttons.cpp,v 1.5 2008/05/04 22:36:22 dbt Exp $
+ * $Id: buttons.cpp,v 1.6 2008/05/23 00:46:49 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -67,7 +67,7 @@ void paintButtons(CFrameBuffer * const frameBuffer, Font * const font,
 		const char * icon = content[i].button ? content[i].button : "";
 		
 		// real rendered textwidth		
-		unsigned int real_textwidth = font->getRenderWidth(buttontext);
+		unsigned int real_textwidth = font->getRenderWidth(buttontext, true);
 		
 		// get height/width of icon
 		iconh =  frameBuffer->getIconHeight(icon);

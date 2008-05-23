@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.53 2008/05/01 00:08:21 dbt Exp $
+  $Id: audioplayer.cpp,v 1.54 2008/05/23 00:46:45 dbt Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -1090,7 +1090,6 @@ void CAudioPlayerGui::scanXmlData(xmlDocPtr answer_parser, char *nametag, char *
 			}
 			element = element_tmp;
 			long listPos = -1;
-
 			progress.setTitle(LOCALE_AUDIOPLAYER_LOAD_RADIO_STATIONS);
 			progress.exec(this, "");
 			neutrino_msg_t      msg;
@@ -1104,7 +1103,13 @@ void CAudioPlayerGui::scanXmlData(xmlDocPtr answer_parser, char *nametag, char *
 				time_t bitrate = 0;
 				bool skip = true;
 				listPos++;
-				progress.showGlobalStatus(100*listPos / maxProgress);
+				// show status
+				int global = 100*listPos / maxProgress;
+				progress.showGlobalStatus(global);
+				#ifdef LCD_UPDATE
+				CLCD::getInstance()->showProgressBar(global, "read xmldata...");
+				CLCD::getInstance()->setMode(CLCD::MODE_PROGRESSBAR);
+				#endif // LCD_UPDATE
 
 				if (usechild) {
 					xmlNodePtr child = element->xmlChildrenNode;
@@ -1181,7 +1186,7 @@ bool CAudioPlayerGui::openFilebrowser(void)
 		if (maxProgress > SHOW_FILE_LOAD_LIMIT)
 		{
 			progress.setTitle(LOCALE_AUDIOPLAYER_READING_FILES);
-			progress.exec(this,"");
+			progress.exec(this,"");	
 		}
 
 		m_Path = filebrowser.getCurrentDir();
@@ -1191,8 +1196,14 @@ bool CAudioPlayerGui::openFilebrowser(void)
 			if (maxProgress > SHOW_FILE_LOAD_LIMIT)
 			{
 				currentProgress++;
-				progress.showGlobalStatus(100*currentProgress/maxProgress);
+				// show status
+				int global = 100*currentProgress/maxProgress;
+				progress.showGlobalStatus(global);
 				progress.showStatusMessageUTF(files->Name);
+				#ifdef LCD_UPDATE
+				CLCD::getInstance()->showProgressBar(global, "read metadata...");
+				CLCD::getInstance()->setMode(CLCD::MODE_PROGRESSBAR);
+				#endif // LCD_UPDATE
 			}
 			if ((files->getType() == CFile::FILE_CDR)
 					||  (files->getType() == CFile::FILE_OGG)
@@ -1374,8 +1385,14 @@ bool CAudioPlayerGui::openSCbrowser(void)
 			//if (maxProgress > SHOW_FILE_LOAD_LIMIT)
 			{
 				currentProgress++;
-				progress.showGlobalStatus(100*currentProgress/maxProgress);
-				progress.showStatusMessageUTF(files->Name);
+				// show progress
+				int global = 100*currentProgress/maxProgress;
+				progress.showGlobalStatus(global);
+				progress.showStatusMessageUTF(files->Name);			
+				#ifdef LCD_UPDATE
+				CLCD::getInstance()->showProgressBar(global, "read metadata...");
+				CLCD::getInstance()->setMode(CLCD::MODE_PROGRESSBAR);
+				#endif // LCD_UPDATE
 			}
 			printf("processPlaylistUrl(%s, %s)\n", files->Url.c_str(), files->Name.c_str());
 			processPlaylistUrl(files->Url.c_str(), files->Name.c_str(), files->Time);

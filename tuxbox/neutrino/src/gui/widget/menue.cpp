@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.142 2008/05/01 00:08:35 dbt Exp $
+	$Id: menue.cpp,v 1.143 2008/05/23 00:46:49 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -956,8 +956,21 @@ int CMenuSeparator::paint(bool selected)
 	int height;
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 	height = getHeight();
+	uint8_t color, bgcolor0;
+	
+	if ((type & SUB_HEAD))
+	{
+		color = COL_MENUHEAD;
+		bgcolor0 = COL_MENUHEAD_PLUS_0;
+	}
+	else
+	{
+		color = COL_MENUCONTENTINACTIVE;
+		bgcolor0 = COL_MENUCONTENT_PLUS_0;
+	}
+		
 
-	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(x,y, dx, height, bgcolor0);
 	if ((type & LINE))
 	{
 		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1), COL_MENUCONTENT_PLUS_3);
@@ -975,15 +988,15 @@ int CMenuSeparator::paint(bool selected)
 
 			/* if no alignment is specified, align centered */
 			if (type & ALIGN_LEFT)
-				stringstartposX = x + 20;
+				stringstartposX = x + (!SUB_HEAD ?  20 : 20 +18);
 			else if (type & ALIGN_RIGHT)
 				stringstartposX = x + dx - stringwidth - 20;
 			else /* ALIGN_CENTER */
 				stringstartposX = x + (dx >> 1) - (stringwidth >> 1);
 
-			frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT_PLUS_0);
+			frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, bgcolor0);
 
-			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, color, 0, true); // UTF-8
 
 			if (selected)
 			{

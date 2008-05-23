@@ -1,5 +1,5 @@
 /*
-	$Id: menue.h,v 1.73 2008/04/05 21:05:51 houdini Exp $
+	$Id: menue.h,v 1.74 2008/05/23 00:46:49 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -122,7 +122,8 @@ class CMenuSeparator : public CMenuItem
 		    STRING =	2,
 		    ALIGN_CENTER = 4,
 		    ALIGN_LEFT =   8,
-		    ALIGN_RIGHT = 16
+		    ALIGN_RIGHT = 16,
+			SUB_HEAD = 32
 		};
 
 

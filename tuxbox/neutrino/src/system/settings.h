@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.191 2008/05/01 21:53:30 houdini Exp $
+  $Id: settings.h,v 1.192 2008/05/23 00:46:50 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -66,6 +66,7 @@ struct SNeutrinoSettings
 	int infobar_show;
 	int show_mute_icon;
 	int channellist_epgtext_align_right;
+	int show_channel_logo;
 
 	// EPG
 	std::string epg_cache;
@@ -380,16 +381,16 @@ struct SNeutrinoSettings
 #define DRIVER_SETTING_FILES_COUNT 2
 #else
 #if HAVE_DVB_API_VERSION == 1
-#define DRIVER_SETTING_FILES_COUNT 6
+#define DRIVER_SETTING_FILES_COUNT 7
 #else
-#define DRIVER_SETTING_FILES_COUNT 5
+#define DRIVER_SETTING_FILES_COUNT 6
 #endif
 #endif
 
 // #define MISC_SETTING_SPTS_MODE 0
 
+	// driver settings
 	int misc_option[DRIVER_SETTING_FILES_COUNT];
-
 
 	// pictureviewer
 	char   picviewer_slide_time[3];

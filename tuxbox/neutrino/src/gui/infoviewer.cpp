@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.217 2008/05/04 22:36:21 dbt Exp $
+	$Id: infoviewer.cpp,v 1.218 2008/05/23 00:46:45 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -131,7 +131,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 {
 	if ( gotTime )
 	{
-	    int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
+	    ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 
 		char timestr[10];
 		struct timeb tm;
@@ -171,7 +171,7 @@ void CInfoViewer::showRecordIcon(const bool show)
 {
 	if(recordModeActive)
 	{
-		int ChanNameX = BoxStartX + ChanWidth + 20;
+		ChanNameX = BoxStartX + ChanWidth + 20;
 		if(show)
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, ChanNameX, BoxStartY+10 );
@@ -183,11 +183,10 @@ void CInfoViewer::showRecordIcon(const bool show)
 	}
 }
 
-
 void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap, int epgpos)
 {
 	showButtonBar = !calledFromNumZap;
-	std::string ChannelName = Channel;
+	ChannelName = Channel;
 	bool new_chan = false;
 	bool subChannelNameIsUTF = true;
 	
@@ -267,8 +266,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	ChanInfoX = BoxStartX + (ChanWidth / 3);
 	int ChanInfoY = BoxStartY + ChanHeight+ SHADOW_OFFSET;
 	
-	int ChanNameX = BoxStartX + ChanWidth + SHADOW_OFFSET;
-	int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
+	ChanNameX = BoxStartX + ChanWidth + SHADOW_OFFSET;
+	ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 	int c_rad_large = g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0;
 	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
 	int c_shadow_width = (c_rad_large * 2) + 1;
@@ -277,14 +276,16 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	frameBuffer->paintBoxRel(BoxEndX - c_shadow_width, ChanNameY + SHADOW_OFFSET, SHADOW_OFFSET + c_shadow_width, BoxEndY - ChanNameY, COL_INFOBAR_SHADOW_PLUS_0, c_rad_large, CORNER_RIGHT);
 	frameBuffer->paintBoxRel(ChanInfoX + SHADOW_OFFSET, BoxEndY - c_shadow_width, BoxEndX - ChanInfoX - SHADOW_OFFSET - c_shadow_width, SHADOW_OFFSET + c_shadow_width, COL_INFOBAR_SHADOW_PLUS_0, c_rad_large, CORNER_BOTTOM_LEFT);
 
+	// background for channel name, epg data
 	frameBuffer->paintBoxRel(ChanNameX - SHADOW_OFFSET, ChanNameY, BoxEndX - ChanNameX + SHADOW_OFFSET, BoxEndInfoY - ChanNameY, COL_INFOBAR_PLUS_0, c_rad_large, CORNER_TOP_RIGHT | (showButtonBar ? 0 :  CORNER_BOTTOM_RIGHT ));
 
-	//number box
+	// number box
 	frameBuffer->paintBoxRel(BoxStartX + SHADOW_OFFSET, BoxStartY + SHADOW_OFFSET, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0, c_rad_mid);
 	frameBuffer->paintBoxRel(BoxStartX, BoxStartY, ChanWidth, ChanHeight, col_NumBox, c_rad_mid);
 
 	int ChanNumYPos = BoxStartY + ChanHeight;
 
+	// sat display
 	if (g_settings.infobar_sat_display)
 	{
 		for (CZapitClient::SatelliteList::const_iterator satList_it = satList.begin(); satList_it != satList.end(); satList_it++)
@@ -295,42 +296,37 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 					satNameWidth = ChanWidth;
 
 				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxStartX + ((ChanWidth - satNameWidth)>>1), BoxStartY + 22, ChanWidth, satList_it->satName, col_NumBoxText);
-
 				ChanNumYPos += 10;
 
 				break;
 			}
 	}
 	
-	char strChanId[16];
-	sprintf((char*) strChanId, "%llx", channel_id);	
-	std::string strIconName = (std::string)strChanId +".raw";
-	std::string strAbsIconPath = NEUTRINO_ICON_VARPATH + strIconName;
+	// paint background left side
+	frameBuffer->paintBoxRel(ChanInfoX, ChanInfoY, ChanNameX - ChanInfoX, BoxEndInfoY - ChanInfoY, COL_INFOBAR_PLUS_0, c_rad_large, (showButtonBar ? 0 : 1) * CORNER_BOTTOM_LEFT);
 	
+	// paint channel number
 	char strChanNum[10];
 	sprintf((char*) strChanNum, "%d", ChanNum);
-
-	if (access(strAbsIconPath.c_str(), 00) != -1)
+	int ChannelLogoMode = showChannelLogo(channel_id);
+	
+	if (ChannelLogoMode != 1) // show logo in numberbox
 	{
-		// paint channel icon
-		frameBuffer->paintIcon(strIconName, BoxStartX, BoxStartY); 
-	}
-	else
-	{
-		// paint channel number
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, col_NumBoxText);
 	}
 	
+	// channel name  with or without channel logo
+	ChanNameW = BoxEndX- (ChanNameX+ 20)- time_width- 15;
+		
 	// ... with channel name
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, ChannelName, COL_INFOBAR, 0, subChannelNameIsUTF); // UTF-8
-
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX + 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, ChannelName, COL_INFOBAR, 0, subChannelNameIsUTF); // UTF-8
+	
 	
 	paintTime( false, true );
 	
 	
 	ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
-
-	frameBuffer->paintBoxRel(ChanInfoX, ChanInfoY, ChanNameX - ChanInfoX, BoxEndInfoY - ChanInfoY, COL_INFOBAR_PLUS_0, c_rad_large, (showButtonBar ? 0 : 1) * CORNER_BOTTOM_LEFT);
+	
 
 	if ( showButtonBar )
 	{
@@ -1182,6 +1178,110 @@ void CInfoViewer::Set_CA_Status(int Status)
 }
 #endif
 
+int CInfoViewer::showChannelLogo( const t_channel_id logo_channel_id  ) 
+/* ****************************************************************************
+returns mode of painted channel logo, 
+1 = in number box 
+2 = in place of channel name
+3 = beside channel name
+if this failed then returns 0
+Note: this is a kind of funstuff ;-) 
+*******************************************************************************
+*/
+{
+	char strChanId[16];
+	sprintf((char*) strChanId, "%llx", logo_channel_id);
+	std::string mimetype = ".raw", strIconName = (std::string)strChanId + mimetype;
+	std::string strAbsIconPath = NEUTRINO_ICON_VARPATH + strIconName;
+	int x_mid, y_mid, icon_w, icon_h, icon_x, icon_y;
+	
+	if (access(strAbsIconPath.c_str(), 0) != -1)
+	{
+		// printf("[infoviewer] paint channel logo\n");
+		// get icon dimensions
+		icon_w = frameBuffer->getIconWidth(strIconName.c_str());
+		icon_h = frameBuffer->getIconHeight(strIconName.c_str());
+		
+		if (g_settings.show_channel_logo == 0) // paint logo in numberbox
+		{
+			// calculate mid of numberbox
+			int satNameHeight = g_settings.infobar_sat_display ? 6 : 0; // consider sat display and set an offset for y if exists
+			x_mid = BoxStartX+ChanWidth/2;
+			y_mid = (BoxStartY+satNameHeight)+ChanHeight/2;
+				
+			// check logo dimensions
+			if ((icon_w > ChanWidth) || (icon_h > ChanHeight))	
+			{
+				printf("[infoviewer] channel logo too large...use maximal %2dpx%2dpx\n",ChanWidth, ChanHeight);
+				return 0;
+			}
+			else
+			{
+				// get position of channel icon, must be centered in number box
+				icon_x = x_mid - icon_w/2;
+				icon_y = y_mid - icon_h/2;
+				
+				// paint channel icon
+				if (frameBuffer->paintIcon(strIconName, icon_x, icon_y))			
+					return 1;
+				else
+					return 0;		
+			}
+		}
+		else if (g_settings.show_channel_logo == 1) // paint logo in place of channel name
+		{
+				// check logo dimensions
+				if (icon_w > ChanNameW)
+				{
+					printf("[infoviewer] channel logo too large...use maximal %2dpx66px\n", ChanNameW);
+					return 0;
+				}
+				else
+				{
+					// hide channel name
+					ChannelName = "";
+					// calculate icon position
+					y_mid = (ChanNameY+time_height) - time_height/2;
+					icon_y = y_mid - icon_h/2;
+					if (frameBuffer->paintIcon(strIconName, ChanNameX+10, icon_y))
+						return 2;
+					else
+						return 0;
+				}
+		}
+		else if (g_settings.show_channel_logo == 2) // paint logo beside channel name
+		{
+				// check logo dimensions
+				int Logo_max_width = ChanNameW - icon_w;
+				if (icon_w > Logo_max_width)
+				{
+					printf("[infoviewer] channel logo too large...use maximal %2dx66px\n", Logo_max_width);
+					return 0;
+				}
+				else
+				{
+					// calculate icon position
+					y_mid = (ChanNameY+time_height) - time_height/2;
+					icon_y = y_mid - icon_h/2;
+					if (frameBuffer->paintIcon(strIconName, ChanNameX+10, icon_y))
+					{
+						// set channel name x pos
+						ChanNameX = ChanNameX+icon_w+10;
+						return 3;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+		}			
+		else
+		{
+			return 0;
+		}
+	}
+}
+
 void CInfoViewer::showLcdPercentOver()
 {
 	if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] != 1)
@@ -1253,7 +1353,6 @@ int CInfoViewerHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 	i->start();
 	i->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 	delete i;
-
 
 	return res;
 }

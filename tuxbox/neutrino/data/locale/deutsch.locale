@@ -16,6 +16,7 @@ EPGPlus.channelentry_width Breite der Kanalnamen
 EPGPlus.channelevententry_font Sendungen
 EPGPlus.edit_fonts Schriften einstellen
 EPGPlus.edit_sizes Abmessungen einstellen
+EPGPlus.event_info Eventinfo
 EPGPlus.font_style_bold Fett
 EPGPlus.font_style_italic Kursiv
 EPGPlus.font_style_regular Normal
@@ -279,6 +280,7 @@ driversettings.head Treiber- und Bootoptionen
 driversettings.hwsections HW-Sections verwenden
 driversettings.noaviawatchdog AVIA-Watchdog aktivieren
 driversettings.noenxwatchdog eNX-Watchdog aktivieren
+driversettings.philipsrcpatch Philips FB Workaround aktivieren
 driversettings.pmtupdate PMT Update verwenden
 driversettings.sptsmode SPTS-Mode Treiber laden
 driversettings.startbhdriver BH-Mode Treiber laden
@@ -445,6 +447,9 @@ imageinfo.support Unterstützung
 imageinfo.supporthere technische Unterstützung und Hilfe finden Sie hier
 imageinfo.version Rel.-Zyklus:
 inetradio.name Internetradio
+infoviewer.channellogo_show_as_channelname anstelle Sendername
+infoviewer.channellogo_show_beside_channelname neben Sendername
+infoviewer.channellogo_show_in_numberbox anstelle Kanalnummer
 infoviewer.epginfo_expensive_message aufwändig
 infoviewer.epginfo_simple_message einfach
 infoviewer.epgnotload Informationen noch nicht geladen...
@@ -580,6 +585,7 @@ messagebox.no Nein
 messagebox.yes Ja
 miscsettings.channellist Kanalliste
 miscsettings.channellist_epgtext_align Ausrichtung des Programmtextes
+miscsettings.channellogo Senderlogo anzeigen
 miscsettings.epg_cache EPG-Cache (Tage)
 miscsettings.epg_cache_hint1 EPG-Daten im Voraus cachen?
 miscsettings.epg_cache_hint2 Angabe in Tagen
@@ -587,7 +593,7 @@ miscsettings.epg_dir EPG Speicherverzeichnis
 miscsettings.epg_extendedcache EPG Langtext (Stunden)
 miscsettings.epg_extendedcache_hint1 EPG Langtext im Voraus cachen?
 miscsettings.epg_extendedcache_hint2 Angabe in Stunden
-miscsettings.epg_head EPG-Einstellungen
+miscsettings.epg_head EPG
 miscsettings.epg_max_events Max. Events
 miscsettings.epg_max_events_hint1 Wieviele Events sollen max. gespeichert werden?
 miscsettings.epg_max_events_hint2 Standard 6000
@@ -597,7 +603,7 @@ miscsettings.epg_old_events_hint2 Angabe in Stunden
 miscsettings.general Allgemein
 miscsettings.head Diverse Einstellungen
 miscsettings.infobar Infobar
-miscsettings.infobar_sat_display Infobar Satellitenanzeige
+miscsettings.infobar_sat_display Satellitenanzeige
 miscsettings.infobar_show Info bei EPG Änderung
 miscsettings.osd_specials OSD-Extras
 miscsettings.show_mute_icon Mute-Icon bei Lautstärke 0
@@ -610,7 +616,7 @@ miscsettings.shutdown_count_hint2 komplett ausgeschaltet wird (0 = aus).
 miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.tuxtxt_cache Videotext zwischenspeichern
-miscsettings.virtual_zap_mode Virtual zap bei Infobar
+miscsettings.virtual_zap_mode Virtual Zap
 miscsettings.volumebar_disp_pos Lautstärkeanzeige
 motorcontrol.decrease_motor_position verringere Motor Position (a)
 motorcontrol.decrease_step_size Decrease Step Size (c)
@@ -824,12 +830,12 @@ networkmenu.nameserver Nameserver
 networkmenu.netmask Netzmaske
 networkmenu.ntpenable Syncronisation via
 networkmenu.ntprefresh NTP/DVB-Refresh
-networkmenu.ntprefresh_hint1 NTP/DVB-Zeitsyncronisierung in Minuten
+networkmenu.ntprefresh_hint1 NTP/DVB-Zeitsynchronisierung in Minuten
 networkmenu.ntprefresh_hint2 Neustart / EPG-Reset erforderlich
 networkmenu.ntpserver NTP-Server
 networkmenu.ntpserver_hint1 NTP-Server z.b: ntp1.ptb.de
 networkmenu.ntpserver_hint2 Neustart / EPG-Reset erforderlich
-networkmenu.ntptitle Zeitsyncronisation
+networkmenu.ntptitle Zeitsynchronisation
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
 networkmenu.setuponstartup Beim Starten Netzwerk setzen
 networkmenu.show aktive Netzwerkeinstellungen zeigen

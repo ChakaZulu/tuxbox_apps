@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.120 2008/05/01 21:53:30 houdini Exp $
+ * $Id: locals_intern.h,v 1.121 2008/05/23 00:46:50 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -43,6 +43,7 @@ const char * locale_real_names[] =
 	"EPGPlus.channelevententry_font",
 	"EPGPlus.edit_fonts",
 	"EPGPlus.edit_sizes",
+	"EPGPlus.event_info",
 	"EPGPlus.font_style_bold",
 	"EPGPlus.font_style_italic",
 	"EPGPlus.font_style_regular",
@@ -306,6 +307,7 @@ const char * locale_real_names[] =
 	"driversettings.hwsections",
 	"driversettings.noaviawatchdog",
 	"driversettings.noenxwatchdog",
+	"driversettings.philipsrcpatch",
 	"driversettings.pmtupdate",
 	"driversettings.sptsmode",
 	"driversettings.startbhdriver",
@@ -472,6 +474,9 @@ const char * locale_real_names[] =
 	"imageinfo.supporthere",
 	"imageinfo.version",
 	"inetradio.name",
+	"infoviewer.channellogo_show_as_channelname",
+	"infoviewer.channellogo_show_beside_channelname",
+	"infoviewer.channellogo_show_in_numberbox",
 	"infoviewer.epginfo_expensive_message",
 	"infoviewer.epginfo_simple_message",
 	"infoviewer.epgnotload",
@@ -607,6 +612,7 @@ const char * locale_real_names[] =
 	"messagebox.yes",
 	"miscsettings.channellist",
 	"miscsettings.channellist_epgtext_align",
+	"miscsettings.channellogo",
 	"miscsettings.epg_cache",
 	"miscsettings.epg_cache_hint1",
 	"miscsettings.epg_cache_hint2",

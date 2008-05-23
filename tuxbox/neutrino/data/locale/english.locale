@@ -16,6 +16,7 @@ EPGPlus.channelentry_width width of channel names
 EPGPlus.channelevententry_font Program
 EPGPlus.edit_fonts Edit fonts
 EPGPlus.edit_sizes Edit sizes
+EPGPlus.event_info Event Info
 EPGPlus.font_style_bold bold
 EPGPlus.font_style_italic italic
 EPGPlus.font_style_regular regular
@@ -188,7 +189,7 @@ audioplayer.show_playlist Show Playlist
 audioplayer.shuffle shuffle
 audioplayer.stop Stop
 audioplayer.title_artist Title, Artist
-audioplayerpicsettings.general audioplayer / picviewer
+audioplayerpicsettings.general Audioplayer / Picviewer
 bookmarkmanager.delete delete
 bookmarkmanager.name bookmarks
 bookmarkmanager.rename rename
@@ -279,6 +280,7 @@ driversettings.head Driver & Boot Options
 driversettings.hwsections Use hardware sections
 driversettings.noaviawatchdog Enable AVIA watchdog
 driversettings.noenxwatchdog Enable eNX watchdog
+driversettings.philipsrcpatch Load Philips RC workaround driver
 driversettings.pmtupdate Enable pmt update
 driversettings.sptsmode Use spts mode
 driversettings.startbhdriver Load BH-Mode drivers
@@ -445,6 +447,9 @@ imageinfo.support support
 imageinfo.supporthere You can find technical support and help here:
 imageinfo.version Cycle:
 inetradio.name Internetradio
+infoviewer.channellogo_show_as_channelname in place of  channelname
+infoviewer.channellogo_show_beside_channelname beside channelname
+infoviewer.channellogo_show_in_numberbox in place of  channelnumber
 infoviewer.epginfo_expensive_message Expanded
 infoviewer.epginfo_simple_message Short
 infoviewer.epgnotload EPG not loaded....
@@ -580,6 +585,7 @@ messagebox.no No
 messagebox.yes Yes
 miscsettings.channellist Channellist
 miscsettings.channellist_epgtext_align Programtext Align
+miscsettings.channellogo Channel Logo
 miscsettings.epg_cache EPG-Cache (Days)
 miscsettings.epg_cache_hint1 How long will EPG-Data in the future cached?
 miscsettings.epg_cache_hint2 Set in days.
@@ -587,7 +593,7 @@ miscsettings.epg_dir EPG Directory
 miscsettings.epg_extendedcache EPG Long Description (hours)
 miscsettings.epg_extendedcache_hint1 How long into the future will EPG extended descriptions
 miscsettings.epg_extendedcache_hint2 be Cached? (Set in hours)
-miscsettings.epg_head EPG-Settings
+miscsettings.epg_head EPG
 miscsettings.epg_max_events Max. Events
 miscsettings.epg_max_events_hint1 How many events should be stored?
 miscsettings.epg_max_events_hint2 normaly 6000
@@ -597,7 +603,7 @@ miscsettings.epg_old_events_hint2 Set in hours
 miscsettings.general General
 miscsettings.head Miscellaneous Settings
 miscsettings.infobar Infobar
-miscsettings.infobar_sat_display Satellite display on infobar
+miscsettings.infobar_sat_display Satellite display
 miscsettings.infobar_show EPG Info
 miscsettings.osd_specials OSD-Specials
 miscsettings.show_mute_icon Mute-Icon on volume 0
@@ -610,7 +616,7 @@ miscsettings.shutdown_count_hint2 to deep standby (0 = off).
 miscsettings.shutdown_real Standby
 miscsettings.shutdown_real_rcdelay Delayed Shutdown
 miscsettings.tuxtxt_cache TuxText Cache
-miscsettings.virtual_zap_mode Virtual zap by infobar
+miscsettings.virtual_zap_mode Virtual Zap
 miscsettings.volumebar_disp_pos Volumebar
 motorcontrol.decrease_motor_position Decrease Motor Position (a)
 motorcontrol.decrease_step_size Decrease Step Size (c)

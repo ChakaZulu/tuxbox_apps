@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.38 2008/05/01 00:08:22 dbt Exp $
+	$Id: epgplus.cpp,v 1.39 2008/05/23 00:46:45 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -905,7 +905,7 @@ struct button_label buttonLabels[] =
 	{ NEUTRINO_ICON_BUTTON_GREEN  , LOCALE_EPGPLUS_PAGE_DOWN},
 	{ NEUTRINO_ICON_BUTTON_YELLOW , LOCALE_EPGPLUS_PAGE_UP},
 	{ NEUTRINO_ICON_BUTTON_BLUE   , LOCALE_EPGPLUS_OPTIONS},
-	{ NEUTRINO_ICON_BUTTON_HELP_SMALL   , LOCALE_EPGMENU_EVENTINFO}
+	{ NEUTRINO_ICON_BUTTON_HELP_SMALL   , LOCALE_EPGPLUS_EVENT_INFO}
 };
 
 void EpgPlus::Footer::paintButtons
@@ -915,13 +915,13 @@ void EpgPlus::Footer::paintButtons
 {
   int yPos = this->y + this->getUsedHeight() - this->fontButtons->getHeight();
 
-  int buttonWidth = 40;
+  int buttonWidth =  40;
 
   int buttonHeight = 16;
 
   this->frameBuffer->paintBoxRel(this->x, yPos, this->width, this->fontButtons->getHeight(), COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 
-  ::paintButtons(this->frameBuffer, this->fontButtons, g_Locale, this->x + 10, yPos , buttonWidth, numberOfButtons, buttonLabels);
+  ::paintButtons(this->frameBuffer, this->fontButtons, g_Locale, this->x +5, yPos , buttonWidth, numberOfButtons, buttonLabels,  this->width-25);
 
 }
 
