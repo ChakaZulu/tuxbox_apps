@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.4 2008/05/01 00:08:25 dbt Exp $
+	$Id: movieviewer.cpp,v 1.5 2008/05/26 21:01:00 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -385,7 +385,12 @@ void CMovieViewer::show()
 		dd_icon = "pause.raw";
 	else 
 		dd_icon = "play.raw";
-	res = frameBuffer->paintIcon(dd_icon, BoxStartX , BoxStartY );
+	/* calculating play state icon position, usefully for using customized icons with other sizes */
+	int dd_icon_h = frameBuffer->getIconHeight(dd_icon);
+	int dd_icon_w = frameBuffer->getIconWidth(dd_icon);
+	int dd_icon_x = (BoxStartX+ChanWidth/2)-(dd_icon_w/2);
+	int dd_icon_y = (BoxStartY+ChanHeight/2)-(dd_icon_h/2);
+	res = frameBuffer->paintIcon(dd_icon, dd_icon_x , dd_icon_y);
 
 	paintTime( false, true );
 

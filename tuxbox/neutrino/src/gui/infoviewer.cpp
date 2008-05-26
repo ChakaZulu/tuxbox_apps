@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.218 2008/05/23 00:46:45 dbt Exp $
+	$Id: infoviewer.cpp,v 1.219 2008/05/26 21:00:59 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1194,6 +1194,7 @@ Note: this is a kind of funstuff ;-)
 	std::string mimetype = ".raw", strIconName = (std::string)strChanId + mimetype;
 	std::string strAbsIconPath = NEUTRINO_ICON_VARPATH + strIconName;
 	int x_mid, y_mid, icon_w, icon_h, icon_x, icon_y;
+	int res;
 	
 	if (access(strAbsIconPath.c_str(), 0) != -1)
 	{
@@ -1213,19 +1214,14 @@ Note: this is a kind of funstuff ;-)
 			if ((icon_w > ChanWidth) || (icon_h > ChanHeight))	
 			{
 				printf("[infoviewer] channel logo too large...use maximal %2dpx%2dpx\n",ChanWidth, ChanHeight);
-				return 0;
+				res = 0;
 			}
 			else
 			{
 				// get position of channel icon, must be centered in number box
 				icon_x = x_mid - icon_w/2;
 				icon_y = y_mid - icon_h/2;
-				
-				// paint channel icon
-				if (frameBuffer->paintIcon(strIconName, icon_x, icon_y))			
-					return 1;
-				else
-					return 0;		
+				res =  1;
 			}
 		}
 		else if (g_settings.show_channel_logo == 1) // paint logo in place of channel name
@@ -1234,7 +1230,7 @@ Note: this is a kind of funstuff ;-)
 				if (icon_w > ChanNameW)
 				{
 					printf("[infoviewer] channel logo too large...use maximal %2dpx66px\n", ChanNameW);
-					return 0;
+					res =  0;
 				}
 				else
 				{
@@ -1242,11 +1238,9 @@ Note: this is a kind of funstuff ;-)
 					ChannelName = "";
 					// calculate icon position
 					y_mid = (ChanNameY+time_height) - time_height/2;
-					icon_y = y_mid - icon_h/2;
-					if (frameBuffer->paintIcon(strIconName, ChanNameX+10, icon_y))
-						return 2;
-					else
-						return 0;
+					icon_x = ChanNameX+10;
+					icon_y = y_mid - icon_h/2;				
+					res =  2;
 				}
 		}
 		else if (g_settings.show_channel_logo == 2) // paint logo beside channel name
@@ -1256,30 +1250,34 @@ Note: this is a kind of funstuff ;-)
 				if (icon_w > Logo_max_width)
 				{
 					printf("[infoviewer] channel logo too large...use maximal %2dx66px\n", Logo_max_width);
-					return 0;
+					res =  0;
 				}
 				else
 				{
 					// calculate icon position
 					y_mid = (ChanNameY+time_height) - time_height/2;
+					icon_x = ChanNameX+10;
 					icon_y = y_mid - icon_h/2;
-					if (frameBuffer->paintIcon(strIconName, ChanNameX+10, icon_y))
-					{
-						// set channel name x pos
-						ChanNameX = ChanNameX+icon_w+10;
-						return 3;
-					}
-					else
-					{
-						return 0;
-					}
+					// set channel name x pos
+					ChanNameX = ChanNameX+icon_w+10;
+					res =  3;
 				}
 		}			
 		else
 		{
-			return 0;
-		}
+			res = 0;
+		}	
 	}
+	
+	if (frameBuffer->paintIcon(strIconName, icon_x, icon_y))	
+	{
+		return res;
+	}
+	else 
+	{
+		return 0;
+	}
+	
 }
 
 void CInfoViewer::showLcdPercentOver()
