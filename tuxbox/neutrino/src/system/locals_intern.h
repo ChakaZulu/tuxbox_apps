@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.121 2008/05/23 00:46:50 dbt Exp $
+ * $Id: locals_intern.h,v 1.122 2008/05/27 21:19:03 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -474,6 +474,7 @@ const char * locale_real_names[] =
 	"imageinfo.supporthere",
 	"imageinfo.version",
 	"inetradio.name",
+	"infoviewer.channellogo_off",
 	"infoviewer.channellogo_show_as_channelname",
 	"infoviewer.channellogo_show_beside_channelname",
 	"infoviewer.channellogo_show_in_numberbox",

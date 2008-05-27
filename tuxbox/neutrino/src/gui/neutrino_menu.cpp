@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.25 2008/05/23 00:46:45 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.26 2008/05/27 21:20:27 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -890,12 +890,13 @@ const CMenuOptionChooser::keyval  CHANNELLIST_EPGTEXT_ALIGN_RIGHT_OPTIONS[CHANNE
 	{ 1 , LOCALE_CHANNELLIST_EPGTEXT_ALIGN_RIGHT }
 };
 
-#define INFOBAR_CHANNELLOGO_SHOW_OPTIONS_COUNT 3
+#define INFOBAR_CHANNELLOGO_SHOW_OPTIONS_COUNT 4
 const CMenuOptionChooser::keyval  INFOBAR_CHANNELLOGO_SHOW_OPTIONS[INFOBAR_CHANNELLOGO_SHOW_OPTIONS_COUNT]=
 {
-   { 0 , LOCALE_INFOVIEWER_CHANNELLOGO_SHOW_IN_NUMBERBOX },
-   { 1 , LOCALE_INFOVIEWER_CHANNELLOGO_SHOW_AS_CHANNELNAME },
-   { 2 , LOCALE_INFOVIEWER_CHANNELLOGO_SHOW_BESIDE_CHANNELNAME }
+   { 0 , LOCALE_INFOVIEWER_CHANNELLOGO_OFF },
+   { 1 , LOCALE_INFOVIEWER_CHANNELLOGO_SHOW_IN_NUMBERBOX },
+   { 2 , LOCALE_INFOVIEWER_CHANNELLOGO_SHOW_AS_CHANNELNAME },
+   { 3 , LOCALE_INFOVIEWER_CHANNELLOGO_SHOW_BESIDE_CHANNELNAME }
 };
 
 /* misc settings menu */
@@ -969,9 +970,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_SUBCHAN_DISP_POS, &g_settings.infobar_subchan_disp_pos, INFOBAR_SUBCHAN_DISP_POS_OPTIONS, INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT, true));
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VIRTUAL_ZAP_MODE, &g_settings.virtual_zap_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SHOW, &g_settings.infobar_show, INFOBAR_EPG_SHOW_OPTIONS, INFOBAR_EPG_SHOW_OPTIONS_COUNT, true));
-#ifdef CHANNEL_LOGO
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_CHANNELLOGO, &g_settings.show_channel_logo, INFOBAR_CHANNELLOGO_SHOW_OPTIONS, INFOBAR_CHANNELLOGO_SHOW_OPTIONS_COUNT, true));
-#endif /* CHANNEL_LOGO */
 
 	//channellist
 	miscSettingsChannellist.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_CHANNELLIST));
