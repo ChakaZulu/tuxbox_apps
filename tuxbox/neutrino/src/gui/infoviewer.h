@@ -67,7 +67,8 @@ class CInfoViewer
 	int            BoxStartY;
 	int            ButtonWidth;
 
- 	std::string ChannelName;	
+ 	std::string ChannelName;
+	char strChanNum[10]; 
  
 	int			 ChanNameX;	
 	int			 ChanNameY;

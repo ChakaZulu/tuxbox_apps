@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.220 2008/05/27 21:21:02 houdini Exp $
+	$Id: infoviewer.cpp,v 1.221 2008/05/29 20:57:30 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -306,7 +306,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	frameBuffer->paintBoxRel(ChanInfoX, ChanInfoY, ChanNameX - ChanInfoX, BoxEndInfoY - ChanInfoY, COL_INFOBAR_PLUS_0, c_rad_large, (showButtonBar ? 0 : 1) * CORNER_BOTTOM_LEFT);
 	
 	// paint channel number
-	char strChanNum[10];
 	sprintf((char*) strChanNum, "%d", ChanNum);
 
 	if (g_settings.show_channel_logo) {// do paint logo
@@ -1197,43 +1196,44 @@ Note: this is a kind of funstuff ;-)
 	sprintf((char*) strChanId, "%llx", logo_channel_id);
 	std::string mimetype = ".raw", strIconName = (std::string)strChanId + mimetype;
 	std::string strAbsIconPath = NEUTRINO_ICON_VARPATH + strIconName;
-	int x_mid, y_mid, icon_w, icon_h, icon_x, icon_y;
-	int res;
+	int x_mid, y_mid, icon_w, icon_h, icon_x = 0, icon_y = 0;
+	int res = 0;
 	
 	if (access(strAbsIconPath.c_str(), 0) != -1)
 	{
-		// printf("[infoviewer] paint channel logo\n");
 		// get icon dimensions
 		icon_w = frameBuffer->getIconWidth(strIconName.c_str());
 		icon_h = frameBuffer->getIconHeight(strIconName.c_str());
-		
-		if (g_settings.show_channel_logo == 1) // paint logo in numberbox
-		{
-			// calculate mid of numberbox
-			int satNameHeight = g_settings.infobar_sat_display ? 6 : 0; // consider sat display and set an offset for y if exists
-			x_mid = BoxStartX+ChanWidth/2;
-			y_mid = (BoxStartY+satNameHeight)+ChanHeight/2;
-				
-			// check logo dimensions
-			if ((icon_w > ChanWidth) || (icon_h > ChanHeight))	
+			
+			if (g_settings.show_channel_logo == 1) // paint logo in numberbox
 			{
-				printf("[infoviewer] channel logo too large...use maximal %2dpx%2dpx\n",ChanWidth, ChanHeight);
-				res = 0;
-			}
-			else
-			{
-				// get position of channel icon, must be centered in number box
-				icon_x = x_mid - icon_w/2;
-				icon_y = y_mid - icon_h/2;
-				res =  1;
-			}
-		}
-		else if (g_settings.show_channel_logo == 2) // paint logo in place of channel name
-		{
+				// calculate mid of numberbox
+				int satNameHeight = g_settings.infobar_sat_display ? 6 : 0; // consider sat display and set an offset for y if exists
+				x_mid = BoxStartX+ChanWidth/2;
+				y_mid = (BoxStartY+satNameHeight)+ChanHeight/2;
+					
 				// check logo dimensions
-				if (icon_w > ChanNameW)
+				if ((icon_w > ChanWidth) || (icon_h > ChanHeight))	
 				{
-					printf("[infoviewer] channel logo too large...use maximal %2dpx66px\n", ChanNameW);
+					printf("[infoviewer] channel logo too large...use maximal %2dpx%2dpx\n",ChanWidth, ChanHeight);
+					res = 0;
+				}
+				else
+				{
+					// channel name with number
+					ChannelName = (std::string)strChanNum + ". " + ChannelName;
+					// get position of channel icon, must be centered in number box
+					icon_x = x_mid - icon_w/2;
+					icon_y = y_mid - icon_h/2;
+					res =  1;
+				}
+			}
+			else if (g_settings.show_channel_logo == 2) // paint logo in place of channel name
+			{
+				// check logo dimensions
+				if ((icon_w > ChanNameW) || (icon_h > ChanHeight))
+				{
+					printf("[infoviewer] channel logo too large...use maximal %2dpx%2dpx\n", ChanNameW, ChanHeight);
 					res =  0;
 				}
 				else
@@ -1246,14 +1246,14 @@ Note: this is a kind of funstuff ;-)
 					icon_y = y_mid - icon_h/2;				
 					res =  2;
 				}
-		}
-		else if (g_settings.show_channel_logo == 3) // paint logo beside channel name
-		{
+			}
+			else if (g_settings.show_channel_logo == 3) // paint logo beside channel name
+			{
 				// check logo dimensions
 				int Logo_max_width = ChanNameW - icon_w;
-				if (icon_w > Logo_max_width)
+				if ((icon_w > Logo_max_width) || (icon_h > ChanHeight))
 				{
-					printf("[infoviewer] channel logo too large...use maximal %2dx66px\n", Logo_max_width);
+					printf("[infoviewer] channel logo too large...use maximal %2dx%2dpx\n", Logo_max_width, ChanHeight);
 					res =  0;
 				}
 				else
@@ -1266,22 +1266,22 @@ Note: this is a kind of funstuff ;-)
 					ChanNameX = ChanNameX+icon_w+10;
 					res =  3;
 				}
-		}			
-		else
+			}			
+			else
+			{
+				res = 0;
+			}
+			
+		// paint the logo
+		if (!frameBuffer->paintIcon(strIconName, icon_x, icon_y)) 	
 		{
-			res = 0;
-		}	
+			res = 0; // paint logo was failed
+		}
+		//~ else
+			//~ printf("[infoviewer] paint channel logo %s (%s)\n", strIconName.c_str(), ChannelName.c_str());
+		
 	}
-	
-	if (frameBuffer->paintIcon(strIconName, icon_x, icon_y))	
-	{
-		return res;
-	}
-	else 
-	{
-		return 0;
-	}
-	
+	return res;
 }
 
 void CInfoViewer::showLcdPercentOver()
