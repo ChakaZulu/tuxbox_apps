@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.26 2008/05/27 21:20:27 houdini Exp $
+	$Id: neutrino_menu.cpp,v 1.27 2008/05/31 13:42:37 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1076,7 +1076,7 @@ void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
 		else
 			g_settings.misc_option[i] = 0;
 		
-			if ((driver_setting_files[i].filename == "/var/etc/.philips_rc_patch") && (boxtype !=2)) // Philips only
+			if ((driver_setting_files[i].filename == "/var/etc/.philips_rc_patch") && (boxtype ==1)) // usefully for Philips RC and sometimes for Sagem RC
 			{
 				item_enabled[i] = false;
 			}

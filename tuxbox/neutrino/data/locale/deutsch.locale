@@ -280,7 +280,7 @@ driversettings.head Treiber- und Bootoptionen
 driversettings.hwsections HW-Sections verwenden
 driversettings.noaviawatchdog AVIA-Watchdog aktivieren
 driversettings.noenxwatchdog eNX-Watchdog aktivieren
-driversettings.philipsrcpatch Philips FB Workaround aktivieren
+driversettings.philipsrcpatch Philips/Sagem FB Workaround
 driversettings.pmtupdate PMT Update verwenden
 driversettings.sptsmode SPTS-Mode Treiber laden
 driversettings.startbhdriver BH-Mode Treiber laden

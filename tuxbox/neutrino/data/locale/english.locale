@@ -280,7 +280,7 @@ driversettings.head Driver & Boot Options
 driversettings.hwsections Use hardware sections
 driversettings.noaviawatchdog Enable AVIA watchdog
 driversettings.noenxwatchdog Enable eNX watchdog
-driversettings.philipsrcpatch Load Philips RC workaround driver
+driversettings.philipsrcpatch Philips/Sagem RC workaround
 driversettings.pmtupdate Enable pmt update
 driversettings.sptsmode Use spts mode
 driversettings.startbhdriver Load BH-Mode drivers
