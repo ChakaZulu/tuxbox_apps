@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.192 2008/05/23 00:46:50 dbt Exp $
+  $Id: settings.h,v 1.193 2008/05/31 14:12:17 ecosys Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -414,11 +414,12 @@ struct SNeutrinoSettings
 	int filebrowser_denydirectoryleave;
 
 	//uboot
-	int	uboot_lcd_inverse;
-	int	uboot_lcd_contrast;
+	int	uboot_baudrate;
+	int	uboot_dbox_duplex;
 	int	uboot_console;
 	int	uboot_console_bak;
-	int	uboot_baudrate;
+	int	uboot_lcd_inverse;
+	int	uboot_lcd_contrast;
 
 	// USERMENU
 	typedef enum
