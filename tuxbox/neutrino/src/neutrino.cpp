@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.893 2008/05/31 14:12:16 ecosys Exp $
+	$Id: neutrino.cpp,v 1.894 2008/06/01 12:08:02 ecosys Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -728,6 +728,7 @@ int CNeutrinoApp::loadSetup()
 			fclose(fd);
 		}
 		g_settings.uboot_console_bak = g_settings.uboot_console;
+		g_settings.uboot_dbox_duplex_bak = g_settings.uboot_dbox_duplex;
 	}
 
 	return erg;
@@ -742,9 +743,10 @@ void CNeutrinoApp::saveSetup()
 {
 	//uboot; write config only on changes
 	if (fromflash &&
-	    ((g_settings.uboot_console_bak != g_settings.uboot_console) ||
-	     (g_settings.uboot_lcd_inverse  != g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]) ||
-	     (g_settings.uboot_lcd_contrast != g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST])))
+		((g_settings.uboot_console_bak != g_settings.uboot_console ) ||
+		( g_settings.uboot_dbox_duplex_bak != g_settings.uboot_dbox_duplex ) ||
+		( g_settings.uboot_lcd_inverse  != g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE] ) ||
+		( g_settings.uboot_lcd_contrast != g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST] ) ))
 	{
 		FILE* fd = fopen("/var/tuxbox/boot/boot.conf", "w");
 
@@ -754,6 +756,7 @@ void CNeutrinoApp::saveSetup()
 			g_settings.uboot_console_bak    = g_settings.uboot_console;
 			g_settings.uboot_lcd_inverse	= g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE];
 			g_settings.uboot_lcd_contrast	= g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST];
+			g_settings.uboot_dbox_duplex	= g_settings.uboot_dbox_duplex_bak;
 
 			switch(g_settings.uboot_console)
 			{
@@ -1923,24 +1926,25 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_PluginList->loadPlugins();
 
 
-	colorSetupNotifier        = new CColorSetupNotifier;
-	audioSetupNotifier        = new CAudioSetupNotifier;
-	APIDChanger               = new CAPIDChangeExec;
+	colorSetupNotifier			= new CColorSetupNotifier;
+	audioSetupNotifier			= new CAudioSetupNotifier;
+	APIDChanger					= new CAPIDChangeExec;
 #ifndef HAVE_DREAMBOX_HARDWARE
-	UCodeChecker              = new CUCodeCheckExec;
+	UCodeChecker				= new CUCodeCheckExec;
 #endif
-	DVBInfo                   = new CDVBInfoExec;
-	NVODChanger               = new CNVODChangeExec;
-	StreamFeaturesChanger     = new CStreamFeaturesChangeExec;
-	MoviePluginChanger        = new CMoviePluginChangeExec;
-	MyIPChanger               = new CIPChangeNotifier;
-	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
-	fontsizenotifier          = new CFontSizeNotifier;
+	DVBInfo						= new CDVBInfoExec;
+	NVODChanger					= new CNVODChangeExec;
+	StreamFeaturesChanger		= new CStreamFeaturesChangeExec;
+	MoviePluginChanger			= new CMoviePluginChangeExec;
+	MyIPChanger					= new CIPChangeNotifier;
+	ConsoleDestinationChanger	= new CConsoleDestChangeNotifier;
+	FdxSettingsChanger			= new CFdxChangeNotifier;
+	fontsizenotifier			= new CFontSizeNotifier;
 
-	rcLock                    = new CRCLock();
-	moviePlayerGui            = new CMoviePlayerGui();
+	rcLock						= new CRCLock();
+	moviePlayerGui				= new CMoviePlayerGui();
 	//USERMENU
-	Timerlist                 = new CTimerList;
+	Timerlist					= new CTimerList;
 
 	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 

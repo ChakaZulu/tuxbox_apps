@@ -276,6 +276,8 @@ date.Wed  Mi
 driversettings.bootinfo Infos beim Booten anzeigen
 driversettings.driver_boot Treiber- und Bootoptionen
 driversettings.fb_destination EXPERT! Boot-Konsole
+driversettings.fdx_force erzwingen
+driversettings.fdx_load FullDuplex Mode
 driversettings.head Treiber- und Bootoptionen
 driversettings.hwsections HW-Sections verwenden
 driversettings.noaviawatchdog AVIA-Watchdog aktivieren

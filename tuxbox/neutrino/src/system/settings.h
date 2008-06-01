@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.193 2008/05/31 14:12:17 ecosys Exp $
+  $Id: settings.h,v 1.194 2008/06/01 12:08:04 ecosys Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -416,6 +416,7 @@ struct SNeutrinoSettings
 	//uboot
 	int	uboot_baudrate;
 	int	uboot_dbox_duplex;
+	int uboot_dbox_duplex_bak;
 	int	uboot_console;
 	int	uboot_console_bak;
 	int	uboot_lcd_inverse;

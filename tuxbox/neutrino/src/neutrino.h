@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.197 2008/05/23 00:46:43 dbt Exp $
+	$Id: neutrino.h,v 1.198 2008/06/01 12:08:02 ecosys Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -171,6 +171,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CIPChangeNotifier		*MyIPChanger;
 //		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
+		CFdxChangeNotifier			*FdxSettingsChanger;
 		CRCLock				*rcLock;
 		CMenuTarget* 			moviePlayerGui;
 		bool 					parentallocked;

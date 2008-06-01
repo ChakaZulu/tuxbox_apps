@@ -276,6 +276,8 @@ date.Wed  Wed
 driversettings.bootinfo Show Boot Info
 driversettings.driver_boot Driver & Boot Options
 driversettings.fb_destination Expert! Boot-Console
+driversettings.fdx_force force
+driversettings.fdx_load FullDuplex Mode
 driversettings.head Driver & Boot Options
 driversettings.hwsections Use hardware sections
 driversettings.noaviawatchdog Enable AVIA watchdog

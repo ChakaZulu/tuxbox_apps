@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.122 2008/05/27 21:19:03 houdini Exp $
+ * $Id: locals_intern.h,v 1.123 2008/06/01 12:08:04 ecosys Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -303,6 +303,8 @@ const char * locale_real_names[] =
 	"driversettings.bootinfo",
 	"driversettings.driver_boot",
 	"driversettings.fb_destination",
+	"driversettings.fdx_force",
+	"driversettings.fdx_load",
 	"driversettings.head",
 	"driversettings.hwsections",
 	"driversettings.noaviawatchdog",

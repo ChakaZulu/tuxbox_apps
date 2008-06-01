@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.28 2008/05/31 13:59:05 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.29 2008/06/01 12:08:03 ecosys Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1027,6 +1027,14 @@ const CMenuOptionChooser::keyval DRIVERSETTINGS_FB_DESTINATION_OPTIONS[DRIVERSET
 	{ 2, LOCALE_OPTIONS_FB     }
 };
 
+#define DRIVERSETTINGS_FDX_OPTION_COUNT 3
+const CMenuOptionChooser::keyval DRIVERSETTINGS_FDX_OPTIONS[DRIVERSETTINGS_FDX_OPTION_COUNT] =
+{
+	{ 0, LOCALE_OPTIONS_OFF					},
+	{ 1, LOCALE_OPTIONS_ON					},
+	{ 2, LOCALE_DRIVERSETTINGS_FDX_FORCE	},
+};
+
 typedef struct driver_setting_files_t
 {
 	const neutrino_locale_t                  name;
@@ -1094,6 +1102,7 @@ void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
 
 #ifndef HAVE_DREAMBOX_HARDWARE
 	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_FB_DESTINATION, &g_settings.uboot_console, DRIVERSETTINGS_FB_DESTINATION_OPTIONS, DRIVERSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
+	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_FDX_LOAD, &g_settings.uboot_dbox_duplex, DRIVERSETTINGS_FDX_OPTIONS, DRIVERSETTINGS_FDX_OPTION_COUNT, true, FdxSettingsChanger));
 #endif
 }
 

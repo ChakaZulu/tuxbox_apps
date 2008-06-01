@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.88 2008/02/15 22:33:28 houdini Exp $
+	$Id: setting_helpers.h,v 1.89 2008/06/01 12:08:04 ecosys Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -219,6 +219,12 @@ class CIPChangeNotifier : public CChangeObserver
 };
 
 class CConsoleDestChangeNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const neutrino_locale_t, void * Data);
+};
+
+class CFdxChangeNotifier : public CChangeObserver
 {
 	public:
 		bool changeNotify(const neutrino_locale_t, void * Data);
