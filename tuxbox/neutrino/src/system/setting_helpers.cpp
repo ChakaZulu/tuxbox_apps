@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.168 2008/06/01 12:18:54 ecosys Exp $
+	$Id: setting_helpers.cpp,v 1.169 2008/06/01 12:22:28 ecosys Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -816,7 +816,7 @@ int CUserMenuMenu::exec(CMenuTarget* parent, const std::string & actionKey)
 	menu.addItem(GenericMenuBack);
 	menu.addItem(GenericMenuSeparatorLine);
 	
-	CStringInputSMS name(LOCALE_USERMENU_NAME,    &g_settings.usermenu_text[button], 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz√§√∂√º√ü/- ");
+	CStringInputSMS name(LOCALE_USERMENU_NAME,    &g_settings.usermenu_text[button], 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz‰ˆ¸ﬂ/- ");
 	menu.addItem(new CMenuForwarder(LOCALE_USERMENU_NAME,    true, g_settings.usermenu_text[button],&name));
 	menu.addItem(GenericMenuSeparatorLine);
 	
