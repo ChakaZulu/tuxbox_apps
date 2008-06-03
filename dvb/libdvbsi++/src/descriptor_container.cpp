@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.cpp,v 1.11 2008/03/31 08:16:25 mws Exp $
+ * $Id: descriptor_container.cpp,v 1.12 2008/06/03 15:02:23 obi Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -79,6 +79,7 @@
 #include <dvbsi++/plugin_descriptor.h>
 #include <dvbsi++/prefetch_descriptor.h>
 #include <dvbsi++/private_data_specifier_descriptor.h>
+#include <dvbsi++/registration_descriptor.h>
 #include <dvbsi++/related_content_descriptor.h>
 #include <dvbsi++/satellite_delivery_system_descriptor.h>
 #include <dvbsi++/s2_satellite_delivery_system_descriptor.h>
@@ -149,6 +150,9 @@ Descriptor *DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool
 
 	case AUDIO_STREAM_DESCRIPTOR:
 		return new AudioStreamDescriptor(buffer);
+
+	case REGISTRATION_DESCRIPTOR:
+		return new RegistrationDescriptor(buffer);
 
 	case TARGET_BACKGROUND_GRID_DESCRIPTOR:
 		return new TargetBackgroundGridDescriptor(buffer);

@@ -1,17 +1,12 @@
 AM_CPPFLAGS = -I$(top_srcdir)/include
-
 lib_LTLIBRARIES = libdvbsi++.la
-
-libdvbsi___la_LDFLAGS = \
-	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
-
+libdvbsi___la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 libdvbsi___la_SOURCES = \
 	aac_descriptor.cpp \
 	ac3_descriptor.cpp \
 	adaptation_field_data_descriptor.cpp \
 	ancillary_data_descriptor.cpp \
 	announcement_support_descriptor.cpp \
-	audio_stream_descriptor.cpp \
 	application_descriptor.cpp \
 	application_icons_descriptor.cpp \
 	application_identifier.cpp \
@@ -20,16 +15,17 @@ libdvbsi___la_SOURCES = \
 	application_profile.cpp \
 	application_signalling_descriptor.cpp \
 	application_storage_descriptor.cpp \
+	audio_stream_descriptor.cpp \
 	bouquet_association_section.cpp \
 	bouquet_name_descriptor.cpp \
+	cable_delivery_system_descriptor.cpp \
+	caching_priority_descriptor.cpp \
 	ca_descriptor.cpp \
 	ca_identifier_descriptor.cpp \
 	ca_message_section.cpp \
 	ca_program_map_section.cpp \
-	ca_section.cpp \
-	cable_delivery_system_descriptor.cpp \
-	caching_priority_descriptor.cpp \
 	carousel_identifier_descriptor.cpp \
+	ca_section.cpp \
 	cell_frequency_link_descriptor.cpp \
 	cell_list_descriptor.cpp \
 	component_descriptor.cpp \
@@ -44,8 +40,8 @@ libdvbsi___la_SOURCES = \
 	data_broadcast_id_descriptor.cpp \
 	default_authority_descriptor.cpp \
 	delegated_application_descriptor.cpp \
-	descriptor.cpp \
 	descriptor_container.cpp \
+	descriptor.cpp \
 	dii_location_descriptor.cpp \
 	dsng_descriptor.cpp \
 	dts_descriptor.cpp \
@@ -58,9 +54,9 @@ libdvbsi___la_SOURCES = \
 	enhanced_ac3_descriptor.cpp \
 	est_download_time_descriptor.cpp \
 	event_information_section.cpp \
+	extended_event_descriptor.cpp \
 	extension_descriptor.cpp \
 	external_application_authorisation_descriptor.cpp \
-	extended_event_descriptor.cpp \
 	frequency_list_descriptor.cpp \
 	group_link_descriptor.cpp \
 	info_descriptor.cpp \
@@ -90,10 +86,11 @@ libdvbsi___la_SOURCES = \
 	private_data_specifier_descriptor.cpp \
 	program_association_section.cpp \
 	program_map_section.cpp \
+	registration_descriptor.cpp \
 	related_content_descriptor.cpp \
 	running_status_section.cpp \
-	satellite_delivery_system_descriptor.cpp \
 	s2_satellite_delivery_system_descriptor.cpp \
+	satellite_delivery_system_descriptor.cpp \
 	scrambling_descriptor.cpp \
 	service_availability_descriptor.cpp \
 	service_description_section.cpp \
@@ -117,8 +114,8 @@ libdvbsi___la_SOURCES = \
 	time_shifted_service_descriptor.cpp \
 	time_slice_fec_identifier_descriptor.cpp \
 	transport_protocol_descriptor.cpp \
-	transport_stream_descriptor.cpp \
 	transport_stream_description_section.cpp \
+	transport_stream_descriptor.cpp \
 	tva_id_descriptor.cpp \
 	type_descriptor.cpp \
 	unknown_descriptor.cpp \
@@ -126,4 +123,3 @@ libdvbsi___la_SOURCES = \
 	vbi_teletext_descriptor.cpp \
 	video_stream_descriptor.cpp \
 	video_window_descriptor.cpp
-

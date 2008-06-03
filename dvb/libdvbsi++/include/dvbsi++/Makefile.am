@@ -88,11 +88,13 @@ pkginclude_HEADERS = \
 	private_data_specifier_descriptor.h \
 	program_association_section.h \
 	program_map_section.h \
+	registration_descriptor.h \
 	related_content_descriptor.h \
 	running_status_section.h \
 	s2_satellite_delivery_system_descriptor.h \
 	satellite_delivery_system_descriptor.h \
 	scrambling_descriptor.h \
+	service_availability_descriptor.h \
 	service_description_section.h \
 	service_descriptor.h \
 	service_identifier_descriptor.h \
@@ -102,6 +104,7 @@ pkginclude_HEADERS = \
 	short_crc_section.h \
 	short_event_descriptor.h \
 	short_section.h \
+	short_smoothing_buffer_descriptor.h \
 	stream_identifier_descriptor.h \
 	stream_type.h \
 	stuffing_descriptor.h \
