@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.62 2008/05/01 00:08:25 dbt Exp $
+	$Id: pictureviewer.cpp,v 1.63 2008/06/04 15:46:12 ecosys Exp $
 
 	MP3Player by Dirch
 	
@@ -67,6 +67,8 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
+#define PICTUREVIEWER_START_SCRIPT CONFIGDIR "/pictureviewer.start"
+#define PICTUREVIEWER_END_SCRIPT CONFIGDIR "/pictureviewer.end"
 
 //------------------------------------------------------------------------
 bool comparePictureByDate (const CPicture& a, const CPicture& b)
@@ -114,6 +116,7 @@ CPictureViewerGui::~CPictureViewerGui()
 //------------------------------------------------------------------------
 int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
+	struct stat sFileInfo;
 	selected = 0;
 	width = 710;
 	if((g_settings.screen_EndX- g_settings.screen_StartX) < width)
@@ -152,6 +155,13 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 		parent->hide();
 	}
 
+	if ( stat(PICTUREVIEWER_START_SCRIPT, &sFileInfo) == 0 )
+	{
+		puts("[pictureviewer.cpp] executing " PICTUREVIEWER_START_SCRIPT ".");
+		if (system(PICTUREVIEWER_START_SCRIPT) != 0)
+			perror("Datei " PICTUREVIEWER_START_SCRIPT " fehlt.Bitte erstellen, wenn gebraucht.\nFile " PICTUREVIEWER_START_SCRIPT " not found. Please create if needed.\n");
+	}
+		
 	// tell neutrino we're in pic_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_pic );
 	// remember last mode
@@ -163,6 +173,13 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 	// free picviewer mem
 	m_viewer->Cleanup();
+
+	if ( stat(PICTUREVIEWER_END_SCRIPT, &sFileInfo) == 0)
+	{
+		puts("[pictureviewer.cpp] executing " PICTUREVIEWER_END_SCRIPT ".");
+		if (system(PICTUREVIEWER_END_SCRIPT) != 0)
+			perror("Datei " PICTUREVIEWER_END_SCRIPT " fehlt.Bitte erstellen, wenn gebraucht.\nFile " PICTUREVIEWER_END_SCRIPT " not found. Please create if needed.\n");
+	}
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
@@ -717,7 +734,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.62 $");
+	return imageinfo.getModulVersion("","$Revision: 1.63 $");
 }
 
 void CPictureViewerGui::showHelp()
