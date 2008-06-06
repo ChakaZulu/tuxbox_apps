@@ -125,7 +125,8 @@ off64_t ePermanentTimeshift::getCurrentLength(int slice)
 	if (slice < 0)
 	{
 		struct stat64 s;
-		if (!stat64(eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, slicelist.back().first).c_str(), &s))
+		eString curfilename = (slicelist.back().first ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, slicelist.back().first) : eString(PERMANENT_TIMESHIFT_FILE));
+		if (!stat64(curfilename.c_str(), &s))
 		{
 			filelength+=s.st_size;
 		}
