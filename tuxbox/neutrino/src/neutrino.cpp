@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.894 2008/06/01 12:08:02 ecosys Exp $
+	$Id: neutrino.cpp,v 1.895 2008/06/06 15:51:11 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -683,8 +683,8 @@ int CNeutrinoApp::loadSetup()
 	// uboot config file
 	if(fromflash)
 	{
-		g_settings.uboot_baudrate		= 9600;
-		g_settings.uboot_console		= 0;
+		g_settings.uboot_baudrate	= 9600;
+		g_settings.uboot_console	= 0;
 		g_settings.uboot_dbox_duplex	= 0;
 		g_settings.uboot_lcd_inverse	= -1;
 		g_settings.uboot_lcd_contrast	= -1;
@@ -756,7 +756,7 @@ void CNeutrinoApp::saveSetup()
 			g_settings.uboot_console_bak    = g_settings.uboot_console;
 			g_settings.uboot_lcd_inverse	= g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE];
 			g_settings.uboot_lcd_contrast	= g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST];
-			g_settings.uboot_dbox_duplex	= g_settings.uboot_dbox_duplex_bak;
+			g_settings.uboot_dbox_duplex_bak= g_settings.uboot_dbox_duplex;
 
 			switch(g_settings.uboot_console)
 			{
@@ -770,14 +770,21 @@ void CNeutrinoApp::saveSetup()
 				buffer = "null";
 				break;
 			}
-			fprintf(fd, "console=%s\n" "baudrate=%d\n" "dbox_duplex=%d\n" "lcd_inverse=%d\n" "lcd_contrast=%d\n",
-					buffer, g_settings.uboot_baudrate, g_settings.uboot_dbox_duplex, g_settings.uboot_lcd_inverse,
-				    g_settings.uboot_lcd_contrast);
+			fprintf(fd,	"console=%s\n"
+					"baudrate=%d\n"
+					"dbox_duplex=%d\n"
+					"lcd_inverse=%d\n"
+					"lcd_contrast=%d\n",
+					buffer,
+					g_settings.uboot_baudrate,
+					g_settings.uboot_dbox_duplex,
+					g_settings.uboot_lcd_inverse,
+					g_settings.uboot_lcd_contrast);
 			fclose(fd);
 		}
 		else
 		{
-			dprintf(DEBUG_NORMAL, "unable to write file /var/tuxbox/boot/boot.conf\n");
+			fprintf(stderr, "[neutrino] unable to write file /var/tuxbox/boot/boot.conf\n");
 		}
 	}
 
