@@ -3428,7 +3428,7 @@ void eZapMain::startSkip(int dir)
 			{
 				if ( !eSystemInfo::getInstance()->canTimeshift() )
 					return;
-				if (state & stateRecording && eDVB::getInstance()->recorder
+				if (state & (stateRecording | recPermanentTimeshift) && eDVB::getInstance()->recorder
 					&& eDVB::getInstance()->recorder->recRef == eServiceInterface::getInstance()->service )
 				{
 					if (!timeshift && dir!=skipForward)
