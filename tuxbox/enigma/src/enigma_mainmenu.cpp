@@ -184,6 +184,12 @@ eMainMenu::eMainMenu()
 		CONNECT(wndShowTimer.timeout, eMainMenu::showWindow);
 		wnd.cmove(ePoint(180, 115));
 		int entry=0;
+		int count = MENU_ENTRIES;
+		for (int i=0; i<count; i++)
+		{
+			pixmaps[i][0]=NULL;
+			pixmaps[i][1]=NULL;
+		}
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("TV mode"), eString().sprintf("(%d) %s", ++entry, _("TV mode")) ))->selected, eMainMenu::sel_tv);
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Radio mode"), eString().sprintf("(%d) %s", ++entry, _("Radio mode")) ))->selected, eMainMenu::sel_radio);
 #ifndef DISABLE_FILE
