@@ -20,7 +20,6 @@
 #define FB_DEV "/dev/fb/0"
 
 #ifdef USEFREETYPEFB
-#define OLDFT
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_CACHE_H
@@ -36,7 +35,7 @@ class fbClass
 	FTC_Manager		manager;
 	FTC_SBitCache		cache;
 	FTC_SBit		sbit;
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 	FTC_ImageDesc		desc;
 #else
 	FTC_ImageTypeRec	desc;

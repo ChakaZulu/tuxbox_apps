@@ -1,6 +1,7 @@
 SUBDIRS = skins
 
 AM_CPPFLAGS = \
+	@FREETYPE_CFLAGS@ \
 	-I$(srcdir)/../lib \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/../enigma/include \

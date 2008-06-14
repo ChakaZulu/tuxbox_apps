@@ -1,4 +1,5 @@
 #ifdef HAVE_DREAMBOX_HARDWARE
+#include <png.h>
 #include "my_lcd.h"
 
 #include <fcntl.h>
@@ -8,7 +9,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <png.h>
 
 #ifdef USEFREETYPELCD
 FT_Error LCD_FaceRequester(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face *aface)
@@ -79,7 +79,7 @@ CLCDDisplay::CLCDDisplay()
 	use_kerning = FT_HAS_KERNING(face);
 
 	desc.font.face_id = (char*)FONT;
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 	desc.type = ftc_image_mono;
 #else
 	desc.flags = FT_LOAD_MONOCHROME;
