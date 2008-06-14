@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.39 2008/05/23 00:46:45 dbt Exp $
+	$Id: epgplus.cpp,v 1.40 2008/06/14 22:47:34 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -916,8 +916,6 @@ void EpgPlus::Footer::paintButtons
   int yPos = this->y + this->getUsedHeight() - this->fontButtons->getHeight();
 
   int buttonWidth =  40;
-
-  int buttonHeight = 16;
 
   this->frameBuffer->paintBoxRel(this->x, yPos, this->width, this->fontButtons->getHeight(), COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 
