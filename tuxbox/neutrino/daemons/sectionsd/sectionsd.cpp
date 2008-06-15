@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.262 2008/05/12 11:06:37 seife Exp $
+//  $Id: sectionsd.cpp,v 1.263 2008/06/15 10:44:27 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -1964,6 +1964,8 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 		dmxEIT.request_unpause();
 		dmxPPT.request_unpause();
 		scanning = 1;
+		dmxCN.change(0);
+		dmxEIT.change(0);
 	}
 
 	struct sectionsd::msgResponseHeader msgResponse;
@@ -2371,7 +2373,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.262 2008/05/12 11:06:37 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.263 2008/06/15 10:44:27 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6240,7 +6242,9 @@ static void *sdtThread(void *)
 
 				dmxSDT.real_pause();
 				pthread_mutex_lock( &dmxSDT.start_stop_mutex );
-				dprintf("dmxSDT: going to sleep...\n");
+				/* this is the "last" thread. Means: if this one goes to sleep, sectionsd
+				   sleeps mostly. Worth printing. */
+				printdate_ms(stdout);printf("dmxSDT: going to sleep...\n");
 
 				readLockMessaging();
 
@@ -6764,12 +6768,12 @@ static void *eitThread(void *)
 	{
 		dprintf("[%sThread] pid %d (%lu) start\n", "eit", getpid(), pthread_self());
 		int timeoutsDMX = 0;
-		time_t lastChanged = time(NULL);
 		dmxEIT.start(); // -> unlock
 		if (!scanning)
 			dmxEIT.request_pause();
 
 		waitForTimeset();
+		dmxEIT.lastChanged = time(NULL);
 
 		for (;;)
 		{
@@ -6845,7 +6849,6 @@ static void *eitThread(void *)
 					dprintf("[eitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxEIT.filter_index+1 );
 					timeoutsDMX = 0;
 					dmxEIT.change(dmxEIT.filter_index + 1);
-					lastChanged = time(NULL);
 				}
 				else {
 					sendToSleepNow = true;
@@ -6878,7 +6881,6 @@ static void *eitThread(void *)
 
 						dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
 						dmxEIT.change( dmxEIT.filter_index + 1 );
-						lastChanged = time(NULL);
 					}
 					else
 						if (dmxEIT.filter_index >= 1)
@@ -6887,7 +6889,6 @@ static void *eitThread(void *)
 							{
 								dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
 								dmxEIT.change(dmxEIT.filter_index + 1);
-								lastChanged = time(NULL);
 								//dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n" );
 								timeoutsDMX = 0;
 							}
@@ -6908,7 +6909,6 @@ static void *eitThread(void *)
 				{
 					dprintf("[eitThread] skipping to next filter(%d) (> DMX_TIMEOUT_SKIPPING)\n", dmxEIT.filter_index+1 );
 					dmxEIT.change(dmxEIT.filter_index + 1);
-					lastChanged = time(NULL);
 				}
 				else
 					sendToSleepNow = true;
@@ -6956,14 +6956,12 @@ static void *eitThread(void *)
 // maybe .change should imply .real_unpause()? -- seife
 					dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxEIT.filters.size() );
 					dmxEIT.change(1); // -> restart
-					lastChanged = time(NULL);
 				}
 				else if (rs == 0)
 				{
 					dprintf("dmxEIT: waking up again - requested from .change()\n");
 #ifdef PAUSE_EQUALS_STOP
 					dmxEIT.real_unpause();
-					lastChanged = time(NULL);
 #endif
 				}
 				else
@@ -6974,7 +6972,7 @@ static void *eitThread(void *)
 				// update zeit after sleep
 				zeit = time(NULL);
 			}
-			else if (zeit > lastChanged + TIME_EIT_SKIPPING )
+			else if (zeit > dmxEIT.lastChanged + TIME_EIT_SKIPPING )
 			{
 				readLockMessaging();
 
@@ -6982,7 +6980,6 @@ static void *eitThread(void *)
 				{
 					dprintf("[eitThread] skipping to next filter(%d) (> TIME_EIT_SKIPPING)\n", dmxEIT.filter_index+1 );
 					dmxEIT.change(dmxEIT.filter_index + 1);
-					lastChanged = time(NULL);
 				}
 				else
 					sendToSleepNow = true;
@@ -7092,7 +7089,6 @@ static void *cnThread(void *)
 	{
 		dprintf("[%sThread] pid %d (%lu) start\n", "cn", getpid(), pthread_self());
 		int timeoutsDMX = 0;
-		time_t lastChanged = time(NULL);
 		dmxCN.start(); // -> unlock
 		if (!scanning)
 			dmxCN.request_pause();
@@ -7105,6 +7101,7 @@ static void *cnThread(void *)
 		waitForTimeset();
 
 		time_t eit_waiting_since = time(NULL);
+		dmxCN.lastChanged = eit_waiting_since;
 
 		for (;;)
 		{
@@ -7223,7 +7220,6 @@ static void *cnThread(void *)
 					printdate_ms(stderr); fprintf(stderr,"dmxCN: waking up again - requested from .change()\n");
 #ifdef PAUSE_EQUALS_STOP
 					dmxCN.real_unpause();
-					lastChanged = time(NULL);
 #endif
 				}
 				else
@@ -7233,7 +7229,7 @@ static void *cnThread(void *)
 				}
 				zeit = time(NULL);
 			}
-			else if (zeit > lastChanged + TIME_EIT_SKIPPING && !messaging_need_eit_version)
+			else if (zeit > dmxCN.lastChanged + TIME_EIT_SKIPPING && !messaging_need_eit_version)
 			{
 				readLockMessaging();
 				sendToSleepNow = true;
@@ -7340,6 +7336,7 @@ static void *pptThread(void *)
 			dmxPPT.request_pause();
 
 		waitForTimeset();
+		dmxPPT.lastChanged = time(NULL);
 
 		for (;;)
 		{
@@ -7981,7 +7978,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.262 2008/05/12 11:06:37 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.263 2008/06/15 10:44:27 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.35 2008/05/12 11:06:37 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.36 2008/06/15 10:44:27 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -55,7 +55,7 @@ extern bool timeset;
 DMX::DMX(const unsigned short p, const unsigned short bufferSizeInKB)
 {
 	fd = -1;
-	lastChanged = 0;
+	lastChanged = time(NULL);
 	filter_index = 0;
 	pID = p;
 	dmxBufferSizeInKB = bufferSizeInKB;
