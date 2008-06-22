@@ -1108,7 +1108,7 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 		return 0;
 	}
 
-	Decoder::Flush();
+	Decoder::Flush(1);
 
 #ifndef DISABLE_FILE
 	eServiceReferenceDVB recRef =

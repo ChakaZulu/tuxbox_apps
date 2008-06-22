@@ -159,11 +159,13 @@ void Decoder::Close()
 					fd.video, fd.audio, fd.demux_video, fd.demux_audio, fd.demux_pcr, fd.demux_vtxt, fd.mpeg);
 }
 
-void Decoder::Flush()
+void Decoder::Flush(int keepaudiotype)
 {
 //	eDebug("Decoder::Flush()");
 	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = parms.pmtpid = -1;
-	parms.audio_type=parms.descriptor_length=parms.restart_camd=0;
+	if (!keepaudiotype)
+		parms.audio_type=0;
+	parms.descriptor_length=parms.restart_camd=0;
 	Set();
 }
 
@@ -503,10 +505,27 @@ int Decoder::Set()
 			break;
 		}
 		eDebugNoNewLine("AUDIO_SET_BYPASS_MODE to %d - ", bypass);
+		int wasclosed = 0;
+		if ( fd.audio == -1 )  // open audio dev... if not open..
+		{
+			fd.audio=open(AUDIO_DEV, O_RDWR);
+			if (fd.audio<0)
+				eDebug("fd.audio couldn't be opened");
+/*			else
+				eDebug("fd.audio opened");*/
+			wasclosed = 1;
+		}
 		if (::ioctl( fd.audio , AUDIO_SET_BYPASS_MODE, bypass ) < 0)
 			eDebug("failed (%m)");
 		else
 			eDebug("ok");
+		if ( wasclosed && fd.audio != -1 )  // audio dev was closed before
+		{
+			close(fd.audio);
+			fd.audio = -1;
+//			eDebug("fd.audio closed");
+		}
+		
 	}
 
 	if (changed & 11)

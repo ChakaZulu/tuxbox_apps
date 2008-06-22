@@ -38,7 +38,7 @@ public:
 	static decoderParameters parms;
 	static int Initialize();
 	static void Close();
-	static void Flush();
+	static void Flush(int keepaudiotype=0);
 	static void Pause( int flags=1 );
 	static void Resume( bool enableAudio=true );
 	static void addCADescriptor(__u8 *descriptor);
