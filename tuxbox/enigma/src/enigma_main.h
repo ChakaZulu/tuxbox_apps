@@ -566,6 +566,8 @@ private:
 	void renameFile(eServiceSelector *);
 	void showHDDSpaceLeft(eLabel *);
 	void startPermanentTimeshift();
+	void removeFromPlaylist(eServiceReference ref);
+
 #endif // DISABLE_FILE
 
 // both called from other context.. 	

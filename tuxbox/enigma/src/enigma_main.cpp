@@ -2944,6 +2944,9 @@ standby:
 */
 			standby.hide();   // here we are after wakeup
 			state &= ~stateSleeping;
+#ifndef DISABLE_FILE
+			beginPermanentTimeshift();
+#endif
 		}
 	}
 }
@@ -4004,6 +4007,7 @@ void eZapMain::deleteService( eServiceSelector *sel )
 				fname+="eit";
 				::unlink(fname.c_str());
 				::unlink((it->service.path+".indexmarks").c_str());
+				removeFromPlaylist(ref);
 			}
 		}
 	} // bouquet (playlist) selected
@@ -4091,6 +4095,22 @@ void eZapMain::deleteFile(eServiceReference ref)
 		if (::stat64(filename.c_str(), &s) < 0)
 			break;
 		eBackgroundFileEraser::getInstance()->erase(filename.c_str());
+	}
+	removeFromPlaylist(ref);
+}
+void eZapMain::removeFromPlaylist(eServiceReference ref)
+{
+	for ( std::list<ePlaylistEntry>::iterator it(playlist->getList().begin());
+		it != playlist->getList().end(); ++it )
+	{
+		if ( it->service.path == ref.path )
+		{
+			if (playlist->current == it)
+				playlistPrevService();
+			playlist->deleteService(it);
+			playlist->save();
+			break;
+		}
 	}
 }
 
