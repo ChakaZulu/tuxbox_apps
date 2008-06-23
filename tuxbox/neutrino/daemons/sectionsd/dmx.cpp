@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.36 2008/06/15 10:44:27 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.37 2008/06/23 09:27:47 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -680,9 +680,10 @@ int DMX::change(const int new_filter_index)
 
 	if (real_pauseCounter > 0)
 	{
-		printf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", filters[new_filter_index].filter);
-		unlock();
-		return 0;	// not running (e.g. streaming)
+		printf("changeDMX: for 0x%x not ignored! even though real_pauseCounter> 0\n",
+			filters[new_filter_index].filter);
+		/* immediate_start() checks for real_pauseCounter again (and
+		   does nothing in that case), so we can just continue here. */
 	}
 
 	if (debug) { // friendly debug output...
@@ -701,8 +702,6 @@ int DMX::change(const int new_filter_index)
 	}
 
 	closefd();
-
-
 
 	int rc = immediate_start();
 

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.263 2008/06/15 10:44:27 seife Exp $
+//  $Id: sectionsd.cpp,v 1.264 2008/06/23 09:27:47 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2373,7 +2373,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.263 2008/06/15 10:44:27 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.264 2008/06/23 09:27:47 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6011,9 +6011,9 @@ static void *nitThread(void *)
 
 		for (;;)
 		{
-			zeit = time(NULL);
 			while (!scanning)
 				sleep(1);
+			zeit = time(NULL);
 
 			readLockMessaging();
 			if (messaging_zap_detected)
@@ -6223,9 +6223,9 @@ static void *sdtThread(void *)
 
 		for (;;)
 		{
-			zeit = time(NULL);
 			while (!scanning)
 				sleep(1);
+			zeit = time(NULL);
 
 			readLockMessaging();
 			if (messaging_zap_detected)
@@ -6777,9 +6777,9 @@ static void *eitThread(void *)
 
 		for (;;)
 		{
-			time_t zeit = time(NULL);
 			while (!scanning)
 				sleep(1);
+			time_t zeit = time(NULL);
 
 			buf = dmxEIT.getSection(timeoutInMSeconds, timeoutsDMX);
 #if 0
@@ -7105,9 +7105,9 @@ static void *cnThread(void *)
 
 		for (;;)
 		{
-			time_t zeit = time(NULL);
 			while (!scanning)
 				sleep(1);
+			time_t zeit = time(NULL);
 
 			buf = dmxCN.getSection(timeoutInMSeconds, timeoutsDMX);
 			if (update_eit) {
@@ -7453,6 +7453,9 @@ static void *pptThread(void *)
 				sleep(1);
 				continue;
 			}
+
+			if (!scanning)
+				continue; // go to sleep again...
 
 			if (pptpid != privatePid)
 			{
@@ -7978,7 +7981,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.263 2008/06/15 10:44:27 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.264 2008/06/23 09:27:47 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
