@@ -1163,9 +1163,9 @@ void eFrontend::RotorStartLoop()
 					/* emit */ s_RotorRunning( newPos );
 				}
 
-				// set rotor running timeout  // 150 sek
+				// set rotor running timeout  // 360 sek
 				gettimeofday(&rotorTimeout,0);
-				rotorTimeout+=150000;
+				rotorTimeout+=360000;
 				RotorRunningLoop();
 				return;
 			}
