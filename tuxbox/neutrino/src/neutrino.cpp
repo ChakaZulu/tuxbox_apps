@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.895 2008/06/06 15:51:11 seife Exp $
+	$Id: neutrino.cpp,v 1.896 2008/07/16 22:07:34 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -325,7 +325,9 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_show			= configfile.getInt32("infobar_show"             , 0);
 	g_settings.show_mute_icon		= configfile.getInt32("show_mute_icon"		,1);
 	g_settings.channellist_epgtext_align_right		= configfile.getBool("channellist_epgtext_align_right"          , false);
-	g_settings.show_channel_logo		= configfile.getInt32("show_channel_logo"		,0);
+	strcpy( g_settings.infobar_channel_logodir, configfile.getString( "infobar_channel_logodir", "var/share/tuxbox/neutrino/icons" ).c_str());
+	g_settings.infobar_show_channellogo		= configfile.getInt32("show_channel_logo"		,0);
+	g_settings.infobar_channellogo_background		= configfile.getInt32("infobar_channellogo_backround"		,0);
 	
 
 	//audio
@@ -824,7 +826,9 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32("infobar_show"             , g_settings.infobar_show);
 	configfile.setInt32("show_mute_icon"			, g_settings.show_mute_icon);
 	configfile.setBool("channellist_epgtext_align_right"                 , g_settings.channellist_epgtext_align_right);
-	configfile.setInt32("show_channel_logo"			, g_settings.show_channel_logo);
+	configfile.setInt32("infobar_show_channellogo"			, g_settings.infobar_show_channellogo);
+	configfile.setString("infobar_channel_logodir"	, g_settings.infobar_channel_logodir);
+	configfile.setInt32( "infobar_channellogo_background"	, g_settings.infobar_channellogo_background);
 	
 
 	//audio
@@ -3725,6 +3729,15 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		b.Dir_Mode=true;
 		if (b.exec(g_settings.network_nfs_moviedir))
 			strncpy(g_settings.network_nfs_moviedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_moviedir)-1);
+		return menu_return::RETURN_REPAINT;
+	}
+	else if(actionKey == "channel_logodir")
+	{
+		parent->hide();
+		CFileBrowser b;
+		b.Dir_Mode=true;
+		if (b.exec(g_settings.infobar_channel_logodir))
+			strncpy(g_settings.infobar_channel_logodir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.infobar_channel_logodir)-1);
 		return menu_return::RETURN_REPAINT;
 	}
 	else if(actionKey == "epgdir")

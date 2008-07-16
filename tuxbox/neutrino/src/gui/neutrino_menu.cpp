@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.29 2008/06/01 12:08:03 ecosys Exp $
+	$Id: neutrino_menu.cpp,v 1.30 2008/07/16 22:07:36 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -899,6 +899,14 @@ const CMenuOptionChooser::keyval  INFOBAR_CHANNELLOGO_SHOW_OPTIONS[INFOBAR_CHANN
    { 3 , LOCALE_INFOVIEWER_CHANNELLOGO_SHOW_BESIDE_CHANNELNAME }
 };
 
+#define INFOBAR_CHANNELLOGO_BACKGROUND_SHOW_OPTIONS_COUNT 3
+const CMenuOptionChooser::keyval  INFOBAR_CHANNELLOGO_BACKGROUND_SHOW_OPTIONS[INFOBAR_CHANNELLOGO_BACKGROUND_SHOW_OPTIONS_COUNT]=
+{
+   { 0 , LOCALE_INFOVIEWER_CHANNELLOGO_BACKGROUND_OFF },
+   { 1 , LOCALE_INFOVIEWER_CHANNELLOGO_BACKGROUND_FRAMED },
+   { 2 , LOCALE_INFOVIEWER_CHANNELLOGO_BACKGROUND_SHADED }
+};
+
 /* misc settings menu */
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 															CMenuWidget &miscSettingsGeneral,
@@ -970,7 +978,12 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_SUBCHAN_DISP_POS, &g_settings.infobar_subchan_disp_pos, INFOBAR_SUBCHAN_DISP_POS_OPTIONS, INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT, true));
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VIRTUAL_ZAP_MODE, &g_settings.virtual_zap_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SHOW, &g_settings.infobar_show, INFOBAR_EPG_SHOW_OPTIONS, INFOBAR_EPG_SHOW_OPTIONS_COUNT, true));
-	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_CHANNELLOGO, &g_settings.show_channel_logo, INFOBAR_CHANNELLOGO_SHOW_OPTIONS, INFOBAR_CHANNELLOGO_SHOW_OPTIONS_COUNT, true));
+
+	miscSettingsInfobar.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_CHANNELLOGO));
+	
+	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_CHANNELLOGO_SHOW, &g_settings.infobar_show_channellogo, INFOBAR_CHANNELLOGO_SHOW_OPTIONS, INFOBAR_CHANNELLOGO_SHOW_OPTIONS_COUNT, true));
+	miscSettingsInfobar.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_CHANNELLOGO_LOGODIR, true, g_settings.infobar_channel_logodir, this, "channel_logodir"));
+ 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_CHANNELLOGO_BACKGROUND, &g_settings.infobar_channellogo_background, INFOBAR_CHANNELLOGO_BACKGROUND_SHOW_OPTIONS, INFOBAR_CHANNELLOGO_BACKGROUND_SHOW_OPTIONS_COUNT, true));
 
 	//channellist
 	miscSettingsChannellist.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_CHANNELLIST));

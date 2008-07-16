@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.194 2008/06/01 12:08:04 ecosys Exp $
+  $Id: settings.h,v 1.195 2008/07/16 22:07:37 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -66,7 +66,9 @@ struct SNeutrinoSettings
 	int infobar_show;
 	int show_mute_icon;
 	int channellist_epgtext_align_right;
-	int show_channel_logo;
+	char infobar_channel_logodir[100];
+	int infobar_show_channellogo;
+	int infobar_channellogo_background;
 
 	// EPG
 	std::string epg_cache;

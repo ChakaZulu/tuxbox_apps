@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.221 2008/05/29 20:57:30 dbt Exp $
+	$Id: infoviewer.cpp,v 1.222 2008/07/16 22:07:36 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -171,14 +171,14 @@ void CInfoViewer::showRecordIcon(const bool show)
 {
 	if(recordModeActive)
 	{
-		ChanNameX = BoxStartX + ChanWidth + 20;
+		int rec_icon_x = BoxStartX + ChanWidth + 20;
 		if(show)
 		{
-			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, ChanNameX, BoxStartY+10 );
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, rec_icon_x, BoxStartY+10 );
 		}
 		else
 		{
-			frameBuffer->paintBoxRel(ChanNameX, BoxStartY+10, 20, 20, 255);
+			frameBuffer->paintBoxRel(rec_icon_x, BoxStartY+10, 20, 20, 255);
 		}
 	}
 }
@@ -305,25 +305,22 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	// paint background left side
 	frameBuffer->paintBoxRel(ChanInfoX, ChanInfoY, ChanNameX - ChanInfoX, BoxEndInfoY - ChanInfoY, COL_INFOBAR_PLUS_0, c_rad_large, (showButtonBar ? 0 : 1) * CORNER_BOTTOM_LEFT);
 	
-	// paint channel number
-	sprintf((char*) strChanNum, "%d", ChanNum);
-
-	if (g_settings.show_channel_logo) {// do paint logo
-		int ChannelLogoMode = showChannelLogo(channel_id);
+/* paint channel number, channelname or/and channellogo */
+		sprintf((char*) strChanNum, "%d", ChanNum);
 	
-		if (ChannelLogoMode != 1) // show logo in numberbox
-		{
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, col_NumBoxText);
-		}
-	} else
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, col_NumBoxText);
-	
-	// channel name  with or without channel logo
-	ChanNameW = BoxEndX- (ChanNameX+ 20)- time_width- 15;
+		int ChannelLogoMode = showChannelLogo(channel_id); // get logo mode, paint channel logo if adjusted
 		
-	// ... with channel name
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX + 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, ChannelName, COL_INFOBAR, 0, subChannelNameIsUTF); // UTF-8
-	
+		if (ChannelLogoMode != 1) // no logo in numberbox
+			{
+				// show logo in numberbox
+				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, col_NumBoxText);
+			}
+
+		ChanNameW = BoxEndX- (ChanNameX+ 20)- time_width- 15; // set channel name width
+			
+		// ... with channel name 
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX + 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, ChannelName, COL_INFOBAR, 0, subChannelNameIsUTF); // UTF-8
+/* paint channel number, channelname or/and channellogo */
 	
 	paintTime( false, true );
 	
@@ -1183,103 +1180,159 @@ void CInfoViewer::Set_CA_Status(int Status)
 
 int CInfoViewer::showChannelLogo( const t_channel_id logo_channel_id  ) 
 /* ****************************************************************************
-returns mode of painted channel logo, 
+returns mode of painted channel logo,
+0 = no logo painted
 1 = in number box 
 2 = in place of channel name
 3 = beside channel name
-if this failed then returns 0
-Note: this is a kind of funstuff ;-) 
 *******************************************************************************
 */
 {
 	char strChanId[16];
 	sprintf((char*) strChanId, "%llx", logo_channel_id);
-	std::string mimetype = ".raw", strIconName = (std::string)strChanId + mimetype;
-	std::string strAbsIconPath = NEUTRINO_ICON_VARPATH + strIconName;
-	int x_mid, y_mid, icon_w, icon_h, icon_x = 0, icon_y = 0;
-	int res = 0;
+	std::string	mimetype = "raw",
+						strLogoIDName = (std::string)strChanId + "." + mimetype,
+						strLogoName = ChannelName + "." + mimetype,
+						strLogo,
+						strAbsIconChIDPath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoIDName,
+						strAbsIconChNamePath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoName,
+						strAbsIconPath,
+						strErrText= "[infoviewer] channel logo too large...use maximal %2dpx%2dpx (current: %2dpx%2dpx)\n";
 	
-	if (access(strAbsIconPath.c_str(), 0) != -1)
+	int x_mid, y_mid, logo_w, logo_h; 
+	int logo_x=0, logo_y=0;
+	int res = 0;
+	int start_x = ChanNameX, chan_w = BoxEndX- (start_x+ 20)- time_width- 15;
+	
+	bool logo_available;
+	
+	if (g_settings.infobar_show_channellogo) // show logo only if "infobar_show_channellogo" adjusted to true, else use defaults
 	{
-		// get icon dimensions
-		icon_w = frameBuffer->getIconWidth(strIconName.c_str());
-		icon_h = frameBuffer->getIconHeight(strIconName.c_str());
-			
-			if (g_settings.show_channel_logo == 1) // paint logo in numberbox
-			{
-				// calculate mid of numberbox
-				int satNameHeight = g_settings.infobar_sat_display ? 6 : 0; // consider sat display and set an offset for y if exists
-				x_mid = BoxStartX+ChanWidth/2;
-				y_mid = (BoxStartY+satNameHeight)+ChanHeight/2;
-					
-				// check logo dimensions
-				if ((icon_w > ChanWidth) || (icon_h > ChanHeight))	
+
+		// check if logo is available
+		if (access(strAbsIconChIDPath.c_str(), 0) != -1)
+		{
+			strAbsIconPath = strAbsIconChIDPath;
+			strLogo = strLogoIDName;
+			logo_available = true;
+		}
+		else if (access(strAbsIconChNamePath.c_str(), 0) != -1)
+		{
+			strAbsIconPath = strAbsIconChNamePath;
+			strLogo = strLogoName;
+			logo_available = true;
+		}
+		else
+			logo_available = false;
+		
+		if (logo_available)
+		{
+			// get logo dimensions
+			logo_w = frameBuffer->getIconWidth(strLogo.c_str());
+			logo_h = frameBuffer->getIconHeight(strLogo.c_str());
+			printf("[infoviewer] paint channel logo...\n -> %s (%s)\n -> %2dpx%2dpx\n -> mode: %d\n", strAbsIconPath.c_str(), ChannelName.c_str(), logo_w, logo_h, g_settings.infobar_show_channellogo);
+	
+			{	
+				if (g_settings.infobar_show_channellogo == 1) // paint logo in numberbox
 				{
-					printf("[infoviewer] channel logo too large...use maximal %2dpx%2dpx\n",ChanWidth, ChanHeight);
+					// calculate mid of numberbox
+					int satNameHeight = g_settings.infobar_sat_display ? 8 : 0; // consider sat display and set an offset for y if exists
+					x_mid = BoxStartX+ChanWidth/2;
+					y_mid = (BoxStartY+satNameHeight)+ChanHeight/2;
+						
+					// check logo dimensions
+					if ((logo_w > ChanWidth) || (logo_h > ChanHeight))	
+					{
+						printf(strErrText.c_str(),ChanWidth, ChanHeight, logo_w, logo_h);
+						res = 0;
+					}
+					else
+					{
+						// channel name with number
+						ChannelName = (std::string)strChanNum + ". " + ChannelName;
+						// get position of channel logo, must be centered in number box
+						logo_x = x_mid - logo_w/2;
+						logo_y = y_mid - logo_h/2;
+						res =  1;
+					}
+				}
+				else if (g_settings.infobar_show_channellogo == 2) // paint logo in place of channel name
+				{
+					// check logo dimensions
+					if ((logo_w > chan_w) || (logo_h > ChanHeight))
+					{
+						printf(strErrText.c_str(), chan_w, ChanHeight, logo_w, logo_h);
+						res =  0;
+					}
+					else
+					{
+						// hide channel name
+						ChannelName = "";
+						// calculate logo position
+						y_mid = (ChanNameY+time_height) - time_height/2;
+						logo_x = start_x+10;
+						logo_y = y_mid - logo_h/2;				
+						res =  2;
+					}
+				}
+				else if (g_settings.infobar_show_channellogo == 3) // paint logo beside channel name
+				{
+					// check logo dimensions
+					int Logo_max_width = chan_w - logo_w - 10;
+					if ((logo_w > Logo_max_width) || (logo_h > ChanHeight))
+					{
+						printf(strErrText.c_str(), Logo_max_width, ChanHeight, logo_w, logo_h);
+						res =  0;
+					}
+					else
+					{
+						// calculate logo position
+						y_mid = (ChanNameY+time_height) - time_height/2;
+						logo_x = start_x+10;
+						logo_y = y_mid - logo_h/2;
+	
+						// set channel name x pos
+						ChanNameX =  start_x + logo_w + 10;
+						res =  3;
+					}
+				}			
+				else
+				{
 					res = 0;
 				}
-				else
-				{
-					// channel name with number
-					ChannelName = (std::string)strChanNum + ". " + ChannelName;
-					// get position of channel icon, must be centered in number box
-					icon_x = x_mid - icon_w/2;
-					icon_y = y_mid - icon_h/2;
-					res =  1;
-				}
-			}
-			else if (g_settings.show_channel_logo == 2) // paint logo in place of channel name
-			{
-				// check logo dimensions
-				if ((icon_w > ChanNameW) || (icon_h > ChanHeight))
-				{
-					printf("[infoviewer] channel logo too large...use maximal %2dpx%2dpx\n", ChanNameW, ChanHeight);
-					res =  0;
-				}
-				else
-				{
-					// hide channel name
-					ChannelName = "";
-					// calculate icon position
-					y_mid = (ChanNameY+time_height) - time_height/2;
-					icon_x = ChanNameX+10;
-					icon_y = y_mid - icon_h/2;				
-					res =  2;
-				}
-			}
-			else if (g_settings.show_channel_logo == 3) // paint logo beside channel name
-			{
-				// check logo dimensions
-				int Logo_max_width = ChanNameW - icon_w;
-				if ((icon_w > Logo_max_width) || (icon_h > ChanHeight))
-				{
-					printf("[infoviewer] channel logo too large...use maximal %2dx%2dpx\n", Logo_max_width, ChanHeight);
-					res =  0;
-				}
-				else
-				{
-					// calculate icon position
-					y_mid = (ChanNameY+time_height) - time_height/2;
-					icon_x = ChanNameX+10;
-					icon_y = y_mid - icon_h/2;
-					// set channel name x pos
-					ChanNameX = ChanNameX+icon_w+10;
-					res =  3;
-				}
-			}			
-			else
-			{
-				res = 0;
-			}
 			
-		// paint the logo
-		if (!frameBuffer->paintIcon(strIconName, icon_x, icon_y)) 	
-		{
-			res = 0; // paint logo was failed
+			// paint logo background (shaded/framed)
+			if ((g_settings.infobar_channellogo_background !=0) && (res !=0)) // with background
+			{	
+				int sh_offset=0, logo_bg_x=0, logo_bg_y=0, logo_bg_w=0, logo_bg_h=0;
+				
+				if (g_settings.infobar_channellogo_background == 1) // framed
+				{
+					sh_offset = 2;
+					logo_bg_x = logo_x-sh_offset;
+					logo_bg_y = logo_y-sh_offset;
+					logo_bg_w = logo_w+sh_offset*2;
+					logo_bg_h = logo_h+sh_offset*2;
+				}
+				else if (g_settings.infobar_channellogo_background == 2) // shaded
+				{
+					sh_offset = 3;
+					logo_bg_x = logo_x+sh_offset;
+					logo_bg_y = logo_y+sh_offset;
+					logo_bg_w = logo_w;
+					logo_bg_h = logo_h;
+				}
+				frameBuffer->paintBoxRel(logo_bg_x, logo_bg_y, logo_bg_w, logo_bg_h, COL_INFOBAR_BUTTONS_BACKGROUND);
+			}
+				
+			
+			// paint the logo
+			if (!frameBuffer->paintIcon(strLogo, logo_x, logo_y)) 
+				{
+					res = 0; // paint logo was failed
+				}
+			}
 		}
-		//~ else
-			//~ printf("[infoviewer] paint channel logo %s (%s)\n", strIconName.c_str(), ChannelName.c_str());
-		
 	}
 	return res;
 }
@@ -1310,10 +1363,12 @@ void CInfoViewer::showLcdPercentOver()
 void CInfoViewer::showEpgInfo()   //message on event change
 {
 	char nextStart[10];
+	int mode = g_Zapit->getMode();
 	struct tm *pnStartZeit = localtime(&info_CurrentNext.next_zeit.startzeit);
 		sprintf( (char*)&nextStart, "%02d:%02d", pnStartZeit->tm_hour, pnStartZeit->tm_min);
 
-		if (eventname != info_CurrentNext.current_name) // should not happen, but if so, then only if message is different
+	/* show epg info only if we in TV- or Radio mode and current event is not the same like before */	
+	if ((eventname != info_CurrentNext.current_name) && (mode !=0)) 
 		{
 			eventname = info_CurrentNext.current_name;
 				if (g_settings.infobar_show == 1)

@@ -449,7 +449,10 @@ imageinfo.support support
 imageinfo.supporthere You can find technical support and help here:
 imageinfo.version Cycle:
 inetradio.name Internetradio
-infoviewer.channellogo_off do not display
+infoviewer.channellogo_background_framed framed
+infoviewer.channellogo_background_off no
+infoviewer.channellogo_background_shaded shaded
+infoviewer.channellogo_off do without
 infoviewer.channellogo_show_as_channelname in place of channelname
 infoviewer.channellogo_show_beside_channelname beside channelname
 infoviewer.channellogo_show_in_numberbox in place of channelnumber
@@ -588,7 +591,10 @@ messagebox.no No
 messagebox.yes Yes
 miscsettings.channellist Channellist
 miscsettings.channellist_epgtext_align Programtext Align
-miscsettings.channellogo Channel Logo
+miscsettings.channellogo Channellogo
+miscsettings.channellogo_background Background
+miscsettings.channellogo_logodir Logo directory
+miscsettings.channellogo_show Show
 miscsettings.epg_cache EPG-Cache (Days)
 miscsettings.epg_cache_hint1 How long will EPG-Data in the future cached?
 miscsettings.epg_cache_hint2 Set in days.

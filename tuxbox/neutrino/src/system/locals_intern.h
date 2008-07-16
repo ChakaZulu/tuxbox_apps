@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.123 2008/06/01 12:08:04 ecosys Exp $
+ * $Id: locals_intern.h,v 1.124 2008/07/16 22:07:37 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -476,6 +476,9 @@ const char * locale_real_names[] =
 	"imageinfo.supporthere",
 	"imageinfo.version",
 	"inetradio.name",
+	"infoviewer.channellogo_background_framed",
+	"infoviewer.channellogo_background_off",
+	"infoviewer.channellogo_background_shaded",
 	"infoviewer.channellogo_off",
 	"infoviewer.channellogo_show_as_channelname",
 	"infoviewer.channellogo_show_beside_channelname",
@@ -616,6 +619,9 @@ const char * locale_real_names[] =
 	"miscsettings.channellist",
 	"miscsettings.channellist_epgtext_align",
 	"miscsettings.channellogo",
+	"miscsettings.channellogo_background",
+	"miscsettings.channellogo_logodir",
+	"miscsettings.channellogo_show",
 	"miscsettings.epg_cache",
 	"miscsettings.epg_cache_hint1",
 	"miscsettings.epg_cache_hint2",
