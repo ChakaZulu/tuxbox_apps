@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.222 2008/07/16 22:07:36 dbt Exp $
+	$Id: infoviewer.cpp,v 1.223 2008/07/21 21:24:04 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1193,7 +1193,6 @@ returns mode of painted channel logo,
 	std::string	mimetype = "raw",
 						strLogoIDName = (std::string)strChanId + "." + mimetype,
 						strLogoName = ChannelName + "." + mimetype,
-						strLogo,
 						strAbsIconChIDPath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoIDName,
 						strAbsIconChNamePath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoName,
 						strAbsIconPath,
@@ -1213,13 +1212,11 @@ returns mode of painted channel logo,
 		if (access(strAbsIconChIDPath.c_str(), 0) != -1)
 		{
 			strAbsIconPath = strAbsIconChIDPath;
-			strLogo = strLogoIDName;
 			logo_available = true;
 		}
 		else if (access(strAbsIconChNamePath.c_str(), 0) != -1)
 		{
-			strAbsIconPath = strAbsIconChNamePath;
-			strLogo = strLogoName;
+			strAbsIconPath = strAbsIconChNamePath; // strLogoName;
 			logo_available = true;
 		}
 		else
@@ -1228,8 +1225,8 @@ returns mode of painted channel logo,
 		if (logo_available)
 		{
 			// get logo dimensions
-			logo_w = frameBuffer->getIconWidth(strLogo.c_str());
-			logo_h = frameBuffer->getIconHeight(strLogo.c_str());
+			logo_w = frameBuffer->getIconWidth(strAbsIconPath.c_str());
+			logo_h = frameBuffer->getIconHeight(strAbsIconPath.c_str());
 			printf("[infoviewer] paint channel logo...\n -> %s (%s)\n -> %2dpx%2dpx\n -> mode: %d\n", strAbsIconPath.c_str(), ChannelName.c_str(), logo_w, logo_h, g_settings.infobar_show_channellogo);
 	
 			{	
@@ -1327,7 +1324,7 @@ returns mode of painted channel logo,
 				
 			
 			// paint the logo
-			if (!frameBuffer->paintIcon(strLogo, logo_x, logo_y)) 
+			if (!frameBuffer->paintIcon(strAbsIconPath, logo_x, logo_y)) 
 				{
 					res = 0; // paint logo was failed
 				}

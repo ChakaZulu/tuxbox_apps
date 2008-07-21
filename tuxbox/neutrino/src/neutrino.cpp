@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.897 2008/07/20 16:02:27 dbt Exp $
+	$Id: neutrino.cpp,v 1.898 2008/07/21 21:24:21 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -326,7 +326,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.show_mute_icon		= configfile.getInt32("show_mute_icon"		,1);
 	g_settings.channellist_epgtext_align_right		= configfile.getBool("channellist_epgtext_align_right"          , false);
 	strcpy( g_settings.infobar_channel_logodir, configfile.getString( "infobar_channel_logodir", "var/share/tuxbox/neutrino/icons" ).c_str());
-	g_settings.infobar_show_channellogo		= configfile.getInt32("show_channel_logo"		,0);
+	g_settings.infobar_show_channellogo		= configfile.getInt32("infobar_show_channellogo"		,0);
 	g_settings.infobar_channellogo_background		= configfile.getInt32("infobar_channellogo_background"		,0);
 	
 
