@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: tuxinfo.c,v 1.5 2007/11/20 17:00:52 seife Exp $
+ * $Id: tuxinfo.c,v 1.6 2008/07/22 19:20:09 dbt Exp $
  */
 
 #include <stdio.h>
@@ -40,18 +40,23 @@ int main(int argc, char **argv)
 	unsigned char show_vendor_str = 0;
 	unsigned char show_eval = 0;
 	char *digit_format_str = "%d\n";
+	int cap_filter = 0;
 
 	while (1) {
 	
 		int c;
 		
-		if ((c = getopt(argc, argv, "cmMnNsSvVe")) < 0)
+		if ((c = getopt(argc, argv, "cC:mMnNsSvVe")) < 0)
 			break;
 			
 		switch (c) {
 		
 			case 'c':
 				show_capabilities++;
+				break;
+			case 'C':
+				show_capabilities++;
+				cap_filter = atoi(optarg);
 				break;
 			case 'e':
 				show_eval++;
@@ -87,8 +92,12 @@ int main(int argc, char **argv)
 		
 	}
 
-	if (show_capabilities)
-		printf (digit_format_str, tuxbox_get_capabilities ());
+	if (show_capabilities) {
+		if (cap_filter)
+			printf (digit_format_str, tuxbox_get_capabilities () & cap_filter);
+		else
+			printf (digit_format_str, tuxbox_get_capabilities ());
+	}
 
 	if (show_vendor) {
 		if (show_eval)
