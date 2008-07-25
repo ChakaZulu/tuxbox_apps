@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.898 2008/07/21 21:24:21 dbt Exp $
+	$Id: neutrino.cpp,v 1.899 2008/07/25 21:43:59 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2655,40 +2655,43 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 			tmpTimerList.clear();
 			tmpTimerdClient.getTimerList( tmpTimerList );
-
-			sort( tmpTimerList.begin(), tmpTimerList.end() );
-
-			CTimerd::responseGetTimer &timer = tmpTimerList[0];
-
-			CZapitClient Zapit;
 			std::string name = g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE);
 			name += "\n";
+			std::string zAddData;
 
-			std::string zAddData = Zapit.getChannelName( timer.channel_id ); // UTF-8
-			if( zAddData.empty() )
-			{
-				zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
-			}
+			if (tmpTimerList.size() > 0) {
+				sort( tmpTimerList.begin(), tmpTimerList.end() );
+				CTimerd::responseGetTimer &timer = tmpTimerList[0];
 
-			if(timer.epgID!=0)
-			{
-				CEPGData epgdata;
-#warning fixme sectionsd should deliver data in UTF-8 format
-				zAddData += " :\n";
-				if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
+				CZapitClient Zapit;
+				zAddData = Zapit.getChannelName( timer.channel_id ); // UTF-8
+				if( zAddData.empty() )
 				{
-					zAddData += Latin1_to_UTF8(epgdata.title);
+					zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
+				}
+
+				if(timer.epgID!=0)
+				{
+					CEPGData epgdata;
+#warning fixme sectionsd should deliver data in UTF-8 format
+					zAddData += " :\n";
+					if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
+					{
+						zAddData += Latin1_to_UTF8(epgdata.title);
+					}
+					else if(strlen(timer.epgTitle)!=0)
+					{
+						zAddData += Latin1_to_UTF8(timer.epgTitle);
+					}
 				}
 				else if(strlen(timer.epgTitle)!=0)
 				{
 					zAddData += Latin1_to_UTF8(timer.epgTitle);
 				}
 			}
-			else if(strlen(timer.epgTitle)!=0)
-			{
-				zAddData += Latin1_to_UTF8(timer.epgTitle);
+			else {
+				zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
 			}
-
 			name += zAddData;
 			ShowHintUTF( LOCALE_MESSAGEBOX_INFO, name.c_str() );
 //			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE));
