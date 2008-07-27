@@ -2026,8 +2026,11 @@ void eZapMain::prepareDVRHelp()
 
 	addActionToHelpList(&i_enigmaMainActions->showServiceSelector);
 	addActionToHelpList(&i_enigmaMainActions->serviceListDown);
-	addActionToHelpList(&i_enigmaMainActions->serviceListUp);
-	addActionToHelpList(&i_enigmaMainActions->toggleIndexmark);*/
+	addActionToHelpList(&i_enigmaMainActions->serviceListUp);*/
+	addActionToHelpList(&i_enigmaMainActions->toggleIndexmark);
+	addActionToHelpList(&i_enigmaMainActions->indexSeekNext);
+	addActionToHelpList(&i_enigmaMainActions->indexSeekPrev);
+
 }
 
 void eZapMain::prepareNonDVRHelp()

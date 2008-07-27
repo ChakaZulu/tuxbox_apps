@@ -241,6 +241,10 @@
 		<img name="key.30" src="button_home.png" />
 		<img name="key.31" src="button_mute.png" />
 		<img name="key.32" src="button_menu.png" />
+		<img name="key.33" src="button_shift_red.png" />
+		<img name="key.34" src="button_shift_green.png" />
+		<img name="key.35" src="button_shift_yellow.png" />
+		<img name="key.36" src="button_shift_blue.png" />
 	</images>
 
 	<colors>
