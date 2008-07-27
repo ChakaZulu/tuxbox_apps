@@ -534,20 +534,12 @@ eDVRPlayerThread::~eDVRPlayerThread()
 
 void eDVRPlayerThread::updatePosition()
 {
-	int slice=0;
-	struct stat64 s;
 	int filelength=0;
 
 	if (playingPermanentTimeshift)
 		filelength = permanentTimeshift.getCurrentLength (-1)/1880;
 	else
-	{
-		while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
-		{
-			filelength+=s.st_size/1880;
-			slice++;
-		}
-	}
+		filelength = FillSliceSizes();
 	if (state == stateFileEnd)
 	{
 		eDebug("file end reached, retrying..");
