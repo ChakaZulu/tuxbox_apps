@@ -1306,7 +1306,7 @@ void CUpnpBrowserGui::paintItem2DetailsLine (int pos, unsigned int ch_index)
 	fb_pixel_t col2 = COL_MENUCONTENT_PLUS_1;
 
 	// Clear
-	m_frameBuffer->paintBackgroundBoxRel(xpos, m_y + m_title_height, ConnectLineBox_Width, m_height+m_info_height);
+	m_frameBuffer->paintBackgroundBoxRel(xpos, m_y + m_title_height, ConnectLineBox_Width, m_height+m_info_height-(m_y + m_title_height));
 	if (pos < 0) {
 		m_frameBuffer->paintBackgroundBoxRel(m_x, m_y + (m_height - m_info_height - 1 * m_buttonHeight) + 2, m_width, m_info_height);
 	}
@@ -1360,7 +1360,7 @@ void CUpnpBrowserGui::updateTimes(const bool force)
 
 		if (updatePlayed)
 		{
-paintDetails(NULL, 0, true);
+			paintDetails(NULL, 0, true);
 			top = m_y + (m_height - m_info_height - 1 * m_buttonHeight) + m_buttonHeight + 4;
 			m_frameBuffer->paintBoxRel(m_x + m_width - w - 15, top + 1, w + 4, m_buttonHeight,
 				   COL_MENUCONTENTDARK_PLUS_0);
