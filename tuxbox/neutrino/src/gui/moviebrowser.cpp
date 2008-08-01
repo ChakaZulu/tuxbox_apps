@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.17 2008/05/01 00:08:24 dbt Exp $
+	$Id: moviebrowser.cpp,v 1.18 2008/08/01 21:07:19 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.18  2008/08/01 21:07:19  houdini
+	increased ping timeout to 500ms for nfs mount during record directory select
+	
 	Revision 1.17  2008/05/01 00:08:24  dbt
 	- add optional rounded corners in menues and most other windows, configurable in color menue, saved with themes
 	- revised buttonbars with uniformed background colors and more accurate captions
@@ -441,7 +444,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.17 2008/05/01 00:08:24 dbt Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.18 2008/08/01 21:07:19 houdini Exp $\r\n");
 	init();
 }
 
@@ -3814,7 +3817,7 @@ void CDirMenu::updateDirState(void)
         // 1st ping server
         if(dirNfsMountNr[i] != -1)
         {
-            int retvalue = pingthost(g_settings.network_nfs_ip[dirNfsMountNr[i]].c_str(),60); // get ping for 60ms
+            int retvalue = pingthost(g_settings.network_nfs_ip[dirNfsMountNr[i]].c_str(), 500); // get ping for 60ms - increased
             if (retvalue == 0)//LOCALE_PING_UNREACHABLE
             {
                 dirOptionText[i] = g_Locale->getText(LOCALE_RECDIRCHOOSER_SERVER_DOWN);
@@ -3868,7 +3871,7 @@ std::string CMovieBrowser::getMovieBrowserVersion(void)
 /************************************************************************/
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.17 $");
+	return imageinfo.getModulVersion("","$Revision: 1.18 $");
 }
 
 /************************************************************************/
