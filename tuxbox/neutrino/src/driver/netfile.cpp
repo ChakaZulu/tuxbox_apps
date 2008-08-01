@@ -1327,7 +1327,7 @@ int push(FILE *fd, char *buf, long len)
 	if(i < 0)
 		return -1;
 
-//  dprintf(stderr, "push: %d bytes to store [filled: %d of %d], stream: %x\n", len, cache[i].filled, CACHESIZE, fd);
+//	dprintf(stderr, "push: %d bytes to store [filled: %d of %d], stream: %x\n", len, cache[i].filled, CACHESIZE, fd);
 
 	if(cache[i].fd == fd)
 	{
@@ -1436,6 +1436,10 @@ int pop(FILE *fd, char *buf, long len)
 		{
 			if(cache[i].closed && (!cache[i].filled) )
 				return 0;
+
+			if((!cache[i].filled) && feof(fd)){
+				return 0;
+			}
 
 			/* try to obtain read permissions for the cache */
 			/* this will block if the cache is empty */
@@ -1555,6 +1559,9 @@ void CacheFillThread(void *c)
 		datalen = CACHEBTRANS;
 
 		rval = fread(buf, 1, datalen, cache->fd);
+
+		if ((rval == 0) && feof(cache->fd)) 
+			break; /* exit cache fill thread if eof and nothing to push */
 
 		/* if there is a filter function set up for this stream, then */
 		/* we need to call it with the propper arguments */
