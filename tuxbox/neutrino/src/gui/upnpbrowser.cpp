@@ -516,7 +516,6 @@ void CUpnpBrowserGui::playnext(void)
 		bool tfound = false;
 
 		sindex << m_playid;
-
 		attribs.push_back(UPnPAttribute("ObjectID", m_playfolder));
 		attribs.push_back(UPnPAttribute("BrowseFlag", "BrowseDirectChildren"));
 		attribs.push_back(UPnPAttribute("Filter", "*"));
@@ -580,7 +579,17 @@ void CUpnpBrowserGui::playnext(void)
 					CAudioPlayer::getInstance()->play(&mp3, g_settings.audioplayer_highprio == 1);
 					return;
 				}
-			}	
+			}
+		} else {
+			neutrino_msg_t      msg;
+			neutrino_msg_data_t data;
+			g_RCInput->getMsg(&msg, &data, 10); // 1 sec timeout to update play/stop state display
+
+			if( msg == CRCInput::RC_home)
+			{
+				m_folderplay = false;
+				break;
+			}
 		}
 	}
 }
