@@ -21,6 +21,7 @@
 #include <enigma_lcd.h>
 #include <enigma_plugins.h>
 #include <enigma_ci.h>
+#include <enigma_streamer.h>
 #include <helpwindow.h>
 #include <timer.h>
 #include <download.h>
@@ -4658,6 +4659,13 @@ void eZapMain::startPermanentTimeshift()
 		return;
 	if ( freeRecordSpace() < 10) // less than 10MB free
 		return;
+	eServiceReference streamingRef;
+	if ( eStreamer::getInstance()->getServiceReference(streamingRef)) // no timeshift when streaming
+	{
+		eDebug("[PERM] no permanent timeshifting when streamts is running");
+		return;
+	}
+
 	eDebug("starting permanent timeshift ...");
 
 	state |= recPermanentTimeshift;

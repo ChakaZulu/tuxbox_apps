@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.568 2008/03/15 09:55:04 dbluelle Exp $
+ * $Id: enigma_dyn.cpp,v 1.569 2008/08/03 14:09:33 dbluelle Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2014,6 +2014,9 @@ static eString getvideom3u()
 
 static eString videom3u(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+#ifndef DISABLE_FILE
+	eZapMain::getInstance()->stopPermanentTimeshift();
+#endif
 	eProcessUtils::killProcess("streamts");
 	
 	content->local_header["Content-Type"] = "video/mpegfile";
