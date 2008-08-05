@@ -311,42 +311,42 @@
 	
 	<station
 		name="NDR 90,3"
-		url="http://lsd.newmedia.nacamar.net/bb/redirect.lsc?content=live&amp;media=mp3&amp;stream=ndr/ndr903.mp3"
+               url="http://213.200.97.110:80/ndr/ndr903.mp3"
 		/>
 	
 	<station
 		name="NDR 1 Niedersachsen"
-		url="http://lsd.newmedia.nacamar.net/bb/redirect.lsc?content=live&amp;media=mp3&amp;stream=ndr/ndr1niedersachsen.mp3"
+               url="http://213.200.97.110:80/ndr/ndr1niedersachsen.mp3"
 		/>
 	
 	<station
 		name="NDR 1 Radio MV"
-		url="http://lsd.newmedia.nacamar.net/bb/redirect.lsc?content=live&amp;media=mp3&amp;stream=ndr/ndr1radiomv.mp3"
+               url="http://213.200.97.110:80/ndr/ndr1radiomv.mp3"
 		/>
 	
 	<station
 		name="NDR 1 Welle Nord"
-		url="http://lsd.newmedia.nacamar.net/bb/redirect.lsc?content=live&amp;media=mp3&amp;stream=ndr/ndr1wellenord.mp3"
+               url="http://213.200.97.110:80/ndr/ndr1wellenord.mp3"
 		/>
 	
 	<station
 		name="NDR 2"
-		url="http://lsd.newmedia.nacamar.net/bb/redirect.lsc?content=live&amp;media=mp3&amp;stream=ndr/ndr2.mp3"
+               url="http://213.200.97.110:80/ndr/ndr2.mp3"
 		/>
 	
 	<station
 		name="NDR Kultur"
-		url="http://lsd.newmedia.nacamar.net/bb/redirect.lsc?content=live&amp;media=mp3&amp;stream=ndr/ndrkultur.mp3"
+               url="http://213.200.97.110:80/ndr/ndrkultur.mp3"
 		/>
 	
 	<station
 		name="NDR Info"
-		url="http://lsd.newmedia.nacamar.net/bb/redirect.lsc?content=live&amp;media=mp3&amp;stream=ndr/ndrinfo.mp3"
+               url="http://213.200.97.110:80/ndr/ndrinfo.mp3"
 		/>
 	
 	<station
 		name="N-Joy Radio"
-		url="http://lsd.newmedia.nacamar.net/bb/redirect.lsc?content=live&amp;media=mp3&amp;stream=ndr/n-joy.mp3"
+               url="http://213.200.97.110:80/ndr/n-joy.mp3"
 		/>
 	
 	<station
