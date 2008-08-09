@@ -1,5 +1,7 @@
 #include <setup_osd.h>
 
+#include <setup_osd_extra.h>
+
 #include <setupskin.h>
 #include <enigma.h>
 #include <enigma_main.h>
@@ -271,6 +273,16 @@ void eZapOsdSetup::init_eZapOsdSetup()
 
 	CONNECT(ok->selected, eZapOsdSetup::okPressed);
 
+	expert=new eButton(this);
+	expert->setText(_("additional settings"));
+	expert->setShortcut("red");
+	expert->setShortcutPixmap("red");
+	expert->move(ePoint(235, 245));
+	expert->resize(eSize(205, 40));
+	expert->loadDeco();
+	expert->setHelpText(_("open additional settings"));
+	CONNECT( expert->selected, eZapOsdSetup::expertPressed );
+
 	statusbar=new eStatusBar(this);
 	statusbar->move( ePoint(0, clientrect.height()-50 ) );
 	statusbar->resize( eSize( clientrect.width(), 50) );
@@ -347,6 +359,20 @@ void eZapOsdSetup::skinPressed()
 	}
 	show();
 	setFocus(oldfocus);
+}
+
+void eZapOsdSetup::expertPressed()
+{
+	hide();
+	eOSDExpertSetup setup;
+#ifndef DISABLE_LCD
+	setup.setLCD(LCDTitle, LCDElement);
+#endif
+	setup.show();
+	setup.exec();
+	setup.hide();
+	eConfig::getInstance()->flush();
+	show();
 }
 
 int eZapOsdSetup::eventHandler( const eWidgetEvent &e )

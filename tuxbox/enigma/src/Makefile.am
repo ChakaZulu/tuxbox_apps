@@ -19,7 +19,8 @@ enigma_SOURCES = \
 	enigma_dyn_mount.cpp enigma_dyn_utils.cpp enigma_dyn_wap.cpp enigma_dyn_conf.cpp \
 	enigma_dyn_flash.cpp enigma_dyn_xml.cpp enigma_streamer.cpp enigma_dyn_timer.cpp \
 	enigma_processutils.cpp enigma_picmanager.cpp enigma_dyn_misc.cpp enigma_dyn_pda.cpp \
-	enigma_dyn_movieplayer.cpp enigma_dyn_boot.cpp rds_text.cpp swapmanager.cpp setup_timeshift.cpp
+	enigma_dyn_movieplayer.cpp enigma_dyn_boot.cpp rds_text.cpp swapmanager.cpp setup_timeshift.cpp \
+	setup_osd_extra.cpp
 
 enigma_LDADD_WHOLE = \
 	$(top_builddir)/lib/driver/libenigma_driver.a \

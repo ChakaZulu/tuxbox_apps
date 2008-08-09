@@ -13,7 +13,7 @@ class eZapOsdSetup: public eWindow
 	eSlider *sAlpha, *sBrightness, *sGamma;
 	eStatusBar *statusbar;
 
-	eButton *pluginoffs, *skin, *ok;
+	eButton *pluginoffs, *skin, *ok, *expert;
 	eCheckbox *simpleMainMenu;
 	int alpha, brightness, gamma;
 private:
@@ -24,6 +24,7 @@ private:
 	void gammaChanged( int );
 	void pluginPositionPressed();
 	void okPressed();
+	void expertPressed();
 	void init_eZapOsdSetup();
 public:
 	eZapOsdSetup();

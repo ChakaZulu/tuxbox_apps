@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.75 2008/01/30 19:01:42 dbluelle Exp $
+ * $Id: setup_extra.cpp,v 1.76 2008/08/09 15:14:02 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -105,33 +105,8 @@ void eExpertSetup::init_eExpertSetup()
 		CONNECT( list.selchanged, eExpertSetup::selChanged );
 	}
 #endif
-	timeout_infobar = new eListBoxEntryMulti(&list, _("infobar timeout (left, right)"));
-	timeout_infobar->add((eString)"  " + eString().sprintf(_("Infobar timeout %d sec"), 2) + (eString)" >", 2);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 3) + (eString)" >", 3);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 4) + (eString)" >", 4);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 5) + (eString)" >", 5);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 6) + (eString)" >", 6);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 7) + (eString)" >", 7);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 8) + (eString)" >", 8);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 9) + (eString)" >", 9);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 10) + (eString)" >", 10);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 11) + (eString)" >", 11);
-	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 12) + (eString)"  ", 12);
-	int timeoutInfobar = 6;
-	eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
-	timeout_infobar->setCurrent(timeoutInfobar);
-	CONNECT( list.selchanged, eExpertSetup::selInfobarChanged );
-
-	CONNECT((new eListBoxEntryCheck(&list,_("Serviceselector help buttons"),"/ezap/serviceselector/showButtons",_("show colored help buttons in service selector")))->selected, eExpertSetup::colorbuttonsChanged );
-	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite)
-		new eListBoxEntryCheck(&list, _("Show Sat position"), "/extras/showSatPos", _("show sat position in the infobar"));
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 		CONNECT((new eListBoxEntryCheck(&list,_("Enable fast zapping"),"/elitedvb/extra/fastzapping",_("enables faster zapping.. but with visible sync")))->selected, eExpertSetup::fastZappingChanged );
-	new eListBoxEntryCheck(&list, _("Skip confirmations"), "/elitedvb/extra/profimode", _("enable/disable confirmations"));
-	new eListBoxEntryCheck(&list, _("Hide error windows"), "/elitedvb/extra/hideerror", _("don't show zap error messages"));
-	new eListBoxEntryCheck(&list, _("Auto show Infobar"), "/ezap/osd/showOSDOnEITUpdate", _("always show infobar when new event info is avail"));
-	new eListBoxEntryCheck(&list, _("Show remaining Time"), "/ezap/osd/showCurrentRemaining", _("show event remaining time in the infobar"));
-	new eListBoxEntryCheck(&list, _("Hide shortcut icons"), "/ezap/osd/hideshortcuts", _("hide shortcut icons in menus"));
 	CONNECT((new eListBoxEntryCheck(&list, _("Use http authentification"), "/ezap/webif/lockWebIf", _("enables the http (user/password) authentification")))->selected, eExpertSetup::reinitializeHTTPServer );
 	CONNECT((new eListBoxEntryCheck(&list, _("Don't open serial port"), "/ezap/extra/disableSerialOutput", _("don't write debug messages to /dev/tts/0")))->selected, eExpertSetup::reinitializeHTTPServer );
 	new eListBoxEntryCheck(&list, _("Auto bouquet change"), "/elitedvb/extra/autobouquetchange", _("change into next bouquet when end of current bouquet is reached"));
@@ -274,18 +249,6 @@ void eExpertSetup::selChanged(eListBoxEntryMenu* e)
 		eConfig::getInstance()->setKey("/extras/record_splitsize", (int)e->getKey());
 }
 #endif
-
-void eExpertSetup::selInfobarChanged(eListBoxEntryMenu* e)
-{
-	if ( e == (eListBoxEntryMenu*)timeout_infobar )
-		eConfig::getInstance()->setKey("/enigma/timeoutInfobar", (int)e->getKey());
-}
-
-void eExpertSetup::colorbuttonsChanged(bool b)
-{
-	eServiceSelector *sel = eZap::getInstance()->getServiceSelector();
-	sel->setStyle( sel->getStyle(), true );
-}
 
 void eExpertSetup::reinitializeHTTPServer(bool)
 {
