@@ -121,6 +121,7 @@
 ./src/setup_lcd.cpp
 ./src/setup_keyboard.cpp
 ./src/setup_osd.cpp
+./src/setup_osd_extra.cpp
 ./src/setup_rc.cpp
 ./src/setup_rfmod.cpp
 ./src/setup_timezone.cpp
