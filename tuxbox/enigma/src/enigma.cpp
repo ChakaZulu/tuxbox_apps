@@ -161,6 +161,11 @@ void eZap::init_eZap(int argc, char **argv)
 	init->setRunlevel(eAutoInitNumbers::configuration);
 	Decoder::Initialize();
 
+	char *language=0;
+	if (eConfig::getInstance()->getKey("/elitedvb/language", language))
+		language=strdup("");
+	setlocale(LC_ALL, language);
+	free(language);
 	init->setRunlevel(eAutoInitNumbers::osd);
 
 	if (eServiceHandlerExternal::getInstance())
@@ -252,12 +257,6 @@ void eZap::init_eZap(int argc, char **argv)
 	for(std::map<eString,eRCDevice*>::iterator i(eRCInput::getInstance()->getDevices().begin());
 		i != eRCInput::getInstance()->getDevices().end(); ++i)
 			eActionMapList::getInstance()->loadDevice(i->second);
-
-	char *language=0;
-	if (eConfig::getInstance()->getKey("/elitedvb/language", language))
-		language=strdup("");
-	setlocale(LC_ALL, language);
-	free(language);
 
 	eString::readEncodingFile();
 
