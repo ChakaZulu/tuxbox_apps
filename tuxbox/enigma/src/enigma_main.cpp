@@ -3513,7 +3513,9 @@ void eZapMain::startSkip(int dir)
 			s="(ts) "+s;
 		skipLabel1->setText(s);
 	}
-	if (firstskip)
+	int showosd = 1;
+	eConfig::getInstance()->getKey("/ezap/osd/showOSDOnSwitchService", showosd );
+	if (firstskip && showosd)
 		showInfobar();
 	if ( timeout.isActive() )
 		timeout.stop();
@@ -5985,7 +5987,10 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*376)); // ca in TS
 					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 					updateProgress();
-					showInfobar(true);
+					int showosd = 1;
+					eConfig::getInstance()->getKey("/ezap/osd/showOSDOnSwitchService", showosd );
+					if (showosd)
+						showInfobar(true);
 
 				}
 				return 1;
@@ -6611,7 +6616,10 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 		}
 	}
 #endif // DISABLE_FILE
-	showInfobar(true);
+	int showosd = 1;
+	eConfig::getInstance()->getKey("/ezap/osd/showOSDOnSwitchService", showosd );
+	if (showosd)
+		showInfobar(true);
 	cur_event_id = -1;
 
 	eServiceInterface::getInstance()->removeRef(_serviceref);
