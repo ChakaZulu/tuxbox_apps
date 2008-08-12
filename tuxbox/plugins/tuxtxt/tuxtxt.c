@@ -308,7 +308,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.99 $";
+	char cvs_revision[] = "$Revision: 1.100 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -1544,7 +1544,7 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 
 void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 {
-	int byte, line;
+	int byte, line, name_len;
 	int national_subset_bak = tuxtxt_cache.national_subset;
 
 	memcpy(menu, configmenu[menulanguage], Menu_Height*Menu_Width);
@@ -1553,7 +1553,10 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 	{
 		memset(&menu[MenuLine[M_PID]*Menu_Width+3], 0x20,24);
 		if (SDT_ready)
-			memcpy(&menu[MenuLine[M_PID]*Menu_Width+3+(24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
+		{
+			name_len = pid_table[current_pid].service_name_len < 24 ? pid_table[current_pid].service_name_len : 24;	// Maximum of 24 chars will fit
+			memcpy(&menu[MenuLine[M_PID]*Menu_Width+3+(24-name_len)/2], &pid_table[current_pid].service_name, name_len);
+		}
 		else
 			tuxtxt_hex2str(&menu[MenuLine[M_PID]*Menu_Width + 13 + 3], tuxtxt_cache.vtxtpid);
 	}
@@ -1616,7 +1619,7 @@ void ConfigMenu(int Init)
 	int current_pid = 0;
 	int hotindex;
 	int oldscreenmode;
-	int i;
+	int i, name_len;
 	int national_subset_bak = tuxtxt_cache.national_subset;
 	char menu[Menu_Height*Menu_Width];
 
@@ -1745,9 +1748,10 @@ void ConfigMenu(int Init)
 
 						if (SDT_ready)
 						{
-							memcpy(&menu[MenuLine[M_PID]*Menu_Width+3+(24-pid_table[current_pid].service_name_len)/2],
-							       &pid_table[current_pid].service_name,
-							       pid_table[current_pid].service_name_len);
+							name_len = pid_table[current_pid].service_name_len < 24 ? pid_table[current_pid].service_name_len : 24;	// Maximum of 24 chars will fit
+							memcpy(&menu[MenuLine[M_PID]*Menu_Width+3+
+								(24-name_len)/2],
+								&pid_table[current_pid].service_name, name_len);
 						}
 						else
 							tuxtxt_hex2str(&menu[MenuLine[M_PID]*Menu_Width + 13 + 3], tuxtxt_cache.vtxtpid);
@@ -1862,10 +1866,12 @@ void ConfigMenu(int Init)
 						memset(&menu[MenuLine[M_PID]*Menu_Width + 3], ' ', 24);
 
 						if (SDT_ready)
+						{
+							name_len = pid_table[current_pid].service_name_len < 24 ? pid_table[current_pid].service_name_len : 24;	// Maximum of 24 chars will fit
 							memcpy(&menu[MenuLine[M_PID]*Menu_Width + 3 +
-											 (24-pid_table[current_pid].service_name_len)/2],
-									 &pid_table[current_pid].service_name,
-									 pid_table[current_pid].service_name_len);
+								(24-name_len)/2],
+								&pid_table[current_pid].service_name, name_len);
+						}
 						else
 							tuxtxt_hex2str(&menu[MenuLine[M_PID]*Menu_Width + 13 + 3], pid_table[current_pid].vtxt_pid);
 
@@ -2877,6 +2883,7 @@ void SwitchHintMode()
 	if (!hintmode)	/* toggle evaluation of level 2.5 information by explicitly switching off hintmode */
 	{
 		showl25 ^= 1;
+		saveconfig = 1;
 #if TUXTXT_DEBUG
 		printf("TuxTxt <ShowLevel2p5: %d>\n", showl25);
 #endif
