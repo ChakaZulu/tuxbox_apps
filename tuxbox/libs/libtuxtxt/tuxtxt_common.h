@@ -2281,7 +2281,7 @@ void tuxtxt_eval_l25(unsigned char* page_char, tstPageAttr *page_atrb, int hintm
 
 
 			for (r = 0; r < 25; r++)
-				for (c = 0; c < 39; c++)
+				for (c = 0; c < 40; c++)
 				{
 					if (BlackBgSubst && page_atrb[o].bg == black && !(page_atrb[o].IgnoreAtBlackBgSubst))
 					{
