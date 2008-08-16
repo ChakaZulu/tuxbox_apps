@@ -31,9 +31,9 @@ public:
 			return sortpos < ((ePlugin&)e).sortpos;
 	}
 };
-class ePluginContextMenu: public eListBoxWindow<eListBoxEntryText>
+class ePluginContextMenu: public eListBoxWindow<eListBoxEntryMenu>
 {
-	void entrySelected(eListBoxEntryText *s);
+	void entrySelected(eListBoxEntryMenu *s);
 	void init_ePluginContextMenu(ePlugin* current_plugin, int reordering);
 public:
 	ePluginContextMenu(ePlugin* current_plugin, int reordering);

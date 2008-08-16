@@ -70,7 +70,7 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, eSimpleConfigFi
 }
 
 ePluginContextMenu::ePluginContextMenu(ePlugin* current_plugin, int reordering)
-: eListBoxWindow<eListBoxEntryText>(_("Plugin Menu"), 6, 400, true)
+: eListBoxWindow<eListBoxEntryMenu>(_("Plugin Menu"), 6, 400, true)
 {
 	init_ePluginContextMenu(current_plugin, reordering);
 }
@@ -80,19 +80,26 @@ void ePluginContextMenu::init_ePluginContextMenu(ePlugin* current_plugin, int re
 
 	move(ePoint(150, 80));
 	if ( reordering )
-		prev = new eListBoxEntryText(&list, _("disable move mode"), (void*)1, 0, _("switch move mode off"));
+		prev = new eListBoxEntryMenu(&list, _("disable move mode"), _("switch move mode off"), 0, (void*)1);
 	else
-		prev = new eListBoxEntryText(&list, _("enable move mode"), (void*)1, 0, _("activate mode to simply change the entry order"));
+		prev = new eListBoxEntryMenu(&list, _("enable move mode"), _("activate mode to simply change the entry order"), 0, (void*)1);
 	struct stat64 s;
 	if (!::stat64(current_plugin->cfgname.c_str(),&s) && ((s.st_mode & S_IWUSR) == S_IWUSR))
 	{
-		prev = new eListBoxEntryText(&list, _("rename"), (void*)2, 0, _("rename the selected plugin"));
+		prev = new eListBoxEntryMenu(&list, _("rename"), _("rename the selected plugin"), 0,(void*)2);
 	}
+	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	int ColorButtonsFirst=0;
+	eConfig::getInstance()->getKey("/enigma/plugins/colorbuttonsfirst", ColorButtonsFirst);
+	if (ColorButtonsFirst)
+		prev = new eListBoxEntryMenu(&list, _("number buttons first"), _("use number buttons as first shortcuts"),0,(void*)3);
+	else
+		prev = new eListBoxEntryMenu(&list, _("color buttons first"), _("use color buttons as first shortcuts"),0,(void*)3);
 	list.setFlags(eListBoxBase::flagHasShortcuts);
 	CONNECT(list.selected, ePluginContextMenu::entrySelected);
 }
 
-void ePluginContextMenu::entrySelected(eListBoxEntryText *test)
+void ePluginContextMenu::entrySelected(eListBoxEntryMenu *test)
 {
 	if (!test)
 		close(0);
@@ -110,6 +117,10 @@ eZapPlugins::eZapPlugins(Types type, eWidget* lcdTitle, eWidget* lcdElement)
 	setLCD(lcdTitle, lcdElement);
 #endif
 	list.setFlags(eListBoxBase::flagHasShortcuts);
+	int ColorButtonsFirst=0;
+	eConfig::getInstance()->getKey("/enigma/plugins/colorbuttonsfirst", ColorButtonsFirst);
+	if (ColorButtonsFirst)
+		list.setFlags(eListBoxBase::flagColorShortcutsFirst);
 	CONNECT(list.selected, eZapPlugins::selected);
 	valign();
 }
@@ -423,6 +434,7 @@ void eZapPlugins::showContextMenu()
 	m.show();
 	int res=m.exec();
 	m.hide();
+	int ColorButtonsFirst=0;
 	switch (res)
 	{
 	case 1: // enable/disable movemode
@@ -430,6 +442,15 @@ void eZapPlugins::showContextMenu()
 		break;
 	case 2: // rename plugin
 		renamePlugin();
+		break;
+	case 3:
+		eConfig::getInstance()->getKey("/enigma/plugins/colorbuttonsfirst", ColorButtonsFirst);
+		ColorButtonsFirst = 1-ColorButtonsFirst;
+		eConfig::getInstance()->setKey("/enigma/plugins/colorbuttonsfirst", ColorButtonsFirst);
+		if (ColorButtonsFirst)
+			list.setFlags(eListBoxBase::flagColorShortcutsFirst);
+		else
+			list.removeFlags(eListBoxBase::flagColorShortcutsFirst);
 		break;
 	default:
 		break;

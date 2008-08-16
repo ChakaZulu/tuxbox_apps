@@ -1006,37 +1006,39 @@ int eListBoxBase::getShortcut(eListBoxEntry* e)
 int eListBoxBase::eventHandlerShortcuts(const eWidgetEvent &event)
 {
 	int num=-1;
+	int ColorShortcutsFirst = (getFlags() & flagColorShortcutsFirst ? 1 : 0);
+
 	switch (event.type)
 	{
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_shortcutActions->number0)
-			num=9;
+			num=9 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number1)
-			num=0;
+			num=0 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number2)
-			num=1;
+			num=1 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number3)
-			num=2;
+			num=2 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number4)
-			num=3;
+			num=3 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number5)
-			num=4;
+			num=4 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number6)
-			num=5;
+			num=5 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number7)
-			num=6;
+			num=6 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number8)
-			num=7;
+			num=7 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->number9)
-			num=8;
+			num=8 + ColorShortcutsFirst*4;
 		else if (event.action == &i_shortcutActions->red)
-			num=10;
+			num=10 - ColorShortcutsFirst*10;
 		else if (event.action == &i_shortcutActions->green)
-			num=11;
+			num=11 - ColorShortcutsFirst*10;
 		else if (event.action == &i_shortcutActions->yellow)
-			num=12;
+			num=12 - ColorShortcutsFirst*10;
 		else if (event.action == &i_shortcutActions->blue)
-			num=13;
+			num=13 - ColorShortcutsFirst*10;
 		else
 			break;
 		if (num != -1)
@@ -1290,6 +1292,14 @@ const eString& eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor
 		if (!hideshortcuts)
 		{
 			int shortcut = listbox->getShortcut(this);
+			if (listbox->getFlags() & eListBoxBase::flagColorShortcutsFirst)
+			{
+				if (shortcut < 5) 
+					shortcut += 10;
+				else if (shortcut < 15)
+					shortcut -= 4;
+			}
+		
 			eString strShortcut;
 			switch (shortcut)
 			{
