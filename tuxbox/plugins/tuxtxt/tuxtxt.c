@@ -308,7 +308,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.100 $";
+	char cvs_revision[] = "$Revision: 1.101 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -1601,7 +1601,7 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 			tuxtxt_cache.national_subset = menusubset[menulanguage];
 
 		if (line == Menu_Height-2)
-			memcpy(&menu[line*Menu_Width + 21], versioninfo, 4);
+			memcpy(&menu[line*Menu_Width + 20], versioninfo, 5);
 
 		for (byte = 0; byte < Menu_Width; byte++)
 			RenderCharFB(menu[line*Menu_Width + byte], &atrtable[menuatr[line*Menu_Width + byte] - '0' + ATR_MENU0]);
@@ -3148,7 +3148,7 @@ void RenderMessage(int Message)
 
 /*                     00000000001111111111222222222233333333334 */
 /*                     01234567890123456789012345678901234567890 */
-	char message_1[] = "אבבבבבבב www.tuxtxt.net x.xx בבבבבבבגט";
+	char message_1[] = "אבבבבבבב www.tuxtxt.net x.xxx בבבבבבגט";
 	char message_2[] = "ד                                   הי";
 /* 	char message_3[] = "ד   suche nach Teletext-Anbietern   הי"; */
 	char message_4[] = "ד                                   הי";
@@ -3159,7 +3159,7 @@ void RenderMessage(int Message)
 /* 	char message_8[] = "ד  warte auf Empfang von Seite 100  הי"; */
 /* 	char message_9[] = "ד     Seite 100 existiert nicht!    הי"; */
 
-	memcpy(&message_1[24], versioninfo, 4);
+	memcpy(&message_1[24], versioninfo, 5);
 	/* reset zoom */
 	zoommode = 0;
 
@@ -3212,7 +3212,7 @@ void RenderMessage(int Message)
 	PosX = StartX + fontwidth+5;
 	PosY = StartY + fontheight*16;
 	for (byte = 0; byte < 37; byte++)
-		RenderCharFB(message_1[byte], &atrtable[menuatr + ((byte >= 9 && byte <= 27) ? 1 : 0)]);
+		RenderCharFB(message_1[byte], &atrtable[menuatr + ((byte >= 9 && byte <= 28) ? 1 : 0)]);
 	RenderCharFB(message_1[37], &atrtable[menuatr + 2]);
 
 	PosX = StartX + fontwidth+5;
