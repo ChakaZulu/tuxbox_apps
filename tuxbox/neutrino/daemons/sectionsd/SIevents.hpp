@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.28 2007/05/23 16:39:55 papst Exp $
+// $Id: SIevents.hpp,v 1.29 2008/08/16 19:23:18 seife Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -373,6 +373,9 @@ public:
 	event_id_t uniqueKey(void) const {
 		return CREATE_EVENT_ID(CREATE_CHANNEL_ID, eventID);
 	}
+	int runningStatus(void) const {
+		return running;
+	}
     SIcomponents components;
     SIparentalRatings ratings;
     SIlinkage_descs linkage_descs;
@@ -400,6 +403,7 @@ public:
     std::map<std::string, std::string> langName;
     std::map<std::string, std::string> langText;
     std::map<std::string, std::string> langExtendedText;
+	int running;
 };
 
 // Fuer for_each

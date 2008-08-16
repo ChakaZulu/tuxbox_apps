@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.11 2008/01/05 18:05:13 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.12 2008/08/16 19:23:18 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -41,6 +41,7 @@ class DMX
 	sections_id_t first_skipped;
 	int		current_service;
 	unsigned char	eit_version;
+	bool		cache; /* should read sections be cached? true for all but dmxCN */
 
 	inline bool isOpen(void) { return (fd != -1); }
 	
@@ -67,7 +68,7 @@ class DMX
 	pthread_mutex_t        start_stop_mutex;
 
 
-	DMX(const unsigned short p, const unsigned short bufferSizeInKB);
+	DMX(const unsigned short p, const unsigned short bufferSizeInKB, const bool cache = true);
 	~DMX();
 
 	int start(void);

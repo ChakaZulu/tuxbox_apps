@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.37 2008/06/23 09:27:47 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.38 2008/08/16 19:23:18 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -52,7 +52,7 @@ extern void showProfiling(std::string text);
 extern bool timeset;
 
 
-DMX::DMX(const unsigned short p, const unsigned short bufferSizeInKB)
+DMX::DMX(const unsigned short p, const unsigned short bufferSizeInKB, const bool c)
 {
 	fd = -1;
 	lastChanged = time(NULL);
@@ -74,6 +74,7 @@ DMX::DMX(const unsigned short p, const unsigned short bufferSizeInKB)
 	current_service = 0;
 
 	first_skipped = 0;
+	cache = c;
 }
 
 DMX::~DMX()
@@ -262,7 +263,7 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 	/* filter == 0 && maks == 0 => EIT dummy filter to slow down EIT thread startup */
 	if (pID == 0x12 && filters[filter_index].filter == 0 && filters[filter_index].mask == 0)
 	{
-		dprintf("dmx: dummy filter, sleeping for %d ms\n", timeoutInMSeconds);
+		//dprintf("dmx: dummy filter, sleeping for %d ms\n", timeoutInMSeconds);
 		usleep(timeoutInMSeconds * 1000);
 		timeouts++;
 		return NULL;
@@ -354,7 +355,7 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		
 		// only current sections 
 		if (extended_header->current_next_indicator != 0) {
-			// if ((initial_header.table_id >= 0x4e) && (initial_header.table_id <= 0x6f)) {
+			// if ((initial_header.table_id >= 0x4e) && (initial_header.table_id <= 0x6f))
 			if (pID == 0x12) {
 				eit_extended_header = (eit_extended_section_header *)(buf+8);
 				current_onid = 	eit_extended_header->original_network_id_hi * 256 +
@@ -376,6 +377,10 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 				dprintf("EIT old: %d new version: %d\n",eit_version,extended_header->version_number);
 				eit_version = extended_header->version_number;
 			}
+
+			/* if we are not caching the already read sections (CN-thread), then get out now */
+			if (!cache)
+				goto out;
 
 			//find current section in list
 			MyDMXOrderUniqueKey::iterator di = myDMXOrderUniqueKey.find(create_sections_id(
@@ -467,6 +472,7 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		}
 	}
 	
+ out:
 	memcpy(buf, &initial_header, 3);
 	
 	return buf;
@@ -477,10 +483,12 @@ int DMX::immediate_start(void)
 	if (isOpen())
 		return 1;
 
-	if (real_pauseCounter != 0)
+	if (real_pauseCounter != 0) {
+		dprintf("DMX::immediate_start: realPausecounter !=0 !\n");
 		return 0;
+	}
 
-	if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1)
+	if ((fd = open(DEMUX_DEVICE, O_RDWR|O_NONBLOCK)) == -1)
 	{
 		perror("[sectionsd] open dmx");
 		return 2;
@@ -518,8 +526,10 @@ int DMX::start(void)
 
 int DMX::real_pause(void)
 {
-	if (!isOpen())
+	if (!isOpen()) {
+		dprintf("DMX::real_pause: (!isOpen())\n");
 		return 1;
+	}
 
 	lock();
 
@@ -537,8 +547,9 @@ int DMX::real_pause(void)
 		}
 #endif
 	}
+	//else
+	//	dprintf("real_pause: counter %d\n", real_pauseCounter);
 
-	//dprintf("real_pause: %d\n", real_pauseCounter);
 	unlock();
 
 	return 0;
@@ -568,9 +579,8 @@ int DMX::real_unpause(void)
 #endif
 		//dprintf("real_unpause DONE: %d\n", real_pauseCounter);
 	}
-
-	//    else
-	//dprintf("real_unpause NOT DONE: %d\n", real_pauseCounter);
+	//else
+	//	dprintf("real_unpause NOT DONE: %d\n", real_pauseCounter);
 
 	unlock();
 
@@ -643,8 +653,8 @@ int DMX::unpause(void)
 
 const char *dmx_filter_types [] = {
 			"dummy filter",
-			"actual transport stream, scheduled",
 			"other transport stream, now/next",
+			"actual transport stream, scheduled",
 			"actual transport stream, scheduled2",
 //			"other transport stream, scheduled"
 			"other transport stream, scheduled 1/2",

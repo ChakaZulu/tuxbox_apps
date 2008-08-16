@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.34 2007/05/23 16:39:55 papst Exp $
+// $Id: SIevents.cpp,v 1.35 2008/08/16 19:23:18 seife Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -61,6 +61,8 @@ SIevent::SIevent(const struct eit_event *e)
 	if (start_time && duration)
 		times.insert(SItime(start_time, duration));
 
+	running = (int)e->running_status;
+
 	service_id = 0;
 	original_network_id = 0;
 	transport_stream_id = 0;
@@ -100,6 +102,7 @@ SIevent::SIevent(const SIevent &e)
 	components=e.components;
 	ratings=e.ratings;
 	linkage_descs=e.linkage_descs;
+	running=e.running;
 }
 
 int SIevent::saveXML(FILE *file, const char *serviceName) const
