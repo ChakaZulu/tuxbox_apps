@@ -32,6 +32,7 @@
 
 #ifndef DISABLE_FILE
 #include <lib/dvb/record.h>
+#include <lib/system/file_eraser.h>
 
 void ePermanentTimeshift::Start()
 {
@@ -42,6 +43,18 @@ void ePermanentTimeshift::Start()
 	current_slice_playing = slicelist.end();
 	IsTimeshifting = 1;
 	gettimeofday(&(last_split),0);
+	int minutes = 30;
+	eConfig::getInstance()->getKey("/enigma/timeshift/permanentminutes", minutes );
+
+	struct stat64 s;
+	eString filename = eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, minutes);
+	while (!stat64(filename.c_str(), &s))
+	{
+		eBackgroundFileEraser::getInstance()->erase(filename.c_str());
+		minutes++;
+		filename = eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, minutes);
+	}
+
 	lock.unlock();
 }
 void ePermanentTimeshift::Stop()
