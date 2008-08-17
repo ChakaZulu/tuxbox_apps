@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.224 2008/08/17 13:39:59 seife Exp $
+	$Id: infoviewer.cpp,v 1.225 2008/08/17 13:52:18 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1194,12 +1194,12 @@ returns mode of painted channel logo,
 	char strChanId[16];
 	sprintf((char*) strChanId, "%llx", logo_channel_id);
 	std::string	mimetype = "raw",
-						strLogoIDName = (std::string)strChanId + "." + mimetype,
-						strLogoName = ChannelName + "." + mimetype,
-						strAbsIconChIDPath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoIDName,
-						strAbsIconChNamePath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoName,
-						strAbsIconPath,
-						strErrText= "[infoviewer] channel logo too large...use maximal %2dpx%2dpx (current: %2dpx%2dpx)\n";
+			strLogoIDName = (std::string)strChanId + "." + mimetype,
+			strLogoName = ChannelName + "." + mimetype,
+			strAbsIconChIDPath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoIDName,
+			strAbsIconChNamePath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoName,
+			strAbsIconPath,
+			strErrText= "[infoviewer] channel logo too large...use maximal %2dpx%2dpx (current: %2dpx%2dpx)\n";
 	
 	int x_mid, y_mid, logo_w, logo_h; 
 	int logo_x=0, logo_y=0;
@@ -1365,26 +1365,26 @@ void CInfoViewer::showEpgInfo()   //message on event change
 	char nextStart[10];
 	int mode = g_Zapit->getMode();
 	struct tm *pnStartZeit = localtime(&info_CurrentNext.next_zeit.startzeit);
-		sprintf( (char*)&nextStart, "%02d:%02d", pnStartZeit->tm_hour, pnStartZeit->tm_min);
+	sprintf((char*)&nextStart, "%02d:%02d", pnStartZeit->tm_hour, pnStartZeit->tm_min);
 
-	/* show epg info only if we in TV- or Radio mode and current event is not the same like before */	
-	if ((eventname != info_CurrentNext.current_name) && (mode !=0)) 
+	/* show epg info only if we in TV- or Radio mode and current event is not the same like before */
+	if ((eventname != info_CurrentNext.current_name) && (mode !=0))
+	{
+		eventname = info_CurrentNext.current_name;
+		if (g_settings.infobar_show == 1)
 		{
-			eventname = info_CurrentNext.current_name;
-				if (g_settings.infobar_show == 1)
-						{
-	 					if (eventname.length() !=0) // simple message
- 							{
-							std::string event = eventname + "\n" + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;	
-							std::string event_message =  ZapitTools::Latin1_to_UTF8(event.c_str());
-							ShowHintUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, event_message.c_str(), 420 , 6, "epginfo.raw"); 
-							}
-						}
-				else if (g_settings.infobar_show == 2) // complex message, show infobar
-						{							
-						g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR , 0 );
-						}	
-		}			
+			if (eventname.length() !=0) // simple message
+ 			{
+				std::string event = eventname + "\n" + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;
+				std::string event_message =  ZapitTools::Latin1_to_UTF8(event.c_str());
+				ShowHintUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, event_message.c_str(), 420 , 6, "epginfo.raw"); 
+			}
+		}
+		else if (g_settings.infobar_show == 2) // complex message, show infobar
+		{
+			g_RCInput->postMsg(NeutrinoMessages::SHOW_INFOBAR , 0);
+		}
+	}
 }
 
 //
