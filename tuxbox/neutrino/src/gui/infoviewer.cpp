@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.223 2008/07/21 21:24:04 dbt Exp $
+	$Id: infoviewer.cpp,v 1.224 2008/08/17 13:39:59 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -993,7 +993,10 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 			runningPercent=(jetzt-info_CurrentNext.current_zeit.startzeit) * 112 / info_CurrentNext.current_zeit.dauer;
 			if (runningPercent > 112)	// this would lead to negative value in paintBoxRel
 				runningPercent = 112;	// later on which can be fatal...
-			sprintf((char*)&runningRest, "%d / %d min", seit, rest);
+			if (rest >= 0)
+				sprintf((char*)&runningRest, "%d / %d min", seit, rest);
+			else 
+				sprintf((char*)&runningRest, "%d +%d min", info_CurrentNext.current_zeit.dauer / 60, -rest);
 		}
 		struct tm *pStartZeit = localtime(&info_CurrentNext.current_zeit.startzeit);
 		sprintf((char*)&runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
