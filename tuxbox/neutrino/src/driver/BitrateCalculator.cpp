@@ -260,7 +260,6 @@ unsigned int BitrateCalculatorRadio::calc(unsigned int &long_average)
 	int 			b_len, b_start;
 	unsigned long long 	bit_s = 0;
 	long  			d_tim_ms;
-	int 			timeout = 100;
 	unsigned int		short_average = 0;
 
 	b_len = 0;
