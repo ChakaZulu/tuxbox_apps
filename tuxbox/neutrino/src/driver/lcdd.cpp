@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.55 2008/01/26 01:16:33 dbt Exp $
+	$Id: lcdd.cpp,v 1.56 2008/08/17 15:33:16 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -391,7 +391,7 @@ void CLCD::showVolume(const char vol, const bool perform_update)
 		}
 		else
 		{
-			int dp = int( vol/100.0*61.0+12.0);
+			int dp = vol*61/100+12;
 			display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
 		}
 		if(mode == MODE_AUDIO)
@@ -411,69 +411,66 @@ void CLCD::showVolume(const char vol, const bool perform_update)
 
 void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 {
-
+	int left, top, width, height = 5;
+	bool draw = true;
 	percentOver = perc;
 	if (mode == MODE_TVRADIO)
 	{
-        if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 0)
+		if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 0)
 		{
-			display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
-			//strichlin
-			if (perc==255)
-			{
-				display.draw_line (12,55,72,59, CLCDDisplay::PIXEL_ON);
-			}
-			else
-			{
-				int dp = int( perc/100.0*61.0+12.0);
-				display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
-			}
+			left = 12; top = 55; width = 60;
 		}
 		else if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 2)
 		{
-			display.draw_fill_rect (11,2,117,8, CLCDDisplay::PIXEL_OFF);
-			//strichlin
-			if (perc==255)
-			{
-				display.draw_line (12,3,116,7, CLCDDisplay::PIXEL_ON);
-			}
-			else
-			{
-				int dp = int( perc/100.0*105.0+12.0);
-				display.draw_fill_rect (11,2,dp,8, CLCDDisplay::PIXEL_ON);
-			}
+			left = 12; top = 3; width = 104;
 		}
 		else if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 3)
 		{
-			display.draw_fill_rect (11,2,97,8, CLCDDisplay::PIXEL_OFF);
-			//strichlin
-			if (perc==255)
+			left = 12; top = 3; width = 84;
+			const char * icon;
+            
+			if(g_RemoteControl != NULL)
 			{
-				display.draw_line (12,3,96,7, CLCDDisplay::PIXEL_ON);
+				uint count = g_RemoteControl->current_PIDs.APIDs.size();
+				if ((g_RemoteControl->current_PIDs.PIDs.selected_apid < count) &&
+				    (g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3))
+					icon = DATADIR "/lcdd/icons/dd.raw";
+				else
+					icon = DATADIR "/lcdd/icons/stereo.raw";
+
+				display.paintIcon(icon, 101, 1, false);
+			}
+		}
+		else
+			draw = false;
+
+		if (draw)
+		{
+			display.draw_fill_rect (left-1, top-1, left+width+1, top+height, CLCDDisplay::PIXEL_OFF);
+			if (perc == (unsigned char) -1)
+			{
+				display.draw_line (left, top, left+width, top+height-1, CLCDDisplay::PIXEL_ON);
 			}
 			else
 			{
-				int dp = int( perc/100.0*86.0+12.0);
-				display.draw_fill_rect (11,2,dp,8, CLCDDisplay::PIXEL_ON);
+				int dp;
+				if (perc == (unsigned char) -2)
+					dp = width+1;
+				else
+					dp = perc * (width + 1) / 100;
+				display.draw_fill_rect (left-1, top-1, left+dp, top+height, CLCDDisplay::PIXEL_ON);
+
+				if (perc == (unsigned char) -2)
+				{
+					// draw a "+" to show that the event is overdue
+					display.draw_line(left+width-2, top+1, left+width-2, top+height-2, CLCDDisplay::PIXEL_OFF);
+					display.draw_line(left+width-1, top+(height/2), left+width-3, top+(height/2), CLCDDisplay::PIXEL_OFF);
+				}
 			}
-
-            const char * icon;
-            
-            if( g_RemoteControl != NULL )
-            {
-                uint count = g_RemoteControl->current_PIDs.APIDs.size();
-                if ( ( g_RemoteControl->current_PIDs.PIDs.selected_apid < count ) &&
-                     ( g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3 ) )
-                    icon = DATADIR "/lcdd/icons/dd.raw";
-                else
-                    icon = DATADIR "/lcdd/icons/stereo.raw";
-
-                display.paintIcon( icon, 101, 1, false );
-            }
 		}
 
 		if (perform_update)
-            displayUpdate();
+			displayUpdate();
 	}
 }
 
