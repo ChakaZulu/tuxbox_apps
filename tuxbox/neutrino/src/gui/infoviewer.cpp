@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.225 2008/08/17 13:52:18 seife Exp $
+	$Id: infoviewer.cpp,v 1.226 2008/08/17 15:33:47 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1352,6 +1352,8 @@ void CInfoViewer::showLcdPercentOver()
 		{
 			if (jetzt < info_CurrentNext.current_zeit.startzeit)
 				runningPercent = 0;
+			else if (jetzt > info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer)
+				runningPercent = -2; /* overtime */
 			else
 				runningPercent=MIN((jetzt-info_CurrentNext.current_zeit.startzeit) * 100 /
 					            info_CurrentNext.current_zeit.dauer ,100);
