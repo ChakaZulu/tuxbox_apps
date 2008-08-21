@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.21 2007/07/26 21:29:35 pieterg Exp $
+ * $Id: setupskin.cpp,v 1.22 2008/08/21 20:19:16 fergy Exp $
  */
 
 #include <setupskin.h>
@@ -26,11 +26,16 @@
 #include <lib/gui/ebutton.h>
 #include <lib/gui/emessage.h>
 #include <lib/system/econfig.h>
+#include <lib/gdi/epng.h>
+#include <lib/gdi/gfbdc.h>
+
+#include <lib/gui/ewidget.h>
+
 
 void eSkinSetup::loadSkins()
 {
 	eListBoxEntrySkin* selection=0;
-
+        lskins->beginAtomic();
 	const char *skinPaths[] =
 	{
 		CONFIGDIR "/enigma/skins/",
@@ -91,6 +96,7 @@ void eSkinSetup::loadSkins()
 		lskins->setCurrent(selection);
 	if ( current_skin )
 		free(current_skin);
+        lskins->endAtomic();
 }
 
 void eSkinSetup::accept()
@@ -98,6 +104,57 @@ void eSkinSetup::accept()
 	skinSelected(lskins->getCurrent());
 }
 
+void eSkinSetup::skinchanged(eListBoxEntrySkin *skin)
+{
+        eString icon;
+        eString command;
+        eString iconname; 
+        eString finalname;
+        int len;
+
+        iconname = skin->getESML();
+        len = iconname.find(".esml");
+        finalname= iconname.substr(0,len)+ ".png";
+
+        system(command.c_str());
+        lb3->clear();
+        gPixmap *img = 0;
+        img = loadPNG(finalname.c_str());
+        if(img)
+        { 
+           gPixmap * mp = &gFBDC::getInstance()->getPixmap();
+           gPixmapDC mydc(img);
+           gPainter p(mydc);
+           p.mergePalette(*mp);
+
+           lb3->move(ePoint(280, 15));
+           lb3->resize(eSize(256, 200));
+           lb3->setBlitFlags(BF_ALPHATEST);
+           lb3->setProperty("align", "center");
+           lb3->setPixmap(img);
+           lb3->setPixmapPosition(ePoint(1, 1));
+        }
+        else
+        {
+           gPixmap *img = loadPNG("/share/tuxbox/enigma/pictures/nopreview.png");
+           if(img)
+           {
+              gPixmap * mp = &gFBDC::getInstance()->getPixmap();
+              gPixmapDC mydc(img);
+              gPainter p(mydc);
+              p.mergePalette(*mp);
+
+              lb3->move(ePoint(280, 15));
+              lb3->resize(eSize(256, 200));
+              lb3->setBlitFlags(BF_ALPHATEST);
+              lb3->setProperty("align", "center");
+              lb3->setPixmap(img);
+              lb3->setPixmapPosition(ePoint(1, 1));
+              lb3->loadDeco();
+           }
+        }
+        lb3->show();
+}
 void eSkinSetup::skinSelected(eListBoxEntrySkin *skin)
 {
 	if (!skin)
@@ -112,23 +169,35 @@ void eSkinSetup::skinSelected(eListBoxEntrySkin *skin)
 
 eSkinSetup::eSkinSetup()
 {
+        lb3     = new eLabel(this);
+        move(ePoint(50,50));
+        cresize(eSize(590,376));
+        setText("Skin Selector");
 	baccept=new eButton(this);
 	baccept->setName("accept");
+	baccept->setText("Save");
+        baccept->setShortcut("green");
+        baccept->setShortcutPixmap("green");
+        baccept->resize(eSize(250,40));
+        baccept->move(ePoint(10,320)); 
+        baccept->loadDeco(); 
+
 	lskins=new eListBox<eListBoxEntrySkin>(this);
 	lskins->setName("skins");
 	lskins->setFlags(eListBoxBase::flagLostFocusOnLast);
+        lskins->move(ePoint(10,10));
+        lskins->resize(eSize(clientrect.width()-350,clientrect.height() -60));
+        lskins->loadDeco();
+
 	statusbar=new eStatusBar(this);
 	statusbar->setName("statusbar");
 
 	CONNECT(baccept->selected, eSkinSetup::accept);
 	CONNECT(lskins->selected, eSkinSetup::skinSelected);
-	
+
 	setFocus(lskins);
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "setup.skins"))
-		eFatal("skin load of \"setup.skins\" failed");
-
+	CONNECT(lskins->selchanged, eSkinSetup::skinchanged);
 	loadSkins();
 	
 	setHelpID(88);
@@ -153,5 +222,14 @@ int eSkinSetup::eventHandler(const eWidgetEvent &event)
 		default:
 			break;
 	}
-	return eWindow::eventHandler(event);
+	return eWidget::eventHandler(event);
+}
+int  eListBoxEntrySkin::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+		default:
+			break;
+	}
+	return eListBoxEntry::eventHandler(event);
 }

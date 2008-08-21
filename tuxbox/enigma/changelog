@@ -167,3 +167,4 @@
 200312172100 4 56 Support for dreamcrypt smartcards added (all cardreaders can handle this now)
 200312221545 5 * Zap to services in any bouquet is now possible (via servicenumber)
 200312221545 5 * Add support for bouquets in file mode
+200808212212 2 * Add skin preview

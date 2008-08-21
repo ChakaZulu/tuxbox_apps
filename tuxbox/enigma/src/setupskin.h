@@ -18,16 +18,22 @@ public:
 	}
 
 	const eString &getESML() const { return esml; };
+protected:
+	int eventHandler(const eWidgetEvent &event);
 };
 
 class eSkinSetup: public eWindow
 {
 	eButton *baccept;
+	eLabel  *lb3;
 	eListBox<eListBoxEntrySkin> *lskins;
 	eStatusBar* statusbar;
 	void loadSkins();
 	void accept();
 	void skinSelected(eListBoxEntrySkin *l);
+	void skinchanged(eListBoxEntrySkin *l);
+
+protected:
 	int eventHandler(const eWidgetEvent &event);
 public:
 	eSkinSetup();
