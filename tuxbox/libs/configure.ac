@@ -2,6 +2,7 @@ AC_INIT(tuxbox-apps-tuxbox-libs,0.0.1,,libs)
 AM_INIT_AUTOMAKE(libs,0.0.1)
 
 TUXBOX_APPS
+TUXBOX_APPS_DIRECTORY
 
 AC_PROG_CC
 AC_PROG_CXX

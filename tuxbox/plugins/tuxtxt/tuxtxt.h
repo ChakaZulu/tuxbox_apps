@@ -28,18 +28,10 @@
 
 #include <linux/fb.h>
 
-#if HAVE_DVB_API_VERSION < 3
-#include <dbox/avia_gt_pig.h>
-#else
-#include <linux/input.h>
-#include <linux/videodev.h>
-#endif
 
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
-#include <dbox/avs_core.h>
-#include <dbox/saa7126_core.h>
 #include <dbox/fp.h>
 #include <plugin.h>
 #include <dbox/lcd-ks0713.h>
@@ -47,26 +39,13 @@
 
 #include "tuxtxt_def.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_CACHE_H
-#include FT_CACHE_SMALL_BITMAPS_H
-
-/* devices */
-#define AVS "/dev/dbox/avs0"
-#define SAA "/dev/dbox/saa0"
-#if HAVE_DVB_API_VERSION < 3
-#define PIG "/dev/dbox/pig0"
-#else
-#define PIG "/dev/v4l/video0"
-#endif
-
 
 #if TUXTXT_CFG_STANDALONE
 #include "tuxtxt_common.h"
 #else
 /* variables and functions from libtuxtxt */
 extern tuxtxt_cache_struct tuxtxt_cache;
+extern tstPageAttr tuxtxt_atrtable[];
 extern int tuxtxt_init();
 extern void tuxtxt_close();
 extern void tuxtxt_start(int tpid);  // Start caching
@@ -87,45 +66,26 @@ extern void tuxtxt_RenderDRCS(int xres,unsigned char *s,unsigned char *d,unsigne
 #if TUXTXT_DEBUG
 extern int tuxtxt_get_zipsize(int p, int sp);
 #endif
+extern void tuxtxt_RenderPage(tstRenderInfo* renderinfo);
+extern void tuxtxt_SetPosX(tstRenderInfo* renderinfo, int column);
+extern void tuxtxt_RenderCharFB(tstRenderInfo* renderinfo, int Char, tstPageAttr *Attribute);
+extern void tuxtxt_ClearBB(tstRenderInfo* renderinfo,int color);
+extern void tuxtxt_ClearFB(tstRenderInfo* renderinfo,int color);
+extern void tuxtxt_setcolors(tstRenderInfo* renderinfo,unsigned short *pcolormap, int offset, int number);
+extern int tuxtxt_SetRenderingDefaults(tstRenderInfo* renderinfo);
+extern int tuxtxt_InitRendering(tstRenderInfo* renderinfo,int setTVFormat);
+extern void tuxtxt_EndRendering(tstRenderInfo* renderinfo);
+extern void tuxtxt_CopyBB2FB(tstRenderInfo* renderinfo);
+extern void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode);
 #endif
 
 
 #define TUXTXTCONF CONFIGDIR "/tuxtxt/tuxtxt2.conf"
 
-/* fonts */
-#define TUXTXTTTF FONTDIR "/tuxtxt.ttf"
-#define TUXTXTOTB FONTDIR "/tuxtxt.otb"
-/* alternative fontdir */
-#define TUXTXTTTFVAR "/var/tuxtxt/tuxtxt.ttf"
-#define TUXTXTOTBVAR "/var/tuxtxt/tuxtxt.otb"
 
-int TTFWidthFactor16, TTFHeightFactor16, TTFShiftX, TTFShiftY; /* parameters for adapting to various TTF fonts */
-int fontheight, fontwidth, fontwidth_normal, fontwidth_small, fontwidth_topmenumain, fontwidth_topmenusmall, ascender;
-int displaywidth;
 #define fontwidth_small_lcd 8
 
-#define TV43STARTX (ex - 146) //(StartX + 2 + (40-nofirst)*fontwidth_topmenumain + (40*fontwidth_topmenumain/abx))
-#define TV169FULLSTARTX (sx+ 8*40) //(sx +(ex +1 - sx)/2)
-#define TVENDX ex
-#define TVENDY (StartY + 25*fontheight)
-#define TV43WIDTH 144 /* 120 */
-#define TV43HEIGHT 116 /* 96 */
-#define TV43STARTY (TVENDY - TV43HEIGHT)
-#define TV169FULLSTARTY sy
-#define TV169FULLWIDTH  (ex - sx)/2
-#define TV169FULLHEIGHT (ey - sy)
 
-#define TOPMENUSTARTX TV43STARTX+2
-#define TOPMENUENDX TVENDX
-#define TOPMENUSTARTY StartY
-#define TOPMENUENDY TV43STARTY
-
-#define TOPMENULINEWIDTH ((TOPMENUENDX-TOPMENU43STARTX+fontwidth_topmenusmall-1)/fontwidth_topmenusmall)
-#define TOPMENUINDENTBLK 0
-#define TOPMENUINDENTGRP 1
-#define TOPMENUINDENTDEF 2
-#define TOPMENUSPC 0
-#define TOPMENUCHARS (TOPMENUINDENTDEF+12+TOPMENUSPC+4)
 
 
 /* rc codes */
@@ -195,24 +155,7 @@ int displaywidth;
 #define ShowServiceName 2
 #define NoServicesFound 3
 
-/* framebuffer stuff */
-unsigned char *lfb = 0;
-struct fb_var_screeninfo var_screeninfo;
-struct fb_fix_screeninfo fix_screeninfo;
 
-/* freetype stuff */
-FT_Library      library;
-FTC_Manager     manager;
-FTC_SBitCache   cache;
-FTC_SBit        sbit;
-#if HAVE_DVB_API_VERSION < 3
-#define FONTTYPE FTC_Image_Desc
-#else
-#define FONTTYPE FTC_ImageTypeRec
-#endif
-
-FT_Face			face;
-FONTTYPE typettf;
 
 
 
@@ -247,41 +190,20 @@ char versioninfo[16];
 int hotlist[10];
 int maxhotlist;
 
-int pig, avs, saa, rc, fb, lcd;
-int sx, ex, sy, ey;
-int PosX, PosY, StartX, StartY;
+int rc, lcd;
 int lastpage;
-int inputcounter;
-int zoommode, screenmode, transpmode, hintmode, boxed, nofirst, savedscreenmode, showflof, show39, showl25, prevscreenmode;
+int savedscreenmode;
 char dumpl25;
 int catch_row, catch_col, catched_page, pagecatching;
-int prev_100, prev_10, next_10, next_100;
-int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, trans_mode, auto_national, swapupdown, showhex, menulanguage;
+int swapupdown, menulanguage;
 int pids_found, current_service, getpidsdone;
 int SDT_ready;
 int pc_old_row, pc_old_col;     /* for page catching */
 int temp_page;	/* for page input */
 char saveconfig, hotlistchanged;
-signed char clearbbcolor = -1;
-int usettf;
-unsigned char axdrcs[12+1+10+1];
-#define aydrcs (axdrcs + 12+1)
-tstPageinfo *pageinfo = 0;/* pointer to cached info of last decoded page */
-const int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
-const int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
-
+tstRenderInfo renderinfo;
 struct timeval tv_delay;
-int  subtitledelay, delaystarted;
 FILE *conf;
-#define SUBTITLE_CACHESIZE 50 
-typedef struct 
-{
-	unsigned char valid;
-	struct timeval tv_timestamp;
-	unsigned char  page_char[40 * 25];
-	tstPageAttr page_atrb[40 * 25];
-} subtitle_cache;
-subtitle_cache *subtitlecache[SUBTITLE_CACHESIZE];
 
 
 unsigned short RCCode;
@@ -324,8 +246,8 @@ unsigned char avstable_dvb[3][7] =
 const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL    , NAT_SW      , NAT_SW , NAT_SP};
 
 
-#define Menu_StartX (StartX + fontwidth*9/2)
-#define Menu_StartY (StartY + fontheight)
+#define Menu_StartX (renderinfo.StartX + renderinfo.fontwidth*9/2)
+#define Menu_StartY (renderinfo.StartY + renderinfo.fontheight)
 #define Menu_Height 24
 #define Menu_Width 31
 
@@ -770,94 +692,10 @@ const char message8pagecolumn[] = /* last(!) column of page to show in each lang
 
 
 
-enum /* indices in atrtable */
-{
-	ATR_WB, /* white on black */
-	ATR_PassiveDefault, /* Default for passive objects: white on black, ignore at Black Background Color Substitution */
-	ATR_L250, /* line25 */
-	ATR_L251, /* line25 */
-	ATR_L252, /* line25 */
-	ATR_L253, /* line25 */
-	ATR_TOPMENU0, /* topmenu */
-	ATR_TOPMENU1, /* topmenu */
-	ATR_TOPMENU2, /* topmenu */
-	ATR_TOPMENU3, /* topmenu */
-	ATR_MSG0, /* message */
-	ATR_MSG1, /* message */
-	ATR_MSG2, /* message */
-	ATR_MSG3, /* message */
-	ATR_MSGDRM0, /* message */
-	ATR_MSGDRM1, /* message */
-	ATR_MSGDRM2, /* message */
-	ATR_MSGDRM3, /* message */
-	ATR_MENUHIL0, /* hilit menu line */
-	ATR_MENUHIL1, /* hilit menu line */
-	ATR_MENUHIL2, /* hilit menu line */
-	ATR_MENU0, /* menu line */
-	ATR_MENU1, /* menu line */
-	ATR_MENU2, /* menu line */
-	ATR_MENU3, /* menu line */
-	ATR_MENU4, /* menu line */
-	ATR_MENU5, /* menu line */
-	ATR_MENU6, /* menu line */
-	ATR_CATCHMENU0, /* catch menu line */
-	ATR_CATCHMENU1 /* catch menu line */
-};
-
-
-//const (avoid warnings :<)
-tstPageAttr atrtable[] =
-{
-	{ white  , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_WB */
-	{ white  , black , C_G0P, 0, 0, 1 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_PassiveDefault */
-	{ white  , red   , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_L250 */
-	{ black  , green , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_L251 */
-	{ black  , yellow, C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_L252 */
-	{ white  , blue  , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_L253 */
-	{ magenta, black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_TOPMENU0 */
-	{ green  , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_TOPMENU1 */
-	{ yellow , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_TOPMENU2 */
-	{ cyan   , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_TOPMENU3 */
-	{ menu2  , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSG0 */
-	{ yellow , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSG1 */
-	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSG2 */
-	{ white  , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSG3 */
-	{ menu2  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSGDRM0 */
-	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSGDRM1 */
-	{ menu2  , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSGDRM2 */
-	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSGDRM3 */
-	{ menu1  , blue  , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENUHIL0 5a Z */
-	{ white  , blue  , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENUHIL1 58 X */
-	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENUHIL2 9b › */
-	{ menu2  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU0 ab « */
-	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU1 a4 ¤ */
-	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU2 9b › */
-	{ menu2  , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU3 cb Ë */
-	{ cyan   , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU4 c7 Ç */
-	{ white  , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU5 c8 È */
-	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU6 a8 ¨ */
-	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_CATCHMENU0 a4 ¤ */
-	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}  /* ATR_CATCHMENU1 a8 ¨ */
-};
 /* buffers */
 unsigned char  lcd_backbuffer[120*64 / 8];
-unsigned char  page_char[40 * 25];
-tstPageAttr page_atrb[40 * 25];
 
 //unsigned short page_atrb[40 * 25]; /*  ?????:h:cc:bbbb:ffff -> ?=reserved, h=double height, c=charset (0:G0 / 1:G1c / 2:G1s), b=background, f=foreground */
-
-
-/* colormaps */
-
-unsigned short rd0[] = {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0x00<<8, 0x00<<8, 0x00<<8, 0,      0      };
-unsigned short gn0[] = {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0x20<<8, 0x10<<8, 0x20<<8, 0,      0      };
-unsigned short bl0[] = {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0x40<<8, 0x20<<8, 0x40<<8, 0,      0      };
-unsigned short tr0[] = {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0x0000 , 0x0000 , 0x0A00 , 0xFFFF, 0x3000 };
-struct fb_cmap colormap_0 = {0, SIZECOLTABLE, rd0, gn0, bl0, tr0};
-
-
-
-
 
 
 
@@ -1193,33 +1031,16 @@ void CatchNextPage(int, int);
 void GetNextPageOne(int up);
 void GetNextSubPage(int offset);
 void SwitchZoomMode();
-void SwitchScreenMode(int newscreenmode);
 void SwitchTranspMode();
 void SwitchHintMode();
-void CreateLine25();
-void CopyBB2FB();
 void RenderCatchedPage();
-void RenderCharFB(int Char, tstPageAttr *Attribute);
-void RenderCharBB(int Char, tstPageAttr *Attribute);
 void RenderCharLCD(int Digit, int XPos, int YPos);
 void RenderMessage(int Message);
-void RenderPage();
-void DecodePage();
 void UpdateLCD();
 int  Init();
 int  GetNationalSubset(char *country_code);
 int  GetTeletextPIDs();
 int  GetRCCode();
-int  eval_triplet(int iOData, tstCachedPage *pstCachedPage,
-						unsigned char *pAPx, unsigned char *pAPy,
-						unsigned char *pAPx0, unsigned char *pAPy0,
-						unsigned char *drcssubp, unsigned char *gdrcssubp,
-						signed char *endcol, tstPageAttr *attrPassive, unsigned char* pagedata);
-void eval_object(int iONr, tstCachedPage *pstCachedPage,
-					  unsigned char *pAPx, unsigned char *pAPy,
-					  unsigned char *pAPx0, unsigned char *pAPy0,
-					  tObjType ObjType, unsigned char* pagedata);
-
 /* Local Variables: */
 /* indent-tabs-mode:t */
 /* tab-width:3 */
