@@ -371,7 +371,8 @@ public:
 		cStereoMono,
 		cAc3Delay, /* not used in e1.. but in e2 */
 		cPcmDelay, /* not used in e1.. but in e2 */
-		cSubtitle, 
+		cSubtitle,
+		cTTXSubtitle,
 		/*
 		please do not simply add any other value to the service cache
 		this breaks binary compatibilty of enigma1 and enigma2 service format

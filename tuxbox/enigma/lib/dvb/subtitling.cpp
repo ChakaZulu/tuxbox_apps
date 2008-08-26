@@ -39,6 +39,17 @@
 
 #include <lib/dvb/subtitling.h>
 
+#ifndef TUXTXT_CFG_STANDALONE
+#include <tuxtxt/tuxtxt_def.h>
+extern "C" tstPageinfo* tuxtxt_DecodePage(int showl25, unsigned char* page_char, tstPageAttr *page_atrb, int hintmode, int showflof);
+extern "C" void tuxtxt_RenderPage(tstRenderInfo* renderinfo);
+extern "C" int tuxtxt_SetRenderingDefaults(tstRenderInfo* renderinfo);
+extern "C" tuxtxt_cache_struct tuxtxt_cache;
+extern "C" int tuxtxt_InitRendering(tstRenderInfo* renderinfo,int setTVFormat);
+extern "C" void tuxtxt_EndRendering(tstRenderInfo* renderinfo);
+tstRenderInfo renderinfo;
+#endif
+
 eSubtitleWidget *eSubtitleWidget::instance;
 
 static int extractPTS(unsigned long long &pts, unsigned char *pkt)
@@ -122,6 +133,17 @@ void eSubtitleWidget::displaying_timeout()
 
 void eSubtitleWidget::processNext()
 {
+#ifndef TUXTXT_CFG_STANDALONE
+	if (ttx_running) // using teletext subtitles
+	{
+		renderinfo.pageinfo = tuxtxt_DecodePage(0,renderinfo.page_char,renderinfo.page_atrb,0,0);
+		if (renderinfo.pageinfo)
+		{
+			tuxtxt_RenderPage(&renderinfo);
+		}
+		return;
+	}
+#endif
 	if (queue.empty())
 	{
 		eWarning("Subtitle queue is empty, but timer was called!");
@@ -226,11 +248,18 @@ int eSubtitleWidget::eventHandler(const eWidgetEvent &event)
 	{
 	case eWidgetEvent::willShow:
 //		eDebug("willShow!!!");
+#ifndef TUXTXT_CFG_STANDALONE
+		startttx(ttxpage);
+#endif
 		isvisible = 1;
 		subtitle_screen_enable(subtitle, 1);
 		break;
 	case eWidgetEvent::willHide:
 //		eDebug("willHide!!!");
+#ifndef TUXTXT_CFG_STANDALONE
+		stopttx();
+#endif
+			
 		isvisible = 0;
 		subtitle_screen_enable(subtitle, 0);
 		//restore old palette
@@ -242,6 +271,45 @@ int eSubtitleWidget::eventHandler(const eWidgetEvent &event)
 	return 0;
 }
 
+#ifndef TUXTXT_CFG_STANDALONE
+void eSubtitleWidget::startttx(int page)
+{
+	if (page == 0|| ttx_running) return;
+	if (page < 0) page = ttxpage;
+	if (page == 0)	return;
+	eDebug("Starting teletext subtitling:%x",page);
+	stop();
+	if (isvisible)
+		subtitle_screen_enable(subtitle, 1);	
+	rememberttxpage = tuxtxt_cache.page;
+	rememberttxsubpage = tuxtxt_cache.subpage;
+	tuxtxt_cache.page = ttxpage = page;
+	ttx_running = 1;
+	this->pid = -ttxpage;
+	tuxtxt_cache.subpage = 0;
+	tuxtxt_SetRenderingDefaults(&renderinfo);
+	int left=20, top=20, right=699, bottom=555;
+	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/left", left);
+	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/top", top);
+	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/right", right);
+	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/bottom", bottom);
+	renderinfo.sx = left;
+	renderinfo.sy = top;
+	renderinfo.ex = right;
+	renderinfo.ey = bottom;
+	renderinfo.fb =fbClass::getInstance()->lock();
+	if (tuxtxt_InitRendering(&renderinfo,0))
+	{
+		renderinfo.pageinfo = tuxtxt_DecodePage(0,renderinfo.page_char,renderinfo.page_atrb,0,0);
+		if (renderinfo.pageinfo)
+		{	
+			tuxtxt_cache.pageupdate=1; // force complete redraw of page
+			tuxtxt_RenderPage(&renderinfo);
+		}
+		timer.start(250, false);
+	}
+}
+#endif
 void eSubtitleWidget::start(int pid, const std::set<int> &ppageids)
 {
 	pageids = ppageids;
@@ -356,6 +424,10 @@ eSubtitleWidget::eSubtitleWidget()
 	instance = this;
 	fd = -1;
 	sn = 0;
+#ifndef TUXTXT_CFG_STANDALONE
+	ttxpage = 0;
+	ttx_running= 0;
+#endif
 	subtitle = new subtitle_ctx;
 	subtitle->pages = 0;
 	subtitle->bbox_left = 0;
@@ -412,11 +484,34 @@ void eSubtitleWidget::stop()
 		}
 		eSkin::getActive()->setPalette(gFBDC::getInstance());
 	}
+#ifndef TUXTXT_CFG_STANDALONE
+	stopttx();
+	ttxpage = 0;
+	pid=-1;
+#endif
 }
+
+#ifndef TUXTXT_CFG_STANDALONE
+void eSubtitleWidget::stopttx()
+{
+	if (ttx_running) 
+	{
+		eDebug("Stopping teletext subtitling:%x",ttxpage);
+		tuxtxt_EndRendering(&renderinfo);
+		tuxtxt_cache.page = rememberttxpage;
+		tuxtxt_cache.subpage = rememberttxsubpage;
+		ttx_running = 0;
+		timer.stop();
+		fbClass::getInstance()->unlock();
+		eSkin::getActive()->setPalette(gFBDC::getInstance());
+		
+	}
+}
+#endif
 
 void eSubtitleWidget::globalFocusHasChanged(const eWidget* newFocus)
 {
-	if ( !sn ) // not running
+	if ( !sn && !ttxpage) // not running
 		return; 
 	if ( newFocus )
 		hide();

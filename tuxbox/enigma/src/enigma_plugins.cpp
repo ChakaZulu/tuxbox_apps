@@ -616,9 +616,6 @@ void ePluginThread::start()
 				if ( wasVisible )
 					wnd->hide();
 
-				if (needfb)
-					MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
-
 #ifndef DISABLE_LCD
 				if (needlcd && eSystemInfo::getInstance()->hasLCD())
 					MakeParam(P_ID_LCD, eDBoxLCD::getInstance()->lock() );
@@ -630,6 +627,9 @@ void ePluginThread::start()
 						MakeParam(P_ID_VTXTPID, 0);
 					else
 						MakeParam(P_ID_VTXTPID, Decoder::current.tpid);
+					// stop teletext subtitles, if activated
+					eSubtitleWidget *i = eSubtitleWidget::getInstance();
+					if (i) i->stopttx();
 			// stop vtxt reinsertion
 					tpid = Decoder::current.tpid;
 					if (tpid != -1)
@@ -639,6 +639,9 @@ void ePluginThread::start()
 						Decoder::Set();
 					}
 				}
+
+				if (needfb)
+					MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
 
 				if (needoffsets)
 				{
@@ -730,6 +733,9 @@ void ePluginThread::finalize_plugin()
 
 	if (needvtxtpid)
 	{
+		// start teletext subtitles, if activated
+		eSubtitleWidget *i = eSubtitleWidget::getInstance();
+		if (i) i->startttx(-1);
 		// start vtxt reinsertion
 		if (tpid != -1 && Decoder::current.tpid == -1)
 		{

@@ -60,7 +60,10 @@
 #include <lib/system/info.h>
 #include <src/time_correction.h>
 #include <lib/driver/audiodynamic.h>
-
+#ifndef TUXTXT_CFG_STANDALONE
+#include <tuxtxt/tuxtxt_def.h>
+extern "C" tuxtxt_cache_struct tuxtxt_cache;
+#endif
 struct enigmaMainActions
 {
 	eActionMap map;
@@ -586,8 +589,10 @@ struct selectCurSubtitleStream
 
 	bool operator()(eListBoxEntryText& stream)
 	{
-		PMTEntry *e = (PMTEntry*)stream.getKey();
-		if ( (e && e->elementary_PID == pid) || (!e && pid == -1) )
+		//PMTEntry *e = (PMTEntry*)stream.getKey();
+		//if ( (e && e->elementary_PID == pid) || (!e && pid == -1) )
+		int k = (int)stream.getKey();
+		if ( (k == pid) || (!k && pid == -1) )
 		{
 			lb.setCurrent( &stream );
 			return true;
@@ -738,7 +743,8 @@ void eAudioSelector::subtitleSelected(eListBoxEntryText *entry)
 	eServiceHandler *service=eServiceInterface::getInstance()->getService();
 	if (service)
 	{
-		PMTEntry *pe = (PMTEntry*)entry->getKey();
+		//PMTEntry *pe = (PMTEntry*)entry->getKey();
+		int k = (int)entry->getKey();
 		eSubtitleWidget *i = eSubtitleWidget::getInstance();
 		if (!i)
 			return;
@@ -747,15 +753,24 @@ void eAudioSelector::subtitleSelected(eListBoxEntryText *entry)
 		{
 			if (sp->dvb)
 			{
-				int val = (pe ? pe->elementary_PID : -1);
-				sp->dvb->set(eServiceDVB::cSubtitle, val);
+				//int val = (pe ? pe->elementary_PID : -1);
+				int val1 = (k > 0 ? k : -1);
+				int val2 = (k < 0 ? -k : -1);
+				sp->dvb->set(eServiceDVB::cSubtitle, val1);
+				sp->dvb->set(eServiceDVB::cTTXSubtitle, val2);
 			}
 			eServiceInterface::getInstance()->removeRef(eServiceInterface::getInstance()->service);
 		}
-		if (pe)
+		//if (pe)
+		if (k> 0)
 		{
 			std::set<int> pages; pages.insert(-1);
-			i->start(pe->elementary_PID, pages);
+			//i->start(pe->elementary_PID, pages);
+			i->start(k, pages);
+
+		} else if (k < 0)
+		{
+			i->startttx(-k);
 		} else
 			i->stop();
 	}
@@ -802,7 +817,64 @@ void eAudioSelector::addSubtitle(const PMTEntry *entry)
 		
 	}
 end:
-	new eListBoxEntryText(m_subtitles, description, (void*)entry, eTextPara::dirCenter );
+	//new eListBoxEntryText(m_subtitles, description, (void*)entry, eTextPara::dirCenter );
+	new eListBoxEntryText(m_subtitles, description, (void*)entry->elementary_PID, eTextPara::dirCenter );
+}
+struct RemoveTTXSubtitle
+{
+	eListBox<eListBoxEntryText> &lb;
+	RemoveTTXSubtitle(eListBox<eListBoxEntryText> &lb )
+		:lb(lb)
+	{
+	}
+
+	bool operator()(eListBoxEntryText& stream)
+	{
+		int k = (int)stream.getKey();
+		if (k<0)
+		{
+			lb.take( &stream );
+			return true;
+		}
+		return false;
+	}
+};
+void eAudioSelector::addTTXSubtitles()
+{
+#ifndef TUXTXT_CFG_STANDALONE
+	const eString countries[] ={
+		"",   /*  0 no subset specified */
+		"CS/SK",   /*  1 czech, slovak */
+		"EN",   /*  2 english */
+		"ET",   /*  3 estonian */
+		"FR",   /*  4 french */
+		"DE",   /*  5 german */
+		"IT",   /*  6 italian */
+		"LV/LT",   /*  7 latvian, lithuanian */
+		"PL",   /*  8 polish */
+		"PT/ES",   /*  9 portuguese, spanish */
+		"RO",   /* 10 romanian */
+		"SR/HR/SL",   /* 11 serbian, croatian, slovenian */
+		"SV/FI/HU",   /* 12 swedish, finnish, hungarian */
+		"TR",   /* 13 turkish */
+		"RU/BUL/SER/CRO/UKR",   /* 14 cyrillic */
+		"EK"   /* 15 greek */
+	};
+	while (m_subtitles->forEachEntry(RemoveTTXSubtitle(*m_subtitles)) == eListBoxBase::OK);
+	for (int i = 0; i < 8; i++)
+	{
+		int page = tuxtxt_cache.subtitlepages[i].page;
+		if (page)
+		{
+			m_subtitles->show();
+			list.setFlags( eListBoxBase::flagLostFocusOnLast );
+			eString description;
+			description.sprintf(_("Teletext Page %03x (%s)"), page,countries[tuxtxt_cache.subtitlepages[i].language].c_str());
+
+			new eListBoxEntryText(m_subtitles, description, (void*)-page, eTextPara::dirCenter );
+		}
+	}
+#endif
 }
 
 int eAudioSelector::eventHandler(const eWidgetEvent &e)
@@ -811,6 +883,8 @@ int eAudioSelector::eventHandler(const eWidgetEvent &e)
 	{
 		case eWidgetEvent::execBegin:
 		{
+			if (Decoder::current.tpid != -1)
+				addTTXSubtitles();
 			list.forEachEntry(selectCurAudioStream(Decoder::current.apid, list));
 			m_subtitles->forEachEntry(selectCurSubtitleStream(eSubtitleWidget::getInstance()->getCurPid(), *m_subtitles ));
 			setFocus(&list);
@@ -6406,6 +6480,15 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 				{
 					std::set<int> pages; pages.insert(-1);
 					i->start(tmp2, pages);
+				}
+			}
+			int tmp3 = sp->dvb->get(eServiceDVB::cTTXSubtitle);
+			if ( tmp3 != -1)
+			{
+				eSubtitleWidget *i = eSubtitleWidget::getInstance();
+				if (i)
+				{
+					i->startttx(tmp3);
 				}
 			}
 		}

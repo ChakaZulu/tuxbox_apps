@@ -206,6 +206,7 @@ public:
 	void update(std::list<eDVBServiceController::audioStream>&);
 	void add(eDVBServiceController::audioStream &pmt);
 	void addSubtitle(const PMTEntry *entry);
+	void addTTXSubtitles();
 };
 
 class ePSAudioSelector: public eListBoxWindow<eListBoxEntryText>

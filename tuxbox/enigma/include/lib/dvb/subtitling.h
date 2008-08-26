@@ -15,7 +15,12 @@ class eSubtitleWidget: public eWidget
 	eSocketNotifier *sn;
 	int fd;
 	int isvisible;
-	
+#ifndef TUXTXT_CFG_STANDALONE
+	int ttxpage;
+	int ttx_running;
+	int rememberttxpage;
+	int rememberttxsubpage;
+#endif	
 	subtitle_ctx *subtitle; // the subtitle context
 	
 	struct pes_packet_s
@@ -40,6 +45,10 @@ class eSubtitleWidget: public eWidget
 	void globalFocusHasChanged(const eWidget* newFocus);
 public:
 	void start(int pid, const std::set<int> &pageids);
+#ifndef TUXTXT_CFG_STANDALONE
+	void startttx(int page);
+	void stopttx();
+#endif
 	void stop();
 	int getCurPid();
 	eSubtitleWidget();
