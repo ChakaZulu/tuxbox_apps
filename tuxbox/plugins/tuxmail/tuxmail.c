@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.48  2008/08/28 20:29:51  robspr1
+ * increase maximum startup delay to 120
+ *
  * Revision 1.47  2007/05/17 16:19:47  dbluelle
  * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
  *
@@ -1739,9 +1742,9 @@ void SaveConfigMailBox(int nConfigPage)
 						{ 
 							startdelay=15;
 						}
-						if( startdelay > 60 )
+						if( startdelay > 120 )
 						{ 
-							startdelay=60;
+							startdelay=120;
 						}
 					}
 					else
@@ -3736,7 +3739,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.47 $";
+	char cvs_revision[] = "$Revision: 1.48 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
