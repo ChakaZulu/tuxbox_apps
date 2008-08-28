@@ -14,6 +14,9 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include "tuxtxt_def.h"
+#ifndef HAVE_DREAMBOX_HARDWARE
+#include <tuxbox.h>
+#endif
 #if TUXTXT_COMPRESS == 1
 #include <zlib.h>
 #endif
@@ -4294,7 +4297,7 @@ void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 #if HAVE_DVB_API_VERSION < 3
 		avia_pig_hide(renderinfo->pig);
 #else
-		ioctl(pig, VIDIOC_OVERLAY, &renderinfo->screenmode);
+		ioctl(renderinfo->pig, VIDIOC_OVERLAY, &renderinfo->screenmode);
 #endif
 
 		tuxtxt_setfontwidth(renderinfo,renderinfo->fontwidth_normal);

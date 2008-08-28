@@ -138,7 +138,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.102 $";
+	char cvs_revision[] = "$Revision: 1.103 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -2430,8 +2430,8 @@ void RenderMessage(int Message)
 #ifndef HAVE_DREAMBOX_HARDWARE
 	if (renderinfo.screenmode)
 	{
-		fbcolor   = black;
-		timecolor = black<<4 | black;
+		fbcolor   = tuxtxt_color_black;
+		timecolor = tuxtxt_color_black<<4 | tuxtxt_color_black;
 		menuatr = ATR_MSGDRM0;
 	}
 	else

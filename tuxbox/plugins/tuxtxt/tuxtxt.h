@@ -16,6 +16,9 @@
 #ifndef DREAMBOX
 #include <tuxbox.h>
 #endif
+#if HAVE_DVB_API_VERSION >= 3
+#include <linux/input.h>
+#endif
 
 #include <fcntl.h>
 #include <stdio.h>
