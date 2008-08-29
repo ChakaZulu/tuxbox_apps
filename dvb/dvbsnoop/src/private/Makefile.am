@@ -4,6 +4,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 
 SUBDIRS = \
 	default \
+	nordig.org \
 	premiere.de 
 
 noinst_LIBRARIES = libprivate.a

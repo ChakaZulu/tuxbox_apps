@@ -31,6 +31,7 @@ src/ts/Makefile
 src/tvanytime/Makefile
 src/private/Makefile
 src/private/default/Makefile
+src/private/nordig.org/Makefile
 src/private/premiere.de/Makefile
 src/net_ip/Makefile
 ])
