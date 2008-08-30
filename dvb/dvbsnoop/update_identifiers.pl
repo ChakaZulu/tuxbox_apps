@@ -48,7 +48,8 @@ sub update {
 	binmode(OUT, ":utf8");
 	foreach my $row ($t->rows) {
 		my ($id, @fields) = trim @$row;
-		if ($id =~ m/(0x[0-9a-fA-F]+)\s+-\s+(0x[0-9a-fA-F]+)/) {
+		$id =~ s/\s//g;
+		if ($id =~ m/(0x[0-9a-fA-F]+)-(0x[0-9a-fA-F]+)/) {
 			if (oct($2) < oct($1)) {
 				print OUT "//";
 			}
@@ -110,6 +111,23 @@ sub rootOfTrustID {
 	update("rootOfTrustID", "Description", "Operator");
 }
 
+sub mhpOrganisationID {
+	update("mhpOrganisationID", "Organisation Supplying MHP Applications");
+}
+
+sub mhpApplicationTypeID {
+	update("mhpApplicationTypeID", "Description", "Operator");
+}
+
+sub mhpAITDescriptors {
+	update("mhpAITDescriptors", "Description", "Operator");
+}
+
+sub mhpProtocolID {
+	update("mhpProtocolID", "Description");
+}
+
+# DVB-SI Identifiers
 bouquetID();
 caSystemID();
 cpSystemID();
@@ -119,4 +137,10 @@ originalNetworkID();
 privateDataSpecifierID();
 platformID();
 rootOfTrustID();
+
+# MHP Identifiers
+mhpOrganisationID();
+mhpApplicationTypeID();
+mhpAITDescriptors();
+mhpProtocolID();
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.38 2006/03/06 20:25:38 rasc Exp $
+$Id: dsmcc_str.c,v 1.39 2008/08/30 18:11:16 obi Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.38 2006/03/06 20:25:38 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.39  2008/08/30 18:11:16  obi
+also generate mhp identifiers
+
 Revision 1.38  2006/03/06 20:25:38  rasc
 DSM-CC Carousell, lots of Bugfixes, BIOP::Message not yet decodable (ddb has to collect Modules)
 
@@ -274,9 +277,7 @@ char *dsmccStrMHP_AIT_DescriptorTAG (u_int i)
      {  0x10, 0x10,  "Application storage descriptor" },
      {  0x11, 0x5E,  "reserved to MHP" },
      {  0x5F, 0x5F,  "private data specifier descriptor" },
-     {  0x60, 0x7F,  "reserved to MHP" },
-     {  0x80, 0xFF,  "user defined" },
-     {  0,0, NULL }
+#include "identifiers/mhpAITDescriptors.h"
   };
 
   return findTableID (Table, i);
@@ -298,38 +299,7 @@ char *dsmccStrMHPOrg (u_int id)
 {
   STR_TABLE  TableIDs[] = {
 	// --{ MHP Organisation ID, MHP Organisation ID,   "Organisation Supplying MHP Applications" },
-	{ 0x0000, 0x0000,   "Reserved" },
-	{ 0x0001, 0x0001,   "MTV Oy" },
-	{ 0x0002, 0x0002,   "Digita Oy" },
-	{ 0x0003, 0x0003,   "NRK" },
-	{ 0x0004, 0x0004,   "Premiere Medien GmbH & Co KG" },
-	{ 0x0005, 0x0005,   "Platco Oy" },
-	{ 0x0006, 0x0006,   "NOB" },
-	{ 0x0007, 0x0007,   "Sofia Digital Oy" },
-	{ 0x0008, 0x0008,   "YLE (Finnish Broadcasting Company)" },
-	{ 0x0009, 0x0009,   "IRT (Institut für Rundfunktechnik GmbH)" },
-	{ 0x000A, 0x000A,   "Cardinal Information Systems Ltd" },
-	{ 0x000B, 0x000B,   "Mediaset s.p.a." },
-	{ 0x000C, 0x000C,   "Ortikon Interactive Oy" },
-	{ 0x000D, 0x000D,   "Austrian Broadcastion Corporation (ORF)" },
-	{ 0x000E, 0x000E,   "Strategy & Technology Ltd" },
-	{ 0x000F, 0x000F,   "Canal+ Technologies" },
-	{ 0x0010, 0x0010,   "TV2Nord Digital" },
-	{ 0x0011, 0x0011,   "Zweites Deutsches Fernsehen - ZDF" },
-	{ 0x0012, 0x0012,   "SCIP AG" },
-	{ 0x0013, 0x0013,   "ARD" },
-	{ 0x0014, 0x0014,   "Sveng.com" },
-	{ 0x0015, 0x0015,   "UniSoft Corporation" },
-	{ 0x0016, 0x0016,   "Microsoft Corp" },
-	{ 0x0017, 0x0017,   "Nokia" },
-	{ 0x0018, 0x0018,   "SWelcom Oy" },
-	{ 0x0019, 0x0019,   "Fraunhofer Institut Medienkommunikation - IMK" },
-	{ 0x001A, 0x001A,   "RTL NewMedia GmbH" },
-	{ 0x001B, 0x001B,   "Fraunhofer FOKUS" },
-	{ 0x001C, 0x001C,   "TwonkyVision GmbH" },
-	{ 0x001D, 0x001D,   "Gist Communications" },
-	{ 0x001E, 0x001E,   "Televisió de Catalunya SA" },
-     {  0,0, NULL }
+	#include "identifiers/mhpOrganisationID.h"
   };
 
 
@@ -897,11 +867,7 @@ char *dsmccStr_LLC_SNAP_prot (u_int id)
 char *dsmccStrMHP_application_type (u_int id)
 {
   STR_TABLE  TableIDs[] = {
-	{ 0x0000, 0x0000,   "reserved" },
-	{ 0x0001, 0x0001,   "DVB-J application" },
-	{ 0x0002, 0x0002,   "DVB-HTML application" },
-	{ 0x0003, 0x7FFF,   "subject to registration with DVB" },  // $$$ TODO ??
-      	{  0,0, NULL }
+	#include "identifiers/mhpApplicationTypeID.h"
   };
 
   return findTableID (TableIDs, id);
@@ -911,7 +877,7 @@ char *dsmccStrMHP_application_type (u_int id)
 
 
 /*
-  -- MHP application type
+  -- MHP application id
 */
 
 char *dsmccStrMHP_application_id (u_int id)
@@ -983,13 +949,7 @@ char *dsmccStrMHP_visibility_state (u_int id)
 char *dsmccStrMHP_protocol_id (u_int id)
 {
   STR_TABLE  TableIDs[] = {
-	{ 0x0000, 0x0000,   "reserved" },
-	{ 0x0001, 0x0001,   "MHP Object Carousel" },
-	{ 0x0002, 0x0002,   "IP via DVB multiprotocol encapsulation" },
-	{ 0x0003, 0x0003,   "Transport via HTTP over the interaction channel" },
-	{ 0x0004, 0x00FF,   "Reserved for use by DVB" },
-	{ 0x0100, 0xFFFF,   "Subject to registration in ETSI TR 101 162" },
-      	{  0,0, NULL }
+	#include "identifiers/mhpProtocolID.h"
   };
 
   return findTableID (TableIDs, id);
