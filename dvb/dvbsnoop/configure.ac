@@ -26,6 +26,7 @@ src/misc/Makefile
 src/pes/Makefile
 src/sections/Makefile
 src/strings/Makefile
+src/strings/identifiers/Makefile
 src/testdata/Makefile
 src/ts/Makefile
 src/tvanytime/Makefile
