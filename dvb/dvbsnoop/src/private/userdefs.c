@@ -1,5 +1,5 @@
 /*
-$Id: userdefs.c,v 1.5 2008/08/29 20:00:05 obi Exp $
+$Id: userdefs.c,v 1.6 2008/08/30 19:23:40 obi Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: userdefs.c,v 1.5 2008/08/29 20:00:05 obi Exp $
  
 
 $Log: userdefs.c,v $
+Revision 1.6  2008/08/30 19:23:40  obi
+eicta (eacem) private descriptors
+
 Revision 1.5  2008/08/29 20:00:05  obi
 decode NorDig logic(al) channel descriptor (e.g. used by unitymedia)
 
@@ -83,10 +86,12 @@ typedef struct _PRIVATE_PROVIDER_FUNC {
 // -- provider names in lowercase!!
 //
 
+#include "eicta.org/eicta_org.h"
 #include "nordig.org/nordig_org.h"
 #include "premiere.de/premiere_de.h"
 
 static PRIV_PROVIDER_FUNC ppf[] = {
+	{ "eicta.org",		getPrivate_EictaORG },
 	{ "nordig.org",		getPrivate_NordigORG },
 	{ "premiere.de",	getPrivate_PremiereDE },
 	{ NULL,			NULL }

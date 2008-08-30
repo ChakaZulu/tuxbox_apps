@@ -4,6 +4,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 
 SUBDIRS = \
 	default \
+	eicta.org \
 	nordig.org \
 	premiere.de 
 
