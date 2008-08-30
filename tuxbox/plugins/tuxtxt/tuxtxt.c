@@ -138,7 +138,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.103 $";
+	char cvs_revision[] = "$Revision: 1.104 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -941,15 +941,18 @@ int GetNationalSubset(char *cc)
 		return 11;
 	if (memcmp(cc, "tur", 3) == 0)
 		return 12;
-	if (memcmp(cc, "rus", 3) == 0 ||
-	    memcmp(cc, "bul", 3) == 0 ||
-	    memcmp(cc, "ser", 3) == 0 ||
-	    memcmp(cc, "cro", 3) == 0 ||
-	    memcmp(cc, "ukr", 3) == 0)
-		return NAT_RU;
+	if (memcmp(cc, "rus", 3) == 0 || memcmp(cc, "bul", 3) == 0)
+	    return NAT_RB;
+	if (memcmp(cc, "ser", 3) == 0 || memcmp(cc, "cro", 3) == 0)
+	    return NAT_SC;
+	if (memcmp(cc, "ukr", 3) == 0)
+		return NAT_UA;
 	if (memcmp(cc, "gre", 3) == 0)
 		return NAT_GR;
-
+	if (memcmp(cc, "heb", 3) == 0)
+		return NAT_HB;
+	//if (memcmp(cc, "ara", 3) == 0) TODO: Arabic
+	//	return NAT_AR;		
 	return NAT_DEFAULT;	/* use default charset */
 }
 
@@ -1047,6 +1050,7 @@ void charpage()
 #endif
 void Menu_HighlightLine(char *menu, int line, int high)
 {
+	int active_national_subset=tuxtxt_cache.national_subset;
 	char hilitline[] = "0111111111111111111111111111102";
 	int itext = Menu_Width*line; /* index start menuline */
 	int byte;
@@ -1058,12 +1062,17 @@ void Menu_HighlightLine(char *menu, int line, int high)
 		tuxtxt_cache.national_subset = national_subset_bak;
 	else
 		tuxtxt_cache.national_subset = menusubset[menulanguage];
-
+	if (line == MenuLine[M_PID] && getpidsdone) { // channel names should be rendered in NAT_DEFAULT
+		active_national_subset=tuxtxt_cache.national_subset;
+		tuxtxt_cache.national_subset=NAT_DEFAULT;
+	}
 	for (byte = 0; byte < Menu_Width; byte++)
 		tuxtxt_RenderCharFB(&renderinfo,menu[itext + byte],
 						 high ?
 						 &tuxtxt_atrtable[hilitline[byte] - '0' + ATR_MENUHIL0] :
 						 &tuxtxt_atrtable[menuatr[itext + byte] - '0' + ATR_MENU0]);
+	if (line == MenuLine[M_PID] && getpidsdone) // restore national_subset
+		tuxtxt_cache.national_subset=active_national_subset;
 	tuxtxt_cache.national_subset = national_subset_bak;
 }
 
@@ -1118,7 +1127,7 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 
 void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 {
-	int byte, line, name_len;
+	int byte, line, name_len, active_national_subset;
 	int national_subset_bak = tuxtxt_cache.national_subset;
 
 	memcpy(menu, configmenu[menulanguage], Menu_Height*Menu_Width);
@@ -1156,11 +1165,10 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 	memset(&menu[Menu_Width*MenuLine[M_TRA] + 3+renderinfo.trans_mode  ], 0x20,24-renderinfo.trans_mode);
 
 	memcpy(&menu[Menu_Width*MenuLine[M_AUN] + Menu_Width - 5], &configonoff[menulanguage][renderinfo.auto_national ? 3 : 0], 3);
-	if (tuxtxt_cache.national_subset != NAT_DE)
-		memcpy(&menu[Menu_Width*MenuLine[M_NAT] + 2], &countrystring[tuxtxt_cache.national_subset*COUNTRYSTRING_WIDTH], COUNTRYSTRING_WIDTH);
-	if (tuxtxt_cache.national_subset == 0  || renderinfo.auto_national)
+	memcpy(&menu[Menu_Width*MenuLine[M_NAT] + 2], &countrystring[tuxtxt_cache.national_subset*COUNTRYSTRING_WIDTH], COUNTRYSTRING_WIDTH);
+	if (renderinfo.auto_national)
 		menu[MenuLine[M_NAT]*Menu_Width +  1] = ' ';
-	if (tuxtxt_cache.national_subset == MAX_NATIONAL_SUBSET || renderinfo.auto_national)
+	if (renderinfo.auto_national)
 		menu[MenuLine[M_NAT]*Menu_Width + 28] = ' ';
 	if (renderinfo.showhex)
 		menu[MenuLine[M_PID]*Menu_Width + 27] = '?';
@@ -1171,14 +1179,30 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 		renderinfo.PosX = Menu_StartX;
 		if (line == MenuLine[M_NAT])
 			tuxtxt_cache.national_subset = national_subset_bak;
+		else if (line == MenuLine[M_TRA] || line == MenuLine[M_COL])
+			tuxtxt_cache.national_subset = 0;
 		else
 			tuxtxt_cache.national_subset = menusubset[menulanguage];
 
-		if (line == Menu_Height-2)
+		if ((line == MenuLine[M_PID]) && getpidsdone) {
+			active_national_subset=tuxtxt_cache.national_subset;
+			tuxtxt_cache.national_subset = NAT_DEFAULT;
+		}
+			
+		if (line == Menu_Height-2) { // version info should be rendered in NAT_DEFAULT always
 			memcpy(&menu[line*Menu_Width + 20], versioninfo, 5);
+			tuxtxt_cache.national_subset=NAT_DEFAULT;
+		}
 
 		for (byte = 0; byte < Menu_Width; byte++)
 			tuxtxt_RenderCharFB(&renderinfo,menu[line*Menu_Width + byte], &tuxtxt_atrtable[menuatr[line*Menu_Width + byte] - '0' + ATR_MENU0]);
+
+		if ((line == MenuLine[M_PID]) && getpidsdone) { //restore charset
+			tuxtxt_cache.national_subset=active_national_subset;
+		}
+		if (line == Menu_Height-2) {
+			tuxtxt_cache.national_subset=active_national_subset;
+		}
 
 		renderinfo.PosY += renderinfo.fontheight;
 	}
@@ -1359,21 +1383,14 @@ void ConfigMenu(int Init)
 
 				case M_NAT:
 					saveconfig = 1;
-					if (tuxtxt_cache.national_subset > 0)
+					if (tuxtxt_cache.national_subset >= 0)
 					{
 						tuxtxt_cache.national_subset--;
 
-						if (tuxtxt_cache.national_subset == 0)
-						{
-							menu[MenuLine[M_NAT]*Menu_Width +  1] = ' ';
-							menu[MenuLine[M_NAT]*Menu_Width + 28] = 'î';
-						}
-						else
-						{
-							menu[MenuLine[M_NAT]*Menu_Width +  1] = 'í';
-							menu[MenuLine[M_NAT]*Menu_Width + 28] = 'î';
-						}
-
+						if (tuxtxt_cache.national_subset < 0)
+							tuxtxt_cache.national_subset = MAX_NATIONAL_SUBSET;
+						menu[MenuLine[M_NAT]*Menu_Width +  1] = 'í';
+						menu[MenuLine[M_NAT]*Menu_Width + 28] = 'î';
 						Menu_Init(menu, current_pid, menuitem, hotindex);
 					}
 					break;
@@ -1477,21 +1494,14 @@ void ConfigMenu(int Init)
 
 				case M_NAT:
 					saveconfig = 1;
-					if (tuxtxt_cache.national_subset < MAX_NATIONAL_SUBSET)
+					if (tuxtxt_cache.national_subset <= MAX_NATIONAL_SUBSET)
 					{
 						tuxtxt_cache.national_subset++;
 
-						if (tuxtxt_cache.national_subset == MAX_NATIONAL_SUBSET)
-						{
-							menu[MenuLine[M_NAT]*Menu_Width +  1] = 'í';
-							menu[MenuLine[M_NAT]*Menu_Width + 28] = ' ';
-						}
-						else
-						{
-							menu[MenuLine[M_NAT]*Menu_Width +  1] = 'í';
-							menu[MenuLine[M_NAT]*Menu_Width + 28] = 'î';
-						}
-
+						if (tuxtxt_cache.national_subset > MAX_NATIONAL_SUBSET)
+							tuxtxt_cache.national_subset = NAT_DEFAULT;
+						menu[MenuLine[M_NAT]*Menu_Width +  1] = 'í';
+						menu[MenuLine[M_NAT]*Menu_Width + 28] = 'î';
 						Menu_Init(menu, current_pid, menuitem, hotindex);
 					}
 					break;
@@ -2001,6 +2011,7 @@ void ColorKey(int target)
 
 void PageCatching()
 {
+	int active_national_subset=tuxtxt_cache.national_subset;
 	int val, byte;
 	int oldzoommode = renderinfo.zoommode;
 
@@ -2013,8 +2024,11 @@ void PageCatching()
 	renderinfo.zoommode = 0;
 	renderinfo.PosX = renderinfo.StartX;
 	renderinfo.PosY = renderinfo.StartY + 24*renderinfo.fontheight;
-	for (byte = 0; byte < 40-renderinfo.nofirst; byte++)
+	for (byte = 0; byte < 40-renderinfo.nofirst; byte++) {
+		tuxtxt_cache.national_subset=menusubset[menulanguage]; //render page catching line in correct language
 		tuxtxt_RenderCharFB(&renderinfo,catchmenutext[menulanguage][byte], &tuxtxt_atrtable[catchmenutext[menulanguage][byte+40] - '0' + ATR_CATCHMENU0]);
+		tuxtxt_cache.national_subset=active_national_subset;
+	}
 	renderinfo.zoommode = oldzoommode;
 
 	/* check for pagenumber(s) */

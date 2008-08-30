@@ -77,107 +77,153 @@ tstPageAttr tuxtxt_atrtable[] =
 	{ tuxtxt_color_white  , tuxtxt_color_menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}  /* ATR_CATCHMENU1 a8 ¨ */
 };
 
-// G2 Charset (0 = Latin, 1 = Cyrillic, 2 = Greek)
+// G2 Set as defined in ETS 300 706
 const unsigned short int G2table[3][6*16] =
 {
-	{ ' ' ,'¡' ,'¢' ,'£' ,'$' ,'¥' ,'#' ,'§' ,'¤' ,'\'','\"','«' ,8592,8594,8595,8593,
-	  '°' ,'±' ,'²' ,'³' ,'x' ,'µ' ,'¶' ,'·' ,'÷' ,'\'','\"','»' ,'¼' ,'½' ,'¾' ,'¿' ,
-	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
-	  '­' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,' ' ,' ' ,' ' ,8539,8540,8541,8542,
-	  937 ,'Æ' ,272 ,'ª' ,294 ,' ' ,306 ,319 ,321 ,'Ø' ,338 ,'º' ,'Þ' ,358 ,330 ,329 ,
-	  1082,'æ' ,273 ,'ð' ,295 ,305 ,307 ,320 ,322 ,'ø' ,339 ,'ß' ,'þ' ,359 ,951 ,0x7F},
-	{ ' ' ,'¡' ,'¢' ,'£' ,'$' ,'¥' ,' ' ,'§' ,' ' ,'\'','\"','«' ,8592,8594,8595,8593,
-	  '°' ,'±' ,'²' ,'³' ,'x' ,'µ' ,'¶' ,'·' ,'÷' ,'\'','\"','»' ,'¼' ,'½' ,'¾' ,'¿' ,
-	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
-	  '­' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,321 ,322 ,'ß' ,8539,8540,8541,8542,
-	  'D' ,'E' ,'F' ,'G' ,'I' ,'J' ,'K' ,'L' ,'N' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Z' ,
-	  'd' ,'e' ,'f' ,'g' ,'i' ,'j' ,'k' ,'l' ,'n' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'z' },
-	{ ' ' ,'a' ,'b' ,'£' ,'e' ,'h' ,'i' ,'§' ,':' ,'\'','\"','k' ,8592,8594,8595,8593,
-	  '°' ,'±' ,'²' ,'³' ,'x' ,'m' ,'n' ,'p' ,'÷' ,'\'','\"','t' ,'¼' ,'½' ,'¾' ,'x' ,
-	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
-	  '?' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,906 ,910 ,911 ,8539,8540,8541,8542,
-	  'C' ,'D' ,'F' ,'G' ,'J' ,'L' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Y' ,'Z' ,902 ,905 ,
-	  'c' ,'d' ,'f' ,'g' ,'j' ,'l' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'y' ,'z' ,904 ,0x7F}
+	// Latin G2 Supplementary Set  
+	{ 0x0020, 0x00A1, 0x00A2, 0x00A3, 0x0024, 0x00A5, 0x0023, 0x00A7, 0x00A4, 0x2018, 0x201C, 0x00AB, 0x2190, 0x2191, 0x2192, 0x2193,
+	  0x00B0, 0x00B1, 0x00B2, 0x00B3, 0x00D7, 0x00B5, 0x00B6, 0x00B7, 0x00F7, 0x2019, 0x201D, 0x00BB, 0x00BC, 0x00BD, 0x00BE, 0x00BF,
+	  0x0020, 0x0300, 0x0301, 0x02C6, 0x0303, 0x02C9, 0x02D8, 0x02D9, 0x00A8, 0x002E, 0x02DA, 0x00B8, 0x005F, 0x02DD, 0x02DB, 0x02C7,
+	  0x2014, 0x00B9, 0x00AE, 0x00A9, 0x2122, 0x266A, 0x20AC, 0x2030, 0x03B1, 0x0020, 0x0020, 0x0020, 0x215B, 0x215C, 0x215D, 0x215E,
+	  0x2126, 0x00C6, 0x00D0, 0x00AA, 0x0126, 0x0020, 0x0132, 0x013F, 0x0141, 0x00D8, 0x0152, 0x00BA, 0x00DE, 0x0166, 0x014A, 0x0149,
+	  0x0138, 0x00E6, 0x0111, 0x00F0, 0x0127, 0x0131, 0x0133, 0x0140, 0x0142, 0x00F8, 0x0153, 0x00DF, 0x00FE, 0x0167, 0x014B, 0x25A0},
+	// Cyrillic G2 Supplementary Set  
+	{ 0x0020, 0x00A1, 0x00A2, 0x00A3, 0x0024, 0x00A5, 0x0020, 0x00A7, 0x0020, 0x2018, 0x201C, 0x00AB, 0x2190, 0x2191, 0x2192, 0x2193,
+	  0x00B0, 0x00B1, 0x00B2, 0x00B3, 0x00D7, 0x00B5, 0x00B6, 0x00B7, 0x00F7, 0x2019, 0x201D, 0x00BB, 0x00BC, 0x00BD, 0x00BE, 0x00BF,
+	  0x0020, 0x0300, 0x0301, 0x02C6, 0x02DC, 0x02C9, 0x02D8, 0x02D9, 0x00A8, 0x002E, 0x02DA, 0x00B8, 0x005F, 0x02DD, 0x02DB, 0x02C7,
+	  0x2014, 0x00B9, 0x00AE, 0x00A9, 0x2122, 0x266A, 0x20AC, 0x2030, 0x03B1, 0x0141, 0x0142, 0x00DF, 0x215B, 0x215C, 0x215D, 0x215E,
+	  0x0044, 0x0045, 0x0046, 0x0047, 0x0049, 0x004A, 0x004B, 0x004C, 0x004E, 0x0051, 0x0052, 0x0053, 0x0055, 0x0056, 0x0057, 0x005A,
+	  0x0064, 0x0065, 0x0066, 0x0067, 0x0069, 0x006A, 0x006B, 0x006C, 0x006E, 0x0071, 0x0072, 0x0073, 0x0075, 0x0076, 0x0077, 0x007A},
+	// Greek G2 Supplementary Set  
+	{ 0x0020, 0x0061, 0x0062, 0x00A3, 0x0065, 0x0068, 0x0069, 0x00A7, 0x003A, 0x2018, 0x201C, 0x006B, 0x2190, 0x2191, 0x2192, 0x2193,
+	  0x00B0, 0x00B1, 0x00B2, 0x00B3, 0x00D7, 0x006D, 0x006E, 0x0070, 0x00F7, 0x2019, 0x201D, 0x0074, 0x00BC, 0x00BD, 0x00BE, 0x0078,
+	  0x0020, 0x0300, 0x0301, 0x02C6, 0x02DC, 0x02C9, 0x02D8, 0x02D9, 0x00A8, 0x002E, 0x02DA, 0x00B8, 0x005F, 0x02DD, 0x02DB, 0x02C7,
+	  0x003F, 0x00B9, 0x00AE, 0x00A9, 0x2122, 0x266A, 0x20AC, 0x2030, 0x03B1, 0x038A, 0x038E, 0x038F, 0x215B, 0x215C, 0x215D, 0x215E,
+	  0x0043, 0x0044, 0x0046, 0x0047, 0x004A, 0x004C, 0x0051, 0x0052, 0x0053, 0x0055, 0x0056, 0x0057, 0x0059, 0x005A, 0x0386, 0x0389,
+	  0x0063, 0x0064, 0x0066, 0x0067, 0x006A, 0x006C, 0x0071, 0x0072, 0x0073, 0x0075, 0x0076, 0x0077, 0x0079, 0x007A, 0x0388, 0x25A0}
+	// Arabic G2 Set: TODO
+	//{ 0x0020, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????,
+	//  0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????,
+	//  0x00E0, 0x0041, 0x0042, 0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048, 0x0049, 0x004A, 0x004B, 0x004C, 0x004D, 0x004E, 0x004F,
+	//  0x0050, 0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057, 0x0058, 0x0059, 0x005A, 0x00EB, 0x00EA, 0x00F9, 0x00EE, 0x????,
+	//  0x00E9, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067, 0x0068, 0x0069, 0x006A, 0x006B, 0x006C, 0x006D, 0x006E, 0x006F,
+	//  0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077, 0x0078, 0x0079, 0x007A, 0x00E2, 0x00F4, 0x00FB, 0x00E7, 0x0020}
 };
-// cyrillic G0 Charset
-// TODO: different maps for serbian/russian/ukrainian
-const unsigned short int G0tablecyrillic[6*16] =
+// G0 Table as defined in ETS 300 706
+// cyrillic G0 Charset (0 = Serbian/Croatian, 1 = Russian/Bulgarian, 2 = Ukrainian)
+const unsigned short int G0table[5][6*16] =
 {
-	  ' ' ,'!' ,'\"','#' ,'$' ,'%' ,'&' ,'\'','(' ,')' ,'*' ,'+' ,',' ,'-' ,'.' ,'/' ,
-	  '0' ,'1' ,'2' ,'3' ,'4' ,'5' ,'6' ,'7' ,'8' ,'9' ,':' ,';' ,'<' ,'=' ,'>' ,'?' ,
-	  1063,1040,1041,1062,1044,1045,1060,1043,1061,1048,1032,1050,1051,1052,1053,1054,
-	  1055,1036,1056,1057,1058,1059,1042,1027,1033,1034,1047,1035,1046,1026,1064,1119,
-	  1095,1072,1073,1094,1076,1077,1092,1075,1093,1080,1112,1082,1083,1084,1085,1086,
-	  1087,1116,1088,1089,1090,1091,1074,1107,1113,1114,1079,1115,1078,1106,1096,0x7F
+	// Cyrillic G0 Set - Option 1 - Serbian/Croatian
+	{ ' ', '!', '\"', '#', '$', '%', '&', '\'', '(' , ')' , '*', '+', ',', '-', '.', '/', 
+	  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
+	  0x0427, 0x0410, 0x0411, 0x0426, 0x0414, 0x0415, 0x0424, 0x0413, 0x0425, 0x0418, 0x0408, 0x041A, 0x041B, 0x041C, 0x041D, 0x041E,
+	  0x041F, 0x040C, 0x0420, 0x0421, 0x0422, 0x0423, 0x0412, 0x0403, 0x0409, 0x040A, 0x0417, 0x040B, 0x0416, 0x0402, 0x0428, 0x040F,
+	  0x0447, 0x0430, 0x0431, 0x0446, 0x0434, 0x0435, 0x0444, 0x0433, 0x0445, 0x0438, 0x0458, 0x043A, 0x043B, 0x043C, 0x043D, 0x043E,
+	  0x043F, 0x045C, 0x0440, 0x0441, 0x0442, 0x0443, 0x0432, 0x0453, 0x0459, 0x045A, 0x0437, 0x045B, 0x0436, 0x0452, 0x0448, 0x25A0},
+	// Cyrillic G0 Set - Option 2 - Russian/Bulgarian
+	{ ' ', '!', '\"', '#', '$', '%', 0x044B, '\'', '(' , ')' , '*', '+', ',', '-', '.', '/', 
+	  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
+	  0x042E, 0x0410, 0x0411, 0x0426, 0x0414, 0x0415, 0x0424, 0x0413, 0x0425, 0x0418, 0x0419, 0x041A, 0x041B, 0x041C, 0x041D, 0x041E,
+	  0x041F, 0x042F, 0x0420, 0x0421, 0x0422, 0x0423, 0x0416, 0x0412, 0x042C, 0x042A, 0x0417, 0x0428, 0x042D, 0x0429, 0x0427, 0x042B,
+	  0x044E, 0x0430, 0x0431, 0x0446, 0x0434, 0x0435, 0x0444, 0x0433, 0x0445, 0x0438, 0x0439, 0x043A, 0x043B, 0x043C, 0x043D, 0x043E,
+	  0x043F, 0x044F, 0x0440, 0x0441, 0x0442, 0x0443, 0x0436, 0x0432, 0x044C, 0x044A, 0x0437, 0x0448, 0x044D, 0x0449, 0x0447, 0x25A0},
+	// Cyrillic G0 Set - Option 3 - Ukrainian
+	{ ' ', '!', '\"', '#', '$', '%', 0x0457, '\'', '(' , ')' , '*', '+', ',', '-', '.', '/', 
+	  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
+	  0x042E, 0x0410, 0x0411, 0x0426, 0x0414, 0x0415, 0x0424, 0x0413, 0x0425, 0x0418, 0x0419, 0x041A, 0x041B, 0x041C, 0x041D, 0x041E,
+	  0x041F, 0x042F, 0x0420, 0x0421, 0x0422, 0x0423, 0x0416, 0x0412, 0x042C, 0x0406, 0x0417, 0x0428, 0x0404, 0x0429, 0x0427, 0x0407,
+	  0x044E, 0x0430, 0x0431, 0x0446, 0x0434, 0x0435, 0x0444, 0x0433, 0x0445, 0x0438, 0x0439, 0x043A, 0x043B, 0x043C, 0x043D, 0x043E,
+	  0x043F, 0x044F, 0x0440, 0x0441, 0x0442, 0x0443, 0x0436, 0x0432, 0x044C, 0x0456, 0x0437, 0x0448, 0x0454, 0x0449, 0x0447, 0x25A0},
+	// Greek G0 Set
+	{ ' ', '!', '\"', '#', '$', '%', '&', '\'', '(' , ')' , '*', '+', ',', '-', '.', '/', 
+	  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', 0x00AB, '=', 0x00BB, '?',
+	  0x0390, 0x0391, 0x0392, 0x0393, 0x0394, 0x0395, 0x0396, 0x0397, 0x0398, 0x0399, 0x039A, 0x039B, 0x039C, 0x039D, 0x039E, 0x039F,
+	  0x03A0, 0x03A1, 0x0384, 0x03A3, 0x03A4, 0x03A5, 0x03A6, 0x03A7, 0x03A8, 0x03A9, 0x03AA, 0x03AB, 0x03AC, 0x03AD, 0x03AE, 0x03AF,
+	  0x03B0, 0x03B1, 0x03B2, 0x03B3, 0x03B4, 0x03B5, 0x03B6, 0x03B7, 0x03B8, 0x03B9, 0x03BA, 0x03BB, 0x03BC, 0x03BD, 0x03BE, 0x03BF,
+	  0x03C0, 0x03C1, 0x03C2, 0x03C3, 0x03C4, 0x03C5, 0x03C6, 0x03C7, 0x03C8, 0x03C9, 0x03CA, 0x03CB, 0x03CC, 0x03CD, 0x03CE, 0x25A0},
+	// Hebrew G0 Set
+	{ ' ', '!', '\"', 0x00A3, '$', '%', '&', '\'', '(' , ')' , '*', '+', ',', '-', '.', '/', 
+	  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
+	  '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+	  'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 0x2190, 0x00BD, 0x2192, 0x2191, '#',
+	  0x05D0, 0x05D1, 0x05D2, 0x05D3, 0x05D4, 0x05D5, 0x05D6, 0x05D7, 0x05D8, 0x05D9, 0x05DA, 0x05DB, 0x05DC, 0x05DD, 0x05DE, 0x05DF,
+	  0x05E0, 0x05E1, 0x05E2, 0x05E3, 0x05E4, 0x05E5, 0x05E6, 0x05E7, 0x05E8, 0x05E9, 0x05EA, 0x20AA, 0x2551, 0x00BE, 0x00F7, 0x25A0}
+	// Arabic G0 Set :TODO
+	//{ ' ', '!', '\"', 0x00A3, '$', '%', '&', '\'', ')' , '(' , '*', '+', ',', '-', '.', '/', 
+	//  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', 0x061B, '>', '=', '<', 0x061F,
+	//  0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????,
+	//  0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????,
+	//  0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????,
+	//  0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x????, 0x25A0}
 };
 
 const unsigned short int nationaltable23[14][2] =
 {
-	{ '#', '¤' }, /* 0          */
-	{ '#', 367 }, /* 1  CS/SK   */
-	{ '£', '$' }, /* 2    EN    */
-	{ '#', 'õ' }, /* 3    ET    */
-	{ 'é', 'ï' }, /* 4    FR    */
-	{ '#', '$' }, /* 5    DE    */
-	{ '£', '$' }, /* 6    IT    */
-	{ '#', '$' }, /* 7  LV/LT   */
-	{ '#', 329 }, /* 8    PL    */
-	{ 'ç', '$' }, /* 9  PT/ES   */
-	{ '#', '¤' }, /* A    RO    */
-	{ '#', 'Ë' }, /* B SR/HR/SL */
-	{ '#', '¤' }, /* C SV/FI/HU */
-	{ '£', 287 }, /* D    TR   ? */
+	{ '#',    0x00A4 }, /* 0          */
+	{ '#',    0x016F }, /* 1  CS/SK   */
+	{ 0x00A3,    '$' }, /* 2    EN    */
+	{ '#',    0x00F5 }, /* 3    ET    */
+	{ 0x00E9, 0x0457 }, /* 4    FR    */
+	{ '#',       '$' }, /* 5    DE    */
+	{ 0x00A3,    '$' }, /* 6    IT    */
+	{ '#',       '$' }, /* 7  LV/LT   */
+	{ '#',    0x0144 }, /* 8    PL    */
+	{ 0x00E7,    '$' }, /* 9  PT/ES   */
+	{ '#',    0x00A4 }, /* A    RO    */
+	{ '#',    0x00CB }, /* B SR/HR/SL */
+	{ '#',    0x00A4 }, /* C SV/FI/HU */
+	{ 0x20A4, 0x011F }, /* D    TR    */
 };
 const unsigned short int nationaltable40[14] =
 {
-	'@', /* 0          */
-	269, /* 1  CS/SK   */
-	'@', /* 2    EN    */
-	352, /* 3    ET    */
-	'à', /* 4    FR    */
-	'§', /* 5    DE    */
-	'é', /* 6    IT    */
-	352, /* 7  LV/LT   */
-	261, /* 8    PL    */
-	'¡', /* 9  PT/ES   */
-	354, /* A    RO    */
-	268, /* B SR/HR/SL */
-	'É', /* C SV/FI/HU */
-	304, /* D    TR    */
+	'@',    /* 0          */
+	0x010D, /* 1  CS/SK   */
+	'@',    /* 2    EN    */
+	0x0161, /* 3    ET    */
+	0x00E0, /* 4    FR    */
+	0x00A7, /* 5    DE    */
+	0x00E9, /* 6    IT    */
+	0x0161, /* 7  LV/LT   */
+	0x0105, /* 8    PL    */
+	0x00A1, /* 9  PT/ES   */
+	0x0162, /* A    RO    */
+	0x010C, /* B SR/HR/SL */
+	0x00C9, /* C SV/FI/HU */
+	0x0130, /* D    TR    */
 };
 const unsigned short int nationaltable5b[14][6] =
 {
-	{ '[','\\', ']', '^', '_', '`' }, /* 0          */
-	{ 357, 382, 'ý', 'í', 345, 'é' }, /* 1  CS/SK   */
-	{8592, '½',8594,8593, '#', 173 }, /* 2    EN    */
-	{ 'Ä', 'Ö', 381, 'Ü', 'Õ', 353 }, /* 3    ET    */
-	{ 'ë', 'ê', 'ù', 'î', '#', 'è' }, /* 4    FR    */
-	{ 'Ä', 'Ö', 'Ü', '^', '_', '°' }, /* 5    DE    */
-	{ '°', 'ç',8594,8593, '#', 'ù' }, /* 6    IT    */
-	{ 'é', 553, 381, 269, 363, 353 }, /* 7  LV/LT   */
-	{ 437, 346, 321, 263, 'ó', 281 }, /* 8    PL    */
-	{ 'á', 'é', 'í', 'ó', 'ú', '¿' }, /* 9  PT/ES   */
-	{ 'Â', 350, 461, 'Î', 305, 355 }, /* A    RO    */
-	{ 262, 381, 272, 352, 'ë', 269 }, /* B SR/HR/SL */
-	{ 'Ä', 'Ö', 'Å', 'Ü', '_', 'é' }, /* C SV/FI/HU */
-	{ 350, 'Ö', 'Ç', 'Ü', 486, 305 }, /* D    TR    */
+	{    '[',   '\\',    ']',    '^',    '_',    '`' }, /* 0          */
+	{ 0x0165, 0x017E, 0x00FD, 0x00ED, 0x0159, 0x00E9 }, /* 1  CS/SK   */
+	{ 0x2190, 0x00BD, 0x2192, 0x2191,    '#', 0x00AD }, /* 2    EN    */
+	{ 0x00C4, 0x00D6, 0x017D, 0x00DC, 0x00D5, 0x0161 }, /* 3    ET    */
+	{ 0x0451, 0x00EA, 0x00F9, 0x00EE,    '#', 0x00E8 }, /* 4    FR    */
+	{ 0x00C4, 0x00D6, 0x00DC,    '^',    '_', 0x00B0 }, /* 5    DE    */
+	{ 0x00B0, 0x00E7, 0x2192, 0x2191,    '#', 0x00F9 }, /* 6    IT    */
+	{ 0x0117, 0x0119, 0x017D, 0x010D, 0x016B, 0x0161 }, /* 7  LV/LT   */
+	{ 0x017B, 0x015A, 0x0141, 0x0107, 0x00F3, 0x0119 }, /* 8    PL    */
+	{ 0x00E1, 0x00E9, 0x00ED, 0x00F3, 0x00FA, 0x00BF }, /* 9  PT/ES   */
+	{ 0x00C2, 0x015E, 0x01CD, 0x01CF, 0x0131, 0x0163 }, /* A    RO    */
+	{ 0x0106, 0x017D, 0x00D0, 0x0160, 0x0451, 0x010D }, /* B SR/HR/SL */
+	{ 0x00C4, 0x00D6, 0x00C5, 0x00DC,    '_', 0x00E9 }, /* C SV/FI/HU */
+	{ 0x015E, 0x00D6, 0x00C7, 0x00DC, 0x011E, 0x0131 }, /* D    TR    */
 };
 const unsigned short int nationaltable7b[14][4] =
 {
-	{ '{', '|', '}', '~' }, /* 0          */
-	{ 'á', 283, 'ú', 353 }, /* 1  CS/SK   */
-	{ '¼',8214, '¾', '÷' }, /* 2    EN    */
-	{ 'ä', 'ö', 382, 'ü' }, /* 3    ET    */
-	{ 'â', 'ô', 'û', 'ç' }, /* 4    FR    */
-	{ 'ä', 'ö', 'ü', 'ß' }, /* 5    DE    */
-	{ 'à', 'ò', 'è', 'ì' }, /* 6    IT    */
-	{ 261, 371, 382, 303 }, /* 7  LV/LT   */
-	{ 380, 347, 322, 378 }, /* 8    PL    */
-	{ 'ü', 'ñ', 'è', 'à' }, /* 9  PT/ES   */
-	{ 'â', 351, 462, 'î' }, /* A    RO    */
-	{ 263, 382, 273, 353 }, /* B SR/HR/SL */
-	{ 'ä', 'ö', 'å', 'ü' }, /* C SV/FI/HU */
-	{ 351, 'ö', 231, 'ü' }, /* D    TR    */
+	{ '{',       '|',    '}',    '~' }, /* 0          */
+	{ 0x00E1, 0x011B, 0x00FA, 0x0161 }, /* 1  CS/SK   */
+	{ 0x00BC, 0x2551, 0x00BE, 0x00F7 }, /* 2    EN    */
+	{ 0x00E4, 0x00F6, 0x017E, 0x00FC }, /* 3    ET    */
+	{ 0x00E2, 0x00F4, 0x00FB, 0x00E7 }, /* 4    FR    */
+	{ 0x00E4, 0x00F6, 0x00FC, 0x00DF }, /* 5    DE    */
+	{ 0x00E0, 0x00F3, 0x00E8, 0x00EC }, /* 6    IT    */
+	{ 0x0105, 0x0173, 0x017E, 0x012F }, /* 7  LV/LT   */
+	{ 0x017C, 0x015B, 0x0142, 0x017A }, /* 8    PL    */
+	{ 0x00FC, 0x00F1, 0x00E8, 0x00E0 }, /* 9  PT/ES   */
+	{ 0x00E2, 0x015F, 0x01CE, 0x00EE }, /* A    RO    */
+	{ 0x0107, 0x017E, 0x0111, 0x0161 }, /* B SR/HR/SL */
+	{ 0x00E4, 0x00F6, 0x00E5, 0x00FC }, /* C SV/FI/HU */
+	{ 0x015F, 0x00F6, 0x00E7, 0x00FC }, /* D    TR    */
 };
 const unsigned short int arrowtable[] =
 {
@@ -2412,23 +2458,23 @@ int tuxtxt_setnational(unsigned char sec)
 		case 0x1d:
 			return NAT_SR; //serbian, croatian, slovenian
 		case 0x20:
+			return NAT_SC; // serbian, croatian
 		case 0x24:
+			return NAT_RB; // russian, bulgarian
 		case 0x25:
-			return NAT_RU; // cyrillic
+			return NAT_UA; // ukrainian
 		case 0x22:
 			return NAT_ET; // estonian
 		case 0x23:
 			return NAT_LV; // latvian, lithuanian
 		case 0x37:
 			return NAT_GR; // greek
+		case 0x55:
+			return NAT_HB; // hebrew			
 		case 0x47:
 		case 0x57:
-			// TODO : arabic
+			// return NAT_AR; TODO : arabic
 			break;
-		case 0x55:
-			// TODO : hebrew
-			break;
-
 	}
 	return countryconversiontable[sec & 0x07];
 }
@@ -2769,7 +2815,7 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 {
 	int row, col;
 	int hold, dhset;
-	int foreground, background, doubleheight, doublewidth, charset, mosaictype, IgnoreAtBlackBgSubst, concealed, flashmode, boxwin;
+	int foreground, background, doubleheight, doublewidth, charset, previous_charset, mosaictype, IgnoreAtBlackBgSubst, concealed, flashmode, boxwin;
 	unsigned char held_mosaic, *p;
 	tstCachedPage *pCachedPage;
 
@@ -2905,7 +2951,7 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 			}
 		}
 	}
-
+	int mosaic_pending,esc_pending;
 	/* decode */
 	for (row = 0;
 		  row < ((showflof && pageinfo->p24) ? 25 : 24);
@@ -2916,7 +2962,7 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 		background   = tuxtxt_color_black;
 		doubleheight = 0;
 		doublewidth  = 0;
-		charset      = C_G0P;
+		charset      = previous_charset = C_G0P; // remember charset for switching back after mosaic charset was used
 		mosaictype   = 0;
 		concealed    = 0;
 		flashmode    = 0;
@@ -2925,6 +2971,7 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 		held_mosaic  = ' ';
 		dhset        = 0;
 		IgnoreAtBlackBgSubst = 0;
+		mosaic_pending = esc_pending = 0; // we need to render at least one mosaic char if 'esc' is received immediatly after mosac charset switch on
 
 		if (boxed && memchr(&page_char[row*40], start_box, 40) == 0)
 		{
@@ -2953,6 +3000,14 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 
 			if (page_char[index] < ' ')
 			{
+				if (esc_pending) { // mosaic char has been rendered and we can switch charsets
+					charset = previous_charset;
+					if (charset == C_G0P)
+						charset = previous_charset = C_G0S;
+					else if (charset == C_G0S)
+						charset = previous_charset = C_G0P;
+					esc_pending = 0;
+				}
 				switch (page_char[index])
 				{
 				case alpha_black:
@@ -2967,7 +3022,8 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 					foreground = page_char[index] - alpha_black + tuxtxt_color_black;
 					if (col == 0 && page_char[index] == alpha_white)
 						page_atrb[index].fg = tuxtxt_color_black; // indicate level 1 color change on column 0; (hack)
-					charset = C_G0P;
+					if ((charset!=C_G0P) && (charset!=C_G0S)) // we need to change charset to state it was before mosaic
+						charset = previous_charset;
 					break;
 
 				case flash:
@@ -3053,6 +3109,7 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 					concealed = 0;
 					foreground = page_char[index] - mosaic_black + tuxtxt_color_black;
 					charset = mosaictype ? C_G1S : C_G1C;
+					mosaic_pending = 1;					
 					break;
 
 				case conceal:
@@ -3084,10 +3141,14 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 					break;
 
 				case esc:
-					if (charset == C_G0P)
-						charset = C_G0S;
-					else if (charset == C_G0S)
-						charset = C_G0P;
+					if (!mosaic_pending) { // if mosaic is pending we need to wait before mosaic arrives
+						if ((charset != C_G0P) && (charset != C_G0S)) // we need to switch to charset which was active before mosaic
+							charset = previous_charset;
+						if (charset == C_G0P)
+							charset = previous_charset = C_G0S;
+						else if (charset == C_G0S)
+							charset = previous_charset = C_G0P;
+					} else esc_pending = 1;
 					break;
 
 				case black_background:
@@ -3510,20 +3571,28 @@ int tuxtxt_RenderChar(unsigned char *lfb, // pointer to render buffer, min. font
 		switch (Attribute->setG0G2)
 		{
 			case 0x20 :
+				national_subset_local = NAT_SC;
+				break;				
 			case 0x24 :
+				national_subset_local = NAT_RB;
+				break;				
 			case 0x25 :
-				national_subset_local = NAT_RU;
+				national_subset_local = NAT_UA;
 				break;
 			case 0x37:
 				national_subset_local = NAT_GR;
 				break;
-				//TODO: arabic and hebrew
+			case 0x55:
+				national_subset_local = NAT_HB;
+				break;
+			// case 0x47: TODO : arabic
+			// case 0x57:
+				// national_subset_local = NAT_AR; 
+				// break;
 			default:
 				national_subset_local = countryconversiontable[Attribute->setG0G2 & 0x07];
 				break;
-
 		}
-
 	}
 	if (Attribute->charset == C_G0S) // use secondary charset
 		national_subset_local = tuxtxt_cache.national_subset_secondary;
@@ -3668,31 +3737,35 @@ int tuxtxt_RenderChar(unsigned char *lfb, // pointer to render buffer, min. font
 	}
 	else if (Attribute->charset == C_G2 && Char >= 0x20 && Char <= 0x7F)
 	{
-		if (national_subset_local == NAT_GR)
-			Char = G2table[2][Char-0x20];
-		else if (national_subset_local == NAT_RU)
+		if ((national_subset_local == NAT_SC) || (national_subset_local == NAT_RB) || (national_subset_local == NAT_UA))
 			Char = G2table[1][Char-0x20];
+		else if (national_subset_local == NAT_GR)
+			Char = G2table[2][Char-0x20];
+		// else if (national_subset_local == NAT_AR) TODO: Arabic
+		//	Char = G2table[3][Char-0x20];
 		else
 			Char = G2table[0][Char-0x20];
 
-		if (Char == 0x7F)
-		{
-			tuxtxt_FillRect(lfb,xres,*pPosX, PosY, curfontwidth, factor*ascender, fgcolor);
-			tuxtxt_FillRect(lfb,xres,*pPosX, PosY + factor*ascender, curfontwidth, factor*(fontheight-ascender), bgcolor);
-			*pPosX += curfontwidth;
-			return 0;
-		}
+		//if (Char == 0x7F)
+		//{
+		//	tuxtxt_FillRect(lfb,xres,*pPosX, PosY, curfontwidth, factor*ascender, fgcolor);
+		//	tuxtxt_FillRect(lfb,xres,*pPosX, PosY + factor*ascender, curfontwidth, factor*(fontheight-ascender), bgcolor);
+		//	*pPosX += curfontwidth;
+		//	return 0;
+		//}
 	}
-	else if (national_subset_local == NAT_GR && Char >= 0x40 && Char <= 0x7E)	/* remap complete areas for greek */
-		Char += 0x390 - 0x40;
-	else if (national_subset_local == NAT_GR && Char == 0x3c)
-		Char = '«';
-	else if (national_subset_local == NAT_GR && Char == 0x3e)
-		Char = '»';
-	else if (national_subset_local == NAT_GR && Char >= 0x23 && Char <= 0x24)
-		Char = nationaltable23[NAT_DE][Char-0x23]; /* #$ as in german option */
-	else if (national_subset_local == NAT_RU && Char >= 0x40 && Char <= 0x7E) /* remap complete areas for cyrillic */
-		Char = G0tablecyrillic[Char-0x20];
+	else if (national_subset_local == NAT_SC && Char >= 0x20 && Char <= 0x7F) /* remap complete areas for serbian/croatian */
+		Char = G0table[0][Char-0x20];
+	else if (national_subset_local == NAT_RB && Char >= 0x20 && Char <= 0x7F) /* remap complete areas for russian/bulgarian */
+		Char = G0table[1][Char-0x20];
+	else if (national_subset_local == NAT_UA && Char >= 0x20 && Char <= 0x7F) /* remap complete areas for ukrainian */
+		Char = G0table[2][Char-0x20];
+	else if (national_subset_local == NAT_GR && Char >= 0x20 && Char <= 0x7F)	/* remap complete areas for greek */
+		Char = G0table[3][Char-0x20];
+	else if (national_subset_local == NAT_HB && Char >= 0x20 && Char <= 0x7F)	/* remap complete areas for hebrew */
+		Char = G0table[4][Char-0x20];
+	//else if (national_subset_local == NAT_AR && Char >= 0x20 && Char <= 0x7F)	/* remap complete areas for arabic */
+	//	Char = G0table[5][Char-0x20]; TODO: Arabic
 	else
 	{
 		/* load char */
@@ -4057,10 +4130,14 @@ void tuxtxt_RenderCharIntern(tstRenderInfo* renderinfo,int Char, tstPageAttr *At
 	{
 		FTC_SBit        sbit_diacrit;
 
-		if (national_subset_local == NAT_GR)
-			Char = G2table[2][0x20+ Attribute->diacrit];
-		else if (national_subset_local == NAT_RU)
+		if ((national_subset_local == NAT_SC) || (national_subset_local == NAT_RB) || (national_subset_local == NAT_UA))
 			Char = G2table[1][0x20+ Attribute->diacrit];
+		else if (national_subset_local == NAT_GR)
+			Char = G2table[2][0x20+ Attribute->diacrit];
+		else if (national_subset_local == NAT_HB)
+			Char = G2table[3][0x20+ Attribute->diacrit];
+		//else if (national_subset_local == NAT_AR) TODO: Arabic
+		//	Char = G2table[4][0x20+ Attribute->diacrit];
 		else
 			Char = G2table[0][0x20+ Attribute->diacrit];
 		if ((glyph = FT_Get_Char_Index(renderinfo->face, Char)))
@@ -5106,7 +5183,7 @@ void tuxtxt_SetRenderingDefaults(tstRenderInfo* renderinfo)
 	renderinfo->show39          = 1;
 	renderinfo->showl25         = 1;
 	renderinfo->TTFWidthFactor16  = 28;
-	renderinfo->TTFHeightFactor16 = 16;
+	renderinfo->TTFHeightFactor16 = 15;
 	renderinfo->color_mode   = 10;
 	renderinfo->trans_mode   = 10;
 	renderinfo->prev_100   = 0x100;
@@ -5276,6 +5353,7 @@ int tuxtxt_InitRendering(tstRenderInfo* renderinfo,int setTVFormat)
 		FT_Done_FreeType(renderinfo->library);
 		return 0;
 	}
+	tuxtxt_ClearFB(renderinfo,tuxtxt_color_transp);
 	tuxtxt_ClearBB(renderinfo,tuxtxt_color_transp); /* initialize backbuffer */
 	for (i = 0; i < 40 * 25; i++)
 	{

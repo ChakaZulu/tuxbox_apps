@@ -165,22 +165,26 @@ extern void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 
 /* national subsets */
 const char countrystring[] =
-"          (#$@[\\]^_`{|}~) "   /*  0 no subset specified */
-"  CS/SK   (#$@[\\]^_`{|}~) "   /*  1 czech, slovak */
-"    EN    (#$@[\\]^_`{|}~) "   /*  2 english */
-"    ET    (#$@[\\]^_`{|}~) "   /*  3 estonian */
-"    FR    (#$@[\\]^_`{|}~) "   /*  4 french */
-"    DE    (#$@[\\]^_`{|}~) "   /*  5 german */
-"    IT    (#$@[\\]^_`{|}~) "   /*  6 italian */
-"  LV/LT   (#$@[\\]^_`{|}~) "   /*  7 latvian, lithuanian */
-"    PL    (#$@[\\]^_`{|}~) "   /*  8 polish */
-"  PT/ES   (#$@[\\]^_`{|}~) "   /*  9 portuguese, spanish */
-"    RO    (#$@[\\]^_`{|}~) "   /* 10 romanian */
-" SR/HR/SL (#$@[\\]^_`{|}~) "   /* 11 serbian, croatian, slovenian */
-" SV/FI/HU (#$@[\\]^_`{|}~) "   /* 12 swedish, finnish, hungarian */
-"    TR    (#$@[\\]^_`{|}~) "   /* 13 turkish */
-" RU/BUL/SER/CRO/UKR (cyr) "   /* 14 cyrillic */
-"    EK                    "   /* 15 greek */
+"         Default          "   /*  0 no subset specified */
+"       Czech/Slovak       "   /*  1 czech, slovak */
+"         English          "   /*  2 english */
+"         Estonian         "   /*  3 estonian */
+"          French          "   /*  4 french */
+"         Deutsch          "   /*  5 german */
+"         Italian          "   /*  6 italian */
+"    Latvian/Lithuanian    "   /*  7 latvian, lithuanian */
+"          Polish          "   /*  8 polish */
+"    Portuguese/Spanish    "   /*  9 portuguese, spanish */
+"         Romanian         "   /* 10 romanian */
+"Serbian/Croatian/Slovenian"   /* 11 serbian, croatian, slovenian */
+"Swedish/Finnish/Hungarian "   /* 12 swedish, finnish, hungarian */
+"          T~rk}e          "   /* 13 turkish */
+"      Srpski/Hrvatski     "   /* 14 serbian, croatian */
+"     Russkij/Bylgarski    "   /* 15 russian, bulgarian */
+"        Ukra&nsxka        "   /* 16 ukrainian */
+"         Ekkgmij\\         "   /* 17 greek */
+"          zixar           "   /* 18 hebrew */
+//"          Arabic           "   /* 19 arabic */ TODO: Arabic
 ;
 #define COUNTRYSTRING_WIDTH 26
 #define MAX_NATIONAL_SUBSET (sizeof(countrystring) / COUNTRYSTRING_WIDTH - 1)
@@ -245,8 +249,8 @@ unsigned char avstable_dvb[3][7] =
 };
 
 /* language dependent texts */
-#define MAXMENULANGUAGE 9 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch, 6 polnisch, 7 schwedisch, 8 suomi, 9 Portuguesa */
-const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL    , NAT_SW      , NAT_SW , NAT_SP};
+#define MAXMENULANGUAGE 10 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch, 6 polnisch, 7 schwedisch, 8 suomi, 9 portuguesa, 10 russian */
+const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL    , NAT_SW      , NAT_SW ,   NAT_SP,      NAT_RB};
 
 
 #define Menu_StartX (renderinfo.StartX + renderinfo.fontwidth*9/2)
@@ -278,11 +282,11 @@ enum
 
 const char hotlistpagecolumn[] =	/* last(!) column of page to show in each language */
 {
-	22, 26, 28, 27, 28, 27, 28, 21, 20, 26
+	22, 26, 28, 27, 28, 27, 28, 21, 20, 26, 26
 };
 const char hotlisttextcolumn[] =
 {
-	24, 14, 14, 15, 14, 15, 14, 23, 22, 14
+	24, 14, 14, 15, 14, 15, 14, 23, 22, 14, 14
 };
 const char hotlisttext[][2*5] =
 {
@@ -296,6 +300,7 @@ const char hotlisttext[][2*5] =
 	{ "ny   bort " },
 	{ "lis{{pois " },
 	{ " adi rem. " },
+	{ "Dob. Udal." },	
 };
 
 const char configonoff[][2*3] =
@@ -310,6 +315,7 @@ const char configonoff[][2*3] =
 	{ "p} av " },
 	{ "EI ON " },
 	{ "offon " },
+	{ "w&kwkl" },
 };
 const char menuatr[Menu_Height*Menu_Width] =
 {
@@ -363,7 +369,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7  nationaler Zeichensatz   הי"
 		"דautomatische Erkennung      הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Sprache/Language deutsch מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -391,7 +397,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7   national characterset   הי"
 		"ד automatic recognition      הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Sprache/language english מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -419,7 +425,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7     police nationale      הי"
 		"דreconn. automatique         הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Sprache/language francaisמהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -447,7 +453,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7    nationale tekenset     הי"
 		"דautomatische herkenning     הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Sprache/Language nederl. מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -475,7 +481,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7    Ehmij^ tuposeiq\\       הי"
 		"דaut|latg amacm~qisg         הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Ck~ssa/Language ekkgmij\\ מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -503,7 +509,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7   nazionalita'caratteri   הי"
 		"ד riconoscimento automatico  הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Lingua/Language Italiana מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -531,7 +537,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7 Znaki charakterystyczne   הי"
 		"ד automatyczne rozpozn.      הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם  J`zyk/Language   polski מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -559,7 +565,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7nationell teckenupps{ttningהי"
 		"ד automatisk igenk{nning     הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Sprache/language svenska מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -587,7 +593,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7   kansallinen merkist|    הי"
 		"ד automaattinen tunnistus    הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Kieli            suomi   מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -615,8 +621,36 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דם                          מהי"
 		"ד7  Caracteres nacionaist    הי"
 		"דreconhecimento utomatico    הי"
-		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם                          מהי"
 		"דם Lingua      Portuguesa   מהי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
+		"כלללללללללללללללללללללללללללללך"
+	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד        Konfiguraciq        הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד1 Faworit&:   dob str. 111  הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2     W&bor teleteksta      הי"
+		"דם           Poisk          מהי"
+		"ד                            הי"
+		"ד       Format kartinki      הי"
+		"ד3 Stand. revim  16:9        הי"
+		"ד4 Tekst/TW rev. 16:9        הי"
+		"ד                            הי"
+		"ד5          Qrkostx          הי"
+		"דם                          מהי"
+		"ד6       Prozra~nostx        הי"
+		"דם                          מהי"
+		"ד7  Ispolxzuem&j alfawit     הי"
+		"ד      awtoopredelenie       הי"
+		"דם                          מהי"
+		"דם  Qz&k:         Russkij   מהי"
 		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
@@ -644,20 +678,23 @@ const char catchmenutext[][80] =
 	  "0000000011110000000000110000000000000000" },
 	{ "        םןנמ seleccao סע mostrar        "
 	  "0000000011110000000000110000000000000000" },
+	{ "        םןנמ w&bratx  סע pokazatx       "
+	  "0000000011110000000000110000000000000000" },
 };
 
 const char message_3[][38] =
 {
-	{ "ד   suche nach Teletext-Anbietern   הי" },
-	{ "ד  searching for teletext Services  הי" },
-	{ "ד  recherche des services teletext  הי" },
-	{ "ד zoeken naar teletekst aanbieders  הי" },
+	{ "ד   Suche nach Teletext-Anbietern   הי" },
+	{ "ד  Searching for teletext services  הי" },
+	{ "ד  Recherche des services teletext  הי" },
+	{ "ד Zoeken naar teletekst aanbieders  הי" },
 	{ "ד     amaf^tgsg voq]ym Teket]nt     הי" },
 	{ "ד     attesa opzioni televideo      הי" },
-	{ "ד  poszukiwanie sygna}u telegazety  הי" },
+	{ "ד  Poszukiwanie sygna}u telegazety  הי" },
 	{ "ד    s|ker efter TextTV tj{nster    הי" },
 	{ "ד   etsit{{n Teksti-TV -palvelua    הי" },
 	{ "ד  Procurar servicos de teletexto   הי" },
+	{ "ד   W&polnqetsq poisk teleteksta    הי" },
 };
 const char message_3_blank[] = "ד                                   הי";
 const char message_7[][38] =
@@ -672,6 +709,7 @@ const char message_7[][38] =
 	{ "ד ingen TextTV p} denna transponder הי" },
 	{ "ד    Ei Teksti-TV:t{ l{hettimell{   הי" },
 	{ "ד  nao ha teletexto no transponder  הי" },
+	{ "ד  Na transpondere net teleteksta   הי" },	
 };
 const char message_8[][38] =
 {
@@ -687,10 +725,11 @@ const char message_8[][38] =
 	{ "ד  v{ntar p} mottagning av sida 100 הי" },
 	{ "ד        Odotetaan sivua 100        הי" },
 	{ "ד   esperando recepcao na pag 100   הי" },
+	{ "ד   Ovidanie priema stranic& 100    הי" },	
 };
 const char message8pagecolumn[] = /* last(!) column of page to show in each language */
 {
-	33, 34, 34, 35, 29, 30, 30, 34, 34, 32
+	33, 34, 34, 35, 29, 30, 30, 34, 34, 32, 34
 };
 
 
