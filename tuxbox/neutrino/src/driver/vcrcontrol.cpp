@@ -74,7 +74,7 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 #ifndef TUXTXT_CFG_STANDALONE
 extern "C" int  tuxtxt_init();
-extern "C" void tuxtxt_start(int tpid);
+extern "C" int  tuxtxt_start(int tpid);
 extern "C" int  tuxtxt_stop();
 extern "C" void tuxtxt_close();
 #endif
@@ -307,8 +307,8 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, co
 	{
 		// Auf Scart schalten
 		CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::VCR_ON, 0 );
-		// Das ganze nochmal in die queue, da obiges RC_timeout erst in der naechsten ev. loop ausgeführt wird
-		// und dann das menu widget das display falsch rücksetzt
+		// Das ganze nochmal in die queue, da obiges RC_timeout erst in der naechsten ev. loop ausgefï¿½hrt wird
+		// und dann das menu widget das display falsch rï¿½cksetzt
 		g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
 	}
 
@@ -371,11 +371,11 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 		if (mode != last_mode && (last_mode != NeutrinoMessages::mode_standby || mode != CNeutrinoApp::getInstance()->getLastMode()))
 		{
 			CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , mode | NeutrinoMessages::norezap );
-			// Wenn wir im Standby waren, dann brauchen wir fürs streamen nicht aufwachen...
+			// Wenn wir im Standby waren, dann brauchen wir fï¿½rs streamen nicht aufwachen...
 			if(last_mode == NeutrinoMessages::mode_standby)
 				CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_standby);
 		}
-		// Wenn im SB dann müssen wir die zapit aufwecken
+		// Wenn im SB dann mï¿½ssen wir die zapit aufwecken
 /*		if(last_mode == NeutrinoMessages::mode_standby)
 		{
 			g_Zapit->setStandby(false);
@@ -398,7 +398,7 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 		tuxtxt_close();
 	}
 #endif
-	if(StopPlayBack && g_Zapit->isPlayBackActive())	// wenn playback gestoppt werden soll und noch läuft
+	if(StopPlayBack && g_Zapit->isPlayBackActive())	// wenn playback gestoppt werden soll und noch lï¿½uft
 		g_Zapit->stopPlayBack();					// dann playback stoppen
 
 	if(StopSectionsd)								// wenn sectionsd gestoppt werden soll

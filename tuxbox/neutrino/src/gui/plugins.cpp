@@ -66,7 +66,7 @@
 #define PLUGINDIR_MNT "/mnt/plugins"
 
 #ifndef TUXTXT_CFG_STANDALONE
-extern "C" void tuxtxt_start(int tpid);
+extern "C" int tuxtxt_start(int tpid);
 #endif
 
 bool CPlugins::plugin_exists(const std::string & filename)

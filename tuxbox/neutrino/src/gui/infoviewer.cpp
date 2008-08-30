@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.226 2008/08/17 15:33:47 seife Exp $
+	$Id: infoviewer.cpp,v 1.227 2008/08/30 16:47:38 dbluelle Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -75,7 +75,7 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #define LCD_UPDATE_TIME_TV_MODE (60 * 1000 * 1000)
 
 #ifndef TUXTXT_CFG_STANDALONE
-extern "C" void tuxtxt_start(int tpid);
+extern "C" int  tuxtxt_start(int tpid);
 extern "C" int  tuxtxt_stop();
 #endif
 

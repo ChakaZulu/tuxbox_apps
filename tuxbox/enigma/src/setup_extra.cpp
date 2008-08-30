@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.76 2008/08/09 15:14:02 dbluelle Exp $
+ * $Id: setup_extra.cpp,v 1.77 2008/08/30 16:47:35 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -34,7 +34,7 @@
 extern "C" int  tuxtxt_stop();
 extern "C" void tuxtxt_close();
 extern "C" int  tuxtxt_init();
-extern "C" void tuxtxt_start(int tpid);
+extern "C" int  tuxtxt_start(int tpid);
 #endif
 
 eExpertSetup::eExpertSetup()

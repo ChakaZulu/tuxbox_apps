@@ -73,8 +73,9 @@ int tuxtxt_stop()
 	pthread_mutex_unlock(&tuxtxt_control_lock);
 	return res;
 }
-void tuxtxt_start(int tpid)
+int tuxtxt_start(int tpid)
 {
+	int ret = 1;
 	pthread_mutex_lock(&tuxtxt_control_lock);
 	if (tuxtxt_cache.vtxtpid != tpid)
 	{
@@ -82,11 +83,11 @@ void tuxtxt_start(int tpid)
 		tuxtxt_clear_cache();
 		tuxtxt_cache.page = 0x100;
 		tuxtxt_cache.vtxtpid = tpid;
-		tuxtxt_start_thread();
+		ret = tuxtxt_start_thread();
 	}
 	else if (!tuxtxt_cache.thread_starting && !tuxtxt_cache.receiving)
 	{
-		tuxtxt_start_thread();
+		ret = tuxtxt_start_thread();
 	}
 	pthread_mutex_unlock(&tuxtxt_control_lock);
 }

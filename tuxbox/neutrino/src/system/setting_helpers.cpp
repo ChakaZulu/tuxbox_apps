@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.170 2008/06/01 12:31:59 ecosys Exp $
+	$Id: setting_helpers.cpp,v 1.171 2008/08/30 16:47:38 dbluelle Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -65,7 +65,7 @@ extern "C" int pinghost( const char *hostname );
 extern "C" int  tuxtxt_stop();
 extern "C" void tuxtxt_close();
 extern "C" int  tuxtxt_init();
-extern "C" void tuxtxt_start(int tpid);
+extern "C" int  tuxtxt_start(int tpid);
 #endif
 
 bool CSatDiseqcNotifier::changeNotify(const neutrino_locale_t, void * Data)

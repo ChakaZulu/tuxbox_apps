@@ -55,7 +55,7 @@ typedef unsigned char __u8;
 
 #ifndef TUXTXT_CFG_STANDALONE
 extern "C" int  tuxtxt_init();
-extern "C" void tuxtxt_start(int tpid);
+extern "C" int  tuxtxt_start(int tpid);
 extern "C" int  tuxtxt_stop();
 extern "C" void tuxtxt_close();
 #endif
