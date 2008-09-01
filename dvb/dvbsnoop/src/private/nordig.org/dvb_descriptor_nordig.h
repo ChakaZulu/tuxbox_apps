@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor_nordig.h,v 1.1 2008/08/29 20:00:06 obi Exp $ 
+$Id: dvb_descriptor_nordig.h,v 1.2 2008/09/01 08:06:07 mws Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_descriptor_nordig.h,v 1.1 2008/08/29 20:00:06 obi Exp $
 
 
 $Log: dvb_descriptor_nordig.h,v $
+Revision 1.2  2008/09/01 08:06:07  mws
+decode NorDig content protection descriptor
+
 Revision 1.1  2008/08/29 20:00:06  obi
 decode NorDig logic(al) channel descriptor (e.g. used by unitymedia)
 
@@ -39,6 +42,7 @@ Revision 1.1  2004/11/03 21:01:02  rasc
 
 
 void descriptor_PRIVATE_NordigORG_LogicChannelDescriptor (u_char *b);
+void descriptor_PRIVATE_NordigORG_ContentProtectionDescriptor (u_char *b);
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor_nordig.c,v 1.2 2008/08/30 19:21:23 obi Exp $ 
+$Id: dvb_descriptor_nordig.c,v 1.3 2008/09/01 08:06:07 mws Exp $ 
 
 
  DVBSNOOP
@@ -59,3 +59,40 @@ void descriptor_PRIVATE_NordigORG_LogicChannelDescriptor (u_char *b)
 	out_NL(4);
 }
 
+/*
+   0xA0  Logic Channel Descriptor
+   NorDig-Unified ver 2.0, 01.07.2008
+*/
+void descriptor_PRIVATE_NordigORG_ContentProtectionDescriptor (u_char *b)
+{
+	unsigned int tag = b[0];
+	unsigned int len = b[1];
+	unsigned int protectionLevel = b[2];
+
+	out_nl(4, "--> NorDig Content Protection Descriptor ");
+
+	b += 2;
+
+	indent(+1);
+	out_NL(4);
+	out_SB_NL(2, "value: ", protectionLevel);
+
+	switch(protectionLevel)
+	{
+		default:
+		case 0x00:
+			out_nl(4, "Outputs shall not be protected.");
+			break;
+		case 0x01:
+			out_nl(4, "Content protection not required.");
+			break;
+		case 0x02:
+			out_nl(4, "Content protection mandatory for video resolution > 576 lines.");
+			break;
+		case 0x03:
+			out_nl(4, "Content protection mandatory regardless of video format and resolution.");
+			break;
+	}
+	indent(-1);
+	out_NL(4);
+}
