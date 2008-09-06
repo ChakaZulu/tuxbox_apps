@@ -1412,7 +1412,7 @@ void *tuxtxt_CacheThread(void *arg)
 						{
 							if (tuxtxt_is_dec(tuxtxt_cache.current_page[magazine]))
 								for (byte = 2; byte < 42; byte++)
-									*p++ = deparity[vtxt_row[byte]]; /* check/remove parity bit */
+									*p++ = vtxt_row[byte] & 0x7f; /* allow values with parity errors as some channels don't care :( */
 							else if ((tuxtxt_cache.current_page[magazine] & 0xff) == 0xfe)
 								for (byte = 2; byte < 42; byte++)
 									*p++ = dehamming[vtxt_row[byte]]; /* decode hamming 8/4 */
