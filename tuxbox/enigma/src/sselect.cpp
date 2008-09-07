@@ -41,6 +41,7 @@ gPixmap *eListBoxEntryService::newfound=0;
 int eListBoxEntryService::maxNumSize=0;
 std::set<eServiceReference> eListBoxEntryService::hilitedEntrys;
 eListBoxEntryService *eListBoxEntryService::selectedToMove=0;
+int eListBoxEntryService::nownextEPG = 0;
 eStreamer streamer;
 bool streaming = false;
 eServiceReference streamingRef;
@@ -385,24 +386,41 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 				EITEvent *e=eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)service);
 				if (e)
 				{
-					eString descr;
-					LocalEventData led;
-					led.getLocalData(e, &descr);
-					if (descr.length())
+					if (eListBoxEntryService::nownextEPG)
 					{
-						sdescr='('+descr+')';
-						curEventId = e->event_id;
-						descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
-						descrPara->setFont( descrFont );
-						descrPara->renderString( sdescr );
-						descrXOffs = newNameXOffs+namePara->getBoundBox().width();
-						if ( service.isLocked() && locked && eConfig::getInstance()->getParentalPin() )
-							descrXOffs = descrXOffs + locked->x;
-						if (numPara)
-							descrXOffs += numPara->getBoundBox().height();
-						descrYOffs = ((rect.height() - descrPara->getBoundBox().height()) / 2 ) - descrPara->getBoundBox().top();
+						time_t t = e->start_time+e->duration+1;
+						delete e;
+						e = eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)service,t);
 					}
-					delete e;
+					if (e)
+					{
+						eString descr;
+						LocalEventData led;
+						led.getLocalData(e, &descr);
+						if (descr.length())
+						{
+							if (eListBoxEntryService::nownextEPG)
+							{
+								tm *t=localtime(&e->start_time);
+								eString nexttime;
+								nexttime.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
+								sdescr='('+nexttime+' '+descr+')';
+							}
+							else
+								sdescr='('+descr+')';
+							curEventId = e->event_id;
+							descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
+							descrPara->setFont( descrFont );
+							descrPara->renderString( sdescr );
+							descrXOffs = newNameXOffs+namePara->getBoundBox().width();
+							if ( service.isLocked() && locked && eConfig::getInstance()->getParentalPin() )
+								descrXOffs = descrXOffs + locked->x;
+							if (numPara)
+								descrXOffs += numPara->getBoundBox().height();
+							descrYOffs = ((rect.height() - descrPara->getBoundBox().height()) / 2 ) - descrPara->getBoundBox().top();
+						}
+						delete e;
+					}
 				}
 			}
 		}
@@ -863,6 +881,25 @@ void eServiceSelector::EPGUpdated()
 	epgcache->Unlock();
 }
 
+struct invalidateServiceDescr
+{
+	invalidateServiceDescr()
+	{
+	}
+
+	bool operator()(eListBoxEntryService& l)
+	{
+		l.invalidateDescr();
+		return 0;
+	}
+};
+void eServiceSelector::SwitchNowNext()
+{
+	eListBoxEntryService::nownextEPG = 1-eListBoxEntryService::nownextEPG;
+	services->forEachEntry( invalidateServiceDescr() );
+	services->invalidate();
+}
+
 void eServiceSelector::pathUp()
 {
 	if (!movemode)
@@ -1288,6 +1325,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						setFocus( bouquets );
 					else
 						setFocus( services );
+				if ( style == styleSingleColumn )
+					SwitchNowNext();
 			}
 			else if (event.action == &i_serviceSelectorActions->showMenu && focus != bouquets && !plockmode )
 			{
@@ -1652,6 +1691,7 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 			eListBoxEntryService::newfound = eSkin::getActive()->queryImage("sselect_newfound");
 			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Number");
 			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Name");
+			i_serviceSelectorActions->toggleFocus.setDescription(_("toggle between now and next epg entries in single column list"));
 		}
 		else if (newStyle == styleMultiColumn)
 		{
@@ -1661,6 +1701,7 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 			eListBoxEntryService::newfound = eSkin::getActive()->queryImage("sselect_newfound_small");
 			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Number");
 			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Name");
+			i_serviceSelectorActions->toggleFocus.setDescription(_("toggle focus between service and bouquet list (in combi column style)"));
 		}
 		else
 		{
@@ -1670,6 +1711,7 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 			eListBoxEntryService::newfound = eSkin::getActive()->queryImage("sselect_newfound_small");
 			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Number");
 			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Name");
+			i_serviceSelectorActions->toggleFocus.setDescription(_("toggle focus between service and bouquet list (in combi column style)"));
 		}
 		services = new eListBoxExt<eListBoxEntryService>(this);
 		services->setName("services");

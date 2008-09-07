@@ -44,6 +44,7 @@ public:
 	const eString &getText() const { return sort; }
 	static eListBoxEntryService *selectedToMove;
 	static std::set<eServiceReference> hilitedEntrys;
+	static int nownextEPG;
 	int getNum() const { return num; }
 	void invalidate();
 	void invalidateDescr();
@@ -103,6 +104,8 @@ private:
 	void gotoChar(char c);
 	void updateCi();
 	void init_eServiceSelector();
+	void SwitchNowNext();
+
 public:
 	void EPGUpdated();
 	int eventHandler(const eWidgetEvent &event);
