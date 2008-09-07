@@ -90,6 +90,7 @@ int tuxtxt_start(int tpid)
 		ret = tuxtxt_start_thread();
 	}
 	pthread_mutex_unlock(&tuxtxt_control_lock);
+	return ret;
 }
 
 void tuxtxt_close()
