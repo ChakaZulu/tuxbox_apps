@@ -4730,7 +4730,7 @@ void eZapMain::addServiceToCurUserBouquet(const eServiceReference& service)
 #ifndef DISABLE_FILE
 void eZapMain::startPermanentTimeshift()
 {
-	
+
 	if ( state & stateRecording ) // no timeshift when recording
 		return;
 	if ( freeRecordSpace() < 10) // less than 10MB free
@@ -4746,7 +4746,7 @@ void eZapMain::startPermanentTimeshift()
 
 	state |= recPermanentTimeshift;
 	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-	if (handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordOpenPermanentTimeshift)))
+	if (!handler || handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordOpenPermanentTimeshift)))
 	{
 		state &= ~(recPermanentTimeshift);
 		eDebug("couldn't start permanent timeshift ... :/");
