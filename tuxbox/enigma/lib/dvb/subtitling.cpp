@@ -308,6 +308,13 @@ void eSubtitleWidget::startttx(int page)
 		}
 		timer.start(250, false);
 	}
+	else
+	{
+		fbClass::getInstance()->unlock();
+		ttx_running = 0;
+	}
+
+
 }
 #endif
 void eSubtitleWidget::start(int pid, const std::set<int> &ppageids)
