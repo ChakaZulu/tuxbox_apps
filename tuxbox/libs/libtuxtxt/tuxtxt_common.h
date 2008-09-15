@@ -3108,6 +3108,8 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 				case mosaic_white:
 					concealed = 0;
 					foreground = page_char[index] - mosaic_black + tuxtxt_color_black;
+					if ((charset==C_G0P) || (charset==C_G0S))
+						previous_charset=charset;
 					charset = mosaictype ? C_G1S : C_G1C;
 					mosaic_pending = 1;					
 					break;
@@ -3188,6 +3190,7 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 			}
 			else /* char >= ' ' */
 			{
+				mosaic_pending = 0; // charset will be switched next if esc_pending
 				/* set new held-mosaic char */
 				if ((charset == C_G1C || charset == C_G1S) &&
 					 ((page_char[index]&0xA0) == 0x20))
