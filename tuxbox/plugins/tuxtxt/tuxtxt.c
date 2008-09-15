@@ -138,7 +138,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.104 $";
+	char cvs_revision[] = "$Revision: 1.105 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -2488,9 +2488,15 @@ void RenderMessage(int Message)
 	/* render infobar */
 	renderinfo.PosX = renderinfo.StartX + renderinfo.fontwidth+5;
 	renderinfo.PosY = renderinfo.StartY + renderinfo.fontheight*16;
+
+	int active_national_subset=tuxtxt_cache.national_subset;	// version string should be rendered in NAT_DEFAULT
+	tuxtxt_cache.national_subset=NAT_DEFAULT;
+
 	for (byte = 0; byte < 37; byte++)
 		tuxtxt_RenderCharFB(&renderinfo,message_1[byte], &tuxtxt_atrtable[menuatr + ((byte >= 9 && byte <= 28) ? 1 : 0)]);
 	tuxtxt_RenderCharFB(&renderinfo,message_1[37], &tuxtxt_atrtable[menuatr + 2]);
+
+	tuxtxt_cache.national_subset=menusubset[menulanguage]; //render message in menulanguage
 
 	renderinfo.PosX = renderinfo.StartX + renderinfo.fontwidth+5;
 	renderinfo.PosY = renderinfo.StartY + renderinfo.fontheight*17;
@@ -2526,6 +2532,8 @@ void RenderMessage(int Message)
 	renderinfo.PosY = renderinfo.StartY + renderinfo.fontheight*21;
 	for (byte = 0; byte < 38; byte++)
 		tuxtxt_RenderCharFB(&renderinfo,message_6[byte], &tuxtxt_atrtable[menuatr + 2]);
+
+	tuxtxt_cache.national_subset=active_national_subset; // restore charset
 }
 
 
