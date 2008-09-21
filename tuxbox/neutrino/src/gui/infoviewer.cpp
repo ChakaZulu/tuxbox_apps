@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.227 2008/08/30 16:47:38 dbluelle Exp $
+	$Id: infoviewer.cpp,v 1.228 2008/09/21 10:41:26 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -178,7 +178,7 @@ void CInfoViewer::showRecordIcon(const bool show)
 		}
 		else
 		{
-			frameBuffer->paintBoxRel(rec_icon_x, BoxStartY+10, 20, 20, 255);
+			frameBuffer->paintBackgroundBoxRel(rec_icon_x, BoxStartY+10, 20, 20);
 		}
 	}
 }
