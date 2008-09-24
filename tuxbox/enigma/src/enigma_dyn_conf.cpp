@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_conf.cpp,v 1.23 2008/01/30 19:01:42 dbluelle Exp $
+ * $Id: enigma_dyn_conf.cpp,v 1.24 2008/09/24 19:20:16 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -198,6 +198,24 @@ eString getConfigSettings(void)
 	int timeroffset = 0;
 	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
 	result.strReplace("#TIMEROFFSET#", eString().sprintf("%d", timeroffset));
+	int timeroffset2 = 0;
+	eConfig::getInstance()->getKey("/enigma/timeroffset2", timeroffset2);
+	result.strReplace("#TIMEROFFSET2#", eString().sprintf("%d", timeroffset2));
+	int defaultaction = 0;
+	eConfig::getInstance()->getKey("/enigma/timerenddefaultaction", defaultaction);
+	switch(defaultaction)
+	{
+		default:
+		case 0:
+			result.strReplace("#TIMERENDDEFAULTACTION#", eString().sprintf("<option selected value=\"0\">Nothing</option><option value=\"%d\">Standby</option><option value=\"%d\">Shutdown</option>",ePlaylistEntry::doGoSleep,ePlaylistEntry::doShutdown));
+			break;
+		case ePlaylistEntry::doGoSleep:
+			result.strReplace("#TIMERENDDEFAULTACTION#", eString().sprintf("<option value=\"0\">Nothing</option><option selected value=\"%d\">Standby</option><option value=\"%d\">Shutdown</option>",ePlaylistEntry::doGoSleep,ePlaylistEntry::doShutdown));
+			break;
+		case ePlaylistEntry::doShutdown:
+			result.strReplace("#TIMERENDDEFAULTACTION#", eString().sprintf("<option value=\"0\">Nothing</option><option value=\"%d\">Standby</option><option selected value=\"%d\">Shutdown</option>",ePlaylistEntry::doGoSleep,ePlaylistEntry::doShutdown));
+			break;
+	}
 	int maxmtu = 1500;
 	eConfig::getInstance()->getKey("/elitedvb/network/maxmtu", maxmtu);
 	result.strReplace("#MAXMTU#", eString().sprintf("%d", maxmtu));
@@ -251,6 +269,8 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 	eString hddti = opt["hddstandby"];
 	eString hddac = opt["hddacoustics"];
 	eString timeroffset = opt["timeroffset"];
+	eString timeroffset2 = opt["timeroffset2"];
+	eString timerenddefaultaction = opt["timerenddefaultaction"];
 	eString showsatpos = opt["showsatpos"];
 	eString webiflock = opt["webiflock"];
 	eString audiochannelspriority = opt["audiochannelspriority"];
@@ -275,6 +295,8 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 		eZap::getInstance()->reconfigureHTTPServer();
 	eConfig::getInstance()->setKey("/extras/showSatPos", (showsatpos == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/enigma/timeroffset", atoi(timeroffset.c_str()));
+	eConfig::getInstance()->setKey("/enigma/timeroffset2", atoi(timeroffset2.c_str()));
+	eConfig::getInstance()->setKey("/enigma/timerenddefaultaction", atoi(timerenddefaultaction.c_str()));
 	eConfig::getInstance()->setKey("/elitedvb/network/maxmtu", atoi(maxmtu.c_str()));
 	system(eString("/sbin/ifconfig eth0 mtu " + maxmtu).c_str());
 	if ((atoi(hddti.c_str()) * 12) != oldti)

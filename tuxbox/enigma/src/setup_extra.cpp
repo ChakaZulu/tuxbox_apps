@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.77 2008/08/30 16:47:35 dbluelle Exp $
+ * $Id: setup_extra.cpp,v 1.78 2008/09/24 19:20:16 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -38,14 +38,14 @@ extern "C" int  tuxtxt_start(int tpid);
 #endif
 
 eExpertSetup::eExpertSetup()
-	:eSetupWindow(_("Expert Setup"), 10, 400)
+	:eSetupWindow(_("Expert Setup"), 12, 470)
 {
 	init_eExpertSetup();
 }
 
 void eExpertSetup::init_eExpertSetup()
 {
-	cmove(ePoint(170, 115));
+	cmove(ePoint(135, 100));
 
 	int lockWebIf=1;
 	if ( eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf) )
@@ -104,6 +104,67 @@ void eExpertSetup::init_eExpertSetup()
 		record_split_size->setCurrent(splitsize);
 		CONNECT( list.selchanged, eExpertSetup::selChanged );
 	}
+
+	// Timeroffset (Anfang)
+	timeroffsetstart = new eListBoxEntryMulti( &list, (_("Change timer offset [start] (left, right)")));
+	timeroffsetstart->add( (eString)"  " + eString().sprintf(_("Timer offset [start] %d min"), 0) + (eString)" >", 0);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 1) + (eString)" >", 1);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 2) + (eString)" >", 2);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 3) + (eString)" >", 3);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 4) + (eString)" >", 4);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 5) + (eString)" >", 5);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 6) + (eString)" >", 6);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 7) + (eString)" >", 7);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 8) + (eString)" >", 8);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 9) + (eString)" >", 9);
+	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 10) + (eString)"  ", 10);
+	int offsetstart=0;
+	if (eConfig::getInstance()->getKey("/enigma/timeroffset", offsetstart) )
+		offsetstart=0; // 0 Minutes
+	timeroffsetstart->setCurrent(offsetstart);
+	CONNECT(list.selchanged, eExpertSetup::startoffsetChanged );
+
+
+	// Timeroffset (Ende)
+	timeroffsetend = new eListBoxEntryMulti( &list, (_("Change timer offset [end] (left, right)")));
+	timeroffsetend->add( (eString)"  " + eString().sprintf(_("Timer offset [end] %d min"), 0) + (eString)" >", 0);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 1) + (eString)" >", 1);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 2) + (eString)" >", 2);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 3) + (eString)" >", 3);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 4) + (eString)" >", 4);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 5) + (eString)" >", 5);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 6) + (eString)" >", 6);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 7) + (eString)" >", 7);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 8) + (eString)" >", 8);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 9) + (eString)" >", 9);
+	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 10) + (eString)"  ", 10);
+	int offsetend=0;
+	if (eConfig::getInstance()->getKey("/enigma/timeroffset2", offsetend) )
+		offsetend=0; // 0 Minutes
+	timeroffsetend->setCurrent(offsetend);
+	CONNECT(list.selchanged, eExpertSetup::endoffsetChanged );
+
+	timerenddefaultaction = new eListBoxEntryMulti( &list, _("Default action on timer end (left, right)"));
+
+	timerenddefaultaction->add( eString().sprintf("%s: %s%s",_("Action on timer end"),_("Nothing")," >").c_str(), 0 );
+	
+	if ( eSystemInfo::getInstance()->canShutdown() )
+	{
+		timerenddefaultaction->add( eString().sprintf("< %s: %s >", _("Action on timer end"), _("Standby")).c_str(), ePlaylistEntry::doGoSleep );
+		timerenddefaultaction->add( eString().sprintf("< %s: %s", _("Action on timer end"), _("Shutdown")).c_str(), ePlaylistEntry::doShutdown );
+	}
+	else
+	{
+		timerenddefaultaction->add( eString().sprintf("< %s: %s", _("Action on timer end"), _("Standby")).c_str(), ePlaylistEntry::doGoSleep );
+	}
+
+	int defaultaction = 0;
+	if (eConfig::getInstance()->getKey("/enigma/timerenddefaultaction", defaultaction) )
+		defaultaction = 0;
+	timerenddefaultaction->setCurrent(defaultaction);
+	
+	CONNECT(list.selchanged, eExpertSetup::timerenddefaultactionChanged );
+	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 #endif
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 		CONNECT((new eListBoxEntryCheck(&list,_("Enable fast zapping"),"/elitedvb/extra/fastzapping",_("enables faster zapping.. but with visible sync")))->selected, eExpertSetup::fastZappingChanged );
@@ -249,6 +310,24 @@ void eExpertSetup::selChanged(eListBoxEntryMenu* e)
 		eConfig::getInstance()->setKey("/extras/record_splitsize", (int)e->getKey());
 }
 #endif
+
+void eExpertSetup::startoffsetChanged(eListBoxEntryMenu* e)
+{
+	if ( e == (eListBoxEntryMenu*)timeroffsetstart )
+		eConfig::getInstance()->setKey("/enigma/timeroffset", (int)e->getKey() );
+}
+
+void eExpertSetup::endoffsetChanged(eListBoxEntryMenu* e)
+{
+	if ( e== (eListBoxEntryMenu*)timeroffsetend )
+		eConfig::getInstance()->setKey("/enigma/timeroffset2", (int)e->getKey() );
+}
+
+void eExpertSetup::timerenddefaultactionChanged(eListBoxEntryMenu* e)
+{
+	if ( e == (eListBoxEntryMenu*)timerenddefaultaction )
+		eConfig::getInstance()->setKey("/enigma/timerenddefaultaction", (int)e->getKey() );
+}
 
 void eExpertSetup::reinitializeHTTPServer(bool)
 {

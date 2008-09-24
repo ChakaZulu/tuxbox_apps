@@ -2337,17 +2337,25 @@ eTimerEditView::eTimerEditView( ePlaylistEntry* e)
 {
 	createWidgets();
 
-	if ( e )
+	if ( e ) // this is used when editing a timer in timerlist
 	{
 		fillInData( e->time_begin, e->duration, e->type, e->service );
 		multipleChanged( e->type&ePlaylistEntry::isRepeating );
 	}
-	else
+	else // this is used when a new timer is created from timerlist
 	{
 		time_t now = time(0)+eDVB::getInstance()->time_difference;
 		int type = eSystemInfo::getInstance()->getDefaultTimerType();
 		fillInData( now, 0, type, eServiceInterface::getInstance()->service );
 		multipleChanged( 0 );
+
+		// load user defined default action; use nothing when no value has been stored
+		int defaultaction = 0;
+
+		eConfig::getInstance()->getKey("/enigma/timerenddefaultaction", defaultaction);
+
+		// set user defined action in combobox
+		after_event->setCurrent((void*)defaultaction);
 	}
 	setHelpID(98);
 }
@@ -2358,6 +2366,15 @@ eTimerEditView::eTimerEditView( const EITEvent &e, int type, eServiceReference r
 	createWidgets();
 	fillInData( e.start_time, e.duration, type, ref );
 	multipleChanged(0);
+
+	// load user defined default action; use nothing when no value has been stored
+	int defaultaction = 0;
+
+	eConfig::getInstance()->getKey("/enigma/timerenddefaultaction", defaultaction);
+
+	// set user defined action in combobox
+	after_event->setCurrent((void*)defaultaction);
+
 	scanEPGPressed();
 }
 
@@ -2502,8 +2519,12 @@ void eTimerEditView::applyPressed()
 		if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
 			timeroffset = 0;
 			
+		int timeroffset2 = 0;
+		if ((eConfig::getInstance()->getKey("/enigma/timeroffset2", timeroffset2)) != 0)
+			timeroffset2 = 0;
+			
 		evt.start_time = newEventBegin - (timeroffset * 60);
-		evt.duration = newEventDuration + (2* timeroffset * 60);
+		evt.duration = newEventDuration + (( timeroffset + timeroffset2) * 60);
 
 		eString sname = getLeft(tmpService.descr,'/');
 		eString descr = event_name->getText();

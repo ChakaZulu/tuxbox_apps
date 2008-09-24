@@ -8,6 +8,12 @@ class eExpertSetup: public eSetupWindow
 #ifndef DISABLE_FILE
 	eListBoxEntryMulti *record_split_size;
 	void selChanged(eListBoxEntryMenu* e);
+	eListBoxEntryMulti *timeroffsetstart;
+	eListBoxEntryMulti *timeroffsetend;
+	eListBoxEntryMulti *timerenddefaultaction;
+	void startoffsetChanged(eListBoxEntryMenu* e);
+	void endoffsetChanged(eListBoxEntryMenu* e);
+	void timerenddefaultactionChanged(eListBoxEntryMenu* e);
 #endif
 #ifndef DISABLE_NETWORK
 	void communication_setup();

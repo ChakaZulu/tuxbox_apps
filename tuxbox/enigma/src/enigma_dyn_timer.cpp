@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_timer.cpp,v 1.22 2008/06/14 14:42:58 dbluelle Exp $
+ * $Id: enigma_dyn_timer.cpp,v 1.23 2008/09/24 19:20:16 dbluelle Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -832,8 +832,11 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	int timeroffset = 0;
 	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
 
+	int timeroffset2 = 0;
+	eConfig::getInstance()->getKey("/enigma/timeroffset2", timeroffset2);
+
 	eventStartTime = eventStartTime - (timeroffset * 60);
-	eventDuration = eventDuration + (2 * timeroffset * 60);
+	eventDuration = eventDuration + (( timeroffset + timeroffset2) * 60);
 
 	int type = (after_event) ? atoi(after_event.c_str()) : 0;
 
@@ -903,13 +906,26 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 static eString buildAfterEventOpts(int type)
 {
 	std::stringstream afterOpts;
-	if (type & ePlaylistEntry::doGoSleep || type & ePlaylistEntry::doShutdown)
+
+	// get default action for timer end
+	int defaultaction = 0;
+
+	eConfig::getInstance()->getKey("/enigma/timerenddefaultaction", defaultaction);
+
+	// only use default action when creating a new timer (type == 0)
+	if (type & ePlaylistEntry::doGoSleep || type & ePlaylistEntry::doShutdown || type == 0 && defaultaction > 0)
+	{
 		afterOpts << "<option value=\"0\">";
-	else
-		afterOpts << "<option selected value=\"0\">";
-	afterOpts << "Nothing"
+		afterOpts << "Nothing"
 		<< "</option>";
-	if (type & ePlaylistEntry::doGoSleep)
+	}
+ 	else
+	{
+		afterOpts << "<option selected value=\"0\">";
+		afterOpts << "Nothing"
+		<< "</option>";
+	}
+	if (type & ePlaylistEntry::doGoSleep || type== 0 && defaultaction == ePlaylistEntry::doGoSleep)
 		afterOpts << "<option selected value=\"" << ePlaylistEntry::doGoSleep << "\">";
 	else
 		afterOpts << "<option value=\"" << ePlaylistEntry::doGoSleep << "\">";
@@ -917,7 +933,7 @@ static eString buildAfterEventOpts(int type)
 		<< "</option>";
 	if (eSystemInfo::getInstance()->canShutdown())
 	{
-		if (type & ePlaylistEntry::doShutdown)
+		if (type & ePlaylistEntry::doShutdown || type == 0 && defaultaction == ePlaylistEntry::doShutdown)
 			afterOpts << "<option selected value=\"" << ePlaylistEntry::doShutdown << "\">";
 		else
 			afterOpts << "<option value=\"" << ePlaylistEntry::doShutdown << "\">";

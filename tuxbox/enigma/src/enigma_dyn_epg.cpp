@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_epg.cpp,v 1.11 2008/03/06 21:02:17 pieterg Exp $
+ * $Id: enigma_dyn_epg.cpp,v 1.12 2008/09/24 19:20:16 dbluelle Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -97,6 +97,12 @@ eString getServiceEPG(eString format, eString opts)
 	eService* current;
 	eServiceReference ref;
 
+	// we read the default action on timer end
+	int defaultendaction = 0;
+
+	eConfig::getInstance()->getKey("/enigma/timerenddefaultaction", defaultendaction);
+
+
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
@@ -170,6 +176,7 @@ eString getServiceEPG(eString format, eString opts)
 					tmp.strReplace("\"", "\\\"");
 					tmp.strReplace("&", "~");
 					result.strReplace("#DESCRIPTIONJS#", XMLify(tmp, format)); 
+					result.strReplace("#TIMERENDACTION#", eString().sprintf("%d", defaultendaction));
 					tmp = filter_string(ext_description);
 					result.strReplace("#DETAILS#", XMLify(tmp, format));
 					result.strReplace("#GENRE#", genre);
@@ -316,6 +323,10 @@ public:
 		result << std::setfill('0');
 		eService* current;
 
+		// we read the default action on timer end
+		int defaultendaction = 0;
+		eConfig::getInstance()->getKey("/enigma/timerenddefaultaction", defaultendaction);
+
 		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 		if (sapi)
 		{
@@ -435,6 +446,8 @@ public:
 							tmp.strReplace("&", "~");
 							result  << tmp << "','"
 								<< filter_string(current->service_name)
+								<< "','"
+								<< defaultendaction
 								<< "')\"><img src=\"timer.gif\" border=\"0\" /></a>"
 								<< "&#160;&#160;";
 #endif

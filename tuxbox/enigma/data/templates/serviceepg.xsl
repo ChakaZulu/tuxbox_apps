@@ -22,7 +22,7 @@
 							<span class="time"><xsl:value-of select="date"/> - <xsl:value-of select="time"/></span>
 						</td>
 						<td>
-							<a href="javascript:record('{/service_epg/service/reference},{start},{duration},{description},{/service_epg/service/name}')">
+							<a href="javascript:record('{/service_epg/service/reference},{start},{duration},{description},{/service_epg/service/name},{timerendaction}')">
 								<img src="/timer.gif" border="0"/>
 							</a>
 						</td>
