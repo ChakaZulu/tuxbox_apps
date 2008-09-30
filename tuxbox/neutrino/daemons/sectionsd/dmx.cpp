@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.38 2008/08/16 19:23:18 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.39 2008/09/30 21:37:23 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -279,7 +279,7 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		unlock();
 		if (rc == 0)
 		{
-			dprintf("dmx.read timeout - filter: %x - timeout# %d\n", filters[filter_index].filter, timeouts);
+			//dprintf("dmx.read timeout - filter: %x - timeout# %d\n", filters[filter_index].filter, timeouts);
 			timeouts++;
 		}
 		else
@@ -294,6 +294,13 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 
 	section_length = (initial_header.section_length_hi * 256) | initial_header.section_length_lo;
 	
+	if (section_length <= 0)
+	{
+		unlock();
+		fprintf(stderr, "[sectionsd] section_length <= 0: %d [%s:%s:%d] please report!\n", section_length, __FILE__,__FUNCTION__,__LINE__);
+		return NULL;
+	}
+
 	timeouts = 0;
 	buf = new char[section_length + 3];
 	
@@ -306,8 +313,7 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		return NULL;
 	}
 	
-	if (section_length > 0)
-		rc = read(buf + 3, section_length, timeoutInMSeconds);
+	rc = read(buf + 3, section_length, timeoutInMSeconds);
 	
 	//	if (rc <= 0)
 	if (rc != section_length)
