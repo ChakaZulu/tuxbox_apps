@@ -673,7 +673,15 @@ and add to neutrino playlist
 			} else {
 				char * tunein_base = NULL;
 
-				if (xml_decode == 2) {
+				if (xml_decode == 1) {
+					CFile file;
+					file.Mode = S_IFDIR + 0777 ;
+					file.Name = " Top500"; // use space to have it at the beginning of the list
+					file.Url = "/sbin/newxml.phtml?genre=Top500";
+					file.Size = 0;
+					file.Time = 0;
+					flist->push_back(file);
+				} else if (xml_decode == 2) {
 					CFile file2;
 					file2.Mode = S_IFDIR + 0777 ;
 					file2.Name = "..";
