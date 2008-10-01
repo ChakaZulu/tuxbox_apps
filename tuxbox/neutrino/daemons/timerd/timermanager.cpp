@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.86 2006/03/04 09:51:47 zwen Exp $
+   $Id: timermanager.cpp,v 1.87 2008/10/01 19:04:46 houdini Exp $
 
 	License: GPL
 
@@ -96,7 +96,9 @@ void* CTimerManager::timerThread(void *arg)
 				dprintf("waiting for time to be set\n");
 				wait.tv_sec = time(NULL) + 5 ;
 				wait.tv_nsec = 0;
+				pthread_mutex_lock(&dummy_mutex);
 				pthread_cond_timedwait(&dummy_cond, &dummy_mutex, &wait);
+				pthread_mutex_unlock(&dummy_mutex);
 			}
 		}
 		else
@@ -186,7 +188,10 @@ void* CTimerManager::timerThread(void *arg)
 
 			wait.tv_sec = (((time(NULL) / sleeptime) * sleeptime) + sleeptime);
 			wait.tv_nsec = 0;
+
+			pthread_mutex_lock(&dummy_mutex);
 			pthread_cond_timedwait(&dummy_cond, &dummy_mutex, &wait);
+			pthread_mutex_unlock(&dummy_mutex);
 		}
 	}
 	return 0;
