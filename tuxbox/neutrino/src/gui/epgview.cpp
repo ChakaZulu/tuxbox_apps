@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.139 2008/05/01 00:08:22 dbt Exp $
+	$Id: epgview.cpp,v 1.140 2008/10/03 23:23:22 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -115,26 +115,25 @@ CEpgData::CEpgData()
 
 void CEpgData::start()
 {
-	// ox = 540;
-	// oy = 320;
-	ox = w_max (540, 0);
-	oy = h_max (320, 0);
-	sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
-
-
+	/* This defines the size of the EPG window. We leave 35 pixels left and right,
+	 * 25 pixels top and bottom. It adjusts itself to the "visible screen" settings
+	 */
+	ox = w_max (768, 70);
+	oy = h_max (576, 50 + 30); // 30 for the bottom button box.
 
 	topheight     = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->getHeight();
 	topboxheight  = topheight + 6;
 	botheight     = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->getHeight();
 	botboxheight  = botheight + 6;
+
+	sx = (g_settings.screen_EndX - g_settings.screen_StartX - ox) / 2 + g_settings.screen_StartX;
+	sy = (g_settings.screen_EndY - g_settings.screen_StartY - oy) / 2 + g_settings.screen_StartY - 30/2;
+	/* this is the text box height - and the height of the scroll bar */
+	sb = oy - topboxheight - botboxheight;
 	medlineheight = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getHeight();
-	medlinecount  = (oy- botboxheight)/medlineheight;
-	sb = medlinecount* medlineheight;
+	medlinecount  = sb / medlineheight;
 
-	oy = botboxheight+medlinecount*medlineheight; // recalculate
-	sy = (((g_settings.screen_EndY-g_settings.screen_StartY)-(oy- topboxheight) ) / 2) + g_settings.screen_StartY;
 	toph = topboxheight;
-
 }
 
 void CEpgData::addTextToArray(const std::string & text) // UTF-8
@@ -214,7 +213,7 @@ void CEpgData::showText( int startPos, int ypos )
 {
 	// recalculate
 	medlineheight = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getHeight();
-	medlinecount=(oy- botboxheight)/medlineheight;
+	medlinecount = sb / medlineheight;
 
 	int textCount = epgText.size();
 	int y=ypos;
@@ -379,7 +378,8 @@ const neutrino_locale_t * genre_sub_classes_list[10] =
 	genre_travel_hobbies
 };
 
-bool CEpgData::hasFollowScreenings(const t_channel_id channel_id, const std::string & title) {
+bool CEpgData::hasFollowScreenings(const t_channel_id /*channel_id*/, const std::string & title)
+{
 	time_t curtime = time(NULL);
 
 	for (CChannelEventList::iterator e = evtlist.begin(); e != evtlist.end(); ++e )
@@ -446,33 +446,28 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 		return res;
 	}
 
-
+	printf("showing epgid: 0x%04llx (%lld)\n", epgData.eventID & 0xFFFFULL, epgData.eventID & 0xFFFFULL);
 
 	int pos;
 	std::string text1 = epgData.title;
 	std::string text2 = "";
-	if (g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->getRenderWidth(text1) > 520)
+	if (g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->getRenderWidth(text1) > ox - 15) // 15 for the scroll bar...
 	{
 		do
 		{
 			pos = text1.find_last_of("[ .]+");
 			if ( pos!=-1 )
 				text1 = text1.substr( 0, pos );
-		} while ( ( pos != -1 ) && (g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->getRenderWidth(text1) > 520));
+		} while ( ( pos != -1 ) && (g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->getRenderWidth(text1) > ox - 15));
 		text2 = epgData.title.substr(text1.length()+ 1, uint(-1) );
 	}
-
-	int oldtoph= toph;
 
 	if (text2!="")
 		toph = 2* topboxheight;
 	else
 		toph = topboxheight;
 
-	if ( (oldtoph> toph) && (!doLoop) )
-	{
-		frameBuffer->paintBackgroundBox (sx, sy- oldtoph- 1, sx+ ox, sy- toph);
-	}
+	sb = oy - toph - botboxheight;
 
 	// 21.07.2005 - rainerk
 	// Only show info1 if it's not included in info2!
@@ -487,7 +482,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 /*	Houdini: changed for safty reason (crashes with some events at WDR regional)
 			if (nPosDot < epgData.info2.length()) {   // Make sure we don't overrun the buffer
 */
-			if (nPosDot < epgData.info2.length() && nPosDot < epgData.info1.length()) {   // Make sure we don't overrun the buffer
+				if (nPosDot < epgData.info2.length() && nPosDot < epgData.info1.length()) {   // Make sure we don't overrun the buffer
 
 					if (0 == epgData.info2.find(epgData.info1.substr(nPosDot, epgData.info1.length() - nPosDot))) {
 						strEpisode = epgData.info1.substr(0, nPosDot) + "\n";
@@ -547,10 +542,10 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	}
 
 	//show the epg
-	frameBuffer->paintBoxRel(sx, sy - toph, ox, toph, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
-	g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy- toph+ topheight+ 3, ox-15, text1, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(sx, sy, ox, toph, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy + topheight+ 3, ox-15, text1, COL_MENUHEAD);
 	if (!(text2.empty()))
-		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy- toph+ 2* topheight+ 3, ox-15, text2, COL_MENUHEAD);
+		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy + 2* topheight+ 3, ox-15, text2, COL_MENUHEAD);
 
 	//show date-time....
 	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD_PLUS_0);
@@ -567,8 +562,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 	int showPos = 0;
 	textCount = epgText.size();
-	int textypos = sy;
-	showText(showPos, textypos);
+	showText(showPos, sy + toph);
 
 	// show Timer Event Buttons
 	showTimerEventBar (true);
@@ -657,7 +651,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 					if(showPos+scrollCount<textCount)
 					{
 						showPos += scrollCount;
-						showText(showPos,textypos);
+						showText(showPos, sy + toph);
 					}
 					break;
 
@@ -666,7 +660,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 					if(showPos<0)
 						showPos = 0;
 					else
-						showText(showPos,textypos);
+						showText(showPos, sy + toph);
 					break;
 
 				// 31.05.2002 dirch		record timer
@@ -787,7 +781,7 @@ void CEpgData::hide()
 		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize() * 10 / BIG_FONT_FAKTOR);
 	}
 
-	frameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
+	frameBuffer->paintBackgroundBoxRel(sx, sy, ox, oy);
         showTimerEventBar (false);
 }
 
@@ -884,8 +878,7 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 // -- 2002-05-03 rasc
 //
 
-int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string & title)
-
+int CEpgData::FollowScreenings (const t_channel_id /*channel_id*/, const std::string & title)
 {
   CChannelEventList::iterator e;
   time_t			curtime;
@@ -984,7 +977,7 @@ void CEpgData::showTimerEventBar (bool show)
 //  -- (2004-03-06 rasc)
 //
 
-int CEPGDataHandler::exec(CMenuTarget* parent, const std::string &actionkey)
+int CEPGDataHandler::exec(CMenuTarget* parent, const std::string & /*actionkey*/)
 {
 	int           res = menu_return::RETURN_EXIT_ALL;
 	CChannelList  *channelList;
