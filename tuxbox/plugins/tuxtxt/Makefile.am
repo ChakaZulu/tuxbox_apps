@@ -32,6 +32,6 @@ install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
 	install -d $(DESTDIR)$(CONFIGDIR)
 	install -d $(DESTDIR)$(CONFIGDIR)/tuxtxt
-	$(LIBTOOL) install tuxtxt.la $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) --mode=install install tuxtxt.la $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/tuxtxt.cfg $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/tuxtxt.conf $(DESTDIR)$(CONFIGDIR)/tuxtxt
