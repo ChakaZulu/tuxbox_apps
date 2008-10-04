@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.40 2008/06/14 22:47:34 dbt Exp $
+	$Id: epgplus.cpp,v 1.41 2008/10/04 09:55:12 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1632,6 +1632,7 @@ int EpgPlus::exec
 					this->createChannelEntries(selectedChannelEntryIndex);
 
 					this->paint();
+					g_RCInput->clearRCMsg();
 				}
 				else
 				{
@@ -1659,6 +1660,7 @@ int EpgPlus::exec
 					this->createChannelEntries(selectedChannelEntryIndex);
 
 					this->paint();
+					g_RCInput->clearRCMsg();
 				}
 				else
 				{
@@ -1738,6 +1740,8 @@ int EpgPlus::exec
 							    this->createChannelEntries(this->selectedChannelEntry->index);
 
 							    this->paint();
+							g_RCInput->clearRCMsg();
+							
 						    }
               }
             }
@@ -1798,6 +1802,7 @@ int EpgPlus::exec
 						    this->createChannelEntries(this->selectedChannelEntry->index);
 
 						    this->paint();
+						g_RCInput->clearRCMsg();
 					    }
 				    }
             break;
