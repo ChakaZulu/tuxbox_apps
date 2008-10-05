@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.39 2008/09/30 21:37:23 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.40 2008/10/05 12:46:20 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -659,8 +659,8 @@ int DMX::unpause(void)
 
 const char *dmx_filter_types [] = {
 			"dummy filter",
-			"other transport stream, now/next",
 			"actual transport stream, scheduled",
+			"other transport stream, now/next",
 			"actual transport stream, scheduled2",
 //			"other transport stream, scheduled"
 			"other transport stream, scheduled 1/2",
