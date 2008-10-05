@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.228 2008/09/21 10:41:26 seife Exp $
+	$Id: infoviewer.cpp,v 1.229 2008/10/05 17:54:22 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -451,6 +451,9 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		{
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 			//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
+#if 0
+There is no need to poll for EPG when we are going to get events from sectionsd. Saves lots of useless
+requests to sectionsd.
 			if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_current ) ) )
 			{
 				if(difftime(time(&tb),ta) > 1.1)
@@ -464,6 +467,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 					}
 				}
 			}
+#endif
 
 			if ( msg == CRCInput::RC_help )
 			{
@@ -1343,11 +1347,14 @@ void CInfoViewer::showLcdPercentOver()
 	{
 		int runningPercent=-1;
 		time_t jetzt=time(NULL);
+#if 0
+No need to poll for EPG, we are getting events from sectionsd!
 		if ( ! (info_CurrentNext.flags & CSectionsdClient::epgflags::has_current) ||
 		     jetzt > (int)(info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer))
 		{
 			info_CurrentNext = getEPG(channel_id);
 		}
+#endif
 		if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 		{
 			if (jetzt < info_CurrentNext.current_zeit.startzeit)
