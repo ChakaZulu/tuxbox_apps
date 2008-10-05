@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.268 2008/10/05 13:12:48 seife Exp $
+//  $Id: sectionsd.cpp,v 1.269 2008/10/05 14:42:45 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -296,6 +296,12 @@ inline void unlockBouquets(void)
 	pthread_rwlock_unlock(&bouquetsLock);
 }
 
+#if 0
+/* access to the data structures is protected by locks anyway, so there is no
+   reason to pause the EITThreads anymore for the sake of locking. It was not
+   used otherwise at all anyway and it did not work correctly since quite some
+   time.
+   To be removed, just kept for reference. 10.2008-seife */
 inline int EITThreadsPause(void)
 {
 	return(	dmxEIT.pause() ||
@@ -309,6 +315,7 @@ inline int EITThreadsUnPause(void)
 		dmxEIT.unpause() ||
 		dmxPPT.unpause());
 } 
+#endif
 
 bool timeset = false;
 bool bTimeCorrect = false;
@@ -2061,6 +2068,7 @@ static void commandGetIsScanningActive(int connfd, char* /*data*/, const unsigne
 		dputs("[sectionsd] Fehler/Timeout bei write");
 }
 
+/* deprecated. TODO: remove, from both neutrino and sectionsd */
 static void commandPauseSorting(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 4)
@@ -2071,11 +2079,7 @@ static void commandPauseSorting(int connfd, char *data, const unsigned dataLengt
 	if (pause && pause != 1)
 		goto out;
 
-	if (pause)
-		EITThreadsPause();
-	else
-		EITThreadsUnPause();
-
+	dprintf("DEPRECATED! Request of %s sorting events.\n", pause ? "stop" : "continue" );
  out:
 	struct sectionsd::msgResponseHeader msgResponse;
 
@@ -2234,9 +2238,6 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 	if (serviceUniqueKey != 0)
 	{
 		// service Found
-		if (EITThreadsPause())
-			goto out;
-
 		readLockEvents();
 		int serviceIDfound = 0;
 
@@ -2349,9 +2350,6 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 		}
 
 		unlockEvents();
-
-		if (EITThreadsUnPause())
-			goto out;
 	}
 
 	//printf("warning: [sectionsd] all events - response-size: 0x%x, count = %lx\n", liste - evtList, count);
@@ -2438,7 +2436,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.268 2008/10/05 13:12:48 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.269 2008/10/05 14:42:45 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2593,9 +2591,6 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 
 	dprintf("Request of ComponentTags for 0x%llx\n", uniqueKey);
 
-	if (EITThreadsPause()) // -> lock
-		goto out;
-
 	readLockEvents();
 
 	nResultDataSize = sizeof(int);    // num. Component-Tags
@@ -2624,7 +2619,6 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		EITThreadsUnPause();
 		goto out;
 	}
 
@@ -2655,7 +2649,6 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 	}
 
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 
 	responseHeader.dataLength = nResultDataSize;
 
@@ -2690,9 +2683,6 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 
 	dprintf("Request of LinkageDescriptors for 0x%llx\n", uniqueKey);
 
-	if (EITThreadsPause()) // -> lock
-		goto out;
-
 	readLockEvents();
 
 	nResultDataSize = sizeof(int);    // num. Component-Tags
@@ -2726,7 +2716,6 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		EITThreadsUnPause();
 		goto out;
 	}
 
@@ -2754,7 +2743,6 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 	}
 
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 
 	responseHeader.dataLength = nResultDataSize;
 
@@ -2940,6 +2928,7 @@ commented the messaging_WaitForServiceDesc stuff out for now - is unused anyway 
 	msgResponse.dataLength = 0;
 	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), WRITE_TIMEOUT_IN_SECONDS);
 
+	dprintf("[sectionsd] commandserviceChanged: END!!\n");
 	return ;
 }
 
@@ -2970,9 +2959,6 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	t_channel_id * uniqueServiceKey = (t_channel_id *)data;
 
 	dprintf("[sectionsd] Request of current/next information for " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
-
-	if (EITThreadsPause()) // -> lock
-		goto out;
 
 	readLockEvents();
 	/* if the currently running program is requested... */
@@ -3128,7 +3114,6 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		EITThreadsUnPause();
 		nResultDataSize = 0; // send empty response
 		goto out;
 	}
@@ -3184,7 +3169,6 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	p++;
 
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 
 	//dprintf("change: %s, messaging_eit_busy: %s, last_request: %d\n", change?"true":"false", messaging_eit_is_busy?"true":"false",(time(NULL) - messaging_last_requested));
 	if (change && !messaging_eit_is_busy && (time(NULL) - messaging_last_requested) < 11) {
@@ -3252,7 +3236,6 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 	{
 		fprintf(stderr, "sendEPG: low on memory!\n");
 		unlockEvents();
-		EITThreadsUnPause(); // -> unlock
 		responseHeader.dataLength = 0;
 		goto out;
 	}
@@ -3309,8 +3292,6 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 
 	unlockEvents();
 
-	EITThreadsUnPause(); // -> unlock
-
  out:
 	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS))
 		if (responseHeader.dataLength)
@@ -3338,11 +3319,6 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 
 	dprintf("Request of next epg for 0x%llx %s", *uniqueEventKey, ctime(starttime));
 
-	if (EITThreadsPause()) { // -> lock
-		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
-		return ;
-	}
-
 	readLockEvents();
 
 	SItime zeit(*starttime, 0);
@@ -3353,14 +3329,12 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 	{
 		dprintf("next epg found.\n");
 		sendEPG(connfd, nextEvt, zeit);
-// these 2 calls are made in sendEPG()
+// this call is made in sendEPG()
 //		unlockEvents();
-//		EITThreadsUnPause(); // -> unlock
 		return;
 	}
 
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 	dprintf("next epg not found!\n");
 
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
@@ -3377,9 +3351,6 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 	SItime zeit(0, 0);
 
 	dprintf("[commandActualEPGchannelID] Request of actual EPG for " PRINTF_CHANNEL_ID_TYPE "\n", * uniqueServiceKey);
-
-	if (EITThreadsPause()) // -> lock
-		goto out;
 
 	readLockEvents();
 	if (*uniqueServiceKey == messaging_current_servicekey) {
@@ -3414,10 +3385,9 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 	}
 	
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 	dprintf("EPG not found!\n");
 
- out:
+// out:
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
@@ -3447,9 +3417,6 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 
 	dprintf("Request of Prev/Next EPG for 0x%llx %s", *uniqueEventKey, ctime(starttime));
 
-	if (EITThreadsPause()) // -> lock
-		goto out;
-
 	readLockEvents();
 
 	findPrevNextSIevent(*uniqueEventKey, zeit, prev_evt, prev_zeit, next_evt, next_zeit);
@@ -3466,7 +3433,6 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		EITThreadsUnPause(); // -> unlock
 		responseHeader.dataLength = 0; // empty response
 		goto out;
 	}
@@ -3478,7 +3444,6 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 	        next_zeit.startzeit
 	       );
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 
  out:
 	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS))
@@ -3615,19 +3580,6 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 
 	*evtList = 0;
 
-	if (EITThreadsPause()) // -> lock
-	{
-//		delete[] evtList;
-		goto out;
-	}
-
-	if (dmxSDT.pause())
-	{
-//		delete[] evtList;
-		EITThreadsUnPause();
-		goto out;
-	}
-
 	char *liste = evtList;
 	readLockEvents();
 
@@ -3750,9 +3702,6 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 
 	unlockEvents();
 
-	dmxSDT.unpause();
-	EITThreadsUnPause();
-
 	//printf("warning: [sectionsd] sendEventList - response-size: 0x%x, count = %lx\n", liste - evtList, count);
 	if (liste - evtList > MAX_SIZE_BIGEVENTLIST)
 		printf("warning: [sectionsd] sendEventList- response-size: 0x%x\n", liste - evtList);
@@ -3793,7 +3742,6 @@ static void sendShort(int connfd, const SIevent& e, const SItime& t)
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		EITThreadsUnPause(); // -> unlock
 		responseHeader.dataLength = 0;
 		goto out;
 	}
@@ -3806,7 +3754,6 @@ static void sendShort(int connfd, const SIevent& e, const SItime& t)
 	        t.dauer
 	       );
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 
  out:
 	if(writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS))
@@ -3835,11 +3782,6 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 
 	dprintf("Request of next short for 0x%llx %s", *uniqueEventKey, ctime(starttime));
 
-	if (EITThreadsPause()) { // -> lock
-		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
-		return;
-	}
-
 	readLockEvents();
 
 	const SIevent &nextEvt = findNextSIevent(*uniqueEventKey, zeit);
@@ -3848,14 +3790,11 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 	{
 		dprintf("next short found.\n");
 		sendShort(connfd, nextEvt, zeit);
-// these 2 calls are made in sendShort()
+// this call is made in sendShort()
 //		unlockEvents();
-//		EITThreadsUnPause(); // -> unlock
 		return;
 	}
-
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 	dprintf("next short not found!\n");
 
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
@@ -3916,11 +3855,6 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 
 	dprintf("Request of actual EPG for 0x%llx 0x%lx\n", *epgID, *startzeit);
 
-	if (EITThreadsPause()) { // -> lock
-		writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
-		return;
-	}
-
 	readLockEvents();
 
 	const SIevent& evt = findSIeventForEventUniqueKey(*epgID);
@@ -3938,16 +3872,14 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 			dputs("EPG found.");
 			// Sendet ein EPG, unlocked die events, unpaused dmxEIT
 			sendEPG(connfd, evt, *t);
-// these 2 calls are made in sendEPG()
+// this call is made in sendEPG()
 //			unlockEvents();
-//			EITThreadsUnPause(); // -> unlock
 			return;
 		}
 	}
 
 	dputs("EPG not found!");
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 	// response
 
 	writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
@@ -3967,11 +3899,6 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 
 	dprintf("Request of actual EPG for 0x%llx\n", *epgID);
 
-	if (EITThreadsPause()) { // -> lock
-		writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
-		return;
-	}
-
 	readLockEvents();
 
 	const SIevent& evt = findSIeventForEventUniqueKey(*epgID);
@@ -3980,15 +3907,13 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 	{ // Event found
 		dputs("EPG found.");
 		sendEPG(connfd, evt, SItime(0, 0), 1);
-// these 2 calls are made in sendEPG()
+// this call is made in sendEPG()
 //			unlockEvents();
-//		EITThreadsUnPause(); // -> unlock
 		return;
 	}
 
 	dputs("EPG not found!");
 	unlockEvents();
-	EITThreadsUnPause(); // -> unlock
 	// response
 
 	writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
@@ -4007,9 +3932,6 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 	t_channel_id uniqueServiceKey = *(t_channel_id *)data;
 
 	dprintf("Request of NVOD times for " PRINTF_CHANNEL_ID_TYPE "\n", uniqueServiceKey);
-
-	if (EITThreadsPause()) // -> lock
-		goto out;
 
 	readLockServices();
 	readLockEvents();
@@ -4030,7 +3952,6 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 				fprintf(stderr, "low on memory!\n");
 				unlockEvents();
 				unlockServices();
-				EITThreadsUnPause(); // -> unlock
 				responseHeader.dataLength = 0; // empty response
 				goto out;
 			}
@@ -4074,7 +3995,6 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 	}
 	unlockEvents();
 	unlockServices();
-	EITThreadsUnPause(); // -> unlock
 
 	dprintf("data bytes: %u\n", responseHeader.dataLength);
 
@@ -4271,9 +4191,6 @@ static void deleteSIexceptEPG()
 
 static void commandFreeMemory(int connfd, char * /*data*/, const unsigned /*dataLength*/)
 {
-	EITThreadsPause();
-	dmxSDT.pause();
-
 	deleteSIexceptEPG();
 
 	writeLockEvents();
@@ -4282,9 +4199,6 @@ static void commandFreeMemory(int connfd, char * /*data*/, const unsigned /*data
 	mySIeventsOrderUniqueKey.clear();
 	mySIeventsNVODorderUniqueKey.clear();
 	unlockEvents();
-
-	dmxSDT.unpause();
-	EITThreadsUnPause();
 
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
@@ -4578,9 +4492,6 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 		dprintf("unable to open %s for writing\n", tmpname);
 	}
 	else {
-		EITThreadsPause();
-		dmxSDT.pause();
-
 		dprintf("Writing Information to file: %s\n", tmpname);
 
 		write_index_xml_header(indexfile);
@@ -4673,8 +4584,6 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 		fclose(indexfile);
 
 		dprintf("Writing Information finished\n");
-		dmxSDT.unpause();
-		EITThreadsUnPause();
 	}
 	strncpy(filename, data, dataLength);
 	filename[dataLength] = '\0';
@@ -7822,9 +7731,7 @@ static void *houseKeepingThread(void *)
 
 			dprintf("housekeeping.\n");
 
-			EITThreadsPause();
-
-			dmxSDT.pause();
+// TODO: maybe we need to stop scanning here?...
 
 			readLockEvents();
 
@@ -7955,8 +7862,6 @@ static void *houseKeepingThread(void *)
 
 			print_meminfo();
 
-			dmxSDT.unpause();
-			EITThreadsUnPause();
 			count++;
 
 		} // for endlos
@@ -8153,7 +8058,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.268 2008/10/05 13:12:48 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.269 2008/10/05 14:42:45 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
