@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.h,v 1.19 2008/04/05 21:22:47 houdini Exp $
+  $Id: audioplayer.h,v 1.20 2008/10/05 17:40:51 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -154,7 +154,7 @@ class CAudioPlayerGui : public CMenuTarget
 	CFileFilter audiofilefilter;
 	void paintItemID3DetailsLine (int pos);
 	void clearItemID3DetailsLine ();
-	void play(int pos);
+	void play(unsigned int pos);
 	void stop();
 	void pause();
 	void ff(unsigned int seconds=0);
