@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/debug.h,v 1.3 2008/01/05 18:02:11 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/debug.h,v 1.4 2008/10/05 13:40:36 seife Exp $
  *
  * Debug tools (sectionsd) - d-box2 linux project
  *
@@ -32,6 +32,7 @@ extern bool debug;
 
 #define dprintf(fmt, args...) do { if (debug) { printdate_ms(stdout); printf(fmt, ## args); fflush(stdout); }} while (0)
 #define dputs(str)            do { if (debug) { printdate_ms(stdout); puts(str);            fflush(stdout); }} while (0)
+#define xprintf(fmt, args...) do { printdate_ms(stderr); fprintf(stderr, fmt, ## args); } while (0)
 
 void printdate_ms(FILE* f);
 
