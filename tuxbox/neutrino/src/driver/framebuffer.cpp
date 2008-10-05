@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.66 2008/07/21 21:23:50 dbt Exp $
+	$Id: framebuffer.cpp,v 1.67 2008/10/05 21:29:00 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -637,12 +637,13 @@ void CFrameBuffer::loadPal(const std::string & filename, const unsigned char off
 
 	struct rgbData rgbdata;
 	int            fd;
+	std::string  palfile = getIconFilePath(filename);
 
-	fd = open((iconBasePath + filename).c_str(), O_RDONLY);
+	fd = open(palfile.c_str(), O_RDONLY);
 
 	if (fd == -1)
 	{
-		printf("error while loading palette: %s%s\n", iconBasePath.c_str(), filename.c_str());
+		printf("error while loading palette: %s\n", palfile.c_str());
 		return;
 	}
 
@@ -891,11 +892,13 @@ bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t
 	struct rawHeader header;
 	int              fd;
 
-	fd = open((iconBasePath + filename).c_str(), O_RDONLY );
+	std::string  picturefile = getIconFilePath(filename);
+	
+	fd = open(picturefile.c_str(), O_RDONLY );
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s%s\n", iconBasePath.c_str(), filename.c_str());
+		printf("error while loading icon: %s\n", picturefile.c_str());
 		return false;
 	}
 
@@ -945,12 +948,14 @@ bool CFrameBuffer::savePictureFromMem(const std::string & filename, const fb_pix
 	header.height_lo = height &  0xFF;
 	header.height_hi = height >>    8;
 	header.transp    =              0;
+	
+	std::string picturefile = getIconFilePath(filename);
 
-	fd = open((iconBasePath + filename).c_str(), O_WRONLY | O_CREAT);
+	fd = open(picturefile.c_str(), O_WRONLY | O_CREAT);
 
 	if (fd==-1)
 	{
-		printf("error while saving icon: %s%s", iconBasePath.c_str(), filename.c_str() );
+		printf("error while saving icon: %s", picturefile.c_str() );
 		return false;
 	}
 
@@ -964,7 +969,9 @@ bool CFrameBuffer::savePictureFromMem(const std::string & filename, const fb_pix
 
 bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned char offset)
 {
-	if ((backgroundFilename == filename) && (background))
+	std::string picturefile = getIconFilePath(filename);
+
+	if ((backgroundFilename == picturefile) && (background))
 	{
 		// loaded previously
 		return true;
@@ -977,7 +984,7 @@ bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned c
 
 	background = new fb_pixel_t[BACKGROUNDIMAGEWIDTH * 576];
 
-	if (!loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, 0, background))
+	if (!loadPictureToMem(picturefile, BACKGROUNDIMAGEWIDTH, 576, 0, background))
 	{
 		delete[] background;
 		background=0;
@@ -1008,7 +1015,7 @@ bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned c
 		}
 #endif
 
-	backgroundFilename = filename;
+	backgroundFilename = picturefile;
 
 	return true;
 }
