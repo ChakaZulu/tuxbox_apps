@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.269 2008/10/05 14:42:45 seife Exp $
+//  $Id: sectionsd.cpp,v 1.270 2008/10/05 17:39:54 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -322,9 +322,11 @@ bool bTimeCorrect = false;
 pthread_cond_t timeIsSetCond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t timeIsSetMutex = PTHREAD_MUTEX_INITIALIZER;
 
-static bool	messaging_wants_current_next_Event = false;
-static bool	messaging_got_current = false;
-static bool	messaging_got_next = false;
+//static bool	messaging_wants_current_next_Event = false;
+//static bool	messaging_got_current = false;
+//static bool	messaging_got_next = false;
+static int	messaging_have_CN = 0x00;	// 0x01 = CURRENT, 0x02 = NEXT
+static int	messaging_got_CN = 0x00;	// 0x01 = CURRENT, 0x02 = NEXT
 static time_t	messaging_last_requested = time(NULL);
 static bool	messaging_neutrino_sets_time = false;
 //static bool 	messaging_WaitForServiceDesc = false;
@@ -603,7 +605,7 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 					      ((t_channel_id)evt.service_id);
 		readLockMessaging();
 		if (evt_channel_id == messaging_current_servicekey && // but only if it is the current channel...
-		    !(messaging_got_current && messaging_got_next)) { // ...and if we don't have them already.
+		    (messaging_got_CN != 0x03)) { // ...and if we don't have them already.
 			unlockMessaging();
 			SIevent *eptr = new SIevent(evt);
 			if (!eptr)
@@ -621,13 +623,13 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 						delete myCurrentEvent;
 					myCurrentEvent = new SIevent(evt);
 					writeLockMessaging();
-					messaging_got_current = true;
+					messaging_got_CN |= 0x01;
 					if (myNextEvent && (*myNextEvent).uniqueKey() == e->uniqueKey()) {
 						dprintf("addevent-cn: removing next-event\n");
 						/* next got "promoted" to current => trigger re-read */
 						delete myNextEvent;
 						myNextEvent = NULL;
-						messaging_got_next = false;
+						messaging_got_CN &= 0x01;
 					}
 					unlockMessaging();
 					dprintf("addevent-cn: added running (%d) event 0x%04x '%s'\n",
@@ -643,7 +645,7 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 						delete myNextEvent;
 					myNextEvent = new SIevent(evt);
 					writeLockMessaging();
-					messaging_got_next = true;
+					messaging_got_CN |= 0x02;
 					unlockMessaging();
 					dprintf("addevent-cn: added next    (%d) event 0x%04x '%s'\n",
 						e->runningStatus(), e->eventID, e->getName().c_str());
@@ -2436,7 +2438,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.269 2008/10/05 14:42:45 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.270 2008/10/05 17:39:54 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2850,9 +2852,8 @@ commented the messaging_WaitForServiceDesc stuff out for now - is unused anyway 
 */
 		writeLockMessaging();
 		messaging_current_servicekey = *uniqueServiceKey;
-		messaging_wants_current_next_Event = true;
-		messaging_got_current = false;
-		messaging_got_next = false;
+		messaging_have_CN = 0x00;
+		messaging_got_CN = 0x00;
 		messaging_zap_detected = true;
 		unlockMessaging();
 /*
@@ -7206,17 +7207,22 @@ static void *cnThread(void *)
 			} // if (update_eit)
 
 			readLockMessaging();
-			if (messaging_got_current && messaging_got_next && messaging_wants_current_next_Event) // timeoutsDMX < -1)
+			if (messaging_got_CN != messaging_have_CN) // timeoutsDMX < -1)
 			{
 				unlockMessaging();
 				writeLockMessaging();
-				messaging_wants_current_next_Event = false;
+				messaging_have_CN = messaging_got_CN;
 				unlockMessaging();
-				dprintf("[cnThread] got all current_next - sending event!\n");
+				dprintf("[cnThread] got current_next (0x%x) - sending event!\n", messaging_have_CN);
 				eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG,
 							CEventServer::INITID_SECTIONSD,
 							&messaging_current_servicekey,
 							sizeof(messaging_current_servicekey));
+				readLockMessaging();
+			}
+			if (messaging_have_CN == 0x03) // current + next
+			{
+				unlockMessaging();
 				sendToSleepNow = true;
 				timeoutsDMX = 0;
 			}
@@ -8058,7 +8064,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.269 2008/10/05 14:42:45 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.270 2008/10/05 17:39:54 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8250,9 +8256,8 @@ int main(int argc, char **argv)
 //						messaging_skipped_sections_ID[0].clear();
 //						messaging_sections_max_ID[0] = -1;
 //						messaging_sections_got_all[0] = false;
-						messaging_wants_current_next_Event = true;
-						messaging_got_current = false;
-						messaging_got_next = false;
+						messaging_have_CN = 0x00;
+						messaging_got_CN = 0x00;
 						messaging_last_requested = time(NULL);
 						unlockMessaging();
 						sched_yield();
