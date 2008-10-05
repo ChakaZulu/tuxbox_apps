@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.12 2008/08/16 19:23:18 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.13 2008/10/05 13:12:48 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -97,7 +97,6 @@ class DMX
 	int setCurrentService(int new_current_service);
 	int dropCachedSectionIDs();
 
-	void reset_eit_version(void);
 	unsigned char get_eit_version(void);
 	// was useful for debugging...
 	unsigned int get_current_service(void);

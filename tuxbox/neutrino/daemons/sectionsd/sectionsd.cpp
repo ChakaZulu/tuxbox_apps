@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.267 2008/10/05 12:46:16 seife Exp $
+//  $Id: sectionsd.cpp,v 1.268 2008/10/05 13:12:48 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -1028,9 +1028,7 @@ static void removeOldEvents(const long seconds)
 
 	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin();
 
-	readLockMessaging();
 	while ((e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end()) && (!messaging_zap_detected)) {
-		unlockMessaging();
 		unlockEvents();
 		goodtimefound = false;
 		for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++) {
@@ -1046,10 +1044,8 @@ static void removeOldEvents(const long seconds)
 		else
 			++e;
 		readLockEvents();
-		readLockMessaging();
 	}	
 	unlockEvents();
-	unlockMessaging();
 	
 	return;
 }
@@ -1072,9 +1068,7 @@ static void removeWasteEvents()
 
 	MySIeventsOrderUniqueKey::iterator e = mySIeventsOrderUniqueKey.begin();
 
-	readLockMessaging();
 	while ((e != mySIeventsOrderUniqueKey.end()) && (!messaging_zap_detected)) {
-		unlockMessaging();
 		unlockEvents();
 		validevent = true;
 		haslinkage = false;
@@ -1136,10 +1130,8 @@ static void removeWasteEvents()
 		else
 			++e;
 		readLockEvents();
-		readLockMessaging();
 	}
 	unlockEvents();
-	unlockMessaging();
 
 	xmlFreeDoc(service_parser);
 	return;
@@ -1352,9 +1344,7 @@ static bool AddServiceToAutoBouquets(const char *provname, const t_original_netw
 		bouquet_exists = true;
 
 	currentBouquet = getNextAutoBouquet(currentBouquet, provname, onid, tsid, sid);
-	readLockMessaging();
 	while ((currentBouquet) && (!messaging_zap_detected)) {
-		unlockMessaging();
 		dprintf("Service %s, ONID: 0x%04x, TSID: 0x%04x, SID: 0x%04x will be added to Bouquet: %s\n",
 				provname,
 				onid,
@@ -1364,14 +1354,10 @@ static bool AddServiceToAutoBouquets(const char *provname, const t_original_netw
 
 		if (bouquet_exists)
 			bouquet = findBouquetByName(bouquet_parser, currentBouquet->BouquetName);
-		readLockMessaging();
 		if ((!bouquetContainsService(bouquet, onid, tsid, sid)) && (!messaging_zap_detected)) {
-			unlockMessaging();
 			if (current_exists)
 				bouquet2 = findBouquetByName(current_parser, currentBouquet->BouquetName);
-			readLockMessaging();
 			if ((!bouquetContainsService(bouquet2, onid, tsid, sid)) && (!messaging_zap_detected)) {
-				unlockMessaging();
 				if (!(dst = fopen(CURRENTBOUQUETS_TMP, "w"))) {
 					dprintf("unable to open %s for writing", CURRENTBOUQUETS_TMP);
 				}
@@ -1424,16 +1410,10 @@ static bool AddServiceToAutoBouquets(const char *provname, const t_original_netw
 					rename(CURRENTBOUQUETS_TMP, CURRENTBOUQUETS_XML);
 				}
 			}
-			else
-				unlockMessaging();
 		}
-		else
-			unlockMessaging();
 		currentBouquet = currentBouquet->next;
 		currentBouquet = getNextAutoBouquet(currentBouquet, provname, onid, tsid, sid);
-		readLockMessaging();
 	}
-	unlockMessaging();
 
 	return returnvalue;
 }
@@ -2458,7 +2438,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.267 2008/10/05 12:46:16 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.268 2008/10/05 13:12:48 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2797,7 +2777,7 @@ std::vector<long long>	messaging_skipped_sections_ID [0x22];			// 0x4e .. 0x6f
 static long long 	messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
 static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
 */
-static unsigned char 	messaging_current_version_number = 0xff;
+//static unsigned char 	messaging_current_version_number = 0xff;
 //static unsigned char 	messaging_current_section_number = 0;
 /* messaging_eit_is_busy does not need locking, it is only written to from CN-Thread */
 static bool		messaging_eit_is_busy = false;
@@ -2852,15 +2832,11 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	time_t zeit = time(NULL);
 
-	readLockMessaging();
-	//if (debug) showProfiling("[sectionsd] commandserviceChanged: after messaging lock");
-
 	if ( (messaging_current_servicekey >> 16) == (*uniqueServiceKey >> 16) )
 		transponderChanged = false;
 
 	if (messaging_current_servicekey != *uniqueServiceKey)
 	{
-		unlockMessaging();
 		doWakeUp = true;
 
 		//if (debug) showProfiling("[sectionsd] commandserviceChanged: before events lock");
@@ -2890,6 +2866,7 @@ commented the messaging_WaitForServiceDesc stuff out for now - is unused anyway 
 		messaging_got_current = false;
 		messaging_got_next = false;
 		messaging_zap_detected = true;
+		unlockMessaging();
 /*
 		messaging_WaitForServiceDesc = (si == mySIservicesOrderUniqueKey.end() );
 		if ( messaging_WaitForServiceDesc )
@@ -2898,8 +2875,6 @@ commented the messaging_WaitForServiceDesc stuff out for now - is unused anyway 
 		unlockServices();
 */
 	}
-
-	unlockMessaging();
 
 #if 0
 /* to be removed... -- seife */
@@ -2929,11 +2904,7 @@ commented the messaging_WaitForServiceDesc stuff out for now - is unused anyway 
 #endif
 	if (debug)
 		showProfiling("[sectionsd] commandserviceChanged: before wakeup");
-	writeLockMessaging();
 	messaging_last_requested = zeit;
-	messaging_current_version_number = 0xff;
-	dmxCN.reset_eit_version();
-	unlockMessaging();
 
 	if ( doWakeUp )
 	{
@@ -2950,14 +2921,12 @@ commented the messaging_WaitForServiceDesc stuff out for now - is unused anyway 
 #ifdef PAUSE_EQUALS_STOP
 		dmxCN.real_unpause();
 #endif
-//		readLockMessaging();
 		dmxCN.setCurrentService(messaging_current_servicekey & 0xffff);
 		dmxCN.change(0);
 #ifdef PAUSE_EQUALS_STOP
 		dmxEIT.real_unpause();
 #endif
 		dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
-//		unlockMessaging();
 		dmxEIT.change( 0 );
 	}
 	else
@@ -3006,10 +2975,8 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		goto out;
 
 	readLockEvents();
-//	readLockMessaging();
 	/* if the currently running program is requested... */
 	if (*uniqueServiceKey == messaging_current_servicekey) {
-//		unlockMessaging();
 		/* ...check for myCurrentEvent and myNextEvent */
 		if (!myCurrentEvent) {
 			dprintf("!myCurrentEvent ");
@@ -3032,8 +2999,6 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 			flag |= CSectionsdClient::epgflags::has_next; // aktuelles event da...
 			flag |= CSectionsdClient::epgflags::has_anything;
 		}
-	} else {
-	//	unlockMessaging();
 	}
 
 	//dprintf("flag: 0x%x, has_current: 0x%x has_next: 0x%x\n", flag, CSectionsdClient::epgflags::has_current, CSectionsdClient::epgflags::has_next); 
@@ -3221,16 +3186,11 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	unlockEvents();
 	EITThreadsUnPause(); // -> unlock
 
-	/* if we do this earlier, with eit threads paused, we deadlock */
-//	readLockMessaging();
 	//dprintf("change: %s, messaging_eit_busy: %s, last_request: %d\n", change?"true":"false", messaging_eit_is_busy?"true":"false",(time(NULL) - messaging_last_requested));
 	if (change && !messaging_eit_is_busy && (time(NULL) - messaging_last_requested) < 11) {
-//		unlockMessaging();
 		/* restart dmxCN, but only if it is not already running, and only for 10 seconds */
 		dprintf("change && !messaging_eit_is_busy => dmxCN.change(0)\n");
 		dmxCN.change(0);
-	} else {
-//		unlockMessaging();
 	}
 
 	// response
@@ -3422,9 +3382,7 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 		goto out;
 
 	readLockEvents();
-//	readLockMessaging();
 	if (*uniqueServiceKey == messaging_current_servicekey) {
-//		unlockMessaging();
 		if (myCurrentEvent) {
 			evt = myCurrentEvent;
 			zeit.startzeit = (*evt).times.begin()->startzeit;
@@ -3440,8 +3398,6 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 				}
 			}
 		}
-	} else {
-//		unlockMessaging();
 	}
 
 	if ((*evt).service_id == 0)
@@ -4184,7 +4140,6 @@ static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLeng
 	if (dataLength != 2)
 		goto out;
 
-//	writeLockMessaging();
 	pid = *((unsigned short*)data);
 //	if (privatePid != pid)
 	{
@@ -4194,7 +4149,6 @@ static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLeng
 			dmxPPT.change( 0 );
 		}
 	}
-//	unlockMessaging();
 
  out:
 	struct sectionsd::msgResponseHeader responseHeader;
@@ -6223,10 +6177,8 @@ static void *nitThread(void *)
 		dprintf("[%sThread] pid %d (%lu) start\n", "nit", getpid(), pthread_self());
 
 		int timeoutsDMX = 0;
-		// writeLockMessaging();
 		for ( i = 0; i < MAX_NIDs; i++)
 			messaging_nit_nid[i] = 0;
-		// unlockMessaging();
 		dmxNIT.start(); // -> unlock
 		if (!scanning)
 			dmxNIT.request_pause();
@@ -6258,8 +6210,6 @@ static void *nitThread(void *)
 				pthread_mutex_lock( &dmxNIT.start_stop_mutex );
 				dprintf("dmxNIT: going to sleep...\n");
 
-				//readLockMessaging();
-
 				if ((auto_scanning > 0) && (!startup)) {
 					 if (messaging_nit_nid[0] != 0)
 						updateNetwork();
@@ -6269,12 +6219,9 @@ static void *nitThread(void *)
 #endif
 					dmxSDT.change( 0 );
 				}
-				// unlockMessaging();
-		
-				// writeLockMessaging();
+
 				for ( i = 0; i < MAX_NIDs; i++)
 					messaging_nit_nid[i] = 0;
-				// unlockMessaging();
 
 				rs = pthread_cond_timedwait( &dmxNIT.change_cond, &dmxNIT.start_stop_mutex, &abs_wait );
 				pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
@@ -6339,8 +6286,6 @@ static void *nitThread(void *)
 						if (addTransponder(*s, is_actual))
 							is_new = true;
 
-					// readLockMessaging();
-
 					if (is_new) {
 						nid = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
 						lastData = time(NULL);
@@ -6349,15 +6294,9 @@ static void *nitThread(void *)
 						i = 0;
 						while ((i < MAX_NIDs) && (messaging_nit_nid[i] != 0) && (messaging_nit_nid[i] != nid))
 							i++;
-
-						// unlockMessaging();
-						// writeLockMessaging();
-
 						if (i < MAX_NIDs)
 							messaging_nit_nid[i] = nid;
 					}
-
-					//unlockMessaging();
 				}
 				else {
 					delete[] buf;
@@ -6579,8 +6518,6 @@ static void *sdtThread(void *)
 														 s->transport_stream_id);
 						}
 
-					//readLockMessaging();
-
 					if (is_new) {
 						lastData = time(NULL);
 
@@ -6590,14 +6527,9 @@ static void *sdtThread(void *)
 						i = 0;
 						while ((i < MAX_SDTs) && (messaging_sdt_tid[i] != 0) && (messaging_sdt_tid[i] != tid))
 							i++;
-
-						//unlockMessaging();
-						//writeLockMessaging();
 						if (i < MAX_SDTs)
 							messaging_sdt_tid[i] = tid;
 					}
-
-					//unlockMessaging();
 				}
 				else if (header.table_id == 0x4a) {
 					t_bouquet_id bid = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
@@ -6876,28 +6808,30 @@ int eit_set_update_filter(int *fd)
 	}
 
 	memset((void*)&dsfp, 0, sizeof(struct dmx_sct_filter_params));
-	readLockMessaging();
+
+	unsigned char cur_eit = dmxCN.get_eit_version();
 	/* tone down to dprintf later */
 	printdate_ms(stderr);
 	fprintf(stderr, "eit_set_update_filter, servicekey = 0x"
 			PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 			", current version %d\n",
 			messaging_current_servicekey,
-			messaging_current_version_number);
+			cur_eit);
 
-	if (messaging_current_version_number == 0xff) {
+	if (cur_eit == 0xff) {
 		if (*fd >= 0)
 			close(*fd);
 		*fd = -1;
-		unlockMessaging();
 		return -1;
 	}
 
+	/* potential race: eit version could have been updated until now.
+	   how to handle best? */
 	dsfp.filter.filter[0] = 0x4e;	/* table_id */
 	dsfp.filter.filter[1] = (unsigned char)(messaging_current_servicekey >> 8);
 	dsfp.filter.filter[2] = (unsigned char)messaging_current_servicekey;
 	/* set a negative filter on the current version number */
-	dsfp.filter.filter[3] = (messaging_current_version_number << 1) | 0x01;
+	dsfp.filter.filter[3] = (cur_eit << 1) | 0x01;
 //	dsfp.filter.filter[4] = messaging_current_section_number;
 	dsfp.filter.mask[0] = 0xFF;
 	dsfp.filter.mask[1] = 0xFF;
@@ -6913,7 +6847,6 @@ int eit_set_update_filter(int *fd)
 	mode[3] = 0x1F << 1;
 	dsfp.flags = DMX_CHECK_CRC;
 #endif
-	unlockMessaging();
 	dsfp.pid = 0x12;
 	dsfp.timeout = 0;
 
@@ -7083,8 +7016,6 @@ static void *eitThread(void *)
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
 			{
 				readLockServices();
-				//readLockMessaging();
-
 				MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
 				//dprintf("timeoutsDMX %x\n",currentServiceKey);
 
@@ -7123,7 +7054,6 @@ static void *eitThread(void *)
 							}
 						}
 				}
-				// unlockMessaging();
 				unlockServices();
 			}
 
@@ -7335,12 +7265,7 @@ static void *cnThread(void *)
 
 			buf = dmxCN.getSection(timeoutInMSeconds, timeoutsDMX);
 			if (update_eit) {
-//				writeLockMessaging();
-				messaging_current_version_number = dmxCN.get_eit_version();
-//				unlockMessaging();
-//				readLockMessaging();
-				if (messaging_current_version_number != 0xff) {
-//					unlockMessaging();
+				if (dmxCN.get_eit_version() != 0xff) {
 					writeLockMessaging();
 					messaging_need_eit_version = false;
 					unlockMessaging();
@@ -7474,9 +7399,7 @@ static void *cnThread(void *)
 			}
 			else if (zeit > dmxCN.lastChanged + TIME_EIT_VERSION_WAIT && !messaging_need_eit_version)
 			{
-				//readLockMessaging();
 				sendToSleepNow = true;
-				//unlockMessaging();
 				continue;
 			}
 
@@ -8230,7 +8153,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.267 2008/10/05 12:46:16 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.268 2008/10/05 13:12:48 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8426,7 +8349,6 @@ int main(int argc, char **argv)
 						messaging_got_current = false;
 						messaging_got_next = false;
 						messaging_last_requested = time(NULL);
-						dmxCN.reset_eit_version();
 						unlockMessaging();
 						sched_yield();
 #ifdef PAUSE_EQUALS_STOP

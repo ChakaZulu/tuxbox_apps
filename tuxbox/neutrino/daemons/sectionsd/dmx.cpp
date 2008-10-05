@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.40 2008/10/05 12:46:20 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.41 2008/10/05 13:12:48 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -514,6 +514,8 @@ int DMX::immediate_start(void)
 		closefd();
 		return 4;
 	}
+	/* this is for dmxCN only... */
+	eit_version = 0xff;
 	return 0;
 }
 
@@ -935,11 +937,6 @@ int DMX::dropCachedSectionIDs()
 	unlock();
 
 	return 0;
-}
-
-void DMX::reset_eit_version()
-{
-	eit_version = 0xff;
 }
 
 unsigned char DMX::get_eit_version()
