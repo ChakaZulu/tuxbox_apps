@@ -338,8 +338,13 @@ void CVCRControl::CFileAndServerDevice::RestoreNeutrino(void)
 	if (!g_Zapit->isPlayBackActive() && 
 	    CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby)
 		g_Zapit->startPlayBack();
-	g_Sectionsd->setPauseScanning(false);
 	g_Zapit->setRecordMode( false );
+	if (StopSectionsd) {
+#ifdef RESTART_SECTIONSD_INSTEAD_OF_STOP
+		g_Sectionsd->RegisterNeutrino();
+#endif
+		g_Sectionsd->setPauseScanning(false);
+	}
 	// alten mode wieder herstellen (ausser wen zwischenzeitlich auf oder aus sb geschalten wurde)
 	if(CNeutrinoApp::getInstance()->getMode() != last_mode && 
 	   CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby &&
@@ -399,10 +404,14 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 	}
 #endif
 	if(StopPlayBack && g_Zapit->isPlayBackActive())	// wenn playback gestoppt werden soll und noch l�uft
-		g_Zapit->stopPlayBack();					// dann playback stoppen
+		g_Zapit->stopPlayBack();		// dann playback stoppen
 
-	if(StopSectionsd)								// wenn sectionsd gestoppt werden soll
-		g_Sectionsd->setPauseScanning(true);		// sectionsd stoppen
+	if(StopSectionsd)				// wenn sectionsd gestoppt werden soll
+#ifdef RESTART_SECTIONSD_INSTEAD_OF_STOP
+		g_Sectionsd->Restart();			// sectionsd neu starten (pausiert automatisch)
+#else
+		g_Sectionsd->setPauseScanning(true);	// sectionsd stoppen
+#endif
 
 	g_Zapit->setRecordMode( true );					// recordmode einschalten
 }
