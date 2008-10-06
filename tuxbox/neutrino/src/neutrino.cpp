@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.900 2008/10/06 07:34:14 seife Exp $
+	$Id: neutrino.cpp,v 1.901 2008/10/06 07:44:11 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1655,10 +1655,16 @@ public:
 
 
 
-bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
+bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer, char * filename)
 {
 	CTimerd::RecordingInfo eventinfo;
 	bool refreshGui = false;
+	/* helpful for debugging...
+	if (filename != NULL)
+		 printf("CNeutrinoApp::doGuiRecord: filename == '%s'\n",filename);
+	 else
+		 printf("CNeutrinoApp::doGuiRecord filename == NULL\n");
+	 */
 	if(CVCRControl::getInstance()->isDeviceRegistered())
 	{
 		if(recordingstatus == 1)
@@ -1667,8 +1673,9 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 
 			eventinfo.channel_id = g_Zapit->getCurrentServiceID();
 			CEPGData epgData;
-			if (g_Sectionsd->getActualEPGServiceKey(g_RemoteControl->current_channel_id, &epgData ))
+			if (filename == NULL && g_Sectionsd->getActualEPGServiceKey(g_RemoteControl->current_channel_id, &epgData))
 			{
+				//printf("CNeutrinoApp::doGuiRecord got info from sectionsd\n");
 				eventinfo.epgID = epgData.eventID;
 				eventinfo.epg_starttime = epgData.epg_times.startzeit;
 				strncpy(eventinfo.epgTitle, epgData.title.c_str(), EPG_TITLE_MAXLEN-1);
@@ -1691,7 +1698,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 					recDirs.exec(NULL,"");
 					refreshGui = true;
 					recDir = recDirs.get_selected_dir();
-                    //printf("dir : %s\n",recDir.c_str());
+					//printf("dir : %s\n",recDir.c_str());
 					if( recDir != "")
 					{
 						int nfs_nr = getNFSIDOfDir(recDir.c_str());
@@ -1734,12 +1741,17 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 						fileDevice->CreateTemplateDirectories = false;
 					}
 					fileDevice->Directory = recDir;
-					fileDevice->FilenameTemplate = g_settings.recording_filename_template[0];
-				} else
+					if (filename != NULL) {
+						//printf("CNeutrinoApp::doGuiRecord: given filename: %s\n", filename);
+						fileDevice->FilenameTemplate = filename;
+					}
+					else
+						fileDevice->FilenameTemplate = g_settings.recording_filename_template[0];
+				}
+				else
 				{
 					puts("[neutrino] could not set directory and filename template");
 				}
-
 			}
 			if(!doRecord || (CVCRControl::getInstance()->Record(&eventinfo)==false))
 			{
@@ -2851,7 +2863,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			 * instead it checks the state of the variable recordingstatus
 			 */
 			/* restart recording */
-			doGuiRecord((*(stream2file_status2_t *) data).dir);
+			doGuiRecord((*(stream2file_status2_t *) data).dir, false, (*(stream2file_status2_t *) data).filename);
 			//changeNotify(LOCALE_MAINMENU_RECORDING_START, data);
 		}
 
