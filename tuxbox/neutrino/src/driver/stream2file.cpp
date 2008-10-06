@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.29 2008/01/05 21:04:53 seife Exp $
+ * $Id: stream2file.cpp,v 1.30 2008/10/06 07:15:32 seife Exp $
  * 
  * streaming to file/disc
  * 
@@ -189,16 +189,22 @@ void * FileThread(void * v_arg)
 			if (remfile == 0)
 			{
 				char filename[FILENAMEBUFFERSIZE];
-				int flags = O_WRONLY|O_CREAT|O_TRUNC|O_LARGEFILE;
+				int flags = O_WRONLY|O_CREAT|O_EXCL|O_TRUNC|O_LARGEFILE;
 				if (use_o_sync)
 					flags |= O_SYNC;
 
+ retry:
 				sprintf(filename, "%s.%3.3d.%s", myfilename, ++filecount, ((struct filenames_t *)v_arg)->extension);
+				printf("[stream2file] filename: '%s' myfilename: '%s'\n", filename, myfilename);
 				if (fd2 != -1)
 					close(fd2);
 
 				if ((fd2 = open(filename, flags, REC_FILE_PERMISSIONS)) < 0)
 				{
+					if (errno == EEXIST) {
+						printf("[stream2file] %s exists, retrying...\n", filename);
+						goto retry;
+					}
 					perror("[stream2file]: error opening outfile");
 					exit_flag = STREAM2FILE_STATUS_WRITE_OPEN_FAILURE;
 					pthread_exit(NULL);
@@ -378,7 +384,7 @@ void * DMXThread(void * v_arg)
 
 		while (exit_flag == STREAM2FILE_STATUS_RUNNING)
 		{
-			if ((pres=poll (&pfd, 1, 15000))>0)
+			if ((pres=poll (&pfd, 1, 5000))>0)
 			{
 				if (!(pfd.revents&POLLIN))
 				{
@@ -408,7 +414,7 @@ void * DMXThread(void * v_arg)
 			}
 			else if (!pres){
 				printf ("[stream2file]: timeout reading from demux\n");
-				goto next;
+				exit_flag = STREAM2FILE_STATUS_READ_FAILURE;
 			}
 		}
 		next:
@@ -437,10 +443,12 @@ void * DMXThread(void * v_arg)
 		eventServer.registerEvent2(NeutrinoMessages::EVT_RECORDING_ENDED, CEventServer::INITID_NEUTRINO, "/tmp/neutrino.sock");
 		stream2file_status2_t s;
 		s.status = exit_flag;
+		strncpy(s.filename,basename(myfilename),512);
+		s.filename[511] = '\0';
 		strncpy(s.dir,dirname(myfilename),100);
 		s.dir[99] = '\0';
 		eventServer.sendEvent(NeutrinoMessages::EVT_RECORDING_ENDED, CEventServer::INITID_NEUTRINO, &s, sizeof(s));
-		printf("[stream2file]: pthreads exit code: %i\n", exit_flag);
+		printf("[stream2file]: pthreads exit code: %i, dir: '%s', filename: '%s' myfilename: '%s'\n", exit_flag, s.dir, s.filename, myfilename);
 	}
 
 	pthread_exit(NULL);
@@ -477,9 +485,10 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	INC_BUSY_COUNT;
 	strcpy(myfilename, filename);
 
+	// printf("start_recording: myfilename '%s' filename '%s'\n",myfilename,filename);
 	// write stream information (should wakeup the disk from standby, too)
 	sprintf(buf, "%s.xml", filename);
-	if ((fd = open(buf, O_SYNC|O_WRONLY|O_CREAT|O_TRUNC, REC_FILE_PERMISSIONS)) >= 0)
+	if ((fd = open(buf, O_SYNC|O_WRONLY|O_CREAT|O_TRUNC|O_EXCL, REC_FILE_PERMISSIONS)) >= 0)
 	{
 		write(fd, info, strlen(info));
 		fdatasync(fd);
@@ -487,8 +496,13 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	}
 	else
 	{
-		DEC_BUSY_COUNT;
-		return STREAM2FILE_INVALID_DIRECTORY;
+		if (errno == EEXIST)
+			printf("[stream2file] INFO: %s already exists, not overwriting\n", buf);
+		else
+		{
+			DEC_BUSY_COUNT;
+			return STREAM2FILE_INVALID_DIRECTORY;
+		}
 	}
 
 	if (splitsize < TS_SIZE)
@@ -533,7 +547,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 
 	if (write_ts)
 	{
-		if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0)
+		if ((dvrfd = open(DVRDEV, O_RDONLY|O_NONBLOCK)) < 0)
 		{
 			while (demuxfd_count > 0)
 				unsetPesFilter(demuxfd[--demuxfd_count]);

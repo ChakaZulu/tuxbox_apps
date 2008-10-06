@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.h,v 1.11 2007/04/01 21:17:22 houdini Exp $
+ * $Id: stream2file.h,v 1.12 2008/10/06 07:15:32 seife Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -48,6 +48,7 @@ struct stream2file_status2_t
 {
 	stream2file_status_t status;
 	char dir[100];
+	char filename[512];
 };
 
 stream2file_error_msg_t start_recording(const char * const filename,
