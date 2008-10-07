@@ -5,6 +5,7 @@
  *                                                                            *
  *    continued 2004-2005 by Roland Meier <RolandMeier@Siemens.com>           *
  *                       and DBLuelle <dbluelle@blau-weissoedingen.de>        *
+ *	russian and arabic support by Leonid Protasov <Lprot@mail.ru>         *
  *                                                                            *
  ******************************************************************************/
 
@@ -184,7 +185,7 @@ const char countrystring[] =
 "        Ukra&nsxka        "   /* 16 ukrainian */
 "         Ekkgmij\\         "   /* 17 greek */
 "          zixar           "   /* 18 hebrew */
-//"          Arabic           "   /* 19 arabic */ TODO: Arabic
+"           pHQY           "   /* 19 arabic */
 ;
 #define COUNTRYSTRING_WIDTH 26
 #define MAX_NATIONAL_SUBSET (sizeof(countrystring) / COUNTRYSTRING_WIDTH - 1)

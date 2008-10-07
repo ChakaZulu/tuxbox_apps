@@ -102,8 +102,8 @@ enum
 	NAT_RB = 15,
 	NAT_UA = 16,		
 	NAT_GR = 17,	
-	NAT_HB = 18		
-	//NAT_AR = 19 :TODO
+	NAT_HB = 18,
+	NAT_AR = 19
 };
 const unsigned char countryconversiontable[] = { NAT_UK, NAT_DE, NAT_SW, NAT_IT, NAT_FR, NAT_SP, NAT_CZ, NAT_RO};
 /* tables for color table remapping, first entry (no remapping) skipped, offsets for color index */

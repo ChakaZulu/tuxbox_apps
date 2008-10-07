@@ -5,6 +5,7 @@
  *                                                                            *
  *    continued 2004-2005 by Roland Meier <RolandMeier@Siemens.com>           *
  *                       and DBLuelle <dbluelle@blau-weissoedingen.de>        *
+ *	russian and arabic support by Leonid Protasov <Lprot@mail.ru>         *
  *                                                                            *
  ******************************************************************************/
 
@@ -138,7 +139,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.105 $";
+	char cvs_revision[] = "$Revision: 1.106 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -951,8 +952,8 @@ int GetNationalSubset(char *cc)
 		return NAT_GR;
 	if (memcmp(cc, "heb", 3) == 0)
 		return NAT_HB;
-	//if (memcmp(cc, "ara", 3) == 0) TODO: Arabic
-	//	return NAT_AR;		
+	if (memcmp(cc, "ara", 3) == 0)
+		return NAT_AR;		
 	return NAT_DEFAULT;	/* use default charset */
 }
 
