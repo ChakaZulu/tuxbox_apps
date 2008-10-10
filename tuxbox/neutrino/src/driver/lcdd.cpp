@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.57 2008/09/11 06:56:07 dbt Exp $
+	$Id: lcdd.cpp,v 1.58 2008/10/10 22:28:31 dbt Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -1015,12 +1015,12 @@ void CLCD::showProgressBar(int global, const char * const text,int show_escape,i
 // showProgressBar2
 /*****************************************************************************************/
 #define PROG2_GLOB_POS_X 10
-#define PROG2_GLOB_POS_Y 24
+#define PROG2_GLOB_POS_Y 37
 #define PROG2_GLOB_POS_WIDTH 100
 #define PROG2_GLOB_POS_HEIGTH 10
 
 #define PROG2_LOCAL_POS_X 10
-#define PROG2_LOCAL_POS_Y 37
+#define PROG2_LOCAL_POS_Y 24
 #define PROG2_LOCAL_POS_WIDTH PROG2_GLOB_POS_WIDTH
 #define PROG2_LOCAL_POS_HEIGTH PROG2_GLOB_POS_HEIGTH
 
@@ -1040,6 +1040,7 @@ void CLCD::showProgressBar2(int local,const char * const text_local ,int global 
 		else
 			m_progressGlobal = global;
 	}
+	
 	if(local >= 0)
 	{
 		if(local > 100)
@@ -1047,22 +1048,23 @@ void CLCD::showProgressBar2(int local,const char * const text_local ,int global 
 		else
 			m_progressLocal = local;
 	}
+	
 	if(show_escape != -1)
 		m_progressShowEscape = show_escape;
 
 	if (mode == MODE_PROGRESSBAR2)
 	{
-	
 		//printf("[lcdd] prog2:%s,%d,%d\n",m_progressHeaderGlobal.c_str(),m_progressGlobal,m_progressShowEscape);
 		// Clear Display
 		display.draw_fill_rect (0,12,120,64, CLCDDisplay::PIXEL_OFF);
+		
 	
-		// paint  global header 
+		// paint  global caption 
 		int width = fonts.menu->getRenderWidth(m_progressHeaderGlobal.c_str(),true);
 		if(width > 100)
 			width = 100;
 		int start_pos = (120-width) /2;
-		fonts.menu->RenderString(start_pos, PROG2_GLOB_POS_Y-3, width+10, m_progressHeaderGlobal.c_str(), CLCDDisplay::PIXEL_ON,0,true);
+		fonts.menu->RenderString(start_pos, PROG2_GLOB_POS_Y+20, width+10, m_progressHeaderGlobal.c_str(), CLCDDisplay::PIXEL_ON,0,true);
 	
 		// paint global bar 
 		int marker_length = (PROG2_GLOB_POS_WIDTH * m_progressGlobal)/100;
@@ -1070,17 +1072,20 @@ void CLCD::showProgressBar2(int local,const char * const text_local ,int global 
 		display.draw_fill_rect (PROG2_GLOB_POS_X,   				PROG2_GLOB_POS_Y,   PROG2_GLOB_POS_X+PROG2_GLOB_POS_WIDTH,   PROG2_GLOB_POS_Y+PROG2_GLOB_POS_HEIGTH,   CLCDDisplay::PIXEL_ON);
 		display.draw_fill_rect (PROG2_GLOB_POS_X+1+marker_length, PROG2_GLOB_POS_Y+1, PROG2_GLOB_POS_X+PROG2_GLOB_POS_WIDTH-1, PROG2_GLOB_POS_Y+PROG2_GLOB_POS_HEIGTH-1, CLCDDisplay::PIXEL_OFF);
 	
-		// paint  local header 
+		
+		// paint  local caption 
 		width = fonts.menu->getRenderWidth(m_progressHeaderLocal.c_str(),true);
 		if(width > 100)
 			width = 100;
 		start_pos = (120-width) /2;
-		fonts.menu->RenderString(start_pos, PROG2_LOCAL_POS_Y + PROG2_LOCAL_POS_HEIGTH +10 , width+10, m_progressHeaderLocal.c_str(), CLCDDisplay::PIXEL_ON,0,true);
+		fonts.menu->RenderString(start_pos, PROG2_LOCAL_POS_Y -3, width+10, m_progressHeaderLocal.c_str(), CLCDDisplay::PIXEL_ON,0,true);
 		// paint local bar 
 		marker_length = (PROG2_LOCAL_POS_WIDTH * m_progressLocal)/100;
 		
 		display.draw_fill_rect (PROG2_LOCAL_POS_X,   				PROG2_LOCAL_POS_Y,   PROG2_LOCAL_POS_X+PROG2_LOCAL_POS_WIDTH,   PROG2_LOCAL_POS_Y+PROG2_LOCAL_POS_HEIGTH,   CLCDDisplay::PIXEL_ON);
 		display.draw_fill_rect (PROG2_LOCAL_POS_X+1+marker_length,   PROG2_LOCAL_POS_Y+1, PROG2_LOCAL_POS_X+PROG2_LOCAL_POS_WIDTH-1, PROG2_LOCAL_POS_Y+PROG2_LOCAL_POS_HEIGTH-1, CLCDDisplay::PIXEL_OFF);
+		
+		
 		// paint foot 
 		if(m_progressShowEscape  == true)
 		{
