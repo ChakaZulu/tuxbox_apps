@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.195 2008/07/16 22:07:37 dbt Exp $
+  $Id: settings.h,v 1.196 2008/10/10 22:37:00 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -464,7 +464,7 @@ struct SNeutrinoSettings
 #define CORNER_RADIUS_SMALL		4
 
 // shadow
-#define SHADOW_OFFSET			6
+#define SHADOW_OFFSET			4
 
 /* some default Values */
 
