@@ -1,5 +1,5 @@
 /*
-	$Id: progresswindow.cpp,v 1.18 2008/05/01 00:08:35 dbt Exp $
+	$Id: progresswindow.cpp,v 1.19 2008/10/10 22:34:57 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,7 +43,7 @@ CProgressWindow::CProgressWindow()
 	frameBuffer = CFrameBuffer::getInstance();
 	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
-	width       = 420;
+	width       = 500;
 	height      = hheight+5*mheight+20;
 
 	global_progress = local_progress = 101;
@@ -51,6 +51,12 @@ CProgressWindow::CProgressWindow()
 
 	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
 	y=(576-height)>>1;
+		
+	progressbar_x = x + 10;
+	progressbar_h = 16;
+	progressbar_w = width - 20;
+
+	max_val = 100;
 
 	caption = NONEXISTANT_LOCALE;
 }
@@ -72,20 +78,15 @@ void CProgressWindow::showGlobalStatus(const unsigned int prog)
 
 	global_progress = prog;
 
-	int pos = x + 10;
-	int c_rad_small =  g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
-	
 	if(global_progress != 0)
 	{
-		if (global_progress > 100)
-			global_progress = 100;
-
-		pos += (width-20) * global_progress / 100;
-		//vordergrund
-		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT_PLUS_7, c_rad_small);
+		if (global_progress > max_val)
+			global_progress = max_val;
+	
+		CProgressBar pb;
+		pb.paintProgressBarDefault (progressbar_x, globalstatusY, progressbar_w, progressbar_h, global_progress, max_val);
 	}
-	//hintergrund
-	frameBuffer->paintBox(pos, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT_PLUS_2, c_rad_small);
+		
 
 #ifdef LCD_UPDATE
 	CLCD::getInstance()->showProgressBar2(-1,NULL,global_progress);
@@ -98,26 +99,21 @@ void CProgressWindow::showLocalStatus(const unsigned int prog)
 		return;
 
 	local_progress = prog;
-
-	int pos = x + 10;
-	int c_rad_small =  g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
-
-	if (local_progress != 0)
+	
+	if(local_progress != 0)
 	{
-		if (local_progress > 100)
-			local_progress = 100;
-
-		pos += (width-20) * local_progress / 100;
-		//vordergrund
-		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT_PLUS_7, c_rad_small);
+		if (local_progress > max_val)
+			local_progress = max_val;
+	
+	CProgressBar pb;
+	pb.paintProgressBarDefault (progressbar_x, localstatusY, progressbar_w, progressbar_h, local_progress, max_val);
 	}
-	//hintergrund
-	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT_PLUS_2, c_rad_small);	
-
+	
+	
 #ifdef LCD_UPDATE
 	CLCD::getInstance()->showProgressBar2(local_progress);
 #endif // LCD_UPDATE
-}
+}	
 
 void CProgressWindow::showStatusMessageUTF(const std::string & text)
 {

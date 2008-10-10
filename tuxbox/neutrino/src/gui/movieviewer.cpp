@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.5 2008/05/26 21:01:00 dbt Exp $
+	$Id: movieviewer.cpp,v 1.6 2008/10/10 22:35:27 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,7 @@
 
 #include <gui/widget/icons.h>
 #include <gui/widget/hintbox.h>
+#include <gui/widget/progressbar.h>
 
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
@@ -66,7 +67,6 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #define ICON_OFFSET (2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2)
 
 #define BOTTOM_BAR_OFFSET 0
-#define SHADOW_OFFSET 6
 
 // in us
 #define FADE_TIME 40000
@@ -443,14 +443,14 @@ void CMovieViewer::showData( )
 	if ( is_visible )
 	{
 		// runningPercent bar
-		int posy = BoxStartY+12;
-		int height2= 20;
-
-		if (!g_settings.rounded_corners) 
-			frameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW_PLUS_0); //border
+		int progressbar_h = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight()-4;
+		int progressbar_w = 112;
+		int progressbar_x = BoxEndX - progressbar_w - SHADOW_OFFSET;
+		int progressbar_y = BoxStartY + 12;
 		
-		frameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR_PLUS_7, c_rad_small, CORNER_LEFT);//fill(active)
-		frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR_PLUS_3, c_rad_small, CORNER_RIGHT);//fill passive
+		CProgressBar pb;
+		pb.paintProgressBar	(progressbar_x, progressbar_y, progressbar_w, progressbar_h, runningPercent, progressbar_w, 
+					 0, 0, COL_SILVER, COL_INFOBAR_SHADOW, "", COL_INFOBAR);
 
 		int height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getHeight()/3;
 		int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10

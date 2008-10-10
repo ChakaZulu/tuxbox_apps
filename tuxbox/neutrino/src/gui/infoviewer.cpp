@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.229 2008/10/05 17:54:22 seife Exp $
+	$Id: infoviewer.cpp,v 1.230 2008/10/10 22:35:27 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -40,6 +40,7 @@
 #include <gui/infoviewer.h>
 #include <gui/widget/icons.h>
 #include <gui/widget/hintbox.h>
+#include <gui/widget/progressbar.h>
 
 
 #include <daemonc/remotecontrol.h>
@@ -266,7 +267,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	ChanInfoX = BoxStartX + (ChanWidth / 3);
 	int ChanInfoY = BoxStartY + ChanHeight+ SHADOW_OFFSET;
 	
-	ChanNameX = BoxStartX + ChanWidth + SHADOW_OFFSET;
+	ChanNameX = BoxStartX + ChanWidth;
 	ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 	int c_rad_large = g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0;
 	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
@@ -1016,17 +1017,18 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 
 	int height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getHeight()/3;
 	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
-	int c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 
 	if (showButtonBar)
 	{
-		int posy = BoxStartY+12;
-		int height2= 20;
-		//percent
+		// show percent/event progressbar
 		if (info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 		{
-			frameBuffer->paintBoxRel(BoxEndX - 112, posy + 2, 112, height2 - 4, COL_INFOBAR_PLUS_3, c_rad_small);	// fill passive
-			frameBuffer->paintBoxRel(BoxEndX - 112, posy + 2, runningPercent + 2, height2 - 4, COL_INFOBAR_PLUS_7, c_rad_small, CORNER_LEFT);	// fill(active)
+			int progressbar_w = 112;
+			int progressbar_h = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight()-4;
+	
+			CProgressBar pb;
+			pb.paintProgressBar (BoxEndX - progressbar_w - SHADOW_OFFSET,	BoxStartY + 12, progressbar_w, progressbar_h, runningPercent, progressbar_w, 
+						      0, 0, COL_SILVER, COL_INFOBAR_SHADOW, "", COL_INFOBAR);
 		}
 
 		// show red button
@@ -1185,7 +1187,7 @@ void CInfoViewer::Set_CA_Status(int Status)
 }
 #endif
 
-int CInfoViewer::showChannelLogo( const t_channel_id logo_channel_id  ) 
+int CInfoViewer::showChannelLogo( const t_channel_id logo_channel_id  )
 /* ****************************************************************************
 returns mode of painted channel logo,
 0 = no logo painted
@@ -1203,8 +1205,8 @@ returns mode of painted channel logo,
 			strAbsIconChIDPath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoIDName,
 			strAbsIconChNamePath = (std::string)g_settings.infobar_channel_logodir +"/"+ strLogoName,
 			strAbsIconPath,
-			strErrText= "[infoviewer] channel logo too large...use maximal %2dpx%2dpx (current: %2dpx%2dpx)\n";
-	
+			strErrText= "[infoviewer] error while painting channel logo\n -> channel logo too large...use maximal %2dpx%2dpx or change display mode\n -> current logo size: %2dpx%2dpx\n -> current mode: %d\n";	
+
 	int x_mid, y_mid, logo_w, logo_h; 
 	int logo_x=0, logo_y=0;
 	int res = 0;
@@ -1231,11 +1233,15 @@ returns mode of painted channel logo,
 		
 		if (logo_available)
 		{
-			// get logo dimensions
+			// get logo sizes
 			logo_w = frameBuffer->getIconWidth(strAbsIconPath.c_str());
 			logo_h = frameBuffer->getIconHeight(strAbsIconPath.c_str());
-			printf("[infoviewer] paint channel logo...\n -> %s (%s)\n -> %2dpx%2dpx\n -> mode: %d\n", strAbsIconPath.c_str(), ChannelName.c_str(), logo_w, logo_h, g_settings.infobar_show_channellogo);
-	
+			if ((logo_w == 0) || (logo_h == 0)) // corrupt logo size?
+			{
+				printf("[infoviewer] channel logo: \n -> %s (%s) has no size\n -> please check logo file!\n",strAbsIconPath.c_str(), ChannelName.c_str());
+				return 0;
+			}
+							
 			{	
 				if (g_settings.infobar_show_channellogo == 1) // paint logo in numberbox
 				{
@@ -1247,7 +1253,7 @@ returns mode of painted channel logo,
 					// check logo dimensions
 					if ((logo_w > ChanWidth) || (logo_h > ChanHeight))	
 					{
-						printf(strErrText.c_str(),ChanWidth, ChanHeight, logo_w, logo_h);
+						printf(strErrText.c_str(),ChanWidth, ChanHeight, logo_w, logo_h, g_settings.infobar_show_channellogo);
 						res = 0;
 					}
 					else
@@ -1265,7 +1271,7 @@ returns mode of painted channel logo,
 					// check logo dimensions
 					if ((logo_w > chan_w) || (logo_h > ChanHeight))
 					{
-						printf(strErrText.c_str(), chan_w, ChanHeight, logo_w, logo_h);
+						printf(strErrText.c_str(), chan_w, ChanHeight, logo_w, logo_h, g_settings.infobar_show_channellogo);
 						res =  0;
 					}
 					else
@@ -1285,7 +1291,7 @@ returns mode of painted channel logo,
 					int Logo_max_width = chan_w - logo_w - 10;
 					if ((logo_w > Logo_max_width) || (logo_h > ChanHeight))
 					{
-						printf(strErrText.c_str(), Logo_max_width, ChanHeight, logo_w, logo_h);
+						printf(strErrText.c_str(), Logo_max_width, ChanHeight, logo_w, logo_h, g_settings.infobar_show_channellogo);
 						res =  0;
 					}
 					else
@@ -1305,39 +1311,39 @@ returns mode of painted channel logo,
 					res = 0;
 				}
 			
-			// paint logo background (shaded/framed)
-			if ((g_settings.infobar_channellogo_background !=0) && (res !=0)) // with background
-			{	
-				int sh_offset=0, logo_bg_x=0, logo_bg_y=0, logo_bg_w=0, logo_bg_h=0;
-				
-				if (g_settings.infobar_channellogo_background == 1) // framed
-				{
-					sh_offset = 2;
-					logo_bg_x = logo_x-sh_offset;
-					logo_bg_y = logo_y-sh_offset;
-					logo_bg_w = logo_w+sh_offset*2;
-					logo_bg_h = logo_h+sh_offset*2;
+				// paint logo background (shaded/framed)
+				if ((g_settings.infobar_channellogo_background !=0) && (res !=0)) // with background
+				{	
+					int frame_w = 2, logo_bg_x=0, logo_bg_y=0, logo_bg_w=0, logo_bg_h=0;
+					
+					if (g_settings.infobar_channellogo_background == 1) // framed
+					{
+						//sh_offset = 2;
+						logo_bg_x = logo_x-frame_w;
+						logo_bg_y = logo_y-frame_w;
+						logo_bg_w = logo_w+frame_w*2;
+						logo_bg_h = logo_h+frame_w*2;
+					}
+					else if (g_settings.infobar_channellogo_background == 2) // shaded
+					{
+						//sh_offset = 3;
+						logo_bg_x = logo_x+SHADOW_OFFSET;
+						logo_bg_y = logo_y+SHADOW_OFFSET;
+						logo_bg_w = logo_w;
+						logo_bg_h = logo_h;
+					}
+					frameBuffer->paintBoxRel(logo_bg_x, logo_bg_y, logo_bg_w, logo_bg_h, COL_INFOBAR_BUTTONS_BACKGROUND);
 				}
-				else if (g_settings.infobar_channellogo_background == 2) // shaded
-				{
-					sh_offset = 3;
-					logo_bg_x = logo_x+sh_offset;
-					logo_bg_y = logo_y+sh_offset;
-					logo_bg_w = logo_w;
-					logo_bg_h = logo_h;
-				}
-				frameBuffer->paintBoxRel(logo_bg_x, logo_bg_y, logo_bg_w, logo_bg_h, COL_INFOBAR_BUTTONS_BACKGROUND);
-			}
-				
-			
-			// paint the logo
-			if (!frameBuffer->paintIcon(strAbsIconPath, logo_x, logo_y)) 
-				{
-					res = 0; // paint logo was failed
-				}
+
+				// paint the logo
+				if (res !=0) {
+						if (!frameBuffer->paintIcon(strAbsIconPath, logo_x, logo_y)) 
+							return 0; // paint logo was failed
+					}
 			}
 		}
 	}
+
 	return res;
 }
 
@@ -1359,7 +1365,7 @@ No need to poll for EPG, we are getting events from sectionsd!
 		{
 			if (jetzt < info_CurrentNext.current_zeit.startzeit)
 				runningPercent = 0;
-			else if (jetzt > info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer)
+			else if (jetzt > (int)(info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer))
 				runningPercent = -2; /* overtime */
 			else
 				runningPercent=MIN((jetzt-info_CurrentNext.current_zeit.startzeit) * 100 /

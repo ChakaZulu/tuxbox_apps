@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.140 2008/10/03 23:23:22 seife Exp $
+	$Id: epgview.cpp,v 1.141 2008/10/10 22:35:27 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -42,6 +42,8 @@
 #include <gui/widget/messagebox.h>
 #include <gui/widget/mountchooser.h>
 #include <gui/widget/dirchooser.h>
+#include <gui/widget/progressbar.h>
+
 #include <gui/timerlist.h>
 
 #include <global.h>
@@ -584,13 +586,10 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 		}
 	}
 
-	//show progressbar
-	if ( epg_done!= -1 )
-	{
-		int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
-		frameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUCONTENT_PLUS_6);
-		frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUCONTENT_PLUS_0);
-		frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, epg_done, height-10, COL_MENUCONTENT_PLUS_3);
+	if ( epg_done!= -1 )	//show event progressbar
+	{		
+ 		CProgressBar pb;
+		pb.paintProgressBarDefault (sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1), sy+oy-height, 104, height-6, epg_done, 104);	
 	}
 
 	GetPrevNextEPGData( epgData.eventID, &epgData.epg_times.startzeit );

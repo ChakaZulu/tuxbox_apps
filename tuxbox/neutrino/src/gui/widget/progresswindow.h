@@ -29,6 +29,7 @@
 #include <system/localize.h>
 
 #include "progressstatus.h"
+#include "progressbar.h"
 #include "menue.h"
 
 #include <string>
@@ -52,6 +53,10 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 		int globalstatusY;
 		int localstatusY;
 		int statusTextY;
+		int progressbar_x;
+		int progressbar_h;
+		int progressbar_w;
+		int max_val;
 		std::string statusText;
 
 
