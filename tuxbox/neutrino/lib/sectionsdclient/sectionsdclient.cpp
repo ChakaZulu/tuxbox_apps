@@ -1,7 +1,7 @@
 /*
   Client-Interface fuer sectionsd  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.60 2008/05/01 19:57:28 seife Exp $
+  $Id: sectionsdclient.cpp,v 1.61 2008/10/11 21:39:21 seife Exp $
 
   License: GPL
 
@@ -138,16 +138,6 @@ void CSectionsdClient::setEventsAreOldInMinutes(const unsigned short minutes)
 	close_connection();
 }
 #endif
-
-void CSectionsdClient::setPauseSorting(const bool doPause)
-{
-	int PauseIt = (doPause) ? 1 : 0;
-
-	send(sectionsd::pauseSorting, (char*)&PauseIt, sizeof(PauseIt));
-
-	readResponse();
-	close_connection();
-}
 
 void CSectionsdClient::setPauseScanning(const bool doPause)
 {

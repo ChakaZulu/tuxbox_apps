@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.193 2008/05/04 22:36:21 dbt Exp $
+	$Id: channellist.cpp,v 1.194 2008/10/11 21:39:20 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -1219,8 +1219,6 @@ void CChannelList::paintFoot()
 
 void CChannelList::paint()
 {
-	g_Sectionsd->setPauseSorting( true );
-
 	liststart = (selected/listmaxshow)*listmaxshow;
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
 	updateEvents();
@@ -1249,8 +1247,6 @@ void CChannelList::paint()
 	int sbs= (selected/listmaxshow);
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
-
-	g_Sectionsd->setPauseSorting( false );
 }
 
 /*

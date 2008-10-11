@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.271 2008/10/11 12:10:33 seife Exp $
+//  $Id: sectionsd.cpp,v 1.272 2008/10/11 21:39:20 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2070,28 +2070,6 @@ static void commandGetIsScanningActive(int connfd, char* /*data*/, const unsigne
 		dputs("[sectionsd] Fehler/Timeout bei write");
 }
 
-/* deprecated. TODO: remove, from both neutrino and sectionsd */
-static void commandPauseSorting(int connfd, char *data, const unsigned dataLength)
-{
-	if (dataLength != 4)
-		goto out;
-
-	int pause = *(int *)data;
-
-	if (pause && pause != 1)
-		goto out;
-
-	dprintf("DEPRECATED! Request of %s sorting events.\n", pause ? "stop" : "continue" );
- out:
-	struct sectionsd::msgResponseHeader msgResponse;
-
-	msgResponse.dataLength = 0;
-
-	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), WRITE_TIMEOUT_IN_SECONDS);
-
-	return ;
-}
-
 static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
 	dputs("Request of service list.\n");
@@ -2438,7 +2416,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.271 2008/10/11 12:10:33 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.272 2008/10/11 21:39:20 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -4528,13 +4506,18 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 	return ;
 }
 
+/* dummy1: do not send back anything */
 static void commandDummy1(int, char *, const unsigned)
 {
 	return;
 }
 
-static void commandDummy2(int, char *, const unsigned)
+/* dummy2: send back an empty response */
+static void commandDummy2(int connfd, char *, const unsigned)
 {
+	struct sectionsd::msgResponseHeader msgResponse;
+	msgResponse.dataLength = 0;
+	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), WRITE_TIMEOUT_IN_SECONDS);
 	return;
 }
 
@@ -4755,7 +4738,7 @@ struct s_cmd_table
 
 static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
         //commandActualEPGchannelName,
-{	commandDummy1,				"commandDummy1"				},
+{	commandDummy2,				"commandDummy1"				},
 {	commandEventListTV,			"commandEventListTV"			},
         //commandCurrentNextInfoChannelName,
 {	commandDummy2,				"commandDummy2"				},
@@ -4784,7 +4767,7 @@ static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
 {	commandGetIsTimeSet,                    "commandGetIsTimeSet"			},
 {	commandserviceChanged,                  "commandserviceChanged"			},
 {	commandLinkageDescriptorsUniqueKey,     "commandLinkageDescriptorsUniqueKey"	},
-{	commandPauseSorting,                    "commandPauseSorting"			},
+{	commandDummy2,                          "commandPauseSorting"			},
 {	commandRegisterEventClient,             "commandRegisterEventClient"		},
 {	commandUnRegisterEventClient,           "commandUnRegisterEventClient"		},
 {	commandSetPrivatePid,                   "commandSetPrivatePid"			},
@@ -7997,7 +7980,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.271 2008/10/11 12:10:33 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.272 2008/10/11 21:39:20 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
