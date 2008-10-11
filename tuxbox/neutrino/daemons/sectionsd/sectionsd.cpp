@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.270 2008/10/05 17:39:54 seife Exp $
+//  $Id: sectionsd.cpp,v 1.271 2008/10/11 12:10:33 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2438,7 +2438,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.270 2008/10/05 17:39:54 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.271 2008/10/11 12:10:33 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2806,29 +2806,18 @@ static t_transponder_id messaging_sdt_tid[MAX_SDTs];							// 0x42,0x46
 
 static void commandserviceChanged(int connfd, char *data, const unsigned dataLength)
 {
-	bool doWakeUp = false;
-	bool transponderChanged = true;
-
 	if (dataLength != sizeof(sectionsd::commandSetServiceChanged))
 		goto out;
 
 	t_channel_id * uniqueServiceKey = &(((sectionsd::commandSetServiceChanged *)data)->channel_id);
-//	bool         * requestCN_Event  = &(((sectionsd::commandSetServiceChanged *)data)->requestEvent);
 
 	dprintf("[sectionsd] commandserviceChanged: Service changed to " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
 
-	if (debug)
-		showProfiling("[sectionsd] commandserviceChanged: before messaging lock");
-
 	time_t zeit = time(NULL);
-
-	if ( (messaging_current_servicekey >> 16) == (*uniqueServiceKey >> 16) )
-		transponderChanged = false;
+	messaging_last_requested = zeit;
 
 	if (messaging_current_servicekey != *uniqueServiceKey)
 	{
-		doWakeUp = true;
-
 		//if (debug) showProfiling("[sectionsd] commandserviceChanged: before events lock");
 		writeLockEvents();
 		//if (debug) showProfiling("[sectionsd] commandserviceChanged: after events lock");
@@ -2841,64 +2830,11 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 			myNextEvent = NULL;
 		}
 		unlockEvents();
-
-		//if (debug) showProfiling("[sectionsd] commandserviceChanged: before services lock");
-/*
-commented the messaging_WaitForServiceDesc stuff out for now - is unused anyway --seife
-		readLockServices();
-		//if (debug) showProfiling("[sectionsd] commandserviceChanged: after services lock");
-		MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
-		si = mySIservicesOrderUniqueKey.find(*uniqueServiceKey);
-*/
 		writeLockMessaging();
 		messaging_current_servicekey = *uniqueServiceKey;
 		messaging_have_CN = 0x00;
 		messaging_got_CN = 0x00;
 		messaging_zap_detected = true;
-		unlockMessaging();
-/*
-		messaging_WaitForServiceDesc = (si == mySIservicesOrderUniqueKey.end() );
-		if ( messaging_WaitForServiceDesc )
-			dputs("[sectionsd] commandserviceChanged: current service-descriptor not loaded yet!" );
-
-		unlockServices();
-*/
-	}
-
-#if 0
-/* to be removed... -- seife */
-	writeLockMessaging();
-	if ( ( !doWakeUp )/* && ( messaging_sections_got_all[0] )*/ && ( *requestCN_Event ) && ( !messaging_WaitForServiceDesc ) )
-	{
-		messaging_wants_current_next_Event = false;
-		messaging_WaitForServiceDesc = false;
-		eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
-	}
-	else
-	{
-		if ( messaging_current_servicekey != *uniqueServiceKey )
-		{
-			messaging_wants_current_next_Event = *requestCN_Event;
-		}
-		else if ( *requestCN_Event )
-			messaging_wants_current_next_Event = true;
-
-		if ( messaging_WaitForServiceDesc )
-			messaging_wants_current_next_Event = false;
-
-		if (messaging_wants_current_next_Event)
-			dprintf("[sectionsd] commandserviceChanged: requesting current_next event...\n");
-	}
-	unlockMessaging();
-#endif
-	if (debug)
-		showProfiling("[sectionsd] commandserviceChanged: before wakeup");
-	messaging_last_requested = zeit;
-
-	if ( doWakeUp )
-	{
-		sched_yield();
-		writeLockMessaging();
 		for ( int i = 0; i < MAX_BAT; i++) {
 			messaging_bat_bouquet_id[i] = 0;
 			messaging_bat_last_section[i] = 0;
@@ -2919,10 +2855,7 @@ commented the messaging_WaitForServiceDesc stuff out for now - is unused anyway 
 		dmxEIT.change( 0 );
 	}
 	else
-		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
-
-	if (debug)
-		showProfiling("[sectionsd] commandserviceChanged: after doWakeup");
+		dprintf("[sectionsd] commandserviceChanged: no change...\n");
 
  out:
 	struct sectionsd::msgResponseHeader msgResponse;
@@ -8064,7 +7997,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.270 2008/10/05 17:39:54 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.271 2008/10/11 12:10:33 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
