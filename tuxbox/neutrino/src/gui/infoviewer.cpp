@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.230 2008/10/10 22:35:27 dbt Exp $
+	$Id: infoviewer.cpp,v 1.231 2008/10/12 10:31:44 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -138,7 +138,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 		struct timeb tm;
 
 		ftime(&tm);
-		strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
+		strftime((char*) &timestr, 10, "%H:%M", localtime(&tm.time) );
 
 		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
 		{
