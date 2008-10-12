@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.272 2008/10/11 21:39:20 seife Exp $
+//  $Id: sectionsd.cpp,v 1.273 2008/10/12 10:51:53 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -186,6 +186,7 @@ static bool update_eit = true;
 /* messaging_current_servicekey does probably not need locking, since it is
    changed from one place */
 static t_channel_id    messaging_current_servicekey = 0;
+static bool channel_is_blacklisted = false;
 // EVENTS...
 
 CEventServer *eventServer;
@@ -442,7 +443,14 @@ struct EPGFilter
 	EPGFilter *next;
 };
 
+struct ChannelBlacklist
+{
+	t_channel_id chan;
+	ChannelBlacklist *next;
+};
+
 EPGFilter *CurrentEPGFilter = NULL;
+ChannelBlacklist *CurrentBlacklist = NULL;
 
 static bool checkEPGFilter(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
 {
@@ -458,6 +466,18 @@ static bool checkEPGFilter(t_original_network_id onid, t_transport_stream_id tsi
 	return false;
 }
 
+static bool checkBlacklist(t_channel_id channel_id)
+{
+	ChannelBlacklist *blptr = CurrentBlacklist;
+	while (blptr)
+	{
+		if (blptr->chan == channel_id)
+			return true;
+		blptr = blptr->next;
+	}
+	return false;
+}
+
 static void addEPGFilter(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
 {
 	if (!checkEPGFilter(onid, tsid, sid))
@@ -469,6 +489,19 @@ static void addEPGFilter(t_original_network_id onid, t_transport_stream_id tsid,
 		node->sid = sid;
         	node->next = CurrentEPGFilter;
         	CurrentEPGFilter = node;
+	}
+}
+
+static void addBlacklist(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
+{
+	t_channel_id channel_id = (t_channel_id)tsid << 32 | (t_channel_id)onid << 16 | sid;
+	if (!checkBlacklist(channel_id))
+	{
+		xprintf("Add Channel Blacklist for channel 0x%012llx\n", channel_id);
+		ChannelBlacklist *node = new ChannelBlacklist;
+		node->chan = channel_id;
+		node->next = CurrentBlacklist;
+		CurrentBlacklist = node;
 	}
 }
 
@@ -2416,7 +2449,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.272 2008/10/11 21:39:20 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.273 2008/10/12 10:51:53 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2793,6 +2826,31 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	time_t zeit = time(NULL);
 	messaging_last_requested = zeit;
+
+	if(checkBlacklist(*uniqueServiceKey))
+	{
+		if (!channel_is_blacklisted) {
+			channel_is_blacklisted = true;
+			dmxCN.request_pause();
+			dmxEIT.request_pause();
+			dmxNIT.request_pause();
+			dmxSDT.request_pause();
+			dmxPPT.request_pause();
+		}
+		xprintf("[sectionsd] commandserviceChanged: service is filtered!\n");
+	}
+	else
+	{
+		if (channel_is_blacklisted) {
+			channel_is_blacklisted = false;
+			dmxCN.request_unpause();
+			dmxEIT.request_unpause();
+			dmxNIT.request_unpause();
+			dmxSDT.request_unpause();
+			dmxPPT.request_unpause();
+			xprintf("[sectionsd] commandserviceChanged: service is no longer filtered!\n");
+		}
+	}
 
 	if (messaging_current_servicekey != *uniqueServiceKey)
 	{
@@ -6803,7 +6861,7 @@ static void *eitThread(void *)
 			} // if (update_eit)
 #endif
 
-			if (timeoutsDMX < 0)
+			if (timeoutsDMX < 0 && !channel_is_blacklisted)
 			{
 #if 0
 				writeLockMessaging();
@@ -6839,7 +6897,7 @@ static void *eitThread(void *)
 				}
 			}
 
-			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1 && !channel_is_blacklisted)
 			{
 				readLockServices();
 				MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
@@ -6883,7 +6941,7 @@ static void *eitThread(void *)
 				unlockServices();
 			}
 
-			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning && !channel_is_blacklisted)
 			{
 				if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 				{
@@ -6896,12 +6954,11 @@ static void *eitThread(void *)
 				timeoutsDMX = 0;
 			}
 
-			if (sendToSleepNow)
+			if (sendToSleepNow || channel_is_blacklisted)
 			{
 				sendToSleepNow = false;
 
 				dmxEIT.real_pause();
-				pthread_mutex_lock( &dmxEIT.start_stop_mutex );
 				writeLockMessaging();
 				messaging_zap_detected = false;
 				unlockMessaging();
@@ -6914,16 +6971,19 @@ static void *eitThread(void *)
 					dmxNIT.change( 0 );
 				}
 
-				struct timespec abs_wait;
-				struct timeval now;
-				gettimeofday(&now, NULL);
-				TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-				abs_wait.tv_sec += TIME_EIT_SCHEDULED_PAUSE;
-				dprintf("dmxEIT: going to sleep for %d seconds...\n", TIME_EIT_SCHEDULED_PAUSE);
+				int rs;
+				do {
+					struct timespec abs_wait;
+					struct timeval now;
+					gettimeofday(&now, NULL);
+					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+					abs_wait.tv_sec += TIME_EIT_SCHEDULED_PAUSE;
+					dprintf("dmxEIT: going to sleep for %d seconds...\n", TIME_EIT_SCHEDULED_PAUSE);
 
-				int rs = pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
-
-				pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
+					pthread_mutex_lock( &dmxEIT.start_stop_mutex );
+					rs = pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
+					pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
+				} while (channel_is_blacklisted);
 
 				if (rs == ETIMEDOUT)
 				{
@@ -7191,23 +7251,26 @@ static void *cnThread(void *)
 				timeoutsDMX = 0;
 			}
 
-			if (sendToSleepNow && !messaging_need_eit_version)
+			if (sendToSleepNow && !messaging_need_eit_version || channel_is_blacklisted)
 			{
 				sendToSleepNow = false;
 
 				dmxCN.real_pause();
-				pthread_mutex_lock( &dmxCN.start_stop_mutex );
 				printdate_ms(stderr);fprintf(stderr,"dmxCN: going to sleep...\n");
 
 				writeLockMessaging();
 				messaging_eit_is_busy = false;
 				unlockMessaging();
 
-				eit_set_update_filter(&eit_update_fd);
-				int rs = pthread_cond_wait(&dmxCN.change_cond, &dmxCN.start_stop_mutex);
-				eit_stop_update_filter(&eit_update_fd);
-
-				pthread_mutex_unlock(&dmxCN.start_stop_mutex);
+				int rs;
+				do {
+					pthread_mutex_lock( &dmxCN.start_stop_mutex );
+					if (!channel_is_blacklisted)
+						eit_set_update_filter(&eit_update_fd);
+					rs = pthread_cond_wait(&dmxCN.change_cond, &dmxCN.start_stop_mutex);
+					eit_stop_update_filter(&eit_update_fd);
+					pthread_mutex_unlock(&dmxCN.start_stop_mutex);
+				} while (channel_is_blacklisted);
 
 				writeLockMessaging();
 				messaging_need_eit_version = false;
@@ -7345,7 +7408,7 @@ static void *pptThread(void *)
 		{
 			time_t zeit = time(NULL);
 
-			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning && !channel_is_blacklisted)
 			{
 				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // last restart older than 3secs, therefore do NOT decrease cache
 				{
@@ -7389,33 +7452,35 @@ static void *pptThread(void *)
 				lastData = zeit;
 			}
 
-			if (sendToSleepNow || !scanning)
+			if (sendToSleepNow || !scanning || channel_is_blacklisted)
 			{
 				sendToSleepNow = false;
 
 				dmxPPT.real_pause();
-				pthread_mutex_lock( &dmxPPT.start_stop_mutex );
 
 				int rs;
+				do {
+					pthread_mutex_lock( &dmxPPT.start_stop_mutex );
 
-				if (0 != privatePid)
-				{
-					struct timespec abs_wait;
-					struct timeval now;
+					if (0 != privatePid)
+					{
+						struct timespec abs_wait;
+						struct timeval now;
 
-					gettimeofday(&now, NULL);
-					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-					abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
-					dprintf("[pptThread] going to sleep for %d seconds...\n", TIME_EIT_SCHEDULED_PAUSE);
-					rs = pthread_cond_timedwait(&dmxPPT.change_cond, &dmxPPT.start_stop_mutex, &abs_wait);
-				}
-				else
-				{
-					dprintf("[pptThread] going to sleep until wakeup...\n");
-					rs = pthread_cond_wait(&dmxPPT.change_cond, &dmxPPT.start_stop_mutex);
-				}
+						gettimeofday(&now, NULL);
+						TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+						abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
+						dprintf("[pptThread] going to sleep for %d seconds...\n", TIME_EIT_SCHEDULED_PAUSE);
+						rs = pthread_cond_timedwait(&dmxPPT.change_cond, &dmxPPT.start_stop_mutex, &abs_wait);
+					}
+					else
+					{
+						dprintf("[pptThread] going to sleep until wakeup...\n");
+						rs = pthread_cond_wait(&dmxPPT.change_cond, &dmxPPT.start_stop_mutex);
+					}
 
-				pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
+					pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
+				} while (channel_is_blacklisted);
 
 				if (rs == ETIMEDOUT)
 				{
@@ -7826,8 +7891,10 @@ static void readEPGFilter(void)
 			onid = xmlGetNumericAttribute(filter, "onid", 16);
 			tsid = xmlGetNumericAttribute(filter, "tsid", 16);
 			sid  = xmlGetNumericAttribute(filter, "serviceID", 16);
-
-			addEPGFilter(onid, tsid, sid);
+			if (xmlGetNumericAttribute(filter, "blacklist", 10) == 1)
+				addBlacklist(onid, tsid, sid);
+			else
+				addEPGFilter(onid, tsid, sid);
 
 			filter = filter->xmlNextNode;
 		}
@@ -7980,7 +8047,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.272 2008/10/11 21:39:20 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.273 2008/10/12 10:51:53 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 

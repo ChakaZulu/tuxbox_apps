@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.41 2008/10/05 13:12:48 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.42 2008/10/12 10:51:53 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -116,6 +116,8 @@ int DMX::immediate_stop(void)
 	
 	if (real_pauseCounter == 0)
 		closefd();
+	else
+		dprintf("DMX::immediate_stop not closed because real_pauseCounter=%d\n",real_pauseCounter);
 	
 	return 0;
 }
@@ -490,7 +492,7 @@ int DMX::immediate_start(void)
 		return 1;
 
 	if (real_pauseCounter != 0) {
-		dprintf("DMX::immediate_start: realPausecounter !=0 !\n");
+		dprintf("DMX::immediate_start: realPausecounter !=0 (%d)!\n", real_pauseCounter);
 		return 0;
 	}
 
@@ -698,8 +700,8 @@ int DMX::change(const int new_filter_index)
 
 	if (real_pauseCounter > 0)
 	{
-		printf("changeDMX: for 0x%x not ignored! even though real_pauseCounter> 0\n",
-			filters[new_filter_index].filter);
+		printf("changeDMX: for 0x%x not ignored! even though real_pauseCounter> 0 (%d)\n",
+			filters[new_filter_index].filter, real_pauseCounter);
 		/* immediate_start() checks for real_pauseCounter again (and
 		   does nothing in that case), so we can just continue here. */
 	}
@@ -829,7 +831,7 @@ int DMX::setPid(const unsigned short new_pid)
 
 	if (real_pauseCounter > 0)
 	{
-		dprintf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", new_pid);
+		dprintf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0 (%d)\n", new_pid, real_pauseCounter);
 		unlock();
 		return 0;	// not running (e.g. streaming)
 	}
@@ -873,7 +875,7 @@ int DMX::setCurrentService(int new_current_service)
 
 	if (real_pauseCounter > 0)
 	{
-		/*d*/printf("currentDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", new_current_service);
+		/*d*/printf("DMX::setCurrentService(0x%x) ignored because of real_pauseCounter > 0 (%d)\n", new_current_service, real_pauseCounter);
 		unlock();
 		return 0;	// not running (e.g. streaming)
 	}
