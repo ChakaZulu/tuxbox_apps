@@ -27,7 +27,7 @@
 			<key name="down" code="22" />
 			<key name="left" code="23" />
 			<key name="right" code="24" />
-			<key name="ok" code="25" />
+			<key name="ok" code="25"  picture="key.37" />
 			<key name="audio" code="26" picture="key.10" />
 			<key name="video" code="27" picture="key.11" />
 			<key name="info" code="28" picture="key.12" />
@@ -275,6 +275,12 @@
 		</actionmap>
 		<actionmap name="EPGStyleSelector">
 			<action name="infoPressed" key="info" flags="m" />
+		</actionmap>
+		<actionmap name="Tuxtxt">
+			<action name="switchZoommode" key="prev" flags="m" />
+			<action name="switchScreenmode" key="next" flags="m" />
+			<action name="switchTranspmode" key="video" flags="m" />
+			<action name="switchHintmode" key="info" flags="m" />
 		</actionmap>
 	</device>
 

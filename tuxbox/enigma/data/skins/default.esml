@@ -245,6 +245,7 @@
 		<img name="key.34" src="button_shift_green.png" />
 		<img name="key.35" src="button_shift_yellow.png" />
 		<img name="key.36" src="button_shift_blue.png" />
+		<img name="key.37" src="button_ok.png" />
 	</images>
 
 	<colors>
@@ -982,4 +983,25 @@
 		</SetupTimeshift>
 	</object>
 
+	<object name="SetupTuxtxt">
+		<SetupTuxtxt text="Teletext Settings" cposition="140:80" csize="440:385">
+			<eLabel text="Favourites:" position="10:10" size="110:30" />
+			<eComboBox name="favourites" openEntries="5" position="140:10" size="60:30" loadDeco="" />
+			<eNumber name="pagenumber" position="140:45" size="60:30" helptext="teletext page number (100 - 899)" loadDeco="" />
+			<eButton name="removepage" text="remove page" position="e-200:10" size="190:30" loadDeco="" helptext="remove selected page from favourites" shortcut="red" />
+			<eButton name="addpage" text="add page" position="e-200:45" size="190:30" loadDeco="" helptext="add page to favourites" shortcut="green" />
+			<eLabel text="Service:" position="10:80" size="140:30" />
+			<eComboBox name="service" openEntries="5" position="140:80" size="e-10:35" loadDeco="" helptext="select teletext service" />
+			<eCheckbox name="normal169" text="16:9 mode in normal view" position="10:120" size="e-10:30" helptext="switch to 16:9 mode when displaying teletext pages" vcenter="on" />
+			<eCheckbox name="split169" text="16:9 mode on splitscreen" position="10:150" size="e-10:30" helptext="switch to 16:9 in split screen mode"  vcenter="on" />
+			<eLabel text="Brightness:" position="10:180" size="140:30" />
+			<eSlider name="sBrightness" position="140:180" size="e-10:30" helptext="set brightness of the displayed teletext page" />
+			<eLabel text="Transparency:" position="10:220" size="140:30" />
+			<eSlider name="sTransparency" position="140:220" size="e-10:30" helptext="set amount of transparency when in semi-transparent mode" />
+			<eLabel text="Language:" position="10:260" size="140:30" />
+			<eComboBox name="language" openEntries="5" position="140:260" size="e-10:35" loadDeco="" helptext="set the language of the displayed pages" />
+			<eCheckbox name="truetype" text="use truetype font" position="10:300" size="e-10:30" helptext="use truetype font instead of standard font" vcenter="on" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</SetupTuxtxt>
+	</object>
 </eskin>

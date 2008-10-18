@@ -102,6 +102,7 @@
 ./src/enigma_main.cpp
 ./src/enigma_mainmenu.cpp
 ./src/enigma_plugins.cpp
+./src/enigma_tuxtxt.cpp
 ./src/enigma_scan.cpp
 ./src/enigma_setup.cpp
 ./src/enigma_vcr.cpp

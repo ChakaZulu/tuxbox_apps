@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.78 2008/09/24 19:20:16 dbluelle Exp $
+ * $Id: setup_extra.cpp,v 1.79 2008/10/18 18:44:56 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -180,6 +180,7 @@ void eExpertSetup::init_eExpertSetup()
 #ifndef TUXTXT_CFG_STANDALONE
 	CONNECT((new eListBoxEntryCheck(&list, _("Disable teletext caching"), "/ezap/extra/teletext_caching", _("don't cache teletext pages in background")))->selected, eExpertSetup::tuxtxtCachingChanged );
 #endif
+	new eListBoxEntryCheck(&list, _("Disable internal teletext"), "/ezap/teletext/use_external", _("use external tuxtxt plugin"));
 	new eListBoxEntryCheck(&list, _("Enable Zapping History"), "/elitedvb/extra/extzapping", _("don't care about actual mode when zapping in history list"));
 	if ( eSystemInfo::getInstance()->getHwType() < eSystemInfo::DM5600 )
 		new eListBoxEntryCheck(&list, _("Disable Standby"), "/extras/fastshutdown", _("Box goes directly into Deep-Standby"));

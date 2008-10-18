@@ -297,6 +297,13 @@ void eSubtitleWidget::startttx(int page)
 	renderinfo.sy = top;
 	renderinfo.ex = right;
 	renderinfo.ey = bottom;
+	if (eConfig::getInstance()->getKey("/ezap/teletext/AutoNational", renderinfo.auto_national ))
+		eConfig::getInstance()->setKey("/ezap/teletext/AutoNational", renderinfo.auto_national);
+	if (eConfig::getInstance()->getKey("/ezap/teletext/NationalSubset", tuxtxt_cache.national_subset ))
+		eConfig::getInstance()->setKey("/ezap/teletext/NationalSubset", tuxtxt_cache.national_subset);
+	if (eConfig::getInstance()->getKey("/ezap/teletext/UseTTF", renderinfo.usettf ))
+		eConfig::getInstance()->setKey("/ezap/teletext/UseTTF", renderinfo.usettf);
+
 	renderinfo.fb =fbClass::getInstance()->lock();
 	if (tuxtxt_InitRendering(&renderinfo,0))
 	{

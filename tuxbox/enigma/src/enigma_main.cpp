@@ -60,6 +60,7 @@
 #include <lib/system/info.h>
 #include <src/time_correction.h>
 #include <lib/driver/audiodynamic.h>
+#include <src/enigma_tuxtxt.h>
 #ifndef TUXTXT_CFG_STANDALONE
 #include <tuxtxt/tuxtxt_def.h>
 extern "C" tuxtxt_cache_struct tuxtxt_cache;
@@ -5144,9 +5145,23 @@ void eZapMain::runVTXT()
 	} 
 	else if (isVT)
 	{
-		eZapPlugins plugins(eZapPlugins::StandardPlugin);
-		if ( plugins.execPluginByName("tuxtxt.cfg") != "OK" )
-			plugins.execPluginByName("_tuxtxt.cfg");
+
+		int useexternal = 0;
+		eConfig::getInstance()->getKey("/ezap/teletext/use_external", useexternal );
+		if (useexternal)
+		{
+			eZapPlugins plugins(eZapPlugins::StandardPlugin);
+			if ( plugins.execPluginByName("tuxtxt.cfg") != "OK" )
+				plugins.execPluginByName("_tuxtxt.cfg");
+		}
+		else
+		{
+			hide();
+			eTuxtxtWidget w;
+			w.show();
+			w.exec();
+			w.hide();
+		}
 	}
 }
 
