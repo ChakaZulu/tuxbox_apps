@@ -11,6 +11,8 @@
 #endif
 
 #include <config.h>
+#include <sys/time.h>
+#include <pthread.h>
 
 #if HAVE_DVB_API_VERSION < 3
  #define dmx_pes_filter_params dmxPesFilterParams
