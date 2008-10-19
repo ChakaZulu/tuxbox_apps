@@ -4088,7 +4088,7 @@ void eZapMain::deleteService( eServiceSelector *sel )
 				fname+="eit";
 				::unlink(fname.c_str());
 				::unlink((it->service.path+".indexmarks").c_str());
-				removeFromPlaylist(ref);
+				removeFromPlaylist(it->service);
 			}
 		}
 	} // bouquet (playlist) selected
