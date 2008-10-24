@@ -946,7 +946,7 @@ FILE *f_open(const char *filename, const char *acctype)
 
 				/* create either a shoutcast or an icecast query */
 				if(url.access_mode == MODE_SCAST)
-					sprintf(buf, "http://www.shoutcast.com/directory/?orderby=listeners&s=%s", url.host);
+					sprintf(buf, "http://classic.shoutcast.com/directory/?orderby=listeners&s=%s", url.host);
 				else
 					sprintf(buf, "http://www.icecast.org/streamlist.php?search=%s", url.host);
 
@@ -979,7 +979,7 @@ FILE *f_open(const char *filename, const char *acctype)
 
 			/* create the correct url from the station number */
 			CRLFCut(url.host);
-			sprintf(url.url, "http://www.shoutcast.com/sbin/shoutcast-playlist.pls?rn=%s&file=filename.pls", url.host);
+			sprintf(url.url, "http://classic.shoutcast.com/sbin/shoutcast-playlist.pls?rn=%s&file=filename.pls", url.host);
 
 		case MODE_PLS:	{
 			char *ptr=NULL, *ptr2, buf[4096], servers[25][1024];
@@ -1838,7 +1838,7 @@ void ShoutCAST_MetaFilter(STREAM_FILTER *arg)
 void parseURL_url(URL& url) {
 	/* now lets see what we have ... */
 	char buffer[2048];
-
+//	printf("parseURL_url: %s\n", url.url);
 	char *ptr = strstr(url.url, "://");
 	if (!ptr)
 	{
