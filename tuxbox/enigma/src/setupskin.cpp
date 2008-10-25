@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.22 2008/08/21 20:19:16 fergy Exp $
+ * $Id: setupskin.cpp,v 1.23 2008/10/25 14:24:36 dbluelle Exp $
  */
 
 #include <setupskin.h>
@@ -107,7 +107,6 @@ void eSkinSetup::accept()
 void eSkinSetup::skinchanged(eListBoxEntrySkin *skin)
 {
         eString icon;
-        eString command;
         eString iconname; 
         eString finalname;
         int len;
@@ -116,8 +115,8 @@ void eSkinSetup::skinchanged(eListBoxEntrySkin *skin)
         len = iconname.find(".esml");
         finalname= iconname.substr(0,len)+ ".png";
 
-        system(command.c_str());
         lb3->clear();
+
         gPixmap *img = 0;
         img = loadPNG(finalname.c_str());
         if(img)
