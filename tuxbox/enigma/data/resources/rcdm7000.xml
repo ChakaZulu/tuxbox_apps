@@ -263,6 +263,7 @@
 			<action name="addSwitchTimerEvent" key="blue" flags="m" />
 			<action name="removeTimerEvent" key="red" flags="m" />
 			<action name="showExtendedInfo" key="info" flags="m" />
+			<action name="searchEPG" key="dream" flags="m" />
 		</actionmap>
 		<actionmap name="timerEdit">
 			<action name="incBegTime" key="volup" flags="mr" />

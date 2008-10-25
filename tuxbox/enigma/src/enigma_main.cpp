@@ -1881,6 +1881,8 @@ void eZapMain::init_main()
 	addActionMap(&i_enigmaMainActions->map);
 	addActionMap(&i_numberActions->map);
 
+	cEPGSearchDATA = new eEPGSearchDATA();
+
 	gotPMT();
 	gotSDT();
 	gotEIT();
@@ -2036,6 +2038,7 @@ void eZapMain::exit_main()
 #ifndef DISABLE_FILE
 	saveRecordings(true);
 #endif
+	delete cEPGSearchDATA;
 	savePlaylist(true);
 	destroyUserBouquets(true);
 	// get current selected serviceselector path
@@ -5198,6 +5201,9 @@ void eZapMain::showSelectorStyleEPG()
 			case 3:
 				runPluginEPG();
 				break;
+			case 4:
+				EPGSearchEvent((eServiceReferenceDVB&)eServiceInterface::getInstance()->service);
+				break;
 			default:
 				break;
 		}
@@ -5207,6 +5213,64 @@ void eZapMain::showSelectorStyleEPG()
 		doubleklickTimer.start(400,true);
 		doubleklickTimerConnection = CONNECT( doubleklickTimer.timeout, eZapMain::showCurrentStyleEPG );
 	}
+}
+
+void eZapMain::EPGSearchEvent(eServiceReferenceDVB service)
+{
+	if (service.type != eServiceReference::idDVB)
+	        return;
+	int wasVisible=isVisible();
+	if (wasVisible)
+	{
+		timeout.stop();
+		hide();
+	}
+	//if (EINow->getText() != eString(_("no EPG available")))
+	//if (!strcmp(EINow->getText(),_("no EPG available"))
+	//{
+		eString EPGSearchName = "";
+		eEPGSearch *dd = new eEPGSearch(service, EINow->getText());
+		dd->show();
+		int back = 2;
+		do
+		{
+			back = dd->exec();
+			EPGSearchName = dd->getSearchName();
+			if (back == 2)
+			{
+				dd->hide();
+				eMessageBox rsl(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
+				rsl.show(); rsl.exec(); rsl.hide();
+				dd->show();
+			}
+		}
+		while (back == 2);
+		dd->hide();
+		delete dd;
+		if (!back)
+		{
+			// Zeige EPG Ergebnis an
+#ifndef DISABLE_LCD
+			bool bMain = lcdmain.lcdMain->isVisible();
+			bool bMenu = lcdmain.lcdMenu->isVisible();
+			lcdmain.lcdMain->hide();
+			lcdmain.lcdMenu->show();
+#endif
+			eEPGSelector eEPGSelectorSearch(EPGSearchName);
+#ifndef DISABLE_LCD
+			eEPGSelectorSearch.setLCD(lcdmain.lcdMenu->Title, lcdmain.lcdMenu->Element);
+#endif
+	                eEPGSelectorSearch.show(); eEPGSelectorSearch.exec(); eEPGSelectorSearch.hide();
+#ifndef DISABLE_LCD
+			if (!bMenu)
+				lcdmain.lcdMenu->hide();
+			if ( bMain )
+				lcdmain.lcdMain->show();
+#endif
+		}
+	//}
+	if (wasVisible && !doHideInfobar())
+		showInfobar();
 }
 
 void eZapMain::showCurrentStyleEPG()
@@ -5301,8 +5365,17 @@ void eZapMain::showEPGList(eServiceReferenceDVB service)
 			hide();
 		}
 		wnd.show();
-		wnd.exec();
+		int back = wnd.exec();
 		wnd.hide();
+		if (back == 2)
+		{
+			eString searchname = wnd.getEPGSearchName();
+			eEPGSelector eEPGSelectorSearch(searchname);
+#ifndef DISABLE_LCD
+			eEPGSelectorSearch.setLCD(lcdmain.lcdMenu->Title, lcdmain.lcdMenu->Element);
+#endif
+			eEPGSelectorSearch.show(); eEPGSelectorSearch.exec(); eEPGSelectorSearch.hide();
+		}
 #ifndef DISABLE_LCD
 		if (!bMenu)
 			lcdmain.lcdMenu->hide();

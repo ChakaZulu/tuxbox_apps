@@ -135,6 +135,7 @@
 			<action name="addSwitchTimerEvent" key="blue" flags="m" />
 			<action name="removeTimerEvent" key="red" flags="m" />
 			<action name="showExtendedInfo" key="?" flags="m" />
+			<action name="searchEPG" key="d-box" flags="m" />
 		</actionmap>
 
 		<actionmap name="serviceSelector" style="default" descr="Default (Enigma)" >

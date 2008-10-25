@@ -33,6 +33,7 @@ public:
 	~eEventDisplay();
 	void setList(const ePtrList<EITEvent> &events);
 	void setEvent(EITEvent *event);
+	void setEPGSearchEvent(eServiceReferenceDVB &ref, EITEvent *event, eString Service);
 };
 
 #endif /* __enigma_event_h */

@@ -160,7 +160,7 @@ void eChannelInfo::ParseEITInfo(EITEvent *e)
 
 		LocalEventData led;
 		led.getLocalData(e, &name, &descr, 0);
-
+		DescriptionForEPGSearch = name;
 		for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
 		{
 			Descriptor *descriptor=*d;
@@ -226,6 +226,7 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 	
 	if (!service.path.size())
 	{
+		DescriptionForEPGSearch = "";
 		cdescr.show();
 		cname.setFlags(RS_FADE);
 		cname.resize( eSize( clientrect.width()/8*7-4, clientrect.height()/3) );
@@ -284,6 +285,7 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 void eChannelInfo::EITready( int err )
 {
 //	eDebug("Channelinfo eit ready: %d", err);
+	DescriptionForEPGSearch = "";
 	if (eit->ready && !eit->error)
 	{
 		if ( eit->events.size() )
@@ -298,6 +300,7 @@ void eChannelInfo::update( const eServiceReferenceDVB& service )
 	if (service)
 	{
 		current = service;
+		DescriptionForEPGSearch = "";
 		getServiceInfo(current);
 	}
 }

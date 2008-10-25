@@ -118,6 +118,99 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 	return eWindow::eventHandler(event);
 }
 
+void eEventDisplay::setEPGSearchEvent(eServiceReferenceDVB &Ref, EITEvent *event, eString Service)
+{
+	ref = Ref;
+	service = Service;
+	time_t time = event->start_time+event->duration/2;
+
+	EITEvent *tmp = event->event_id != -1 ? eEPGCache::getInstance()->lookupEvent( ref, event->event_id ) : 0;
+	if ( !tmp )
+		tmp = eEPGCache::getInstance()->lookupEvent( ref, time );
+	evt = tmp;
+	valid=0;
+	long_description->hide();
+	long_description->move( ePoint(0,0) );
+	if (evt)
+	{
+		eString _title=0, _long_description="";
+		eString _eventDate="";
+		eString _eventTime="";
+		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
+		if (begin)
+		{
+			valid |= 1;
+			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
+			_eventDate=eString().sprintf("%02d.%02d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
+		}
+		time_t endtime=event->start_time+event->duration;
+		tm *end=event->start_time!=-1?localtime(&endtime):0;
+		if (end)
+		{
+			valid |= 2;
+			_eventTime+=eString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
+		}
+		for (ePtrList<Descriptor>::iterator d(evt->descriptor); d != evt->descriptor.end(); ++d)
+		{
+			if (d->Tag()==DESCR_SHORT_EVENT)
+			{
+				ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
+				valid |= 4;
+				_title=s->event_name;
+#ifndef DISABLE_LCD
+				if (LCDElement)
+				LCDElement->setText(s->text);
+#endif
+				if ((s->text.length() > 0) && (s->text!=_title))
+				{
+					valid |= 8;
+					_long_description+=s->text;
+					_long_description+="\n\n";
+				}
+			}
+			else if (d->Tag()==DESCR_EXTENDED_EVENT)
+			{
+				ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*d;
+				valid |= 16;
+				_long_description+=ss->text;
+			}
+			else if (d->Tag() == DESCR_LINKAGE)
+			{
+				if ( !ref.path )
+				{
+					LinkageDescriptor *ld=(LinkageDescriptor*)*d;
+					if (ld->linkage_type==0xB0)
+					{
+						eServiceReferenceDVB MySubService(ref.getDVBNamespace(),
+							eTransportStreamID(ld->transport_stream_id),
+							eOriginalNetworkID(ld->original_network_id),
+							eServiceID(ld->service_id), 7);
+						ref = MySubService;
+					}
+				}
+			}
+		}
+		if (!_title)
+			_title = _("no information is available");
+		if ( !ref.path )
+			channel->setText(service);
+		eventTime->setText(_eventTime);
+		eventDate->setText(_eventDate);
+		setText(_title);
+		if (!_long_description)
+			long_description->setText(_("no description is available"));
+		else
+			long_description->setText(_long_description);
+		checkTimerIcon(evt);
+	}
+	else
+	{
+		setText(service);
+		long_description->setText(_("no description is available"));
+	}
+	updateScrollbar();
+	long_description->show();
+}
 eEventDisplay::eEventDisplay(eString service, eServiceReferenceDVB &ref, const ePtrList<EITEvent>* e, EITEvent* evt )
 : eWindow(1), service(service), ref(ref), evt(evt)
 {

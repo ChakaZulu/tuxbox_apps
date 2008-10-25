@@ -30,6 +30,7 @@
 #include <enigma_streamer.h>
 #include <enigma_picmanager.h>
 #include <epgwindow.h>
+#include <epgsearch.h>
 
 gFont eListBoxEntryService::serviceFont;
 gFont eListBoxEntryService::descrFont;
@@ -59,7 +60,7 @@ struct EPGStyleSelectorActions
 eAutoInitP0<EPGStyleSelectorActions> i_EPGStyleSelectorActions(eAutoInitNumbers::actions, "EPG Style Selector actions");
 
 eEPGStyleSelector::eEPGStyleSelector(int ssel)
-		:eListBoxWindow<eListBoxEntryText>(_("EPG Style"), 5, 350, true)
+		:eListBoxWindow<eListBoxEntryText>(_("EPG Style"), 6, 350, true)
 		,ssel(ssel)
 {
 	addActionMap( &i_EPGStyleSelectorActions->map );
@@ -69,16 +70,16 @@ eEPGStyleSelector::eEPGStyleSelector(int ssel)
 		eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", last);
 	else
 		eConfig::getInstance()->getKey("/ezap/lastEPGStyle", last);
-	eListBoxEntryText *sel[3];
+	eListBoxEntryText *sel[4];
 	sel[0] = new eListBoxEntryText(&list,_("Channel EPG"), (void*)1, 0, _("open EPG for selected Channel") );
 	sel[1] = new eListBoxEntryText(&list,_("Multi EPG"), (void*)2, 0, _("open EPG for next five channels") );
+	sel[2] = new eListBoxEntryText(&list,_("EPG Search"), (void*)4, 0, _("Search event in EPG cache") );
 
 	// only show external EPG Entry when it realy exist..
 	eZapPlugins plugins(eZapPlugins::StandardPlugin);
 	if ( plugins.execPluginByName("extepg.cfg",true) == "OK"
 		|| plugins.execPluginByName("_extepg.cfg",true) == "OK" )
-		sel[2] = new eListBoxEntryText(&list,_("External EPG"), (void*)3, 0, _("open external plugin EPG") );
-
+		sel[3] = new eListBoxEntryText(&list,_("External EPG"), (void*)3, 0, _("open external plugin EPG") );
 	list.setCurrent(sel[last-1]);
 	CONNECT( list.selected, eEPGStyleSelector::entrySelected );
 }
@@ -103,10 +104,13 @@ void eEPGStyleSelector::entrySelected( eListBoxEntryText* e )
 {
 	if (e)
 	{
-		if ( ssel )
-			eConfig::getInstance()->setKey("/ezap/serviceselector/lastEPGStyle", (int)e->getKey());
-		else
-			eConfig::getInstance()->setKey("/ezap/lastEPGStyle", (int)e->getKey());
+		if ( (int)e->getKey() != 4) // EPG search
+		{
+			if ( ssel )
+				eConfig::getInstance()->setKey("/ezap/serviceselector/lastEPGStyle", (int)e->getKey());
+			else
+				eConfig::getInstance()->setKey("/ezap/lastEPGStyle", (int)e->getKey());
+		}
 		close( (int)e->getKey() );
 	}
 	else
@@ -1294,6 +1298,9 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						case 2:
 							showMultiEPG();
 							break;
+						case 4:
+							EPGSearchEvent(selected);
+							break;
 						default:
 							show();
 							break;
@@ -1903,6 +1910,50 @@ void eServiceSelector::showMultiEPG()
 		show();
 }
 
+void eServiceSelector::EPGSearchEvent(eServiceReference ref)
+{
+	eString EPGSearchName = "";
+	eEPGSearch dd(ref, ci->GetDescription());
+	dd.show();
+	int back = 2;
+	do
+	{
+		back = dd.exec();
+		EPGSearchName = dd.getSearchName();
+		if (back == 2)
+		{
+			dd.hide();
+			eMessageBox rsl(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
+			rsl.show(); rsl.exec(); rsl.hide();
+			dd.show();
+		}
+	}
+	while (back == 2);
+	dd.hide();
+	if (!back)
+	{
+		// Zeige EPG Ergebnis an
+#ifndef DISABLE_LCD
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		bool bMain = pLCD->lcdMain->isVisible();
+		bool bMenu = pLCD->lcdMenu->isVisible();
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
+#endif
+		eEPGSelector eEPGSelectorSearch(EPGSearchName);
+#ifndef DISABLE_LCD
+		eEPGSelectorSearch.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+#endif
+		eEPGSelectorSearch.show(); eEPGSelectorSearch.exec(); eEPGSelectorSearch.hide();
+#ifndef DISABLE_LCD
+		if (!bMenu)
+			pLCD->lcdMenu->hide();
+		if ( bMain )
+			pLCD->lcdMain->show();
+#endif
+		}
+	show();
+}
 void eServiceSelector::ResetBrowseChar()
 {
 	BrowseChar=0;

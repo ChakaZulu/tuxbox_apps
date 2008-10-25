@@ -23,7 +23,7 @@
 #include <src/audio_dynamic.h>
 #include <lib/dvb/subtitling.h>
 #include <math.h>
-
+#include <src/epgsearch.h>
 class eProgress;
 
 struct eMMIMessage
@@ -358,7 +358,7 @@ private:
 	int dvrfunctions;
 	int stateOSD;
 	int timeoutInfobar;
-
+	eEPGSearchDATA *cEPGSearchDATA;
 	// eRecordingStatus *recstatus;
 
 #ifndef DISABLE_FILE
@@ -472,6 +472,7 @@ private:
 	void hideVolumeSlider();
 	void toggleMute();
 	void showMainMenu();
+	void EPGSearchEvent(eServiceReferenceDVB service);
 /* SNR,AGC,BER DISPLAY */
 	void showSNR();
 /* SNR,AGC,BER DISPLAY */

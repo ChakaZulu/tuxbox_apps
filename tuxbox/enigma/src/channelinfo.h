@@ -25,6 +25,7 @@ class eChannelInfo : public eDecoWidget
 	EIT *eit;
 	void EITready(int err);
 	void closeEIT();
+	eString DescriptionForEPGSearch;
 public:
 	enum
 	{
@@ -43,6 +44,7 @@ public:
 	void update( const eServiceReferenceDVB& );
 	void clear();
 	static eString getGenre(int index) {return genresTableShort[index];}
+	eString GetDescription() {return DescriptionForEPGSearch;}
 };
 
 #endif // __APPS_ENIGMA_CHANNELINFO__

@@ -1004,4 +1004,23 @@
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</SetupTuxtxt>
 	</object>
+
+	<object name="eEPGSearch">
+		<eEPGSearch text="EPG Search" cposition="115:80" csize="490:410">
+			<eLabel text="Title:" position="10:10" size="200:30" />
+			<eTextInputField name="searchtext" position="10:40" size="e-10:40" loadDeco="eNumber" helptext="Enter title for epg searching" />
+			<eLabel text="Search in:" position="10:95" size="180:30" />
+			<eCheckbox name="CurrentService" text="" position="190:95" size="e-10:30" helptext="Select this option if you want to search the title only in selected channel" vcenter="on" />
+			<eCheckbox name="AllServices" text="All Services" position="190:125" size="e-10:30" helptext="Select this option if you want to search the title in all services" vcenter="on" />
+			<eLabel text="Search options:" position="10:175" size="180:30" />
+			<eCheckbox name="ExactMatch" text="Exact match" position="190:175" size="e-10:30" helptext="Select this option if you want to search the exact title" vcenter="on" />
+			<eCheckbox name="CaseSensitive" text="Case Sensitive" position="190:205" size="e-10:30" helptext="Select this option if you want to make this epg search case sensitive" vcenter="on" />
+			<eLabel text="Genre:" position="10:260" size="100:30" />
+			<eComboBox name="Genre" openEntries="5" position="120:255" size="e-10:35" loadDeco="" helptext="Select a genre if you want to search for a genre" />
+			<eButton name="Close" text="Close" position="10:310" size="210:40" loadDeco="" helptext="Closes EPG search window" shortcut="blue" />
+			<eButton name="Start" text="Start" position="230:310" size="210:40" loadDeco="" helptext="Begin EPG Search" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eEPGSearch>
+	</object>
+
 </eskin>

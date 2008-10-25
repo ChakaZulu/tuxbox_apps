@@ -38,13 +38,17 @@ class eEPGSelector: public eWindow
 	eServiceReferenceDVB current;
 private:
 	void fillEPGList();
+	void fillEPGSearchList();
 	void entrySelected(eListBoxEntryEPG *entry);
 	int eventHandler(const eWidgetEvent &event);
+	eString EPGSearchName;
 public:
 	eEPGSelector(const eServiceReferenceDVB &service);
+	eEPGSelector(eString SearchString); // EPG Search :-)
 	inline ~eEPGSelector(){};
 	Signal3<bool, eEPGSelector*, eServiceReference*, EITEvent *> addEventToTimerList;
 	Signal3<bool, eEPGSelector*, eServiceReference*, EITEvent *> removeEventFromTimerList;
+	eString getEPGSearchName() { return EPGSearchName; }
 };
 
 class LocalEventData

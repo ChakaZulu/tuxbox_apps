@@ -23,6 +23,14 @@ int eListBoxEntryEPG::dateXSize=0;
 eString LocalEventData::country;
 eString LocalEventData::primary_language;
 eString LocalEventData::secondary_language;
+eString now_text;
+int myEPGSearch;
+vecEPGSearch mEPGSearch;
+
+bool sortByEventStart(const EPGSEARCHDATA& a, const EPGSEARCHDATA& b)
+{
+	return a.EventStart < b.EventStart;
+}
 
 eAutoInitP0<epgSelectorActions> i_epgSelectorActions(eAutoInitNumbers::actions, "epg selector actions");
 
@@ -63,7 +71,11 @@ int eListBoxEntryEPG::getEntryHeight()
 void eListBoxEntryEPG::build()
 {
 	start_time = *localtime(&event.start_time);
-     
+	if (myEPGSearch) // EPGSearch
+	{
+		descr = now_text;
+		return;
+	}
 	LocalEventData led;
 	led.getLocalData(&event, &descr);
 
@@ -283,6 +295,8 @@ void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)
 		hide();
 		eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
 		eEventDisplay ei(service ? service->service_name.c_str() : "", current, 0, &entry->event);
+		if (myEPGSearch)
+			ei.setEPGSearchEvent((eServiceReferenceDVB&)entry->service, &entry->event, service ? service->service_name.c_str() : "");
 #ifndef DISABLE_LCD
 		ei.setLCD(LCDTitle, LCDElement);
 #endif
@@ -299,9 +313,18 @@ void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)
 				break; // close EventDisplay
 
 			if (tmp)
-				ei.setEvent(&tmp->event);
+			{
+				if (myEPGSearch)
+				{
+					eService *ServiceName=eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)tmp->service);
+					ei.setEPGSearchEvent((eServiceReferenceDVB&)tmp->service, &tmp->event, ServiceName ? ServiceName->service_name.c_str() : "");
+				}
+				else
+					ei.setEvent(&tmp->event);
+			}
 		}
 		ei.hide();
+		invalidate();
 		show();
 	}
 }
@@ -317,6 +340,7 @@ eEPGSelector::eEPGSelector(const eServiceReferenceDVB &service)
 		eWarning("EPG selector widget build failed!");
 
 	CONNECT(events->selected, eEPGSelector::entrySelected);
+	myEPGSearch = 0;
 	fillEPGList();
 	addActionMap( &i_epgSelectorActions->map );
 #ifndef DISABLE_FILE
@@ -330,12 +354,85 @@ eEPGSelector::eEPGSelector(const eServiceReferenceDVB &service)
 	setHelpID(12);
 }
 
+eEPGSelector::eEPGSelector(eString SearchString):eWindow(0)
+{
+	events = new eListBox<eListBoxEntryEPG>(this);
+	events->setName("events");
+	events->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
+	if (eSkin::getActive()->build(this, "eEPGSelector"))
+		eWarning("EPG selector widget build failed!");
+	CONNECT(events->selected, eEPGSelector::entrySelected);
+	myEPGSearch = 1;
+	fillEPGSearchList();
+	setText(eString(_("EPG Search")) +": " + SearchString);
+	addActionMap( &i_epgSelectorActions->map );
+#ifndef DISABLE_FILE
+	addActionToHelpList( &i_epgSelectorActions->addDVRTimerEvent );
+#endif
+#ifndef DISABLE_NETWORK
+	addActionToHelpList( &i_epgSelectorActions->addNGRABTimerEvent );
+#endif
+	addActionToHelpList( &i_epgSelectorActions->addSwitchTimerEvent );
+	addActionToHelpList( &i_epgSelectorActions->removeTimerEvent );
+	setHelpID(12);
+}
+void eEPGSelector::fillEPGSearchList()
+{
+	SearchEPGDATA SearchEPGDATA1;
+	SearchEPGDATA1 = eEPGSearchDATA::getInstance()->getSearchData();
+	for (SearchEPGDATA::iterator a = SearchEPGDATA1.begin(); a != SearchEPGDATA1.end(); a++)
+	{
+		EITEvent *e = new EITEvent();
+		e->start_time = a->start_time;
+		e->duration = a->duration;
+		e->event_id = -1;
+		eServiceReference Ref;
+		Ref = a->ref;
+		Ref.descr = a->name + "/" + a->title;
+		now_text = a->name + ": " + a->title;
+		new eListBoxEntryEPG(*e, events, Ref);
+	}
+	eEPGSearchDATA::getInstance()->clearList();
+}
+
 int eEPGSelector::eventHandler(const eWidgetEvent &event)
 {
 	int addtype=-1;
 	switch (event.type)
 	{
 		case eWidgetEvent::evtAction:
+			if (event.action == &i_epgSelectorActions->searchEPG)
+			{
+				if (!myEPGSearch)
+				{
+					hide();
+					eEPGSearch *dd = new eEPGSearch(current, events->getCurrent()->event);
+					dd->show();
+					int back = 2;
+					do
+					{
+						back = dd->exec();
+						EPGSearchName = dd->getSearchName();
+						if (back == 2)
+						{
+							dd->hide();
+							eMessageBox rsl(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
+							rsl.show(); rsl.exec(); rsl.hide();
+							dd->show();
+						}
+					}
+					while (back == 2);
+					dd->hide();
+					delete dd;
+					if (!back)
+					{
+						close(2);
+					}
+					else
+						show();
+					break;
+				}
+			}
 			if ( (addtype = i_epgSelectorActions->checkTimerActions( event.action )) != -1 )
 				;
 			else if (event.action == &i_epgSelectorActions->removeTimerEvent)

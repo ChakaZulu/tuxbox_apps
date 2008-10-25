@@ -104,6 +104,7 @@ private:
 	void gotoChar(char c);
 	void updateCi();
 	void init_eServiceSelector();
+	void EPGSearchEvent(eServiceReference ref);
 	void SwitchNowNext();
 
 public:
