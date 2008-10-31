@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.232 2008/10/31 20:29:17 seife Exp $
+	$Id: infoviewer.cpp,v 1.233 2008/10/31 22:35:58 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -934,21 +934,31 @@ void CInfoViewer::showButton_SubServices()
 
 CSectionsdClient::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_channel_id)
 {
+	static CSectionsdClient::CurrentNextInfo oldinfo;
 	CSectionsdClient::CurrentNextInfo info;
 
 	g_Sectionsd->getCurrentNextServiceKey(for_channel_id, info );
 
-	if ( info.flags & ( CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_next ) )
+	if (info.current_uniqueKey != oldinfo.current_uniqueKey && info.next_uniqueKey != oldinfo.next_uniqueKey)
 	{
-		CSectionsdClient::CurrentNextInfo*	_info = new CSectionsdClient::CurrentNextInfo;
-		*_info = info;
-		g_RCInput->postMsg( ( info.flags & ( CSectionsdClient::epgflags::has_current ) )? NeutrinoMessages::EVT_CURRENTEPG : NeutrinoMessages::EVT_NEXTEPG, (unsigned) _info, false );
-	}
-	else
-	{
-		t_channel_id * p = new t_channel_id;
-		*p = for_channel_id;
-		g_RCInput->postMsg(NeutrinoMessages::EVT_NOEPG_YET, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
+		if (info.flags & (CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_next))
+		{
+			CSectionsdClient::CurrentNextInfo*	_info = new CSectionsdClient::CurrentNextInfo;
+			*_info = info;
+			neutrino_msg_t msg;
+			if (info.flags & CSectionsdClient::epgflags::has_current)
+				msg = NeutrinoMessages::EVT_CURRENTEPG;
+			else
+				msg = NeutrinoMessages::EVT_NEXTEPG;
+			g_RCInput->postMsg(msg, (unsigned) _info, false );
+		}
+		else
+		{
+			t_channel_id * p = new t_channel_id;
+			*p = for_channel_id;
+			g_RCInput->postMsg(NeutrinoMessages::EVT_NOEPG_YET, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
+		}
+		oldinfo = info;
 	}
 
 	return info;
