@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.233 2008/10/31 22:35:58 seife Exp $
+	$Id: infoviewer.cpp,v 1.234 2008/10/31 23:20:03 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1365,6 +1365,7 @@ void CInfoViewer::showLcdPercentOver()
 {
 	if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] != 1)
 	{
+		static long long old_interval = 0;
 		int runningPercent=-1;
 		time_t jetzt=time(NULL);
 #if 0
@@ -1375,6 +1376,7 @@ No need to poll for EPG, we are getting events from sectionsd!
 			info_CurrentNext = getEPG(channel_id);
 		}
 #endif
+		long long interval = 60000000; /* 60 seconds default update time */
 		if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 		{
 			if (jetzt < info_CurrentNext.current_zeit.startzeit)
@@ -1382,8 +1384,22 @@ No need to poll for EPG, we are getting events from sectionsd!
 			else if (jetzt > (int)(info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer))
 				runningPercent = -2; /* overtime */
 			else
+			{
 				runningPercent=MIN((jetzt-info_CurrentNext.current_zeit.startzeit) * 100 /
 					            info_CurrentNext.current_zeit.dauer ,100);
+				interval = info_CurrentNext.current_zeit.dauer * 1000LL * (1000/100); // update every percent
+				if (is_visible && interval > 60000000)
+					interval = 60000000;	// if infobar visible, update at least once per minute (radio mode)
+				if (interval < 5000000)
+					interval = 5000000;	// update only every 5 seconds
+			}
+		}
+		if (interval != old_interval)
+		{
+			g_RCInput->killTimer(lcdUpdateTimer);
+			lcdUpdateTimer = g_RCInput->addTimer(interval, false);
+			//printf("lcdUpdateTimer: interval %lld old %lld\n",interval/1000000,old_interval/1000000);
+			old_interval = interval;
 		}
 		CLCD::getInstance()->showPercentOver(runningPercent);
 	}
