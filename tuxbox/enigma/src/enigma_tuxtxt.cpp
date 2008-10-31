@@ -19,7 +19,11 @@
 #include <config.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <unistd.h>
 #define TUXTXT_TIMER_TICK 100
+#define TUXTXTTTF FONTDIR "/tuxtxt.ttf"
+#define TUXTXTTTFVAR "/var/tuxtxt/tuxtxt.ttf"
+
 struct tuxtxtActions
 {
 	eActionMap map;
@@ -247,7 +251,8 @@ void eTuxtxtSetup::FillServiceCombo(eListBox<eListBoxEntryText>* lb)
 	service->removeEntry((void*)-1);
 	for (int i = 0; i < pids_found; i++)
 	{
-		new eListBoxEntryText( lb,pid_table[i].service_name, (void*) i );
+		eString s = pid_table[i].service_name;
+		new eListBoxEntryText( lb,convertLatin1UTF8(s), (void*) i );
 	}
 	if (pids_found ==  0)
 		new eListBoxEntryText( lb,_("no services on this transponder"), (void*) -2 );
@@ -519,24 +524,7 @@ skip_pid:
 
 					for (byte = 0; byte < pid_table[pid_test].service_name_len; byte++)
 					{
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'Ä')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5B;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ä')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7B;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'Ö')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5C;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ö')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7C;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'Ü')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5D;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ü')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7D;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ß')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7E;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] >= 0x80 && SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] <= 0x9F)
-							diff--;
-						else
-							pid_table[pid_test].service_name[byte + diff] = SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte];
+						pid_table[pid_test].service_name[byte + diff] = SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte];
 					}
 
 					pid_table[pid_test].service_name_len += diff;
@@ -709,10 +697,10 @@ int eTuxtxtWidget::eventHandler(const eWidgetEvent &event)
 			else
 				GetNextPageOne(0);
 		}
-		else if (event.action == &i_cursorActions->left)
+		else if (event.action == &i_cursorActions->right)
 		{
 			if (pagecatching)
-				CatchNextPage(0, -1);
+				CatchNextPage(0, 1);
 			else if (renderinfo.boxed)
 			{
 				renderinfo.subtitledelay++;				    
@@ -729,10 +717,10 @@ int eTuxtxtWidget::eventHandler(const eWidgetEvent &event)
 			else
 				GetNextSubPage(1);	
 		}
-		else if (event.action == &i_cursorActions->right)
+		else if (event.action == &i_cursorActions->left)
 		{
 			if (pagecatching)
-				CatchNextPage(0, 1);
+				CatchNextPage(0, -1);
 			else if (renderinfo.boxed)
 			{
 				renderinfo.subtitledelay--;
@@ -924,6 +912,17 @@ void eTuxtxtWidget::Init()
 		eConfig::getInstance()->setKey("/ezap/teletext/ShowLevel2p5", renderinfo.showl25);
 	if (eConfig::getInstance()->getKey("/ezap/teletext/UseTTF", renderinfo.usettf ))
 		eConfig::getInstance()->setKey("/ezap/teletext/UseTTF", renderinfo.usettf);
+	if (renderinfo.usettf)
+	{
+		struct stat64 s;
+		
+		if (stat64(TUXTXTTTF, &s)<0 &&
+		    stat64(TUXTXTTTFVAR, &s)<0)
+		{
+			renderinfo.usettf = 0;
+			eConfig::getInstance()->setKey("/ezap/teletext/UseTTF", renderinfo.usettf);
+		}
+	}
 
 	if (!tuxtxt_InitRendering(&renderinfo,1))
 	{
