@@ -208,6 +208,7 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	,needasyncworkaround(false), inputsn(0), outputsn(0), messages(this, 1)
 {
 	state=stateInit;
+	timestampParser = new eTimeStampParserTS(_filename);
 
 	int count=0;
 	seekbusy=0;
@@ -379,9 +380,26 @@ void eDVRPlayerThread::thread()
 	exec();
 }
 
+eString eDVRPlayerThread::getPTSTimeStampPosition(int what)
+{
+	switch (what)
+	{
+		case eServiceHandler::posQueryTimeCurrent:
+			return timestampParser->getCurrentTime();
+		case eServiceHandler::posQueryTimeRemain:
+			return timestampParser->getRemainTime();
+		default:
+			return("-");
+
+	}
+}
+
 void eDVRPlayerThread::outputReady(int what)
 {
 	(void)what;
+	char ptsbuf[65424];
+	int len = buffer.peek(ptsbuf, 65424);
+	timestampParser->parseData(ptsbuf,len);
 
 	int wr=buffer.tofile(dvrfd,65424);
 	seekbusy-=wr;
@@ -543,6 +561,8 @@ eDVRPlayerThread::~eDVRPlayerThread()
 		::close(dvrfd);
 	if (sourcefd >= 0)
 		::close(sourcefd);
+	delete timestampParser;
+	timestampParser = 0;
 }
 
 void eDVRPlayerThread::updatePosition()
@@ -1674,6 +1694,14 @@ int eServiceHandlerDVB::getPosition(int what)
 	}
 #else
 	return -1;
+#endif
+}
+eString eServiceHandlerDVB::getPTSTimeStampPosition(int what)
+{
+#ifndef DISABLE_FILE
+	return decoder->getPTSTimeStampPosition(what);
+#else
+	return "-";
 #endif
 }
 

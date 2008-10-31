@@ -2381,6 +2381,8 @@ void eZapMain::updateProgress()
 		int total=handler->getPosition(eServiceHandler::posQueryLength);
 		int current=handler->getPosition(eServiceHandler::posQueryCurrent);
 
+		eString _remain = handler->getPTSTimeStampPosition(eServiceHandler::posQueryTimeRemain);
+
 		if (total != indices.getTotalLength())
 			indices.setTotalLength(total);
 
@@ -2392,11 +2394,19 @@ void eZapMain::updateProgress()
 			lcdmain.lcdMain->Progress->setPerc(current*100/total);
 			lcdmain.lcdMain->Progress->show();
 #endif
-			int min=total-current;
-			int sec=min%60;
-			min/=60;
-			int sign=-1;
-			ChannelNumber->setText(eString().sprintf("%s%d:%02d", (sign==-1)?"-":"", min, sec));
+			if (_remain.length() == 1)
+			{
+				int min=total-current;
+				int sec=min%60;
+				min/=60;
+				int sign=-1;
+				ChannelNumber->setText(eString().sprintf("%s%d:%02d", (sign==-1)?"-":"", min, sec));
+			}
+			else
+			{
+				ChannelNumber->setText(eString().sprintf("-%s",_remain.c_str()));
+			}
+
 		} else
 		{
 #ifndef DISABLE_LCD

@@ -7,7 +7,7 @@
 #include <lib/base/buffer.h>
 #include <lib/base/message.h>
 #include <lib/dvb/edvb.h>
-
+#include <lib/dvb/timestampts.h>
 
 class eServiceHandlerDVB;
 
@@ -82,6 +82,9 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	int getDriverBufferFullness();
 	int FillSliceSizes();
 	off64_t getCurrentSliceLength();
+
+  	eTimeStampParserTS *timestampParser;
+
 public:
 	struct eDVRPlayerThreadMessage
 	{
@@ -111,6 +114,7 @@ public:
 
 	int getPosition(int);
 	int getLength(int);
+	eString getPTSTimeStampPosition(int what);
 
 	void thread();
 };
@@ -202,6 +206,7 @@ public:
 	void removeRef(const eServiceReference &service);
 
 	int getPosition(int what);
+	eString getPTSTimeStampPosition(int what);
 };
 
 #endif
