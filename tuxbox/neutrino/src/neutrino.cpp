@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.901 2008/10/06 07:44:11 seife Exp $
+	$Id: neutrino.cpp,v 1.902 2008/10/31 20:29:15 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -264,7 +264,8 @@ const lcd_setting_struct_t lcd_setting[LCD_SETTING_COUNT] =
 	{"lcd_power"            , DEFAULT_LCD_POWER            },
 	{"lcd_inverse"          , DEFAULT_LCD_INVERSE          },
 	{"lcd_show_volume"      , DEFAULT_LCD_SHOW_VOLUME      },
-	{"lcd_autodimm"         , DEFAULT_LCD_AUTODIMM         }
+	{"lcd_autodimm"         , DEFAULT_LCD_AUTODIMM         },
+	{"lcd_epgmode"          , DEFAULT_LCD_EPGMODE          }
 };
 
 

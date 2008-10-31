@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.58 2008/10/10 22:28:31 dbt Exp $
+	$Id: lcdd.cpp,v 1.59 2008/10/31 20:29:17 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -278,44 +278,120 @@ void CLCD::setlcdparameter(void)
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
 }
 
-void CLCD::showServicename(const std::string & name) // UTF-8
+void CLCD::showServicename(const std::string & name, const bool perform_wakeup) // UTF-8
 {
-	servicename = name;
+	/*
+	   1 = show servicename
+	   2 = show epg title
+	   4 = draw separator line between name and EPG
+	 */
+	int showmode = g_settings.lcd_setting[SNeutrinoSettings::LCD_EPGMODE];
+
+	//printf("CLCD::showServicename '%s' epg: '%s'\n", name.c_str(), epg_title.c_str());
+
+	if (!name.empty())
+		servicename = name;
+
 	if (mode != MODE_TVRADIO)
 		return;
-	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
 
-	if (fonts.channelname->getRenderWidth(name.c_str(), true) > 120)
-	{
-		int pos;
-		std::string text1 = name;
-		do
+	display.draw_fill_rect (0,10,120,51, CLCDDisplay::PIXEL_OFF);
+
+	std::string cname[2];
+	std::string event[4];
+	int namelines = 0, eventlines = 0;
+
+	if (showmode & 1) {
+		if (fonts.channelname->getRenderWidth(servicename.c_str(), true) <= 120)
 		{
-			pos = text1.find_last_of("[ .]+"); // <- characters are UTF-encoded!
-			if (pos != -1)
-				text1 = text1.substr( 0, pos );
-		} while ( ( pos != -1 ) && ( fonts.channelname->getRenderWidth(text1.c_str(), true) > 120 ) ); // UTF-8
-		
-		if ( fonts.channelname->getRenderWidth(text1.c_str(), true) <= 120 ) // UTF-8
-			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length()+ 1).c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+			cname[0] = servicename;
+			namelines = 1;
+		}
 		else
 		{
-			std::string text1 = name;
-			while (fonts.channelname->getRenderWidth(text1.c_str(), true) > 120) // UTF-8
-				text1= text1.substr(0, text1.length()- 1);
-			
-			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length()).c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
-		}
+			int pos;
+			std::string text1 = servicename;
+			do
+			{
+				pos = text1.find_last_of("[ .]+"); // <- characters are UTF-encoded!
+				if (pos != -1)
+					text1 = text1.substr( 0, pos );
+			} while ( ( pos != -1 ) && ( fonts.channelname->getRenderWidth(text1.c_str(), true) > 120 ) ); // UTF-8
+
+			if ( fonts.channelname->getRenderWidth(text1.c_str(), true) > 120 ) // UTF-8
+			{
+				text1 = servicename;
+				while (fonts.channelname->getRenderWidth(text1.c_str(), true) > 120) // UTF-8
+					text1= text1.substr(0, text1.length()- 1);
+			}
 		
-		fonts.channelname->RenderString(1,29, 130, text1.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+			cname[0] = text1;
+			cname[1] = servicename.substr(text1.length());
+			pos = cname[1].find_first_not_of(" ");
+			if (pos != -1)
+				cname[1] = cname[1].substr(pos);
+
+			namelines = 2;
+		}
 	}
-	else
+
+	// one nameline => 2 eventlines, 2 namelines => 1 eventline
+	int maxeventlines = 4 - (namelines * 3 + 1) / 2;
+
+	if (showmode & 2) {
+		if (!epg_title.empty()) {
+			std::string title = epg_title;
+			int pos =0;
+			do {
+				int spc = title.find_first_not_of(" ");
+				if (spc != -1) {
+					title = title.substr(spc);
+					pos += spc;
+				}
+				while (fonts.menu->getRenderWidth(title.c_str(), false) > 120)
+					title = title.substr(0, title.length()-1);
+				event[eventlines++] = title;
+				pos += title.length();
+				title = epg_title.substr(pos);
+			} while (title.length() >0 && eventlines < maxeventlines);
+		}
+	}
+
+	/* this values were determined empirically */
+	int y = 8 + (41 - namelines*14 - eventlines*10)/2;
+	for (int i = 0; i < namelines; i++) {
+		y += 14;
+		fonts.channelname->RenderString(1, y, 130, cname[i].c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+	}
+	y++;
+	if (eventlines > 0 && namelines > 0 && showmode & 4)
 	{
-		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+		y++;
+		display.draw_line(1, y, 119, y, CLCDDisplay::PIXEL_ON);
 	}
-	
-	wake_up();
+	if (eventlines > 0)
+	{
+		for (int i = 0; i < eventlines; i++) {
+			y += 10;
+			fonts.menu->RenderString(1, y, 130, event[i].c_str(), CLCDDisplay::PIXEL_ON, 0,false); // UTF-8
+		}
+	}
+
+	if (perform_wakeup)
+		wake_up();
+
 	displayUpdate();
+}
+
+void CLCD::setEPGTitle(const std::string & title)
+{
+	if (title == epg_title)
+	{
+		//fprintf(stderr,"CLCD::setEPGTitle: not changed\n");
+		return;
+	}
+	epg_title = title;
+	showServicename("", false);
 }
 
 void CLCD::showTime()

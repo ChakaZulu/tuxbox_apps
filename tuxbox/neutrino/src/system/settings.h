@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.196 2008/10/10 22:37:00 dbt Exp $
+  $Id: settings.h,v 1.197 2008/10/31 20:29:18 seife Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -360,7 +360,7 @@ struct SNeutrinoSettings
 	};
 
 	// lcdd
-#define LCD_SETTING_COUNT 7
+#define LCD_SETTING_COUNT 8
 	enum LCD_SETTINGS {
 		LCD_BRIGHTNESS         = 0,
 		LCD_STANDBY_BRIGHTNESS = 1,
@@ -369,6 +369,7 @@ struct SNeutrinoSettings
 		LCD_INVERSE            = 4,
 		LCD_SHOW_VOLUME        = 5,
 		LCD_AUTODIMM           = 6,
+		LCD_EPGMODE            = 7,
 	};
 	int lcd_setting[LCD_SETTING_COUNT];
 
@@ -479,6 +480,7 @@ extern const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT];
 #define DEFAULT_LCD_INVERSE			0x00
 #define DEFAULT_LCD_AUTODIMM			0x00
 #define DEFAULT_LCD_SHOW_VOLUME			0x01
+#define DEFAULT_LCD_EPGMODE			0x01	/* 0x1 = name 0x2 = epgtitle 0x4 = separator */
 
 /* end default values */
 

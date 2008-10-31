@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.h,v 1.34 2007/03/09 21:10:09 feynman Exp $
+	$Id: lcdd.h,v 1.35 2008/10/31 20:29:17 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -101,6 +101,7 @@ class CLCD
 		MODES				mode;
 
 		std::string			servicename;
+		std::string			epg_title;
 		char				volume;
 		unsigned char			percentOver;
 		bool				muted;
@@ -133,7 +134,8 @@ class CLCD
 
 		void setMode(const MODES m, const char * const title = "");
 
-		void showServicename(const std::string & name); // UTF-8
+		void showServicename(const std::string & name, const bool perform_wakeup = true); // UTF-8
+		void setEPGTitle(const std::string & title);
 		void showTime();
 		/** blocks for duration seconds */
 		void showRCLock(int duration = 2);
