@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.59 2008/03/16 12:42:23 seife Exp $
+ * $Id: pzapit.cpp,v 1.60 2008/11/02 20:11:33 houdini Exp $
  *
  * simple commandline client for zapit
  *
@@ -546,7 +546,7 @@ int main (int argc, char** argv)
 
 		std::vector<CZapitClient::responseGetSatelliteList>::const_iterator rI;
 		for (i = 0, rI = satelliteList.begin(); rI != satelliteList.end(); i++, rI++)
-			std::cout << (1 << i) << ": " << rI->satName << std::endl;
+			std::cout << (1 + i) << ": " << rI->satName << std::endl;
 
 		return 0;
 	}
