@@ -227,7 +227,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 		method=eHTTPFile::methodPUT;
 	else
 		return new eHTTPError(conn, 405); // method not allowed
-	if (path.find("../")!=eString::npos)		// evil hax0r
+	if (httpUnescape(path).find("../")!=eString::npos)		// evil hax0r
 		return new eHTTPError(conn, 403);
 	if (path[0] != '/')		// prepend '/'
 		path.insert(0,"/");
