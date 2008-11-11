@@ -254,6 +254,12 @@ int eSubtitleWidget::eventHandler(const eWidgetEvent &event)
 		isvisible = 1;
 		subtitle_screen_enable(subtitle, 1);
 		break;
+#ifndef TUXTXT_CFG_STANDALONE
+	case eWidgetEvent::execBegin:
+		if (!rendering_initialized)
+			in_loop=0;
+		return eWidget::eventHandler(event);
+#endif
 	case eWidgetEvent::willHide:
 //		eDebug("willHide!!!");
 #ifndef TUXTXT_CFG_STANDALONE
@@ -314,6 +320,7 @@ void eSubtitleWidget::startttx(int page)
 			tuxtxt_RenderPage(&renderinfo);
 		}
 		timer.start(250, false);
+		rendering_initialized = 1;
 	}
 	else
 	{
@@ -441,6 +448,7 @@ eSubtitleWidget::eSubtitleWidget()
 #ifndef TUXTXT_CFG_STANDALONE
 	ttxpage = 0;
 	ttx_running= 0;
+	rendering_initialized = 0;
 #endif
 	subtitle = new subtitle_ctx;
 	subtitle->pages = 0;
@@ -520,6 +528,7 @@ void eSubtitleWidget::stopttx()
 		eSkin::getActive()->setPalette(gFBDC::getInstance());
 		
 	}
+	rendering_initialized = 0;
 }
 #endif
 

@@ -20,6 +20,7 @@ class eSubtitleWidget: public eWidget
 	int ttx_running;
 	int rememberttxpage;
 	int rememberttxsubpage;
+	int rendering_initialized;
 #endif	
 	subtitle_ctx *subtitle; // the subtitle context
 	

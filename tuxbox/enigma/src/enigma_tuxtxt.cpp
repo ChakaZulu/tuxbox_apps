@@ -593,7 +593,7 @@ int eTuxtxtSetup::GetNationalSubset(char *cc)
 }
 
 eTuxtxtWidget::eTuxtxtWidget()
-	: eWidget(0, 1),timer(eApp), initialized(0),pagecatching(0)
+	: eWidget(0, 1),timer(eApp), initialized(0),pagecatching(0),rendering_initialized(0)
 {
 	addActionMap(&i_tuxtxtActions->map);
 	addActionMap(&i_shortcutActions->map);
@@ -676,6 +676,10 @@ int eTuxtxtWidget::eventHandler(const eWidgetEvent &event)
 		Init();
 		lock.unlock();
 		break;
+	case eWidgetEvent::execBegin:
+		if (!rendering_initialized)
+			in_loop=0;
+		return eWidget::eventHandler(event);
 	case eWidgetEvent::willHide:
 		lock.lock();
 		CleanUp();
@@ -926,12 +930,12 @@ void eTuxtxtWidget::Init()
 
 	if (!tuxtxt_InitRendering(&renderinfo,1))
 	{
+				
 #if !TUXTXT_CFG_STANDALONE
 		if ( initialized ){
 			tuxtxt_close();
 		}
 #endif
-		fbClass::getInstance()->unlock();
 		return;
 	}
 	savedscreenmode = renderinfo.screenmode;
@@ -950,46 +954,48 @@ void eTuxtxtWidget::Init()
 	renderinfo.prevscreenmode = renderinfo.screenmode;
 	CONNECT(timer.timeout, eTuxtxtWidget::RenderPage);
 	timer.start(TUXTXT_TIMER_TICK, false);
-
+	rendering_initialized=1;
 }
 
 void eTuxtxtWidget::CleanUp()
 {
 	timer.stop();
-	if (renderinfo.transpmode == 2) /* TV mode */
+	if (rendering_initialized)
 	{
-		renderinfo.transpmode = 1; /* switch to normal mode */
-		SwitchTranspMode();
-	}
-	eConfig::getInstance()->setKey("/ezap/teletext/ScreenMode16x9Normal", renderinfo.screen_mode1 );
-	eConfig::getInstance()->setKey("/ezap/teletext/ScreenMode16x9Divided", renderinfo.screen_mode2 );
-	eConfig::getInstance()->setKey("/ezap/teletext/Brightness", renderinfo.color_mode );
-	eConfig::getInstance()->setKey("/ezap/teletext/Transparency", renderinfo.trans_mode );
-	eConfig::getInstance()->setKey("/ezap/teletext/AutoNational", renderinfo.auto_national );
-	eConfig::getInstance()->setKey("/ezap/teletext/NationalSubset", tuxtxt_cache.national_subset );
-	eConfig::getInstance()->setKey("/ezap/teletext/Screenmode", renderinfo.screenmode );
-	eConfig::getInstance()->setKey("/ezap/teletext/ShowLevel2p5", renderinfo.showl25 );
-	eConfig::getInstance()->setKey("/ezap/teletext/UseTTF", renderinfo.usettf);
-	/* hide and close pig */
-	if (renderinfo.screenmode)
-		tuxtxt_SwitchScreenMode(&renderinfo,0); /* turn off divided screen */
-
+		if (renderinfo.transpmode == 2) /* TV mode */
+		{
+			renderinfo.transpmode = 1; /* switch to normal mode */
+			SwitchTranspMode();
+		}
+		eConfig::getInstance()->setKey("/ezap/teletext/ScreenMode16x9Normal", renderinfo.screen_mode1 );
+		eConfig::getInstance()->setKey("/ezap/teletext/ScreenMode16x9Divided", renderinfo.screen_mode2 );
+		eConfig::getInstance()->setKey("/ezap/teletext/Brightness", renderinfo.color_mode );
+		eConfig::getInstance()->setKey("/ezap/teletext/Transparency", renderinfo.trans_mode );
+		eConfig::getInstance()->setKey("/ezap/teletext/AutoNational", renderinfo.auto_national );
+		eConfig::getInstance()->setKey("/ezap/teletext/NationalSubset", tuxtxt_cache.national_subset );
+		eConfig::getInstance()->setKey("/ezap/teletext/Screenmode", renderinfo.screenmode );
+		eConfig::getInstance()->setKey("/ezap/teletext/ShowLevel2p5", renderinfo.showl25 );
+		eConfig::getInstance()->setKey("/ezap/teletext/UseTTF", renderinfo.usettf);
+		/* hide and close pig */
+		if (renderinfo.screenmode)
+			tuxtxt_SwitchScreenMode(&renderinfo,0); /* turn off divided screen */
 #if TUXTXT_CFG_STANDALONE
-	tuxtxt_stop_thread();
-	tuxtxt_clear_cache();
-	if (tuxtxt_cache.dmx != -1)
-    	    close(tuxtxt_cache.dmx);
-	tuxtxt_cache.dmx = -1;
+		tuxtxt_stop_thread();
+		tuxtxt_clear_cache();
+		if (tuxtxt_cache.dmx != -1)
+		close(tuxtxt_cache.dmx);
+		tuxtxt_cache.dmx = -1;
 #else
-	tuxtxt_stop();
+		tuxtxt_stop();
 #endif
 
 
-	tuxtxt_EndRendering(&renderinfo);
+		tuxtxt_EndRendering(&renderinfo);
 #if !TUXTXT_CFG_STANDALONE
-	if ( initialized )
-		tuxtxt_close();
+		if ( initialized )
+			tuxtxt_close();
 #endif
+	}
 	fbClass::getInstance()->unlock();
 	eSkin::getActive()->setPalette(gFBDC::getInstance());
 }

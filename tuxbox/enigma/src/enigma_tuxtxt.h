@@ -51,6 +51,7 @@ private:
 	int pids_found, current_service, getpidsdone;
 	int pc_old_row, pc_old_col;     /* for page catching */
 	int temp_page;	/* for page input */
+	int rendering_initialized;
 	tstRenderInfo renderinfo;
 	struct timeval tv_delay;
 	std::vector<int> hotlist;
