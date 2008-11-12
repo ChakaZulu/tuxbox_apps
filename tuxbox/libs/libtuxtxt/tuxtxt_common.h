@@ -4184,7 +4184,7 @@ void tuxtxt_RenderCharIntern(tstRenderInfo* renderinfo,int Char, tstPageAttr *At
 
 		if (renderinfo->ascender - renderinfo->sbit->top + renderinfo->TTFShiftY + he > renderinfo->fontheight)
 			he = renderinfo->fontheight - renderinfo->ascender + renderinfo->sbit->top - renderinfo->TTFShiftY; /* limit char height to defined/calculated fontheight */
-
+		if (he < 0) he = renderinfo->fontheight;
 
 		p = renderinfo->lfb + renderinfo->PosX + (yoffset + renderinfo->PosY + Row) * renderinfo->var_screeninfo.xres; /* running pointer into framebuffer */
 		for (Row = he; Row; Row--) /* row counts up, but down may be a little faster :) */
