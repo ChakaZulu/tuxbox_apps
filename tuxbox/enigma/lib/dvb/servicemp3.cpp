@@ -513,7 +513,7 @@ void eMP3Decoder::checkFlow(int last)
 		}
 	}
 
-	if ( o[0] < maxOutputBufferSize && o[1] < maxOutputBufferSize )
+	if ( o[0] < maxOutputBufferSize)// && o[1] < maxOutputBufferSize )
 	{
 		int samples=0;
 		if (last || (i >= audiodecoder->getMinimumFramelength()))
