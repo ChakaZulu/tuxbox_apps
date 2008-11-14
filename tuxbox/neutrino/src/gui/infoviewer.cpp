@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.235 2008/11/14 23:07:11 seife Exp $
+	$Id: infoviewer.cpp,v 1.236 2008/11/14 23:59:13 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1137,7 +1137,6 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(InfoX,     NextInfoY, 100, nextStart, COL_INFOBAR);
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart,    NextInfoY, nextTimeX- xStart- 5, info_CurrentNext.next_name, COL_INFOBAR);
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(nextTimeX, NextInfoY, nextTimeW, nextDuration, COL_INFOBAR);
-printf("INFOBAR: %s %s 0x%016llx %s\n",nextStart, info_CurrentNext.next_name.c_str(),info_CurrentNext.next_uniqueKey, nextDuration);
 		}
 	}
 }
