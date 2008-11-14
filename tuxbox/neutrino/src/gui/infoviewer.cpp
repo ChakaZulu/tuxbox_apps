@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.234 2008/10/31 23:20:03 seife Exp $
+	$Id: infoviewer.cpp,v 1.235 2008/11/14 23:07:11 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -85,6 +85,8 @@ int time_dot_width;
 int time_width;
 int time_height;
 char old_timestr[10];
+/* hack: remember the last shown event IDs to reduce flickering */
+static event_id_t last_curr_id = 0, last_next_id = 0;
 
 extern CZapitClient::SatelliteList satList;
 
@@ -186,6 +188,8 @@ void CInfoViewer::showRecordIcon(const bool show)
 
 void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap, int epgpos)
 {
+	/* reset the "last shown eventid" markers */
+	last_curr_id = last_next_id = 0;
 	showButtonBar = !calledFromNumZap;
 	ChannelName = Channel;
 	bool new_chan = false;
@@ -412,10 +416,19 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		}
 	}
 	
-	if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_later | CSectionsdClient::epgflags::has_current |  CSectionsdClient::epgflags::not_broadcast ) ) )
+	if (!(info_CurrentNext.flags & (CSectionsdClient::epgflags::has_anything | CSectionsdClient::epgflags::not_broadcast)))
 	{
 		// nicht gefunden / noch nicht geladen
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), g_Locale->getText(gotTime?(showButtonBar ? LOCALE_INFOVIEWER_EPGWAIT : LOCALE_INFOVIEWER_EPGNOTLOAD) : LOCALE_INFOVIEWER_WAITTIME), COL_INFOBAR, 0, true); // UTF-8
+		/* see the comment in showData() for a reasoning for this calculation */
+		int CurrInfoY = (BoxStartY + InfoHeightY + ChanNameY + time_height)/2;	// lower end of current info box
+		neutrino_locale_t loc;
+		if (! gotTime)
+			loc = LOCALE_INFOVIEWER_WAITTIME;
+		else if (showButtonBar)
+			loc = LOCALE_INFOVIEWER_EPGWAIT;
+		else
+			loc = LOCALE_INFOVIEWER_EPGNOTLOAD;
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(ChanNameX+ 10, CurrInfoY, BoxEndX- (ChanNameX+ 20), g_Locale->getText(loc), COL_INFOBAR, 0, true); // UTF-8
 	}
 	else
 	{
@@ -811,9 +824,9 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		}
 		else if ( data == lcdUpdateTimer )
 		{
-			showLcdPercentOver();
 			if ( is_visible )
 				show_Data( true );
+			showLcdPercentOver();
 			return messages_return::handled;
 		}
 		else if ( data == sec_timer_id )
@@ -984,6 +997,7 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 		info_CurrentNext.current_zeit.startzeit = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].startzeit;
 		info_CurrentNext.current_zeit.dauer = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].dauer;
 	}
+	/* what is this for? is it for preventing overlapping events to be displayed? */
 	else
 	{
 		if ((info_CurrentNext.flags & CSectionsdClient::epgflags::has_current) &&
@@ -1019,7 +1033,8 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 		}
 		struct tm *pStartZeit = localtime(&info_CurrentNext.current_zeit.startzeit);
 		sprintf((char*)&runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
-	}
+	} else
+		last_curr_id = 0;
 
 	if (info_CurrentNext.flags & CSectionsdClient::epgflags::has_next)
 	{
@@ -1027,10 +1042,8 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 		sprintf((char*)&nextDuration, "%d min", dauer);
 		struct tm *pStartZeit = localtime(&info_CurrentNext.next_zeit.startzeit);
 		sprintf((char*)&nextStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
-	}
-
-	int height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getHeight()/3;
-	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
+	} else
+		last_next_id = 0;
 
 	if (showButtonBar)
 	{
@@ -1060,58 +1073,71 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 		}
 	}
 
-	height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getHeight();
-	int xStart= BoxStartX + ChanWidth;
+	/* dimensions of the two-line current-next "box":
+	   top of box    == ChanNameY + time_height (bottom of channel name)
+	   bottom of box == BoxStartY + InfoHeightY
+	   height of box == (BoxStartY + InfoHeightY) - (ChanNameY + time_height)
+	   middle of box == top + height / 2
+			 == ChanNameY + time_height + (BoxStartY + InfoHeightY - (ChanNameY + time_height))/2
+			 == ChanNameY + time_height + (BoxStartY + InfoHeightY - ChanNameY - time_height)/2
+			 == (BoxStartY + InfoHeightY + ChanNameY + time_height)/2
+	   The bottom of current info and the top of next info is == middle of box.
+	 */
 
-	frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR_PLUS_0);
+	int height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getHeight();
+	int CurrInfoY = (BoxStartY + InfoHeightY + ChanNameY + time_height)/2;	// lower end of current info box
+	int NextInfoY = CurrInfoY + height;	// lower end of next info box
+	int xStart= BoxStartX + ChanWidth;
+	int InfoX = ChanInfoX + 10;
 
 	if ((info_CurrentNext.flags & CSectionsdClient::epgflags::not_broadcast) ||
 	    (calledFromEvent) && !(info_CurrentNext.flags & (CSectionsdClient::epgflags::has_next|CSectionsdClient::epgflags::has_current)))
 	{
 		// no EPG available
-		ChanInfoY += height;
-		frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR_PLUS_0);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(BoxStartX + ChanWidth + 20,  ChanInfoY+height, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText(gotTime ? LOCALE_INFOVIEWER_NOEPG : LOCALE_INFOVIEWER_WAITTIME), COL_INFOBAR, 0, true); // UTF-8
+		frameBuffer->paintBox(InfoX, NextInfoY - height, BoxEndX, NextInfoY, COL_INFOBAR_PLUS_0);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(BoxStartX + ChanWidth + 20,  NextInfoY, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText(gotTime ? LOCALE_INFOVIEWER_NOEPG : LOCALE_INFOVIEWER_WAITTIME), COL_INFOBAR, 0, true); // UTF-8
+		return;
+	}
+	
+	// irgendein EPG gefunden
+	int currTimeW = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(runningRest);
+	int currTimeX = BoxEndX- currTimeW- 10;
+	int nextTimeW = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(nextDuration);
+	int nextTimeX = BoxEndX- nextTimeW- 10;
+	static int oldCurrTimeX = currTimeX; // remember the last pos. of remaining time, in case we change from 20/100min to 21/99min
+
+	if (info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
+	{
+		if(info_CurrentNext.current_uniqueKey != last_curr_id)
+		{
+			//printf("SHOWDATA: last_curr_id = 0x%016llx curr_id = 0x%016llx\n", last_curr_id, info_CurrentNext.current_uniqueKey);
+			last_curr_id = info_CurrentNext.current_uniqueKey;
+			frameBuffer->paintBox(InfoX, CurrInfoY-height, currTimeX, CurrInfoY , COL_INFOBAR_PLUS_0);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(InfoX,     CurrInfoY, 100,       runningStart, COL_INFOBAR);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart,    CurrInfoY, currTimeX- xStart- 5, info_CurrentNext.current_name, COL_INFOBAR);
+		}
+		if (currTimeX < oldCurrTimeX)
+			oldCurrTimeX = currTimeX;
+		frameBuffer->paintBox(oldCurrTimeX, CurrInfoY-height, BoxEndX, CurrInfoY , COL_INFOBAR_PLUS_0);
+		oldCurrTimeX = currTimeX;
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(currTimeX, CurrInfoY, currTimeW, runningRest, COL_INFOBAR);
 	}
 	else
 	{
-		// irgendein EPG gefunden
-		int duration1Width   = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(runningRest);
-		int duration1TextPos = BoxEndX- duration1Width- 10;
-		int duration2Width   = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(nextDuration);
-		int duration2TextPos = BoxEndX- duration2Width- 10;
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart, CurrInfoY, BoxEndX- xStart, g_Locale->getText(LOCALE_INFOVIEWER_NOCURRENT), COL_INFOBAR, 0, true); // UTF-8
+	}
 
-		if ((info_CurrentNext.flags & CSectionsdClient::epgflags::has_next) && !(info_CurrentNext.flags & CSectionsdClient::epgflags::has_current))
-		{
-			// there are later events available - yet no current
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart,  ChanInfoY+height, BoxEndX- xStart, g_Locale->getText(LOCALE_INFOVIEWER_NOCURRENT), COL_INFOBAR, 0, true); // UTF-8
-
-			ChanInfoY += height;
-
-			//info next
-			frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR_PLUS_0);
-
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart,  ChanInfoY+height, duration2TextPos- xStart- 5, info_CurrentNext.next_name, COL_INFOBAR);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
-		}
-		else
-		{
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, runningStart, COL_INFOBAR);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart,  ChanInfoY+height, duration1TextPos- xStart- 5, info_CurrentNext.current_name, COL_INFOBAR);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(duration1TextPos,            ChanInfoY+height, duration1Width, runningRest, COL_INFOBAR);
-
-			ChanInfoY += height;
-
-			//info next
-			frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR_PLUS_0);
-
-			if (!is_nvod && (info_CurrentNext.flags & CSectionsdClient::epgflags::has_next))
-			{
-				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
-				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart,  ChanInfoY+height, duration2TextPos- xStart- 5, info_CurrentNext.next_name, COL_INFOBAR);
-				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
-			}
+	if (info_CurrentNext.flags & CSectionsdClient::epgflags::has_next && info_CurrentNext.next_uniqueKey != last_next_id)
+	{
+		frameBuffer->paintBox(InfoX, NextInfoY-height, BoxEndX, NextInfoY, COL_INFOBAR_PLUS_0);
+		if (!(is_nvod && (info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)))
+		{	/* if current is shown, show next only if !nvod. Why? I don't know */
+			//printf("SHOWDATA: last_next_id = 0x%016llx next_id = 0x%016llx\n", last_next_id, info_CurrentNext.next_uniqueKey);
+			last_next_id = info_CurrentNext.next_uniqueKey;
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(InfoX,     NextInfoY, 100, nextStart, COL_INFOBAR);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart,    NextInfoY, nextTimeX- xStart- 5, info_CurrentNext.next_name, COL_INFOBAR);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(nextTimeX, NextInfoY, nextTimeW, nextDuration, COL_INFOBAR);
+printf("INFOBAR: %s %s 0x%016llx %s\n",nextStart, info_CurrentNext.next_name.c_str(),info_CurrentNext.next_uniqueKey, nextDuration);
 		}
 	}
 }
@@ -1351,9 +1377,9 @@ returns mode of painted channel logo,
 
 				// paint the logo
 				if (res !=0) {
-						if (!frameBuffer->paintIcon(strAbsIconPath, logo_x, logo_y)) 
-							return 0; // paint logo was failed
-					}
+					if (!frameBuffer->paintIcon(strAbsIconPath, logo_x, logo_y)) 
+						return 0; // paint logo was failed
+				}
 			}
 		}
 	}
