@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.112 2008/05/01 00:08:22 dbt Exp $
+	$Id: eventlist.cpp,v 1.113 2008/11/15 21:57:54 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -725,7 +725,7 @@ void EventList::paint()
 void  EventList::showFunctionBar (bool show)
 {
 	int  bx,by,bw,bh;
-	int  cellwidth[4];		// 5 cells
+	int  cellwidth;		// 5 cells
 	int  h_offset;
 	int  h_iconoffset;
 	int  space = 8;		// space between buttons
@@ -735,7 +735,7 @@ void  EventList::showFunctionBar (bool show)
 	CKeyHelper keyhelper;
 	neutrino_msg_t key = CRCInput::RC_nokey;
 	const char * icon = NULL;
-	std::string btncaption[5];	
+	std::string btncaption;	
 
 	bw = width;
 	bh = iheight;
@@ -763,19 +763,19 @@ void  EventList::showFunctionBar (bool show)
 		keyhelper.get(&key, &icon, g_settings.key_channelList_addrecord);
 		
 		if(is_timer & EventList::TIMER_RECORD )
-			btncaption[0] = g_Locale->getText(LOCALE_TIMERLIST_DELETE);
+			btncaption = g_Locale->getText(LOCALE_TIMERLIST_DELETE);
 		else
-			btncaption[0] = g_Locale->getText(LOCALE_EVENTLISTBAR_RECORDEVENT);
+			btncaption = g_Locale->getText(LOCALE_EVENTLISTBAR_RECORDEVENT);
 		
 		iconw = frameBuffer->getIconWidth(icon)+4;
-		cellwidth[0] = iconw + space +g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption[0]);
+		cellwidth = iconw + space +g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption);
 
 		// paint 1st button
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[0], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 
-		bx += cellwidth[0];
+		bx += cellwidth;
 	}
 
 	if (1)
@@ -783,17 +783,17 @@ void  EventList::showFunctionBar (bool show)
 
 		keyhelper.get(&key, &icon, CRCInput::RC_green);
 		
-		btncaption[1] = g_Locale->getText(LOCALE_EVENTFINDER_SEARCH);
+		btncaption = g_Locale->getText(LOCALE_EVENTFINDER_SEARCH);
 		
 		iconw = frameBuffer->getIconWidth(icon)+4;
-		cellwidth[1] = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption[1]);
+		cellwidth = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption);
 	
 		// paint second button
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[1], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 		
-		bx += cellwidth[1];
+		bx += cellwidth;
 	}
 
 	// Button: Timer Channelswitch
@@ -802,19 +802,19 @@ void  EventList::showFunctionBar (bool show)
 		keyhelper.get(&key, &icon, g_settings.key_channelList_addremind);
 
 		if(is_timer & EventList::TIMER_ZAPTO)
-			btncaption[2] =  g_Locale->getText(LOCALE_TIMERLIST_DELETE);
+			btncaption =  g_Locale->getText(LOCALE_TIMERLIST_DELETE);
 		else
-			btncaption[2] =  g_Locale->getText(LOCALE_EVENTLISTBAR_CHANNELSWITCH);
+			btncaption =  g_Locale->getText(LOCALE_EVENTLISTBAR_CHANNELSWITCH);
 		
 		iconw = frameBuffer->getIconWidth(icon)+4;
-		cellwidth[2] = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption[2]);
+		cellwidth = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption);
 
 		// paint 3rd button
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[2], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8	
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8	
 
-		bx += cellwidth[2];
+		bx += cellwidth;
 	}
 
 	// Button: Event Re-Sort
@@ -822,16 +822,16 @@ void  EventList::showFunctionBar (bool show)
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_sort);
 		
-		btncaption[3] =  g_Locale->getText(LOCALE_EVENTLISTBAR_EVENTSORT);
+		btncaption =  g_Locale->getText(LOCALE_EVENTLISTBAR_EVENTSORT);
 		
 		iconw = frameBuffer->getIconWidth(icon)+4;
-		cellwidth[3] = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption[3]);
+		cellwidth = iconw + space + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(btncaption);
 	
 		// paint 4th button
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[3], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
-		bx += cellwidth[3];
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		bx += cellwidth;
 	}
 
 	// Button: Event Reload/Refresh
@@ -840,11 +840,11 @@ void  EventList::showFunctionBar (bool show)
 		keyhelper.get(&key, &icon, g_settings.key_channelList_reload);
 
 		// paint 5th button
-		btncaption[4] =  g_Locale->getText(LOCALE_KEYBINDINGMENU_RELOAD);
+		btncaption =  g_Locale->getText(LOCALE_KEYBINDINGMENU_RELOAD);
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
 		iconw = frameBuffer->getIconWidth(icon)+4;
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption[4], COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 	}
 
 }
