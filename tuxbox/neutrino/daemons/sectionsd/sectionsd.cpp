@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.273 2008/10/12 10:51:53 seife Exp $
+//  $Id: sectionsd.cpp,v 1.274 2008/11/16 16:08:27 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -446,6 +446,7 @@ struct EPGFilter
 struct ChannelBlacklist
 {
 	t_channel_id chan;
+	t_channel_id mask;
 	ChannelBlacklist *next;
 };
 
@@ -471,7 +472,7 @@ static bool checkBlacklist(t_channel_id channel_id)
 	ChannelBlacklist *blptr = CurrentBlacklist;
 	while (blptr)
 	{
-		if (blptr->chan == channel_id)
+		if (blptr->chan == (channel_id & blptr->mask))
 			return true;
 		blptr = blptr->next;
 	}
@@ -494,12 +495,18 @@ static void addEPGFilter(t_original_network_id onid, t_transport_stream_id tsid,
 
 static void addBlacklist(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
 {
-	t_channel_id channel_id = (t_channel_id)tsid << 32 | (t_channel_id)onid << 16 | sid;
+	t_channel_id channel_id =
+		CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(sid, onid, tsid);
+	t_channel_id mask =
+		CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(
+			(sid ? 0xFFFF : 0), (onid ? 0xFFFF : 0), (tsid ? 0xFFFF : 0)
+		);
 	if (!checkBlacklist(channel_id))
 	{
-		xprintf("Add Channel Blacklist for channel 0x%012llx\n", channel_id);
+		xprintf("Add Channel Blacklist for channel 0x%012llx, mask 0x%012llx\n", channel_id, mask);
 		ChannelBlacklist *node = new ChannelBlacklist;
 		node->chan = channel_id;
+		node->mask = mask;
 		node->next = CurrentBlacklist;
 		CurrentBlacklist = node;
 	}
@@ -2449,7 +2456,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.273 2008/10/12 10:51:53 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.274 2008/11/16 16:08:27 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -8047,7 +8054,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.273 2008/10/12 10:51:53 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.274 2008/11/16 16:08:27 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 

@@ -1,0 +1,59 @@
+EPGFILTER - Filter out unwanted EPG entries
+-------------------------------------------
+
+If you want to filter out EPG entries from being collected inside sectionsd
+(e.g. to not waste memory for services that you do not use anyway), there
+is a facility to do that.
+Create a file /var/tuxbox/config/zapit/epgfilter.xml (defined as
+EPG_FILTER_PATH in sectionsd.cpp) with the following contents:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<epgfilter is_whitelist = "1" except_current_next = "1">
+    <filter serviceID="6dca" name="Das Erste" tsid="044d" onid="0001"/>
+    <filter serviceID="6d66" name="ZDF" tsid="0437" onid="0001"/>
+</epgfilter>
+
+(the "name=" property is only for better readability, it is not needed)
+This example would lead to only EPG for the two channels "Das Erste" and
+"ZDF" being collected.
+You can also list complete transponders or providers by specifying wildcards.
+Using the value "0" for serviceID, tsid or onid (or omitting the property)
+will result in this value to be ignored completely. Example:
+    <filter onid="0001" tsid="044d">
+will filter on the whole transponder.
+
+The is_whitelist property determines if the list is used as a whitelist (1)
+(listing all the channels for which EPG is collected) or as a blacklist (0)
+(listing all the channels for which no EPG is collected).
+
+The except_current_next property determines if the current and next events
+should also be subject to the EPG filtering. In the above example, current
+and next events would be collected on all channels. If this is set to 0, no
+current and next events are collected on channels that are filtered.
+
+The default is "is_whitelist = 1" and "except_current_next = 1".
+
+Note that the above filters are only affecting the storage of the events:
+all events are still read and processed, but they are not stored, so this
+leads to memory savings.
+
+BLACKLISTING specific channels:
+-------------------------------
+Due to driver problems, some boxes hang up on certain channels when EPG
+collection is enabled. As a quick workaround, the blacklist feature was
+hacked into sectionsd.
+It gets activated by adding 'blacklist="1"' to a filter entry.
+Note that in this case, no EPG filter is added, but sectionsd is instructed
+to sleep almost completely when switching to this channel. There might still
+be events received for this channel on other transponders.
+
+Example:
+    <filter serviceID="445d" name="ProSieben" tsid="0453" onid="0001" blacklist="1"/>
+
+This would make sectionsd sleep whenever the box is zapped to "ProSieben".
+In order to blacklist a whole transponder, something like that would be used:
+
+    <filter tsid="0421" onid="0001" blacklist="1"/>
+
+This would blacklist the whole 10.83225GHz transponder on Astra 19.2E.
+
