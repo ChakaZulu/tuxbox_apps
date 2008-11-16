@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.55 2008/10/05 17:40:51 seife Exp $
+  $Id: audioplayer.cpp,v 1.56 2008/11/16 21:46:40 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -1536,7 +1536,7 @@ void CAudioPlayerGui::paintHead()
 	if (!m_show_playlist)
 		return;
 
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	std::string strCaption;
 	if (m_inetmode)
 		strCaption = g_Locale->getText(LOCALE_INETRADIO_NAME);
@@ -1612,7 +1612,7 @@ void CAudioPlayerGui::paintFoot()
 {
 	//	printf("paintFoot{\n");
 	int top;
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	if (m_show_playlist)
 		top = m_y + (m_height - m_info_height - 2 * m_buttonHeight);
 	else
@@ -1698,7 +1698,7 @@ void CAudioPlayerGui::paintFoot()
 //------------------------------------------------------------------------
 void CAudioPlayerGui::paintInfo()
 {
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	if(m_state == CAudioPlayerGui::STOP && m_show_playlist)
 		m_frameBuffer->paintBackgroundBoxRel(m_x, m_y, m_width, m_title_height);
 	else
@@ -1791,7 +1791,7 @@ void CAudioPlayerGui::paint()
 		int sbc = ((m_playlist.size() - 1) / m_listmaxshow) + 1;
 		int sbs = (m_selected / m_listmaxshow);
 
-		m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + sbs*(sb-4)/sbc , 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+		m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + sbs*(sb-4)/sbc , 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, RADIUS_SMALL);
 	}
 
 	paintFoot();

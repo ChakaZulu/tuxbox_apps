@@ -215,7 +215,7 @@ void CHintBoxExt::refresh(void)
 		return;
 	}
 	
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	// shadow
 	m_window->paintBoxRel(SHADOW_OFFSET, SHADOW_OFFSET, m_width, m_height, COL_INFOBAR_SHADOW, c_rad_mid);
 	// title

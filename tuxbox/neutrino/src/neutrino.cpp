@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.903 2008/11/16 00:52:25 seife Exp $
+	$Id: neutrino.cpp,v 1.904 2008/11/16 21:46:39 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3061,7 +3061,7 @@ void CNeutrinoApp::paintMuteIcon( bool is_visible )
 
 	if ( is_visible )
 			{
-				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0);
+				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0, RADIUS_LARGE);
 				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+4, y+4);
 			}
 			else
@@ -3111,7 +3111,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 	const int dy = 28; 	// height
 	// if you want a non-rounded volumebar, set r=0 here...
-	const int r = g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0;	// radius
+	const int r = RADIUS_LARGE;	// radius
 	const int b = 4;	// border
 	const int w = 200;	// volume bar width
 	const int nw = 36;	// numbers width

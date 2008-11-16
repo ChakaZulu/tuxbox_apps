@@ -338,7 +338,7 @@ void CBouquetList::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
-		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+		c_rad_small = RADIUS_SMALL;
 	}
 	else
 	{
@@ -364,7 +364,7 @@ void CBouquetList::paintItem(int pos)
 
 void CBouquetList::paintHead()
 {
-	frameBuffer->paintBoxRel(x, y, width, theight, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	frameBuffer->paintBoxRel(x, y, width, theight, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, g_Locale->getText(LOCALE_BOUQUETLIST_HEAD), COL_MENUHEAD, 0, true); // UTF-8
 }
 
@@ -406,12 +406,12 @@ void CBouquetList::paint()
 	int sbc= ((Bouquets.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, RADIUS_SMALL);
 
 	//footbar
 	int fy = y + theight + listmaxshow * fheight ;
 	int ButtonWith = width/3;
 	int icony = fy + theight / 2 - 12;
-	frameBuffer->paintBoxRel(x, fy, width, theight, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x, fy, width, theight, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 4, icony, ButtonWith, sizeof(CBouquetListButtons)/sizeof(CBouquetListButtons[0]), CBouquetListButtons, width);
 }

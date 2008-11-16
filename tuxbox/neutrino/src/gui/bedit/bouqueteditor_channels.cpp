@@ -80,7 +80,7 @@ void CBEChannelWidget::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
-		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+		c_rad_small = RADIUS_SMALL;
 	}
 	else
 	{
@@ -129,13 +129,13 @@ void CBEChannelWidget::paint()
 	int sbc= ((Channels.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc , 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc , 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, RADIUS_SMALL);
 
 }
 
 void CBEChannelWidget::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, caption.c_str() , COL_MENUHEAD);
 }
 
@@ -149,7 +149,7 @@ const struct button_label CBEChannelWidgetButtons[4] =
 
 void CBEChannelWidget::paintFoot()
 {
-	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW_PLUS_0);
 
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + height, width/5, 4, CBEChannelWidgetButtons);

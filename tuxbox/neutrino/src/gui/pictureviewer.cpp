@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.63 2008/06/04 15:46:12 ecosys Exp $
+	$Id: pictureviewer.cpp,v 1.64 2008/11/16 21:46:40 seife Exp $
 
 	MP3Player by Dirch
 	
@@ -131,7 +131,7 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	listmaxshow = (height-theight-2*buttonHeight)/(fheight);
 	height = theight+2*buttonHeight+listmaxshow*fheight;	// recalc height
 	
-	c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	c_rad_mid = RADIUS_MID;
 
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height)/ 2) + g_settings.screen_StartY;
@@ -567,7 +567,7 @@ void CPictureViewerGui::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTDARK;
 		bgcolor = COL_MENUCONTENTDARK_PLUS_0;
-		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+		c_rad_small = RADIUS_SMALL;
 	}
 	else
 	{
@@ -580,7 +580,7 @@ void CPictureViewerGui::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
-		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+		c_rad_small = RADIUS_SMALL;
 	}
 
 	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, bgcolor, c_rad_small);
@@ -677,7 +677,7 @@ void CPictureViewerGui::paint()
 	int sbc= ((playlist.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, RADIUS_SMALL);
 
 	paintFoot();
 	paintInfo();
@@ -734,7 +734,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.63 $");
+	return imageinfo.getModulVersion("","$Revision: 1.64 $");
 }
 
 void CPictureViewerGui::showHelp()

@@ -431,7 +431,7 @@ const char * CStringInput::getHint1(void)
 
 void CStringInput::paint()
 {
-	int iconoffset, c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int iconoffset, c_rad_mid = RADIUS_MID;
 
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
@@ -647,7 +647,7 @@ void CStringInputSMS::paint()
 
 	frameBuffer->paintIcon("numericpad.raw", x+20+140, y+ hheight+ mheight+ iheight* 3+ 30, COL_MENUCONTENT);
 
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	frameBuffer->paintBoxRel(x, y + height - 25, width, 25, COL_INFOBAR_SHADOW_PLUS_1, c_rad_mid, CORNER_BOTTOM);
 
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 8, y+height-25, 230, 2, CStringInputSMSButtons);

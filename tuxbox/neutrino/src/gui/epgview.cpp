@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.142 2008/11/16 00:52:26 seife Exp $
+	$Id: epgview.cpp,v 1.143 2008/11/16 21:46:40 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -544,7 +544,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	}
 
 	//show the epg
-	frameBuffer->paintBoxRel(sx, sy, ox, toph, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	frameBuffer->paintBoxRel(sx, sy, ox, toph, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy + topheight+ 3, ox-15, text1, COL_MENUHEAD);
 	if (!(text2.empty()))
 		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy + 2* topheight+ 3, ox-15, text2, COL_MENUHEAD);
@@ -951,7 +951,7 @@ void CEpgData::showTimerEventBar (bool show)
 		return;
 	}
 
-    frameBuffer->paintBoxRel(x, y, w, h, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+    frameBuffer->paintBoxRel(x, y, w, h, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 
     // Button: Timer Record & Channelswitch
 	if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)

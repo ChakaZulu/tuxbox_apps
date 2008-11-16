@@ -153,7 +153,7 @@ void CKeyChooserItem::paint()
 
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 
-	int c_rad = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad = RADIUS_MID;
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0, c_rad, CORNER_TOP);
 	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad, CORNER_BOTTOM );
 

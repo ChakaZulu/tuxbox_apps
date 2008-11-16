@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.195 2008/11/16 00:52:26 seife Exp $
+	$Id: channellist.cpp,v 1.196 2008/11/16 21:46:40 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -697,7 +697,7 @@ int CChannelList::numericZap(neutrino_msg_t key)
 			while(strlen(valstr)<4)
 				strcat(valstr,"\xB7");   //MIDDLE DOT 
 
-			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0);
+			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR_PLUS_0, RADIUS_MID);
 
 			for (int i=3; i>=0; i--)
 			{
@@ -1050,7 +1050,7 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 	int ypos2a = ypos2 + (info_height/2)-2;
 	fb_pixel_t col1 = COL_MENUCONTENT_PLUS_6;
 	fb_pixel_t col2 = COL_MENUCONTENT_PLUS_1;
-	int c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+	int c_rad_small = RADIUS_SMALL;
 
 	CChannelEvent *p_event;
 	if (displayNext) {
@@ -1110,7 +1110,7 @@ void CChannelList::paintItem(int pos)
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 		paintDetails(liststart+pos);
 		paintItem2DetailsLine (pos, liststart+pos);
-		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+		c_rad_small = RADIUS_SMALL;
 	}
 	else
 	{
@@ -1182,7 +1182,7 @@ void CChannelList::paintItem(int pos)
 
 void CChannelList::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width- 65, name, COL_MENUHEAD, 0, true); // UTF-8
 	paintFoot();
 }
@@ -1212,7 +1212,7 @@ void CChannelList::paintFoot()
 		CChannelListButtons[3].button = NEUTRINO_ICON_BUTTON_DBOX;
 	}
 		
-	frameBuffer->paintBoxRel(x, y + (height - buttonHeight), width, buttonHeight - 1, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x, y + (height - buttonHeight), width, buttonHeight - 1, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight), ButtonWidth, sizeof(CChannelListButtons)/sizeof(CChannelListButtons[0]), CChannelListButtons, width);
 }
 
@@ -1245,7 +1245,7 @@ void CChannelList::paint()
 	int sbc= ((chanlist.size()- 1)/ listmaxshow)+ 1;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, RADIUS_SMALL);
 }
 
 /*

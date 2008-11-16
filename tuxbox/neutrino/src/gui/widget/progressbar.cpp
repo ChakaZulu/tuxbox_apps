@@ -63,7 +63,7 @@ void CProgressBar::paintProgressBar (	const int pos_x,
 	int active_col = activebar_col != 0 ? activebar_col : COL_INFOBAR_PLUS_7;
 	int passive_col = passivebar_col != 0 ? passivebar_col : COL_INFOBAR_PLUS_3;
 	
-	int c_rad = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;								
+	int c_rad = RADIUS_SMALL;								
 	
 	// get icon size
 	int icon_w = 0, icon_h = 0;

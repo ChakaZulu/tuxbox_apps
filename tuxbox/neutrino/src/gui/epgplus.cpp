@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.42 2008/11/16 00:52:26 seife Exp $
+	$Id: epgplus.cpp,v 1.43 2008/11/16 21:46:40 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -210,7 +210,7 @@ void EpgPlus::Header::paint()
 		, this->width
 		, this->font->getHeight()
 		, this->color
-		, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0
+		, RADIUS_MID
 		, CORNER_TOP
 		);
 
@@ -917,7 +917,7 @@ void EpgPlus::Footer::paintButtons
 
   int buttonWidth =  40;
 
-  this->frameBuffer->paintBoxRel(this->x, yPos, this->width, this->fontButtons->getHeight(), COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+  this->frameBuffer->paintBoxRel(this->x, yPos, this->width, this->fontButtons->getHeight(), COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 
   ::paintButtons(this->frameBuffer, this->fontButtons, g_Locale, this->x +5, yPos , buttonWidth, numberOfButtons, buttonLabels,  this->width-25);
 

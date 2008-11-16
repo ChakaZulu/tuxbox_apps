@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.116 2008/11/16 10:54:48 seife Exp $
+	$Id: eventlist.cpp,v 1.117 2008/11/16 21:46:40 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -682,7 +682,7 @@ void EventList::paintHead()
 	char l_name[100];
 	snprintf(l_name, sizeof(l_name), g_Locale->getText(LOCALE_EPGLIST_HEAD), name.c_str()); // UTF-8
 
-	frameBuffer->paintBoxRel(x, y, width, theight, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	frameBuffer->paintBoxRel(x, y, width, theight, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-36, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
@@ -743,7 +743,7 @@ void  EventList::showFunctionBar (bool show)
 		return;
 	}
 
-	frameBuffer->paintBoxRel(x, by, bw, bh - 3, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x, by, bw, bh - 3, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 
 
 	unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].duration,evtlist[selected].get_channel_id());

@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.35 2008/05/04 22:36:21 dbt Exp $
+	$Id: streaminfo2.cpp,v 1.36 2008/11/16 21:46:40 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -65,7 +65,7 @@ CStreamInfo2::CStreamInfo2()
 	iheight     = g_Font[font_info]->getHeight();
 	sheight     = g_Font[font_small]->getHeight();
 	
-	c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	c_rad_mid = RADIUS_MID;
 
 	x 	= 60; //mainwindow position
 	y 	= 45;
@@ -769,7 +769,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.35 $");
+	return imageinfo.getModulVersion("","$Revision: 1.36 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)

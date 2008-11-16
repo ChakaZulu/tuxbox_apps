@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.7 2008/10/12 10:31:44 seife Exp $
+	$Id: movieviewer.cpp,v 1.8 2008/11/16 21:46:40 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -109,9 +109,9 @@ void CMovieViewer::init()
 	time_left_width = 2* g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(widest_number);
 	time_dot_width = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(":");
 	time_width = time_left_width* 2+ time_dot_width;
-	c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
-	c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
-	c_rad_large = g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0;
+	c_rad_small = RADIUS_SMALL;
+	c_rad_mid = RADIUS_MID;
+	c_rad_large = RADIUS_LARGE;
 	getData();
 }
 

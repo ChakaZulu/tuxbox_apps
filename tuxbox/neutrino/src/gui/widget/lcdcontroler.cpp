@@ -80,7 +80,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	int selected, res = menu_return::RETURN_REPAINT;
 	unsigned int contrast_alt, brightness_alt, brightnessstandby_alt, autodimm_alt;
 
@@ -297,7 +297,7 @@ void CLcdControler::paint()
 {
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);

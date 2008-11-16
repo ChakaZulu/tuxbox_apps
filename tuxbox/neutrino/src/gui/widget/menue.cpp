@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.143 2008/05/23 00:46:49 dbt Exp $
+	$Id: menue.cpp,v 1.144 2008/11/16 21:46:42 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -368,7 +368,7 @@ void CMenuWidget::paint()
 	else
 		sb_width=0;
 
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	
 	frameBuffer->paintBoxRel(x, y + height - ((c_rad_mid * 2) + 1) + (c_rad_mid / 3 * 2), width + sb_width, ((c_rad_mid * 2) + 1), COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 	frameBuffer->paintBoxRel(x, y, width + sb_width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
@@ -397,7 +397,7 @@ void CMenuWidget::paintItems()
 	if(total_pages>1)
 	{
 		frameBuffer->paintBoxRel(x+ width,item_start_y, 15, item_height, COL_MENUCONTENT_PLUS_1);
-		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ current_page*(item_height-4)/total_pages, 11, (item_height-4)/total_pages, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ current_page*(item_height-4)/total_pages, 11, (item_height-4)/total_pages, COL_MENUCONTENT_PLUS_3, RADIUS_SMALL);
 	}
 	frameBuffer->paintBoxRel(x,item_start_y, width,item_height, COL_MENUCONTENT_PLUS_0);
 	int ypos=item_start_y;
@@ -475,7 +475,7 @@ int CMenuOptionNumberChooser::paint(bool selected)
 		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, RADIUS_SMALL);
 
 	const char * l_option;
 	char option_value[11];
@@ -594,7 +594,7 @@ int CMenuOptionChooser::paint( bool selected )
 		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, RADIUS_SMALL);
 
 	neutrino_locale_t option = NONEXISTANT_LOCALE;
 
@@ -782,7 +782,7 @@ int CMenuOptionLanguageChooser::paint( bool selected )
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
 
-	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor, RADIUS_SMALL);
 
 	// 	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(optionValue);//unused variable
 	int stringstartposOption = x + offx + 10;
@@ -890,7 +890,7 @@ int CMenuForwarder::paint(bool selected)
 		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor, RADIUS_SMALL);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x), l_text, color, 0, true); // UTF-8
 
 	if (!iconName.empty())

@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.14 2008/05/01 00:08:21 dbt Exp $
+  $Id: bookmarkmanager.cpp,v 1.15 2008/11/16 21:46:40 seife Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -424,7 +424,7 @@ void CBookmarkManager::hide()
 //------------------------------------------------------------------------
 void CBookmarkManager::paintHead()
 {
-	frameBuffer->paintBoxRel(x, y, width, theight, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_TOP);
+	frameBuffer->paintBoxRel(x, y, width, theight, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
 	frameBuffer->paintIcon("bookmarkmanager.raw",x+5,y+4);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText(LOCALE_BOOKMARKMANAGER_NAME), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
@@ -440,7 +440,7 @@ const struct button_label BookmarkmanagerButtons[2] =
 void CBookmarkManager::paintFoot()
 {
 	int ButtonWidth = (width - 20) / 4;
-	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 
 	if (bookmarks.empty()) {
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 1* ButtonWidth + 10, y+height);
@@ -477,7 +477,7 @@ void CBookmarkManager::paint()
 
 		int sbc= ((bookmarks.size()- 1)/ listmaxshow)+ 1;
 
-		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ page_nr*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ page_nr*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3, RADIUS_SMALL);
 	}
 
 	paintFoot();

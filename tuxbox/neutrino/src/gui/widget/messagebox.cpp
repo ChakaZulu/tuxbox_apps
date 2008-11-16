@@ -73,7 +73,7 @@ void CMessageBox::paintButtons()
 	uint8_t    color;
 	fb_pixel_t bgcolor;
 
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	m_window->paintBoxRel(0, m_height - (m_fheight << 1), m_width, (m_fheight << 1), (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 
 	//irgendwann alle vergleichen - aber cancel ist sicher der längste

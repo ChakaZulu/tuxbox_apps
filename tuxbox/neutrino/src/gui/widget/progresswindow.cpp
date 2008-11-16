@@ -1,5 +1,5 @@
 /*
-	$Id: progresswindow.cpp,v 1.19 2008/10/10 22:34:57 dbt Exp $
+	$Id: progresswindow.cpp,v 1.20 2008/11/16 21:46:42 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -141,7 +141,7 @@ void CProgressWindow::hide()
 void CProgressWindow::paint()
 {
 	int ypos=y;
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 	
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0, c_rad_mid, CORNER_TOP);
 	if (caption != NONEXISTANT_LOCALE)

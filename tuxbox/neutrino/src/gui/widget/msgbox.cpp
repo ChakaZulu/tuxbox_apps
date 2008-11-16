@@ -336,7 +336,7 @@ void CMsgBox::refreshFoot(void)
 					m_cBoxFrameFootRel.iWidth,
 					m_cBoxFrameFootRel.iHeight,
 					COL_INFOBAR_SHADOW_PLUS_1,
-					g_settings.rounded_corners ? CORNER_RADIUS_MID : 0,
+					RADIUS_MID,
 					CORNER_BOTTOM);
 
 	// 	const char* text;//unused variable
@@ -427,7 +427,7 @@ void CMsgBox::refreshTitle(void)
 					m_cBoxFrameTitleRel.iWidth,
 					m_cBoxFrameTitleRel.iHeight,
 					(CFBWindow::color_t)COL_MENUHEAD_PLUS_0,
-					g_settings.rounded_corners ? CORNER_RADIUS_MID : 0,
+					RADIUS_MID,
 					CORNER_TOP);
 
 	if (!m_cIcon.empty())

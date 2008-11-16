@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.18 2008/08/01 21:07:19 houdini Exp $
+	$Id: moviebrowser.cpp,v 1.19 2008/11/16 21:46:40 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.19  2008/11/16 21:46:40  seife
+	improve the readability of the rounded corners code with a few macros
+	
 	Revision 1.18  2008/08/01 21:07:19  houdini
 	increased ping timeout to 500ms for nfs mount during record directory select
 	
@@ -444,7 +447,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.18 2008/08/01 21:07:19 houdini Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.19 2008/11/16 21:46:40 seife Exp $\r\n");
 	init();
 }
 
@@ -1651,7 +1654,7 @@ void CMovieBrowser::refreshTitle(void)
 								m_cBoxFrameTitleRel.iWidth, 
 								m_cBoxFrameTitleRel.iHeight, 
 								TITLE_BACKGROUND_COLOR, 
-								g_settings.rounded_corners ? CORNER_RADIUS_MID : 0,
+								RADIUS_MID,
 								CORNER_TOP);
 	
 	m_pcWindow->paintIcon(NEUTRINO_ICON_EPGINFO, 
@@ -1676,7 +1679,7 @@ void CMovieBrowser::refreshFoot(void)
 	//TRACE("[mb]->refreshButtonLine \r\n");
 	int	color   = (CFBWindow::color_t)COL_INFOBAR_SHADOW;
 	int	bgcolor = (CFBWindow::color_t)COL_INFOBAR_SHADOW_PLUS_0;
-	int	c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int	c_rad_mid = RADIUS_MID;
 	int	footheight = m_cBoxFrameFootRel.iHeight + 4;
 
 	std::string filter_text = g_Locale->getText(LOCALE_MOVIEBROWSER_FOOT_FILTER);
@@ -3871,7 +3874,7 @@ std::string CMovieBrowser::getMovieBrowserVersion(void)
 /************************************************************************/
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.18 $");
+	return imageinfo.getModulVersion("","$Revision: 1.19 $");
 }
 
 /************************************************************************/

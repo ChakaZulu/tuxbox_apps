@@ -983,7 +983,7 @@ void CUpnpBrowserGui::paintDevice()
 {
 	std::string tmp;
 	int w, xstart, xpos, ypos, top;
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_mid = RADIUS_MID;
 
 	// LCD
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, "Select UPnP Device");

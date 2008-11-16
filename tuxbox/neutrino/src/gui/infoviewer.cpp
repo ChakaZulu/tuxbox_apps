@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.238 2008/11/16 11:28:11 seife Exp $
+	$Id: infoviewer.cpp,v 1.239 2008/11/16 21:46:40 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -273,8 +273,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	
 	ChanNameX = BoxStartX + ChanWidth;
 	ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
-	int c_rad_large = g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0;
-	int c_rad_mid = g_settings.rounded_corners ? CORNER_RADIUS_MID : 0;
+	int c_rad_large = RADIUS_LARGE;
+	int c_rad_mid = RADIUS_MID;
 	int c_shadow_width = (c_rad_large * 2) + 1;
 
 	// Schatten
@@ -695,7 +695,7 @@ void CInfoViewer::showSubchan()
 			
 			{			
 			// show default small infobar for subchannel
-			frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0);
+			frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0, RADIUS_SMALL);
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT, 0, subChannelNameIsUTF); // UTF-8
 			
 			// show yellow button

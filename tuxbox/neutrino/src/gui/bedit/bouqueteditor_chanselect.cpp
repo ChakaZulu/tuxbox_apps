@@ -100,7 +100,7 @@ void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
-		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
+		c_rad_small = RADIUS_SMALL;
 	}
 	else
 	{
@@ -154,7 +154,7 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, const std::string & action
 void CBEChannelSelectWidget::paintHead()
 {
 	// paint head
-	frameBuffer->paintBoxRel(x,y, width, theight, COL_MENUHEAD_PLUS_0, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0 , CORNER_TOP);
+	frameBuffer->paintBoxRel(x,y, width, theight, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight, width, ZapitTools::UTF8_to_Latin1(caption.c_str()) , COL_MENUHEAD);
 }
 
@@ -167,7 +167,7 @@ const struct button_label CBEBouquetSelectWidgetButtons[2] =
 void CBEChannelSelectWidget::paintFoot()
 {
 	int y_foot = y + height;
-	frameBuffer->paintBoxRel(x, y_foot, width, ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x, y_foot, width, ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 5, y_foot, width/2, 2, CBEBouquetSelectWidgetButtons);
 }

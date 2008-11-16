@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.198 2008/11/16 00:52:28 seife Exp $
+  $Id: settings.h,v 1.199 2008/11/16 21:46:44 seife Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -463,6 +463,11 @@ struct SNeutrinoSettings
 #define CORNER_RADIUS_LARGE		12
 #define CORNER_RADIUS_MID		9
 #define CORNER_RADIUS_SMALL		4
+
+// convenience macros
+#define RADIUS_LARGE	(g_settings.rounded_corners ? CORNER_RADIUS_LARGE : 0)
+#define RADIUS_MID	(g_settings.rounded_corners ? CORNER_RADIUS_MID : 0)
+#define RADIUS_SMALL	(g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0)
 
 // shadow
 #define SHADOW_OFFSET			4
