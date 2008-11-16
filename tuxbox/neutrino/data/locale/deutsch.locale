@@ -536,6 +536,11 @@ lcdcontroler.head LCD Einstellungen
 lcdmenu.autodimm Automatisch dimmen
 lcdmenu.dim_brightness Helligkeit nach dimm-Timeout
 lcdmenu.dim_time Dimm-Timeout
+lcdmenu.epg EPG-Anzeige
+lcdmenu.epg.name Standard (Kanal)
+lcdmenu.epg.name.sepline.title Kanal / Trennl. / Sendung
+lcdmenu.epg.name.title Kanal / Sendung
+lcdmenu.epg.title Sendung
 lcdmenu.head LCD Einstellungen
 lcdmenu.inverse Invertieren
 lcdmenu.lcdcontroler Kontrast / Helligkeit

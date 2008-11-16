@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.162 2008/05/01 00:08:25 dbt Exp $
+  $Id: movieplayer.cpp,v 1.163 2008/11/16 22:45:11 seife Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1328,8 +1328,7 @@ void updateLcd(const std::string & sel_filename)
 			StrSearchReplace(lcd,"_", " ");
 			break;
 	}
-
-	CLCD::getInstance()->showServicename(lcd);
+	CLCD::getInstance()->showMoviename(lcd);
 }
 
 // GMO snip start ...
@@ -4445,7 +4444,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.162 $");
+	return imageinfo.getModulVersion("","$Revision: 1.163 $");
 }
 
 void CMoviePlayerGui::showHelpTS()

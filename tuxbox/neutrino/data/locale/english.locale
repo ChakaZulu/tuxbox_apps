@@ -536,15 +536,20 @@ lcdcontroler.head LCD Stettings
 lcdmenu.autodimm Auto dimm
 lcdmenu.dim_brightness Dim Brightness
 lcdmenu.dim_time Dim Timeout
+lcdmenu.epg LCD EPG
+lcdmenu.epg.name default (Channel)
+lcdmenu.epg.name.sepline.title Channel / Sep.-Line / Title
+lcdmenu.epg.name.title Channel / Title
+lcdmenu.epg.title Title
 lcdmenu.head LCD Settings
 lcdmenu.inverse Invert
 lcdmenu.lcdcontroler Contrast / Brightness
 lcdmenu.power Power
 lcdmenu.statusline Status Line
-lcdmenu.statusline.both volume / playtime
-lcdmenu.statusline.both_audio volume / playtime / audio
-lcdmenu.statusline.playtime playtime
-lcdmenu.statusline.volume volume
+lcdmenu.statusline.both Volume / Playtime
+lcdmenu.statusline.both_audio Volume / Playtime / Audio
+lcdmenu.statusline.playtime Playtime
+lcdmenu.statusline.volume Volume
 listscroll.down down
 listscroll.exit exit
 listscroll.up up

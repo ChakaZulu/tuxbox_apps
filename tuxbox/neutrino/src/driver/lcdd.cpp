@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.59 2008/10/31 20:29:17 seife Exp $
+	$Id: lcdd.cpp,v 1.60 2008/11/16 22:45:11 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -278,23 +278,8 @@ void CLCD::setlcdparameter(void)
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
 }
 
-void CLCD::showServicename(const std::string & name, const bool perform_wakeup) // UTF-8
+void CLCD::showServiceAndEpg(const std::string & big, const std::string & small, const int showmode, const bool perform_wakeup)
 {
-	/*
-	   1 = show servicename
-	   2 = show epg title
-	   4 = draw separator line between name and EPG
-	 */
-	int showmode = g_settings.lcd_setting[SNeutrinoSettings::LCD_EPGMODE];
-
-	//printf("CLCD::showServicename '%s' epg: '%s'\n", name.c_str(), epg_title.c_str());
-
-	if (!name.empty())
-		servicename = name;
-
-	if (mode != MODE_TVRADIO)
-		return;
-
 	display.draw_fill_rect (0,10,120,51, CLCDDisplay::PIXEL_OFF);
 
 	std::string cname[2];
@@ -302,15 +287,15 @@ void CLCD::showServicename(const std::string & name, const bool perform_wakeup) 
 	int namelines = 0, eventlines = 0;
 
 	if (showmode & 1) {
-		if (fonts.channelname->getRenderWidth(servicename.c_str(), true) <= 120)
+		if (fonts.channelname->getRenderWidth(big.c_str(), true) <= 120)
 		{
-			cname[0] = servicename;
+			cname[0] = big;
 			namelines = 1;
 		}
 		else
 		{
 			int pos;
-			std::string text1 = servicename;
+			std::string text1 = big;
 			do
 			{
 				pos = text1.find_last_of("[ .]+"); // <- characters are UTF-encoded!
@@ -320,13 +305,13 @@ void CLCD::showServicename(const std::string & name, const bool perform_wakeup) 
 
 			if ( fonts.channelname->getRenderWidth(text1.c_str(), true) > 120 ) // UTF-8
 			{
-				text1 = servicename;
+				text1 = big;
 				while (fonts.channelname->getRenderWidth(text1.c_str(), true) > 120) // UTF-8
 					text1= text1.substr(0, text1.length()- 1);
 			}
 		
 			cname[0] = text1;
-			cname[1] = servicename.substr(text1.length());
+			cname[1] = big.substr(text1.length());
 			pos = cname[1].find_first_not_of(" ");
 			if (pos != -1)
 				cname[1] = cname[1].substr(pos);
@@ -339,8 +324,8 @@ void CLCD::showServicename(const std::string & name, const bool perform_wakeup) 
 	int maxeventlines = 4 - (namelines * 3 + 1) / 2;
 
 	if (showmode & 2) {
-		if (!epg_title.empty()) {
-			std::string title = epg_title;
+		if (!small.empty()) {
+			std::string title = small;
 			int pos =0;
 			do {
 				int spc = title.find_first_not_of(" ");
@@ -352,7 +337,7 @@ void CLCD::showServicename(const std::string & name, const bool perform_wakeup) 
 					title = title.substr(0, title.length()-1);
 				event[eventlines++] = title;
 				pos += title.length();
-				title = epg_title.substr(pos);
+				title = small.substr(pos);
 			} while (title.length() >0 && eventlines < maxeventlines);
 		}
 	}
@@ -381,6 +366,36 @@ void CLCD::showServicename(const std::string & name, const bool perform_wakeup) 
 		wake_up();
 
 	displayUpdate();
+}
+
+void CLCD::showMoviename(const std::string & name) // UTF-8
+{
+	// is this needed?
+	if (mode != MODE_TVRADIO)
+		return;
+
+	showServiceAndEpg(name, "", 1, false);
+}
+
+void CLCD::showServicename(const std::string & name, const bool perform_wakeup) // UTF-8
+{
+	/*
+	   1 = show servicename
+	   2 = show epg title
+	   4 = draw separator line between name and EPG
+	 */
+	int showmode = g_settings.lcd_setting[SNeutrinoSettings::LCD_EPGMODE];
+
+	//printf("CLCD::showServicename '%s' epg: '%s'\n", name.c_str(), epg_title.c_str());
+
+	if (!name.empty())
+		servicename = name;
+
+	if (mode != MODE_TVRADIO)
+		return;
+
+	showServiceAndEpg(servicename, epg_title, showmode, perform_wakeup);
+	return;
 }
 
 void CLCD::setEPGTitle(const std::string & title)
