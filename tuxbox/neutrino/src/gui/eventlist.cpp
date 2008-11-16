@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.115 2008/11/16 10:42:27 seife Exp $
+	$Id: eventlist.cpp,v 1.116 2008/11/16 10:54:48 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -592,13 +592,14 @@ void EventList::paintItem(unsigned int pos)
 	fb_pixel_t bgcolor;
 	int ypos = y+ theight+0 + pos*fheight;
 	std::string datetime1_str, datetime2_str, duration_str;
+	unsigned int curpos = liststart + pos;
 
-	if (liststart+pos==selected)
+	if (curpos == selected)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
-	else if (liststart+pos == current_event )
+	else if (curpos == current_event)
 	{
 		color   = COL_MENUCONTENT + 1;
 		bgcolor = COL_MENUCONTENT_PLUS_1;
@@ -611,12 +612,12 @@ void EventList::paintItem(unsigned int pos)
 
 	frameBuffer->paintBoxRel(x, ypos, width- 15, fheight, bgcolor);
 
-	if(liststart+pos<evtlist.size())
+	if (curpos < evtlist.size())
 	{
-		if ( evtlist[liststart+pos].eventID != 0 )
+		if (evtlist[curpos].eventID != 0)
 		{
 			char tmpstr[256];
-			struct tm *tmStartZeit = localtime(&evtlist[liststart+pos].startTime);
+			struct tm *tmStartZeit = localtime(&evtlist[curpos].startTime);
 
 			strftime(tmpstr, sizeof(tmpstr), ". %H:%M, ", tmStartZeit );
 			datetime1_str = (std::string)g_Locale->getText(CLocaleManager::getWeekday(tmStartZeit)) + tmpstr;
@@ -626,11 +627,11 @@ void EventList::paintItem(unsigned int pos)
 
 			if ( m_showChannel ) // show the channel if we made a event search only (which could be made through all channels ).
 			{
-				t_channel_id channel = evtlist[liststart+pos].get_channel_id();
+				t_channel_id channel = evtlist[curpos].get_channel_id();
 				datetime2_str += "      " + g_Zapit->getChannelName(channel);
 			}
 
-			sprintf(tmpstr, "[%d min]", evtlist[liststart+pos].duration / 60 );
+			sprintf(tmpstr, "[%d min]", evtlist[curpos].duration / 60 );
 			duration_str = tmpstr;
 		}
 
@@ -638,7 +639,7 @@ void EventList::paintItem(unsigned int pos)
 		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_DATETIME]->RenderString(x+5,         ypos+ fheight1+3, fwidth1+5,            datetime1_str, color, 0, true); // UTF-8
 		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_DATETIME]->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20, datetime2_str, color, 0, true); // UTF-8
 
-		int seit = ( evtlist[liststart+pos].startTime - time(NULL) ) / 60;
+		int seit = (evtlist[curpos].startTime - time(NULL)) / 60;
 		if ( (seit> 0) && (seit<100) && (duration_str.length()!=0) )
 		{
 			char beginnt[100];
@@ -649,10 +650,9 @@ void EventList::paintItem(unsigned int pos)
 		}
 		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL]->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2, duration_str, color, 0, true); // UTF-8
 		// 2nd line
-		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE]->RenderString(x+ 20, ypos+ fheight, width- 25- 20, evtlist[liststart+pos].description, color);
+		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE]->RenderString(x+ 20, ypos+ fheight, width- 25- 20, evtlist[curpos].description, color);
 		
-//		unsigned char is_timer = isTimer(evtlist[liststart+pos].startTime,evtlist[liststart+pos].startTime + evtlist[liststart+pos].duration,evtlist[liststart+pos].eventID);
-		unsigned char is_timer = isTimer(evtlist[liststart+pos].startTime,evtlist[liststart+pos].duration,evtlist[liststart+pos].get_channel_id());
+		unsigned char is_timer = isTimer(evtlist[curpos].startTime,evtlist[curpos].duration,evtlist[curpos].get_channel_id());
 
 		if(is_timer == (EventList::CONFLICT<<4))
 		{
