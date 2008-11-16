@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.237 2008/11/16 00:52:26 seife Exp $
+	$Id: infoviewer.cpp,v 1.238 2008/11/16 11:28:11 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -862,6 +862,12 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 				showButton_SubServices();
 		}
 	    return messages_return::handled;
+	}
+	else if ((msg == NeutrinoMessages::EVT_ZAP_COMPLETE) ||
+		 (msg == NeutrinoMessages::EVT_ZAP_ISNVOD))
+	{
+		channel_id = (*(t_channel_id *)data);
+		return messages_return::handled;
 	}
 	else if (msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE)
 	{
