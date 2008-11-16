@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.199 2008/11/16 21:46:44 seife Exp $
+  $Id: settings.h,v 1.200 2008/11/16 22:29:20 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -66,6 +66,7 @@ struct SNeutrinoSettings
 	int infobar_show;
 	int show_mute_icon;
 	int channellist_epgtext_align_right;
+	int channellist_extended;
 	char infobar_channel_logodir[100];
 	int infobar_show_channellogo;
 	int infobar_channellogo_background;

@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.31 2008/11/16 00:52:26 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.32 2008/11/16 22:29:20 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -991,6 +991,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsChannellist.addItem(GenericMenuBack);
 	miscSettingsChannellist.addItem(GenericMenuSeparatorLine);
 	miscSettingsChannellist.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_CHANNELLIST_EPGTEXT_ALIGN, &g_settings.channellist_epgtext_align_right, CHANNELLIST_EPGTEXT_ALIGN_RIGHT_OPTIONS, CHANNELLIST_EPGTEXT_ALIGN_RIGHT_OPTIONS_COUNT, true));
+	miscSettingsChannellist.addItem(new CMenuOptionChooser(LOCALE_CHANNELLIST_EXTENDED, &g_settings.channellist_extended, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 	
 	//epg settings
 	miscSettingsEPGSettings.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_EPG_HEAD));

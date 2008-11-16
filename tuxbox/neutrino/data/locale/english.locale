@@ -216,6 +216,7 @@ bouquetlist.head Bouquets
 cablesetup.provider cable provider
 channellist.epgtext_align_left left
 channellist.epgtext_align_right right
+channellist.extended extended Channellist
 channellist.head All Services
 channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
 channellist.since since %02d:%02d

@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.196 2008/11/16 21:46:40 seife Exp $
+	$Id: channellist.cpp,v 1.197 2008/11/16 22:29:20 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -51,6 +51,7 @@
 #include <gui/widget/icons.h>
 #include <gui/widget/menue.h>
 #include <gui/widget/messagebox.h>
+#include <gui/widget/progressbar.h>
 
 #include <system/settings.h>
 #include <system/lastchannel.h>
@@ -1068,7 +1069,7 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 		// 1. col thick line
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight, col2, c_rad_small, CORNER_LEFT); // item marker
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-3, ypos1, 8,fheight, col1, c_rad_small, CORNER_LEFT); 
-		
+	
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 4,info_height, col1);
 
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 4,ypos2a-ypos1a, col1);
@@ -1083,19 +1084,14 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,1, col2);
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2);
-
+		
 		// -- small Frame around infobox
 		frameBuffer->paintBoxRel(x,         ypos2, 			2,		info_height, 	col1);
 		frameBuffer->paintBoxRel(x+width-2, ypos2, 			2,		info_height, 	col1);
 		frameBuffer->paintBoxRel(x        , ypos2, 			width-2,	2,     		col1);
 		frameBuffer->paintBoxRel(x        , ypos2+info_height-2, 	width-2,	2, 		col1);
-
 	}
-
 }
-
-
-
 
 void CChannelList::paintItem(int pos)
 {
@@ -1125,11 +1121,22 @@ void CChannelList::paintItem(int pos)
 		CChannel* chan = chanlist[liststart+pos];
 		//number
 		char tmp[10];
+		int prg_offset=0;
+		int title_offset=0;
+		uint8_t tcolor=(liststart + pos == selected) ? color : COL_MENUCONTENT;
+		int xtheight=fheight-2;
+		
+		if(g_settings.channellist_extended)
+		{
+			prg_offset=42;
+			title_offset=6;
+		}
+		
 		sprintf((char*) tmp, "%d", this->historyMode ? pos:CNeutrinoApp::getInstance ()->recordingstatus ? liststart+pos+1 : chan->number);
 
 		CChannelEvent *p_event;
 		if (displayNext) {
-			p_event = &chan->nextEvent;
+			p_event = &chan->nextEvent;		
 		} else {
 			p_event = &chan->currentEvent;
 		}
@@ -1157,26 +1164,58 @@ void CChannelList::paintItem(int pos)
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(p_event->description);
 
-			if ( (width- numwidth- 20- 15- ch_name_len)< ch_desc_len )
-				ch_desc_len = (width- numwidth- 20- 15- ch_name_len);
-			if (ch_desc_len< 0)
+			if ( (width- numwidth - 20 - 15 - prg_offset - ch_name_len)< ch_desc_len )
+				ch_desc_len = (width - numwidth - 20 - 15 - ch_name_len - prg_offset);
+			if (ch_desc_len < 0)
 				ch_desc_len = 0;
 
-			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
+			if(g_settings.channellist_extended)
+			{
+				
+				if(displayNext)
+				{
+					struct		tm *pStartZeit = localtime(&p_event->startTime);
+			
+					sprintf((char*) tmp, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
+					g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(x + 5 + numwidth + 6, ypos + xtheight, width - numwidth - 20 - 15 - prg_offset, tmp, tcolor, 0, true);
+				}
+				else
+				{
+					CProgressBar pb;					
+					time_t jetzt=time(NULL);
+					int runningPercent = 0;
+					int pb_space = prg_offset - title_offset;
+					int pb_max = pb_space - 4;
+							
+					if (((jetzt - p_event->startTime + 30) / 60) < 0 )
+					{
+						runningPercent= 0;
+					}
+					else
+					{
+						runningPercent=(jetzt-p_event->startTime) * pb_max / p_event->duration;
+						if (runningPercent > pb_max)	// this would lead to negative value in paintBoxRel
+							runningPercent = pb_max;	// later on which can be fatal...
+					}
+					pb.paintProgressBar(x+5+numwidth + title_offset, ypos + fheight/4, pb_space + 2, fheight/2, runningPercent, pb_max, COL_MENUCONTENT_PLUS_3, COL_MENUCONTENT_PLUS_1, COL_MENUCONTENT_PLUS_3);
+				}
+			}
+
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x + 5 + numwidth + 10 +prg_offset, ypos + fheight, width - numwidth - 20 - 15 - prg_offset, nameAndDescription, color);
 
 			if (g_settings.channellist_epgtext_align_right){
 				// align right
-				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, p_event->description, color);
+				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x + width - 20 - ch_desc_len, ypos + fheight, ch_desc_len, p_event->description, color);
 			}
 			else{
 				// align left
-				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, p_event->description, color);
+				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x + numwidth + 10 + ch_name_len + 5 + prg_offset, ypos + fheight, ch_desc_len, p_event->description, color);
 			}
 			
 		}
 		else
 			//name
-			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x + 5 + numwidth + 10 + prg_offset, ypos + fheight, width- numwidth - 20 - 15 - prg_offset, nameAndDescription, color);
 	}
 }
 

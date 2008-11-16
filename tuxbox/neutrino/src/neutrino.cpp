@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.904 2008/11/16 21:46:39 seife Exp $
+	$Id: neutrino.cpp,v 1.905 2008/11/16 22:29:19 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -326,6 +326,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_show			= configfile.getInt32("infobar_show"             , 0);
 	g_settings.show_mute_icon		= configfile.getInt32("show_mute_icon"		,1);
 	g_settings.channellist_epgtext_align_right		= configfile.getBool("channellist_epgtext_align_right"          , false);
+	g_settings.channellist_extended		= configfile.getBool("channellist_extended"          , false);
 	strcpy( g_settings.infobar_channel_logodir, configfile.getString( "infobar_channel_logodir", "var/share/tuxbox/neutrino/icons" ).c_str());
 	g_settings.infobar_show_channellogo		= configfile.getInt32("infobar_show_channellogo"		,0);
 	g_settings.infobar_channellogo_background		= configfile.getInt32("infobar_channellogo_background"		,0);
@@ -827,6 +828,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32("infobar_show"             , g_settings.infobar_show);
 	configfile.setInt32("show_mute_icon"			, g_settings.show_mute_icon);
 	configfile.setBool("channellist_epgtext_align_right"                 , g_settings.channellist_epgtext_align_right);
+	configfile.setBool("channellist_extended"                 , g_settings.channellist_extended);
 	configfile.setInt32("infobar_show_channellogo"			, g_settings.infobar_show_channellogo);
 	configfile.setString("infobar_channel_logodir"	, g_settings.infobar_channel_logodir);
 	configfile.setInt32( "infobar_channellogo_background"	, g_settings.infobar_channellogo_background);
