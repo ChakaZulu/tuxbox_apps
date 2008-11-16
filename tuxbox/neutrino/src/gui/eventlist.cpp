@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.114 2008/11/16 00:52:26 seife Exp $
+	$Id: eventlist.cpp,v 1.115 2008/11/16 10:42:27 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -122,12 +122,8 @@ EventList::~EventList()
 
 void EventList::UpdateTimerList(void)
 {
-	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-		(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
-	{
-		timerlist.clear();
-		Timer.getTimerList (timerlist);
-	}
+	timerlist.clear();
+	Timer.getTimerList (timerlist);
 	Timer.getRecordingSafety(timerPre,timerPost);
 }
 
@@ -138,35 +134,30 @@ void EventList::UpdateTimerList(void)
 //          *timerID if timer event was found
 // Note: Due to performance reason, the return values are coded in high and low nibble.
 //unsigned char EventList::isTimer(time_t starttime,time_t endtime ,event_id_t epgid,int* timerID = NULL)
-unsigned char EventList::isTimer(time_t starttime,time_t endtime ,t_channel_id channelID,int* timerID = NULL)
+unsigned char EventList::isTimer(time_t starttime, time_t duration, t_channel_id channelID, int* timerID = NULL)
 {
 	unsigned char result = 0;
-
-	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-		(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
+	//printf("* %d-%d, pre%d,post%d\n",starttime,duration,timerPre,timerPost);
+	for(unsigned int i= 0; i < timerlist.size(); i++)
 	{
-		//printf("* %d-%d, pre%d,post%d\n",starttime,endtime,timerPre,timerPost);
-		for(unsigned int i= 0; i < timerlist.size(); i++)
+		//printf("  %d-%d\n",timerlist[i].alarmTime,timerlist[i].stopTime);
+		//if(timerlist[i].epgID == epgid)
+		if( timerlist[i].epg_starttime == starttime && 
+				timerlist[i].channel_id == channelID)
 		{
-			//printf("  %d-%d\n",timerlist[i].alarmTime,timerlist[i].stopTime);
-			//if(timerlist[i].epgID == epgid)
-			if( timerlist[i].epg_starttime == starttime && 
-					timerlist[i].channel_id == channelID)
-			{
-				if(timerlist[i].eventType == CTimerd::TIMER_RECORD)
-					result |= EventList::TIMER_RECORD;
-				else if(timerlist[i].eventType == CTimerd::TIMER_ZAPTO)
-					result |= EventList::TIMER_ZAPTO;
-					
-				if(timerID != NULL)
-					*timerID = timerlist[i].eventID;
-			}
-			else if(timerlist[i].stopTime  > starttime-timerPre &&
-				   timerlist[i].alarmTime < endtime+timerPost)
-			{
-				// set conflict flag
-				result |= (EventList::CONFLICT<<4);
-			}
+			if(timerlist[i].eventType == CTimerd::TIMER_RECORD)
+				result |= EventList::TIMER_RECORD;
+			else if(timerlist[i].eventType == CTimerd::TIMER_ZAPTO)
+				result |= EventList::TIMER_ZAPTO;
+				
+			if(timerID != NULL)
+				*timerID = timerlist[i].eventID;
+		}
+		else if(timerlist[i].stopTime  > starttime-timerPre &&
+			   timerlist[i].alarmTime < starttime+duration+timerPost)
+		{
+			// set conflict flag
+			result |= (EventList::CONFLICT<<4);
 		}
 	}
 	return result;
@@ -329,8 +320,9 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			else
 				paintItem(selected - liststart);
 			
-			if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-				(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
+			if ((g_settings.key_channelList_addremind != CRCInput::RC_nokey) ||
+			   ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
+			    (g_settings.key_channelList_addrecord != CRCInput::RC_nokey)))
 			{
 				showFunctionBar(true);
 			}
@@ -354,8 +346,9 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			else
 				paintItem(selected - liststart);
 			
-			if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-				(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
+			if ((g_settings.key_channelList_addremind != CRCInput::RC_nokey) ||
+			   ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
+			    (g_settings.key_channelList_addrecord != CRCInput::RC_nokey)))
 			{
 				showFunctionBar(true);
 			}
@@ -407,7 +400,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				CTimerdClient timerdclient;
 				int timerID;
 				//unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].startTime + evtlist[selected].duration,evtlist[selected].eventID,&timerID);
-				unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].startTime + evtlist[selected].duration,evtlist[selected].get_channel_id(),&timerID);
+				unsigned char is_timer = isTimer(evtlist[selected].startTime, evtlist[selected].duration, evtlist[selected].get_channel_id(), &timerID);
 				if(timerdclient.isTimerdAvailable() && !(is_timer & EventList::TIMER_RECORD))
 				{
 					std::string recDir = g_settings.recording_dir[0];
@@ -487,7 +480,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			CTimerdClient timerdclient;
 			int timerID;
 //			unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].startTime + evtlist[selected].duration,evtlist[selected].eventID,&timerID);
-			unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].startTime + evtlist[selected].duration,evtlist[selected].get_channel_id(),&timerID);
+			unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].duration,evtlist[selected].get_channel_id(),&timerID);
 			if(timerdclient.isTimerdAvailable() && !(is_timer & EventList::TIMER_ZAPTO))
 			{
 				// first delete zapto timer if any
@@ -659,7 +652,7 @@ void EventList::paintItem(unsigned int pos)
 		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE]->RenderString(x+ 20, ypos+ fheight, width- 25- 20, evtlist[liststart+pos].description, color);
 		
 //		unsigned char is_timer = isTimer(evtlist[liststart+pos].startTime,evtlist[liststart+pos].startTime + evtlist[liststart+pos].duration,evtlist[liststart+pos].eventID);
-		unsigned char is_timer = isTimer(evtlist[liststart+pos].startTime,evtlist[liststart+pos].startTime + evtlist[liststart+pos].duration,evtlist[liststart+pos].get_channel_id());
+		unsigned char is_timer = isTimer(evtlist[liststart+pos].startTime,evtlist[liststart+pos].duration,evtlist[liststart+pos].get_channel_id());
 
 		if(is_timer == (EventList::CONFLICT<<4))
 		{
@@ -753,7 +746,7 @@ void  EventList::showFunctionBar (bool show)
 	frameBuffer->paintBoxRel(x, by, bw, bh - 3, COL_INFOBAR_SHADOW_PLUS_1, g_settings.rounded_corners ? CORNER_RADIUS_MID : 0, CORNER_BOTTOM);
 
 
-	unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].startTime + evtlist[selected].duration,evtlist[selected].get_channel_id());
+	unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].duration,evtlist[selected].get_channel_id());
 	
 	// -- Button: Timer Record & Channelswitch
 	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
