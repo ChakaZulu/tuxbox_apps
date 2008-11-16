@@ -31,7 +31,7 @@ should also be subject to the EPG filtering. In the above example, current
 and next events would be collected on all channels. If this is set to 0, no
 current and next events are collected on channels that are filtered.
 
-The default is "is_whitelist = 1" and "except_current_next = 1".
+The default is "is_whitelist = 0" and "except_current_next = 0".
 
 Note that the above filters are only affecting the storage of the events:
 all events are still read and processed, but they are not stored, so this
