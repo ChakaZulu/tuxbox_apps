@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.902 2008/10/31 20:29:15 seife Exp $
+	$Id: neutrino.cpp,v 1.903 2008/11/16 00:52:25 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -541,24 +541,24 @@ int CNeutrinoApp::loadSetup()
 	g_settings.movieplayer_plugin = configfile.getString( "movieplayer_plugin", "Teletext" );
 
 	//rc-key configuration
-	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
+	g_settings.key_tvradio_mode = (neutrino_msg_t)configfile.getInt32("key_tvradio_mode", CRCInput::RC_nokey);
 
-	g_settings.key_channelList_pageup = configfile.getInt32( "key_channelList_pageup",  CRCInput::RC_minus );
-	g_settings.key_channelList_pagedown = configfile.getInt32( "key_channelList_pagedown", CRCInput::RC_plus );
-	g_settings.key_channelList_cancel = configfile.getInt32( "key_channelList_cancel",  CRCInput::RC_home );
-	g_settings.key_channelList_sort = configfile.getInt32( "key_channelList_sort",  CRCInput::RC_blue );
-	g_settings.key_channelList_addrecord = configfile.getInt32( "key_channelList_addrecord",  CRCInput::RC_red );
-	g_settings.key_channelList_addremind = configfile.getInt32( "key_channelList_addremind",  CRCInput::RC_yellow );
-	g_settings.key_channelList_reload = configfile.getInt32( "key_channelList_reload",  CRCInput::RC_setup );
+	g_settings.key_channelList_pageup = (neutrino_msg_t)configfile.getInt32("key_channelList_pageup", CRCInput::RC_minus);
+	g_settings.key_channelList_pagedown = (neutrino_msg_t)configfile.getInt32("key_channelList_pagedown", CRCInput::RC_plus);
+	g_settings.key_channelList_cancel = (neutrino_msg_t)configfile.getInt32("key_channelList_cancel", CRCInput::RC_home);
+	g_settings.key_channelList_sort = (neutrino_msg_t)configfile.getInt32("key_channelList_sort", CRCInput::RC_blue);
+	g_settings.key_channelList_addrecord = (neutrino_msg_t)configfile.getInt32("key_channelList_addrecord", CRCInput::RC_red);
+	g_settings.key_channelList_addremind = (neutrino_msg_t)configfile.getInt32("key_channelList_addremind", CRCInput::RC_yellow);
+	g_settings.key_channelList_reload = (neutrino_msg_t)configfile.getInt32("key_channelList_reload", CRCInput::RC_setup);
 
-	g_settings.key_quickzap_up = configfile.getInt32( "key_quickzap_up",  CRCInput::RC_up );
-	g_settings.key_quickzap_down = configfile.getInt32( "key_quickzap_down",  CRCInput::RC_down );
-	g_settings.key_bouquet_up = configfile.getInt32( "key_bouquet_up",  CRCInput::RC_right );
-	g_settings.key_bouquet_down = configfile.getInt32( "key_bouquet_down",  CRCInput::RC_left );
-	g_settings.key_subchannel_up = configfile.getInt32( "key_subchannel_up",  CRCInput::RC_right );
-	g_settings.key_subchannel_down = configfile.getInt32( "key_subchannel_down",  CRCInput::RC_left );
-	g_settings.key_zaphistory = configfile.getInt32( "key_zaphistory",  CRCInput::RC_home );
-	g_settings.key_lastchannel = configfile.getInt32( "key_lastchannel",  CRCInput::RC_0 );
+	g_settings.key_quickzap_up = (neutrino_msg_t)configfile.getInt32("key_quickzap_up", CRCInput::RC_up);
+	g_settings.key_quickzap_down = (neutrino_msg_t)configfile.getInt32("key_quickzap_down", CRCInput::RC_down);
+	g_settings.key_bouquet_up = (neutrino_msg_t)configfile.getInt32("key_bouquet_up", CRCInput::RC_right);
+	g_settings.key_bouquet_down = (neutrino_msg_t)configfile.getInt32("key_bouquet_down", CRCInput::RC_left);
+	g_settings.key_subchannel_up = (neutrino_msg_t)configfile.getInt32("key_subchannel_up", CRCInput::RC_right);
+	g_settings.key_subchannel_down = (neutrino_msg_t)configfile.getInt32("key_subchannel_down", CRCInput::RC_left);
+	g_settings.key_zaphistory = (neutrino_msg_t)configfile.getInt32("key_zaphistory", CRCInput::RC_home);
+	g_settings.key_lastchannel = (neutrino_msg_t)configfile.getInt32("key_lastchannel", CRCInput::RC_0);
 
 #ifndef HAVE_DREAMBOX_HARDWARE
 	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
@@ -1040,24 +1040,24 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "movieplayer_plugin", g_settings.movieplayer_plugin );
 
 	//rc-key configuration
-	configfile.setInt32 ( "key_tvradio_mode", g_settings.key_tvradio_mode );
+	configfile.setInt32 ( "key_tvradio_mode", (int)g_settings.key_tvradio_mode );
 
-	configfile.setInt32( "key_channelList_pageup", g_settings.key_channelList_pageup );
-	configfile.setInt32( "key_channelList_pagedown", g_settings.key_channelList_pagedown );
-	configfile.setInt32( "key_channelList_cancel", g_settings.key_channelList_cancel );
-	configfile.setInt32( "key_channelList_sort", g_settings.key_channelList_sort );
-	configfile.setInt32( "key_channelList_addrecord", g_settings.key_channelList_addrecord );
-	configfile.setInt32( "key_channelList_addremind", g_settings.key_channelList_addremind );
-	configfile.setInt32( "key_channelList_reload",  g_settings.key_channelList_reload );
+	configfile.setInt32( "key_channelList_pageup", (int)g_settings.key_channelList_pageup );
+	configfile.setInt32( "key_channelList_pagedown", (int)g_settings.key_channelList_pagedown );
+	configfile.setInt32( "key_channelList_cancel", (int)g_settings.key_channelList_cancel );
+	configfile.setInt32( "key_channelList_sort", (int)g_settings.key_channelList_sort );
+	configfile.setInt32( "key_channelList_addrecord", (int)g_settings.key_channelList_addrecord );
+	configfile.setInt32( "key_channelList_addremind", (int)g_settings.key_channelList_addremind );
+	configfile.setInt32( "key_channelList_reload",  (int)g_settings.key_channelList_reload );
 
-	configfile.setInt32( "key_quickzap_up", g_settings.key_quickzap_up );
-	configfile.setInt32( "key_quickzap_down", g_settings.key_quickzap_down );
-	configfile.setInt32( "key_bouquet_up", g_settings.key_bouquet_up );
-	configfile.setInt32( "key_bouquet_down", g_settings.key_bouquet_down );
-	configfile.setInt32( "key_subchannel_up", g_settings.key_subchannel_up );
-	configfile.setInt32( "key_subchannel_down", g_settings.key_subchannel_down );
-	configfile.setInt32( "key_zaphistory", g_settings.key_zaphistory );
-	configfile.setInt32( "key_lastchannel", g_settings.key_lastchannel );
+	configfile.setInt32( "key_quickzap_up", (int)g_settings.key_quickzap_up );
+	configfile.setInt32( "key_quickzap_down", (int)g_settings.key_quickzap_down );
+	configfile.setInt32( "key_bouquet_up", (int)g_settings.key_bouquet_up );
+	configfile.setInt32( "key_bouquet_down", (int)g_settings.key_bouquet_down );
+	configfile.setInt32( "key_subchannel_up", (int)g_settings.key_subchannel_up );
+	configfile.setInt32( "key_subchannel_down", (int)g_settings.key_subchannel_down );
+	configfile.setInt32( "key_zaphistory", (int)g_settings.key_zaphistory );
+	configfile.setInt32( "key_lastchannel", (int)g_settings.key_lastchannel );
 
 	configfile.setString( "repeat_blocker", g_settings.repeat_blocker );
 	configfile.setString( "repeat_genericblocker", g_settings.repeat_genericblocker );
@@ -2210,7 +2210,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				g_EpgData->show( g_Zapit->getCurrentServiceID() );
 
 			}
-			else if( msg == (neutrino_msg_t) g_settings.key_tvradio_mode )
+			else if(msg == g_settings.key_tvradio_mode)
 			{
 				if( mode == mode_tv )
 				{
@@ -2318,7 +2318,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
 				g_InfoViewer->showSubchan();
 			}
-			else if( ( msg == (neutrino_msg_t) g_settings.key_quickzap_up ) || ( msg == (neutrino_msg_t) g_settings.key_quickzap_down ) )
+			else if(msg == g_settings.key_quickzap_up || msg == g_settings.key_quickzap_down)
 			{
 				//quickzap
 				channelList->quickZap( msg );
@@ -2331,22 +2331,22 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// show Infoviewer
 				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
-			else if( msg == (neutrino_msg_t) g_settings.key_subchannel_up )
+			else if(msg == g_settings.key_subchannel_up)
 			{
 				g_RemoteControl->subChannelUp();
 				g_InfoViewer->showSubchan();
 			}
-			else if( msg == (neutrino_msg_t) g_settings.key_subchannel_down )
+			else if(msg == g_settings.key_subchannel_down)
 			{
 				g_RemoteControl->subChannelDown();
 				g_InfoViewer->showSubchan();
 			}
-			else if( msg == (neutrino_msg_t) g_settings.key_zaphistory )
+			else if(msg == g_settings.key_zaphistory)
 			{
 				// Zap-History "Bouquet"
 				channelList->numericZap( msg );
 			}
-			else if( msg == (neutrino_msg_t) g_settings.key_lastchannel )
+			else if(msg == g_settings.key_lastchannel)
 			{
 				// Quick Zap
 				channelList->numericZap( msg );

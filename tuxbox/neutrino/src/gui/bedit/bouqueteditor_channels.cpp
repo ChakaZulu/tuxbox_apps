@@ -190,8 +190,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_EPG]);
 
-		if ((msg == CRCInput::RC_timeout) ||
-		    (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))
+		if (msg == CRCInput::RC_timeout || msg == g_settings.key_channelList_cancel)
 		{
 			if (state == beDefault)
 			{
@@ -207,14 +206,14 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		// -- The keys should be configurable. Problem is: red/green key, which is the
 		// -- default in neutrino is used as a function key here... so use left/right
 		//
-		else if (msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup)
+		else if (msg == CRCInput::RC_up || msg == g_settings.key_channelList_pageup)
 		{
 			if (!(Channels.empty()))
 			{
 				int step = 0;
 				int prev_selected = selected;
 
-				step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+				step = (msg == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
 				selected -= step;
 				if((prev_selected-step) < 0)		// because of uint
 				{
@@ -241,12 +240,12 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 				}
 			}
 		}
-		else if (msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown)
+		else if (msg == CRCInput::RC_down || msg == g_settings.key_channelList_pagedown)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
+			step = (msg == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
 			selected += step;
 
 			if(selected >= Channels.size())

@@ -49,12 +49,12 @@ class CKeyChooser : public CMenuWidget
 {
 	private:
 		CFrameBuffer		*frameBuffer;
-		int*			key;
+		neutrino_msg_t*		key;
 		CKeyChooserItem		*keyChooser;
 		CKeyChooserItemNoKey	*keyDeleter;
 
 	public:
-		CKeyChooser(int * const Key, const neutrino_locale_t title, const std::string & Icon = "");
+		CKeyChooser(neutrino_msg_t * const Key, const neutrino_locale_t title, const std::string & Icon = "");
 		~CKeyChooser();
 
 		void paint();
@@ -70,13 +70,13 @@ class CKeyChooserItem : public CMenuTarget
 		int height;
 
 		neutrino_locale_t name;
-		int *             key;
+		neutrino_msg_t *  key;
 
 		void paint();
 
 	public:
 
-		CKeyChooserItem(const neutrino_locale_t Name, int *Key);
+		CKeyChooserItem(const neutrino_locale_t Name, neutrino_msg_t *Key);
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);
@@ -85,11 +85,11 @@ class CKeyChooserItem : public CMenuTarget
 
 class CKeyChooserItemNoKey : public CMenuTarget
 {
-		int		*key;
+		neutrino_msg_t	*key;
 
 	public:
 
-		CKeyChooserItemNoKey(int *Key)
+		CKeyChooserItemNoKey(neutrino_msg_t *Key)
 		{
 			key=Key;
 		};

@@ -149,12 +149,11 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 
-		if ( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == (neutrino_msg_t)g_settings.key_channelList_cancel ) )
+		if (msg == CRCInput::RC_timeout || msg == g_settings.key_channelList_cancel)
 		{
 			loop=false;
 		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup )
+		else if (msg == g_settings.key_channelList_pageup)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=0;
@@ -163,7 +162,7 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paintItems();
 		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown )
+		else if (msg == g_settings.key_channelList_pagedown)
 		{
 			selected+=listmaxshow;
 			if (selected>pluginlist.size()-1)

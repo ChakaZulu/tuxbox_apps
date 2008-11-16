@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.197 2008/10/31 20:29:18 seife Exp $
+  $Id: settings.h,v 1.198 2008/11/16 00:52:28 seife Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -284,24 +284,24 @@ struct SNeutrinoSettings
 	std::string movieplayer_plugin;
 
 	//key configuration
-	int key_tvradio_mode;
+	neutrino_msg_t key_tvradio_mode;
 
-	int key_channelList_pageup;
-	int key_channelList_pagedown;
-	int key_channelList_cancel;
-	int key_channelList_sort;
-	int key_channelList_addrecord;
-	int key_channelList_addremind;
-	int key_channelList_reload;
+	neutrino_msg_t key_channelList_pageup;
+	neutrino_msg_t key_channelList_pagedown;
+	neutrino_msg_t key_channelList_cancel;
+	neutrino_msg_t key_channelList_sort;
+	neutrino_msg_t key_channelList_addrecord;
+	neutrino_msg_t key_channelList_addremind;
+	neutrino_msg_t key_channelList_reload;
 
-	int key_quickzap_up;
-	int key_quickzap_down;
-	int key_bouquet_up;
-	int key_bouquet_down;
-	int key_subchannel_up;
-	int key_subchannel_down;
-	int key_zaphistory;
-	int key_lastchannel;
+	neutrino_msg_t key_quickzap_up;
+	neutrino_msg_t key_quickzap_down;
+	neutrino_msg_t key_bouquet_up;
+	neutrino_msg_t key_bouquet_down;
+	neutrino_msg_t key_subchannel_up;
+	neutrino_msg_t key_subchannel_down;
+	neutrino_msg_t key_zaphistory;
+	neutrino_msg_t key_lastchannel;
 
 	char repeat_blocker[4];
 	char repeat_genericblocker[4];

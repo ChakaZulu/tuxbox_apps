@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.113 2008/11/15 21:57:54 seife Exp $
+	$Id: eventlist.cpp,v 1.114 2008/11/16 00:52:26 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -123,7 +123,7 @@ EventList::~EventList()
 void EventList::UpdateTimerList(void)
 {
 	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-		(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
+		(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
 	{
 		timerlist.clear();
 		Timer.getTimerList (timerlist);
@@ -143,7 +143,7 @@ unsigned char EventList::isTimer(time_t starttime,time_t endtime ,t_channel_id c
 	unsigned char result = 0;
 
 	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-		(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
+		(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
 	{
 		//printf("* %d-%d, pre%d,post%d\n",starttime,endtime,timerPre,timerPost);
 		for(unsigned int i= 0; i < timerlist.size(); i++)
@@ -310,12 +310,12 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-		if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup))
+		if (msg == CRCInput::RC_up || msg == g_settings.key_channelList_pageup)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+			step = (msg == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
 			selected -= step;
 			if((prev_selected-step) < 0)		// because of uint
 				selected = evtlist.size() - 1;
@@ -330,17 +330,17 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				paintItem(selected - liststart);
 			
 			if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-				(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
+				(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
 			{
 				showFunctionBar(true);
 			}
 		}
-		else if ((msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown))
+		else if (msg == CRCInput::RC_down || msg == g_settings.key_channelList_pagedown)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
+			step = (msg == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
 			selected += step;
 
 			if(selected >= evtlist.size())
@@ -355,12 +355,12 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				paintItem(selected - liststart);
 			
 			if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-				(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
+				(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
 			{
 				showFunctionBar(true);
 			}
 		}
-		else if (msg == (neutrino_msg_t)g_settings.key_channelList_sort)
+		else if (msg == g_settings.key_channelList_sort)
 		{
 			unsigned long long selected_id = evtlist[selected].eventID;
 			if(sort_mode==0)
@@ -400,7 +400,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 //  --- either set addrecord timer key to "no key" and leave eventlist with red (default now),
 //  --- or set addrecord timer key to "red key" (zwen 2003-07-29)
 
-		else if (msg == (neutrino_msg_t)g_settings.key_channelList_addrecord)
+		else if (msg == g_settings.key_channelList_addrecord)
 		{
 			if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)
 			{
@@ -482,7 +482,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 					printf("timerd not available\n");
 			}
 		}
-		else if ( msg == (neutrino_msg_t) g_settings.key_channelList_addremind )
+		else if (msg == g_settings.key_channelList_addremind)
 		{
 			CTimerdClient timerdclient;
 			int timerID;
@@ -519,7 +519,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				printf("timerd not available\n");
 		}
 
-		else if (msg == (neutrino_msg_t)g_settings.key_channelList_reload)
+		else if (msg == g_settings.key_channelList_reload)
 		{
 			hide();
 			paintHead();
@@ -528,8 +528,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			showFunctionBar(true);
 		}
 
-		else if ((msg == CRCInput::RC_timeout                             ) ||
-			 (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))
+		else if (msg == CRCInput::RC_timeout || msg == g_settings.key_channelList_cancel)
 		{
 			selected = oldselected;
 			loop=false;
@@ -758,7 +757,7 @@ void  EventList::showFunctionBar (bool show)
 	
 	// -- Button: Timer Record & Channelswitch
 	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-		(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
+		(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_addrecord);
 		
@@ -797,7 +796,7 @@ void  EventList::showFunctionBar (bool show)
 	}
 
 	// Button: Timer Channelswitch
-	if (g_settings.key_channelList_addremind != (int)CRCInput::RC_nokey)
+	if (g_settings.key_channelList_addremind != CRCInput::RC_nokey)
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_addremind);
 
@@ -818,7 +817,7 @@ void  EventList::showFunctionBar (bool show)
 	}
 
 	// Button: Event Re-Sort
-	if (g_settings.key_channelList_sort != (int)CRCInput::RC_nokey)
+	if (g_settings.key_channelList_sort != CRCInput::RC_nokey)
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_sort);
 		
@@ -835,7 +834,7 @@ void  EventList::showFunctionBar (bool show)
 	}
 
 	// Button: Event Reload/Refresh
-	if (g_settings.key_channelList_reload != (int)CRCInput::RC_nokey)
+	if (g_settings.key_channelList_reload != CRCInput::RC_nokey)
 	{
 		keyhelper.get(&key, &icon, g_settings.key_channelList_reload);
 

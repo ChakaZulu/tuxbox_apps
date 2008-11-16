@@ -62,7 +62,7 @@ public:
 
 
 
-CKeyChooser::CKeyChooser(int * const Key, const neutrino_locale_t title, const std::string & Icon) : CMenuWidget(title, Icon)
+CKeyChooser::CKeyChooser(neutrino_msg_t * const Key, const neutrino_locale_t title, const std::string & Icon) : CMenuWidget(title, Icon)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	key = Key;
@@ -93,7 +93,7 @@ void CKeyChooser::paint()
 }
 
 //*****************************
-CKeyChooserItem::CKeyChooserItem(const neutrino_locale_t Name, int * Key)
+CKeyChooserItem::CKeyChooserItem(const neutrino_locale_t Name, neutrino_msg_t * Key)
 {
 	name = Name;
 	key = Key;

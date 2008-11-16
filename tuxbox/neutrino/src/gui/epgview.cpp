@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.141 2008/10/10 22:35:27 dbt Exp $
+	$Id: epgview.cpp,v 1.142 2008/11/16 00:52:26 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -754,7 +754,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 				default:
 					// konfigurierbare Keys handlen...
-					if (msg == (neutrino_msg_t)g_settings.key_channelList_cancel)
+					if (msg == g_settings.key_channelList_cancel)
 						loop = false;
 					else
 					{

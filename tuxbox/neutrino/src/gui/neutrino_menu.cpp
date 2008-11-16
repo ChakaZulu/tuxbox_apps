@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.30 2008/07/16 22:07:36 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.31 2008/11/16 00:52:26 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1996,7 +1996,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem(new CMenuForwarder(LOCALE_USERMENU_BUTTON_YELLOW, true, NULL, new CUserMenuMenu(LOCALE_USERMENU_BUTTON_YELLOW,2), NULL, CRCInput::RC_yellow,NEUTRINO_ICON_BUTTON_YELLOW));
 	keySettings.addItem(new CMenuForwarder(LOCALE_USERMENU_BUTTON_BLUE, true, NULL, new CUserMenuMenu(LOCALE_USERMENU_BUTTON_BLUE,3), NULL, CRCInput::RC_blue,NEUTRINO_ICON_BUTTON_BLUE));
 
-	int * keyvalue_p[] =
+	neutrino_msg_t * keyvalue_p[] =
 		{
 			&g_settings.key_tvradio_mode,
 			&g_settings.key_channelList_pageup,

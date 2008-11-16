@@ -662,9 +662,8 @@ int CMsgBox::exec( int timeout, int returnDefaultOnTimeout)
 			// return default 
 			loop = false;
 		}
-		else if (	((msg == CRCInput::RC_timeout) ||
-					(msg  == (neutrino_msg_t)g_settings.key_channelList_cancel)) &&
-					(return_button & (mbCancel | mbBack)))
+		else if ((msg == CRCInput::RC_timeout || msg == g_settings.key_channelList_cancel) &&
+			 (return_button & (mbCancel | mbBack)))
 		{
 			m_nResult = (return_button & mbCancel) ? mbrCancel : mbrBack;
 			loop   = false;

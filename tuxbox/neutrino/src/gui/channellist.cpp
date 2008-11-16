@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.194 2008/10/11 21:39:20 seife Exp $
+	$Id: channellist.cpp,v 1.195 2008/11/16 00:52:26 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -291,18 +291,17 @@ int CChannelList::show()
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-		if ( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == (neutrino_msg_t)g_settings.key_channelList_cancel) )
+		if (msg == CRCInput::RC_timeout || msg == g_settings.key_channelList_cancel)
 		{
 			selected = oldselected;
 			loop=false;
 		}
-		else if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup))
+		else if (msg == CRCInput::RC_up || msg == g_settings.key_channelList_pageup)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+			step = (msg == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
 			selected -= step;
 			if((prev_selected-step) < 0)		// because of uint
 				selected = chanlist.size() - 1;
@@ -315,12 +314,12 @@ int CChannelList::show()
 			else
 				paintItem(selected - liststart);
 		}
-		else if ((msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown))
+		else if (msg == CRCInput::RC_down || msg == g_settings.key_channelList_pagedown)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
+			step = (msg == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
 			selected += step;
 
 			if(selected >= chanlist.size())
@@ -334,7 +333,7 @@ int CChannelList::show()
 			else
 				paintItem(selected - liststart);
 		}
-		else if ( ( msg == (neutrino_msg_t)g_settings.key_bouquet_up ) && ( bouquetList != NULL ) )
+		else if (msg == g_settings.key_bouquet_up && bouquetList != NULL)
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
@@ -344,7 +343,7 @@ int CChannelList::show()
 				loop = false;
 			}
 		}
-		else if ( ( msg == (neutrino_msg_t)g_settings.key_bouquet_down ) && ( bouquetList != NULL ) )
+		else if (msg == g_settings.key_bouquet_down && bouquetList != NULL)
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
@@ -618,7 +617,7 @@ void CChannelList::zapTo(int pos, bool forceStoreToLastChannels)
 
 
 
-int CChannelList::numericZap(int key)
+int CChannelList::numericZap(neutrino_msg_t key)
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
@@ -740,7 +739,7 @@ int CChannelList::numericZap(int key)
 			}
 			break;
 		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_quickzap_down )
+		else if (msg == g_settings.key_quickzap_down)
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
@@ -752,7 +751,7 @@ int CChannelList::numericZap(int key)
 					chn = (int)chanlist.size();
 			}
 		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_quickzap_up )
+		else if (msg == g_settings.key_quickzap_up)
 		{
 			chn++;
 
@@ -915,7 +914,7 @@ void CChannelList::virtual_zap_mode(bool up)
 	}
 }
 
-void CChannelList::quickZap(int key)
+void CChannelList::quickZap(neutrino_msg_t key)
 {
         if(chanlist.size()==0)
         {
@@ -923,7 +922,7 @@ void CChannelList::quickZap(int key)
                 return;
         }
 
-        if (key==g_settings.key_quickzap_down)
+        if (key == g_settings.key_quickzap_down)
         {
                 if(selected==0)
                         selected = chanlist.size()-1;
@@ -931,7 +930,7 @@ void CChannelList::quickZap(int key)
                         selected--;
                 //                              CChannel* chan = chanlist[selected];
         }
-        else if (key==g_settings.key_quickzap_up)
+        else if (key == g_settings.key_quickzap_up)
         {
                 selected = (selected+1)%chanlist.size();
                 //                      CChannel* chan = chanlist[selected];

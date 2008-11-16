@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.236 2008/11/14 23:59:13 seife Exp $
+	$Id: infoviewer.cpp,v 1.237 2008/11/16 00:52:26 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -547,10 +547,10 @@ requests to sectionsd.
 					res = messages_return::cancel_info;
 				}
 			}
-			else if ( ( msg == (neutrino_msg_t)g_settings.key_quickzap_up  ) ||
-				    ( msg == (neutrino_msg_t)g_settings.key_quickzap_down) ||
-				    ( msg == CRCInput::RC_0 ) ||
-				    ( msg == NeutrinoMessages::SHOW_INFOBAR ) )
+			else if (msg == g_settings.key_quickzap_up ||
+				 msg == g_settings.key_quickzap_down ||
+				 msg == CRCInput::RC_0 ||
+				 msg == NeutrinoMessages::SHOW_INFOBAR)
 			{
 				hideIt = false;
 				g_RCInput->postMsg( msg, data );

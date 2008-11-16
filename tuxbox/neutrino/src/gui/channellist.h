@@ -2,7 +2,7 @@
 #define __channellist__
 
 /*
-	$Id: channellist.h,v 1.75 2008/05/01 00:08:22 dbt Exp $
+	$Id: channellist.h,v 1.76 2008/11/16 00:52:26 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -126,10 +126,10 @@ class CChannelList
 		bool adjustToChannelID(const t_channel_id channel_id);
 		bool showInfo(int pos, int epgpos = 0);
 		void updateEvents(void);
-		int  numericZap(int key);
+		int  numericZap(neutrino_msg_t key);
 		int  show();
 		int  exec();
-		void quickZap(int key);
+		void quickZap(neutrino_msg_t key);
 		int  hasChannel(int nChannelNr);
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
 		void clearTuned(void) { tuned = 0xfffffff; }
