@@ -1,5 +1,5 @@
 /*
- *  $Id: service_availability_descriptor.h,v 1.1 2008/03/31 07:52:52 mws Exp $
+ *  $Id: service_availability_descriptor.h,v 1.2 2008/11/17 17:01:30 ghostrider Exp $
  *
  *  Copyright (C) 2008 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -26,7 +26,6 @@ class ServiceAvailabilityDescriptor : public Descriptor
 
 	public:
 		ServiceAvailabilityDescriptor(const uint8_t* const buffer);
-		virtual ~ServiceAvailabilityDescriptor();
 
 		uint8_t getAvailabilityFlag() const;
 		const CellIdList *getCellIds(void) const;

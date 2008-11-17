@@ -1,5 +1,5 @@
 /*
- * $Id: registration_descriptor.h,v 1.1 2008/06/03 15:02:23 obi Exp $
+ * $Id: registration_descriptor.h,v 1.2 2008/11/17 17:01:30 ghostrider Exp $
  *
  * Copyright (C) 2008 Andreas Oberritter <obi@saftware.de>
  *
@@ -27,7 +27,6 @@ class RegistrationDescriptor : public Descriptor
 
 	public:
 		RegistrationDescriptor(const uint8_t * const buffer);
-		~RegistrationDescriptor(void);
 
 		uint32_t getFormatIdentifier(void) const;
 		const AdditionalIdentificationInfoVector *getAdditionalIdentificationInfo(void) const;
