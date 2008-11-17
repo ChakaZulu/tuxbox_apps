@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.905 2008/11/16 22:29:19 dbt Exp $
+	$Id: neutrino.cpp,v 1.906 2008/11/17 09:38:14 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1991,7 +1991,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    streamingSettings   (LOCALE_STREAMINGMENU_HEAD            , "streaming.raw"       );
 	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD                , "colors.raw"          );
 	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
-	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 420);
+	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 500);
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 450);
 	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD           , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
