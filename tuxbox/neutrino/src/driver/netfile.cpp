@@ -888,8 +888,9 @@ FILE *f_open(const char *filename, const char *acctype)
 							pthread_mutex_lock( &cache[i].readable );
 
 							/* but writeable. */
-							dprintf(stderr, "f_open: unlocking write direction\n");
-							pthread_mutex_unlock( &cache[i].writeable );
+//							dprintf(stderr, "f_open: unlocking write direction\n");
+// mutex is not locked after init
+//							pthread_mutex_unlock( &cache[i].writeable );
 						}
 
 						/* send the file request and check it'S revurn value */
@@ -1117,9 +1118,14 @@ int f_close(FILE *stream)
 
 		cache[i].closed = 1;		/* indicate that the cache is closed */
 
+#warning FIXME! Those pthread_mutex_trylock's are fugly workarounds. Fix them!
 		/* remove the cache looks */
+		// uclibc doen't like unlocking a non locked mutex, so to be safe use trylock before
+		pthread_mutex_trylock( &cache[i].writeable );
 		pthread_mutex_unlock( &cache[i].writeable );
+		pthread_mutex_trylock( &cache[i].readable );
 		pthread_mutex_unlock( &cache[i].readable );
+		pthread_mutex_trylock( &cache[i].cache_lock );
 		pthread_mutex_unlock( &cache[i].cache_lock );
 
 		/* wait for the fill thread to finish */
@@ -1392,14 +1398,20 @@ int push(FILE *fd, char *buf, long len)
 
 				/* unlock the cache for read access, if it */
 				/* contains some data */
-				if(cache[i].filled)
+				if(cache[i].filled){
+					// uclibc doen't like unlocking a non locked mutex, so to be safe use trylock before
+					pthread_mutex_trylock( &cache[i].readable );
 					pthread_mutex_unlock( &cache[i].readable );
+			}
 			}
 
 			/* if there is still space in the cache, unlock */
 			/* it again for further writing by anyone */
-			if(cache[i].csize - cache[i].filled)
+			if(cache[i].csize - cache[i].filled){
+				// uclibc doen't like unlocking a non locked mutex, so to be safe use trylock before
+				pthread_mutex_trylock( & cache[i].writeable );
 				pthread_mutex_unlock( & cache[i].writeable );
+			}
 			else
 				dprintf(stderr, "push: buffer overrun; cache full - leaving cache locked\n");
 
@@ -1501,14 +1513,20 @@ int pop(FILE *fd, char *buf, long len)
 
 				/* unlock the cache for write access, if it */
 				/* has some free space */
-				if(cache[i].csize - cache[i].filled)
+				if(cache[i].csize - cache[i].filled){
+					// uclibc doen't like unlocking a non locked mutex, so to be safe use trylock before
+					pthread_mutex_trylock( &cache[i].writeable );
 					pthread_mutex_unlock( &cache[i].writeable );
+			}
 			}
 
 		/* if there is still data in the cache, unlock */
 		/* it again for further reading by anyone */
-		if(cache[i].filled)
+			if(cache[i].filled){
+				// uclibc doen't like unlocking a non locked mutex, so to be safe use trylock before
+				pthread_mutex_trylock( & cache[i].readable );
 			pthread_mutex_unlock( & cache[i].readable );
+			}
 		else
 			dprintf(stderr, "pop: buffer underrun; cache empty - leaving cache locked\n");
 
@@ -1580,7 +1598,10 @@ void CacheFillThread(void *c)
 
 	/* close the cache if the stream disrupted */
 	cache->closed = 1;
+	// uclibc doen't like unlocking a non locked mutex, so to be safe use trylock before
+	pthread_mutex_trylock( &cache->writeable );
 	pthread_mutex_unlock( &cache->writeable );
+	pthread_mutex_trylock( &cache->readable );
 	pthread_mutex_unlock( &cache->readable );
 
 	/* ... and exit this thread. */
