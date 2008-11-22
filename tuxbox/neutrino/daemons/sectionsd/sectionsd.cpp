@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.274 2008/11/16 16:08:27 seife Exp $
+//  $Id: sectionsd.cpp,v 1.275 2008/11/22 08:58:10 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -338,6 +338,11 @@ inline bool waitForTimeset(void)
 	while(!timeset)
 		pthread_cond_wait(&timeIsSetCond, &timeIsSetMutex);
 	pthread_mutex_unlock(&timeIsSetMutex);
+	/* we have time synchronization issues, at least on kernel 2.4, so
+	   sometimes the time in the threads is still 1.1.1970, even after
+	   waitForTimeset() returns. Let's hope that we work around this issue
+	   with this sleep */
+	sleep(1);
 	writeLockMessaging();
 	messaging_last_requested = time(NULL);
 	unlockMessaging();
@@ -2456,7 +2461,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.274 2008/11/16 16:08:27 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.275 2008/11/22 08:58:10 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -8054,7 +8059,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.274 2008/11/16 16:08:27 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.275 2008/11/22 08:58:10 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
