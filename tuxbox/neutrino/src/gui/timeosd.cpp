@@ -1,4 +1,6 @@
 /*
+	$Id: timeosd.cpp,v 1.5 2008/11/24 16:49:54 dbt Exp $
+	
 	Neutrino-GUI  -   DBoxII-Project
 
 	Timerliste by Zwen
@@ -83,7 +85,7 @@ void CTimeOSD::update()
 			tDisplayTime=0;
 		strftime(cDisplayTime, 9, "%T", gmtime(&tDisplayTime));
 		frameBuffer->paintBackgroundBoxRel(m_xend - m_width -20, m_y - 10 , m_width + 40, m_height + 20);
-		frameBuffer->paintBoxRel(m_xend - m_width - 10, m_y , m_width + 10 , m_height, color);
+		frameBuffer->paintBoxRel(m_xend - m_width - 10, m_y , m_width + 10 , m_height, color, RADIUS_MID);
 		g_Font[TIMEOSD_FONT]->RenderString(m_xend - m_width - 5,m_y + m_height,
 																				m_width+5, cDisplayTime, color);
 	}
