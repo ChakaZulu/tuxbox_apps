@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.410 2008/04/25 21:23:23 houdini Exp $
+ * $Id: zapit.cpp,v 1.411 2008/11/24 10:29:19 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -850,7 +850,15 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 
 		/* store the new channel */
 		if ((!channel) || (channel_id != channel->getChannelID()))
-			channel = &(cit->second);
+		{
+			/* do not only take a reference to the channel list,
+			   copy the entry instead. Otherwise we will die if
+			   the channellist is deleted, since channel members
+			   might get modified. this happened in stop_scan() */
+			if (channel)
+				delete(channel);
+			channel = new CZapitChannel(cit->second);
+		}
 
 		current_transponder_id = channel->getTransponderId();
 	}
@@ -1464,7 +1472,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 		tallchans_iterator cit = allchans.find(cid);
 		if (cit != allchans.end()) 
-			channel = &(cit->second); 
+		{
+			if (channel)
+				delete(channel);
+			channel = new CZapitChannel(cit->second);
+		}
 
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
@@ -1484,7 +1496,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		bouquetManager->loadBouquets();
 		tallchans_iterator cit = allchans.find(cid);
 		if (cit != allchans.end()) 
-			channel = &(cit->second); 
+		{
+			if (channel)
+				delete(channel);
+			channel = new CZapitChannel(cit->second);
+		}
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
@@ -2625,7 +2641,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.410 2008/04/25 21:23:23 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.411 2008/11/24 10:29:19 seife Exp $\n");
 
 	bool check_lock = true;
 
