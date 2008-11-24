@@ -1083,7 +1083,7 @@ scants.startnow Kanalsuche starten
 scants.transponders Transponder:
 screensetup.lowerright Bildrand unten, rechts
 screensetup.upperleft Bildrand oben, links
-sectionsd.scanmode Sections Scan
+sectionsd.scanmode Automatische Kanalsuche
 servicemenu.chan_epg_stat Sender/EPG Statistik
 servicemenu.chan_epg_stat_epg_stat EPG Statistik
 servicemenu.epgrestart EPG neu starten
