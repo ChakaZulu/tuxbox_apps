@@ -37,6 +37,22 @@ Note that the above filters are only affecting the storage of the events:
 all events are still read and processed, but they are not stored, so this
 leads to memory savings.
 
+If you want to create a whitelist containing all the channels that are in
+your "Meine Favoriten"-Bouquet, you can do it with this little script
+(redirect the output to epgfilter.xml):
+
+#!/bin/sh
+BOUQ=/var/tuxbox/config/zapit/bouquets.xml
+echo '<?xml version="1.0" encoding="UTF-8"?>'
+echo '<epgfilter is_whitelist = "1" except_current_next = "1">'
+sed -n '/<Bouquet.*name="Meine Favoriten"/,/<\/Bouquet>/{
+                 s/^.*<channel/ <filter/;
+                 s/ sat=.*/\/>/p
+        };' $BOUQ
+echo '</epgfilter>'
+
+
+
 BLACKLISTING specific channels:
 -------------------------------
 Due to driver problems, some boxes hang up on certain channels when EPG
