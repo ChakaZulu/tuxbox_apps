@@ -56,7 +56,8 @@ void CProgressBar::paintProgressBar (	const int pos_x,
 					const uint8_t shadowbar_col,
 					const char * upper_labeltext,
 					const uint8_t uppertext_col,
-					const char * iconfile)
+					const char * iconfile,
+					bool paintZero)
 {
 	
 	// set colors
@@ -114,7 +115,7 @@ void CProgressBar::paintProgressBar (	const int pos_x,
 					
 	// upper text
 	int upper_labeltext_y = start_y - frame_widht ;
-	if (upper_labeltext != "") 	{		
+	if (upper_labeltext != NULL) 	{		
 		g_Font[font_pbar]->RenderString( start_x +2,
 						upper_labeltext_y,
 						pb_width,
@@ -126,6 +127,8 @@ void CProgressBar::paintProgressBar (	const int pos_x,
 		
 	frameBuffer->paintBoxRel(start_x,  start_y, active_pb_width, bar_height, active_col); // active bar
 	frameBuffer->paintBoxRel(start_x_passive_bar, start_y, width_passive_bar, bar_height, passive_col); // passive bar
+	if ((paintZero) && (value ==0))
+		frameBuffer->paintLine(pos_x+2 , pos_y+2, pos_x+pb_width-2, pos_y+pb_height-2, active_col); // zero line
 }
 
 

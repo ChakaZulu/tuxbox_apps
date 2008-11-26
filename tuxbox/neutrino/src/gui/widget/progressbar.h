@@ -63,6 +63,7 @@ class CProgressBar
 	upper_labeltext >	optional, label text, will be painted  upper/left the progressbar
 	uppertext_col >	optional, but necessary with label text, color of label text
 	iconfile > optional, name of iconfile
+	paintZero > optional, if set to true and value = 0, then paints a diagonal line instead of active bar as symbolic for a zero value
 */
 
 	
@@ -76,9 +77,10 @@ class CProgressBar
 					const uint8_t passivebar_col = 0,
 					const uint8_t frame_col = 0,
 					const uint8_t shadowbar_col = 0,
-					const char * upper_labeltext = "",
+					const char * upper_labeltext = NULL,
 					const uint8_t uppertext_col = 0,
-					const char * iconfile = NULL);
+					const char * iconfile = NULL,
+					bool paintZero = false);
 	
 		void paintProgressBarDefault (	const int pos_x,
 						const int pos_y,
@@ -86,6 +88,7 @@ class CProgressBar
 						const int pb_height,
 						const int value,
 						const int max_value);
+						
 };
 					
 #endif /* __gui_widget_progressbar_h__ */
