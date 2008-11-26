@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.128 2008/05/01 19:57:29 seife Exp $
+	$Id: update.cpp,v 1.129 2008/11/26 21:35:47 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -237,10 +237,10 @@ bool CFlashUpdate::getUpdateImage(const std::string & version)
 {
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer(this);
-
+		
 	showStatusMessageUTF(std::string(g_Locale->getText(LOCALE_FLASHUPDATE_GETUPDATEFILE)) + ' ' + version); // UTF-8
 
-	printf("get update (url): %s - %s\n", filename.c_str(), gTmpPath UPDATE_LOCAL_FILENAME);
+	printf("[update] get update (url): %s - %s\n", filename.c_str(), gTmpPath UPDATE_LOCAL_FILENAME);
 	return httpTool.downloadFile(filename, gTmpPath UPDATE_LOCAL_FILENAME, 40 );
 }
 
@@ -260,7 +260,7 @@ bool CFlashUpdate::checkVersion4Update()
 		showGlobalStatus(20);
 		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_VERSIONCHECK)); // UTF-8
 
-		printf("internet version: %s\n", newVersion.c_str());
+		printf("[update] internet version: %s\n", newVersion.c_str());
 
 		showLocalStatus(100);
 		showGlobalStatus(20);
@@ -320,7 +320,7 @@ bool CFlashUpdate::checkVersion4Update()
 		else
 		{
 			hide();
-			printf("flash-file not found: %s\n", filename.c_str());
+			printf("[update] flash-file not found: %s\n", filename.c_str());
 			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_CANTOPENFILE)); // UTF-8
 			return false;
 		}
@@ -373,7 +373,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	}
 	
 #ifdef LCD_UPDATE
-	CLCD::getInstance()->showProgressBar2(0,"checking",0,"Update Neutrino");
+	CLCD::getInstance()->showProgressBar2(0,NULL,0, g_Locale->getText(LOCALE_FLASHUPDATE_GLOBALPROGRESS));
 	CLCD::getInstance()->setMode(CLCD::MODE_PROGRESSBAR2);
 #endif // LCD_UPDATE
 
@@ -417,7 +417,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	// is a valid cramfs image
 	if (looks_like_cramfs)
 	{
-		printf("Checking it for cramfs correctness\n");
+		printf("[update] Checking it for cramfs correctness\n");
 		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_MD5CHECK)); // UTF-8
 		if(!ft.check_cramfs(filename))
 		{
@@ -585,11 +585,11 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 		return;
 
 #ifdef LCD_UPDATE
-	CLCD::getInstance()->showProgressBar2(0,"checking",0,"Update Neutrino");
+	CLCD::getInstance()->showProgressBar2(0,NULL,0, g_Locale->getText(LOCALE_FLASHUPDATE_GLOBALPROGRESS));
 	CLCD::getInstance()->setMode(CLCD::MODE_PROGRESSBAR2);
 #endif // LCD_UPDATE
 
-	setTitle(LOCALE_FLASHUPDATE_TITLEWRITEFLASH);
+	setTitle(LOCALE_FLASHUPDATE_GLOBALPROGRESS);
 	paint();
 	showGlobalStatus(0);
 	CFlashTool ft;
