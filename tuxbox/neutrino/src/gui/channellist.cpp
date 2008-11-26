@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.197 2008/11/16 22:29:20 dbt Exp $
+	$Id: channellist.cpp,v 1.198 2008/11/26 21:30:47 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -1156,6 +1156,10 @@ void CChannelList::paintItem(int pos)
 		else
 			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
 
+		CProgressBar pb;
+		int pb_space = prg_offset - title_offset;
+		int pb_max = pb_space - 4;
+		
 		if (!(chan->currentEvent.description.empty()))
 		{
 			// add MIDDLE DOT separator between name and description
@@ -1170,8 +1174,7 @@ void CChannelList::paintItem(int pos)
 				ch_desc_len = 0;
 
 			if(g_settings.channellist_extended)
-			{
-				
+			{		
 				if(displayNext)
 				{
 					struct		tm *pStartZeit = localtime(&p_event->startTime);
@@ -1181,11 +1184,8 @@ void CChannelList::paintItem(int pos)
 				}
 				else
 				{
-					CProgressBar pb;					
 					time_t jetzt=time(NULL);
 					int runningPercent = 0;
-					int pb_space = prg_offset - title_offset;
-					int pb_max = pb_space - 4;
 							
 					if (((jetzt - p_event->startTime + 30) / 60) < 0 )
 					{
@@ -1197,7 +1197,19 @@ void CChannelList::paintItem(int pos)
 						if (runningPercent > pb_max)	// this would lead to negative value in paintBoxRel
 							runningPercent = pb_max;	// later on which can be fatal...
 					}
-					pb.paintProgressBar(x+5+numwidth + title_offset, ypos + fheight/4, pb_space + 2, fheight/2, runningPercent, pb_max, COL_MENUCONTENT_PLUS_3, COL_MENUCONTENT_PLUS_1, COL_MENUCONTENT_PLUS_3);
+					
+					// progressbar colors
+					int pb_activeCol , pb_passiveCol ;
+					if (liststart + pos != selected){
+						pb_activeCol = COL_MENUCONTENT_PLUS_3;
+						pb_passiveCol = COL_MENUCONTENT_PLUS_1;
+					}
+					else {
+						pb_activeCol = COL_MENUCONTENTSELECTED_PLUS_2;
+						pb_passiveCol = COL_MENUCONTENTSELECTED_PLUS_0;
+					}
+					// progressbar 
+					pb.paintProgressBar(x+5+numwidth + title_offset, ypos + fheight/4, pb_space + 2, fheight/2, runningPercent, pb_max, pb_activeCol, pb_passiveCol, pb_activeCol);
 				}
 			}
 
@@ -1214,7 +1226,21 @@ void CChannelList::paintItem(int pos)
 			
 		}
 		else
-			//name
+			// progressbar with diagonal zero line
+			if(g_settings.channellist_extended)
+			{
+				int pbz_activeCol , pbz_passiveCol ;
+				if (liststart + pos != selected){
+					pbz_activeCol = COL_MENUCONTENT_PLUS_1;
+					pbz_passiveCol = COL_MENUCONTENT_PLUS_0;
+				}
+				else {
+					pbz_activeCol = COL_MENUCONTENTSELECTED_PLUS_2;
+					pbz_passiveCol = COL_MENUCONTENTSELECTED_PLUS_0;
+				}
+				pb.paintProgressBar(x+5+numwidth + title_offset, ypos + fheight/4, pb_space + 2, fheight/2, 0, pb_max, pbz_activeCol, pbz_passiveCol, pbz_activeCol, 0, NULL, 0, NULL, true);
+			}
+			// name
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x + 5 + numwidth + 10 + prg_offset, ypos + fheight, width- numwidth - 20 - 15 - prg_offset, nameAndDescription, color);
 	}
 }
