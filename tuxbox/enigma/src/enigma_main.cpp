@@ -2381,7 +2381,7 @@ void eZapMain::updateProgress()
 		int total=handler->getPosition(eServiceHandler::posQueryLength);
 		int current=handler->getPosition(eServiceHandler::posQueryCurrent);
 
-		eString _remain = handler->getPTSTimeStampPosition(eServiceHandler::posQueryTimeRemain);
+		eString _remain = timeshift ? "" : handler->getPTSTimeStampPosition(eServiceHandler::posQueryTimeRemain);
 
 		if (total != indices.getTotalLength())
 			indices.setTotalLength(total);
@@ -2394,7 +2394,7 @@ void eZapMain::updateProgress()
 			lcdmain.lcdMain->Progress->setPerc(current*100/total);
 			lcdmain.lcdMain->Progress->show();
 #endif
-			if (_remain.length() == 1)
+			if (_remain.length() <= 1 )
 			{
 				int min=total-current;
 				int sec=min%60;
