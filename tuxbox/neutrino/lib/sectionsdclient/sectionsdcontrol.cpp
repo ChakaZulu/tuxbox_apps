@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.6 2008/05/01 18:06:46 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.7 2008/11/28 22:15:37 seife Exp $
  *
  * Sectionsd command line interface - The Tuxbox Project
  *
@@ -36,6 +36,7 @@ void usage(void) {
 	printf("        sectionsdcontrol --freemem       unloads all events\n");
 	printf("        sectionsdcontrol --restart       restart sectionsd\n");
 	printf("        sectionsdcontrol --ping          ping sectionsd\n");
+	printf("        sectionsdcontrol --statistics    print statistics\n");
 }
 
 int main(int argc, char** argv)
@@ -93,6 +94,13 @@ int main(int argc, char** argv)
 		{
 			printf("restarting sectionsd\n");
 			client.Restart();
+		}
+		else if (!strcmp(argv[i], "--statistics"))
+		{
+			std::string response;
+			printf("statistics:\n");
+			response = client.getStatusinformation();
+			printf("%s", response.c_str());
 		}
 		else if (!strcmp(argv[i], "--ping"))
 			printf("sectionsd %s\n", client.ping() ? "running" : "dead");
