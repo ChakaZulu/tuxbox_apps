@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.275 2008/11/22 08:58:10 seife Exp $
+//  $Id: sectionsd.cpp,v 1.276 2008/11/29 16:55:12 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2461,7 +2461,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.275 2008/11/22 08:58:10 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.276 2008/11/29 16:55:12 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -5332,12 +5332,16 @@ xmlNodePtr getProviderFromSatellitesXML(xmlNodePtr node, const int position) {
 		if (xmlGetSignedNumericAttribute(satellite, "position", 16) == position) {
 			while (node) {
 				if (!strcmp(xmlGetAttribute(satellite, "name"), xmlGetAttribute(node, "name")))
+				{
+					xmlFreeDoc(satellites_parser);
 					return node;
+				}
 				node = node->xmlNextNode;
 			}
 		}
 		satellite = satellite->xmlNextNode;
 	}
+	xmlFreeDoc(satellites_parser);
 	return NULL;
 }
 
@@ -8059,7 +8063,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.275 2008/11/22 08:58:10 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.276 2008/11/29 16:55:12 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
