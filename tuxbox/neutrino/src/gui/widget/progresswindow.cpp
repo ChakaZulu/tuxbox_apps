@@ -1,5 +1,5 @@
 /*
-	$Id: progresswindow.cpp,v 1.20 2008/11/16 21:46:42 seife Exp $
+	$Id: progresswindow.cpp,v 1.21 2008/11/30 22:47:12 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -65,9 +65,9 @@ void CProgressWindow::setTitle(const neutrino_locale_t title)
 {
 	caption = title;
 
-#ifdef LCD_UPDATE
-	CLCD::getInstance()->showProgressBar2(-1,NULL,-1,g_Locale->getText(caption)); // set global text in LCD
-#endif // LCD_UPDATE
+//~ #ifdef LCD_UPDATE
+	//~ CLCD::getInstance()->showProgressBar2(-1,NULL,-1,g_Locale->getText(caption)); // set global text in LCD
+//~ #endif // LCD_UPDATE
 }
 
 
