@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.906 2008/11/17 09:38:14 dbt Exp $
+	$Id: neutrino.cpp,v 1.907 2008/11/30 23:11:23 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3809,6 +3809,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_Sectionsd->Restart();
 		g_Sectionsd->RegisterNeutrino();
 		g_Sectionsd->setPauseScanning(false);
+		g_Sectionsd->setServiceChanged(g_RemoteControl->current_channel_id, false);
 		SendSectionsdConfig();
 	}
 	

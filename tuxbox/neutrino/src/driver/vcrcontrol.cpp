@@ -342,6 +342,7 @@ void CVCRControl::CFileAndServerDevice::RestoreNeutrino(void)
 	if (StopSectionsd) {
 #ifdef RESTART_SECTIONSD_INSTEAD_OF_STOP
 		g_Sectionsd->RegisterNeutrino();
+		g_Sectionsd->setServiceChanged(g_RemoteControl->current_channel_id, false);
 #endif
 		g_Sectionsd->setPauseScanning(false);
 	}
