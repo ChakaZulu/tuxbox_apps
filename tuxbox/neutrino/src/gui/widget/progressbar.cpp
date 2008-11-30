@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id:$
  *
  * (C) 2008 by dbt <info@dbox2-tuning.de>
  *
@@ -128,7 +128,7 @@ void CProgressBar::paintProgressBar (	const int pos_x,
 	frameBuffer->paintBoxRel(start_x,  start_y, active_pb_width, bar_height, active_col); // active bar
 	frameBuffer->paintBoxRel(start_x_passive_bar, start_y, width_passive_bar, bar_height, passive_col); // passive bar
 	if ((paintZero) && (value ==0))
-		frameBuffer->paintLine(pos_x+2 , pos_y+2, pos_x+pb_width-2, pos_y+pb_height-2, active_col); // zero line
+		frameBuffer->paintLine(pos_x+2 , pos_y+2, pos_x+pb_width-3, pos_y+pb_height-3, active_col); // zero line
 }
 
 
