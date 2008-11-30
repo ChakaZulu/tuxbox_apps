@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.411 2008/11/24 10:29:19 seife Exp $
+ * $Id: zapit.cpp,v 1.412 2008/11/30 23:19:48 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -91,7 +91,7 @@ CFrontend *frontend = NULL;
 /* the dvb video device */
 CVideo *videoDecoder = NULL;
 /* the current channel */
-CZapitChannel *channel = NULL;
+CZapitChannel *cc = NULL;
 /* the transponder scan xml input */
 xmlDocPtr scanInputParser = NULL;
 /* the bouquet manager */
@@ -719,9 +719,9 @@ void mergeBouquets()
 
 void saveSettings(bool write)
 {
-	if (channel) {
+	if (cc) {
 		// now save the lowest channel number with the current channel_id
-		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithChannelID(channel->getChannelID());
+		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithChannelID(cc->getChannelID());
 
 		if (c >= 0)
 			if ((currentMode & RADIO_MODE))
@@ -794,13 +794,13 @@ static bool update_pmt = false;
 void
 remember_selected_audio()
 {
-	if (save_audioPIDs && channel) {
-		if (channel->getAudioChannelCount() > 1) {
-			audio_map[channel->getServiceId()] = channel->getAudioPid();
-			DBG("*** Remembering apid = %d for channel (service-id) = %d",  channel->getAudioPid(), channel->getServiceId());
+	if (save_audioPIDs && cc) {
+		if (cc->getAudioChannelCount() > 1) {
+			audio_map[cc->getServiceId()] = cc->getAudioPid();
+			DBG("*** Remembering apid = %d for channel (service-id) = %d",  cc->getAudioPid(), cc->getServiceId());
 		} else {
-			audio_map.erase(channel->getServiceId());
-			DBG("*** Not Remembering apid = %d for channel (service-id) = %d",  channel->getAudioPid(), channel->getServiceId());
+			audio_map.erase(cc->getServiceId());
+			DBG("*** Not Remembering apid = %d for channel (service-id) = %d",  cc->getAudioPid(), cc->getServiceId());
 		}
 	}
 }
@@ -849,18 +849,18 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 		}
 
 		/* store the new channel */
-		if ((!channel) || (channel_id != channel->getChannelID()))
+		if (!cc || channel_id != cc->getChannelID())
 		{
 			/* do not only take a reference to the channel list,
 			   copy the entry instead. Otherwise we will die if
 			   the channellist is deleted, since channel members
 			   might get modified. this happened in stop_scan() */
-			if (channel)
-				delete(channel);
-			channel = new CZapitChannel(cit->second);
+			if (cc)
+				delete(cc);
+			cc = new CZapitChannel(cit->second);
 		}
 
-		current_transponder_id = channel->getTransponderId();
+		current_transponder_id = cc->getTransponderId();
 	}
 	else /* nvod subservice zap */
 	{
@@ -870,20 +870,20 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	stopPlayBack();
 
 	/* have motor move satellite dish to satellite's position if necessary */
-	if ((diseqcType == DISEQC_1_2) && (motorPositions[channel->getSatellitePosition()] != 0))
+	if ((diseqcType == DISEQC_1_2) && (motorPositions[cc->getSatellitePosition()] != 0))
 	{
-		if ((frontend->getCurrentSatellitePosition() != channel->getSatellitePosition()))
+		if ((frontend->getCurrentSatellitePosition() != cc->getSatellitePosition()))
 		{
-			printf("[zapit] currentSatellitePosition = %d, satellitePosition = %d\n", frontend->getCurrentSatellitePosition(), channel->getSatellitePosition());
-			printf("[zapit] motorPosition = %d\n", motorPositions[channel->getSatellitePosition()]);
-			frontend->positionMotor(motorPositions[channel->getSatellitePosition()]);
+			printf("[zapit] currentSatellitePosition = %d, satellitePosition = %d\n", frontend->getCurrentSatellitePosition(), cc->getSatellitePosition());
+			printf("[zapit] motorPosition = %d\n", motorPositions[cc->getSatellitePosition()]);
+			frontend->positionMotor(motorPositions[cc->getSatellitePosition()]);
 
-			waitForMotor = abs(channel->getSatellitePosition() - frontend->getCurrentSatellitePosition()) / motorRotationSpeed; //assuming 1.8 degrees/second motor rotation speed for the time being...
+			waitForMotor = abs(cc->getSatellitePosition() - frontend->getCurrentSatellitePosition()) / motorRotationSpeed; //assuming 1.8 degrees/second motor rotation speed for the time being...
 			printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
 			eventServer->sendEvent(CZapitClient::EVT_ZAP_MOTOR, CEventServer::INITID_ZAPIT, &waitForMotor, sizeof(waitForMotor));
 			sleep(waitForMotor);
 
-			frontend->setCurrentSatellitePosition(channel->getSatellitePosition());
+			frontend->setCurrentSatellitePosition(cc->getSatellitePosition());
 		}
 	}
 
@@ -927,7 +927,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 
 	if (transponder_id == TRANSPONDER_ID_NOT_TUNED)
 	{
-		thisChannel = channel;
+		thisChannel = cc;
 		if (thisChannel->getServiceType() == ST_NVOD_REFERENCE_SERVICE) {
 			current_is_nvod = true;
 			saveSettings(false);
@@ -936,13 +936,13 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	}
 	else
 	{
-		thisChannel = new CZapitChannel(channel->getName(),
+		thisChannel = new CZapitChannel(cc->getName(),
 						channel_id & 0xffff,
 						GET_TRANSPORT_STREAM_ID_FROM_TRANSPONDER_ID(transponder_id),
 						GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(transponder_id),
 						1,
 						frontend->getDiseqcPosition(),
-						channel->getSatellitePosition(),
+						cc->getSatellitePosition(),
 						GET_FREQUENCY_FROM_TRANSPONDER_ID(transponder_id)
 						);
 	}
@@ -983,7 +983,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 
 		if (failed) {
 			thisChannel->resetPids();
-			if (channel != thisChannel)
+			if (cc != thisChannel)
 				delete thisChannel;
 			return -1;
 		}
@@ -1017,7 +1017,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	if (update_pmt)
 		pmt_set_update_filter(thisChannel, &pmt_update_fd);
 
-	if (channel != thisChannel)
+	if (cc != thisChannel)
 		delete thisChannel;
 
 	return 0;
@@ -1029,24 +1029,24 @@ int select_nvod_subservice_num(int num)
 	t_transport_stream_id transport_stream_id;
 	t_service_id service_id;
 
-	if ((!channel) || (channel->getServiceType() != ST_NVOD_REFERENCE_SERVICE) || (num < 0))
+	if (!cc || (cc->getServiceType() != ST_NVOD_REFERENCE_SERVICE) || (num < 0))
 		return -1;
 
-	if (tuned_transponder_id != channel->getTransponderId())
-		zapit(channel->getChannelID(), false, TRANSPONDER_ID_NOT_TUNED);
+	if (tuned_transponder_id != cc->getTransponderId())
+		zapit(cc->getChannelID(), false, TRANSPONDER_ID_NOT_TUNED);
 
-	if (nvod_service_ids(channel->getTransportStreamId(), channel->getOriginalNetworkId(), channel->getServiceId(),
+	if (nvod_service_ids(cc->getTransportStreamId(), cc->getOriginalNetworkId(), cc->getServiceId(),
 				num, &transport_stream_id, &original_network_id, &service_id) < 0)
 		return -1;
 
 	DBG("tsid: %04x, onid: %04x, sid: %04x\n", transport_stream_id, original_network_id, service_id);
 
-	return zapit(CREATE_CHANNEL_ID, false, CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(channel->getFrequency(), channel->getSatellitePosition(), original_network_id, transport_stream_id));
+	return zapit(CREATE_CHANNEL_ID, false, CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(cc->getFrequency(), cc->getSatellitePosition(), original_network_id, transport_stream_id));
 }
 
 int change_audio_pid(uint8_t index)
 {
-	if ((!audioDemux) || (!audioDecoder) || (!channel))
+	if (!audioDemux || !audioDecoder || !cc)
 		return -1;
 
 	/* stop demux filter */
@@ -1058,11 +1058,11 @@ int change_audio_pid(uint8_t index)
 		return -1;
 
 	/* update current channel */
-	channel->setAudioChannel(index);
+	cc->setAudioChannel(index);
 	remember_selected_audio();
 
 	/* set bypass mode */
-	CZapitAudioChannel *currentAudioChannel = channel->getAudioChannel();
+	CZapitAudioChannel *currentAudioChannel = cc->getAudioChannel();
 
 	if (!currentAudioChannel) {
 		WARN("No current audio channel");
@@ -1075,7 +1075,7 @@ int change_audio_pid(uint8_t index)
 		audioDecoder->disableBypass();
 
 	/* set demux filter */
-	if (audioDemux->pesFilter(channel->getAudioPid(), DMX_OUT_DECODER, DMX_PES_AUDIO) < 0)
+	if (audioDemux->pesFilter(cc->getAudioPid(), DMX_OUT_DECODER, DMX_PES_AUDIO) < 0)
 		return -1;
 
 	/* start audio playback */
@@ -1091,8 +1091,8 @@ int change_audio_pid(uint8_t index)
 
 int change_subtitle(uint index)
 {
-	if (!channel) return -1;
-	channel->setChannelSub(index);
+	if (!cc) return -1;
+	cc->setChannelSub(index);
 	return 0;
 }
 
@@ -1342,7 +1342,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_GET_CURRENT_SERVICEID:
 	{
 		CZapitMessages::responseGetCurrentServiceID msgCurrentSID;
-		msgCurrentSID.channel_id = (tuned_transponder_id != TRANSPONDER_ID_NOT_TUNED) ? channel->getChannelID() : 0;
+		msgCurrentSID.channel_id = (tuned_transponder_id != TRANSPONDER_ID_NOT_TUNED) ? cc->getChannelID() : 0;
 		CBasicServer::send_data(connfd, &msgCurrentSID, sizeof(msgCurrentSID));
 		break;
 	}
@@ -1350,13 +1350,13 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_GET_CURRENT_SERVICEINFO:
 	{
 		CZapitClient::CCurrentServiceInfo msgCurrentServiceInfo;
-		msgCurrentServiceInfo.onid = channel->getOriginalNetworkId();
-		msgCurrentServiceInfo.sid = channel->getServiceId();
-		msgCurrentServiceInfo.tsid = channel->getTransportStreamId();
-		msgCurrentServiceInfo.vpid = channel->getVideoPid();
-		msgCurrentServiceInfo.apid = channel->getAudioPid();
+		msgCurrentServiceInfo.onid = cc->getOriginalNetworkId();
+		msgCurrentServiceInfo.sid = cc->getServiceId();
+		msgCurrentServiceInfo.tsid = cc->getTransportStreamId();
+		msgCurrentServiceInfo.vpid = cc->getVideoPid();
+		msgCurrentServiceInfo.apid = cc->getAudioPid();
 		{
-			CZapitAbsSub* sub = channel->getChannelSub(-1);
+			CZapitAbsSub* sub = cc->getChannelSub(-1);
 			if (sub) {
 				CZapitDVBSub* sd = reinterpret_cast<CZapitDVBSub*>(sub);
 				CZapitTTXSub* st = reinterpret_cast<CZapitTTXSub*>(sub);
@@ -1364,7 +1364,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					msgCurrentServiceInfo.spid = sd->pId;
 					msgCurrentServiceInfo.spage = sd->composition_page_id;
 				} else if (sub->thisSubType == CZapitAbsSub::TTX) {
-					msgCurrentServiceInfo.spid = channel->getTeletextPid();
+					msgCurrentServiceInfo.spid = cc->getTeletextPid();
 					msgCurrentServiceInfo.spage =
 						st->teletext_magazine_number * 100 + (st->teletext_page_number >> 4) * 10 + (st->teletext_page_number & 0xf);
 				}
@@ -1373,15 +1373,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				msgCurrentServiceInfo.spage = 0;
 			}
 		}
-		msgCurrentServiceInfo.vtxtpid = channel->getTeletextPid();
-		msgCurrentServiceInfo.pmtpid = channel->getPmtPid();
-		msgCurrentServiceInfo.pcrpid = channel->getPcrPid();
+		msgCurrentServiceInfo.vtxtpid = cc->getTeletextPid();
+		msgCurrentServiceInfo.pmtpid = cc->getPmtPid();
+		msgCurrentServiceInfo.pcrpid = cc->getPcrPid();
 		msgCurrentServiceInfo.tsfrequency = frontend->getFrequency();
 		if (frontend->getInfo()->type == FE_QPSK)
 			msgCurrentServiceInfo.polarisation = frontend->getPolarization();
 		else
 			msgCurrentServiceInfo.polarisation = 2;
-		msgCurrentServiceInfo.diseqc = channel->getDiSEqC();
+		msgCurrentServiceInfo.diseqc = cc->getDiSEqC();
 		CBasicServer::send_data(connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo));
 		break;
 	}
@@ -1459,7 +1459,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_REINIT_CHANNELS:
 	{
 		// Houdini: save actual channel to restore it later, old version's channel was set to scans.conf initial channel
-		t_channel_id cid= channel ? channel->getChannelID() : 0; 
+		t_channel_id cid= cc ? cc->getChannelID() : 0;
 
 		CZapitMessages::responseCmd response;
 
@@ -1473,9 +1473,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		tallchans_iterator cit = allchans.find(cid);
 		if (cit != allchans.end()) 
 		{
-			if (channel)
-				delete(channel);
-			channel = new CZapitChannel(cit->second);
+			if (cc)
+				delete(cc);
+			cc = new CZapitChannel(cit->second);
 		}
 
 		response.cmd = CZapitMessages::CMD_READY;
@@ -1487,7 +1487,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_RELOAD_CURRENTSERVICES:
 	{
 		CZapitMessages::responseCmd response;
-		t_channel_id cid= channel ? channel->getChannelID() : 0; 
+		t_channel_id cid= cc ? cc->getChannelID() : 0;
 
 		transponders.clear();
 		bouquetManager->clearAll();
@@ -1497,9 +1497,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		tallchans_iterator cit = allchans.find(cid);
 		if (cit != allchans.end()) 
 		{
-			if (channel)
-				delete(channel);
-			channel = new CZapitChannel(cit->second);
+			if (cc)
+				delete(cc);
+			cc = new CZapitChannel(cit->second);
 		}
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
@@ -1529,9 +1529,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		TP_params TP;
 		t_channel_id save_channel;
 		
-		if (!channel) break; // otherwise zapit dies
+		if (!cc) break; // otherwise zapit dies
 		// save channel info
-		save_channel = channel->getChannelID();
+		save_channel = cc->getChannelID();
 		CBasicServer::receive_data(connfd, &TP, sizeof(TP));
 // Houdini: now configured/send by neutrino!
 //		TP.diseqc=transponder->second.DiSEqC;
@@ -1837,7 +1837,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_SB_START_PLAYBACK:
 		playbackStopForced = false;
 		/* FIXME: nvod */
-		startPlayBack(channel);
+		startPlayBack(cc);
 		break;
 
 	case CZapitMessages::CMD_SB_STOP_PLAYBACK:
@@ -1863,17 +1863,17 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_GETPIDS:
 	{
-		if (channel)
+		if (cc)
 		{
 			CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
-			responseGetOtherPIDs.vpid = channel->getVideoPid();
+			responseGetOtherPIDs.vpid = cc->getVideoPid();
 			responseGetOtherPIDs.ecmpid = NONE; // TODO: remove
-			responseGetOtherPIDs.vtxtpid = channel->getTeletextPid();
-			responseGetOtherPIDs.pcrpid = channel->getPcrPid();
-			responseGetOtherPIDs.pmtpid = channel->getPmtPid();
-			responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
-			responseGetOtherPIDs.selected_sub = channel->getChannelSubIndex();
-			responseGetOtherPIDs.privatepid = channel->getPrivatePid();
+			responseGetOtherPIDs.vtxtpid = cc->getTeletextPid();
+			responseGetOtherPIDs.pcrpid = cc->getPcrPid();
+			responseGetOtherPIDs.pmtpid = cc->getPmtPid();
+			responseGetOtherPIDs.selected_apid = cc->getAudioChannelIndex();
+			responseGetOtherPIDs.selected_sub = cc->getChannelSubIndex();
+			responseGetOtherPIDs.privatepid = cc->getPrivatePid();
 			CBasicServer::send_data(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs));
 			sendAPIDs(connfd);
 			sendSubPIDs(connfd);
@@ -1902,15 +1902,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			t_original_network_id original_network_id = msgAddSubService.original_network_id;
 			t_service_id          service_id          = msgAddSubService.service_id;
 			transponder_list_t::iterator t;
-			frequency_kHz_t frequency = channel->getFrequency();
+			frequency_kHz_t frequency = cc->getFrequency();
 
 	/* following lines are because the current_transponder_id(nvod channels) might not have the correct frequency (but the frequency of the 'master' channel),
 	  either complete the CSubService struct in remotecontrol.cpp, but frequency doesn't seem to be available there 
 	  or look for the correct transponder (search without frequency) */
-			if (transponders.find(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(frequency, channel->getSatellitePosition(), original_network_id, msgAddSubService.transport_stream_id)) == transponders.end())
+			if (transponders.find(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(frequency, cc->getSatellitePosition(), original_network_id, msgAddSubService.transport_stream_id)) == transponders.end())
 				for (t = transponders.begin(); t != transponders.end(); t++)
 				{
-					if((GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(t->first) == channel->getSatellitePosition()) &&
+					if((GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(t->first) == cc->getSatellitePosition()) &&
 					   (GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(t->first) == original_network_id) &&
 					   (GET_TRANSPORT_STREAM_ID_FROM_TRANSPONDER_ID(t->first) == msgAddSubService.transport_stream_id))
 					{
@@ -1932,8 +1932,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					    msgAddSubService.transport_stream_id,
 					    original_network_id,
 					    1,
-					    channel->getDiSEqC(),
-					    channel->getSatellitePosition(),
+					    cc->getDiSEqC(),
+					    cc->getSatellitePosition(),
 //					    channel->getFrequency()
 					    frequency
 					)
@@ -2140,9 +2140,9 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo, const CZapitClient::c
 		{
 // ATTENTION: in RECORD_MODE empty bouquets are not send!
 			if ((!(currentMode & RECORD_MODE)) ||
-			    ((channel != NULL) &&
-			     (((wantedMode & RADIO_MODE) && (bouquetManager->Bouquets[i]->recModeRadioSize(channel->getTransponderId()) > 0)) ||
-			      ((wantedMode & TV_MODE)    && (bouquetManager->Bouquets[i]->recModeTVSize   (channel->getTransponderId()) > 0)))))
+			    ((cc != NULL) &&
+			     (((wantedMode & RADIO_MODE) && (bouquetManager->Bouquets[i]->recModeRadioSize(cc->getTransponderId()) > 0)) ||
+			      ((wantedMode & TV_MODE)    && (bouquetManager->Bouquets[i]->recModeTVSize   (cc->getTransponderId()) > 0)))))
 			{
 				msgBouquet.bouquet_nr = i;
 				strncpy(msgBouquet.name, bouquetManager->Bouquets[i]->Name.c_str(), 30);
@@ -2185,7 +2185,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 	if (currentMode & RECORD_MODE)
 	{
 		for (uint32_t i = 0; i < channels->size(); i++)
-			if ((*channels)[i]->getTransponderId() != channel->getTransponderId())
+			if ((*channels)[i]->getTransponderId() != cc->getTransponderId())
 				data_count--;
 	}
 
@@ -2194,7 +2194,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 	for (uint32_t i = 0; i < channels->size();i++)
 	{
-		if ((currentMode & RECORD_MODE) && ((*channels)[i]->getTransponderId() != channel->getTransponderId()))
+		if ((currentMode & RECORD_MODE) && ((*channels)[i]->getTransponderId() != cc->getTransponderId()))
 			continue;
 
 		CZapitClient::responseGetBouquetChannels response;
@@ -2215,16 +2215,16 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 void sendAPIDs(int connfd)
 {
-	if (!send_data_count(connfd, channel->getAudioChannelCount()))
+	if (!send_data_count(connfd, cc->getAudioChannelCount()))
 		return;
 
-	for (uint32_t i = 0; i < channel->getAudioChannelCount(); i++)
+	for (uint32_t i = 0; i < cc->getAudioChannelCount(); i++)
 	{
 		CZapitClient::responseGetAPIDs response;
-		response.pid = channel->getAudioPid(i);
-		strncpy(response.desc, channel->getAudioChannel(i)->description.c_str(), 25);
-		response.is_ac3 = channel->getAudioChannel(i)->isAc3;
-		response.component_tag = channel->getAudioChannel(i)->componentTag;
+		response.pid = cc->getAudioPid(i);
+		strncpy(response.desc, cc->getAudioChannel(i)->description.c_str(), 25);
+		response.is_ac3 = cc->getAudioChannel(i)->isAc3;
+		response.component_tag = cc->getAudioChannel(i)->componentTag;
 
 		if (CBasicServer::send_data(connfd, &response, sizeof(response)) == false)
 		{
@@ -2236,11 +2236,11 @@ void sendAPIDs(int connfd)
 
 void sendSubPIDs(int connfd)
 {
-	if (!send_data_count(connfd, channel->getSubtitleCount()))
+	if (!send_data_count(connfd, cc->getSubtitleCount()))
 		return;
-	for (int i = 0 ; i < (int)channel->getSubtitleCount() ; ++i) {
+	for (int i = 0 ; i < (int)cc->getSubtitleCount() ; ++i) {
 		CZapitClient::responseGetSubPIDs response;
-		CZapitAbsSub* s = channel->getChannelSub(i);
+		CZapitAbsSub* s = cc->getChannelSub(i);
 		CZapitDVBSub* sd = reinterpret_cast<CZapitDVBSub*>(s);
 		CZapitTTXSub* st = reinterpret_cast<CZapitTTXSub*>(s);
 
@@ -2444,13 +2444,13 @@ void setDemuxMode(int demux_mode)
 	else
                 aviaExtDriver->playbackSPTS();
 
-	if ((videoDecoder->getPlayState() == VIDEO_PLAYING)  && (channel)) {
+	if ((videoDecoder->getPlayState() == VIDEO_PLAYING) && cc) {
 		//printf("[zapit] restarting playback after changing demux mode\n");
 		stopPlayBack();
 		playbackStopForced = true;
 		sleep(1);
 		playbackStopForced = false;
-		startPlayBack(channel);
+		startPlayBack(cc);
 	}
 }
 #else
@@ -2562,8 +2562,8 @@ void leaveStandby(void)
 		frontend->setLnbOffset(true, i, config.getInt32(tmp, 10600000));
 	}
 
-	if (channel)
-		zapit(channel->getChannelID(), current_is_nvod, 0);
+	if (cc)
+		zapit(cc->getChannelID(), current_is_nvod, 0);
 
 	standby = false;
 }
@@ -2641,7 +2641,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.411 2008/11/24 10:29:19 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.412 2008/11/30 23:19:48 seife Exp $\n");
 
 	bool check_lock = true;
 
@@ -2793,13 +2793,13 @@ int main(int argc, char **argv)
 	if (update_pmt) {
 		while (zapit_server.run(parse_command, CZapitMessages::ACTVERSION, true)) {
 			struct pollfd pfd;
-		 	if (check_lock && !standby && channel && time(NULL) > lastlockcheck &&
+		 	if (check_lock && !standby && cc && time(NULL) > lastlockcheck &&
 			    scan_runs == 0) {
 				DBG("checking for lock...");
 				if ((frontend->getStatus() & FE_HAS_LOCK) == 0) {
-					printf("[zapit] LOCK LOST! trying rezap... channel: '%s'\n", channel->getName().c_str());
+					printf("[zapit] LOCK LOST! trying rezap... channel: '%s'\n", cc->getName().c_str());
 					tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
-					zapit(channel->getChannelID(), current_is_nvod, 0);
+					zapit(cc->getChannelID(), current_is_nvod, 0);
 				}
 				lastlockcheck = time(NULL);
 			}
@@ -2808,7 +2808,7 @@ int main(int argc, char **argv)
 				pfd.events = (POLLIN | POLLPRI);
 				if (poll(&pfd, 1, 0) > 0) {
 					if (pfd.fd == pmt_update_fd)
-						zapit(channel->getChannelID(), current_is_nvod, 0);
+						zapit(cc->getChannelID(), current_is_nvod, 0);
 				}
 			}
 			/* yuck, don't waste that much cpu time :) */
