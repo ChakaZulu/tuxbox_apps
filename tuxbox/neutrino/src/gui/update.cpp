@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.129 2008/11/26 21:35:47 dbt Exp $
+	$Id: update.cpp,v 1.130 2008/11/30 22:30:58 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -589,7 +589,7 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 	CLCD::getInstance()->setMode(CLCD::MODE_PROGRESSBAR2);
 #endif // LCD_UPDATE
 
-	setTitle(LOCALE_FLASHUPDATE_GLOBALPROGRESS);
+	setTitle(LOCALE_FLASHUPDATE_TITLEWRITEFLASH);
 	paint();
 	showGlobalStatus(0);
 	CFlashTool ft;
