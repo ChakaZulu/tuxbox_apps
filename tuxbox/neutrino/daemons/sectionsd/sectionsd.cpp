@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.276 2008/11/29 16:55:12 seife Exp $
+//  $Id: sectionsd.cpp,v 1.277 2008/11/30 19:54:59 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2461,7 +2461,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.276 2008/11/29 16:55:12 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.277 2008/11/30 19:54:59 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6171,7 +6171,7 @@ static void *nitThread(void *)
 			// copy the header
 			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
-			if ((header.current_next_indicator) && (!dmxNIT.pauseCounter))
+			if (header.current_next_indicator)
 			{
 				if ((header.table_id == 0x40) || (header.table_id == 0x41))
 				{
@@ -6396,7 +6396,7 @@ static void *sdtThread(void *)
 			// copy the header
 			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
-			if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
+			if (header.current_next_indicator)
 			{
 				if ((header.table_id == 0x42) || (header.table_id == 0x46))
 				{
@@ -7052,7 +7052,7 @@ static void *eitThread(void *)
 			// copy the header
 			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
-			if ((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
+			if (header.current_next_indicator)
 			{
 				// Wir wollen nur aktuelle sections
 
@@ -7320,7 +7320,7 @@ static void *cnThread(void *)
 			unsigned short section_length = (header->section_length_hi << 8) | header->section_length_lo;
 			unsigned table_id = header->table_id;
 
-			if (!header->current_next_indicator || dmxCN.pauseCounter)
+			if (!header->current_next_indicator)
 			{
 				// Wir wollen nur aktuelle sections
 				delete[] buf;
@@ -7426,7 +7426,7 @@ static void *pptThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning && !channel_is_blacklisted)
 			{
-				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // last restart older than 3secs, therefore do NOT decrease cache
+				if (zeit > lastRestarted + 3) // last restart older than 3secs, therefore do NOT decrease cache
 				{
 					dmxPPT.stop(); // -> lock
 					dmxPPT.start(); // -> unlock
@@ -7566,7 +7566,7 @@ static void *pptThread(void *)
 			// copy the header
 			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
-			if ((header.current_next_indicator) && (!dmxPPT.pauseCounter ))
+			if (header.current_next_indicator)
 			{
 				// Wir wollen nur aktuelle sections
 				if (start_section == 0) start_section = header.section_number;
@@ -8063,7 +8063,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.276 2008/11/29 16:55:12 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.277 2008/11/30 19:54:59 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 

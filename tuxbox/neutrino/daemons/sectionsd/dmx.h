@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.13 2008/10/05 13:12:48 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.14 2008/11/30 19:54:59 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -62,7 +62,6 @@ class DMX
 	int                    filter_index;
 	time_t                 lastChanged;
 
-	int                    pauseCounter;
 	int                    real_pauseCounter;
 	pthread_cond_t         change_cond;
 	pthread_mutex_t        start_stop_mutex;
@@ -77,9 +76,6 @@ class DMX
 	void addfilter(const unsigned char filter, const unsigned char mask);
 	int stop(void);
 
-	int pause(void); // increments pause_counter
-	int unpause(void); // decrements pause_counter
-	
 	int real_pause(void);
 	int real_unpause(void);
 

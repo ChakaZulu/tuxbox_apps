@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.42 2008/10/12 10:51:53 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.43 2008/11/30 19:54:59 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -69,7 +69,6 @@ DMX::DMX(const unsigned short p, const unsigned short bufferSizeInKB, const bool
 	pthread_mutex_init(&start_stop_mutex, NULL); // default = fast mutex
 #endif
 	pthread_cond_init (&change_cond, NULL);
-	pauseCounter = 0;
 	real_pauseCounter = 0;
 	current_service = 0;
 
@@ -114,10 +113,7 @@ int DMX::immediate_stop(void)
 	if (!isOpen())
 		return 1;
 	
-	if (real_pauseCounter == 0)
-		closefd();
-	else
-		dprintf("DMX::immediate_stop not closed because real_pauseCounter=%d\n",real_pauseCounter);
+	closefd();
 	
 	return 0;
 }
@@ -626,7 +622,8 @@ int DMX::request_unpause(void)
 	return 0;
 }
 
-
+#if 0
+to be removed....
 int DMX::pause(void)
 {
 #ifndef PAUSE_EQUALS_STOP
@@ -660,6 +657,7 @@ int DMX::unpause(void)
 
 	return 0;
 }
+#endif
 
 const char *dmx_filter_types [] = {
 			"dummy filter",
