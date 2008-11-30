@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.277 2008/11/30 19:54:59 seife Exp $
+//  $Id: sectionsd.cpp,v 1.278 2008/11/30 19:56:49 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -645,11 +645,8 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 	}
 
 	if (cn) { // current-next => fill current or next event...
-		t_channel_id evt_channel_id = ((t_channel_id)evt.transport_stream_id << 32)|
-					      ((t_channel_id)evt.original_network_id << 16)|
-					      ((t_channel_id)evt.service_id);
 		readLockMessaging();
-		if (evt_channel_id == messaging_current_servicekey && // but only if it is the current channel...
+		if (evt.get_channel_id() == messaging_current_servicekey && // but only if it is the current channel...
 		    (messaging_got_CN != 0x03)) { // ...and if we don't have them already.
 			unlockMessaging();
 			SIevent *eptr = new SIevent(evt);
@@ -2461,7 +2458,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.277 2008/11/30 19:54:59 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.278 2008/11/30 19:56:49 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -8063,7 +8060,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.277 2008/11/30 19:54:59 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.278 2008/11/30 19:56:49 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
