@@ -333,7 +333,32 @@ if test "$USE_NLS" = "yes"; then
 		)]
 	)
 
-	if test "$gt_cv_func_gnugettext_libc" = "yes"; then
+	if test "$gt_cv_func_gnugettext_libc" != "yes"; then
+		AC_LIB_LINKFLAGS_BODY([intl])
+		AC_CACHE_CHECK([for GNU gettext in libintl], gt_cv_func_gnugettext_libintl,[
+			gt_save_CPPFLAGS="$CPPFLAGS"
+			CPPFLAGS="$CPPFLAGS $INCINTL"
+			gt_save_LIBS="$LIBS"
+			LIBS="$LIBS $LIBINTL"
+			AC_TRY_LINK([
+				#include <libintl.h>
+				#ifndef __GNU_GETTEXT_SUPPORTED_REVISION
+				#define __GNU_GETTEXT_SUPPORTED_REVISION(major) ((major) == 0 ? 0 : -1)
+				#endif
+				extern int _nl_msg_cat_cntr;
+				const char *_nl_expand_alias (const char *);
+				],[
+				bindtextdomain ("", "");
+				return (int) gettext ("") + _nl_msg_cat_cntr + *_nl_expand_alias ("");
+				], gt_cv_func_gnugettext_libintl=yes, gt_cv_func_gnugettext_libintl=no
+			)
+			CPPFLAGS="$gt_save_CPPFLAGS"
+			LIBS="$gt_save_LIBS"
+			]
+		)
+	fi
+
+	if test "$gt_cv_func_gnugettext_libc" = "yes" -o "$gt_cv_func_gnugettext_libintl" = "yes"; then
 		AC_DEFINE(ENABLE_NLS, 1, [Define to 1 if translation of program messages to the user's native language is requested.])
 		gt_use_preinstalled_gnugettext=yes
 	else
@@ -385,6 +410,10 @@ AC_SUBST(GMOFILES)
 AC_SUBST(UPDATEPOFILES)
 AC_SUBST(DUMMYPOFILES)
 AC_SUBST(CATALOGS)
+if test "$gt_cv_func_gnugettext_libintl" = "yes"; then
+	GETTEXT_LIBS="-lintl"
+	AC_SUBST(GETTEXT_LIBS)
+fi
 ])
 
 dnl backward compatiblity
