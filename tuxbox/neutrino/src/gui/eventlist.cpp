@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.117 2008/11/16 21:46:40 seife Exp $
+	$Id: eventlist.cpp,v 1.118 2008/12/05 22:06:19 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -297,16 +297,17 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 	while (loop)
 	{
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-		if (msg == CRCInput::RC_up || msg == g_settings.key_channelList_pageup)
+		if (msg_repeatok == CRCInput::RC_up || msg_repeatok == g_settings.key_channelList_pageup)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+			step = (msg_repeatok == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
 			selected -= step;
 			if((prev_selected-step) < 0)		// because of uint
 				selected = evtlist.size() - 1;
@@ -327,12 +328,12 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				showFunctionBar(true);
 			}
 		}
-		else if (msg == CRCInput::RC_down || msg == g_settings.key_channelList_pagedown)
+		else if (msg_repeatok == CRCInput::RC_down || msg_repeatok == g_settings.key_channelList_pagedown)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
+			step = (msg_repeatok == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
 			selected += step;
 
 			if(selected >= evtlist.size())
@@ -548,7 +549,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				{
 					g_RCInput->getMsg( &msg, &data, 0 );
 
-					if ( ( msg != CRCInput::RC_red ) &&
+					if ((msg & ~CRCInput::RC_Repeat) != CRCInput::RC_red &&
 					     ( msg != CRCInput::RC_timeout ) )
 					{
 						// RC_red schlucken

@@ -145,6 +145,7 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 	while (loop)
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
@@ -153,7 +154,7 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			loop=false;
 		}
-		else if (msg == g_settings.key_channelList_pageup)
+		else if (msg_repeatok == g_settings.key_channelList_pageup)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=0;
@@ -162,7 +163,7 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paintItems();
 		}
-		else if (msg == g_settings.key_channelList_pagedown)
+		else if (msg_repeatok == g_settings.key_channelList_pagedown)
 		{
 			selected+=listmaxshow;
 			if (selected>pluginlist.size()-1)
@@ -170,7 +171,7 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paintItems();
 		}
-		else if ( msg == CRCInput::RC_up )
+		else if (msg_repeatok == CRCInput::RC_up)
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -191,7 +192,7 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 				paintItem(selected - liststart);
 			}
 		}
-		else if ( msg == CRCInput::RC_down )
+		else if (msg_repeatok == CRCInput::RC_down)
 		{
 			int prevselected=selected;
 			selected = (selected+1)%pluginlist.size();

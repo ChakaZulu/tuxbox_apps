@@ -419,6 +419,7 @@ void CUpnpBrowserGui::selectDevice()
 		}
 
 		g_RCInput->getMsg(&msg, &data, 10); // 1 sec timeout to update play/stop state display
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if( msg == CRCInput::RC_timeout)
 		{
@@ -430,7 +431,7 @@ void CUpnpBrowserGui::selectDevice()
 			loop=false;
 		}
 
-		else if( msg == CRCInput::RC_up && m_selecteddevice > 0)
+		else if (msg_repeatok == CRCInput::RC_up && m_selecteddevice > 0)
 		{
 			m_selecteddevice--;
 			if (m_selecteddevice < m_indexdevice)
@@ -438,7 +439,7 @@ void CUpnpBrowserGui::selectDevice()
 			changed=true;
 		}
 
-		else if(msg == CRCInput::RC_down && m_selecteddevice + 1 < m_devices.size())
+		else if (msg_repeatok == CRCInput::RC_down && m_selecteddevice + 1 < m_devices.size())
 		{
 			m_selecteddevice++;
 			if (m_selecteddevice + 1 > m_indexdevice + m_listmaxshow)
@@ -700,6 +701,7 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 		}
 
 		g_RCInput->getMsg(&msg, &data, 10); // 1 sec timeout to update play/stop state display
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if( msg == CRCInput::RC_timeout)
 		{
@@ -715,7 +717,7 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 			loop=false;
 		}
 
-		else if(msg == CRCInput::RC_up && selected > 0)
+		else if (msg_repeatok == CRCInput::RC_up && selected > 0)
 		{
 			selected--;
 			if (selected < index)
@@ -739,7 +741,7 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 			changed=true;
 		}
 
-		else if(msg == CRCInput::RC_down && selected + 1 < dirnum)
+		else if (msg_repeatok == CRCInput::RC_down && selected + 1 < dirnum)
 		{
 			selected++;
 			if (selected + 1 > index + m_listmaxshow)

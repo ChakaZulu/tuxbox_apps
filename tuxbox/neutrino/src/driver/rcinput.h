@@ -129,7 +129,9 @@ class CRCInput
 
 	public:
 		//rc-code definitions
-		static const neutrino_msg_t RC_MaxRC    = KEY_MAX;    /* /include/linux/input.h: #define KEY_MAX                 0x1ff */
+		static const neutrino_msg_t RC_Repeat	= 0x0400;
+		static const neutrino_msg_t RC_Release	= 0x0800;
+		static const neutrino_msg_t RC_MaxRC    = KEY_MAX | RC_Repeat | RC_Release; /* /include/linux/input.h: #define KEY_MAX 0x1ff */
 		static const neutrino_msg_t RC_KeyBoard = 0x4000;
 		static const neutrino_msg_t RC_Events   = 0x80000000;
 		static const neutrino_msg_t RC_Messages = 0x90000000;
@@ -276,7 +278,8 @@ class CRCInput
 			//////////////// End of IR Keyboard only keys ////////////////
 
 			RC_timeout	= 0xFFFFFFFF,
-			RC_nokey	= 0xFFFFFFFE
+			RC_nokey	= 0xFFFFFFFE,	// "not defined"
+			RC_ignore	= 0xFFFFFFFD	// different from "not defined"...
 		};
 
 		inline int getFileHandle(void) /* used for plugins (i.e. games) only */
@@ -309,10 +312,10 @@ class CRCInput
 		static long long calcTimeoutEnd_MS(const int timeout_in_milliseconds);
 		static long long calcTimeoutEnd(const int timeout_in_seconds);
 
-		void getMsgAbsoluteTimeout(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long *TimeoutEnd, bool bAllowRepeatLR= false);
-		void getMsg(neutrino_msg_t * msg, neutrino_msg_data_t * data, int Timeout, bool bAllowRepeatLR= false);                  //get message, timeout in 1/10 secs :)
-		void getMsg_ms(neutrino_msg_t * msg, neutrino_msg_data_t * data, int Timeout, bool bAllowRepeatLR= false);               //get message, timeout in msecs :)
-		void getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long Timeout, bool bAllowRepeatLR= false);//get message, timeout in µsecs :)
+		void getMsgAbsoluteTimeout(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigned long long *TimeoutEnd);
+		void getMsg(neutrino_msg_t *msg, neutrino_msg_data_t *data, int Timeout);			//get message, timeout in 1/10 secs :)
+		void getMsg_ms(neutrino_msg_t *msg, neutrino_msg_data_t *data, int Timeout);			//get message, timeout in msecs :)
+		void getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigned long long Timeout);	//get message, timeout in µsecs :)
 		void postMsg(const neutrino_msg_t msg, const neutrino_msg_data_t data, const bool Priority = true);  // push message back into buffer
 		void clearRCMsg();
 

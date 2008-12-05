@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.64 2008/11/16 21:46:40 seife Exp $
+	$Id: pictureviewer.cpp,v 1.65 2008/12/05 22:06:19 seife Exp $
 
 	MP3Player by Dirch
 	
@@ -226,6 +226,7 @@ int CPictureViewerGui::show()
 				timeout=1;
 		}
 		g_RCInput->getMsg( &msg, &data, timeout );
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if( msg == CRCInput::RC_home)
 		{ //Exit after cancel key
@@ -282,7 +283,7 @@ int CPictureViewerGui::show()
 				view(next);
 			}
 		}
-		else if (msg == CRCInput::RC_up)
+		else if (msg_repeatok == CRCInput::RC_up)
 		{
 			if ((m_state == MENU) && (!playlist.empty()))
 			{
@@ -306,7 +307,7 @@ int CPictureViewerGui::show()
 				}
 			}
 		}
-		else if (msg == CRCInput::RC_down)
+		else if (msg_repeatok == CRCInput::RC_down)
 		{
 			if ((m_state == MENU) && (!playlist.empty()))
 			{
@@ -734,7 +735,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.64 $");
+	return imageinfo.getModulVersion("","$Revision: 1.65 $");
 }
 
 void CPictureViewerGui::showHelp()

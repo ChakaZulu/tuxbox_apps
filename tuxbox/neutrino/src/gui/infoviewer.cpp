@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.239 2008/11/16 21:46:40 seife Exp $
+	$Id: infoviewer.cpp,v 1.240 2008/12/05 22:06:19 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -461,11 +461,11 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		unsigned long long timeoutEnd = (neutrino->getMode() != 2) ?  CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]) : CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR_RADIO]);
 
 		int res = messages_return::none;
-		time_t ta=0,tb=0;
 
 		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 		{
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+			neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 			//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
 #if 0
 There is no need to poll for EPG when we are going to get events from sectionsd. Saves lots of useless
@@ -547,8 +547,8 @@ requests to sectionsd.
 					res = messages_return::cancel_info;
 				}
 			}
-			else if (msg == g_settings.key_quickzap_up ||
-				 msg == g_settings.key_quickzap_down ||
+			else if (msg_repeatok == g_settings.key_quickzap_up ||
+				 msg_repeatok == g_settings.key_quickzap_down ||
 				 msg == CRCInput::RC_0 ||
 				 msg == NeutrinoMessages::SHOW_INFOBAR)
 			{
@@ -576,7 +576,8 @@ requests to sectionsd.
 				res = messages_return::cancel_all;
 				hideIt = true;
 			}
-			else
+			else if (!(msg & CRCInput::RC_Release) && //ignore key release ...
+				 msg != (CRCInput::RC_help | CRCInput::RC_Repeat)) //...and help key repeat
 			{
 				res = neutrino->handleMsg(msg, data);
 

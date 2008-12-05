@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.198 2008/11/26 21:30:47 dbt Exp $
+	$Id: channellist.cpp,v 1.199 2008/12/05 22:06:19 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -288,6 +288,7 @@ int CChannelList::show()
 	while (loop)
 	{
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
@@ -297,12 +298,12 @@ int CChannelList::show()
 			selected = oldselected;
 			loop=false;
 		}
-		else if (msg == CRCInput::RC_up || msg == g_settings.key_channelList_pageup)
+		else if (msg_repeatok == CRCInput::RC_up || msg_repeatok == g_settings.key_channelList_pageup)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+			step = (msg_repeatok == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
 			selected -= step;
 			if((prev_selected-step) < 0)		// because of uint
 				selected = chanlist.size() - 1;
@@ -315,12 +316,12 @@ int CChannelList::show()
 			else
 				paintItem(selected - liststart);
 		}
-		else if (msg == CRCInput::RC_down || msg == g_settings.key_channelList_pagedown)
+		else if (msg_repeatok == CRCInput::RC_down || msg_repeatok == g_settings.key_channelList_pagedown)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
+			step = (msg_repeatok == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
 			selected += step;
 
 			if(selected >= chanlist.size())
@@ -334,7 +335,7 @@ int CChannelList::show()
 			else
 				paintItem(selected - liststart);
 		}
-		else if (msg == g_settings.key_bouquet_up && bouquetList != NULL)
+		else if (msg_repeatok == g_settings.key_bouquet_up && bouquetList != NULL)
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
@@ -344,7 +345,7 @@ int CChannelList::show()
 				loop = false;
 			}
 		}
-		else if (msg == g_settings.key_bouquet_down && bouquetList != NULL)
+		else if (msg_repeatok == g_settings.key_bouquet_down && bouquetList != NULL)
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
@@ -614,6 +615,10 @@ void CChannelList::zapTo(int pos, bool forceStoreToLastChannels)
 
 	if (bouquetList != NULL)
 		bouquetList->adjustToChannel( getActiveChannelNumber());
+
+	/* zapTo can take some time.
+	   To prevent unwanted "multizaps", clear the RC buffer" */
+	g_RCInput->clearRCMsg();
 }
 
 
@@ -711,6 +716,7 @@ int CChannelList::numericZap(neutrino_msg_t key)
 		}
 
 		g_RCInput->getMsg( &msg, &data, g_settings.timing[SNeutrinoSettings::TIMING_NUMERICZAP] * 10 );
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if ( msg == CRCInput::RC_timeout )
 		{
@@ -740,7 +746,7 @@ int CChannelList::numericZap(neutrino_msg_t key)
 			}
 			break;
 		}
-		else if (msg == g_settings.key_quickzap_down)
+		else if (msg_repeatok == g_settings.key_quickzap_down)
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
@@ -752,7 +758,7 @@ int CChannelList::numericZap(neutrino_msg_t key)
 					chn = (int)chanlist.size();
 			}
 		}
-		else if (msg == g_settings.key_quickzap_up)
+		else if (msg_repeatok == g_settings.key_quickzap_up)
 		{
 			chn++;
 
@@ -836,6 +842,7 @@ void CChannelList::virtual_zap_mode(bool up)
 		}
 		epgpos = 0;
 		g_RCInput->getMsg( &msg, &data, 15*10 ); // 15 seconds, not user changable
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 		//printf("########### %u ### %u #### %u #######\n", msg, NeutrinoMessages::EVT_TIMER, CRCInput::RC_timeout);
 
 		if ( msg == CRCInput::RC_ok )
@@ -865,11 +872,11 @@ void CChannelList::virtual_zap_mode(bool up)
 			if (chn > (int)chanlist.size())
 				chn = 1;
 		}
-		else if ( msg == CRCInput::RC_up )
+		else if (msg_repeatok == CRCInput::RC_up)
 		{
 			epgpos = -1;
 		}
-		else if ( msg == CRCInput::RC_down )
+		else if (msg_repeatok == CRCInput::RC_down)
 		{
 			epgpos = 1;
 		}

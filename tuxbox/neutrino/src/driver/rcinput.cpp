@@ -463,7 +463,7 @@ long long CRCInput::calcTimeoutEnd_MS(const int timeout_in_milliseconds)
 }
 
 
-void CRCInput::getMsgAbsoluteTimeout(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long *TimeoutEnd, bool bAllowRepeatLR)
+void CRCInput::getMsgAbsoluteTimeout(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigned long long *TimeoutEnd)
 {
 	struct timeval tv;
 
@@ -477,7 +477,7 @@ void CRCInput::getMsgAbsoluteTimeout(neutrino_msg_t * msg, neutrino_msg_data_t *
 	else
 		diff = ( *TimeoutEnd - timeNow );
 
-	getMsg_us( msg, data, diff, bAllowRepeatLR );
+	getMsg_us(msg, data, diff);
 
 	if ( *msg == NeutrinoMessages::EVT_TIMESET )
 	{
@@ -489,17 +489,17 @@ void CRCInput::getMsgAbsoluteTimeout(neutrino_msg_t * msg, neutrino_msg_data_t *
 	}
 }
 
-void CRCInput::getMsg(neutrino_msg_t * msg, neutrino_msg_data_t * data, int Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg(neutrino_msg_t *msg, neutrino_msg_data_t *data, int Timeout)
 {
-	getMsg_us(msg, data, (unsigned long long) Timeout * 100 * 1000, bAllowRepeatLR);
+	getMsg_us(msg, data, Timeout * 100 * 1000ULL);
 }
 
-void CRCInput::getMsg_ms(neutrino_msg_t * msg, neutrino_msg_data_t * data, int Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg_ms(neutrino_msg_t *msg, neutrino_msg_data_t *data, int Timeout)
 {
-	getMsg_us(msg, data, (unsigned long long) Timeout * 1000, bAllowRepeatLR);
+	getMsg_us(msg, data, Timeout * 1000ULL);
 }
 
-void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigned long long Timeout)
 {
 	static unsigned long long last_keypress = 0ULL;
 	unsigned long long getKeyBegin;
@@ -844,12 +844,12 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 								{
 									struct timeval tv;
 									gettimeofday( &tv, NULL );
-									long long timeOld = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+									long long timeOld = tv.tv_usec + tv.tv_sec * 1000000LL;
 
 									stime((time_t*) p);
 
 									gettimeofday( &tv, NULL );
-									long long timeNew = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+									long long timeNew = tv.tv_usec + tv.tv_sec * 1000000LL;
 
 									delete p;
 									p= new unsigned char[ sizeof(long long) ];
@@ -1136,37 +1136,18 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 					{
 #ifdef OLD_RC_API
 						if (ev.code != 0x5cfe)
-#else /* OLD_RC_API */
-						if ((ev.value) && (ev.type==EV_KEY))
-#endif /* OLD_RC_API */
 						{
 							unsigned long long now_pressed;
 							bool keyok = true;
 
-#ifdef OLD_RC_API
 							gettimeofday( &tv, NULL );
-#else /* OLD_RC_API */
-							tv = ev.time;
-#endif /* OLD_RC_API */
 							now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
-#ifdef OLD_RC_API
 							//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
 							if ((ev.code & 0xff00) == 0x5c00)
 								rc_last_key = 0;
-#endif /* OLD_RC_API */
 
 							if (ev.code == rc_last_key)
 							{
-								/* only allow selected keys to be repeated */
-								/* (why?)                                  */
-								if  ((trkey == RC_up     ) ||
-								     (trkey == RC_down   ) ||
-								     (trkey == RC_plus   ) ||
-								     (trkey == RC_minus  ) ||
-								     (trkey == RC_standby) ||
-								     ((bAllowRepeatLR) && ((trkey == RC_left ) ||
-											   (trkey == RC_right))))
-								{
 									if (rc_last_repeat_key != ev.code)
 									{
 										if ((now_pressed > last_keypress + repeat_block) ||
@@ -1176,9 +1157,6 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 										else
 											keyok = false;
 									}
-								}
-								else
-									keyok = false;
 							}
 							else
 								rc_last_repeat_key = 0;
@@ -1192,30 +1170,50 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 								    (now_pressed < last_keypress)) 
 								{
 									last_keypress = now_pressed;
-
-#ifdef OLD_RC_API
 									*msg  = (trkey == RC_standby_release) ? RC_standby : trkey;
 									*data = (trkey == RC_standby_release) ? 1 : 0; /* <- button released / pressed */
-#else /* OLD_RC_API */
-									*msg = trkey;
-									*data = 0; /* <- button pressed */
-#endif /* OLD_RC_API */
 									return;
 								}
 							}
 						}
-#ifndef OLD_RC_API
-						else
+#else /* OLD_RC_API */
+						if (ev.type == EV_KEY)
 						{
-							// clear rc_last_key on keyup event
-							//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
-							rc_last_key = 0;
-							if (trkey == RC_standby)
+							unsigned long long evtime = ev.time.tv_sec * 1000000ULL + ev.time.tv_usec;
+							//fprintf(stderr, "evtime: %llu ", evtime);
+							*data = 0;
+							switch (ev.value)
 							{
-								*msg = RC_standby;
-								*data = 1; /* <- button released */
-								return;
+							case 0x01:	// key pressed
+								last_keypress = evtime;
+								*msg = trkey;
+								rc_last_repeat_key = 0;
+								//fprintf(stderr, "pressed ");
+								break;
+							case 0x02:	// key repeat
+								// unfortunately, the dbox remote control driver does no rate control
+								if (rc_last_repeat_key || (evtime > last_keypress + repeat_block)) // delay
+								{
+									//fprintf(stderr, "repeat  ");
+									rc_last_repeat_key = 1; // not really a key...
+									if (evtime > last_keypress + repeat_block_generic) // rate
+										last_keypress = evtime;
+									*msg = trkey | RC_Repeat;
+								}
+								else
+									*msg = RC_ignore; // KEY_RESERVED
+								break;
+							case 0x00:	// key released
+								*data = 1; // compat
+								*msg = trkey | RC_Release;
+								break;
+							default:
+								fprintf(stderr, "%s:%d: unknown ev.value: 0x%08x\n",__FUNCTION__, __LINE__, ev.value);
+								*msg = RC_ignore; // KEY_RESERVED
+								break;
 							}
+							//fprintf(stderr, "%04x %04x\n", (int)*msg, (int)*data);
+							return;
 						}
 #endif /* OLD_RC_API */
 					}

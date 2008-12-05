@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.907 2008/11/30 23:11:23 seife Exp $
+	$Id: neutrino.cpp,v 1.908 2008/12/05 22:06:18 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2201,6 +2201,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	while( true )
 	{
 		g_RCInput->getMsg(&msg, &data, 100);	// 10 secs..
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if( ( mode == mode_tv ) || ( ( mode == mode_radio ) ) )
 		{
@@ -2229,7 +2230,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// restore mute symbol
 				AudioMute(current_muted, true);
 			}
-			if( msg == CRCInput::RC_ok)
+			else if(msg == CRCInput::RC_ok)
 			{
 				int bouqMode = g_settings.bouquetlist_mode;//bsmChannels;
 
@@ -2320,10 +2321,10 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
 				g_InfoViewer->showSubchan();
 			}
-			else if(msg == g_settings.key_quickzap_up || msg == g_settings.key_quickzap_down)
+			else if(msg_repeatok == g_settings.key_quickzap_up || msg_repeatok == g_settings.key_quickzap_down)
 			{
 				//quickzap
-				channelList->quickZap( msg );
+				channelList->quickZap(msg_repeatok);
 			}
 			else if( ( msg == CRCInput::RC_help ) ||
 						( msg == NeutrinoMessages::SHOW_INFOBAR ) )
@@ -2333,12 +2334,12 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// show Infoviewer
 				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
-			else if(msg == g_settings.key_subchannel_up)
+			else if(msg_repeatok == g_settings.key_subchannel_up)
 			{
 				g_RemoteControl->subChannelUp();
 				g_InfoViewer->showSubchan();
 			}
-			else if(msg == g_settings.key_subchannel_down)
+			else if(msg_repeatok == g_settings.key_subchannel_down)
 			{
 				g_RemoteControl->subChannelDown();
 				g_InfoViewer->showSubchan();
@@ -2397,9 +2398,17 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	}
 }
 
-int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
+int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 {
 	int res = 0;
+	bool repeat = false;
+	neutrino_msg_t msg = m;
+
+	if (msg == CRCInput::RC_ignore)
+	{
+		delete (unsigned char*) data;
+		return messages_return::handled;
+	}
 
 	res = res | g_RemoteControl->handleMsg(msg, data);
 	res = res | g_InfoViewer->handleMsg(msg, data);
@@ -2410,6 +2419,15 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		if( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
 			delete (unsigned char*) data;
 		return( res & ( 0xFFFFFFFF - messages_return::unhandled ) );
+	}
+
+	if (msg <= CRCInput::RC_MaxRC)
+	{
+		if (msg & CRCInput::RC_Repeat)
+		{
+			repeat = true;
+			msg &= ~CRCInput::RC_Repeat;
+		}
 	}
 
 	if (!waitforshutdown) {
@@ -2505,7 +2523,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		setVolume(msg, (mode != mode_scart));
 		return messages_return::handled;
 	}
-	else if( msg == CRCInput::RC_spkr )
+	else if(msg == CRCInput::RC_spkr && !repeat)
 	{
 		if( mode == mode_standby )
 		{
@@ -3110,6 +3128,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 {
 	neutrino_msg_t msg = key;
+	neutrino_msg_t msg_repeatok = key & ~CRCInput::RC_Repeat;
 
 	const int dy = 28; 	// height
 	// if you want a non-rounded volumebar, set r=0 here...
@@ -3185,11 +3204,10 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	{
 		if (msg <= CRCInput::RC_MaxRC)
 		{
-			if (msg == CRCInput::RC_plus)
+			if (msg_repeatok == CRCInput::RC_plus)
 			{
-				
 				if (current_muted)
-				AudioMute( !current_muted ); // switch off mute on pressing the plus button 	
+					AudioMute(false); // switch off mute on pressing the plus button
 				
 #ifndef HAVE_DREAMBOX_HARDWARE
 				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
@@ -3205,7 +3223,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 						current_volume = 100;
 				}
 			}
-			else if (msg == CRCInput::RC_minus)
+			else if (msg_repeatok == CRCInput::RC_minus)
 			{
 				
 #ifndef HAVE_DREAMBOX_HARDWARE
@@ -3222,7 +3240,8 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 						current_volume = 0;
 				}
 			}
-			else
+			else if (msg != (CRCInput::RC_minus|CRCInput::RC_Release) &&
+				 msg != (CRCInput::RC_plus|CRCInput::RC_Release))
 			{
 				g_RCInput->postMsg(msg, data);
 				break;
@@ -3251,9 +3270,9 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 		if( (bDoPaint) && (volumeBarIsVisible ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) //not visible if lirc in use
 		{
-			int vol = current_volume << 1;
+			int vol = current_volume * 2;
 			char p[4]; /* 3 digits + '\0' */
-			sprintf(p, "%3d", vol / 2);
+			sprintf(p, "%3d", current_volume);
 			/* draw the volume bar */
 			frameBuffer->paintBoxRel(x+iw+r/2,     y+b+2, vol  , dy-2*(b+2), COL_INFOBAR_PLUS_3);
 			frameBuffer->paintBoxRel(x+iw+vol+r/2, y+b+2, w-vol, dy-2*(b+2), COL_INFOBAR_PLUS_1);
@@ -3273,9 +3292,10 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		if (msg != CRCInput::RC_timeout)
 		{
 			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
+			msg_repeatok = msg & ~CRCInput::RC_Repeat;
 		}
 
-		}
+	}
 	while (msg != CRCInput::RC_timeout);
 
 	if( (bDoPaint) && ( volumeBarIsVisible ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC) && (pixbuf!= NULL))

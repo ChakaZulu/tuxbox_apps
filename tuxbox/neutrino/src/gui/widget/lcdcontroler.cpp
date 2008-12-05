@@ -103,10 +103,19 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 	bool loop=true;
 	while (loop)
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
+		neutrino_msg_t msg_sav = msg;
+		unsigned char step = 1;
 
 		if ( msg <= CRCInput::RC_MaxRC )
+		{
+			if (msg & CRCInput::RC_Repeat)
+			{
+				step = 5;
+				msg &= ~CRCInput::RC_Repeat; // kill the repeat bit
+			}
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
+		}
 
 		switch ( msg )
 		{
@@ -177,28 +186,18 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 						}
 						break;
 					case 1:
-						if (brightness < 255)
-						{
-							if (brightness < 250)
-								brightness += 5;
-							else
-								brightness = 255;
-
-							paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS, true);
-							setLcd();
-						}
+						brightness += step;
+						if (brightness < step) // check for overflow.
+							brightness = 255;
+						paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS, true);
+						setLcd();
 						break;
 					case 2:
-						if (brightnessstandby < 255)
-						{
-							if (brightnessstandby < 250)
-								brightnessstandby += 5;
-							else
-								brightnessstandby = 255;
-
-							paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, true);
-							setLcd();
-						}
+						brightnessstandby += step;
+						if (brightnessstandby < step)
+							brightnessstandby = 255;
+						paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, true);
+						setLcd();
 						break;
 				}
 				break;
@@ -215,28 +214,18 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 						}
 						break;
 					case 1:
-						if (brightness > 0)
-						{
-							if (brightness > 5)
-								brightness -= 5;
-							else
-								brightness = 0;
-
-							paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS, true);
-							setLcd();
-						}
+						brightness -= step;
+						if (brightness > 255 - step) // overflow
+							brightness = 0;
+						paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS, true);
+						setLcd();
 						break;
 					case 2:
-						if (brightnessstandby > 0)
-						{
-							if (brightnessstandby > 5)
-								brightnessstandby -= 5;
-							else
-								brightnessstandby = 0;
-
-							paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, true);
-							setLcd();
-						}
+						brightnessstandby -= step;
+						if (brightnessstandby > 255 - step)
+							brightnessstandby = 0;
+						paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, true);
+						setLcd();
 						break;
 				}
 				break;
@@ -271,7 +260,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 				break;
 
 			default:
-				if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
+				if (CNeutrinoApp::getInstance()->handleMsg(msg_sav, data) & messages_return::cancel_all)
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;

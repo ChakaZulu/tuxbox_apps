@@ -224,6 +224,7 @@ int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const 
 	while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if ((msg == CRCInput::RC_timeout) ||
 		    (msg == CRCInput::RC_home   ) ||
@@ -231,9 +232,9 @@ int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const 
 		{
 				res = messages_return::cancel_info;
 		}
-		else if ((hintBox->has_scrollbar()) && ((msg == CRCInput::RC_up) || (msg == CRCInput::RC_down)))
+		else if (hintBox->has_scrollbar() && (msg_repeatok == CRCInput::RC_up || msg_repeatok == CRCInput::RC_down))
 		{
-			if (msg == CRCInput::RC_up)
+			if (msg_repeatok == CRCInput::RC_up)
 				hintBox->scroll_up();
 			else
 				hintBox->scroll_down();

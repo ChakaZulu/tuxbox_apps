@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.144 2008/11/16 21:46:42 seife Exp $
+	$Id: menue.cpp,v 1.145 2008/12/05 22:06:21 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -192,13 +192,15 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 			{
 
 				case (CRCInput::RC_up) :
+				case (CRCInput::RC_up|CRCInput::RC_Repeat) :
 				case (CRCInput::RC_down) :
+				case (CRCInput::RC_down|CRCInput::RC_Repeat) :
 					{
 						//search next / prev selectable item
 						for (unsigned int count=1; count< items.size(); count++)
 						{
 
-							if (msg==CRCInput::RC_up)
+							if ((msg & ~CRCInput::RC_Repeat) == CRCInput::RC_up)
 							{
 								pos = selected- count;
 								if ( pos<0 )

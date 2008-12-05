@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.143 2008/11/16 21:46:40 seife Exp $
+	$Id: epgview.cpp,v 1.144 2008/12/05 22:06:19 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -647,6 +647,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 					break;
 
 				case CRCInput::RC_down:
+				case CRCInput::RC_down|CRCInput::RC_Repeat:
 					if(showPos+scrollCount<textCount)
 					{
 						showPos += scrollCount;
@@ -655,6 +656,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 					break;
 
 				case CRCInput::RC_up:
+				case CRCInput::RC_up|CRCInput::RC_Repeat:
 					showPos -= scrollCount;
 					if(showPos<0)
 						showPos = 0;

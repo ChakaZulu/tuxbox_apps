@@ -821,6 +821,7 @@ bool CFileBrowser::exec(const char * const dirname)
 	while (loop)
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_FILEBROWSER]);
@@ -842,7 +843,7 @@ bool CFileBrowser::exec(const char * const dirname)
 						paintItem(selected - liststart);
 					}
 				}
-				msg = CRCInput::RC_down;	// jump to next item
+				msg_repeatok = CRCInput::RC_down;	// jump to next item
 			}
 		}
 
@@ -863,7 +864,7 @@ bool CFileBrowser::exec(const char * const dirname)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == CRCInput::RC_up )
+		else if (msg_repeatok == CRCInput::RC_up)
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -884,7 +885,7 @@ bool CFileBrowser::exec(const char * const dirname)
 				paintItem(selected - liststart);
 			}
 		}
-		else if ( msg == CRCInput::RC_down )
+		else if (msg_repeatok == CRCInput::RC_down)
 		{
 			if (!(filelist.empty()))
 			{
@@ -1039,10 +1040,10 @@ bool CFileBrowser::exec(const char * const dirname)
 			paint();
 			paintFoot();
 		}
-		else if (CRCInput::isNumeric(msg))
+		else if (CRCInput::isNumeric(msg_repeatok))
 		{
 			if (!(filelist.empty()))
-				SMSInput(msg);
+				SMSInput(msg_repeatok);
 		}
 		else
 		{

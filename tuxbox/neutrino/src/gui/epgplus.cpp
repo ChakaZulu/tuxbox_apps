@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.43 2008/11/16 21:46:40 seife Exp $
+	$Id: epgplus.cpp,v 1.44 2008/12/05 22:06:19 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1400,6 +1400,7 @@ int EpgPlus::exec
 		while (loop)
 		{
 			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
+			neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 			if ( msg <= CRCInput::RC_MaxRC )
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
@@ -1599,7 +1600,7 @@ int EpgPlus::exec
 				}
 
 			}
-			else if ( msg == CRCInput::RC_up )
+			else if (msg_repeatok == CRCInput::RC_up)
 			{
 				if (this->channelList->getSize() > 0 ) {
 				#ifdef DEBUG_
@@ -1643,7 +1644,7 @@ int EpgPlus::exec
 				}
 				}
 			}
-			else if ( msg == CRCInput::RC_down )
+			else if (msg_repeatok == CRCInput::RC_down)
 			{
 				if (this->channelList->getSize() > 0 ) {
 				int selectedChannelEntryIndex     = this->selectedChannelEntry->index;
@@ -1676,7 +1677,7 @@ int EpgPlus::exec
 				loop=false;
 			}
 
-			else if ( msg==CRCInput::RC_left )
+			else if (msg_repeatok == CRCInput::RC_left)
 			{
         switch (this->currentViewMode)
         {
@@ -1747,7 +1748,7 @@ int EpgPlus::exec
             break;
 				}
 			}
-			else if ( msg==CRCInput::RC_right )
+			else if (msg_repeatok == CRCInput::RC_right)
 			{
         switch (this->currentViewMode)
         {

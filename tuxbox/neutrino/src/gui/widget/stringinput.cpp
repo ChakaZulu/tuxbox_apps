@@ -297,10 +297,14 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 			strncpy(dispval, value, size);
 		}
 
-		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd, true );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
+		neutrino_msg_t msg_sav = msg;
 
-		if ( msg <= CRCInput::RC_MaxRC )
+		if (msg <= CRCInput::RC_MaxRC)
+		{
+			msg &= ~CRCInput::RC_Repeat;
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
+		}
 
 		if (msg==CRCInput::RC_left)
 		{
@@ -371,7 +375,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		}
 		else
 		{
-			int r = handleOthers( msg, data );
+			int r = handleOthers(msg_sav, data);
 			if (r & (messages_return::cancel_all | messages_return::cancel_info))
 			{
 				res = (r & messages_return::cancel_all) ? menu_return::RETURN_EXIT_ALL : menu_return::RETURN_EXIT;
@@ -379,7 +383,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 			}
 			else if ( r & messages_return::unhandled )
 			{
-				if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
+				if (CNeutrinoApp::getInstance()->handleMsg(msg_sav, data) & messages_return::cancel_all)
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;
@@ -678,6 +682,10 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 	while(loop)
 	{
 		g_RCInput->getMsg( &msg, &data, 300 );
+		neutrino_msg_t msg_sav = msg;
+
+		if (msg <= CRCInput::RC_MaxRC)
+			msg &= ~CRCInput::RC_Repeat;
 
 		if (msg==CRCInput::RC_left)
 		{
@@ -707,7 +715,7 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 		}
 		else
 		{
-			int r = handleOthers(msg, data);
+			int r = handleOthers(msg_sav, data);
 			if (r & (messages_return::cancel_all | messages_return::cancel_info))
 			{
 				res = (r & messages_return::cancel_all) ? menu_return::RETURN_EXIT_ALL : menu_return::RETURN_EXIT;
@@ -715,7 +723,7 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 			}
 			else if ( r & messages_return::unhandled )
 			{
-				if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & ( messages_return::cancel_all | messages_return::cancel_info ) )
+				if (CNeutrinoApp::getInstance()->handleMsg(msg_sav, data) & (messages_return::cancel_all | messages_return::cancel_info))
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;

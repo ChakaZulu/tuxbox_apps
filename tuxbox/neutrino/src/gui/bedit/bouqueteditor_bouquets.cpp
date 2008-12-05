@@ -204,6 +204,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 	while (loop)
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_EPG]);
@@ -248,14 +249,14 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		// -- The keys should be configurable. Problem is: red/green key, which is the
 		// -- default in neutrino is used as a function key here... so use left/right
 		//
-		else if (msg==CRCInput::RC_up || msg == g_settings.key_channelList_pageup)
+		else if (msg_repeatok==CRCInput::RC_up || msg_repeatok == g_settings.key_channelList_pageup)
 		{
 			if (!(Bouquets.empty()))
 			{
 				int step = 0;
 				int prev_selected = selected;
 
-				step = (msg == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+				step = (msg_repeatok == g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
 				selected -= step;
 				if((prev_selected-step) < 0)		// because of uint
 				{
@@ -282,12 +283,12 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 				}
 			}
 		}
-		else if (msg == CRCInput::RC_down || msg == g_settings.key_channelList_pagedown)
+		else if (msg_repeatok == CRCInput::RC_down || msg_repeatok == g_settings.key_channelList_pagedown)
 		{
 			int step = 0;
 			int prev_selected = selected;
 
-			step = (msg == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
+			step = (msg_repeatok == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
 			selected += step;
 
 			if(selected >= Bouquets.size())

@@ -142,7 +142,11 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 			strcpy(dispval, value);
 		}
 
-		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd, true );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
+		neutrino_msg_t msg_sav = msg;
+
+		if (msg <= CRCInput::RC_MaxRC)
+			msg &= ~CRCInput::RC_Repeat; // kill the repeat bit
 
 		if (msg==CRCInput::RC_left)
 		{
@@ -224,7 +228,7 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 					*cancel = true;
 			}
 		}
-		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
+		else if (CNeutrinoApp::getInstance()->handleMsg(msg_sav, data) & messages_return::cancel_all)
 		{
 			loop = false;
 			res = menu_return::RETURN_EXIT_ALL;
