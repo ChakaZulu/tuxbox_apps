@@ -55,6 +55,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <errno.h>
+
 #include <eventserver.h>
 
 #include <global.h>
@@ -504,7 +506,9 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 	static unsigned long long last_keypress = 0ULL;
 	unsigned long long getKeyBegin;
 
+#ifdef OLD_RC_API
 	static __u16 rc_last_key = 0;
+#endif
 	static __u16 rc_last_repeat_key = 0;
 
 	struct timeval tv, tvselect;
@@ -1185,20 +1189,24 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 							switch (ev.value)
 							{
 							case 0x01:	// key pressed
-								last_keypress = evtime;
 								*msg = trkey;
+								if (repeat_kernel)
+									break;
+								last_keypress = evtime;
 								rc_last_repeat_key = 0;
 								//fprintf(stderr, "pressed ");
 								break;
 							case 0x02:	// key repeat
-								// unfortunately, the dbox remote control driver does no rate control
+								*msg = trkey | RC_Repeat;
+								if (repeat_kernel)
+									break;
+								// unfortunately, the old dbox remote control driver did no rate control
 								if (rc_last_repeat_key || (evtime > last_keypress + repeat_block)) // delay
 								{
 									//fprintf(stderr, "repeat  ");
 									rc_last_repeat_key = 1; // not really a key...
 									if (evtime > last_keypress + repeat_block_generic) // rate
 										last_keypress = evtime;
-									*msg = trkey | RC_Repeat;
 								}
 								else
 									*msg = RC_ignore; // KEY_RESERVED
@@ -1258,6 +1266,38 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 				Timeout -= diff;
 		}
 	}
+}
+
+/* helper function. Machines which can set this in the driver can iplement it here. */
+void CRCInput::setRepeat(unsigned int delay,unsigned int period)
+{
+	repeat_block = delay * 1000ULL;
+	repeat_block_generic = period * 1000ULL;
+	repeat_kernel = false;
+
+	int ret;
+	struct my_repeat {
+		unsigned int delay;	// in ms
+		unsigned int period;	// in ms
+	};
+
+	struct my_repeat n;
+
+	n.delay = delay;
+	n.period = period;
+
+	for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
+	{
+		if (fd_rc[i] != -1)
+		{
+			if ((ret = ioctl(fd_rc[i], EVIOCSREP, &n)) < 0)
+				printf("[neutrino] can not use input repeat on fd_rc[%d]: %d (%m) \n", i, errno);
+			else
+				repeat_kernel = true;
+		}
+	}
+
+	printf("[neutrino] %s: delay=%d period=%d use kernel-repeat: %s\n", __FUNCTION__, delay, period, repeat_kernel?"yes":"no");
 }
 
 void CRCInput::postMsg(const neutrino_msg_t msg, const neutrino_msg_data_t data, const bool Priority)

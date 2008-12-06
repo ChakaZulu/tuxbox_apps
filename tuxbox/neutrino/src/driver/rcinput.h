@@ -127,6 +127,10 @@ class CRCInput
 
 		int checkTimers();
 
+		unsigned long long repeat_block;
+		unsigned long long repeat_block_generic;
+		bool repeat_kernel;
+
 	public:
 		//rc-code definitions
 		static const neutrino_msg_t RC_Repeat	= 0x0400;
@@ -289,8 +293,7 @@ class CRCInput
 		void stopInput();
 		void restartInput();
 
-		unsigned long long repeat_block;
-		unsigned long long repeat_block_generic;
+		void setRepeat(unsigned int delay, unsigned int period);
 		CRCInput();      //constructor - opens rc-device and starts needed threads
 		~CRCInput();     //destructor - closes rc-device
 
