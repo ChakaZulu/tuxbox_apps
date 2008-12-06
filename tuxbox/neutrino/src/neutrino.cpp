@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.908 2008/12/05 22:06:18 seife Exp $
+	$Id: neutrino.cpp,v 1.909 2008/12/06 16:23:07 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2481,8 +2481,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 					while(true)
 					{
 						g_RCInput->getMsg_ms(&msg, &data, timeout);
-
-						if (msg == CRCInput::RC_timeout)
+						/* if the power key gets released, then get out of here */
+						if (msg == (CRCInput::RC_standby | CRCInput::RC_Release))
 							break;
 
 						gettimeofday(&endtime, NULL);
