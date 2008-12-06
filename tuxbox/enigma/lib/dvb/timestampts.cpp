@@ -1,5 +1,5 @@
 /*
- * $Id: timestampts.cpp,v 1.2 2008/11/26 20:05:05 dbluelle Exp $
+ * $Id: timestampts.cpp,v 1.3 2008/12/06 18:01:51 dbluelle Exp $
  *
  * (C) 2008 by Dr. Best  <dr.best@dreambox-tools.info>
  *
@@ -30,9 +30,8 @@
 #endif
 
 eTimeStampParserTS::eTimeStampParserTS(eString _filename): pktptr(0), pid(-1), needNextPacket(0), skip(0), MovieCurrentTime(0),
-	MovieBeginTime(0), MovieEndTime(0),MovieDuration(0), type(0)
+	MovieBeginTime(0), MovieEndTime(0),MovieDuration(0),filelength(-1),sec_duration(0),sec_currentpos(0), type(0)
 {
-	durationTime = "";
 	// VPID ermitteln
 	int fd=open(_filename.c_str(), O_RDONLY|O_LARGEFILE);
 	if (fd >= 0)
@@ -88,8 +87,10 @@ eTimeStampParserTS::eTimeStampParserTS(eString _filename): pktptr(0), pid(-1), n
 		struct stat64 s;
 		int slice = 0;
 		eString tfilename;
+		filelength = 0;
 		while (!stat64((_filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 		{
+			filelength += s.st_size;
 			tfilename = _filename + (slice ? eString().sprintf(".%03d", slice) : eString(""));
 			slice++;
 		}
@@ -101,7 +102,7 @@ eTimeStampParserTS::eTimeStampParserTS(eString _filename): pktptr(0), pid(-1), n
 			needNextPacket = 0;
 			skip= 0;
 			off64_t posbegin=::lseek64(fd_end,0, SEEK_END);
-			::lseek64(fd_end, posbegin - (off_t)654240, SEEK_SET);
+			::lseek64(fd_end, posbegin - (off64_t)654240, SEEK_SET);
 			int d1 = dup(fd_end);
 			char p[65424];
 			int rd =1;
@@ -117,10 +118,6 @@ eTimeStampParserTS::eTimeStampParserTS(eString _filename): pktptr(0), pid(-1), n
 	needNextPacket = 0;
 	skip= 0;
 	type = 0;
-	currentTime = "";	
-	beginTime = "";
-	endTime = "";
-	remainTime = "";
 }
 
 int eTimeStampParserTS::processPacket(const unsigned char *pkt)
@@ -203,33 +200,7 @@ int eTimeStampParserTS::processPacket(const unsigned char *pkt)
 				tt.tm_mday = 2;
 			time_t t1 = mktime(&movie_begin);
 			time_t t2 = mktime(&tt);
-			int duration = t2 - t1; 
-			if (duration < 0)
-				currentTime="";
-			else
-			{
-				int min1 = duration / 60;
-				duration %=60;			
-				currentTime = eString().sprintf("%02d:%02d", min1, duration);
-			}
-		}
-
-		if ( MovieCurrentTime && MovieEndTime )
-		{
-			tm tt = movie_end;
-			if (movie_current.tm_hour > tt.tm_hour) // Korrektur
-				tt.tm_mday = 2;
-			time_t t1 = mktime(&tt);
-			time_t t2 = mktime(&movie_current);
-			int duration = t1 - t2; 
-			if (duration < 0)
-				remainTime="";
-			else
-			{
-				int min1 = duration / 60;
-				duration %=60;
-				remainTime = eString().sprintf("%02d:%02d", min1, duration);
-			}
+			sec_currentpos = t2 - t1; 
 		}
 		if (MovieBeginTime && MovieEndTime && !MovieDuration )
 		{
@@ -239,18 +210,7 @@ int eTimeStampParserTS::processPacket(const unsigned char *pkt)
 				tt.tm_mday = 2;
 			time_t t1 = mktime(&tt);
 			time_t t2 = mktime(&movie_begin);
-			int duration = t1 - t2; 
-			if (duration < 0)
-				remainTime="";
-			else
-			{
-				int min1 = duration / 60;
-				duration %=60;
-				if ( min1 != 0 )
-					durationTime = eString().sprintf("%02d min", min1);
-				else
-					durationTime = eString().sprintf("%02d sec", duration);
-			}
+			sec_duration = t1 - t2; 
 		}
 	}
 	return 0;
@@ -367,4 +327,3 @@ void eTimeStampParserTS::parseData(const void *data, unsigned int len)
 		}
 	}
 }
-

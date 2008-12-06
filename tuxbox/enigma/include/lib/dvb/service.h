@@ -138,13 +138,9 @@ public:
 		posQueryLength,	// query length (in seconds)
 		posQueryCurrent, // query current position
 		posQueryRealLength, // service specific length, e.g. file length in bytes
-		posQueryRealCurrent, // service specific current position, e.g. file position in bytes
-		posQueryTimeCurrent, // query current position from pts timestamp
-		posQueryTimeRemain, // query remain time from pts timestamp
-		posQueryTimeLength // query length from pts timestamp
+		posQueryRealCurrent // service specific current position, e.g. file position in bytes
 	};
 	virtual int getPosition(int what);	// -1 means: not available
-	virtual eString getPTSTimeStampPosition(int what) { return "-"; }
 	
 			// simple "info" functions..
 	virtual eString getInfo(int id); // 0: status, 1+2 upper/lower line :)

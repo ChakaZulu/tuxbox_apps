@@ -114,7 +114,6 @@ public:
 
 	int getPosition(int);
 	int getLength(int);
-	eString getPTSTimeStampPosition(int what);
 
 	void thread();
 };
@@ -206,7 +205,6 @@ public:
 	void removeRef(const eServiceReference &service);
 
 	int getPosition(int what);
-	eString getPTSTimeStampPosition(int what);
 };
 
 #endif

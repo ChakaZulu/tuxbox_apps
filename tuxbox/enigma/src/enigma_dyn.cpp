@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.569 2008/08/03 14:09:33 dbluelle Exp $
+ * $Id: enigma_dyn.cpp,v 1.570 2008/12/06 18:02:21 dbluelle Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -799,7 +799,7 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 			int skipTime = ((total * vid) / 20) - current;
 
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime * 376));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime * 1000));
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 		}
 	}

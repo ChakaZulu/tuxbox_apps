@@ -55,21 +55,137 @@ void eDemux::syncBits()
 	remaining&=~7;
 }
 
-eDemux::eDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd)
+eDemux::eDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd, int sourcefd)
 	:input(input), video(video), audio(audio), minFrameLength(4096),
 	mpegtype(-1), curAudioStreamID(0), synced(0), fd(fd), sheader(0)
+
 {
 	remaining=0;
 	memset(&pcmsettings, 0, sizeof(pcmsettings));
-}
 
+	// extract first and last timestamp from file, if available
+	if (sourcefd >= 0)
+	{
+		off64_t oldpos=::lseek64(sourcefd, 0, SEEK_CUR);
+		::lseek64(sourcefd, 0, SEEK_SET);
+		unsigned char tmp[65424];
+		int i=0;
+		int ok = 0;
+		while ( i < 10)
+		{
+			int rd = ::read(sourcefd, tmp, 65424);
+			if (ok = readTimestamp(tmp,rd,&movie_begin))
+				break;
+			i++;
+		}
+		if (ok)
+		{
+			filelength=::lseek64(sourcefd,0, SEEK_END);
+			::lseek64(sourcefd, filelength - (off64_t)654240, SEEK_SET);
+			i = 0;
+			ok = 0;
+			while ( i < 10)
+			{
+				int rd = ::read(sourcefd, tmp, 65424);
+				if (readTimestamp(tmp,rd,&movie_end))
+					ok = 1;
+				i++;
+			}
+			if (ok)
+			{
+				sec_duration = movie_end - movie_begin; 
+				eDebug("[TimeStampMPEG]set duration:%d,%d,%d",sec_duration, movie_begin,movie_end);
+			}
+			::lseek64(sourcefd, oldpos, SEEK_SET);
+		}
+	}
+
+}
+void eDemux::setCurrentTime(unsigned char* data, int len)
+{
+	if (sec_duration < 0)
+		return;
+	int movie_current;
+	if (readTimestamp(data,len,&movie_current))
+	{
+		sec_currentpos = movie_current - movie_begin;
+	}
+}
+int eDemux::readTimestamp(unsigned char* data, int len, int* seconds)
+{
+	unsigned char* pos = data;
+	while (pos-data<len)
+	{
+
+		int x  = (((int)pos[0])<<16) +(((int)pos[1])<<8) +((int)pos[2]);
+		pos++;
+		if ( x != 0x1)
+			continue;
+		pos += 2;
+		int streamid = *pos++;
+		switch(streamid)
+		{
+			case 0xC0 ... 0xCF:
+			case 0xE0 ... 0xEF:
+			{
+				unsigned char* pos2 = pos;
+				int plen = (((int)pos[0])<<8) +((int)pos[1]);// packet length
+				pos += 2;
+				if (parseData(pos,plen,seconds))
+					return 1;
+				pos = pos2 + plen;
+				break;
+			}
+		}
+	}
+	return 0;
+}
+int eDemux::parseData(unsigned char* data, int len, int* seconds)
+{
+	unsigned char* pos = data;
+	while (pos-data<len)
+	{
+		if (((*pos)&0xc0) != 0xc0)
+			break;
+		pos++;
+	}	
+	int haspts = 0;
+	switch ((*pos)&0xc0)
+	{
+		case 0x40: // MPEG-1
+			pos+=2;
+			haspts = (*pos)&0x20;
+			break;
+		case 0x80: // MPEG-2
+			pos++;
+			haspts = (*pos)&0x80;
+			pos+=2;
+			if (haspts) haspts = (*pos)&0xe0 == 0x20;
+			break;
+		case 0x00: // MPEG-1 ohne Indikator
+			haspts = (*pos)&0x20;
+			break;
+	}
+	if (pos-data<len-5 && haspts)
+	{
+		unsigned long long pts;
+		pts  = ((unsigned long long)(pos[0]&0xE))  << 29;
+		pts |= ((unsigned long long)(pos[1]&0xFF)) << 22;
+		pts |= ((unsigned long long)(pos[2]&0xFE)) << 14;
+		pts |= ((unsigned long long)(pos[3]&0xFF)) << 7;
+		pts |= ((unsigned long long)(pos[4]&0xFE)) >> 1;
+		*seconds = pts / 90000;
+		return 1;
+	}
+	return 0;
+}
 eDemux::~eDemux()
 {
 	eConfig::getInstance()->setKey("/ezap/audio/prevAudioStreamID", curAudioStreamID);
 	delete [] sheader;
 }
 
-int eMPEGDemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*newastreamid )
+int eMPEGDemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*newastreamid)
 {
 //	eDebug("decodeMore");
 	int written=0;
@@ -280,6 +396,7 @@ a:
 					if ( length )
 					{
 						int rd = input.read(buffer+p, length);
+						setCurrentTime(buffer, 6+rd);
 						if ( rd != length )
 						{  // buffer empty.. put all data back in input buffer
 							input.write(buffer, p+rd);
@@ -824,6 +941,8 @@ int eDemux::getMinimumFramelength()
 
 int eDemux::getAverageBitrate()
 {
+	if (sec_duration > 0 && filelength > 0)
+		return (filelength/sec_duration)*8;
 	return 3*1024*1024;
 }
 

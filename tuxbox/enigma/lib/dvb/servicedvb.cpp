@@ -380,20 +380,6 @@ void eDVRPlayerThread::thread()
 	exec();
 }
 
-eString eDVRPlayerThread::getPTSTimeStampPosition(int what)
-{
-	switch (what)
-	{
-		case eServiceHandler::posQueryTimeCurrent:
-			return timestampParser->getCurrentTime();
-		case eServiceHandler::posQueryTimeRemain:
-			return timestampParser->getRemainTime();
-		default:
-			return("-");
-
-	}
-}
-
 void eDVRPlayerThread::outputReady(int what)
 {
 	(void)what;
@@ -586,6 +572,13 @@ void eDVRPlayerThread::updatePosition()
 int eDVRPlayerThread::getPosition(int real)
 {
 	int ret=0;
+	if (!real)
+	{
+		ret = timestampParser->getSecondsCurrent();
+		if (ret >= 0)
+			return ret;
+		ret = 0;
+	}
 	int bufferFullness=0;
 	if ( needasyncworkaround )
 	{
@@ -630,6 +623,9 @@ int eDVRPlayerThread::getLength(int real)
 {
 	if (real)
 		return filelength;
+	int ret = timestampParser->getSecondsDuration();
+	if (ret >= 0)
+		return ret;
 	if (Decoder::current.vpid==-1)
 		return filelength/15; //Radiorecording
 	else
@@ -835,8 +831,15 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		off64_t offset=0;
 		if (message.type != eDVRPlayerThreadMessage::seekreal)
 		{
-			offset=10000; // assuming 3MBit bitrate...
-			offset/=8;
+			offset = (timestampParser ? timestampParser->getAverageBitrate() : -1);
+			if (offset <= 0)
+			{
+				if (Decoder::current.vpid==-1) // Radio
+					offset = 192*1024*8;// assuming 192kBit bitrate...
+				else
+					offset=3*1024*1024*8; // assuming 3MBit bitrate...
+			}
+			offset/=8000;
 			offset*=message.parm;
 			buffer.clear();
 			offset-=1000*1000; // account for pvr buffer
@@ -1694,14 +1697,6 @@ int eServiceHandlerDVB::getPosition(int what)
 	}
 #else
 	return -1;
-#endif
-}
-eString eServiceHandlerDVB::getPTSTimeStampPosition(int what)
-{
-#ifndef DISABLE_FILE
-	return decoder->getPTSTimeStampPosition(what);
-#else
-	return "-";
 #endif
 }
 

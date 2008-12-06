@@ -4,13 +4,16 @@
 #define __codec_h
 
 #include <libsig_comp.h>
-
+#include <set>
 class eIOBuffer;
 
 class eAudioDecoder
 {
 protected:
 	int speed;
+	off64_t filelength;
+	int sec_duration;
+	int sec_currentpos;
 public:
 	eAudioDecoder();
 	virtual ~eAudioDecoder();
@@ -28,6 +31,8 @@ public:
 	virtual int getMinimumFramelength()=0;
 	void setSpeed(int _speed) { speed=_speed; }	
 	virtual int getAverageBitrate()=0;
+	int getSecondsCurrent() {return sec_currentpos;}
+	int getSecondsDuration() {return sec_duration;}
 };
 
 #endif

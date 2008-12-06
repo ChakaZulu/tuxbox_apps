@@ -24,20 +24,15 @@ class eTimeStampParserTS
 	int MovieBeginTime;
 	int MovieEndTime;
 	int MovieDuration;
-	eString currentTime;
-	eString beginTime;
-	eString endTime;
-	eString durationTime;
-	eString remainTime;
+	off64_t filelength;
+	int sec_duration;
+	int sec_currentpos;
 	int type;
 public:
 	eTimeStampParserTS(eString _filename);
 	void parseData(const void *data, unsigned int len);
-	eString getCurrentTime() {return currentTime;}
-	eString getBeginTime() {return beginTime;}
-	eString getEndTime() {return endTime;}
-	eString getDurationTime() {return durationTime;}
-	eString getRemainTime() {return remainTime;}
+	int getSecondsDuration() { return sec_duration;}
+	int getSecondsCurrent() { return sec_currentpos; }
+	int getAverageBitrate() { return (sec_duration > 0 && filelength > 0 ? filelength*8/sec_duration : -1 ); }
 };
-
 #endif

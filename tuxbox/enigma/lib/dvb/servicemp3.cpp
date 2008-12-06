@@ -272,9 +272,9 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	{
 		eString fname=filename;
 		if (fname.right(4).upper()==".PVA")
-			audiodecoder=new ePVADemux(input, output, output2, dspfd[0]);
+			audiodecoder=new ePVADemux(input, output, output2, dspfd[0], sourcefd);
 		else
-			audiodecoder=new eMPEGDemux(input, output, output2, dspfd[0]);
+			audiodecoder=new eMPEGDemux(input, output, output2, dspfd[0], sourcefd);
 		CONNECT(checkVideoFinishedTimer.timeout, eMP3Decoder::checkVideoFinished );
 		break;
 	}
@@ -819,16 +819,8 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			off64_t br=audiodecoder->getAverageBitrate();
 			if ( br <= 0 )
 				break;
-			if ( type == codecMPG )
-				br/=128;
-			else
-				br/=32;
-			br*=message.parm;
-			offset=input.size();
-			if ( type == codecMPG )
-				offset+=br/125;
-			else
-				offset+=br/1000;
+			br*=message.parm/8000;
+			offset=input.size()+br;
 			if (message.type == eMP3DecoderMessage::skip)
 			{
 				singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
@@ -930,6 +922,10 @@ int eMP3Decoder::getPosition(int real)
 
 		return (real-nyp)/divisor;
 	}
+	int ret = audiodecoder->getSecondsCurrent();
+	if (ret >=0)
+		return ret;
+
 	return position;
 }
 
@@ -940,6 +936,9 @@ int eMP3Decoder::getLength(int real)
 	singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 	if (real)
 		return filelength / divisor;
+	int ret = audiodecoder->getSecondsDuration();
+	if (ret >= 0)
+		return ret;
 	return length+output.size()/(outputbr/8);
 }
 

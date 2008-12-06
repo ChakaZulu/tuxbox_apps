@@ -2381,8 +2381,6 @@ void eZapMain::updateProgress()
 		int total=handler->getPosition(eServiceHandler::posQueryLength);
 		int current=handler->getPosition(eServiceHandler::posQueryCurrent);
 
-		eString _remain = timeshift ? "" : handler->getPTSTimeStampPosition(eServiceHandler::posQueryTimeRemain);
-
 		if (total != indices.getTotalLength())
 			indices.setTotalLength(total);
 
@@ -2394,18 +2392,11 @@ void eZapMain::updateProgress()
 			lcdmain.lcdMain->Progress->setPerc(current*100/total);
 			lcdmain.lcdMain->Progress->show();
 #endif
-			if (_remain.length() <= 1 )
-			{
-				int min=total-current;
-				int sec=min%60;
-				min/=60;
-				int sign=-1;
-				ChannelNumber->setText(eString().sprintf("%s%d:%02d", (sign==-1)?"-":"", min, sec));
-			}
-			else
-			{
-				ChannelNumber->setText(eString().sprintf("-%s",_remain.c_str()));
-			}
+			int min= total-current;
+			int sec=min%60;
+			min/=60;
+			int sign=-1;
+			ChannelNumber->setText(eString().sprintf("%s%d:%02d", (sign==-1)?"-":"", min, sec));
 
 		} else
 		{
@@ -3013,6 +3004,7 @@ void eZapMain::standbyRelease()
 			case 1: // shutdown
 /*				if (handleState())*/
 					eZap::getInstance()->quit();
+				break;
 			default:
 			case 0:
 				break;
@@ -3528,11 +3520,11 @@ void eZapMain::startSkip(int dir)
 				{
 					if (!timeshift && dir!=skipForward)
 					{ // necessary to enable skipmode, because file end
-						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-1000));
 						usleep(100*1000);
-						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-1000));
 						usleep(100*1000);
-						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-1000));
 						timeshift=1;
 					}
 					else if (!timeshift)
@@ -3613,7 +3605,7 @@ void eZapMain::skipLoop()
 {
 	// called from skipTimer (eTimer)
 
-	int time,speed,faktor,pos,diff,ts;
+	int time,speed,faktor,pos,diff;
 
 	faktor = (skipspeed<0) ? -1 : 1;
 	speed = skipspeed * faktor;
@@ -3659,35 +3651,15 @@ void eZapMain::skipLoop()
 				return;
 			}
 
-			// correct non-ts (test)
-			eServiceReference &ref = eServiceInterface::getInstance()->service;
-			if( ref.type == eServiceReference::idUser &&
-				((ref.data[0] ==  eMP3Decoder::codecMPG) ||
-				 (ref.data[0] ==  eMP3Decoder::codecMP3) ) )
+			if (skipspeed == 1)
 			{
-				if ( ref.data[0] == eMP3Decoder::codecMP3 )
-					time <<= (faktor<0) ? 4 : 2; // ermittelt per trial & error (bitrate?)
-				else
-					time <<= (faktor<0) ? 3 : 2; // ermittelt per trial & error (bitrate?)
-				time *= 3;
-				time /= 2;
-				ts=0;
+				eServiceReference &ref = eServiceInterface::getInstance()->service;
+				if(!( ref.type == eServiceReference::idUser &&
+					((ref.data[0] ==  eMP3Decoder::codecMPG) ||
+					 (ref.data[0] ==  eMP3Decoder::codecMP3) ) ))
+					return; // normal trickmode forward (ts only)
 			}
-			else
-			{
-				ts=1;
-				if ( time == 2 && skipspeed < 0 )
-				{
-					time*=3;
-					time/=2;
-				}
-			}
-
-			// Skip
-			if(ts && skipspeed==1) 
-				return; // normal trickmode forward (ts only)
-			else
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,(time*(faktor<0?1250:1000))*faktor));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,(time*(faktor<0?1250:1000))*faktor));
 
 			seekpos=pos;
 		}
@@ -3742,23 +3714,7 @@ void eZapMain::repeatSkip(int dir)
 				time = -time;
 
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
-			if (ref.type == eServiceReference::idUser)
-			{
-				switch(ref.data[0])
-				{
-					case eMP3Decoder::codecMPG:
-						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*2000));
-						break;
-					case eMP3Decoder::codecMP3:
-						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*3800));
-						break;
-				}
-			}
-			else if (Decoder::current.vpid==-1) //Radiorecording
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*24));
-			else
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*376)); // ca in TS
-
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*1000));
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 
 			updateProgress();
@@ -6141,22 +6097,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 					if (skipping) 
 						endSkip();
 					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
-					if (myref.type == eServiceReference::idUser)
-					{
-						switch(myref.data[0])
-						{
-							case eMP3Decoder::codecMPG:
-								handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*2000));
-								break;
-							case eMP3Decoder::codecMP3:
-								handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*3800));
-								break;
-						}
-					}
-					else if (Decoder::current.vpid==-1) // Radio
-						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*24));
-					else
-						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*376)); // ca in TS
+					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*1000));
 					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 					updateProgress();
 					int showosd = 1;

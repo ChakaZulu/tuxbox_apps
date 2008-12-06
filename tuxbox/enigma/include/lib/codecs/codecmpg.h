@@ -36,9 +36,14 @@ protected:
 	std::list<syncAudioPacket> syncbuffer;
 	unsigned char *sheader;
 	unsigned int sheader_len;
+	int movie_begin;
+	int movie_end;
+	int readTimestamp(unsigned char* data, int len, int* seconds);
+	int parseData(unsigned char *data, int len, int* seconds);
+	void setCurrentTime(unsigned char* data, int len);
 public:
 	void extractSequenceHeader( unsigned char *buf, unsigned int len );
-	eDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd);
+	eDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd, int sourcefd);
 	~eDemux();
 	virtual int decodeMore(int last, int maxsamples, Signal1<void, unsigned int>*newastreamid=0 )=0; // returns number of samples(!) written to IOBuffer (out)
 	void resync(); // clear (secondary) decoder buffers
@@ -51,8 +56,8 @@ public:
 class eMPEGDemux: public eDemux
 {
 public:
-	eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd)
-		:eDemux(input, video, audio, fd)
+	eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd, int sourcefd)
+		:eDemux(input, video, audio, fd, sourcefd)
 	{}
 	int decodeMore(int last, int maxsamples, Signal1<void, unsigned int>*newastreamid=0 ); // returns number of samples(!) written to IOBuffer (out)
 };
@@ -61,8 +66,8 @@ public:
 class ePVADemux: public eDemux
 {
 public:
-	ePVADemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd)
-		:eDemux(input, video, audio, fd)
+	ePVADemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd, int sourcefd)
+		:eDemux(input, video, audio, fd, sourcefd)
 	{}
 	int decodeMore(int last, int maxsamples, Signal1<void, unsigned int>*newastreamid=0 ); // returns number of samples(!) written to IOBuffer (out)
 };
