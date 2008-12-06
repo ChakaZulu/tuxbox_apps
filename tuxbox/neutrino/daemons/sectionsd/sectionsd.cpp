@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.278 2008/11/30 19:56:49 seife Exp $
+//  $Id: sectionsd.cpp,v 1.279 2008/12/06 20:50:08 houdini Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -772,12 +772,12 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 		si->second->setName("OFF",evt.getName().c_str());
 		si->second->contentClassification = evt.contentClassification;
 		si->second->userClassification = evt.userClassification;
-		if ((strlen(evt.getExtendedText().c_str()) > 0) &&
+		if ((evt.getExtendedText().length() > 0) &&
 				(evt.times.begin()->startzeit < zeit + secondsExtendedTextCache))
 			si->second->setExtendedText("OFF",evt.getExtendedText().c_str());
-		if (strlen(evt.getText().c_str()) > 0)
+		if (evt.getText().length() > 0)
 			si->second->setText("OFF",evt.getText().c_str());
-		if (strlen(evt.getName().c_str()) > 0)
+		if (evt.getName().length() > 0)
 			si->second->setName("OFF",evt.getName().c_str());
 	}
 	else {
@@ -2159,11 +2159,11 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 	}
 
 	unlockServices();
-	if (strlen(serviceList) + 1 > MAX_SIZE_SERVICELIST)
-		printf("warning: commandDumpAllServices: length=%d\n", strlen(serviceList) + 1);
-
 	struct sectionsd::msgResponseHeader msgResponse;
 	msgResponse.dataLength = strlen(serviceList) + 1;
+
+	if (msgResponse.dataLength > MAX_SIZE_SERVICELIST)
+		printf("warning: commandDumpAllServices: length=%d\n", msgResponse.dataLength);
 
 	if (msgResponse.dataLength == 1)
 		msgResponse.dataLength = 0;
@@ -2344,7 +2344,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 								*((unsigned *)liste) = t->dauer;
 								liste += 4;
 								strcpy(liste, (*e)->getName().c_str());
-								liste += strlen(liste);
+								liste += (*e)->getName().length();
 								liste++;
 	
 								if (((*e)->getText()).empty())
@@ -2355,7 +2355,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 								else
 								{
 									strcpy(liste, (*e)->getText().c_str());
-									liste += strlen(liste);
+									liste += (*e)->getText().length();
 								}
 								liste++;
 							} else {
@@ -2458,7 +2458,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.278 2008/11/30 19:56:49 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.279 2008/12/06 20:50:08 houdini Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -3644,7 +3644,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 							*((unsigned *)liste) = t->dauer;
 							liste += 4;
 							strcpy(liste, eName.c_str());
-							liste += strlen(liste);
+							liste += eName.length();
 							liste++;
 
 							if (eText.empty())
@@ -3655,7 +3655,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 							else
 							{
 								strcpy(liste, eText.c_str());
-								liste += strlen(liste);
+								liste += eText.length();
 							}
 							liste++;
 						} else {
@@ -8060,7 +8060,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.278 2008/11/30 19:56:49 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.279 2008/12/06 20:50:08 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8166,7 +8166,6 @@ int main(int argc, char **argv)
 		}
 
 		// from here on forked
-
 		signal(SIGHUP, signalHandler);
 		eventServer = new CEventServer;
 
