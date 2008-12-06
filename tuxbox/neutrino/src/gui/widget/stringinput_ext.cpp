@@ -143,12 +143,9 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 		}
 
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
-		neutrino_msg_t msg_sav = msg;
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
-		if (msg <= CRCInput::RC_MaxRC)
-			msg &= ~CRCInput::RC_Repeat; // kill the repeat bit
-
-		if (msg==CRCInput::RC_left)
+		if (msg_repeatok == CRCInput::RC_left)
 		{
 			if(selectedChar>0)
 			{
@@ -170,7 +167,7 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 				}
 			}
 		}
-		else if (msg==CRCInput::RC_right)
+		else if (msg_repeatok == CRCInput::RC_right)
 		{
 			if(selectedChar< (int) inputFields.size()-1)
 			{
@@ -192,10 +189,11 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 				}
 			}
 		}
-		else if ( (CRCInput::getUnicodeValue(msg) != -1) || (msg == CRCInput::RC_red) || (msg == CRCInput::RC_green) || (msg == CRCInput::RC_blue) || (msg == CRCInput::RC_yellow)
-					|| (msg == CRCInput::RC_up) || (msg == CRCInput::RC_down))
+		else if ((CRCInput::getUnicodeValue(msg) != -1) || (msg == CRCInput::RC_red)
+			|| (msg == CRCInput::RC_green) || (msg == CRCInput::RC_blue) || (msg == CRCInput::RC_yellow)
+			|| (msg_repeatok == CRCInput::RC_up) || (msg_repeatok == CRCInput::RC_down))
 		{
-			inputFields[selectedChar]->keyPressed(msg);
+			inputFields[selectedChar]->keyPressed(msg_repeatok);
 			inputFields[selectedChar]->paint( x+20, y+hheight +20, true );
 		}
 		else if (msg==CRCInput::RC_ok)
@@ -228,7 +226,7 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 					*cancel = true;
 			}
 		}
-		else if (CNeutrinoApp::getInstance()->handleMsg(msg_sav, data) & messages_return::cancel_all)
+		else if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 		{
 			loop = false;
 			res = menu_return::RETURN_EXIT_ALL;

@@ -298,19 +298,18 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		}
 
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
-		neutrino_msg_t msg_sav = msg;
+		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
 		if (msg <= CRCInput::RC_MaxRC)
 		{
-			msg &= ~CRCInput::RC_Repeat;
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 		}
 
-		if (msg==CRCInput::RC_left)
+		if (msg_repeatok == CRCInput::RC_left)
 		{
 			keyLeftPressed();
 		}
-		else if (msg==CRCInput::RC_right)
+		else if (msg_repeatok == CRCInput::RC_right)
 		{
 			keyRightPressed();
 		}
@@ -346,17 +345,19 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		{
 			keyBluePressed();
 		}
-		else if (msg==CRCInput::RC_up)
+		else if (msg_repeatok == CRCInput::RC_up)
 		{
 			keyUpPressed();
 		}
-		else if (msg==CRCInput::RC_down)
+		else if (msg_repeatok == CRCInput::RC_down)
 		{
 			keyDownPressed();
-		} else if (msg==CRCInput::RC_plus)
+		}
+		else if (msg_repeatok == CRCInput::RC_plus)
 		{
 			keyPlusPressed();
-		} else if (msg==CRCInput::RC_minus)
+		}
+		else if (msg_repeatok == CRCInput::RC_minus)
 		{
 			keyMinusPressed();
 		}
@@ -375,7 +376,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		}
 		else
 		{
-			int r = handleOthers(msg_sav, data);
+			int r = handleOthers(msg, data);
 			if (r & (messages_return::cancel_all | messages_return::cancel_info))
 			{
 				res = (r & messages_return::cancel_all) ? menu_return::RETURN_EXIT_ALL : menu_return::RETURN_EXIT;
@@ -383,7 +384,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 			}
 			else if ( r & messages_return::unhandled )
 			{
-				if (CNeutrinoApp::getInstance()->handleMsg(msg_sav, data) & messages_return::cancel_all)
+				if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;
@@ -683,9 +684,6 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 	{
 		g_RCInput->getMsg( &msg, &data, 300 );
 		neutrino_msg_t msg_sav = msg;
-
-		if (msg <= CRCInput::RC_MaxRC)
-			msg &= ~CRCInput::RC_Repeat;
 
 		if (msg==CRCInput::RC_left)
 		{
