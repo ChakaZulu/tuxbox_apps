@@ -56,7 +56,7 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 		int progressbar_x;
 		int progressbar_h;
 		int progressbar_w;
-		int max_val;
+		unsigned int max_val;
 		std::string statusText;
 
 
