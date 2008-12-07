@@ -76,5 +76,7 @@ class CScanTs : public CMenuTarget
 		CScanTs();
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);
+
+		enum { SCAN_COMPLETE = 0, SCAN_ONE_TP = 1, SCAN_ONE_SAT = 2 };
 };
 #endif

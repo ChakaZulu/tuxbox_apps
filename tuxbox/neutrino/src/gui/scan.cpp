@@ -80,7 +80,7 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %d TP_diseqc %d\n", get_set.TP_scan, get_set.TP_freq, get_set.TP_rate, get_set.TP_fec, get_set.TP_pol, get_set.TP_mod, (uint8_t)get_set.TP_diseqc);
 
 	// manual TP scan
-	if(get_set.TP_scan == 1)
+	if(get_set.TP_scan == CScanTs::SCAN_ONE_TP)
 	{
 #if HAVE_DVB_API_VERSION < 3
 		TP.feparams.Frequency = atoi(get_set.TP_freq);
@@ -144,15 +144,15 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 	}
 
 	/* go */
-	if(get_set.TP_scan == 1)
+	if (get_set.TP_scan == CScanTs::SCAN_ONE_TP)
 	{
 		success = g_Zapit->scan_TP(TP);
 	}
-	else if(get_set.TP_scan == 2)
+	else if (get_set.TP_scan == CScanTs::SCAN_ONE_SAT)
 	{
 		success = g_Zapit->startScan(get_set.scan_mode, (uint8_t)get_set.TP_diseqc);
 	}
-	else
+	else	// CScanTs::SCAN_COMPLETE
 	{
 		success = g_Zapit->startScan(get_set.scan_mode);
 	}
@@ -254,7 +254,7 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 			msg = CRCInput::RC_timeout;
 			break;
 		case CRCInput::RC_home:
-			if(get_set.TP_scan)
+			if (get_set.TP_scan == CScanTs::SCAN_ONE_TP) // only if we scan a whole sat...
 				break;
 
 			if (ShowLocalizedMessage(LOCALE_SCANTS_ABORT_HEADER, LOCALE_SCANTS_ABORT_BODY, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo) == CMessageBox::mbrYes)
