@@ -840,7 +840,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 					offset=3*1024*1024*8; // assuming 3MBit bitrate...
 			}
 			offset/=8000;
-			offset*=message.parm;
+			offset*=(message.parm >= 0 ? message.parm : message.parm - 4000);
 			buffer.clear();
 			offset-=1000*1000; // account for pvr buffer
 			if (message.type == eDVRPlayerThreadMessage::skip)

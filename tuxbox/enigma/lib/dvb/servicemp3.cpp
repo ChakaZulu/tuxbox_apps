@@ -819,7 +819,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			off64_t br=audiodecoder->getAverageBitrate();
 			if ( br <= 0 )
 				break;
-			br*=message.parm/8000;
+			br*=(message.parm < 0 ? message.parm : message.parm - 2000)/8000;
 			offset=input.size()+br;
 			if (message.type == eMP3DecoderMessage::skip)
 			{
