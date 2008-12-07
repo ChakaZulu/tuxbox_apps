@@ -85,7 +85,13 @@ void CRCLock::lockBox()
 
 		if (msg == CRCInput::RC_red)  {
 			timeoutEnd = CRCInput::calcTimeoutEnd(5);
-			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
+			/* now wait for the setup key, ignore repeat/release events */
+			do {
+				g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
+				/* but do not swallow non-key events */
+				if (msg >  CRCInput::RC_MaxRC)
+					CNeutrinoApp::getInstance()->handleMsg(msg, data); 
+			} while (msg >= KEY_MAX || msg == CRCInput::RC_red); // repeat/release bit set
 
 			if (msg == CRCInput::RC_setup)  break;
 		}
