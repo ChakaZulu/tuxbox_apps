@@ -64,6 +64,7 @@ class CScanTs : public CMenuTarget
 		bool success;
 		bool istheend;
 		uint found_transponder;
+		time_t start_time;
 
 		void paint();
 		void paintLineLocale(int x, int * y, int width, const neutrino_locale_t l);

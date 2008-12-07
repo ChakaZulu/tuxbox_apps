@@ -117,7 +117,8 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
 	frameBuffer->loadPicture2FrameBuffer("scan.raw");
 
-	g_Sectionsd->setPauseScanning(true);
+	g_Sectionsd->Restart();
+	g_Sectionsd->RegisterNeutrino();
 
 	/* send diseqc type to zapit */
 	diseqcType = CNeutrinoApp::getInstance()->getScanSettings().diseqcMode;
@@ -156,6 +157,7 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 	{
 		success = g_Zapit->startScan(get_set.scan_mode);
 	}
+	start_time = time(NULL);
 	paint();
 
 	/* poll for messages */
@@ -272,8 +274,20 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 
 void CScanTs::paintRadar(void)
 {
+	if (radar % 5 == 0)
+	{
+		time_t t = time(NULL) - start_time;
+		if (t < 0) // I'm not sure why this happens - maybe sectionsd restart?
+		{
+			fprintf(stderr, "CScanTs::paintRadar: time going backwards!\n");
+			t = 0;
+			start_time = time(NULL);
+		}
+		char c[10];
+		snprintf(c, 10, "%ld:%02ld:%02ld", t/3600, (t/60)%60, t%60);
+		paintLine(xpos1 + 5*72, ypos_service_numbers, 120, c);
+	}
 	char filename[30];
-
 	sprintf(filename, "radar%d.raw", radar);
 	radar = (radar + 1) % 10;
 	frameBuffer->paintIcon8(filename, xpos_radar, ypos_radar, 17);
