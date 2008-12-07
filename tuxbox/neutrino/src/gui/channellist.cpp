@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.199 2008/12/05 22:06:19 seife Exp $
+	$Id: channellist.cpp,v 1.200 2008/12/07 22:27:41 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -1172,10 +1172,10 @@ void CChannelList::paintItem(int pos)
 			// add MIDDLE DOT separator between name and description
 			const char *sep= g_settings.channellist_epgtext_align_right ? "   " :  " \xB7 " ;
 			strncat(nameAndDescription, sep, sizeof(nameAndDescription) - (strlen(nameAndDescription) + 1));
-			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
-			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(p_event->description);
+			int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
+			int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(p_event->description);
 
-			if ( (width- numwidth - 20 - 15 - prg_offset - ch_name_len)< ch_desc_len )
+			if ((width - (int)numwidth - 20 - 15 - prg_offset - ch_name_len) < ch_desc_len)
 				ch_desc_len = (width - numwidth - 20 - 15 - ch_name_len - prg_offset);
 			if (ch_desc_len < 0)
 				ch_desc_len = 0;
