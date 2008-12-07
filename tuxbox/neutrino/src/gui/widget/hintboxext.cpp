@@ -145,6 +145,9 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 		line++;
 	}
 
+	/* 10 pixels border to the left, 10 pixels to the right... */
+	maxWidth += 20;
+
 	// if there is only one page m_height is already correct 
     // but m_maxEntries has not been set
 	if (m_startEntryOfPage.size() > 1)
