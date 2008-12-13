@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.8 2008/11/16 21:46:40 seife Exp $
+	$Id: movieviewer.cpp,v 1.9 2008/12/13 00:56:37 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -281,7 +281,7 @@ void CMovieViewer::exec()
 			paintTime( show_dot, false );
 			show_dot = !show_dot;
 		}
-		else
+		else if ((msg & ~(CRCInput::RC_Repeat | CRCInput::RC_Release)) != CRCInput::RC_help)
 		{
 			// raus hier und im Hauptfenster behandeln...
 			g_RCInput->postMsg(  msg, data );
