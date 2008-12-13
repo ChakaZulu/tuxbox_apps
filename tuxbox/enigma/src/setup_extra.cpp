@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.79 2008/10/18 18:44:56 dbluelle Exp $
+ * $Id: setup_extra.cpp,v 1.80 2008/12/13 16:32:46 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -164,6 +164,10 @@ void eExpertSetup::init_eExpertSetup()
 	timerenddefaultaction->setCurrent(defaultaction);
 	
 	CONNECT(list.selchanged, eExpertSetup::timerenddefaultactionChanged );
+	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	new eListBoxEntryCheck(&list, _("disable AC3 recording"), "/enigma/noac3recording", _("don't record AC3 audio track"));
+	new eListBoxEntryCheck(&list, _("disable teletext recording"), "/enigma/nottxrecording", _("don't record teletext track"));
+	new eListBoxEntryCheck(&list, _("disable timestamp detection"), "/enigma/notimestampdetect", _("don't try to detect duration from DVB timestamps when replaying recordings"));
 	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 #endif
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )

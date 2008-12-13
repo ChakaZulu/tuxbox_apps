@@ -1,5 +1,5 @@
 /*
- * $Id: timestampts.cpp,v 1.3 2008/12/06 18:01:51 dbluelle Exp $
+ * $Id: timestampts.cpp,v 1.4 2008/12/13 16:32:01 dbluelle Exp $
  *
  * (C) 2008 by Dr. Best  <dr.best@dreambox-tools.info>
  *
@@ -20,6 +20,7 @@
  */
 #include <lib/dvb/timestampts.h>
 #include <lib/base/eerror.h>
+#include <lib/system/econfig.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -30,7 +31,7 @@
 #endif
 
 eTimeStampParserTS::eTimeStampParserTS(eString _filename): pktptr(0), pid(-1), needNextPacket(0), skip(0), MovieCurrentTime(0),
-	MovieBeginTime(0), MovieEndTime(0),MovieDuration(0),filelength(-1),sec_duration(0),sec_currentpos(0), type(0)
+	MovieBeginTime(0), MovieEndTime(0),MovieDuration(0),filelength(-1),sec_duration(-1),sec_currentpos(-1), type(0)
 {
 	// VPID ermitteln
 	int fd=open(_filename.c_str(), O_RDONLY|O_LARGEFILE);
@@ -83,35 +84,37 @@ eTimeStampParserTS::eTimeStampParserTS(eString _filename): pktptr(0), pid(-1), n
 			i++;
 		}
 		close(fd_begin);
-
-		struct stat64 s;
-		int slice = 0;
-		eString tfilename;
-		filelength = 0;
-		while (!stat64((_filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+		if (MovieBeginTime)
 		{
-			filelength += s.st_size;
-			tfilename = _filename + (slice ? eString().sprintf(".%03d", slice) : eString(""));
-			slice++;
-		}
-		int fd_end=::open(tfilename.c_str(), O_RDONLY|O_LARGEFILE);
-		if (fd_end>= 0)
-		{
-			type = 2; // Endzeit setzen!
-			pktptr= 0;
-			needNextPacket = 0;
-			skip= 0;
-			off64_t posbegin=::lseek64(fd_end,0, SEEK_END);
-			::lseek64(fd_end, posbegin - (off64_t)654240, SEEK_SET);
-			int d1 = dup(fd_end);
-			char p[65424];
-			int rd =1;
-			while ( rd > 0 )
+			struct stat64 s;
+			int slice = 0;
+			eString tfilename;
+			filelength = 0;
+			while (!stat64((_filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 			{
-				rd = ::read(d1, p, 65424);
-				parseData(p,rd);
+				filelength += s.st_size;
+				tfilename = _filename + (slice ? eString().sprintf(".%03d", slice) : eString(""));
+				slice++;
 			}
-			close(fd_end);
+			int fd_end=::open(tfilename.c_str(), O_RDONLY|O_LARGEFILE);
+			if (fd_end>= 0)
+			{
+				type = 2; // Endzeit setzen!
+				pktptr= 0;
+				needNextPacket = 0;
+				skip= 0;
+				off64_t posbegin=::lseek64(fd_end,0, SEEK_END);
+				::lseek64(fd_end, posbegin - (off64_t)654240, SEEK_SET);
+				int d1 = dup(fd_end);
+				char p[65424];
+				int rd =1;
+				while ( rd > 0 )
+				{
+					rd = ::read(d1, p, 65424);
+					parseData(p,rd);
+				}
+				close(fd_end);
+			}
 		}
 	}
 	pktptr= 0;

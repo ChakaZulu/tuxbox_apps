@@ -275,13 +275,19 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 					{
 						case DESCR_AC3:
 						{
-							record=1;
+							int norecord=0;
+							eConfig::getInstance()->getKey("/enigma/noac3recording", norecord);
+							if (!norecord)
+								record=1;
 							break;
 						}
 #ifdef RECORD_TELETEXT
 						case DESCR_TELETEXT:
 						{
-							record=2;  // low bitrate
+							int norecord=0;
+							eConfig::getInstance()->getKey("/enigma/nottxrecording", norecord);
+							if (!norecord)
+								record=2;  // low bitrate
 							break;
 						}
 #endif

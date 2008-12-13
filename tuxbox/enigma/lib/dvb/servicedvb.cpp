@@ -208,7 +208,10 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	,needasyncworkaround(false), inputsn(0), outputsn(0), messages(this, 1)
 {
 	state=stateInit;
-	timestampParser = new eTimeStampParserTS(_filename);
+	int nodetect=0;
+	eConfig::getInstance()->getKey("/enigma/notimestampdetect", nodetect );
+	timestampParser = nodetect ? 0 : new eTimeStampParserTS(_filename);
+		
 
 	int count=0;
 	seekbusy=0;
@@ -385,8 +388,8 @@ void eDVRPlayerThread::outputReady(int what)
 	(void)what;
 	char ptsbuf[65424];
 	int len = buffer.peek(ptsbuf, 65424);
-	timestampParser->parseData(ptsbuf,len);
-
+	if (timestampParser)
+		timestampParser->parseData(ptsbuf,len);
 	int wr=buffer.tofile(dvrfd,65424);
 	seekbusy-=wr;
 	int newBufferFullness = curBufferFullness - wr;
@@ -547,7 +550,8 @@ eDVRPlayerThread::~eDVRPlayerThread()
 		::close(dvrfd);
 	if (sourcefd >= 0)
 		::close(sourcefd);
-	delete timestampParser;
+	if (timestampParser)
+		delete timestampParser;
 	timestampParser = 0;
 }
 
@@ -572,7 +576,7 @@ void eDVRPlayerThread::updatePosition()
 int eDVRPlayerThread::getPosition(int real)
 {
 	int ret=0;
-	if (!real)
+	if (!real && timestampParser)
 	{
 		ret = timestampParser->getSecondsCurrent();
 		if (ret >= 0)
@@ -623,7 +627,7 @@ int eDVRPlayerThread::getLength(int real)
 {
 	if (real)
 		return filelength;
-	int ret = timestampParser->getSecondsDuration();
+	int ret = timestampParser ? timestampParser->getSecondsDuration() : -1;
 	if (ret >= 0)
 		return ret;
 	if (Decoder::current.vpid==-1)
