@@ -82,7 +82,7 @@ CRemoteControl::CRemoteControl()
 	selected_subchannel = -1;
 	needs_nvods = 	false;
 	director_mode = 0;
-	current_programm_timer = 0;
+//	current_programm_timer = 0;
 	is_video_started = true;
 }
 
@@ -198,11 +198,13 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 				if ( needs_nvods )
 					getNVODs();
 
+#if 0
 				if ( current_programm_timer != 0 )
 					g_RCInput->killTimer( current_programm_timer );
 
 				time_t end_program= info_CN->current_zeit.startzeit+ info_CN->current_zeit.dauer;
 				current_programm_timer = g_RCInput->addTimer( &end_program );
+#endif
 
 				// is_video_started is only false if channel is locked
 				if (((!is_video_started) && (info_CN->current_fsk == 0)) || ((!is_video_started) && (g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED)))
@@ -226,11 +228,13 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 
 				// timer setzen
 
+#if 0
 	        	if ( current_programm_timer != 0 )
 					g_RCInput->killTimer( current_programm_timer );
 
 				time_t end_program= info_CN->next_zeit.startzeit;
 				current_programm_timer = g_RCInput->addTimer( &end_program );
+#endif
 			}
 		}
 		if ( !is_video_started )
@@ -281,8 +285,9 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 				g_Sectionsd->setServiceChanged( current_channel_id, true );
 
 		}
-	    return messages_return::handled;
+		return messages_return::handled;
 	}
+#if 0
 	else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == current_programm_timer ) )
 	{
 		//printf("new program !\n");
@@ -293,6 +298,7 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 
  		return messages_return::handled;
 	}
+#endif
 	else
 		return messages_return::unhandled;
 }
@@ -575,11 +581,13 @@ void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::s
 		g_Sectionsd->setServiceChanged( current_channel_id, false );
 
 		zap_completion_timeout = now + 2 * (long long) 1000000;
+#if 0
 		if ( current_programm_timer != 0 )
 		{
 			g_RCInput->killTimer( current_programm_timer );
 			current_programm_timer = 0;
 		}
+#endif
 	}
 }
 
