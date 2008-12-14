@@ -3332,7 +3332,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		else
 		{
 //			eDebug("filename = descr = %s", descr.c_str() );
-			filename = descr;
+			filename = descr.left(100);
 		}
 
 		eString cname="";
