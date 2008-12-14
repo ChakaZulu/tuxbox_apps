@@ -1221,7 +1221,8 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 								break;
 							}
 							//fprintf(stderr, "%04x %04x\n", (int)*msg, (int)*data);
-							return;
+							if (*msg != RC_ignore) // no need to push events that need to be ignored anyway.
+								return;
 						}
 #endif /* OLD_RC_API */
 					}
