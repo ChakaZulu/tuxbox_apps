@@ -121,11 +121,14 @@ int CKeyChooserItem::exec(CMenuTarget* parent, const std::string &)
 
  get_Message:
 	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+	/* wait, until all repeat and release events are over... */
+	if (msg <= CRCInput::RC_MaxRC && (msg & (CRCInput::RC_Repeat | CRCInput::RC_Release)))
+		goto get_Message;
 	
 	if (msg != CRCInput::RC_timeout)
 	{
 		if (msg <= CRCInput::RC_MaxRC)
-			*key = msg & ~CRCInput::RC_Repeat;
+			*key = msg; // repeat bit is already checked above
 		else if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 			res = menu_return::RETURN_EXIT_ALL;
 		else
