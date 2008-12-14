@@ -93,15 +93,13 @@ int CRGBCSyncControler::exec(CMenuTarget* parent, const std::string &)
 	while (loop)
 	{
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
-		neutrino_msg_t msg_sav = msg;
 
 		if ( msg <= CRCInput::RC_MaxRC )
 		{
-			msg &= ~CRCInput::RC_Repeat; // kill repeat bit
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 		}
 
-		switch ( msg )
+		switch (msg & ~CRCInput::RC_Repeat)
 		{
 			case CRCInput::RC_right:
 				if (*csync < 31)
@@ -133,15 +131,17 @@ int CRGBCSyncControler::exec(CMenuTarget* parent, const std::string &)
 				break;
 
 			case CRCInput::RC_ok:
-				loop = false;
-			   break;
+				/* ignore repeat... */
+				if (msg == CRCInput::RC_ok)
+					loop = false;
+				break;
 
 			case CRCInput::RC_timeout:
 				loop = false;
 				break;
 
 			default:
-				if (CNeutrinoApp::getInstance()->handleMsg(msg_sav, data) & messages_return::cancel_all)
+				if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;

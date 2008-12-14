@@ -104,20 +104,16 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 	while (loop)
 	{
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
-		neutrino_msg_t msg_sav = msg;
 		unsigned char step = 1;
 
 		if ( msg <= CRCInput::RC_MaxRC )
 		{
 			if (msg & CRCInput::RC_Repeat)
-			{
 				step = 5;
-				msg &= ~CRCInput::RC_Repeat; // kill the repeat bit
-			}
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 		}
 
-		switch ( msg )
+		switch (msg & ~CRCInput::RC_Repeat)
 		{
 		case CRCInput::RC_down:
 			if(selected < 3) // max entries
@@ -244,6 +240,8 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 				break;
 
 			case CRCInput::RC_ok:
+				if (msg != CRCInput::RC_ok) // do not react on repeat...
+					break;
 				if (selected==3)	// default Werte benutzen
 				{
 					brightness		= DEFAULT_LCD_BRIGHTNESS;
@@ -254,13 +252,13 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 					paint();
 					break;
 				}
-
+				/* else fallthrough */
 			case CRCInput::RC_timeout:
 				loop = false;
 				break;
 
 			default:
-				if (CNeutrinoApp::getInstance()->handleMsg(msg_sav, data) & messages_return::cancel_all)
+				if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;
