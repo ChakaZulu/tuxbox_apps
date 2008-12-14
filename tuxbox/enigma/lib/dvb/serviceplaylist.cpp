@@ -54,16 +54,22 @@ int ePlaylist::load(const char *filename)
 		return -1;
 	}
 	int ignore_next=0;
+	int indescr = 0;
 	char line[256];
+	line[255] = 0;
 	while (1)
 	{
-		if (!fgets(line, 256, fp))
+		if (!fgets(line, 255, fp))
 			break;
-		line[strlen(line)-1]=0;
+		if (strlen(line) && line[strlen(line)-1]=='\n')
+			line[strlen(line)-1]=0;
 		if (strlen(line) && line[strlen(line)-1]=='\r')
 			line[strlen(line)-1]=0;
+		if (!strlen(line))
+			continue;
 		if (line[0]=='#')
 		{
+			indescr = 0;
 			if (!strncmp(line, "#SERVICE", 8))
 			{
 				int offs = line[8] == ':' ? 10 : 9;
@@ -93,6 +99,7 @@ int ePlaylist::load(const char *filename)
 			{
 				int offs = line[12] == ':' ? 14 : 13;
 				list.back().service.descr=line+offs;
+				indescr = 1;
 			}
 			else if (!strcmp(line, "#CURRENT"))
 			{
@@ -118,10 +125,14 @@ int ePlaylist::load(const char *filename)
 			}
 			continue;
 		}
+		if (indescr)
+		{
+			list.back().service.descr+=line;
+			continue;
+		}
 
 		if (!line[0])
 			break;
-
 		if (ignore_next)
 		{
 			ignore_next=0;
@@ -180,7 +191,7 @@ int ePlaylist::save(const char *filename)
 		else if ( fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str()) < 0 )
 			goto err;
 		if ( i->service.descr &&
-			fprintf(f, "#DESCRIPTION: %s\r\n", i->service.descr.c_str()) < 0 )
+			fprintf(f, "#DESCRIPTION: %s\r\n#END_DESCRIPTION\r\n", i->service.descr.c_str()) < 0 )
 			goto err;
 		if ( i->type & ePlaylistEntry::PlaylistEntry && i->current_position != -1 )
 		{
