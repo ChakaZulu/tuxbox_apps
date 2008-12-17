@@ -210,7 +210,7 @@ static	void	SaveGame( void )
 
 	if ( score < 31 )
 		return;
-
+	LocalSave();
 #ifdef HAVE_CURL
 	LocalSave();
 
@@ -585,8 +585,8 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 #ifdef USEX
 			FBFlushGrafic();
 #endif
-			SaveGame();
 			doexit=0;
+			SaveGame();
 #ifdef HAVE_CURL
 			if ( use_ihsc )
 				ShowIHScore();
