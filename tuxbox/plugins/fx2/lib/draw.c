@@ -2297,7 +2297,7 @@ char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
 		}
 		if ( actcode == RC_LEFT )
 		{
-			if ( i >= 0 )
+			if ( i > 0 )
 			{
 				*pos=' ';
 				*(pos+1)=0;

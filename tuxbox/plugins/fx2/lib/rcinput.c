@@ -11,6 +11,8 @@
 
 #ifdef HAVE_DREAMBOX_HARDWARE
 	static int fd_is_ext = 0;
+	static int keyboard = 0;
+	static int drop = 0;
 #endif
 
 #include "draw.h"
@@ -217,6 +219,10 @@ static unsigned short translate( unsigned short code )
 		case 0x17: return RC_MINUS;
 		case 0x28: return RC_SPKR;
 		case 0x82: return RC_HELP;
+#ifdef HAVE_DREAMBOX_HARDWARE
+		case 0xFE: keyboard=0;return 0xee;
+		case 0xFF: keyboard=1;return 0xee;
+#endif
 		default:
 			//perror("unknown old rc code");
 			return 0xee;
@@ -246,10 +252,18 @@ void		RcGetActCode( void )
 	}
 	x -= 2;
 	memcpy(&code,buf+x,2);
+	if (!drop && !keyboard)
+	{
+		drop = 1;
+		return;
+	}
 	code=translate(code);
 	realcode=code;
 	if ( code == 0xee )
+	{
+		drop = 0;
 		return;
+	}
 #else
 	struct input_event ev;
 
