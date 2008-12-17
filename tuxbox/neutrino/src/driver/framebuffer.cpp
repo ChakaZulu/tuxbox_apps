@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.67 2008/10/05 21:29:00 dbt Exp $
+	$Id: framebuffer.cpp,v 1.68 2008/12/17 20:56:51 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -456,12 +456,12 @@ void CFrameBuffer::setIconBasePath(const std::string & iconPath)
 const char  *CFrameBuffer::getIconFilePath(const std::string & filename)
 /*    	
  *  	filename can be a single filename eg. "<filename>" 
- *  	or absolute path eg. "var/dir/<filename>" 
+ *  	or absolute path eg. "/var/dir/<filename>" 
  */
 {	
 	std::string 	res,
 						defaultIconPath = iconBasePath + filename,
-						alterIconPath = (access(filename.c_str(), 0 ) != -1) ? filename : NEUTRINO_ICON_VARPATH + filename;
+						alterIconPath = (access(filename.c_str(), 0 ) != -1) ? filename : (std::string)NEUTRINO_ICON_VARPATH + filename;
 
 	if ((access(alterIconPath.c_str(), 0 ) != -1))	{
 			res = alterIconPath;

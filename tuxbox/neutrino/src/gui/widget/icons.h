@@ -2,7 +2,7 @@
 #define __gui_widget_icons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.15 2008/05/01 00:08:35 dbt Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.16 2008/12/17 20:56:52 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -88,6 +88,6 @@
 
 /* misc */
 
-#define NEUTRINO_ICON_VARPATH		"var/share/tuxbox/neutrino/icons/"  //alternatively path for user-defined icons 
+#define NEUTRINO_ICON_VARPATH		"/var/share/tuxbox/neutrino/icons/"  //alternatively path for user-defined icons 
 
 #endif /* __gui_widget_icons_h__ */

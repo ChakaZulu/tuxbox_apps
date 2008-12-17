@@ -19,5 +19,3 @@ install_DATA = \
 	conflict.raw record.raw record_conflict.raw zapto.raw zapto_conflict.raw \
 	ok_small.raw up_small.raw down_small.raw plus.raw minus.raw
 
-install-data-local:
-	install -d $(CONFIGDIR)/share/tuxbox/neutrino/icons

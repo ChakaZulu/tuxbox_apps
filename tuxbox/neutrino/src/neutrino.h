@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.199 2008/10/06 07:44:12 seife Exp $
+	$Id: neutrino.h,v 1.200 2008/12/17 20:56:50 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -54,6 +54,8 @@
 #define widest_number "2"
 
 #define ANNOUNCETIME (1 * 60)
+#define PLUGINDIR_VAR "/var/tuxbox/plugins"
+#define LCDDIR_VAR "/var/share/tuxbox/neutrino/lcdd"
 
 /**************************************************************************************
 *                                                                                     *
@@ -264,6 +266,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void ShowStreamFeatures();
 		bool doGuiRecord(char * preselectedDir, bool addTimer = false, char * filename = NULL);
 		bool doShowMuteIcon(void);
+		void prepareEnviroment();
 		CNeutrinoApp();
 
 	public:
@@ -296,6 +299,9 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		bool isMuted() {return current_muted;}
 		int recordingstatus;
 		void SendSectionsdConfig(void);
+		
+		bool execute_start_file(const char *filename);
+		bool execute_sys_command(const char *command);
 };
 
 

@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.60 2008/11/16 22:45:11 seife Exp $
+	$Id: lcdd.cpp,v 1.61 2008/12/17 20:56:51 dbt Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -142,7 +142,7 @@ const char * const background_name[LCD_NUMBER_OF_BACKGROUNDS] = {
 };
 #define NUMBER_OF_PATHS 2
 const char * const background_path[NUMBER_OF_PATHS] = {
-	"var/share/tuxbox/neutrino/lcdd/" ,
+	LCDDIR_VAR ,
 	DATADIR "/lcdd/icons/"
 };
 

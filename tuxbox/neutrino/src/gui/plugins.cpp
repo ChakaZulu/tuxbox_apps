@@ -62,7 +62,6 @@
 
 #include <daemonc/remotecontrol.h>
 
-#define PLUGINDIR_VAR "/var/tuxbox/plugins"
 #define PLUGINDIR_MNT "/mnt/plugins"
 
 #ifndef TUXTXT_CFG_STANDALONE
@@ -585,5 +584,3 @@ CPlugins::p_type_t CPlugins::getPluginType(int type)
 			return P_TYPE_DISABLED;
 	}
 }
-
-

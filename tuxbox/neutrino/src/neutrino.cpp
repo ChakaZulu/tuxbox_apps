@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.910 2008/12/12 23:22:29 seife Exp $
+	$Id: neutrino.cpp,v 1.911 2008/12/17 20:56:50 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -142,17 +142,35 @@ static void initGlobals(void)
 	g_PluginList    = NULL;
 }
 
-static void execute_start_file(const char *filename)
+bool CNeutrinoApp::execute_start_file(const char *filename)
+/* returns true if execution of a script was successfully */
 {
 	struct stat statbuf;
-	if (stat(filename, &statbuf) == 0)
-	{
+	if (stat(filename, &statbuf) == 0)	{
 		printf("[neutrino] executing %s\n", filename);
 		int result = system(filename);
-		if (result)
+		if (result !=0)	{
 			printf("[neutrino] %s failed with return code = %d\n", filename, WEXITSTATUS(result));
-	} else
-		printf("[neutrino] no file %s was found\n", filename);
+			return false;
+		}
+	} 
+	else	{
+			printf("[neutrino] no file %s was found\n", filename);
+			return false;
+		}
+		return true;
+}
+
+bool CNeutrinoApp::execute_sys_command(const char *command)
+/* returns true for successfully executed system command */
+{
+		printf("[neutrino] executing %s\n", command);
+		int result = system(command);
+		if (result !=0)	{
+			printf("[neutrino] %s failed with return code = %d\n", command, WEXITSTATUS(result));
+			return false;
+		}
+			return true;
 }
 
 
@@ -327,7 +345,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.show_mute_icon		= configfile.getInt32("show_mute_icon"		,1);
 	g_settings.channellist_epgtext_align_right		= configfile.getBool("channellist_epgtext_align_right"          , false);
 	g_settings.channellist_extended		= configfile.getBool("channellist_extended"          , false);
-	strcpy( g_settings.infobar_channel_logodir, configfile.getString( "infobar_channel_logodir", "var/share/tuxbox/neutrino/icons" ).c_str());
+	strcpy( g_settings.infobar_channel_logodir, configfile.getString( "infobar_channel_logodir", "/var/share/tuxbox/neutrino/icons/").c_str()); 
 	g_settings.infobar_show_channellogo		= configfile.getInt32("infobar_show_channellogo"		,0);
 	g_settings.infobar_channellogo_background		= configfile.getInt32("infobar_channellogo_background"		,0);
 	
@@ -1879,12 +1897,37 @@ void CNeutrinoApp::setupRecordingDevice(void)
 	}
 }
 
+void CNeutrinoApp::prepareEnviroment()
+/* use this function for preparing/create/customize 
+	some stuff for an optimized enviroment for neutrino, 
+	there are certainly more stuff that could be here now and in future */
+{	
+	/* check for existance of alternate folders for customizing in /var, and create this if not available,
+		some folders are necessary, because of default values in neutrino settings exist and 
+		there may be happen problems with handling of filebrowser */
+	const char * const env_folders[] = 	{NEUTRINO_ICON_VARPATH,	// custom icons, logos
+						 PLUGINDIR_VAR,		// custom plugins	
+						 LCDDIR_VAR};		// custom lcd icons, logos
+											 
+	for (unsigned int i=0; i<sizeof(env_folders) / sizeof(env_folders[0]); i++)
+	{
+		if ( access(env_folders[i], F_OK) != 0 ) { 
+			std::string cmd = (std::string)"mkdir -p " + env_folders[i];
+			if (!execute_sys_command(cmd.c_str())) 
+				printf("[neutrino] error creating %s\n", env_folders[i]);
+			else
+				printf("[neutrino] alternate folder created in: %s\n", env_folders[i]);
+		}
+	}										 
+}
+
 int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
 
+	prepareEnviroment();
 	int loadSettingsErg = loadSetup();
-
+	
 	/* load locales before setting up any fonts to determine whether we need a true unicode font */
 	bool display_language_selection;
 	CLocaleManager::loadLocale_ret_t loadLocale_ret = g_Locale->loadLocale(g_settings.language);
