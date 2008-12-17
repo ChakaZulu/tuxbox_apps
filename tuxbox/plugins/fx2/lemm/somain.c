@@ -72,8 +72,6 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
-	Fx2ShowPig( 430, 358, 240, 188 );
-
 	while( doexit != 3 )
 	{
 		if ( InitLemm() != 0 )
@@ -82,6 +80,8 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		InitLevel();
 
 		dblDrawFrame( 1 );
+
+		Fx2ShowPig( 430, 358, 240, 188 );
 
 		doexit=0;
 		while( !doexit )

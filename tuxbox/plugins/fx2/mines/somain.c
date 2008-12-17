@@ -46,12 +46,12 @@ int mines_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
-	Fx2ShowPig( 470, 300, 176, 144 );
 
 	while( doexit != 3 )
 	{
 		BoardInitialize();
 		DrawBoard( 0 );
+		Fx2ShowPig( 470, 300, 176, 144 );
 
 		doexit=0;
 		while( !doexit )

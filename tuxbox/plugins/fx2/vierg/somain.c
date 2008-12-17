@@ -111,7 +111,6 @@ int vierg_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
-	Fx2ShowPig( 420, 150, 240, 188 );
 
 #ifdef USEX
 	FBFlushGrafic();
@@ -121,6 +120,7 @@ int vierg_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	{
 		BoardInitialize();
 		DrawBoard( 0 );
+		Fx2ShowPig( 420, 150, 240, 188 );
 
 		doexit=0;
 		while( !doexit )
