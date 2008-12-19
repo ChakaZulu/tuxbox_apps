@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.201 2008/12/19 22:44:45 seife Exp $
+	$Id: channellist.cpp,v 1.202 2008/12/19 23:55:08 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -841,7 +841,7 @@ void CChannelList::virtual_zap_mode(bool up)
 			lastchan= chn;
 		}
 		epgpos = 0;
-		g_RCInput->getMsg( &msg, &data, 15*10 ); // 15 seconds, not user changable
+		g_RCInput->getMsg( &msg, &data, atoi(g_settings.timing_string[3])*10 ); // virtual zap timout = TIMING_INFOBAR
 		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 		//printf("########### %u ### %u #### %u #######\n", msg, NeutrinoMessages::EVT_TIMER, CRCInput::RC_timeout);
 
