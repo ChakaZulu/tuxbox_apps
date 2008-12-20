@@ -15,7 +15,6 @@ class eServiceHandlerDVB;
 
 #define MOVIEDIR "/hdd/movie"
 #define MAX_PERMANENT_TIMESHIFT_MINUTES 240
-#define PERMANENT_TIMESHIFT_FILE MOVIEDIR "/timeshift"
 
 class ePermanentTimeshift
 {
@@ -39,6 +38,7 @@ public:
 	int setNextPlayingSlice();
 	int getCurrentPlayingSlice(); 
 	off64_t seekTo(off64_t offset);
+	eString getTimeshiftPath();
 };
 
 class eDVRPlayerThread: public eThread, public eMainloop, public Object

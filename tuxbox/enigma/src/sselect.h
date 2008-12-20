@@ -71,6 +71,9 @@ protected:
 
 class eServiceSelector: public eWindow
 {
+#ifndef DISABLE_FILE
+	friend class eFileSelector;
+#endif
 	eServiceReference selected;
 	eServiceReference *result;
 	eListBoxExt<eListBoxEntryService> *services, *bouquets;
@@ -103,18 +106,19 @@ private:
 	void ResetBrowseChar();
 	void gotoChar(char c);
 	void updateCi();
-	void init_eServiceSelector();
+	virtual void init_eServiceSelector();
 	void EPGSearchEvent(eServiceReference ref);
 	void SwitchNowNext();
 
 public:
 	void EPGUpdated();
 	int eventHandler(const eWidgetEvent &event);
-	void setKeyDescriptions(bool editMode=false);
+	virtual void setKeyDescriptions(bool editMode=false);
 	void forEachServiceRef( Signal1<void,const eServiceReference&>, bool );
 	int movemode;
 	int editMode;
 	int plockmode;
+	bool isFileSelector;
 	enum { styleInvalid, styleCombiColumn, styleSingleColumn, styleMultiColumn };
 	enum { dirNo, dirUp, dirDown, dirFirst, dirLast };
 
@@ -169,5 +173,15 @@ public:
 	int toggleMoveMode();  // enable / disable move entry Mode ( only in userBouquets )
 	int toggleEditMode();  // enable / disable edit UserBouquet Mode
 };
+#ifndef DISABLE_FILE
+class eFileSelector: public eServiceSelector
+{
+	eServicePath getDirRoot(int list, int _mode);
+public:
+	eFileSelector(eString startPath);
+
+	virtual void setKeyDescriptions(bool editMode=false);
+};
+#endif
 
 #endif

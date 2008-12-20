@@ -45,14 +45,14 @@ void ePermanentTimeshift::Start()
 	gettimeofday(&(last_split),0);
 	int minutes = 30;
 	eConfig::getInstance()->getKey("/enigma/timeshift/permanentminutes", minutes );
-
+	eString path = getTimeshiftPath();
 	struct stat64 s;
-	eString filename = eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, minutes);
+	eString filename = eString().sprintf("%s.%03d", path.c_str(), minutes);
 	while (!stat64(filename.c_str(), &s))
 	{
 		eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 		minutes++;
-		filename = eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, minutes);
+		filename = eString().sprintf("%s.%03d", path.c_str(), minutes);
 	}
 
 	lock.unlock();
@@ -62,11 +62,12 @@ void ePermanentTimeshift::Stop()
 	lock.lock();
 	eDebug("[PERM] stopping permanent timeshift:%d",IsTimeshifting);
 	IsTimeshifting = 0;
+	eString path = getTimeshiftPath();
 	if (slicelist.size() > 0)
 	{
 		int slice = slicelist.back().first;
 		struct stat64 s;
-		eString filename = (slice ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, slice) : eString(PERMANENT_TIMESHIFT_FILE));
+		eString filename = (slice ? eString().sprintf("%s.%03d", path.c_str(), slice) : path);
 		if (!stat64(filename.c_str(), &s))
 		{
 			slicelist.back().second=s.st_size;
@@ -83,9 +84,10 @@ bool ePermanentTimeshift::CheckSlice(unsigned int minutes)
 	// new File every 60 seconds of recording
 	if ((now.tv_sec - last_split.tv_sec) >= 60)
 	{
+		eString path = getTimeshiftPath();
 		int slice = slicelist.back().first;
 		struct stat64 s;
-		eString filename = (slice ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, slice) : eString(PERMANENT_TIMESHIFT_FILE));
+		eString filename = (slice ? eString().sprintf("%s.%03d", path.c_str(), slice) : path);
 		if (!stat64(filename.c_str(), &s))
 		{
 			slicelist.back().second=s.st_size;
@@ -113,9 +115,10 @@ void ePermanentTimeshift::renameAllSlices(const char* filename)
 {
 	eDebug("renameAllSlices:%s",filename);
 	int slice = 0;
+	eString path = getTimeshiftPath();
 	for (std::list<std::pair<int,off64_t> >::iterator x(slicelist.begin()); x != slicelist.end(); ++x)
 	{
-		eString oldfilename = (x->first ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, x->first) : eString(PERMANENT_TIMESHIFT_FILE));
+		eString oldfilename = (x->first ? eString().sprintf("%s.%03d", path.c_str(), x->first) : path.c_str());
 		eString newfilename=filename;
 		if (slice)
 			newfilename += eString().sprintf(".%03d", slice);
@@ -137,8 +140,9 @@ off64_t ePermanentTimeshift::getCurrentLength(int slice)
 	}
 	if (slice < 0)
 	{
+		eString path = getTimeshiftPath();
 		struct stat64 s;
-		eString curfilename = (slicelist.back().first ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, slicelist.back().first) : eString(PERMANENT_TIMESHIFT_FILE));
+		eString curfilename = (slicelist.back().first ? eString().sprintf("%s.%03d", path.c_str(), slicelist.back().first) : path);
 		if (!stat64(curfilename.c_str(), &s))
 		{
 			filelength+=s.st_size;
@@ -200,7 +204,14 @@ off64_t ePermanentTimeshift::seekTo(off64_t offset)
 	eDebug("[PERM] seekTo:%lld(%lld),%d",offset,newoffset,current_slice_playing->first);
 	return newoffset;
 }
-
+eString ePermanentTimeshift::getTimeshiftPath()
+{
+	eString strPath = MOVIEDIR;
+	char* selpath;
+	if (!eConfig::getInstance()->getKey("/enigma/timeshift/storagedir", selpath ))
+		strPath = selpath;
+	return strPath + "/timeshift";
+}
 ePermanentTimeshift permanentTimeshift;
 
 eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *handler, int livemode, int playingPermanentTimeshift)
@@ -1168,7 +1179,7 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 		if (!recording)
 		{
 			permanentTimeshift.Start();
-			current_filename= PERMANENT_TIMESHIFT_FILE;
+			current_filename= permanentTimeshift.getTimeshiftPath();
 			playingPermanentTimeshift = 1;
 
 			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();

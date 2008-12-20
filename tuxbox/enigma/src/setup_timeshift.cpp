@@ -14,6 +14,7 @@
 #include <lib/system/econfig.h>
 #include <lib/dvb/servicedvb.h>
 #include <enigma_main.h>
+#include <sselect.h>
 
 
 eZapTimeshiftSetup::eZapTimeshiftSetup()
@@ -23,6 +24,8 @@ eZapTimeshiftSetup::eZapTimeshiftSetup()
 	minutes=new eNumber(this,1,1, MAX_PERMANENT_TIMESHIFT_MINUTES, 3, 0, 0); minutes->setName("minutes");
 	active=new eCheckbox(this);active->setName("active");
 	pause=new eCheckbox(this);pause->setName("pause");
+	path=new eTextInputField(this);path->setName("path");
+	seldir=new eButton(this); seldir->setName("seldir");
 	store=new eButton(this); store->setName("store");
 
 	int tmp = 0;
@@ -43,15 +46,37 @@ eZapTimeshiftSetup::eZapTimeshiftSetup()
 	eConfig::getInstance()->getKey("/enigma/timeshift/permanentminutes", permbuffersize );
 	minutes->setNumber(permbuffersize);
 
+	eString strPath = MOVIEDIR;
+	char* selpath;
+	if (!eConfig::getInstance()->getKey("/enigma/timeshift/storagedir", selpath ))
+		strPath = selpath;
+	path->setText(strPath);
+
 	sbar = new eStatusBar(this); sbar->setName("statusbar");
 
 	if (eSkin::getActive()->build(this, "SetupTimeshift"))
 		eFatal("skin load of \"SetupTimeshift\" failed");
 
 	CONNECT(store->selected, eZapTimeshiftSetup::storePressed);
+	CONNECT(seldir->selected, eZapTimeshiftSetup::selectDir);
 
 }
+void eZapTimeshiftSetup::selectDir()
+{
+	eFileSelector sel(path->getText());
+#ifndef DISABLE_LCD
+	sel.setLCD(LCDTitle, LCDElement);
+#endif
+	hide();
 
+	const eServiceReference *ref = sel.choose(-1);
+
+	if (ref)
+		path->setText(sel.getPath().current().path);
+	show();
+	setFocus(seldir);
+
+}
 
 eZapTimeshiftSetup::~eZapTimeshiftSetup()
 {
@@ -62,11 +87,15 @@ void eZapTimeshiftSetup::storePressed()
 	int tmp = 0;
 	eConfig::getInstance()->getKey("/enigma/timeshift/permanent", tmp );
 	unsigned char permactive = (unsigned char) tmp;
+	eString startPath =path->getText();
+	if (startPath.empty() || startPath[startPath.length() -1] != '/')
+		startPath+= "/";
 
 	eConfig::getInstance()->setKey("/enigma/timeshift/permanent", active->isChecked()?255:0 );
 	eConfig::getInstance()->setKey("/enigma/timeshift/activatepausebutton", pause->isChecked()?255:0 );
 	eConfig::getInstance()->setKey("/enigma/timeshift/permanentdelay", delay->getNumber() );
 	eConfig::getInstance()->setKey("/enigma/timeshift/permanentminutes", minutes->getNumber() );
+	eConfig::getInstance()->setKey("/enigma/timeshift/storagedir", startPath.c_str() );
 	if (permactive && !active->isChecked())
 	{
 		eZapMain::getInstance()->stopPermanentTimeshift();

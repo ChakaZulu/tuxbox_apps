@@ -971,14 +971,16 @@
 	</object>
 
 	<object name="SetupTimeshift">
-		<SetupTimeshift text="setup timeshifting" cposition="160:150" csize="370:280">
+		<SetupTimeshift text="setup timeshifting" cposition="140:150" csize="390:330">
 			<eLabel text="delay (seconds):" position="10:10" size="290:30" />
 			<eLabel text="max. recording time (minutes):" position="10:60" size="290:30" />
-			<eNumber name="delay" position="300:10" size="60:35" helptext="set number of seconds recording is delayed after switching channel" loadDeco="" />
-			<eNumber name="minutes" position="300:60" size="60:35" helptext="set maximum number of recorded minutes" loadDeco="" />
+			<eNumber name="delay" position="e-70:10" size="60:35" helptext="set number of seconds recording is delayed after switching channel" loadDeco="" />
+			<eNumber name="minutes" position="e-70:60" size="60:35" helptext="set maximum number of recorded minutes" loadDeco="" />
 			<eCheckbox name="active" text="activate timeshift" position="10:100" size="350:30" helptext="activate permanent timeshift" loadDeco="" />
 			<eCheckbox name="pause" text="activate pause button" position="10:140" size="350:30" helptext="use yellow button as pause button" loadDeco="" />
-			<eButton name="store" text="store" position="10:180" size="150:40" loadDeco="" helptext="store timeshift settings and leave" shortcut="green" />
+			<eTextInputField name="path" position="10:180" size="e-150:40" loadDeco="" helptext="set directory where timeshift files will be stored" />
+			<eButton name="seldir" align="center" vcenter="on" position="e-140:180" size="130:40" loadDeco="" text="Select" helptext="set directory where timeshift files will be stored" />
+			<eButton name="store" text="store" position="10:e-100" size="150:40" loadDeco="" helptext="store timeshift settings and leave" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</SetupTimeshift>
 	</object>

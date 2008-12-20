@@ -10,6 +10,7 @@
 class eButton;
 class eCheckbox;
 class eNumber;
+class eTextInputField;
 
 class eZapTimeshiftSetup: public eWindow
 {
@@ -18,10 +19,13 @@ class eZapTimeshiftSetup: public eWindow
 	eNumber *minutes;
 	eCheckbox* active;
 	eCheckbox* pause;
+	eTextInputField* path;
+	eButton *seldir;
 	eButton *store;
 	eStatusBar* sbar;
 private:
 	void storePressed();
+	void selectDir();
 
 public:
 	eZapTimeshiftSetup();

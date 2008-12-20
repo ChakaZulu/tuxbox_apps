@@ -1258,7 +1258,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				}
 				services->endAtomic();
 			}
-			else if (event.action == &i_serviceSelectorActions->showEPGSelector
+			else if (event.action == &i_serviceSelectorActions->showEPGSelector && !isFileSelector
 				&& !movemode && !editMode && this == eZap::getInstance()->getServiceSelector() )
 			{
 				hide();
@@ -1335,21 +1335,21 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				if ( style == styleSingleColumn )
 					SwitchNowNext();
 			}
-			else if (event.action == &i_serviceSelectorActions->showMenu && focus != bouquets && !plockmode )
+			else if (event.action == &i_serviceSelectorActions->showMenu  && !isFileSelector && focus != bouquets && !plockmode )
 			{
 				hide();
 				/*emit*/ showMenu(this);
 				show();
 			}
-			else if (event.action == &i_serviceSelectorActions->addService && !movemode && !editMode)
+			else if (event.action == &i_serviceSelectorActions->addService && !isFileSelector && !movemode && !editMode)
 				/*emit*/ addServiceToPlaylist(selected);
-			else if (event.action == &i_serviceSelectorActions->addServiceToUserBouquet && !movemode && !editMode)
+			else if (event.action == &i_serviceSelectorActions->addServiceToUserBouquet && !isFileSelector && !movemode && !editMode)
 			{
 				hide();
 				/*emit*/ addServiceToUserBouquet(&selected, 0);
 				show();
 			}
-			else if (event.action == &i_serviceSelectorActions->modeTV && !movemode && !editMode)
+			else if (event.action == &i_serviceSelectorActions->modeTV  && !isFileSelector && !movemode && !editMode)
 			{
 				if ( this == eZap::getInstance()->getServiceSelector() )
 					/*emit*/ setMode(eZapMain::modeTV);
@@ -1360,7 +1360,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						-2, (1<<4)|(1<<1), 0xFFFFFFFF ));
 				}
 			}
-			else if (event.action == &i_serviceSelectorActions->modeRadio && !movemode && !editMode)
+			else if (event.action == &i_serviceSelectorActions->modeRadio && !isFileSelector && !movemode && !editMode)
 			{
 				if ( this == eZap::getInstance()->getServiceSelector() )
 					/*emit*/ setMode(eZapMain::modeRadio);
@@ -1372,7 +1372,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				}
 			}
 #ifndef DISABLE_FILE
-			else if (event.action == &i_serviceSelectorActions->modeFile && !movemode && !editMode)
+			else if (event.action == &i_serviceSelectorActions->modeFile  && !isFileSelector && !movemode && !editMode)
 				/*emit*/ setMode(eZapMain::modeFile);
 #endif
 			else if (event.action == &i_serviceSelectorActions->gotoPrevMarker)
@@ -1825,7 +1825,7 @@ eServiceSelector::eServiceSelector()
 	:eWindow(0), result(0), services(0), bouquets(0)
 	,style(styleInvalid), lastSelectedStyle(styleSingleColumn)
 	,BrowseChar(0), BrowseTimer(eApp), ciDelay(eApp), movemode(0)
-	,editMode(0), plockmode(0)
+	,editMode(0), plockmode(0),isFileSelector(false)
 {
 	init_eServiceSelector();
 }
@@ -2149,3 +2149,102 @@ int eServiceSelector::toggleEditMode()
 	editMode^=1;
 	return editMode;
 }
+#ifndef DISABLE_FILE
+eFileSelector::eFileSelector(eString startPath) : eServiceSelector()
+{
+	isFileSelector = true;
+	if (startPath.empty() || startPath[startPath.length() -1] != '/')
+		startPath+= "/";
+	eString tmp = startPath;
+	eString tmp2 = "";
+	while (!tmp.empty())
+	{
+		int pos =tmp.find_first_of('/');
+		tmp2 = tmp2+tmp.substr(0,pos) + "/";
+		eServiceReference startDirRef =eServiceReference(eServiceReference::idFile, eServiceReference::isDirectory|eServiceReference::canDescent|eServiceReference::mustDescent|eServiceReference::shouldSort|eServiceReference::sort1, tmp2);
+		enterDirectory(startDirRef);
+		tmp = tmp.substr(pos+1);
+	}
+	getRoot.connect( slot( *this, &eFileSelector::getDirRoot) );
+	setStyle(eServiceSelector::styleSingleColumn);
+}
+
+void eFileSelector::setKeyDescriptions( bool editMode )
+{
+	if (!(key[0] && key[1] && key[2] && key[3]))
+		return;
+
+	if ( editMode )
+	{
+		eServiceSelector::setKeyDescriptions(editMode);
+		return;
+	}
+	
+	key[0]->setText(_("Root"));
+	key[1]->setText(_("Select"));
+	key[2]->setText(_("New Directory"));
+	key[3]->setText(_("Delete"));
+}
+eServicePath eFileSelector::getDirRoot(int list, int _mode)
+{
+	eServicePath b;
+	switch (list)
+	{
+	case listAll:
+		b.down(eServiceReference(eServiceReference::idFile, eServiceReference::isDirectory|eServiceReference::canDescent|eServiceReference::mustDescent|eServiceReference::shouldSort|eServiceReference::sort1, "/"));
+		break;
+	case listSatellites:
+		result = &selected;
+		close(0);
+		break;
+	case listProvider:
+		{
+			TextEditWindow wnd(_("Enter name of new directory:"));
+			wnd.setText(_("Create Directory"));
+			wnd.show();
+			int ret = wnd.exec();
+			wnd.hide();
+			if ( !ret )
+			{
+				eString cmd = eString().sprintf("mkdir \"%s/%s\"",getPath().current().path.c_str(),wnd.getEditText().c_str());
+				if ( system(cmd.c_str()) )
+				{
+					eMessageBox msg(strerror(errno),_("Error creating directory"),eMessageBox::btOK|eMessageBox::iconError);
+					msg.show();
+					msg.exec();
+					msg.hide();
+				}
+				else
+					actualize();
+			}
+		}
+		break;
+	case listBouquets:
+		{
+			if  (selected.type != eServiceReference::idFile)
+				break;
+			eString s;
+			s.sprintf(_("You are trying to delete '%s'.\nReally do this?"),selected.path.c_str() );
+			eMessageBox box(s, _("Delete"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
+			box.show();
+			int r=box.exec();
+			box.hide();
+			if (r == eMessageBox::btYes)
+			{
+				eString cmd = eString().sprintf("rm -f -r \"%s\"",selected.path.c_str());
+				if ( system(cmd.c_str()) )
+				{
+					eMessageBox msg(strerror(errno),_("Error") ,eMessageBox::btOK|eMessageBox::iconError);
+					msg.show();
+					msg.exec();
+					msg.hide();
+				}
+				else
+					actualize();
+			}
+		}
+		break;
+	}
+	return b;
+}
+#endif
