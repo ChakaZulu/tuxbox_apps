@@ -441,3 +441,4 @@ AC_DEFUN([AC_PROG_EGREP],
 dnl This file comes from GNU gettext, and is not installed on all systems.
 dnl Better to include it with our sources.
 m4_include([progtest.m4])
+m4_include([lib-link.m4])
