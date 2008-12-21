@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-14 13:55+0000\n"
+"POT-Creation-Date: 2008-12-21 08:41+0000\n"
 "PO-Revision-Date: 2005-08-13 07:34+0100\n"
 "Last-Translator: \n"
 "Language-Team: Spanish / J.M. Degen <info@comant.tv>\n"
@@ -39,9 +39,9 @@ msgstr "Satfind"
 msgid "Pause "
 msgstr "Pausa"
 
-#: default.esml:1000
+#: default.esml:1002
 msgid "set amount of transparency when in semi-transparent mode"
-msgstr ""
+msgstr "Ajustar transparencia del modo semi-transparente"
 
 #: default.esml:472
 msgid "motor power input difference between running and not running"
@@ -55,9 +55,9 @@ msgstr "Mandar la sequencia DiSEqC entera en duplicado"
 msgid "Satellite:"
 msgstr "Satélite:"
 
-#: default.esml:1003
+#: default.esml:1005
 msgid "use truetype font instead of standard font"
-msgstr ""
+msgstr "Usar fuente truetype en vez de la fuente estándar"
 
 #: default.esml:976
 msgid "max. recording time (minutes):"
@@ -71,7 +71,7 @@ msgstr "No mandar impulso DiSEqC en cambios Hi/Lo o H/V"
 msgid "SNR"
 msgstr "SNR"
 
-#: default.esml:993
+#: default.esml:995
 msgid "Service:"
 msgstr "Servicio:"
 
@@ -95,9 +95,9 @@ msgstr "LOF/L:"
 msgid "Wednesday"
 msgstr "Miercoles"
 
-#: default.esml:995
+#: default.esml:997
 msgid "switch to 16:9 mode when displaying teletext pages"
-msgstr ""
+msgstr "Conmutar al modo 16:9 al mostrar páginas teletexto"
 
 #: default.esml:880
 msgid "Partition Check"
@@ -115,7 +115,7 @@ msgstr "Elige año (ok)"
 msgid "increased voltage"
 msgstr "Voltaje incrementada"
 
-#: default.esml:1001
+#: default.esml:1003
 msgid "Language:"
 msgstr "Idioma:"
 
@@ -127,7 +127,7 @@ msgstr "LOCK"
 msgid "choose the code rate HP (left, right)"
 msgstr "Elige code rate HP (izquierda, derecha)"
 
-#: default.esml:996
+#: default.esml:998
 msgid "switch to 16:9 in split screen mode"
 msgstr "Cambiar a 16:9 en modo split screen"
 
@@ -139,7 +139,7 @@ msgstr "Activar salida 12V (para rele) (ok)"
 msgid "enable/disable use BAT for scan (if exists)"
 msgstr "Activar/desactivar el uso del BAT (si hay)"
 
-#: default.esml:1010
+#: default.esml:1012
 msgid "Title:"
 msgstr "Título:"
 
@@ -151,7 +151,7 @@ msgstr "Ajustes tematicos"
 msgid "transponder scanned:"
 msgstr "Transpondedores escaneados:"
 
-#: default.esml:990
+#: default.esml:992
 msgid "teletext page number (100 - 899)"
 msgstr "Página teletexto (100 - 899)"
 
@@ -176,7 +176,7 @@ msgstr "Sin pol. circular"
 msgid "Direction:"
 msgstr "Dirección:"
 
-#: default.esml:1002
+#: default.esml:1004
 msgid "set the language of the displayed pages"
 msgstr "Definir idioma de las paginas"
 
@@ -252,7 +252,7 @@ msgstr "Añadir sólo canales libres"
 msgid "abort"
 msgstr "Cancelar"
 
-#: default.esml:999
+#: default.esml:1001
 msgid "Transparency:"
 msgstr "Transparencia:"
 
@@ -268,11 +268,15 @@ msgstr "Cerrar ventana"
 msgid "BER"
 msgstr "BER:"
 
+#: default.esml:981 default.esml:982
+msgid "set directory where timeshift files will be stored"
+msgstr "Definir directorio donde se guardan los ficheros timeshift"
+
 #: default.esml:515
 msgid "Recalc Params:"
-msgstr "Recalcular parámetros:"
+msgstr "Recalc parámetros:"
 
-#: default.esml:1012
+#: default.esml:1014
 msgid "Search in:"
 msgstr "Buscar en:"
 
@@ -309,11 +313,11 @@ msgstr "Mandar disco duro al modo de espera ya"
 msgid "Services"
 msgstr "Servicios"
 
-#: default.esml:1018 src/epgsearch.cpp:682 src/epgsearch.cpp:683
+#: default.esml:1020 src/epgsearch.cpp:682 src/epgsearch.cpp:683
 msgid "Genre:"
 msgstr "Tipo:"
 
-#: default.esml:1015
+#: default.esml:1017
 msgid "Search options:"
 msgstr "Opciones:"
 
@@ -329,7 +333,7 @@ msgstr "&#51;"
 msgid "Coderate LP:"
 msgstr "Coderate LP:"
 
-#: default.esml:997 src/setup_lcd.cpp:69 src/setup_osd.cpp:212
+#: default.esml:999 src/setup_lcd.cpp:69 src/setup_osd.cpp:212
 msgid "Brightness:"
 msgstr "Brillo:"
 
@@ -341,7 +345,7 @@ msgstr "Subservicios"
 msgid "choose the bandwidth (left, right)"
 msgstr "Elige banda de ancha (izquierda, derecha)"
 
-#: default.esml:1020
+#: default.esml:1022
 msgid "Close"
 msgstr "Cerrar"
 
@@ -361,7 +365,7 @@ msgstr "&gt;"
 msgid "select month (ok)"
 msgstr "Elige mes (ok)"
 
-#: default.esml:1021
+#: default.esml:1023
 msgid "Start"
 msgstr "Início"
 
@@ -417,7 +421,7 @@ msgstr "Bajada HTTP"
 msgid "goto prev page (LNB)"
 msgstr "Ir a página anterior (LNB)"
 
-#: default.esml:995
+#: default.esml:997
 msgid "16:9 mode in normal view"
 msgstr "modo 16:9 en vista normal"
 
@@ -425,7 +429,7 @@ msgstr "modo 16:9 en vista normal"
 msgid "Use gotoXX Function"
 msgstr "Utilizar funcion gotoXX"
 
-#: default.esml:992
+#: default.esml:994
 msgid "add page"
 msgstr "Añadir página"
 
@@ -457,7 +461,7 @@ msgstr "Apagar"
 msgid "Transponder:"
 msgstr "Transpondedor:"
 
-#: default.esml:994
+#: default.esml:996
 msgid "select teletext service"
 msgstr "Elige servicio teletexto"
 
@@ -473,7 +477,7 @@ msgstr "horas"
 msgid "LOF/H:"
 msgstr "LOF/H:"
 
-#: default.esml:1003
+#: default.esml:1005
 msgid "use truetype font"
 msgstr "Usar fuente truetype"
 
@@ -482,9 +486,9 @@ msgid "set number of seconds recording is delayed after switching channel"
 msgstr ""
 "Retraso de la grabación timeshift en segundos después de cambiar el canal"
 
-#: default.esml:1017
+#: default.esml:1019
 msgid "Select this option if you want to make this epg search case sensitive"
-msgstr ""
+msgstr "Activar si quiere diferenciar entre mayusculas y minusculas"
 
 #: default.esml:904
 msgid "&#50;"
@@ -498,7 +502,7 @@ msgstr "Sobre..."
 msgid "add new Timer (ok)"
 msgstr "Añadir temporizador nuevo (ok)"
 
-#: default.esml:1017
+#: default.esml:1019
 msgid "Case Sensitive"
 msgstr ""
 
@@ -506,7 +510,7 @@ msgstr ""
 msgid "to change service press ok"
 msgstr "Elegir otro servicio (ok)"
 
-#: default.esml:988
+#: default.esml:990
 msgid "Favourites:"
 msgstr "Favoritos."
 
@@ -518,7 +522,7 @@ msgstr "&#55;"
 msgid "scan EPG"
 msgstr "Buscar EPG"
 
-#: default.esml:1021
+#: default.esml:1023
 msgid "Begin EPG Search"
 msgstr "Iniciar la búsqueda EPG"
 
@@ -538,7 +542,7 @@ msgstr "nuevo"
 msgid "duration:"
 msgstr "Duración:"
 
-#: default.esml:991
+#: default.esml:993
 msgid "remove selected page from favourites"
 msgstr "Eliminar página de los favoritos"
 
@@ -618,11 +622,11 @@ msgstr "Elige transpondedor buscado"
 msgid "add new Transponder to selected sat (ok)"
 msgstr "Añadir transpondedor al satélite elegido (ok)"
 
-#: default.esml:1019
+#: default.esml:1021
 msgid "Select a genre if you want to search for a genre"
 msgstr ""
 
-#: default.esml:996
+#: default.esml:998
 msgid "16:9 mode on splitscreen"
 msgstr ""
 
@@ -800,7 +804,7 @@ msgstr "Frecuencia LNB banda baja (0..9, ok)"
 msgid "Record "
 msgstr "Grabar"
 
-#: default.esml:987
+#: default.esml:989
 msgid "Teletext Settings"
 msgstr "Configuración teletexto"
 
@@ -824,7 +828,7 @@ msgstr "Acción después la grabación"
 msgid "Orbital Position:"
 msgstr "Posición orbital:"
 
-#: default.esml:1011
+#: default.esml:1013
 msgid "Enter title for epg searching"
 msgstr "Título para la búsqueda EPG"
 
@@ -840,7 +844,7 @@ msgstr "Frecuencia LNB banda alta (0..9, OK)"
 msgid "shutdown the box after recording (ok)"
 msgstr "Apagar receptor después la grabación (ok)"
 
-#: default.esml:1013
+#: default.esml:1015
 msgid ""
 "Select this option if you want to search the title only in selected channel"
 msgstr ""
@@ -870,7 +874,7 @@ msgstr "KSymb/s"
 msgid "set harddisk standby timeout (0 - 20; 0 = disabled)"
 msgstr "Temporizador modo espera del disco duro (0 - 20; 0 = desactivado)"
 
-#: default.esml:1014 src/sselect.cpp:462
+#: default.esml:1016 src/sselect.cpp:462
 msgid "All Services"
 msgstr "Todos los servicios"
 
@@ -950,12 +954,12 @@ msgstr "Frecuencia:"
 msgid "enter symbol rate (0..9, left, right)"
 msgstr "Velocidad símbolos (0..9, izquierda, derecha)"
 
-#: default.esml:874 default.esml:981 src/rotorconfig.cpp:508
+#: default.esml:874 default.esml:983 src/rotorconfig.cpp:508
 #: src/rotorconfig.cpp:524 src/rotorconfig.cpp:528 src/rotorconfig.cpp:853
 msgid "store"
 msgstr "Guardar"
 
-#: default.esml:998
+#: default.esml:1000
 msgid "set brightness of the displayed teletext page"
 msgstr ""
 
@@ -999,7 +1003,7 @@ msgstr "Ir al modo espera (ok)"
 msgid "choose wished satellite (ok)"
 msgstr "Elige satélite deseado (ok)"
 
-#: default.esml:991
+#: default.esml:993
 msgid "remove page"
 msgstr "Borrar página"
 
@@ -1007,7 +1011,7 @@ msgstr "Borrar página"
 msgid "show extended configuration"
 msgstr "Mostrar parámetros adicionales"
 
-#: default.esml:981
+#: default.esml:983
 msgid "store timeshift settings and leave"
 msgstr "Guardar ajustes timeshift y volver"
 
@@ -1091,7 +1095,7 @@ msgstr "Activar Sleep Timer"
 msgid "press ok to change"
 msgstr "Pulse OK para cambiar"
 
-#: default.esml:1014
+#: default.esml:1016
 msgid "Select this option if you want to search the title in all services"
 msgstr "Elegir esta opción para buscar el título en todos los servicios"
 
@@ -1135,7 +1139,11 @@ msgstr "Pagina siguiente"
 msgid "Symbol Rate:"
 msgstr "Symbolrate:"
 
-#: default.esml:992
+#: default.esml:982 src/sselect.cpp:2184
+msgid "Select"
+msgstr "Elegir"
+
+#: default.esml:994
 msgid "add page to favourites"
 msgstr "Añadir página a los favoritos"
 
@@ -1155,7 +1163,7 @@ msgstr "Calc param 2 (ver instrucciones del motor ó dejarlo en 00)"
 msgid "select the timer type (ok)"
 msgstr "Elige tipo temporizador (ok)"
 
-#: default.esml:1016
+#: default.esml:1018
 msgid "Select this option if you want to search the exact title"
 msgstr "Elegir esta opción para buscar el título exacto"
 
@@ -1183,7 +1191,7 @@ msgstr "Activar/desactivar búsqueda de red"
 msgid "Guard:"
 msgstr "Guarda:"
 
-#: default.esml:1009 src/enigma_main.cpp:5208 src/epgsearch.cpp:685
+#: default.esml:1011 src/enigma_main.cpp:5208 src/epgsearch.cpp:685
 #: src/epgwindow.cpp:367 src/epgwindow.cpp:419 src/sselect.cpp:76
 #: src/sselect.cpp:1926
 msgid "EPG Search"
@@ -1197,7 +1205,7 @@ msgstr "Stop"
 msgid "select your configuration here"
 msgstr "Elige su preferencia"
 
-#: default.esml:1016
+#: default.esml:1018
 msgid "Exact match"
 msgstr "Búsqueda exacta"
 
@@ -1237,7 +1245,7 @@ msgstr "Activar tecla pausa"
 msgid "select day (ok)"
 msgstr "Elige día (ok)"
 
-#: default.esml:1020
+#: default.esml:1022
 msgid "Closes EPG search window"
 msgstr "Cerrar ventana busqueda EPG"
 
@@ -1392,55 +1400,55 @@ msgstr "QPSK"
 msgid "parental"
 msgstr "paterno"
 
-#: lib/dvb/servicedvb.cpp:1048
+#: lib/dvb/servicedvb.cpp:1059
 msgid "Providers (TV)"
 msgstr "Proveedores (TV)"
 
-#: lib/dvb/servicedvb.cpp:1052
+#: lib/dvb/servicedvb.cpp:1063
 msgid "Providers (Radio)"
 msgstr "Provéedores (Radio)"
 
-#: lib/dvb/servicedvb.cpp:1056
+#: lib/dvb/servicedvb.cpp:1067
 msgid "Providers (Data)"
 msgstr "Proveedores (Data)"
 
-#: lib/dvb/servicedvb.cpp:1061
+#: lib/dvb/servicedvb.cpp:1072
 msgid "All services (TV)"
 msgstr "Todos los servicios (TV)"
 
-#: lib/dvb/servicedvb.cpp:1065
+#: lib/dvb/servicedvb.cpp:1076
 msgid "All services (Radio)"
 msgstr "Todos los servicios (Radio)"
 
-#: lib/dvb/servicedvb.cpp:1069
+#: lib/dvb/servicedvb.cpp:1080
 msgid "All services (Data)"
 msgstr "Todos los servicios (Datos)"
 
-#: lib/dvb/servicedvb.cpp:1076
+#: lib/dvb/servicedvb.cpp:1087
 msgid "Satellites (TV)"
 msgstr "Satélites (TV)"
 
-#: lib/dvb/servicedvb.cpp:1080
+#: lib/dvb/servicedvb.cpp:1091
 msgid "Satellites (Radio)"
 msgstr "Satélites (Radio)"
 
-#: lib/dvb/servicedvb.cpp:1084
+#: lib/dvb/servicedvb.cpp:1095
 msgid "Satellites (Data)"
 msgstr "Satélites (Datos)"
 
-#: lib/dvb/servicedvb.cpp:1504
+#: lib/dvb/servicedvb.cpp:1515
 msgid " - provider"
 msgstr " - Proveedores"
 
-#: lib/dvb/servicedvb.cpp:1512
+#: lib/dvb/servicedvb.cpp:1523
 msgid " - services"
 msgstr " - Servicios"
 
-#: lib/dvb/servicedvb.cpp:1520
+#: lib/dvb/servicedvb.cpp:1531
 msgid " - new found"
 msgstr " - Nuevos"
 
-#: lib/dvb/servicedvb.cpp:1524
+#: lib/dvb/servicedvb.cpp:1535
 msgid "current transponder"
 msgstr "Transpondedor actual"
 
@@ -2542,7 +2550,7 @@ msgstr "No se puede borrar este servicio."
 msgid "delete service"
 msgstr "Borrar servicio"
 
-#: src/enigma_main.cpp:4038 src/enigma_main.cpp:4179
+#: src/enigma_main.cpp:4038 src/enigma_main.cpp:4179 src/sselect.cpp:2227
 #, c-format
 msgid ""
 "You are trying to delete '%s'.\n"
@@ -3126,7 +3134,7 @@ msgid "Couldn't read plugin directory %s"
 msgstr "No se puede acceder al directorio plugin %s"
 
 #: src/enigma_plugins.cpp:206 src/enigma_plugins.cpp:352 src/scan.cpp:1873
-#: src/scan.cpp:1928 src/scan.cpp:2043
+#: src/scan.cpp:1928 src/scan.cpp:2043 src/sselect.cpp:2237
 msgid "Error"
 msgstr "Error"
 
@@ -3472,9 +3480,8 @@ msgid "search for event information"
 msgstr "Buscar información evento"
 
 #: src/epgsearch.cpp:574
-#, fuzzy
 msgid "Thriller"
-msgstr "Temporizador"
+msgstr "Policia"
 
 #: src/epgsearch.cpp:668
 msgid "all services"
@@ -5789,7 +5796,7 @@ msgstr "Satélites"
 msgid "Providers"
 msgstr "Proveedores"
 
-#: src/sselect.cpp:472
+#: src/sselect.cpp:472 src/sselect.cpp:2183
 msgid "Root"
 msgstr "Raíz"
 
@@ -5808,6 +5815,26 @@ msgstr "Elige directorio"
 #: src/sselect.cpp:1701
 msgid "toggle between now and next epg entries in single column list"
 msgstr "Conmutar EPG entre ahora y proxima en la vista clásica "
+
+#: src/sselect.cpp:2185
+msgid "New Directory"
+msgstr "Directorio nuevo"
+
+#: src/sselect.cpp:2186 src/sselect.cpp:2228
+msgid "Delete"
+msgstr "Borrar"
+
+#: src/sselect.cpp:2202
+msgid "Enter name of new directory:"
+msgstr "Editar nombre del directorio nuevo:"
+
+#: src/sselect.cpp:2203
+msgid "Create Directory"
+msgstr "Crear directorio"
+
+#: src/sselect.cpp:2212
+msgid "Error creating directory"
+msgstr "Error al crear el directorio"
 
 #: src/streaminfo.cpp:165
 msgid "album"
