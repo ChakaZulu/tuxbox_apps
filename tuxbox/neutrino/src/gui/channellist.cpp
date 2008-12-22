@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.202 2008/12/19 23:55:08 dbt Exp $
+	$Id: channellist.cpp,v 1.203 2008/12/22 14:19:03 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -609,6 +609,7 @@ void CChannelList::zapTo(int pos, bool forceStoreToLastChannels)
 		}
 #endif
 		tuned = pos;
+		CLCD::getInstance()->showServicename(chan->name);
 		g_RemoteControl->zapTo_ChannelID(chan->channel_id, chan->name, !chan->bAlwaysLocked); // UTF-8
 	}
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
