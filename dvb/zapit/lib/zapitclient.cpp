@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.117 2008/04/25 21:23:01 houdini Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.118 2008/12/24 15:20:58 houdini Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -210,13 +210,15 @@ int CZapitClient::getMode()
 
 void CZapitClient::setSubServices( subServiceList& subServices )
 {
-	unsigned int i;
+	int i;
+	CZapitMessages::commandInt numServices;
 
 	send(CZapitMessages::CMD_SETSUBSERVICES);
-
-	for (i = 0; i< subServices.size(); i++)
+	numServices.val = subServices.size();
+	send_data((char* )&numServices, sizeof(numServices));
+	for (i = 0; i < numServices.val; i++) {
 		send_data((char*)&subServices[i], sizeof(subServices[i]));
-
+	}
 	close_connection();
 }
 
@@ -561,9 +563,13 @@ void CZapitClient::getScanSatelliteList(SatelliteList& satelliteList)
 /* tell zapit which satellites to scan*/
 void CZapitClient::setScanSatelliteList( ScanSatelliteList& satelliteList )
 {
+	CZapitMessages::commandInt num;
 	send(CZapitMessages::CMD_SCANSETSCANSATLIST);
 
-	for (uint i=0; i<satelliteList.size(); i++)
+	num.val = satelliteList.size();
+	send_data((char* )&num, sizeof(num));
+
+	for (int i=0; i<num.val; i++)
 	{
 		send_data((char*)&satelliteList[i], sizeof(satelliteList[i]));
 	}
@@ -573,9 +579,13 @@ void CZapitClient::setScanSatelliteList( ScanSatelliteList& satelliteList )
 /* tell zapit stored satellite positions in diseqc 1.2 motor */
 void CZapitClient::setScanMotorPosList( ScanMotorPosList& motorPosList )
 {
+	CZapitMessages::commandInt num;
 	send(CZapitMessages::CMD_SCANSETSCANMOTORPOSLIST);
 
-	for (uint i = 0; i < motorPosList.size(); i++)
+	num.val = motorPosList.size();
+	send_data((char* )&num, sizeof(num));
+
+	for (int i=0; i<num.val; i++)
 	{
 		send_data((char*)&motorPosList[i], sizeof(motorPosList[i]));
 	}

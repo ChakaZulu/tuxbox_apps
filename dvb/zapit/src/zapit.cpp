@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.412 2008/11/30 23:19:48 seife Exp $
+ * $Id: zapit.cpp,v 1.413 2008/12/24 15:20:42 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1606,8 +1606,12 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_SCANSETSCANSATLIST:
 	{
 		CZapitClient::commandSetScanSatelliteList sat;
+		CZapitMessages::commandInt num;
 		scanProviders.clear();
-		while (CBasicServer::receive_data(connfd, &sat, sizeof(sat))) {
+		CBasicServer::receive_data(connfd, &num, sizeof(num));
+
+		while (num.val-- > 0) {
+			CBasicServer::receive_data(connfd, &sat, sizeof(sat));
 			DBG("adding %s (diseqc %d)", sat.satName, sat.diseqc);
 			scanProviders[sat.diseqc] = sat.satName;
 		}
@@ -1617,11 +1621,13 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_SCANSETSCANMOTORPOSLIST:
 	{
 		CZapitClient::commandSetScanMotorPosList pos;
+		CZapitMessages::commandInt num;
 		bool changed = false;
 		FILE * fd;
 
-		while (CBasicServer::receive_data(connfd, &pos, sizeof(pos)))
-		{
+		CBasicServer::receive_data(connfd, &num, sizeof(num));
+		while (num.val-- > 0) {
+			CBasicServer::receive_data(connfd, &pos, sizeof(pos));
 			//printf("adding %d (motorPos %d)\n", pos.satPosition, pos.motorPos);
 			changed |= (motorPositions[pos.satPosition] != pos.motorPos);
 			motorPositions[pos.satPosition] = pos.motorPos;
@@ -1896,9 +1902,12 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_SETSUBSERVICES:
 	{
 		CZapitClient::commandAddSubServices msgAddSubService;
+		CZapitMessages::commandInt numServices;
 
-		while (CBasicServer::receive_data(connfd, &msgAddSubService, sizeof(msgAddSubService)))
+		CBasicServer::receive_data(connfd, &numServices, sizeof(numServices));
+		while (numServices.val-- > 0)
 		{
+			CBasicServer::receive_data(connfd, &msgAddSubService, sizeof(msgAddSubService));
 			t_original_network_id original_network_id = msgAddSubService.original_network_id;
 			t_service_id          service_id          = msgAddSubService.service_id;
 			transponder_list_t::iterator t;
@@ -1940,7 +1949,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				)
 			);
 		}
-
 		current_is_nvod = true;
 		break;
 	}
@@ -2641,7 +2649,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.412 2008/11/30 23:19:48 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.413 2008/12/24 15:20:42 houdini Exp $\n");
 
 	bool check_lock = true;
 
