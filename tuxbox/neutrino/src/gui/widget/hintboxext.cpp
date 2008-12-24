@@ -117,6 +117,7 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 		bool pagebreak = false;
 		int maxHeight = 0;
 		int lineWidth = 0;
+		int count = 0;
 		for (std::vector<Drawable*>::iterator item = it->begin();
 			 item != it->end(); item++) {
 			if ((*item)->getHeight() > maxHeight)
@@ -124,8 +125,11 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 			lineWidth += (*item)->getWidth();
 			if ((*item)->getType() == Drawable::DTYPE_PAGEBREAK)
 				pagebreak = true;
+			count++;
 		}
-                if (lineWidth > maxWidth)
+		// 10 pixels left and right of every item. determined empirically :-(
+		lineWidth += count * 20;
+		if (lineWidth > maxWidth)
 			maxWidth = lineWidth;
 		m_height += maxHeight;
 		if (m_height > HINTBOXEXT_MAX_HEIGHT || pagebreak) {
@@ -145,14 +149,13 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 		line++;
 	}
 
-	/* 10 pixels border to the left, 10 pixels to the right... */
-	maxWidth += 20;
-
+	m_width = w_max(maxWidth, SHADOW_OFFSET);
 	// if there is only one page m_height is already correct 
     // but m_maxEntries has not been set
 	if (m_startEntryOfPage.size() > 1)
 	{
 		m_height = maxOverallHeight;
+		m_width += 15; // scroll bar
 	} else {
 		m_maxEntriesPerPage = line;
 	}
@@ -165,7 +168,6 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 // 	printf("pages: %d, startEntryVec: %d\n",page+1,m_startEntryOfPage.size()-1);
 // 	printf("maxEntries: %d\n", m_maxEntriesPerPage);
 
-	m_width = w_max(maxWidth, SHADOW_OFFSET); 
 	m_currentPage = 0;
 	m_pages = page + 1;
 	unsigned int additional_width;
