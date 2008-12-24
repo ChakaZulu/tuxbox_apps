@@ -17,6 +17,8 @@ typedef struct
 	size_t size;
 	size_t size_mask;
 	int mlocked;
+	char *helpbuf;
+	size_t helpbufsize;
 } ringbuffer_t;
 
 ringbuffer_t *ringbuffer_create(int sz);
@@ -36,5 +38,8 @@ size_t ringbuffer_write(ringbuffer_t *rb, char *src, size_t cnt);
 
 void ringbuffer_get_read_vector(ringbuffer_t *rb, ringbuffer_data_t *vec);
 void ringbuffer_get_write_vector(ringbuffer_t *rb, ringbuffer_data_t *vec);
+
+size_t ringbuffer_get_readpointer(ringbuffer_t * rb, char **dest, size_t cnt);
+size_t ringbuffer_get_writepointer(ringbuffer_t * rb, char **src, size_t cnt);
 
 #endif

@@ -46,7 +46,9 @@ ringbuffer_t * ringbuffer_create (int sz)
 	rb->read_ptr = 0;
 	rb->buf = malloc (rb->size);
 	rb->mlocked = 0;
-	
+	rb->helpbufsize = 1;
+	rb->helpbuf = malloc (rb->helpbufsize);
+
 	if( rb->buf ) 
 		return rb;
 
@@ -64,6 +66,8 @@ void ringbuffer_free (ringbuffer_t * rb)
 
 	free (rb->buf);
 	rb->buf=0;
+	free (rb->helpbuf);
+	rb->helpbuf=0;
 	free (rb);
 	rb=0;
 }
@@ -301,4 +305,74 @@ void ringbuffer_get_write_vector (ringbuffer_t * rb, ringbuffer_data_t * vec)
 		vec[0].len = free_cnt;
 		vec[1].len = 0;
 	}
+}
+
+/* Get read pointer at most `cnt' bytes from `rb' to
+   `dest'.  Returns the actual readable number of bytes . */
+size_t ringbuffer_get_readpointer (ringbuffer_t * rb, char **dest, size_t cnt)
+{
+	size_t free_cnt;
+	size_t cnt2;
+	size_t to_read;
+	size_t n1, n2;
+	size_t tmp_read_ptr = rb->read_ptr;
+
+	if ((free_cnt = ringbuffer_read_space (rb)) == 0)
+		return 0;
+
+	to_read = cnt > free_cnt ? free_cnt : cnt;
+
+	cnt2 = rb->read_ptr + to_read;
+
+	if (cnt2 > rb->size)
+	{
+		n1 = rb->size - rb->read_ptr;
+		n2 = cnt2 & rb->size_mask;
+	}
+	else
+	{
+		n1 = to_read;
+		n2 = 0;
+	}
+	if (n2)
+	{
+		if (to_read > rb->helpbufsize)
+		{
+			rb->helpbufsize = to_read;
+			rb->helpbuf = realloc (rb->helpbuf, rb->helpbufsize);
+		}
+		memcpy (rb->helpbuf, &(rb->buf[rb->read_ptr]), n1);
+		tmp_read_ptr += n1;
+		tmp_read_ptr &= rb->size_mask;
+		memcpy (rb->helpbuf + n1, &(rb->buf[tmp_read_ptr]), n2);
+		*dest = rb->helpbuf;
+	}
+	else
+		*dest = &(rb->buf[rb->read_ptr]);
+
+	return to_read;
+}
+
+
+/* Get write pointer at most `cnt' bytes to `rb' from
+   `src'.  Returns the actual number of bytes can insert. */
+size_t ringbuffer_get_writepointer (ringbuffer_t * rb, char **src, size_t cnt)
+{
+	size_t free_cnt;
+	size_t cnt2;
+	size_t to_write;
+
+	if ((free_cnt = ringbuffer_write_space (rb)) == 0)
+		return 0;
+
+	to_write = cnt > free_cnt ? free_cnt : cnt;
+
+	cnt2 = rb->write_ptr + to_write;
+
+	if (cnt2 > rb->size)
+		return 0;
+	else
+		*src = &(rb->buf[rb->write_ptr]);
+
+	return to_write;
 }
