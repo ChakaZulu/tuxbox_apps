@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.61 2006/11/16 22:52:28 houdini Exp $
+	$Id: timerd.cpp,v 1.62 2008/12/25 16:20:22 houdini Exp $
 
 	License: GPL
 
@@ -505,9 +505,6 @@ int main(int argc, char **argv)
 
 	CBasicServer timerd_server;
 
-	if (!timerd_server.prepare(TIMERD_UDS_NAME))
-		return -1;
-
 	if(do_fork)
 	{
 		switch(fork())
@@ -526,6 +523,9 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 	}
+
+	if (!timerd_server.prepare(TIMERD_UDS_NAME))
+		return -1;
 
 	//catch all signals
 	signal(SIGHUP, signalHandler);

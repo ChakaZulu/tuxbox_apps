@@ -1199,7 +1199,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.130 2008/01/03 11:09:27 seife Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.131 2008/12/25 16:18:24 houdini Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -1215,9 +1215,6 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 	}
-
-	if (!controld_server.prepare(CONTROLD_UDS_NAME))
-		return -1;
 
 	if (!debug)
 	{
@@ -1238,6 +1235,9 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 	}
+
+	if (!controld_server.prepare(CONTROLD_UDS_NAME))
+		return -1;
 
 	eventServer = new CEventServer;
 

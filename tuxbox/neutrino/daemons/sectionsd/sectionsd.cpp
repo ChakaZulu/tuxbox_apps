@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.279 2008/12/06 20:50:08 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.280 2008/12/25 16:19:12 houdini Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2458,7 +2458,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.279 2008/12/06 20:50:08 houdini Exp $\n"
+		"$Id: sectionsd.cpp,v 1.280 2008/12/25 16:19:12 houdini Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -8060,7 +8060,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.279 2008/12/06 20:50:08 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.280 2008/12/25 16:19:12 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8145,9 +8145,6 @@ int main(int argc, char **argv)
 		readEPGFilter();
 		readBouquetFilter();
 
-		if (!sectionsd_server.prepare(SECTIONSD_UDS_NAME))
-			return EXIT_FAILURE;
-
 		if (!debug) {
 			switch (fork()) { // switching to background
 			case -1:
@@ -8164,6 +8161,9 @@ int main(int argc, char **argv)
 				return EXIT_FAILURE;
 			}
 		}
+
+		if (!sectionsd_server.prepare(SECTIONSD_UDS_NAME))
+			return EXIT_FAILURE;
 
 		// from here on forked
 		signal(SIGHUP, signalHandler);

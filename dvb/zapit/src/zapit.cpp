@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.413 2008/12/24 15:20:42 houdini Exp $
+ * $Id: zapit.cpp,v 1.414 2008/12/25 16:17:42 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2649,7 +2649,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.413 2008/12/24 15:20:42 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.414 2008/12/25 16:17:42 houdini Exp $\n");
 
 	bool check_lock = true;
 
@@ -2747,9 +2747,6 @@ int main(int argc, char **argv)
 
 	CBasicServer zapit_server;
 
-	if (!zapit_server.prepare(ZAPIT_UDS_NAME))
-		return -1;
-
 	if (!debug)
 		switch (fork()) {
 		case -1: /* can't fork */
@@ -2764,6 +2761,9 @@ int main(int argc, char **argv)
 		default: /* parent returns to calling process */
 			return 0;
 		}
+
+	if (!zapit_server.prepare(ZAPIT_UDS_NAME))
+		return -1;
 
 	save_audioPIDs = config.getBool("saveAudioPIDs", false);
 	if (save_audioPIDs) {
