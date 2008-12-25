@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.60 2008/11/02 20:11:33 houdini Exp $
+ * $Id: pzapit.cpp,v 1.61 2008/12/25 18:22:09 houdini Exp $
  *
  * simple commandline client for zapit
  *
@@ -40,6 +40,7 @@ int usage (const char * basename)
 		  << "\t-n <channel-name>\tzap by channel name" << std::endl
 		  << "\t-gi\t\t\tget current channel ID" << std::endl
 		  << "\t-gm\t\t\tget current TV/Radio mode" << std::endl
+		  << "\t-gsi\t\t\tget current service information" << std::endl
 		  << std::endl
 		  << "\t-dt <type>\t\tset DiSEqC type" << std::endl
 		  << "\t-dr <count>\t\tset DiSEqC repeats" << std::endl
@@ -125,6 +126,7 @@ int main (int argc, char** argv)
 	bool getmode = false;
 	bool getpids = false;
 	bool includeBouquetOthers = false;
+	bool getserviceinfo = false;
 	uint8_t motorCmdType = 0;
 	uint8_t motorCmd = 0;
 	uint8_t motorNumParameters = 0;
@@ -361,9 +363,14 @@ int main (int argc, char** argv)
 				continue;
 			}
 		}
-		else if (!strncmp(argv[i], "--getpids", 9)) 
+		else if (!strncmp(argv[i], "--getpids", 9))
 		{
 			getpids = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-gsi", 4))
+		{
+			getserviceinfo = true;
 			continue;
 		}
 		else if (i < argc - 1)
@@ -600,21 +607,21 @@ int main (int argc, char** argv)
 		return 0;
 	}
 
-        if (set_pal)
-        {
-                zapit.stopPlayBack();
-                zapit.setVideoSystem_a(PAL);
-                zapit.startPlayBack();
-                return 0;
-        }
-                 
-        if (set_ntsc)
-        {
-                zapit.stopPlayBack();
-                zapit.setVideoSystem_a(NTSC);
-                zapit.startPlayBack();
-                return 0;
-        }
+	if (set_pal)
+	{
+		zapit.stopPlayBack();
+		zapit.setVideoSystem_a(PAL);
+		zapit.startPlayBack();
+		return 0;
+	}
+
+	if (set_ntsc)
+	{
+		zapit.stopPlayBack();
+		zapit.setVideoSystem_a(NTSC);
+		zapit.startPlayBack();
+		return 0;
+	}
 
 	/* set audio channel */
 	if (audio)
@@ -681,6 +688,31 @@ int main (int argc, char** argv)
                                 	<< std::endl;
 			}
 		}
+		return 0;
+	}
+
+	if (getserviceinfo)
+	{	
+		CZapitClient::CCurrentServiceInfo si;
+		si = zapit.getCurrentServiceInfo();
+
+		printf("%d.%d MHz", si.tsfrequency/1000, si.tsfrequency%1000);
+
+		if (si.polarisation != 2) /* only satellite has polarisation */
+			printf(" (%c)\n", (si.polarisation == HORIZONTAL) ? 'h' : 'v');
+		//satellite
+		printf("diseqc = %d\n", si.diseqc);
+
+		printf("onid = 0x%04x\n", si.onid);
+		printf("sid = 0x%04x\n", si.sid);
+		printf("tsid = 0x%04x\n", si.tsid);
+		printf("pmtpid = 0x%04x\n", si.pmtpid);
+		printf("vpid = 0x%04x\n", si.vpid);
+		printf("apid = 0x%04x\n", si.apid);
+		printf("spid = 0x%04x\n", si.spid);
+		printf("spage = 0x%04x\n", si.spage);
+		printf("pcrpid = 0x%04x\n", si.pcrpid);
+		printf("vtxtpid = 0x%04x\n", si.vtxtpid);
 		return 0;
 	}
 
