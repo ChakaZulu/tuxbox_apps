@@ -202,7 +202,7 @@ int rc, lcd;
 int lastpage;
 int savedscreenmode;
 char dumpl25;
-int catch_row, catch_col, catched_page, pagecatching;
+int catch_row, catch_col, catched_page;
 int swapupdown, menulanguage;
 int pids_found, current_service, getpidsdone;
 int SDT_ready;

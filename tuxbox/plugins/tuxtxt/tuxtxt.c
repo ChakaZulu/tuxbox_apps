@@ -139,7 +139,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.107 $";
+	char cvs_revision[] = "$Revision: 1.108 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -2016,7 +2016,7 @@ void PageCatching()
 	int val, byte;
 	int oldzoommode = renderinfo.zoommode;
 
-	pagecatching = 1;
+	renderinfo.pagecatching = 1;
 
 	/* abort pageinput */
 	renderinfo.inputcounter = 2;
@@ -2041,7 +2041,7 @@ void PageCatching()
 
 	if (!catched_page)
 	{
-		pagecatching = 0;
+		renderinfo.pagecatching = 0;
 		tuxtxt_cache.pageupdate = 1;
 		return;
 	}
@@ -2090,7 +2090,7 @@ void PageCatching()
 		case RC_MUTE:
 			fcntl(rc, F_SETFL, O_NONBLOCK);
 			tuxtxt_cache.pageupdate = 1;
-			pagecatching = 0;
+			renderinfo.pagecatching = 0;
 			RCCode = -1;
 			return;
 		}
@@ -2105,7 +2105,7 @@ void PageCatching()
 	tuxtxt_cache.page         = catched_page;
 	renderinfo.hintmode = 0;
 	tuxtxt_cache.pageupdate = 1;
-	pagecatching = 0;
+	renderinfo.pagecatching = 0;
 
 	int subp = tuxtxt_cache.subpagetable[tuxtxt_cache.page];
 	if (subp != 0xFF)
