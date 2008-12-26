@@ -1078,8 +1078,9 @@ void eServiceSelector::serviceSelChanged(eListBoxEntryService *entry)
 				 (( selected.type == eServiceReference::idDVB )
 #ifndef DISABLE_FILE
 			|| 	( selected.type == eServiceReference::idUser &&
-						( (selected.data[0] == 0 /*eMP3Decoder::codecMPG*/) ||
-							(selected.data[0] == 1 /*eMP3Decoder::codecMP3*/) ) )
+						( (selected.data[0] == eMP3Decoder::codecMPG)
+						||(selected.data[0] == eMP3Decoder::codecMP3)
+						||(selected.data[0] == eMP3Decoder::codecOGG) ) )
 #endif
 							) )
 			ciDelay.start(selected.path.size() ? 100 : 500, true );
@@ -1520,9 +1521,10 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				}
 				else if ( selected.type == eServiceReference::idDVB
 #ifndef DISABLE_FILE
-					|| ( selected.type == eServiceReference::idUser
-						&& ( (selected.data[0] == eMP3Decoder::codecMPG)
-							|| (selected.data[0] == eMP3Decoder::codecMP3) ) ) )
+					|| ( selected.type == eServiceReference::idUser &&
+						( (selected.data[0] == eMP3Decoder::codecMPG)
+						||(selected.data[0] == eMP3Decoder::codecMP3)
+						||(selected.data[0] == eMP3Decoder::codecOGG) ) ) )
 #else
 					)
 #endif

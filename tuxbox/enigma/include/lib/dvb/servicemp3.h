@@ -88,6 +88,7 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	void checkVideoFinished();
 	eTimer checkVideoFinishedTimer;
 	unsigned int prevVideoPTS;
+	void InitCodec(const char* filename);
 public:
 	int getType() { return type; }
 	struct eMP3DecoderMessage

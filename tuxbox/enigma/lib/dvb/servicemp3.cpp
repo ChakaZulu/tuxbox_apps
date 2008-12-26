@@ -7,6 +7,7 @@
 #include <lib/system/init_num.h>
 #include <lib/base/i18n.h>
 #include <lib/codecs/codecmp3.h>
+#include <lib/codecs/codecogg.h>
 #include <lib/codecs/codecmpg.h>
 #include <lib/dvb/decoder.h>
 
@@ -208,7 +209,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 		sourcefd=-1;
 	
 	length=-1;
-
+	Decoder::Flush();
 	if (type != codecMPG)
 	{
 		divisor=1;
@@ -262,26 +263,9 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 			CONNECT(outputsn[1]->activated, eMP3Decoder::outputReady2);
 		}
 	}
-
-	switch (type)
+	if (sourcefd >= 0) // not streaming
 	{
-	case codecMP3:
-		audiodecoder=new eAudioDecoderMP3(input, output);
-		break;
-	case codecMPG:
-	{
-		eString fname=filename;
-		if (fname.right(4).upper()==".PVA")
-			audiodecoder=new ePVADemux(input, output, output2, dspfd[0], sourcefd);
-		else
-			audiodecoder=new eMPEGDemux(input, output, output2, dspfd[0], sourcefd);
-		CONNECT(checkVideoFinishedTimer.timeout, eMP3Decoder::checkVideoFinished );
-		break;
-	}
-	}
-
-	if (sourcefd >= 0)
-	{
+		InitCodec(filename);
 		if ( type == codecMPG )
 		{
 			unsigned char buffer[256*1024];
@@ -301,6 +285,28 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	minOutputBufferSize=8*1024;
 
 	run();
+}
+void eMP3Decoder::InitCodec(const char* filename)
+{
+	switch (type)
+	{
+	case codecMP3:
+		audiodecoder=new eAudioDecoderMP3(input, output);
+		break;
+	case codecOGG:
+		audiodecoder=new eAudioDecoderOgg(input, output,sourcefd < 0 ? 0 :filename,sourcefd);
+		break;
+	case codecMPG:
+	{
+		eString fname=filename;
+		if (fname.right(4).upper()==".PVA")
+			audiodecoder=new ePVADemux(input, output, output2, dspfd[0], sourcefd);
+		else
+			audiodecoder=new eMPEGDemux(input, output, output2, dspfd[0], sourcefd);
+		CONNECT(checkVideoFinishedTimer.timeout, eMP3Decoder::checkVideoFinished );
+		break;
+	}
+	}
 }
 
 		// we got (http) metadata.
@@ -394,8 +400,12 @@ eHTTPDataSource *eMP3Decoder::createStreamSink(eHTTPConnection *conn)
 	CONNECT(stream->dataAvailable, eMP3Decoder::decodeMoreHTTP);
 	CONNECT(stream->metaDataUpdated, eMP3Decoder::metaDataUpdated);
 	singleLock s(lock);  // must protect access on http_status
+//eDebug("Stream-Type:%s",conn->remote_header["Content-Type"].c_str());
+	if (conn->remote_header["Content-Type"].find_first_of("ogg") != eString::npos)
+		type = eMP3Decoder::codecOGG;
 	http_status=_("buffering...");
 	handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
+	InitCodec(0);
 	return stream;
 }
 
@@ -1088,6 +1098,12 @@ void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 		{
 			eServiceReference ref(id, 0, filename);
 			ref.data[0]=eMP3Decoder::codecMP3;
+			eServiceFileHandler::getInstance()->addReference(node, ref);
+		} else if ((filename.right(4).upper()==".OGG")
+			|| (filename.right(4).upper()==".OGA"))
+		{
+			eServiceReference ref(id, 0, filename);
+			ref.data[0]=eMP3Decoder::codecOGG;
 			eServiceFileHandler::getInstance()->addReference(node, ref);
 		} else if ((filename.right(5).upper()==".MPEG")
 			|| (filename.right(4).upper()==".MPG")

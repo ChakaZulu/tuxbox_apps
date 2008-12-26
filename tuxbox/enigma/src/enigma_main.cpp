@@ -3656,7 +3656,8 @@ void eZapMain::skipLoop()
 				eServiceReference &ref = eServiceInterface::getInstance()->service;
 				if(!( ref.type == eServiceReference::idUser &&
 					((ref.data[0] ==  eMP3Decoder::codecMPG) ||
-					 (ref.data[0] ==  eMP3Decoder::codecMP3) ) ))
+					 (ref.data[0] ==  eMP3Decoder::codecMP3) ||
+					 (ref.data[0] ==  eMP3Decoder::codecOGG) ) ))
 					return; // normal trickmode forward (ts only)
 			}
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,(time*(faktor<0?1250:1000))*faktor));
@@ -3687,14 +3688,15 @@ void eZapMain::repeatSkip(int dir)
 
 	if(ref.type == eServiceReference::idUser &&
 		( (ref.data[0] != eMP3Decoder::codecMPG) &&
-			(ref.data[0] != eMP3Decoder::codecMP3) ) ) 
+		(ref.data[0] != eMP3Decoder::codecMP3) &&
+		(ref.data[0] != eMP3Decoder::codecOGG) ) )
 		return;
 
 	aktiv=1;
 
 	// Enter distance in minutes
 	SkipEditWindow dlg( (dir == skipForward) ? ">> Min:" : "<< Min:" );
-	if(ref.type == eServiceReference::idUser && ref.data[0] == eMP3Decoder::codecMP3)
+	if(ref.type == eServiceReference::idUser && (ref.data[0] == eMP3Decoder::codecMP3 || ref.data[0] == eMP3Decoder::codecOGG))
 		dlg.setEditText("1"); // pre value (advertising) :-)
 	else
 		dlg.setEditText("6"); // pre value (advertising) :-)
@@ -3941,7 +3943,8 @@ void eZapMain::renameService( eServiceSelector *sel )
 #ifndef DISABLE_FILE
 		|| 	( ref.type == eServiceReference::idUser &&
 					( (ref.data[0] ==  eMP3Decoder::codecMPG) ||
-						(ref.data[0] ==  eMP3Decoder::codecMP3) ) )
+					(ref.data[0] ==  eMP3Decoder::codecMP3) ||
+					(ref.data[0] ==  eMP3Decoder::codecOGG) ) )
 #endif
 					) )
 	{
@@ -6027,7 +6030,8 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			if ( num && ( (myref.type == eServiceReference::idDVB && myref.path)
 				|| (myref.type == eServiceReference::idUser
 				&& myref.data[0] == eMP3Decoder::codecMPG ) || (myref.type == eServiceReference::idUser
-				&& myref.data[0] == eMP3Decoder::codecMP3 ) || timeshift) && (handler->getState() == eServiceHandler::statePlaying || handler->getState() == eServiceHandler::statePause)) // nur, wenn ts, mpg oder mp3 ausgewählt ist und vor allem, wenn es abgespielt wird oder im Standbild ist! :-)
+				&& myref.data[0] == eMP3Decoder::codecMP3 ) || (myref.type == eServiceReference::idUser
+				&& myref.data[0] == eMP3Decoder::codecOGG ) || timeshift) && (handler->getState() == eServiceHandler::statePlaying || handler->getState() == eServiceHandler::statePause)) // nur, wenn ts, mpg oder mp3 ausgewählt ist und vor allem, wenn es abgespielt wird oder im Standbild ist! :-)
 			{
 				if (handler->getState() == eServiceHandler::statePause)
 					pause();// continue playing in preparation for skipping
@@ -6037,7 +6041,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 					case 2:
 					{
 						SkipEditWindow dlg( "<< Min:" );
-						if(myref.type == eServiceReference::idUser && myref.data[0] == eMP3Decoder::codecMP3)
+						if(myref.type == eServiceReference::idUser && (myref.data[0] == eMP3Decoder::codecMP3 || myref.data[0] == eMP3Decoder::codecOGG))
 							dlg.setEditText("1");
 						else
 							dlg.setEditText("6");
@@ -6058,7 +6062,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 					case 8:
 					{
 						SkipEditWindow dlg( ">> Min:" );
-						if(myref.type == eServiceReference::idUser && myref.data[0] == eMP3Decoder::codecMP3)
+						if(myref.type == eServiceReference::idUser && (myref.data[0] == eMP3Decoder::codecMP3 || myref.data[0] == eMP3Decoder::codecOGG))
 							dlg.setEditText("1");
 						else
 							dlg.setEditText("6");
@@ -6324,7 +6328,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 #ifndef DISABLE_FILE
 			case modeFile:
 				if (ref.type == eServiceReference::idUser &&
-					ref.data[0] == eMP3Decoder::codecMP3 )
+					((ref.data[0] == eMP3Decoder::codecMP3)  || (ref.data[0] == eMP3Decoder::codecOGG)))
 				{
 					eAVSwitch::getInstance()->setVSystem(vsPAL);
 					showMP3Pic();
@@ -7745,7 +7749,8 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 #ifndef DISABLE_FILE
 				|| 	( ref.type == eServiceReference::idUser &&
 							( (ref.data[0] ==  eMP3Decoder::codecMPG) ||
-								(ref.data[0] ==  eMP3Decoder::codecMP3) ) )
+							(ref.data[0] ==  eMP3Decoder::codecMP3)||
+							(ref.data[0] ==  eMP3Decoder::codecOGG) ) )
 #endif
 					) )
 			{
@@ -7803,7 +7808,7 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 #ifndef DISABLE_FILE
 		if ( b && (ref.type == eServiceReference::idDVB && ref.path)
 			|| ( ref.type == eServiceReference::idUser
-				&& ( (ref.data[0] == eMP3Decoder::codecMPG) || (ref.data[0] == eMP3Decoder::codecMP3) )
+				&& ( (ref.data[0] == eMP3Decoder::codecMPG) || (ref.data[0] == eMP3Decoder::codecMP3) || (ref.data[0] == eMP3Decoder::codecOGG) )
 			   )
 			|| (ref.type == 0x2000) // picture
 		   )
