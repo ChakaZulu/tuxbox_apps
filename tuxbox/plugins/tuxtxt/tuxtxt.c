@@ -139,7 +139,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.106 $";
+	char cvs_revision[] = "$Revision: 1.107 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -866,7 +866,7 @@ skip_pid:
 							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7D;
 						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ß')
 							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7E;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] >= 0x80 && SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] <= 0x9F)
+						if (byte + diff >= 24 || SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] >= 0x80 && SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] <= 0x9F)
 							diff--;
 						else
 							pid_table[pid_test].service_name[byte + diff] = SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte];
