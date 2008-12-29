@@ -106,7 +106,7 @@ class CInfoViewer
 	void showMotorMoving(int duration);
    	void showLcdPercentOver();
 	int showChannelLogo(  const t_channel_id logo_channel_id );
-	
+	void showInfoFile();
 	
 	std::string eventname;
 

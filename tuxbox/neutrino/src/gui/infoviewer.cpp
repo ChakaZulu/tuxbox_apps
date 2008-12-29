@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.241 2008/12/12 20:05:00 seife Exp $
+	$Id: infoviewer.cpp,v 1.242 2008/12/29 21:36:09 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -7,6 +7,7 @@
 	Homepage: http://dbox.cyberphoria.org/
 
 	Bugfixes/cleanups/dreambox port (C) 2007-2008 Stefan Seyfried
+	(C) 2008 Novell, Inc. Author: Stefan Seyfried
 
 	Kommentar:
 
@@ -56,6 +57,12 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #include <sys/timeb.h>
 #include <time.h>
 #include <sys/param.h>
+
+/* for showInfoFile... */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #define COL_INFOBAR_BUTTONS            (COL_INFOBAR_SHADOW + 1)
 #define COL_INFOBAR_BUTTONS_BACKGROUND (COL_INFOBAR_SHADOW_PLUS_1)
@@ -230,8 +237,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 
 	// kill linke seite
 	frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY + ChanHeight - 6, BoxStartX + (ChanWidth/3), BoxStartY + ChanHeight + InfoHeightY_Info + 10 + 6);
-	// kill progressbar
-	frameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
+	// kill progressbar + info-line
+	frameBuffer->paintBackgroundBox(BoxStartX + ChanWidth + 40, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
 
 	int col_NumBoxText;
 	int col_NumBox;
@@ -328,7 +335,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 /* paint channel number, channelname or/and channellogo */
 	
 	paintTime( false, true );
-	
+	showInfoFile();
 	
 	ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
 	
@@ -1148,6 +1155,37 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(nextTimeX, NextInfoY, nextTimeW, nextDuration, COL_INFOBAR);
 		}
 	}
+}
+
+void CInfoViewer::showInfoFile()
+{
+	char infotext[80];
+	int fd, xStart, xEnd, height, r;
+	ssize_t cnt;
+
+	fd = open("/tmp/infobar.txt", O_RDONLY);
+
+	if (fd < 0)
+		return;
+
+	cnt = read(fd, infotext, 79);
+	if (cnt < 0) {
+		fprintf(stderr, "CInfoViewer::showInfoFile: could not read from infobar.txt: %m");
+		close(fd);
+		return;
+	}
+	close(fd);
+	infotext[cnt] = '\0';
+
+	xStart = BoxStartX + ChanWidth + 40;	// right of record icon
+	xEnd   = BoxEndX - 125;			// left of progressbar
+	height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getHeight() + 2;
+	r = height / 3;
+	// background
+	frameBuffer->paintBox(xStart, BoxStartY, xEnd, BoxStartY + height, COL_INFOBAR_PLUS_0, r);
+
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(
+		xStart + r, BoxStartY + height, xEnd - xStart - r*2, (std::string)infotext, COL_INFOBAR, height, false);
 }
 
 void CInfoViewer::showButton_Audio()
