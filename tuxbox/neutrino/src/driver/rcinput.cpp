@@ -3,6 +3,7 @@
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
                       2003 thegoodguy
+	Copyright (C) 2008 Novell, Inc. Author: Stefan Seyfried
 
 	Kommentar:
 
@@ -507,9 +508,9 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 	unsigned long long getKeyBegin;
 
 #ifdef OLD_RC_API
-	static __u16 rc_last_key = 0;
+	static int rc_last_key = 0;
 #endif
-	static __u16 rc_last_repeat_key = 0;
+	static bool repeating = false;
 
 	struct timeval tv, tvselect;
 	unsigned long long InitialTimeout = Timeout;
@@ -1134,7 +1135,15 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 					uint trkey = translate(ev.code);
 #ifdef HAVE_DREAMBOX_HARDWARE
 					if (ev.code == 0xff)
-						rc_last_key = 0;
+					{
+						if (rc_last_key != 0)
+						{
+							*data = 1; // compat
+							*msg = rc_last_key | RC_Release;
+							rc_last_key = 0;
+							return;
+						}
+					}
 #endif /* HAVE_DREAMBOX_HARDWARE */
 					if (trkey != RC_nokey)
 					{
@@ -1145,38 +1154,32 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 							bool keyok = true;
 
 							gettimeofday( &tv, NULL );
-							now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+							now_pressed = tv.tv_usec + tv.tv_sec * 1000000ULL;
 							//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
 							if ((ev.code & 0xff00) == 0x5c00)
 								rc_last_key = 0;
 
-							if (ev.code == rc_last_key)
-							{
-									if (rc_last_repeat_key != ev.code)
-									{
-										if ((now_pressed > last_keypress + repeat_block) ||
-										    /* accept all keys after time discontinuity: */
-										    (now_pressed < last_keypress)) 
-											rc_last_repeat_key = ev.code;
-										else
-											keyok = false;
-									}
+							if ((ev.code & 0x8000) == 0)
+							{	// key pressed
+								*msg = trkey;
+								last_keypress = now_pressed;
+								rc_last_key = trkey;
+								repeating = false;
+								//fprintf(stderr, "pressed ");
+								return;
 							}
-							else
-								rc_last_repeat_key = 0;
-
-							rc_last_key = ev.code;
-
-							if (keyok)
+							else	// repeat...
 							{
-								if ((now_pressed > last_keypress + repeat_block_generic) ||
-								    /* accept all keys after time discontinuity: */
-								    (now_pressed < last_keypress)) 
+								if (repeating || (now_pressed > last_keypress + repeat_block)) // delay
 								{
-									last_keypress = now_pressed;
-									*msg  = (trkey == RC_standby_release) ? RC_standby : trkey;
-									*data = (trkey == RC_standby_release) ? 1 : 0; /* <- button released / pressed */
-									return;
+									//fprintf(stderr, "repeat  ");
+									repeating = true; 
+									if (now_pressed > last_keypress + repeat_block_generic)
+									{ // rate
+										*msg = trkey | RC_Repeat;
+										last_keypress = now_pressed;
+										return;
+									}
 								}
 							}
 						}
@@ -1193,7 +1196,7 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 								if (repeat_kernel)
 									break;
 								last_keypress = evtime;
-								rc_last_repeat_key = 0;
+								repeating = false;
 								//fprintf(stderr, "pressed ");
 								break;
 							case 0x02:	// key repeat
@@ -1201,10 +1204,10 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 								if (repeat_kernel)
 									break;
 								// unfortunately, the old dbox remote control driver did no rate control
-								if (rc_last_repeat_key || (evtime > last_keypress + repeat_block)) // delay
+								if (repeating || (evtime > last_keypress + repeat_block)) // delay
 								{
 									//fprintf(stderr, "repeat  ");
-									rc_last_repeat_key = 1; // not really a key...
+									repeating = true;
 									if (evtime > last_keypress + repeat_block_generic) // rate
 										last_keypress = evtime;
 								}
@@ -1583,56 +1586,53 @@ std::string CRCInput::getKeyName(const unsigned int key)
 int CRCInput::translate(int code)
 {
 #ifdef HAVE_DREAMBOX_HARDWARE
-	if ((code&0xFF00)==0x8000)
+	switch (code&0xFF)
 	{
-		switch (code&0xFF)
-		{
-			case 0x00: return RC_0;
-			case 0x01: return RC_1;
-			case 0x02: return RC_2;
-			case 0x03: return RC_3;
-			case 0x04: return RC_4;
-			case 0x05: return RC_5;
-			case 0x06: return RC_6;
-			case 0x07: return RC_7;
-			case 0x08: return RC_8;
-			case 0x09: return RC_9;
-			case 0x0a: return RC_plus;
-			case 0x0b: return RC_minus;
-			case 0x0d: return RC_page_up;
-			case 0x0e: return RC_page_down;
-			case 0x0f: return RC_standby;
-			case 0x20: return RC_setup;
-			case 0x21: return RC_up;
-			case 0x22: return RC_down;
-			case 0x23: return RC_left;
-			case 0x24: return RC_right;
-			case 0x25: return RC_ok;
-			case 0x26: return RC_audio;
-			case 0x27: return RC_video;
-			case 0x28: return RC_help;
-			case 0x40: return RC_red;
-			case 0x41: return RC_green;
-			case 0x42: return RC_yellow;
-			case 0x43: return RC_blue;
-			case 0x45: return RC_text;
-			case 0x53: return RC_radio;
+		case 0x00: return RC_0;
+		case 0x01: return RC_1;
+		case 0x02: return RC_2;
+		case 0x03: return RC_3;
+		case 0x04: return RC_4;
+		case 0x05: return RC_5;
+		case 0x06: return RC_6;
+		case 0x07: return RC_7;
+		case 0x08: return RC_8;
+		case 0x09: return RC_9;
+		case 0x0a: return RC_plus;
+		case 0x0b: return RC_minus;
+		case 0x0d: return RC_page_up;
+		case 0x0e: return RC_page_down;
+		case 0x0f: return RC_standby;
+		case 0x20: return RC_setup;
+		case 0x21: return RC_up;
+		case 0x22: return RC_down;
+		case 0x23: return RC_left;
+		case 0x24: return RC_right;
+		case 0x25: return RC_ok;
+		case 0x26: return RC_audio;
+		case 0x27: return RC_video;
+		case 0x28: return RC_help;
+		case 0x40: return RC_red;
+		case 0x41: return RC_green;
+		case 0x42: return RC_yellow;
+		case 0x43: return RC_blue;
+		case 0x45: return RC_text;
+		case 0x53: return RC_radio;
 #ifdef HAVE_DREAMBOX_DM500
-			case 0x0c: return RC_spkr;	// MUTE key
-			case 0x44: return RC_tv;	// TV   key
-			case 0x50: return RC_plus;	// ">"	key
-			case 0x51: return RC_minus;	// "<"  key
-			case 0x52: return RC_help;	// HELP key
-			case 0x54: return RC_home;	// EXIT key
+		case 0x0c: return RC_spkr;	// MUTE key
+		case 0x44: return RC_tv;	// TV   key
+		case 0x50: return RC_plus;	// ">"	key
+		case 0x51: return RC_minus;	// "<"  key
+		case 0x52: return RC_help;	// HELP key
+		case 0x54: return RC_home;	// EXIT key
 #else
-			case 0x0c: return RC_tv;
-			case 0x44: return RC_spkr;
-			case 0x50: return RC_prev;
-			case 0x51: return RC_next;
-			case 0x52: return RC_home;
-			case 0x54: return RC_help;
+		case 0x0c: return RC_tv;
+		case 0x44: return RC_spkr;
+		case 0x50: return RC_prev;
+		case 0x51: return RC_next;
+		case 0x52: return RC_home;
+		case 0x54: return RC_help;
 #endif
-		}
 	}
 	return RC_nokey;
 #else
