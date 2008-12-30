@@ -1,8 +1,11 @@
 /*
-  $Id: audioplayer.cpp,v 1.56 2008/11/16 21:46:40 seife Exp $
+  $Id: audioplayer.cpp,v 1.57 2008/12/30 19:13:29 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
+
+  (C) 2002-2008 the tuxbox project contributors
+  (C) 2008 Novell, Inc. Author: Stefan Seyfried
 
   Homepage: http://dbox.cyberphoria.org/
 
@@ -484,7 +487,7 @@ int CAudioPlayerGui::show()
 				}
 			}
 		}
-		else if( msg == CRCInput::RC_up )
+		else if((msg &~ CRCInput::RC_Repeat) == CRCInput::RC_up)
 		{
 			if(m_show_playlist && !m_playlist.empty() )
 			{
@@ -510,7 +513,7 @@ int CAudioPlayerGui::show()
 				}
 			}
 		}
-		else if( msg == CRCInput::RC_down )
+		else if((msg &~ CRCInput::RC_Repeat) == CRCInput::RC_down)
 		{
 			if(m_show_playlist && !m_playlist.empty() )
 			{
@@ -2293,7 +2296,18 @@ bool CAudioPlayerGui::getNumericInput(neutrino_msg_data_t& msg, int& val) {
 		m_frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6);
 		m_frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED_PLUS_0);
 		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(x1, y1, w + 1, str, COL_MENUCONTENTSELECTED, 0);
-		g_RCInput->getMsg(&msg, &data, 100); 
+		while (true)
+		{
+			g_RCInput->getMsg(&msg, &data, 100); 
+			if (msg > CRCInput::RC_MaxRC && msg != CRCInput::RC_timeout)
+			{	// not a key event
+				CNeutrinoApp::getInstance()->handleMsg(msg, data);
+				continue;
+			}
+			if (msg & (CRCInput::RC_Repeat|CRCInput::RC_Release)) // repeat / release
+				continue;
+			break;
+		}
 	} while (g_RCInput->isNumeric(msg) && val < 1000000);
 	return (msg == CRCInput::RC_ok);
 }
