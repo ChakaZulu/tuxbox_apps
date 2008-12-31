@@ -1,10 +1,12 @@
 /*
-	$Id: menue.cpp,v 1.145 2008/12/05 22:06:21 seife Exp $
+	$Id: menue.cpp,v 1.146 2008/12/31 17:18:50 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
+
+	(C) 2008 Stefan Seyfried
 
 	Kommentar:
 
@@ -49,6 +51,8 @@
 
 #include <cctype>
 
+// ugly hack :-(
+CLCD::MODES oldlcdmode;
 
 /* the following generic menu items are integrated into multiple menus at the same time */
 CMenuSeparator CGenericMenuSeparator;
@@ -96,6 +100,7 @@ CMenuWidget::CMenuWidget(const neutrino_locale_t Name, const std::string & Icon,
 	height = mheight; // height(menu_title)+10+...
 	wanted_height=mheight;
 	current_page=0;
+	oldlcdmode = CLCD::getInstance()->getMode();
 }
 
 CMenuWidget::CMenuWidget(const char* Name, const std::string & Icon, const int mwidth, const int mheight)
@@ -299,7 +304,7 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 	hide();
 	if(!parent)
 	{
-		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+		CLCD::getInstance()->setMode(oldlcdmode);
 	}
 
 	return retval;
