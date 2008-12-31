@@ -392,7 +392,7 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 				{
 					if (eListBoxEntryService::nownextEPG)
 					{
-						time_t t = e->start_time+e->duration+1;
+						time_t t = e->start_time+e->duration+61;
 						delete e;
 						e = eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)service,t);
 					}
