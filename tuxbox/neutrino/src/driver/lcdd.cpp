@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.62 2008/12/31 12:41:03 seife Exp $
+	$Id: lcdd.cpp,v 1.63 2008/12/31 17:41:50 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -521,6 +521,7 @@ void CLCD::showVolume(const char vol, const bool perform_update)
 	volume = vol;
 	if (
 	    ((mode == MODE_TVRADIO) && (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME])) ||
+	    ((mode == MODE_MOVIE) && (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME])) ||
 	    (mode == MODE_SCART) ||
 	    (mode == MODE_AUDIO)
 	    )
@@ -551,12 +552,15 @@ void CLCD::showVolume(const char vol, const bool perform_update)
 	wake_up();
 }
 
-void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
+void CLCD::showPercentOver(const unsigned char perc, const bool perform_update, const MODES m)
 {
+	if (mode != m)
+		return;
+
 	int left, top, width, height = 5;
 	bool draw = true;
 	percentOver = perc;
-	if (mode == MODE_TVRADIO)
+	if (mode == MODE_TVRADIO || mode == MODE_MOVIE)
 	{
 		if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 0)
 		{
@@ -569,10 +573,10 @@ void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 		else if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 3)
 		{
 			left = 12; top = 3; width = 84;
-			const char * icon;
-            
-			if(g_RemoteControl != NULL)
+
+			if (g_RemoteControl != NULL && mode == MODE_TVRADIO)
 			{
+				const char * icon;
 				uint count = g_RemoteControl->current_PIDs.APIDs.size();
 				if ((g_RemoteControl->current_PIDs.PIDs.selected_apid < count) &&
 				    (g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3))
@@ -728,11 +732,12 @@ void CLCD::setMode(const MODES m, const char * const title)
 	switch (m)
 	{
 	case MODE_TVRADIO:
+	case MODE_MOVIE:
 		switch (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME])
 		{
 		case 0:
 			display.load_screen(&(background[BACKGROUND_LCD2]));
-			showPercentOver(percentOver, false);
+			showPercentOver(percentOver, false, mode);
 			break;
 		case 1:
 			display.load_screen(&(background[BACKGROUND_LCD]));
@@ -741,17 +746,20 @@ void CLCD::setMode(const MODES m, const char * const title)
 		case 2:
 			display.load_screen(&(background[BACKGROUND_LCD3]));
 			showVolume(volume, false);
-			showPercentOver(percentOver, false);
+			showPercentOver(percentOver, false, mode);
 			break;
 		case 3:
 			display.load_screen(&(background[BACKGROUND_LCD4]));
 			showVolume(volume, false);
-			showPercentOver(percentOver, false);
+			showPercentOver(percentOver, false, mode);
 			break;
-        default:
-            break;
+		default:
+			break;
 		}
-		showServicename(servicename);
+		if (mode == MODE_TVRADIO)
+			showServicename(servicename);
+		else
+			setMovieInfo(movie_big, movie_small);
 		showclock = true;
 		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		break;
@@ -766,11 +774,6 @@ void CLCD::setMode(const MODES m, const char * const title)
 		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		break;
 	}
-	case MODE_MOVIE:
-		display.load_screen(&(background[BACKGROUND_LCD]));
-		display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
-		showclock = true;
-		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 	case MODE_SCART:
 		display.load_screen(&(background[BACKGROUND_LCD]));
 		showVolume(volume, false);
