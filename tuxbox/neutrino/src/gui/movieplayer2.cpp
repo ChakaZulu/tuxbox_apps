@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.2 2008/12/29 20:32:39 seife Exp $
+  $Id: movieplayer2.cpp,v 1.3 2008/12/31 12:42:55 seife Exp $
 
   License: GPL
 
@@ -315,6 +315,7 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 		sleep(1);
 	}
 
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	g_Zapit->setStandby(false);
 	g_Sectionsd->setPauseScanning(false);
 }
@@ -324,8 +325,6 @@ int
 CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 {
 	printf("[movieplayer.cpp] %s actionKey=%s\n", __PRETTY_FUNCTION__, actionKey.c_str());
-
-	CLCD::getInstance()->setEPGTitle("");
 
 	if (Path_vlc_settings != g_settings.streaming_server_startdir)
 	{
@@ -441,7 +440,7 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 			startfilename = theBookmark->getUrl();
 			sscanf(theBookmark->getTime(), "%lld", &g_startposition);
 			int vlcpos = startfilename.rfind("vlc://");
-			CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+			CLCD::getInstance()->setMode(CLCD::MODE_MOVIE);
 			if (vlcpos == 0)
 				PlayStream(STREAMTYPE_FILE);
 			else
@@ -484,7 +483,8 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	CNeutrinoApp::getInstance()->handleMsg(NeutrinoMessages::CHANGEMODE, m_LastMode);
 	g_RCInput->postMsg(NeutrinoMessages::SHOW_INFOBAR, 0);
 
-	CLCD::getInstance()->showServicename(g_RemoteControl->getCurrentChannelName());
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+//	CLCD::getInstance()->showServicename(g_RemoteControl->getCurrentChannelName());
 	// always exit all
 	if (bookmarkmanager)
 	{
@@ -1916,7 +1916,7 @@ void updateLcd(const std::string & sel_filename)
 		break;
 	}
 	StrSearchReplace(lcd,"_", " ");
-	CLCD::getInstance()->showMoviename(lcd);
+	CLCD::getInstance()->setMovieInfo("", lcd);
 }
 
 //== seek to pos with sync to next proper TS packet ==
@@ -2189,7 +2189,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 					break;
 			}
 
-			CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+			CLCD::getInstance()->setMode(CLCD::MODE_MOVIE);
 		}
 
 		if (update_info)
@@ -2569,7 +2569,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.2 $");
+	return imageinfo.getModulVersion("","$Revision: 1.3 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
