@@ -5,6 +5,7 @@
 
 #include "enigma_tuxtxt.h"
 #include <enigma.h>
+#include <lib/dvb/decoder.h>
 #include <lib/gui/actions.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/enumber.h>
@@ -608,6 +609,7 @@ eTuxtxtWidget::eTuxtxtWidget()
 	addActionToHelpList(i_shortcutActions->number9.setDescription(_("go to next favourite page")));
 
 	gethotlist();
+	tuxtxt_cache.vtxtpid = Decoder::current.tpid;
 }
 eTuxtxtWidget::~eTuxtxtWidget()
 {
@@ -836,9 +838,11 @@ void eTuxtxtWidget::Init()
 {
 
 #if !TUXTXT_CFG_STANDALONE
+	int vtxtpid = tuxtxt_cache.vtxtpid;
 	initialized = tuxtxt_init();
 	if ( initialized )
 		tuxtxt_cache.page = 0x100;
+	tuxtxt_cache.vtxtpid = vtxtpid;
 #endif
 	tuxtxt_SetRenderingDefaults(&renderinfo);
 
