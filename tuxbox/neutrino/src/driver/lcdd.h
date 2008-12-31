@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.h,v 1.36 2008/11/16 22:45:11 seife Exp $
+	$Id: lcdd.h,v 1.37 2008/12/31 12:41:03 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -62,7 +62,8 @@ class CLCD
 			MODE_SHUTDOWN,
 			MODE_STANDBY,
 			MODE_MENU_UTF8,
-			MODE_AUDIO
+			MODE_AUDIO,
+			MODE_MOVIE
 #ifdef LCD_UPDATE
 		,	MODE_FILEBROWSER,
 			MODE_PROGRESSBAR,
@@ -102,6 +103,8 @@ class CLCD
 
 		std::string			servicename;
 		std::string			epg_title;
+		std::string			movie_big;
+		std::string			movie_small;
 		char				volume;
 		unsigned char			percentOver;
 		bool				muted;
@@ -123,7 +126,7 @@ class CLCD
 		             const char * fontfile3=NULL, const char * fontname3=NULL);
 		void setlcdparameter(int dimm, int contrast, int power, int inverse);
 		void displayUpdate();
-		void showServiceAndEpg(const std::string & big, const std::string & small, int showmode, bool perform_wakeup);
+		void showTextScreen(const std::string & big, const std::string & small, int showmode, bool perform_wakeup, bool centered = false);
 
 	public:
 		void setlcdparameter(void);
@@ -138,6 +141,7 @@ class CLCD
 		void showServicename(const std::string & name, const bool perform_wakeup = true); // UTF-8
 		void showMoviename(const std::string & name); // UTF-8
 		void setEPGTitle(const std::string & title);
+		void CLCD::setMovieInfo(const std::string & big, const std::string & small);
 		void showTime();
 		/** blocks for duration seconds */
 		void showRCLock(int duration = 2);

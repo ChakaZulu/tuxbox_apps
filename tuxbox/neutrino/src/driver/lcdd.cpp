@@ -1,11 +1,12 @@
 /*
-	$Id: lcdd.cpp,v 1.61 2008/12/17 20:56:51 dbt Exp $
+	$Id: lcdd.cpp,v 1.62 2008/12/31 12:41:03 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
+	Copyright (C) 2008 Novell, Inc. Author: Stefan Seyfried
 
 	License: GPL
 
@@ -278,7 +279,45 @@ void CLCD::setlcdparameter(void)
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
 }
 
-void CLCD::showServiceAndEpg(const std::string & big, const std::string & small, const int showmode, const bool perform_wakeup)
+static std::string removeLeadingSpaces(const std::string & text)
+{
+	int pos = text.find_first_not_of(" ");
+
+	if (pos != -1)
+		return text.substr(pos);
+
+	return text;
+}
+
+static std::string splitString(const std::string & text, const int maxwidth, LcdFont *font, bool dumb, bool utf8)
+{
+	int pos;
+	std::string tmp = removeLeadingSpaces(text);
+
+	if (font->getRenderWidth(tmp.c_str(), utf8) > maxwidth)
+	{
+		do
+		{
+			if (dumb)
+				tmp = tmp.substr(0, tmp.length()-1);
+			else
+			{
+				pos = tmp.find_last_of("[ .-]+"); // TODO characters might be UTF-encoded!
+				if (pos != -1)
+					tmp = tmp.substr(0, pos);
+				else // does not fit -> fall back to dumb split
+					tmp = tmp.substr(0, tmp.length()-1);
+			}
+		} while (font->getRenderWidth(tmp.c_str(), utf8) > maxwidth);
+	}
+
+	return tmp;
+}
+
+/* display "big" and "small" text.
+   TODO: right now, "big" is hardcoded as utf-8, small is not (for EPG)
+ */
+void CLCD::showTextScreen(const std::string & big, const std::string & small, const int showmode, const bool perform_wakeup, const bool centered)
 {
 	display.draw_fill_rect (0,10,120,51, CLCDDisplay::PIXEL_OFF);
 
@@ -286,67 +325,60 @@ void CLCD::showServiceAndEpg(const std::string & big, const std::string & small,
 	std::string event[4];
 	int namelines = 0, eventlines = 0;
 
-	if (showmode & 1) {
-		if (fonts.channelname->getRenderWidth(big.c_str(), true) <= 120)
+	if ((showmode & 1) && !big.empty())
+	{
+		bool dumb = false;
+		while (true)
 		{
-			cname[0] = big;
-			namelines = 1;
-		}
-		else
-		{
-			int pos;
-			std::string text1 = big;
-			do
-			{
-				pos = text1.find_last_of("[ .]+"); // <- characters are UTF-encoded!
-				if (pos != -1)
-					text1 = text1.substr( 0, pos );
-			} while ( ( pos != -1 ) && ( fonts.channelname->getRenderWidth(text1.c_str(), true) > 120 ) ); // UTF-8
-
-			if ( fonts.channelname->getRenderWidth(text1.c_str(), true) > 120 ) // UTF-8
-			{
-				text1 = big;
-				while (fonts.channelname->getRenderWidth(text1.c_str(), true) > 120) // UTF-8
-					text1= text1.substr(0, text1.length()- 1);
-			}
-		
-			cname[0] = text1;
-			cname[1] = big.substr(text1.length());
-			pos = cname[1].find_first_not_of(" ");
-			if (pos != -1)
-				cname[1] = cname[1].substr(pos);
-
-			namelines = 2;
+			namelines = 0;
+			std::string title = big;
+			do { // first try "intelligent" splitting
+				cname[namelines] = splitString(title, 120, fonts.channelname, dumb, true);
+				title = removeLeadingSpaces(title.substr(cname[namelines].length()));
+				namelines++;
+			} while (title.length() > 0 && namelines < 2);
+			if (title.length() == 0)
+				break;
+			dumb = !dumb;	// retry with dumb splitting;
+			if (!dumb)	// second retry -> get out;
+				break;
 		}
 	}
 
 	// one nameline => 2 eventlines, 2 namelines => 1 eventline
 	int maxeventlines = 4 - (namelines * 3 + 1) / 2;
 
-	if (showmode & 2) {
-		if (!small.empty()) {
+	if ((showmode & 2) && !small.empty())
+	{
+		bool dumb = false;
+		while (true)
+		{
+			eventlines = 0;
 			std::string title = small;
-			int pos =0;
-			do {
-				int spc = title.find_first_not_of(" ");
-				if (spc != -1) {
-					title = title.substr(spc);
-					pos += spc;
-				}
-				while (fonts.menu->getRenderWidth(title.c_str(), false) > 120)
-					title = title.substr(0, title.length()-1);
-				event[eventlines++] = title;
-				pos += title.length();
-				title = small.substr(pos);
+			do { // first try "intelligent" splitting
+				event[eventlines] = splitString(title, 120, fonts.menu, dumb, false);
+				title = removeLeadingSpaces(title.substr(event[eventlines].length()));
+				eventlines++;
 			} while (title.length() >0 && eventlines < maxeventlines);
+			if (title.length() == 0)
+				break;
+			dumb = !dumb;	// retry with dumb splitting;
+			if (!dumb)	// second retry -> get out;
+				break;
 		}
 	}
 
 	/* this values were determined empirically */
 	int y = 8 + (41 - namelines*14 - eventlines*10)/2;
+	int x = 1;
 	for (int i = 0; i < namelines; i++) {
 		y += 14;
-		fonts.channelname->RenderString(1, y, 130, cname[i].c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+		if (centered)
+		{
+			int w = fonts.channelname->getRenderWidth(cname[i].c_str(), true);
+			x = 60 - (w / 2);
+		}
+		fonts.channelname->RenderString(x, y, 130, cname[i].c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	}
 	y++;
 	if (eventlines > 0 && namelines > 0 && showmode & 4)
@@ -358,7 +390,12 @@ void CLCD::showServiceAndEpg(const std::string & big, const std::string & small,
 	{
 		for (int i = 0; i < eventlines; i++) {
 			y += 10;
-			fonts.menu->RenderString(1, y, 130, event[i].c_str(), CLCDDisplay::PIXEL_ON, 0,false); // UTF-8
+			if (centered)
+			{
+				int w = fonts.menu->getRenderWidth(event[i].c_str(), false);
+				x = 60 - (w / 2);
+			}
+			fonts.menu->RenderString(x, y, 130, event[i].c_str(), CLCDDisplay::PIXEL_ON, 0,false); // UTF-8
 		}
 	}
 
@@ -374,7 +411,7 @@ void CLCD::showMoviename(const std::string & name) // UTF-8
 	if (mode != MODE_TVRADIO)
 		return;
 
-	showServiceAndEpg(name, "", 1, false);
+	showTextScreen(name, "", 1, false, false);
 }
 
 void CLCD::showServicename(const std::string & name, const bool perform_wakeup) // UTF-8
@@ -394,7 +431,7 @@ void CLCD::showServicename(const std::string & name, const bool perform_wakeup) 
 	if (mode != MODE_TVRADIO)
 		return;
 
-	showServiceAndEpg(servicename, epg_title, showmode, perform_wakeup);
+	showTextScreen(servicename, epg_title, showmode, perform_wakeup, true);
 	return;
 }
 
@@ -407,6 +444,20 @@ void CLCD::setEPGTitle(const std::string & title)
 	}
 	epg_title = title;
 	showServicename("", false);
+}
+
+void CLCD::setMovieInfo(const std::string &big, const std::string &small)
+{
+	int showmode = g_settings.lcd_setting[SNeutrinoSettings::LCD_EPGMODE];
+	showmode |= 3; // take only the separator line from the config
+
+	movie_big = big;
+	movie_small = small;
+
+	if (mode != MODE_MOVIE)
+		return;
+
+	showTextScreen(movie_big, movie_small, showmode, true, false);
 }
 
 void CLCD::showTime()
@@ -715,6 +766,11 @@ void CLCD::setMode(const MODES m, const char * const title)
 		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		break;
 	}
+	case MODE_MOVIE:
+		display.load_screen(&(background[BACKGROUND_LCD]));
+		display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
+		showclock = true;
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 	case MODE_SCART:
 		display.load_screen(&(background[BACKGROUND_LCD]));
 		showVolume(volume, false);
