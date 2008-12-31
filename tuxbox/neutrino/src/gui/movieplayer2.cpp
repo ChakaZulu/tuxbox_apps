@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.3 2008/12/31 12:42:55 seife Exp $
+  $Id: movieplayer2.cpp,v 1.4 2008/12/31 17:49:04 seife Exp $
 
   License: GPL
 
@@ -56,7 +56,7 @@
   * AC3
   * the hintBox creation and deletion is fishy.
   * GUI improvements (infobar...)
-  * LCD
+  * check if the CLCD->setMode(MODE_MOVIE) are all correct (and needed)
   * ...lots more... ;)
 
   To build it, just copy it over to movieplayer.cpp and build.
@@ -217,7 +217,6 @@ video_size_t   g_size;
 #endif // HAVE_DVB_API_VERSION >=3
 
 bool  g_showaudioselectdialog = false;
-short g_lcdSetting = -1;
 
 // Function prototypes for helper functions
 static void checkAspectRatio (int vdec, bool init);
@@ -484,7 +483,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	g_RCInput->postMsg(NeutrinoMessages::SHOW_INFOBAR, 0);
 
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
-//	CLCD::getInstance()->showServicename(g_RemoteControl->getCurrentChannelName());
 	// always exit all
 	if (bookmarkmanager)
 	{
@@ -1556,7 +1554,6 @@ PlayStreamThread (void *mrl)
 	//-- lcd stuff --
 	int cPercent = 0;
 	int lPercent = -1;
-	g_lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME];
 	CURLcode httpres;
 	struct dmx_pes_filter_params p;
 	ssize_t wr;
@@ -1801,17 +1798,15 @@ PlayStreamThread (void *mrl)
 				{
 					if (length == 0)
 						length = VlcGetStreamLength();
-					if (g_lcdSetting != 1 && length != 0)
+					if (length != 0)
 					{
 						if (counter == 0 || counter == 120)
 						{
 							cPercent = (VlcGetStreamTime() * 100) / length;
 							if (lPercent != cPercent)
 							{
-								g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] = g_lcdSetting;
 								lPercent = cPercent;
-								CLCD::getInstance()->showPercentOver(cPercent);
-								g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] = 1;
+								CLCD::getInstance()->showPercentOver(cPercent, true, CLCD::MODE_MOVIE);
 							}
 							counter = 119;
 						}
@@ -1819,12 +1814,10 @@ PlayStreamThread (void *mrl)
 							counter--;
 					}
 				}
-				else if (g_lcdSetting != 1 && lPercent != fPercent)
+				else if (lPercent != fPercent)
 				{
-					g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] = g_lcdSetting;
 					lPercent = fPercent;
-					CLCD::getInstance()->showPercentOver(fPercent);
-					g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] = 1;
+					CLCD::getInstance()->showPercentOver(fPercent, true, CLCD::MODE_MOVIE);
 				}
 				break;
 			case CMoviePlayerGui::SOFTRESET:
@@ -1865,7 +1858,6 @@ PlayStreamThread (void *mrl)
 				break;
 		}
 	}
-	g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=g_lcdSetting;
 
 	ioctl(vdec, VIDEO_STOP);
 	ioctl(adec, AUDIO_STOP);
@@ -2569,7 +2561,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.3 $");
+	return imageinfo.getModulVersion("","$Revision: 1.4 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
