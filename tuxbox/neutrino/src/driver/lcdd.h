@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.h,v 1.38 2008/12/31 17:41:50 seife Exp $
+	$Id: lcdd.h,v 1.39 2009/01/01 12:21:40 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -115,7 +115,6 @@ class CLCD
 		int				clearClock;
 		unsigned int                    timeout_cnt;
 
-		void wake_up();
 		void count_down();
 
 		CLCD();
@@ -129,6 +128,7 @@ class CLCD
 		void showTextScreen(const std::string & big, const std::string & small, int showmode, bool perform_wakeup, bool centered = false);
 
 	public:
+		void wake_up();
 		void setlcdparameter(void);
 
 		static CLCD* getInstance();
@@ -141,7 +141,7 @@ class CLCD
 		void showServicename(const std::string & name, const bool perform_wakeup = true); // UTF-8
 		void showMoviename(const std::string & name); // UTF-8
 		void setEPGTitle(const std::string & title);
-		void CLCD::setMovieInfo(const std::string & big, const std::string & small);
+		void setMovieInfo(const std::string & big, const std::string & small);
 		void showTime();
 		/** blocks for duration seconds */
 		void showRCLock(int duration = 2);
