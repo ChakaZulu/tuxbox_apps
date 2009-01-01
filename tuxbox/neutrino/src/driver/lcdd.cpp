@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.63 2008/12/31 17:41:50 seife Exp $
+	$Id: lcdd.cpp,v 1.64 2009/01/01 12:10:40 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -7,6 +7,7 @@
 	Homepage: http://dbox.cyberphoria.org/
 
 	Copyright (C) 2008 Novell, Inc. Author: Stefan Seyfried
+		  (C) 2009 Stefan Seyfried
 
 	License: GPL
 
@@ -264,18 +265,26 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 
 void CLCD::setlcdparameter(void)
 {
-	bool timeouted = (atoi(g_settings.lcd_setting_dim_time) > 0)
-	  & (timeout_cnt == 0);
 	last_toggle_state_power = g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER];
-	setlcdparameter((mode == MODE_STANDBY)
-			? g_settings.lcd_setting[SNeutrinoSettings::LCD_STANDBY_BRIGHTNESS]
-			: timeouted 
-			? atoi(g_settings.lcd_setting_dim_brightness)
-			: g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS],
+	int dim_time = atoi(g_settings.lcd_setting_dim_time);
+	int dim_brightness = atoi(g_settings.lcd_setting_dim_brightness);
+	bool timeouted = (dim_time > 0) && (timeout_cnt == 0);
+	int brightness, power = last_toggle_state_power;
+
+	if (timeouted)
+		brightness = dim_brightness;
+	else
+		brightness = g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS];
+
+	if (! timeouted || (dim_brightness > 0))
+		power = 1;
+
+	if (mode == MODE_STANDBY)
+		brightness = g_settings.lcd_setting[SNeutrinoSettings::LCD_STANDBY_BRIGHTNESS];
+
+	setlcdparameter(brightness,
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST],
-			last_toggle_state_power
-			& (! timeouted
-			   || (atoi(g_settings.lcd_setting_dim_brightness) > 0)),
+			power,
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
 }
 
