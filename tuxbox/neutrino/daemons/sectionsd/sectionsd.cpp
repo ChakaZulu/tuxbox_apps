@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.281 2009/01/01 21:44:07 seife Exp $
+//  $Id: sectionsd.cpp,v 1.282 2009/01/01 22:19:16 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2460,7 +2460,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.281 2009/01/01 21:44:07 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.282 2009/01/01 22:19:16 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -5403,7 +5403,6 @@ static bool updateTP(const int scanType)
 		else
 			provider = NULL;
 
-		current_parser = NULL;
 		tmp = fopen(CURRENTSERVICES_XML, "r");
 		if (tmp) {
 			fclose(tmp);
@@ -5457,6 +5456,7 @@ static bool updateTP(const int scanType)
 		}
 		if (current_parser != NULL)
 			xmlFreeDoc(current_parser);
+		current_parser = NULL;
 
 		i++;
 	}
@@ -6010,8 +6010,9 @@ static bool updateBouquets()
 						addBouquetToCurrentXML(xmlDocGetRootElement(current_parser)->xmlChildrenNode, bouquet_id);
 					else
 						addBouquetToCurrentXML(NULL, bouquet_id);
-					xmlFreeDoc(current_parser);
 					rename(CURRENTBOUQUETS_TMP, CURRENTBOUQUETS_XML);
+					if (current_parser != NULL)
+						xmlFreeDoc(current_parser);
 					current_parser= parseXmlFile(CURRENTBOUQUETS_XML);
 				}
 			}
@@ -7808,6 +7809,8 @@ static void *houseKeepingThread(void *)
 						readLockMessaging();
 						if (!messaging_zap_detected) {
 							unlockMessaging();
+							if (current_parser)
+								xmlFreeDoc(current_parser);
 							current_parser =
 								parseXmlFile(CURRENTBOUQUETS_XML);
 						}
@@ -8062,7 +8065,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.281 2009/01/01 21:44:07 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.282 2009/01/01 22:19:16 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
