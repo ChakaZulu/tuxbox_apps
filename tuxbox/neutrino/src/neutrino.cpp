@@ -1,11 +1,14 @@
 /*
-	$Id: neutrino.cpp,v 1.911 2008/12/17 20:56:50 dbt Exp $
+	$Id: neutrino.cpp,v 1.912 2009/01/01 12:46:01 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	and some other guys
 	Homepage: http://dbox.cyberphoria.org/
+
+	Copyright (C) 2008 Novell, Inc. Author: Stefan Seyfried
+	Copyright (C) 2007, 2008, 2009 Stefan Seyfried
 
 	Kommentar:
 
@@ -2373,7 +2376,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 						( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 			{
 			         // turn on LCD display
-				CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+				CLCD::getInstance()->wake_up();
 				// show Infoviewer
 				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
@@ -2405,7 +2408,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else
 			{     // turn on LCD display by kicking it
 				if (msg == CRCInput::RC_home)
-					CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+					CLCD::getInstance()->wake_up();
 				handleMsg(msg, data);
 			}
 
