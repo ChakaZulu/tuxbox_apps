@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.280 2008/12/25 16:19:12 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.281 2009/01/01 21:44:07 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -7,6 +7,8 @@
 //    Copyright (C) 2001 by fnbrd
 //
 //    Homepage: http://dbox2.elxsi.de
+//
+//    Copyright (C) 2008, 2009 Stefan Seyfried
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -2458,7 +2460,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.280 2008/12/25 16:19:12 houdini Exp $\n"
+		"$Id: sectionsd.cpp,v 1.281 2009/01/01 21:44:07 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2925,8 +2927,8 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 {
 	int nResultDataSize = 0;
 	char* pResultData = 0;
-	SIevent *currentEvt = new SIevent();
-	SIevent *nextEvt = new SIevent();
+	SIevent currentEvt;
+	SIevent nextEvt;
 	unsigned flag = 0, flag2=0;
 	/* ugly hack: retry fetching current/next by restarting dmxCN if this is true */
 	bool change = false;
@@ -2948,7 +2950,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 			change = true;
 			flag |= CSectionsdClient::epgflags::not_broadcast;
 		} else {
-			currentEvt = myCurrentEvent;
+			currentEvt = *myCurrentEvent;
 			flag |= CSectionsdClient::epgflags::has_current; // aktuelles event da...
 			flag |= CSectionsdClient::epgflags::has_anything;
 		}
@@ -2956,7 +2958,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 			dprintf("!myNextEvent ");
 			change = true;
 		} else {
-			nextEvt = myNextEvent;
+			nextEvt = *myNextEvent;
 			if (flag & CSectionsdClient::epgflags::not_broadcast) {
 				dprintf("CSectionsdClient::epgflags::has_no_current\n");
 				flag = CSectionsdClient::epgflags::has_no_current;
@@ -2975,29 +2977,29 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		//dprintf("commandCurrentNextInfoChannelID: current or next missing!\n");
 		SItime zeitEvt1(0, 0);
 		if (!(flag & CSectionsdClient::epgflags::has_current)) {
-			*currentEvt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag2);
+			currentEvt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag2);
 		} else {
-			zeitEvt1.startzeit = (*currentEvt).times.begin()->startzeit;
-			zeitEvt1.dauer = (*currentEvt).times.begin()->dauer;
+			zeitEvt1.startzeit = currentEvt.times.begin()->startzeit;
+			zeitEvt1.dauer = currentEvt.times.begin()->dauer;
 		}
 		SItime zeitEvt2(zeitEvt1);
 
-		if((*currentEvt).getName().empty() && flag2 != 0)
+		if (currentEvt.getName().empty() && flag2 != 0)
 		{
 			dprintf("commandCurrentNextInfoChannelID change1\n");
 			change = true;
 		}
 
-		if ((*currentEvt).service_id != 0)
+		if (currentEvt.service_id != 0)
 		{ //Found
 			flag &= (CSectionsdClient::epgflags::has_no_current|CSectionsdClient::epgflags::not_broadcast)^(unsigned)-1;
 			flag |= CSectionsdClient::epgflags::has_current;
 			flag |= CSectionsdClient::epgflags::has_anything;
-			dprintf("[sectionsd] current EPG found. service_id: %x, flag: 0x%x\n",(*currentEvt).service_id, flag);
+			dprintf("[sectionsd] current EPG found. service_id: %x, flag: 0x%x\n",currentEvt.service_id, flag);
 
 			if (!(flag & CSectionsdClient::epgflags::has_next)) {
 				dprintf("*nextEvt not from cur/next V1!\n");
-				*nextEvt = findNextSIevent((*currentEvt).uniqueKey(), zeitEvt2);
+				nextEvt = findNextSIevent(currentEvt.uniqueKey(), zeitEvt2);
 			}
 		}
 		else
@@ -3024,10 +3026,10 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 				flag |= CSectionsdClient::epgflags::has_anything;
 				if (!(flag & CSectionsdClient::epgflags::has_next)) {
 					dprintf("*nextEvt not from cur/next V2!\n");
-					*nextEvt = findNextSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt2);
+					nextEvt = findNextSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt2);
 				}
 
-				if ((*nextEvt).service_id != 0)
+				if (nextEvt.service_id != 0)
 				{
 					MySIeventsOrderUniqueKey::iterator eFirst = mySIeventsOrderUniqueKey.find(*uniqueServiceKey);
 
@@ -3042,18 +3044,18 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 						{
 							time_t azeit = time(NULL);
 
-							if ( ( eFirst->second->times.begin()->startzeit < azeit ) &&
-							        ( eFirst->second->uniqueKey() == ((*nextEvt).uniqueKey() - 1) ) )
+							if (eFirst->second->times.begin()->startzeit < azeit &&
+							    eFirst->second->uniqueKey() == nextEvt.uniqueKey() - 1)
 								flag |= CSectionsdClient::epgflags::has_no_current;
 						}
 					}
 				}
 			}
 		}
-		if ((*nextEvt).service_id != 0)
+		if (nextEvt.service_id != 0)
 		{
 			flag &= CSectionsdClient::epgflags::not_broadcast^(unsigned)-1;
-			dprintf("[sectionsd] next EPG found. service_id: %x, flag: 0x%x\n",(*nextEvt).service_id, flag);
+			dprintf("[sectionsd] next EPG found. service_id: %x, flag: 0x%x\n",nextEvt.service_id, flag);
 			flag |= CSectionsdClient::epgflags::has_next;
 		}
 		else if (flag != 0)
@@ -3063,11 +3065,11 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		}
 	}
 
-	if ((*currentEvt).service_id != 0)
+	if (currentEvt.service_id != 0)
 	{
 		/* check for nvod linkage */
-		for (unsigned int i = 0; i < (*currentEvt).linkage_descs.size(); i++)
-			if ((*currentEvt).linkage_descs[i].linkageType == 0xB0)
+		for (unsigned int i = 0; i < currentEvt.linkage_descs.size(); i++)
+			if (currentEvt.linkage_descs[i].linkageType == 0xB0)
 			{
 				fprintf(stderr,"[sectionsd] linkage in current EPG found.\n");
 				flag |= CSectionsdClient::epgflags::current_has_linkagedescriptors;
@@ -3079,10 +3081,10 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	nResultDataSize =
 	    sizeof(event_id_t) +                        // Unique-Key
 	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
-	    (*currentEvt).getName().length() + 1 + 	// name + '\0'
+	    currentEvt.getName().length() + 1 + 	// name + '\0'
 	    sizeof(event_id_t) +                        // Unique-Key
 	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
-	    (*nextEvt).getName().length() + 1 +    	// name + '\0'
+	    nextEvt.getName().length() + 1 +    	// name + '\0'
 	    sizeof(unsigned) + 				// flags
 	    1						// CurrentFSK
 	    ;
@@ -3098,19 +3100,19 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	}
 
 	dprintf("currentEvt: '%s' (%04x) nextEvt: '%s' (%04x) flag: 0x%02x\n",
-		(*currentEvt).getName().c_str(), (*currentEvt).eventID,
-		(*nextEvt).getName().c_str(), (*nextEvt).eventID, flag);
+		currentEvt.getName().c_str(), currentEvt.eventID,
+		nextEvt.getName().c_str(), nextEvt.eventID, flag);
 
 	CSectionsdClient::sectionsdTime time_cur;
 	CSectionsdClient::sectionsdTime time_nxt;
 	time_t now = time(NULL);
-	time_cur.startzeit = (*currentEvt).times.begin()->startzeit;
-	time_cur.dauer = (*currentEvt).times.begin()->dauer;
-	time_nxt.startzeit = (*nextEvt).times.begin()->startzeit;
-	time_nxt.dauer = (*nextEvt).times.begin()->dauer;
+	time_cur.startzeit = currentEvt.times.begin()->startzeit;
+	time_cur.dauer = currentEvt.times.begin()->dauer;
+	time_nxt.startzeit = nextEvt.times.begin()->startzeit;
+	time_nxt.dauer = nextEvt.times.begin()->dauer;
 	/* for nvod events that have multiple times, find the one that matches the current time... */
-	if ((*currentEvt).times.size() > 1) {
-		for (SItimes::iterator t = (*currentEvt).times.begin(); t != (*currentEvt).times.end(); ++t) {
+	if (currentEvt.times.size() > 1) {
+		for (SItimes::iterator t = currentEvt.times.begin(); t != currentEvt.times.end(); ++t) {
 			if ((long)now < (long)(t->startzeit + t->dauer) && (long)now > (long)t->startzeit) {
 				time_cur.startzeit = t->startzeit;
 				time_cur.dauer =t->dauer;
@@ -3119,8 +3121,8 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		}
 	}
 	/* ...and the one after that. */
-	if ((*nextEvt).times.size() > 1) {
-		for (SItimes::iterator t = (*nextEvt).times.begin(); t != (*nextEvt).times.end(); ++t) {
+	if (nextEvt.times.size() > 1) {
+		for (SItimes::iterator t = nextEvt.times.begin(); t != nextEvt.times.end(); ++t) {
 			if ((long)(time_cur.startzeit + time_cur.dauer) < (long)(t->startzeit)) {
 				time_nxt.startzeit = t->startzeit;
 				time_nxt.dauer =t->dauer;
@@ -3130,21 +3132,21 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	}
 
 	char *p = pResultData;
-	*((event_id_t *)p) = (*currentEvt).uniqueKey();
+	*((event_id_t *)p) = currentEvt.uniqueKey();
 	p += sizeof(event_id_t);
 	*((CSectionsdClient::sectionsdTime *)p) = time_cur;
 	p += sizeof(CSectionsdClient::sectionsdTime);
-	strcpy(p, (*currentEvt).getName().c_str());
-	p += (*currentEvt).getName().length() + 1;
-	*((event_id_t *)p) = (*nextEvt).uniqueKey();
+	strcpy(p, currentEvt.getName().c_str());
+	p += currentEvt.getName().length() + 1;
+	*((event_id_t *)p) = nextEvt.uniqueKey();
 	p += sizeof(event_id_t);
 	*((CSectionsdClient::sectionsdTime *)p) = time_nxt;
 	p += sizeof(CSectionsdClient::sectionsdTime);
-	strcpy(p, (*nextEvt).getName().c_str());
-	p += (*nextEvt).getName().length() + 1;
+	strcpy(p, nextEvt.getName().c_str());
+	p += nextEvt.getName().length() + 1;
 	*((unsigned*)p) = flag;
 	p += sizeof(unsigned);
-	*p = (*currentEvt).getFSK();
+	*p = currentEvt.getFSK();
 	p++;
 
 	unlockEvents();
@@ -3326,7 +3328,7 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 		return ;
 
 	t_channel_id * uniqueServiceKey = (t_channel_id *)data;
-	SIevent *evt = new SIevent();
+	SIevent evt;
 	SItime zeit(0, 0);
 
 	dprintf("[commandActualEPGchannelID] Request of actual EPG for " PRINTF_CHANNEL_ID_TYPE "\n", * uniqueServiceKey);
@@ -3334,12 +3336,12 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 	readLockEvents();
 	if (*uniqueServiceKey == messaging_current_servicekey) {
 		if (myCurrentEvent) {
-			evt = myCurrentEvent;
-			zeit.startzeit = (*evt).times.begin()->startzeit;
-			zeit.dauer = (*evt).times.begin()->dauer;
-			if ((*evt).times.size() > 1) {
+			evt = *myCurrentEvent;
+			zeit.startzeit = evt.times.begin()->startzeit;
+			zeit.dauer = evt.times.begin()->dauer;
+			if (evt.times.size() > 1) {
 				time_t now = time(NULL);
-				for (SItimes::iterator t = (*evt).times.begin(); t != (*evt).times.end(); ++t) {
+				for (SItimes::iterator t = evt.times.begin(); t != evt.times.end(); ++t) {
 					if ((long)now < (long)(t->startzeit + t->dauer) && (long)now > (long)t->startzeit) {
 						zeit.startzeit = t->startzeit;
 						zeit.dauer = t->dauer;
@@ -3350,16 +3352,16 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 		}
 	}
 
-	if ((*evt).service_id == 0)
+	if (evt.service_id == 0)
 	{
 		dprintf("[commandActualEPGchannelID] evt.service_id == 0 ==> no myCurrentEvent!\n");
-		*evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeit);
+		evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeit);
 	}
 
-	if ((*evt).service_id != 0)
+	if (evt.service_id != 0)
 	{
 		dprintf("EPG found.\n");
-		sendEPG(connfd, *evt, zeit);
+		sendEPG(connfd, evt, zeit);
 		return;
 	}
 	
@@ -8060,7 +8062,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.280 2008/12/25 16:19:12 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.281 2009/01/01 21:44:07 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
