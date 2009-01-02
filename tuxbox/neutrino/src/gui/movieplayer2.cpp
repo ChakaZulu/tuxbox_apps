@@ -2,7 +2,7 @@
   Neutrino-GUI  -   DBoxII-Project 
 
   Movieplayer "v2"
-  (C) 2008 Novell, Inc. Author: Stefan Seyfried
+  (C) 2008, 2009 Novell, Inc. Author: Stefan Seyfried
 
   Based on the old movieplayer code (c) 2003, 2004 by gagga
   which was based on code by Dirch, obi and the Metzler Bros. Thanks.
@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.4 2008/12/31 17:49:04 seife Exp $
+  $Id: movieplayer2.cpp,v 1.5 2009/01/02 10:37:03 seife Exp $
 
   License: GPL
 
@@ -206,6 +206,7 @@ uint16_t g_numpida=0;
 unsigned short g_currentapid = 0; // pida is for the decoder, most of the time the same as g_currentapid
 unsigned int   g_currentac3  = 0;
 bool           g_apidchanged = false;
+bool           g_ac3changed = false;
 unsigned int   g_has_ac3 = 0;
 unsigned short g_prozent=0;
 
@@ -232,10 +233,13 @@ static void close_devices(const char *function);
 int CAPIDSelectExec::exec(CMenuTarget* /*parent*/, const std::string & actionKey)
 {
 	g_apidchanged = false;
+	g_ac3changed = false;
 	unsigned int sel= atoi(actionKey.c_str());
 	if (g_currentapid != g_apids[sel-1])
 	{
 		g_currentapid = g_apids[sel-1];
+		if (g_currentac3 = g_ac3flags[sel-1])
+			g_ac3changed = true;
 		g_currentac3 = g_ac3flags[sel-1];
 		g_apidchanged = true;
 		printf("[movieplayer.cpp] apid changed to %d\n",g_currentapid);
@@ -928,7 +932,7 @@ ReadTSFileThread(void *parm)
 	size_t readsize;
 	off_t bytes_per_second = 500000;
 	off_t filesize, filepos;
-	unsigned int lastpts = 0, count = 0;
+	unsigned int lastpts = 0, smooth = 0;
 	off_t lastpos = 0, ptspos = 0;
 	time_t last = 0;
 	int i;
@@ -945,6 +949,7 @@ ReadTSFileThread(void *parm)
 
 	pidv = 0;
 	memset(&g_apids, 0, sizeof(g_apids));
+	memset(&g_ac3flags, 0, sizeof(g_ac3flags));
 	find_all_avpids(fd, &pidv, g_apids, g_ac3flags, &g_numpida);
 	pida = g_apids[0];
 	g_currentac3 = g_ac3flags[0];
@@ -1012,7 +1017,7 @@ ReadTSFileThread(void *parm)
 			//	g_playstate = CMoviePlayerGui::PLAY;
 			if (filepos < 0)
 				filepos = 0;
-			count = 0;
+			// smooth = 0;
 			last = 0;
 			bufferingBox->paint();
 			INFO("lseek to %lld, size %lld\n", filepos, filesize);
@@ -1041,12 +1046,12 @@ ReadTSFileThread(void *parm)
 				off_t diff_bps = diff_pos * 1000 / diff_pts;
 				lastpos = ptspos;
 				lastpts = g_pts;
-				printf("update bytes_per_second. old: %lld", bytes_per_second);
-				if ((diff_bps > 0 && diff_pos > 0)) // discontinuity, startup...
+				printf("bytes p/s old: %lld", bytes_per_second);
+				if (diff_bps > 0 && diff_pos > 0) // discontinuity, startup...
 				{
-					if (count < 8)
-						count++;
-					bytes_per_second = (count * bytes_per_second + diff_bps) / (count + 1);
+					if (smooth < 8)
+						smooth++;
+					bytes_per_second = (smooth * bytes_per_second + diff_bps) / (smooth + 1);
 				} else
 					printf(" not updated");
 				printf(" new: %lld, diff PTS:%5d diff_pos %lld, filepos: %d%%\n",
@@ -1190,16 +1195,19 @@ ReadMPEGFileThread(void *parm)
 	bufferingBox->paint();
 	INFO("Buffering...\n");
 
-	ringbuffer_t *buf_in = ringbuffer_create(65535);
+	ringbuffer_t *buf_in = ringbuffer_create(0x1FFFF);
+	INFO("input ringbuffer created, size: 0x%lx\n", ringbuffer_write_space(buf_in));
 	ringbuffer_data_t vec_in[2];
 	time_t last = 0;
-	unsigned int lastpts = 0, count = 0;
+	unsigned int lastpts = 0, smooth = 0;
 	off_t lastpos = 0, ptspos = 0;
 	int type = 0; // TODO: use wisely...
 	int i = 0; // loop counter for PTS check
 
 	unsigned char found_aid[0xff]; // lame hash;
 	memset(&found_aid, 0, sizeof(found_aid));
+	memset(&g_apids, 0, sizeof(g_apids));
+	memset(&g_ac3flags, 0, sizeof(g_ac3flags));
 	g_currentapid = 0;
 	g_currentac3 = 0;
 	g_numpida = 0;
@@ -1221,7 +1229,7 @@ ReadMPEGFileThread(void *parm)
 					filepos -= bytes_per_second * skipseconds;
 				if (filepos < 0)
 					filepos = 0;
-				count = 0;
+				// smooth = 0; // reset the bitrate smoothing counter after seek?
 				last = 0;
 				skipseconds = 0;
 //				bufferingBox->paint();
@@ -1247,22 +1255,22 @@ ReadMPEGFileThread(void *parm)
 				break;
 			}
 			time_t now = time(NULL);
-			if ((now - last) > 9)
+			if ((now - last) > 4)
 			{
 				int diff_pts = g_pts - lastpts;
 				off_t diff_pos = ptspos - lastpos;
 				off_t diff_bps = diff_pos * 1000 / diff_pts;
 				lastpos = ptspos;
 				lastpts = g_pts;
-				printf("update bytes_per_second. old: %lld", bytes_per_second);
-				if ((diff_bps > 0 && diff_pos > 0)) // discontinuity, startup...
+				printf("bytes p/s old: %lld", bytes_per_second);
+				if (diff_bps > 0 && diff_pos > 0) // discontinuity, startup...
 				{
-					if (count < 8)
-						count++;
-					bytes_per_second = (count * bytes_per_second + diff_bps) / (count + 1);
+					if (smooth < 8)
+						smooth++;
+					bytes_per_second = (smooth * bytes_per_second + diff_bps) / (smooth + 1);
 				} else
 					printf(" not updated");
-				printf(" new: %lld, diff PTS:%5d diff_pos %lld, count %d %d%%\n", bytes_per_second, diff_pts, diff_pos,count, fPercent);
+				printf(" new: %lld, diff PTS:%5d diff_pos %lld, smooth %d %d%%\n", bytes_per_second, diff_pts, diff_pos, smooth, fPercent);
 				last = now;
 			}
 			break;
@@ -1361,8 +1369,8 @@ ReadMPEGFileThread(void *parm)
 		}
 
  again:
-		rd = ringbuffer_get_readpointer(buf_in, &ppes, 6);
-		if (rd < 6)
+		rd = ringbuffer_get_readpointer(buf_in, &ppes, 10); // we need 10 bytes for AC3
+		if (rd < 10)
 		{
 			INFO("rd:%d\n", rd);
 			usleep(300000);
@@ -1376,7 +1384,7 @@ ReadMPEGFileThread(void *parm)
 			int deleted = 0;
 			do {
 				ringbuffer_read_advance(buf_in, 1); // remove 1 Byte
-				rd = ringbuffer_get_readpointer(buf_in, &ppes, 3);
+				rd = ringbuffer_get_readpointer(buf_in, &ppes, 10);
 				deleted++;
 				//fprintf(stderr, "%d", rd);
 				if ((ppes[0] == 0x00) || (ppes[1] == 0x00) || (ppes[2] == 0x01))
@@ -1385,7 +1393,7 @@ ReadMPEGFileThread(void *parm)
 					break;
 				}
 			}
-			while (rd == 3);
+			while (rd == 10);
 			//fprintf(stderr, "\n");
 			if (deleted > 0)
 			{
@@ -1410,14 +1418,63 @@ ReadMPEGFileThread(void *parm)
 				ringbuffer_read_advance(buf_in, skip);
 				continue;
 				break;
+			case 0xbd: // AC3
+				//skip = (ppes[4] << 8 | ppes[5]) + 6;
+				unsigned int offset = ppes[8] + 8 + 1; // ppes[8] is often 0
+				if (offset >= 10) // we did only make sure for 10 bytes
+				{
+					rd = ringbuffer_get_readpointer(buf_in, &ppes, offset);
+					if (rd < offset) // not enough space in ringbuf;
+						continue;
+				}
+				int subid = ppes[offset];
+				// if (offset == 0x24 && subid == 0x10 ) // TTX?
+				if (subid < 0x80 || subid > 0x87)
+					break;
+				DBG("AC3: ofs 0x%02x subid 0x%02x\n", offset, subid);
+#if 0
+This is commented out so we never start up with the AC3 audio selected.
+TODO: OTOH, if we only have an AC3 stream there will be no sound.
+				if (!g_currentapid)
+				{
+					g_currentapid = ppes[3];
+					INFO("found AC3 aid: %02x\n", g_currentapid);
+					if (g_numpida < 10)
+					{
+						g_ac3flags[g_numpida] = 1;
+						g_apids[g_numpida++] = ppes[3];
+					}
+					found_aid[g_currentapid] = 1;
+				}
+				else
+#endif
+				if (g_currentapid != ppes[3])
+				{
+					if (!found_aid[(int)ppes[3]] && !resync) //only if we are in sync...
+					{
+						if (g_numpida < 10)
+						{
+							g_ac3flags[g_numpida] = 1;
+							g_apids[g_numpida++] = ppes[3];
+						}
+						INFO("additional AC3 aid: %02x\n", ppes[3]);
+						found_aid[(int)ppes[3]] = 1;
+					}
+					av = 0; // skip over this stream;
+					break;
+				}
+				pid = 101;
+				cc = &acc;
+				//g_currentac3 = 1;
+				av = 2;
+				break;
 			case 0xbb:
-			case 0xbd: // TODO: AC3
 			case 0xbe:
 			case 0xbf:
 			case 0xf0 ... 0xf3:
 			case 0xff:
-				skip = (ppes[4] << 8 | ppes[5]) + 6;
-				DBG("0x%02x header, skip = %d\n", ppes[3], skip);
+				//skip = (ppes[4] << 8 | ppes[5]) + 6;
+				//DBG("0x%02x header, skip = %d\n", ppes[3], skip);
 				break;
 			case 0xc0 ... 0xcf:
 			case 0xd0 ... 0xdf:
@@ -1681,12 +1738,22 @@ PlayStreamThread (void *mrl)
 			g_playstate = CMoviePlayerGui::SKIP;
 		}
 
-		if (g_apidchanged && !isPES)
+		if (g_apidchanged)
 		{
-			INFO("APID changed from 0x%04x to 0x%04x\n", pida, g_currentapid);
-			pida = g_currentapid;
+			if (!isPES)
+			{
+				// TS: need to reset dmx...
+				INFO("APID changed from 0x%04x to 0x%04x\n", pida, g_currentapid);
+				pida = g_currentapid;
+				g_playstate= CMoviePlayerGui::SOFTRESET;
+			}
+			else if (g_ac3changed)
+			{
+				// PES/PS: need to enable/disable AC3 passthrough...
+				g_playstate= CMoviePlayerGui::SOFTRESET;
+			}
+			g_ac3changed = false;
 			g_apidchanged = false;
-			g_playstate= CMoviePlayerGui::SOFTRESET;
 		}
 
 		switch (g_playstate)
@@ -2018,7 +2085,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	bool open_filebrowser = true, cdDvd = false, aborted = false;
 	bool stream = true;
 	char mrl[200];
-	unsigned int selected = 0;
+	int selected = 0;
 	CTimeOSD StreamTime;
 	CFileList filelist;
 
@@ -2067,7 +2134,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	{
 		if (g_playstate == CMoviePlayerGui::STOPPED && !cdDvd)
 		{
-			if (selected + 1 < filelist.size() && !aborted)
+			if (selected + 1 < (int)filelist.size() && !aborted)
 			{
 				selected++;
 				filename = filelist[selected].Name.c_str();
@@ -2140,6 +2207,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				filebrowser->Filter = &vlcfilefilter;
 			else
 				filebrowser->Filter = &tsfilefilter;
+			
 			if (filebrowser->exec(Path.c_str()))
 			{
 				Path = filebrowser->getCurrentDir();
@@ -2412,10 +2480,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			}
 			else
 			{
-				int stream_time;
-				// TODO: local files
 				if (stream)
 				{
+					int stream_time;
 					if ((stream_time = VlcGetStreamTime()) >= 0)
 					{
 						StreamTime.SetMode(CTimeOSD::MODE_ASC);
@@ -2436,37 +2503,31 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			if (stream) // TODO: local files
 				showFileInfoVLC();
 		}
-		else if (msg == CRCInput::RC_left)
+		else if (msg == CRCInput::RC_left || msg == CRCInput::RC_right)
 		{
-			if (!filelist.empty() && selected > 0 && g_playstate == CMoviePlayerGui::PLAY)
-			{
+			if (msg == CRCInput::RC_left)
 				selected--;
-				filename = filelist[selected].Name.c_str();
-				sel_filename = filelist[selected].getFileName();
-				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-				int namepos = filelist[selected].Name.rfind("vlc://");
-				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
-				char *tmp = curl_escape(mrl_str.c_str(), 0);
-				strncpy(mrl, tmp, sizeof(mrl) - 1);
-				curl_free (tmp);
-				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
-				update_info = true;
-				start_play = true;
-			}
-		}
-		else if (msg == CRCInput::RC_right)
-		{
-			if (!filelist.empty() && selected + 1 < filelist.size() && g_playstate == CMoviePlayerGui::PLAY)
-			{
+			else
 				selected++;
+			if (selected < 0)
+				selected = 0;
+			else if (selected >= (int)filelist.size())
+				selected = filelist.size() - 1;
+			else if (!filelist.empty() && g_playstate == CMoviePlayerGui::PLAY)
+			{
 				filename = filelist[selected].Name.c_str();
 				sel_filename = filelist[selected].getFileName();
 				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-				int namepos = filelist[selected].Name.rfind("vlc://");
-				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
-				char *tmp = curl_escape (mrl_str.c_str (), 0);
-				strncpy (mrl, tmp, sizeof (mrl) - 1);
-				curl_free (tmp);
+				if (stream)
+				{
+					int namepos = filelist[selected].Name.rfind("vlc://");
+					std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
+					char *tmp = curl_escape(mrl_str.c_str(), 0);
+					strncpy(mrl, tmp, sizeof(mrl) - 1);
+					curl_free(tmp);
+				}
+				else
+					strncpy(mrl, filename, sizeof(mrl) - 1);
 				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 				update_info = true;
 				start_play = true;
@@ -2561,7 +2622,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.4 $");
+	return imageinfo.getModulVersion("","$Revision: 1.5 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
