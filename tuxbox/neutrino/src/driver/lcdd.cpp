@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.64 2009/01/01 12:10:40 seife Exp $
+	$Id: lcdd.cpp,v 1.65 2009/01/02 21:05:11 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -328,11 +328,19 @@ static std::string splitString(const std::string & text, const int maxwidth, Lcd
  */
 void CLCD::showTextScreen(const std::string & big, const std::string & small, const int showmode, const bool perform_wakeup, const bool centered)
 {
+	/* the "showmode" variable is a bit map:
+		0x01	show "big" string
+		0x02	show "small" string
+		0x04	show separator line if big and small are present / shown
+		0x08	show only one line of "big" string
+	 */
 	display.draw_fill_rect (0,10,120,51, CLCDDisplay::PIXEL_OFF);
 
 	std::string cname[2];
 	std::string event[4];
-	int namelines = 0, eventlines = 0;
+	int namelines = 0, eventlines = 0, maxnamelines = 2;
+	if (showmode & 8)
+		maxnamelines = 1;
 
 	if ((showmode & 1) && !big.empty())
 	{
@@ -345,7 +353,7 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 				cname[namelines] = splitString(title, 120, fonts.channelname, dumb, true);
 				title = removeLeadingSpaces(title.substr(cname[namelines].length()));
 				namelines++;
-			} while (title.length() > 0 && namelines < 2);
+			} while (title.length() > 0 && namelines < maxnamelines);
 			if (title.length() == 0)
 				break;
 			dumb = !dumb;	// retry with dumb splitting;
