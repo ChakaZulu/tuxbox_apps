@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.5 2009/01/02 10:37:03 seife Exp $
+  $Id: movieplayer2.cpp,v 1.6 2009/01/02 10:45:41 seife Exp $
 
   License: GPL
 
@@ -48,12 +48,10 @@
   * the whole g_playstate state machine is too complicated and probably
     horribly broken - clean it up.
   * more error checking (end of file, anyone?)
-  * get rid of all that moviebrowser stuff, it's not used anyway
-  * clean up #includes
   * bookmarks? what bookmarks?
   * parental code
   * MPEG1 parser
-  * AC3
+  * Test and fix AC3
   * the hintBox creation and deletion is fishy.
   * GUI improvements (infobar...)
   * check if the CLCD->setMode(MODE_MOVIE) are all correct (and needed)
@@ -63,46 +61,25 @@
   Enjoy.
  */
 
-#define INFO(fmt, args...) fprintf(stderr, "[mp:%s:%d] " fmt, __FUNCTION__, __LINE__, ##args)
-#if 0	// change for verbose debug output
-#define DBG INFO
-#else
-#define DBG(args...)
-#endif
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <gui/movieplayer.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <poll.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
-#include <global.h>
-#include <neutrino.h>
+#include <sstream>
 
-#include <driver/fontrenderer.h>
-#include <driver/rcinput.h>
-#include <daemonc/remotecontrol.h>
-#include <system/settings.h>
-#include <system/helper.h>
-#include <system/xmlinterface.h>
-#include <gui/plugins.h>
-
-#include <gui/eventlist.h>
-#include <gui/color.h>
-#include <gui/infoviewer.h>
-#include <gui/nfs.h>
-#include <gui/bookmarkmanager.h>
-#include <gui/timeosd.h>
-#include <gui/movieviewer.h>
-#include <gui/imageinfo.h>
-
-#include <gui/widget/buttons.h>
-#include <gui/widget/icons.h>
-#include <gui/widget/messagebox.h>
-#include <gui/widget/hintbox.h>
-#include <gui/widget/helpbox.h>
-#include <gui/widget/stringinput.h>
-#include <gui/widget/stringinput_ext.h>
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
 
 #if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/audio.h>
@@ -116,31 +93,34 @@
 #define pes_type		pesType
 #endif
 
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
-
 #include <transform.h>
 
-#include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
+#include <global.h>
+#include <neutrino.h>
+extern "C" {
+#include <driver/ringbuffer.h>
+}
 
-#include <poll.h>
+#include <system/helper.h>
+#include <system/xmlinterface.h>
 
-#ifdef MOVIEBROWSER
-#include <sys/timeb.h>
-#define MOVIE_HINT_BOX_TIMER 5 // time to show bookmark hints in seconds
-#endif /* MOVIEBROWSER */
+#include <gui/movieplayer.h>
+#include <gui/timeosd.h>
+#include <gui/movieviewer.h>
+#include <gui/imageinfo.h>
+
+#include <gui/widget/icons.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/hintbox.h>
+#include <gui/widget/helpbox.h>
+#include <gui/widget/stringinput_ext.h>
+
+#define INFO(fmt, args...) fprintf(stderr, "[mp:%s:%d] " fmt, __FUNCTION__, __LINE__, ##args)
+#if 0	// change for verbose debug output
+#define DBG INFO
+#else
+#define DBG(args...)
+#endif
 
 #if HAVE_DVB_API_VERSION < 3
 #define ADAP	"/dev/dvb/card0"
@@ -170,11 +150,6 @@
 bool g_ZapitsetStandbyState = false;
 
 static bool isTS, isPES, isBookmark;
-
-#ifdef MOVIEBROWSER
-static bool isMovieBrowser = false;
-static bool movieBrowserDelOnExit = false;
-#endif /* MOVIEBROWSER */
 
 #ifndef __USE_FILE_OFFSET64
 #error not using 64 bit file offsets
@@ -269,10 +244,6 @@ CMoviePlayerGui::CMoviePlayerGui()
 
 	filebrowser->Dirs_Selectable = false;
 
-#ifdef MOVIEBROWSER
-	moviebrowser = NULL;
-#endif /* MOVIEBROWSER */
-
 	tsfilefilter.addFilter("ts");
 	tsfilefilter.addFilter("mpg");
 	tsfilefilter.addFilter("mpeg");
@@ -298,12 +269,7 @@ CMoviePlayerGui::CMoviePlayerGui()
 CMoviePlayerGui::~CMoviePlayerGui ()
 {
 	delete filebrowser;
-#ifdef MOVIEBROWSER
-	if (moviebrowser != NULL)
-	{	
-		delete moviebrowser;
-	}
-#endif /* MOVIEBROWSER */
+
 	if (bookmarkmanager)
 		delete bookmarkmanager;
 
@@ -364,10 +330,9 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 
 	g_ZapitsetStandbyState = false; // 'Init State
 
-	// if filebrowser or moviebrowser playback we check if we should disable the tv (other modes might be added later)
+	// if filebrowser playback we check if we should disable the tv (other modes might be added later)
 	if (g_settings.streaming_show_tv_in_browser == false ||
-	    (actionKey != "tsmoviebrowser" &&
-	     actionKey != "tsplayback"     &&
+	    (actionKey != "tsplayback"     &&
 	     actionKey != "fileplayback"   &&
 	     actionKey != "tsplayback_pc"))
 	{
@@ -397,10 +362,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	isTS=false;
 	isPES=false;
 
-#ifdef MOVIEBROWSER
-	isMovieBrowser = false;
-#endif /* MOVIEBROWSER */
-
 	if (actionKey == "fileplayback")
 		PlayStream(STREAMTYPE_FILE);
 	else if (actionKey == "dvdplayback")
@@ -411,25 +372,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	{
 		PlayFile();
 	}
-#ifdef MOVIEBROWSER
-	else if (actionKey == "tsmoviebrowser")
-	{
-		if (moviebrowser == NULL)
-		{
-			TRACE("[mp] new MovieBrowser");
-			moviebrowser= new CMovieBrowser();
-		}
-		if (moviebrowser != NULL)
-		{
-			isMovieBrowser = true;
-			PlayFile();
-		}
-		else
-		{
-			TRACE("[mp] error: cannot create MovieBrowser");
-		}
-	}
-#endif /* MOVIEBROWSER */
 	else if (actionKey=="tsplayback_pc")
 	{
 		//isPES=true;
@@ -492,14 +434,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	{
 		delete bookmarkmanager;
 		bookmarkmanager = NULL;
-	}
-
-	if (moviebrowser != NULL && movieBrowserDelOnExit == true)
-	{
-		//moviebrowser->fileInfoStale();
-		TRACE("[mp] delete MovieBrowser");
-		delete moviebrowser;
-		moviebrowser = NULL;
 	}
 
 	return menu_return::RETURN_REPAINT;
@@ -2622,7 +2556,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.5 $");
+	return imageinfo.getModulVersion("","$Revision: 1.6 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
