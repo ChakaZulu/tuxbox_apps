@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.912 2009/01/01 12:46:01 seife Exp $
+	$Id: neutrino.cpp,v 1.913 2009/01/02 22:38:19 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -123,6 +123,7 @@ CVCRControl::CDevice * recordingdevice = NULL;
 #define NEUTRINO_RECORDING_ENDED_SCRIPT CONFIGDIR "/recording.end"
 #define NEUTRINO_ENTER_STANDBY_SCRIPT   CONFIGDIR "/standby.on"
 #define NEUTRINO_LEAVE_STANDBY_SCRIPT   CONFIGDIR "/standby.off"
+#define NEUTRINO_INIT_END_SCRIPT	CONFIGDIR "/init.end"
 #define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
 #define NEUTRINO_DEFAULTLOCALE_FILE     CONFIGDIR "/defaultlocale"
 #define NEUTRINO_PARENTALLOCKED_FILE    DATADIR   "/neutrino/.plocked"
@@ -145,35 +146,39 @@ static void initGlobals(void)
 	g_PluginList    = NULL;
 }
 
-bool CNeutrinoApp::execute_start_file(const char *filename)
+bool CNeutrinoApp::execute_start_file(const char *filename, const bool blocking)
 /* returns true if execution of a script was successfully */
 {
+	std::string command = filename;
 	struct stat statbuf;
-	if (stat(filename, &statbuf) == 0)	{
-		printf("[neutrino] executing %s\n", filename);
-		int result = system(filename);
-		if (result !=0)	{
+	if (stat(filename, &statbuf) == 0) {
+		if (false == blocking)
+			command += " &";
+		printf("[neutrino] executing %s\n", command.c_str());
+		int result = system(command.c_str());
+		if (result !=0 ) {
 			printf("[neutrino] %s failed with return code = %d\n", filename, WEXITSTATUS(result));
 			return false;
 		}
-	} 
-	else	{
-			printf("[neutrino] no file %s was found\n", filename);
-			return false;
-		}
-		return true;
+	}
+	else 
+	{
+		printf("[neutrino] no file %s was found\n", filename);
+		return false;
+	}
+	return true;
 }
 
 bool CNeutrinoApp::execute_sys_command(const char *command)
 /* returns true for successfully executed system command */
 {
-		printf("[neutrino] executing %s\n", command);
-		int result = system(command);
-		if (result !=0)	{
-			printf("[neutrino] %s failed with return code = %d\n", command, WEXITSTATUS(result));
-			return false;
-		}
-			return true;
+	printf("[neutrino] executing %s\n", command);
+	int result = system(command);
+	if (result !=0)	{
+		printf("[neutrino] %s failed with return code = %d\n", command, WEXITSTATUS(result));
+		return false;
+	}
+	return true;
 }
 
 
@@ -1921,7 +1926,7 @@ void CNeutrinoApp::prepareEnviroment()
 			else
 				printf("[neutrino] alternate folder created in: %s\n", env_folders[i]);
 		}
-	}										 
+	}
 }
 
 int CNeutrinoApp::run(int argc, char **argv)
@@ -1998,25 +2003,25 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_PluginList->loadPlugins();
 
 
-	colorSetupNotifier			= new CColorSetupNotifier;
-	audioSetupNotifier			= new CAudioSetupNotifier;
-	APIDChanger					= new CAPIDChangeExec;
+	colorSetupNotifier		= new CColorSetupNotifier;
+	audioSetupNotifier		= new CAudioSetupNotifier;
+	APIDChanger			= new CAPIDChangeExec;
 #ifndef HAVE_DREAMBOX_HARDWARE
-	UCodeChecker				= new CUCodeCheckExec;
+	UCodeChecker			= new CUCodeCheckExec;
 #endif
-	DVBInfo						= new CDVBInfoExec;
-	NVODChanger					= new CNVODChangeExec;
+	DVBInfo				= new CDVBInfoExec;
+	NVODChanger			= new CNVODChangeExec;
 	StreamFeaturesChanger		= new CStreamFeaturesChangeExec;
-	MoviePluginChanger			= new CMoviePluginChangeExec;
-	MyIPChanger					= new CIPChangeNotifier;
+	MoviePluginChanger		= new CMoviePluginChangeExec;
+	MyIPChanger			= new CIPChangeNotifier;
 	ConsoleDestinationChanger	= new CConsoleDestChangeNotifier;
-	FdxSettingsChanger			= new CFdxChangeNotifier;
-	fontsizenotifier			= new CFontSizeNotifier;
+	FdxSettingsChanger		= new CFdxChangeNotifier;
+	fontsizenotifier		= new CFontSizeNotifier;
 
-	rcLock						= new CRCLock();
-	moviePlayerGui				= new CMoviePlayerGui();
+	rcLock				= new CRCLock();
+	moviePlayerGui			= new CMoviePlayerGui();
 	//USERMENU
-	Timerlist					= new CTimerList;
+	Timerlist			= new CTimerList;
 
 	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 
@@ -2121,7 +2126,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 #define ZAPIT_EVENT_COUNT 23
 #endif
 	const CZapitClient::events zapit_event[ZAPIT_EVENT_COUNT] =
-		{
+	{
 			CZapitClient::EVT_ZAP_COMPLETE,
 			CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD,
 			CZapitClient::EVT_ZAP_FAILED,
@@ -2150,7 +2155,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 			CZapitClient::EVT_SCAN_FOUND_TV_CHAN,
 			CZapitClient::EVT_SCAN_FOUND_RADIO_CHAN,
 			CZapitClient::EVT_SCAN_FOUND_DATA_CHAN,
-		};
+	};
 
 	for (int i = 0; i < ZAPIT_EVENT_COUNT; i++)
 		g_Zapit->registerEvent(zapit_event[i], 222, NEUTRINO_UDS_NAME);
@@ -2228,6 +2233,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	// shutdown counter
 	SHTDCNT::getInstance()->init();
+
+	execute_start_file(NEUTRINO_INIT_END_SCRIPT, false);
 
 	RealRun(mainMenu);
 

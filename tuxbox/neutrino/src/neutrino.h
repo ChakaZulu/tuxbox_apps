@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.200 2008/12/17 20:56:50 dbt Exp $
+	$Id: neutrino.h,v 1.201 2009/01/02 22:38:19 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -300,7 +300,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		int recordingstatus;
 		void SendSectionsdConfig(void);
 		
-		bool execute_start_file(const char *filename);
+		bool execute_start_file(const char *filename, const bool blocking = true);
 		bool execute_sys_command(const char *command);
 };
 
