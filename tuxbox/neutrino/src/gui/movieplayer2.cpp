@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.6 2009/01/02 10:45:41 seife Exp $
+  $Id: movieplayer2.cpp,v 1.7 2009/01/03 22:44:07 seife Exp $
 
   License: GPL
 
@@ -164,21 +164,27 @@ CHintBox *hintBox;
 CHintBox *bufferingBox;
 bool avpids_found;
 std::string startfilename;
-char skipvalue[20];
-int skipseconds;
+
+// globals for skipping / jumping. Ugly...
+int skipseconds = 0;
+bool skipabsolute = false;
+
 int buffer_time = 0;
 int dmxa = -1 , dmxv = -1, dvr = -1, adec = -1, vdec = -1;
 
 // global variables shared by playthread and PlayFile
 static CMoviePlayerGui::state g_playstate;
+// the input thread requests skipping (e.g. for retrying)
+static bool g_skiprequest = false;
 //static bool g_EOF;
 
 static off_t g_startposition = 0L;
-
-uint16_t g_apids[10];
-unsigned short g_ac3flags[10];
+// 32 MPEG audio streams + 8 AC3 streams, theoretically.
+#define MAX_APIDS 40
+uint16_t g_apids[MAX_APIDS];
+unsigned short g_ac3flags[MAX_APIDS];
 uint16_t g_numpida=0;
-unsigned short g_currentapid = 0; // pida is for the decoder, most of the time the same as g_currentapid
+int g_currentapid = -1; // pida is for the decoder, most of the time the same as g_currentapid
 unsigned int   g_currentac3  = 0;
 bool           g_apidchanged = false;
 bool           g_ac3changed = false;
@@ -869,6 +875,7 @@ ReadTSFileThread(void *parm)
 	unsigned int lastpts = 0, smooth = 0;
 	off_t lastpos = 0, ptspos = 0;
 	time_t last = 0;
+	int skipretry = 0;
 	int i;
 	ringbuffer_data_t vec[2];
 	
@@ -937,6 +944,8 @@ ReadTSFileThread(void *parm)
 		else
 			filepos += len;
 	}
+	skipabsolute = false;
+	skipseconds = 0;
 
 	while (g_playstate != CMoviePlayerGui::STOPPED && !failed)
 	{
@@ -945,24 +954,35 @@ ReadTSFileThread(void *parm)
 		case CMoviePlayerGui::SKIP:
 			INFO("lseek from %lld, seconds %d\n", filepos, skipseconds);
 			filesize = lseek(fd, 0, SEEK_END);
-			filepos += (bytes_per_second * skipseconds) / 188 * 188;
-			if (filepos >= filesize)
-				filepos -= (bytes_per_second * skipseconds) / 188 * 188;
-			//	g_playstate = CMoviePlayerGui::PLAY;
-			if (filepos < 0)
-				filepos = 0;
-			// smooth = 0;
-			last = 0;
-			bufferingBox->paint();
-			INFO("lseek to %lld, size %lld\n", filepos, filesize);
-			if (mp_seekSync(fd, filepos) < 0)
-				perror("ReadTSFileThread lseek");
+			if (!(g_startpts == -1 && skipabsolute)) // only jump absolute if startpts is known
+			{
+				int s = skipseconds;
+				if (skipabsolute)
+					s = skipseconds - get_filetime();
+				filepos += (bytes_per_second * s) / 188 * 188;
+				if (filepos >= filesize)
+					filepos -= (filepos - filesize + 30 * bytes_per_second) / 188 * 188;
+				if (filepos < 0)
+					filepos = 0;
+				// smooth = 0;
+				last = 0;
+				bufferingBox->paint();
+				INFO("lseek to %lld, size %lld\n", filepos, filesize);
+				if (mp_seekSync(fd, filepos) < 0)
+					perror("ReadTSFileThread lseek");
+			}
+			DBG("BUFFERRESET!\n");
 			while (!bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
 				usleep(100000);
 			bufferfilled = false;
 			ringbuffer_reset(ringbuf);
 			bufferreset = false;
-			g_playstate = CMoviePlayerGui::PLAY;
+			/* PlayStreamThread() sets g_playstate to SOFTRESET */
+			DBG("BUFFERRESET done.\n");
+			/* PlayStreamThread() sets g_playstate to SOFTRESET */
+			while (g_playstate == CMoviePlayerGui::SKIP)
+				usleep(100000);
+			INFO("skip ends\n");
 			break;
 		case CMoviePlayerGui::PLAY:
 			if (last == 0)
@@ -1039,6 +1059,21 @@ ReadTSFileThread(void *parm)
 						{
 							g_pts = pts;
 							ptspos = filepos + (ts - vec[0].buf);
+							if (skipabsolute && !g_skiprequest)
+							{
+								time_t timediff = skipseconds - get_filetime();
+								if (skipretry++ < 10 && abs(timediff) > 10)
+								{
+									INFO("offset > 10 seconds (%d), retry skipping...(%d)\n", timediff, skipretry);
+									g_skiprequest = true;
+								}
+								else
+								{
+									// more than 10 retries -> get out
+									skipabsolute = false;
+									skipretry = 0;
+								}
+							}
 							break;
 						}
 						ts += 188;
@@ -1068,7 +1103,7 @@ ReadTSFileThread(void *parm)
 				break;
 			}
 
-			if (len <= 0) // len < 0 => error, len == 0 => EOF
+			if (len <= 0 && !skipabsolute) // len < 0 => error, len == 0 => EOF
 			{
 				if (len < 0)
 					perror("ReadTSFileThread read");
@@ -1135,50 +1170,73 @@ ReadMPEGFileThread(void *parm)
 	time_t last = 0;
 	unsigned int lastpts = 0, smooth = 0;
 	off_t lastpos = 0, ptspos = 0;
+	int skipretry = 0;
 	int type = 0; // TODO: use wisely...
 	int i = 0; // loop counter for PTS check
 
-	unsigned char found_aid[0xff]; // lame hash;
+	unsigned char found_aid[MAX_APIDS]; // lame hash;
 	memset(&found_aid, 0, sizeof(found_aid));
 	memset(&g_apids, 0, sizeof(g_apids));
 	memset(&g_ac3flags, 0, sizeof(g_ac3flags));
-	g_currentapid = 0;
+	g_currentapid = -1;
 	g_currentac3 = 0;
 	g_numpida = 0;
 	g_startpts = -1;
 	bool input_empty = true;
 	bool failed = false;
+	skipabsolute = false;
+	skipseconds = 0;
 
 	while (g_playstate != CMoviePlayerGui::STOPPED && !failed)
 	{
+		/* Try to find the lowest numbered audio stream. The "bufferfilled" check
+		   is to make sure that there is already some data parsed. */
+		if (bufferfilled && g_currentapid == -1)
+			for (int j = 0; j < MAX_APIDS; j++)
+				if (found_aid[j])
+				{
+					INFO("g_currentapid set to: %d\n", j);
+					g_currentapid = j;
+					break;
+				}
+
 		switch(g_playstate)
 		{
 		case CMoviePlayerGui::SKIP:
-			if (skipseconds)
+			INFO("lseek from %lld, seconds %d\n", filepos, skipseconds);
+			filesize = lseek(fd, 0, SEEK_END);
+			if (!(g_startpts == -1 && skipabsolute)) // only jump absolute if startpts is known
 			{
-				INFO("lseek from %lld, seconds %d\n", filepos, skipseconds);
-				filesize = lseek(fd, 0, SEEK_END);
-				filepos += bytes_per_second * skipseconds;
+				int s = skipseconds;
+				if (skipabsolute)
+					s = skipseconds - get_filetime();
+				filepos += (bytes_per_second * s);
 				if (filepos >= filesize)
-					filepos -= bytes_per_second * skipseconds;
+				{
+					filepos = filesize - 30 * bytes_per_second;
+					skipabsolute = false;
+				}
 				if (filepos < 0)
 					filepos = 0;
 				// smooth = 0; // reset the bitrate smoothing counter after seek?
 				last = 0;
-				skipseconds = 0;
-//				bufferingBox->paint();
+				bufferingBox->paint();
 				INFO("lseek to %lld, size %lld\n", filepos, filesize);
 				if (lseek(fd, filepos, SEEK_SET) < 0)
 					perror("ReadMPEGFileThread lseek");
 			}
-			if (!bufferreset)
-				break;
 			INFO("BUFFERRESET!\n");
+			while (!bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
+				usleep(100000);
+			bufferfilled = false;
 			ringbuffer_reset(ringbuf);
 			ringbuffer_reset(buf_in);
 			bufferreset = false;
-			input_empty = true;
-			g_playstate = CMoviePlayerGui::PLAY;
+			INFO("BUFFERRESET done.\n");
+			/* PlayStreamThread() sets g_playstate to SOFTRESET */
+			while (g_playstate == CMoviePlayerGui::SKIP)
+				usleep(100000);
+			INFO("skip ends\n");
 			break;
 		case CMoviePlayerGui::PLAY:
 			if (last == 0)
@@ -1366,6 +1424,7 @@ ReadMPEGFileThread(void *parm)
 				if (subid < 0x80 || subid > 0x87)
 					break;
 				DBG("AC3: ofs 0x%02x subid 0x%02x\n", offset, subid);
+				subid -= 0x60; // normalize to 32...39 (hex 0x20..0x27)
 #if 0
 This is commented out so we never start up with the AC3 audio selected.
 TODO: OTOH, if we only have an AC3 stream there will be no sound.
@@ -1382,17 +1441,17 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				}
 				else
 #endif
-				if (g_currentapid != ppes[3])
+				if (g_currentapid != subid)
 				{
-					if (!found_aid[(int)ppes[3]] && !resync) //only if we are in sync...
+					if (!found_aid[subid] && !resync) //only if we are in sync...
 					{
-						if (g_numpida < 10)
+						if (g_numpida < MAX_APIDS)
 						{
 							g_ac3flags[g_numpida] = 1;
-							g_apids[g_numpida++] = ppes[3];
+							g_apids[g_numpida++] = subid;
 						}
-						INFO("additional AC3 aid: %02x\n", ppes[3]);
-						found_aid[(int)ppes[3]] = 1;
+						INFO("found AC3 aid:  %02x\n", subid);
+						found_aid[subid] = 1;
 					}
 					av = 0; // skip over this stream;
 					break;
@@ -1413,22 +1472,26 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 			case 0xc0 ... 0xcf:
 			case 0xd0 ... 0xdf:
 				// fprintf(stderr, "audio stream 0x%02x\n", ppes[3]);
-				if (!g_currentapid)
+				int id = ppes[3] - 0xC0; // normalize to 0...31 (hex 0x0...0x1f)
+#if 0
+				if (g_currentapid == -1)
 				{
-					g_currentapid = ppes[3];
+					g_currentapid = id;
 					INFO("found aid: %02x\n", g_currentapid);
-					if (g_numpida < 10);
-						g_apids[g_numpida++] = ppes[3];
+					if (g_numpida < MAX_APIDS);
+						g_apids[g_numpida++] = id;
 					found_aid[g_currentapid] = 1;
 				}
-				else if (g_currentapid != ppes[3])
+				else
+#endif
+				if (g_currentapid != id)
 				{
-					if (!found_aid[(int)ppes[3]] && !resync) //only if we are in sync...
+					if (!found_aid[id] && !resync) //only if we are in sync...
 					{
-						if (g_numpida < 10);
-							g_apids[g_numpida++] = ppes[3];
-						INFO("additional aid: %02x\n", ppes[3]);
-						found_aid[(int)ppes[3]] = 1;
+						if (g_numpida < MAX_APIDS);
+							g_apids[g_numpida++] = id;
+						INFO("found aid: %02x\n", id);
+						found_aid[id] = 1;
 					}
 					av = 0; // skip over this stream;
 					break;
@@ -1465,20 +1528,37 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 
 		if (av)
 		{
+			static time_t gotpts = 0;
 			rd = ringbuffer_get_readpointer(buf_in, &ppes, pesPacketLen);
 			// we already checked for enough space above...
 
-			if (av == 1 && (i++ %10) == 0) // only for every tenth video packet.
+			if (av == 1 && ((i++ %10) == 0 || time(NULL) > gotpts)) // only for every tenth video packet or once per second
 			{
 				int pts = get_pts(ppes, true);
 				if (pts != -1)
 				{
+					gotpts = time(NULL);
 					g_pts = pts;
 					ptspos = filepos; // not exact: disregards the bytes in the buffer!
 					if (g_startpts == -1) // only works if we are starting from the start of the file
 					{
 						g_startpts = pts;
 						INFO("startpts = %d\n", g_startpts);
+					}
+					if (skipabsolute && !g_skiprequest)
+					{
+						time_t timediff = skipseconds - get_filetime();
+						if (skipretry++ < 10 && abs(timediff) > 10)
+						{
+							INFO("offset > 10 seconds (%d), retry skipping...(%d)\n", timediff, skipretry);
+							g_skiprequest = true;
+						}
+						else
+						{
+							// more than 10 retries -> get out
+							skipabsolute = false;
+							skipretry = 0;
+						}
 					}
 				}
 			}
@@ -1618,8 +1698,6 @@ PlayStreamThread (void *mrl)
 
 	g_playstate = CMoviePlayerGui::SOFTRESET;
 	printf("[movieplayer.cpp] read starting\n");
-	size_t readsize, len;
-	len = 0;
 	bool driverready = false;
 	std::string pauseurl = baseurl;
 	pauseurl += "requests/status.xml?command=pl_pause";
@@ -1634,22 +1712,7 @@ PlayStreamThread (void *mrl)
 
 	while (g_playstate > CMoviePlayerGui::STOPPED && !failed)
 	{
-		if (! bufferfilled)
-		{
-			// fprintf(stderr, "!");
-			usleep(10000);	// non busy wait
-			continue;
-		}
-
-		readsize = ringbuffer_read_space(ringbuf);
-		//fprintf(stderr, "XX readsize = %d MAX %d\n", readsize, MAXREADSIZE);
-		if (readsize > MAXREADSIZE)
-			readsize = MAXREADSIZE;
-		else if (readsize % 188)
-			readsize = (readsize / 188) * 188;
-
-		//printf("[movieplayer.cpp] readsize=%d\n",readsize);
-		if (!driverready)
+		if (!driverready && bufferfilled)
 		{
 			driverready = true;
 			// pida and pidv should have been set by ReceiveStreamThread now
@@ -1663,13 +1726,11 @@ PlayStreamThread (void *mrl)
 				buffer_time=0;
 		}
 
-		if (g_startposition > 0)
+		if (g_startposition > 0 && g_startpts != - 1)
 		{
 			printf("[movieplayer.cpp] Was Bookmark. Skipping to startposition\n");
-			sprintf(skipvalue, "%lld", g_startposition);
-			skipseconds = 0;
+			skip(g_startposition, remote, true);
 			g_startposition = 0;
-			g_playstate = CMoviePlayerGui::SKIP;
 		}
 
 		if (g_apidchanged)
@@ -1708,6 +1769,18 @@ PlayStreamThread (void *mrl)
 			case CMoviePlayerGui::SKIP:
 				if (remote)
 				{
+					char skipvalue[20];
+					time_t s = abs(skipseconds);
+					int o = 0;
+					if (!skipabsolute)
+					{
+						if (skipseconds < 0)
+							skipvalue[0] = '-';
+						else
+							skipvalue[0] = '+';
+						o = 1;
+					}
+					strftime(&skipvalue[o], 9, "%T", gmtime(&s));
 					counter = 0;
 					skipurl = baseurl;
 					skipurl += "requests/status.xml?command=seek&val=";
@@ -1725,7 +1798,7 @@ PlayStreamThread (void *mrl)
 					bufferreset = true;
 					while (bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
 					{
-						DBG("WAITING FOR BUFFERRESET\n");
+						INFO("WAITING FOR BUFFERRESET\n");
 						usleep(250000);
 					}
 				}
@@ -1753,6 +1826,23 @@ PlayStreamThread (void *mrl)
 				g_playstate = CMoviePlayerGui::PLAY;
 				break;
 			case CMoviePlayerGui::PLAY:
+			{
+				if (!bufferfilled)
+				{
+					//fprintf(stderr, "!");
+					usleep(10000);	// non busy wait
+					continue;
+				}
+
+				size_t readsize, len;
+				len = 0;
+				readsize = ringbuffer_read_space(ringbuf);
+				//fprintf(stderr, "XX readsize = %d MAX %d\n", readsize, MAXREADSIZE);
+				if (readsize > MAXREADSIZE)
+					readsize = MAXREADSIZE;
+				else if (readsize % 188)
+					readsize = (readsize / 188) * 188;
+
 				len = ringbuffer_read(ringbuf, buf, readsize); // readsize is n*188
 				if (len < MINREADSIZE)
 				{
@@ -1821,6 +1911,7 @@ PlayStreamThread (void *mrl)
 					CLCD::getInstance()->showPercentOver(fPercent, true, CLCD::MODE_MOVIE);
 				}
 				break;
+			}
 			case CMoviePlayerGui::SOFTRESET:
 				INFO("CMoviePlayerGui::SOFTRESET\n");
 				ioctl(vdec, VIDEO_STOP);
@@ -1857,6 +1948,13 @@ PlayStreamThread (void *mrl)
 			case CMoviePlayerGui::ITEMSELECT:
 			default:
 				break;
+		}
+
+		if (g_skiprequest)
+		{
+			INFO("g_skiprequest == true!\n");
+			g_playstate = CMoviePlayerGui::SKIP;
+			g_skiprequest = false;
 		}
 	}
 
@@ -2074,11 +2172,16 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				filename = filelist[selected].Name.c_str();
 				sel_filename = filelist[selected].getFileName();
 				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-				int namepos = filelist[selected].Name.rfind("vlc://");
-				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
-				char *tmp = curl_escape(mrl_str.c_str(), 0);
-				strncpy(mrl, tmp, sizeof(mrl) - 1);
-				curl_free(tmp);
+				if (stream)
+				{
+					int namepos = filelist[selected].Name.rfind("vlc://");
+					std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
+					char *tmp = curl_escape(mrl_str.c_str(), 0);
+					strncpy(mrl, tmp, sizeof(mrl) - 1);
+					curl_free(tmp);
+				}
+				else
+					strncpy(mrl, filename, sizeof(mrl) - 1);
 				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 
 				update_info = true;
@@ -2336,15 +2439,18 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		{
 			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount())
 			{
-				int stream_time;
-				if ((stream_time = VlcGetStreamTime()) >= 0)
+				if (stream)
 				{
-					std::stringstream stream_time_ss;
-					stream_time_ss << (stream_time - buffer_time);
-					bookmarkmanager->createBookmark(filename, stream_time_ss.str());
+					int stream_time;
+					if ((stream_time = VlcGetStreamTime()) >= 0)
+					{
+						std::stringstream stream_time_ss;
+						stream_time_ss << (stream_time - buffer_time);
+						bookmarkmanager->createBookmark(filename, stream_time_ss.str());
+					}
+					else
+						DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_WRONGVLCVERSION)); // UTF-8
 				}
-				else
-					DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_WRONGVLCVERSION)); // UTF-8
 			}
 			else
 			{
@@ -2379,18 +2485,23 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		}
 		else if (msg == CRCInput::RC_down)
 		{
-			char tmp[10+1];
+			char tmp[10 + 1];
 			bool cancel;
 
 			CTimeInput ti(LOCALE_MOVIEPLAYER_GOTO, tmp, LOCALE_MOVIEPLAYER_GOTO_H1, LOCALE_MOVIEPLAYER_GOTO_H2, NULL, &cancel);
 			ti.exec(NULL, "");
 			if (!cancel)	// no cancel
 			{
-				if (tmp[0]== '=')
-					strcpy(skipvalue, tmp+1);
-				else
-					strcpy(skipvalue, tmp);
-				g_playstate = CMoviePlayerGui::SKIP;
+				struct tm t;
+				bool absolute = (tmp[0] == '=');
+
+				if (strptime(tmp + 1, "%T", &t) != NULL)
+				{
+					time_t seconds = t.tm_sec + 60 * t.tm_min + 3600 * t.tm_hour;
+					if (tmp[0] == '-')
+						seconds = -seconds;
+					skip(seconds, stream, absolute);
+				}
 			}
 		}
 		else if (msg == CRCInput::RC_setup)
@@ -2488,7 +2599,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	INFO("waiting for rct\n");
 	pthread_join(rct, NULL);
 	INFO("ends here\n");
-}
+} // PlayStream()
 
 #if HAVE_DVB_API_VERSION >= 3
 // checks if AR has changed an sets cropping mode accordingly
@@ -2556,7 +2667,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.6 $");
+	return imageinfo.getModulVersion("","$Revision: 1.7 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
@@ -2635,27 +2746,10 @@ void CMoviePlayerGui::showFileInfoVLC()
 	}
 }
 
-static inline void skip(int seconds, bool remote, bool absolute)
+static inline void skip(int seconds, bool /*remote*/, bool absolute)
 {
-	char *t = skipvalue;
-	time_t s = abs(seconds);
-	if (remote)
-	{
-		if (! absolute)
-		{
-			if (seconds < 0)
-				t[0] = '-';
-			else
-				t[0] = '+';
-			t++;
-		}
-		strftime(t, 9, "%T", gmtime(&s));
-	}
-	else
-	{
-		// TODO: absolute jump in local mode
-		skipseconds = seconds;
-	}
+	skipseconds = seconds;
+	skipabsolute = absolute;
 	g_playstate = CMoviePlayerGui::SKIP;
 }
 
