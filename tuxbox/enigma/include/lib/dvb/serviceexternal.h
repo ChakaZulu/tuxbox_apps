@@ -44,8 +44,8 @@ public:
 class ePlayerThread: public eThread, public Object
 {
 	eFixedMessagePump<int> message;
-	bool needfb, needrc, needlcd;
 	eString command;
+	bool needfb, needrc, needlcd;
 	void thread();
 	void thread_finished();
 	void finalize_player();
