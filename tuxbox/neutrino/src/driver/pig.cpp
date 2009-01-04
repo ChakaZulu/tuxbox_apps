@@ -139,6 +139,10 @@ void CPIG::pigclose ()
 void CPIG::_set_window (int x, int y, int w, int h)
 {
   // -- Modul interne Routine
+#if HAVE_DVB_API_VERSION < 3
+	avia_pig_set_pos(fd, x, y);
+	avia_pig_set_size(fd, w, h);
+#else
 	struct v4l2_crop crop;
 	struct v4l2_format coord;
 	int    err;
@@ -163,6 +167,7 @@ void CPIG::_set_window (int x, int y, int w, int h)
 	coord.fmt.win.w.height = h;
 
 	err = ioctl(fd, VIDIOC_S_FMT, &coord);
+#endif
 }
 
 
@@ -247,10 +252,14 @@ void CPIG::show (int x, int y, int w, int h)
 void CPIG::show (void)
 {
 	if ( fd >= 0 ) {
+#if HAVE_DVB_API_VERSION < 3
+		avia_pig_show(fd);
+#else
 		int pigmode = 1;
 		int err;
 		err = ioctl(fd, VIDIOC_OVERLAY, &pigmode);
 		// old API: avia_pig_show(fd);
+#endif
 		status = SHOW;
 	}
 }
@@ -258,10 +267,14 @@ void CPIG::show (void)
 void CPIG::hide (void)
 {
 	if ( fd >= 0 ) {
+#if HAVE_DVB_API_VERSION < 3
+		avia_pig_hide(fd);
+#else
 		int pigmode = 0;
 		int err;
 		err = ioctl(fd, VIDIOC_OVERLAY, &pigmode);
 		// old API: avia_pig_hide(fd);
+#endif
 		status = HIDE;
 	}
 }

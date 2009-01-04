@@ -32,12 +32,17 @@ using namespace std;
 //  --  2003-06  rasc   V4L API
 //
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-
+#if HAVE_DVB_API_VERSION < 3
+#include <dbox/avia_gt_pig.h>
+#define PIG_DEV "/dev/dbox/pig"
+#else
 #include <linux/videodev.h>
-
 #define PIG_DEV "/dev/v4l/video"		// PigNr will be appended!
-
+#endif
 
 
 class CPIG

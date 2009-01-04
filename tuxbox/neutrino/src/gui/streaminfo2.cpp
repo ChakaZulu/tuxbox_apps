@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.36 2008/11/16 21:46:40 seife Exp $
+	$Id: streaminfo2.cpp,v 1.37 2009/01/04 22:13:14 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -270,7 +270,11 @@ void CStreamInfo2::hide()
 
 void CStreamInfo2::paint_pig(int x, int y, int w, int h)
 {
+#if HAVE_DVB_API_VERSION < 3
+	frameBuffer->paintBackgroundBoxRel(x, y, w, h);
+#else
 	frameBuffer->paintBoxRel(x,y,w,h, COL_BLACK); //black
+#endif
 	pig->show (x,y,w,h);
 }
 
@@ -439,7 +443,12 @@ void CStreamInfo2::paint(int mode)
 		ypos = y+hheight+8;
 
 		// paint PIG
+#ifndef HAVE_DREAMBOX_DM500
 		paint_pig( pigboxes_x,  ypos , 240, 190);
+#else
+		// the dm500 seems to like only half / quarter resolution...
+		paint_pig(pigboxes_x + 60,  ypos, 180, 144);
+#endif
 
 		// Info Output
 		paint_techinfo ( xpos, ypos );
@@ -769,7 +778,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.36 $");
+	return imageinfo.getModulVersion("","$Revision: 1.37 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
