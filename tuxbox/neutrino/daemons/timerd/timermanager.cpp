@@ -4,7 +4,9 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.87 2008/10/01 19:04:46 houdini Exp $
+	Copyright (C) 2009 Stefan Seyfried
+
+   $Id: timermanager.cpp,v 1.88 2009/01/05 14:07:25 seife Exp $
 
 	License: GPL
 
@@ -51,6 +53,21 @@ CTimerManager::CTimerManager()
 	m_saveEvents = false;
 	m_isTimeSet = false;
 	loadRecordingSafety();
+
+	timer_wakeup = false; // fallback
+	char wakeup;
+	int fd = open("/dev/dbox/fp0", O_RDWR);
+	int ret = ioctl(fd, FP_IOCTL_IS_WAKEUP, &wakeup);
+	if (ret < 0)
+		perror("[timerd] FP_IOCTL_IS_WAKEUP");
+	else
+	{
+		timer_wakeup = !!wakeup;
+		printf("[timerd] woke up from timer? %s!\n", timer_wakeup ? "true" : "false");
+		// clear wakeup event...
+		if (ioctl(fd, FP_IOCTL_CLEAR_WAKEUP_TIMER) < 0)
+			perror("[timerd] FP_IOCTL_CLEAR_WAKEUP_TIMER");
+	}
 
 	//thread starten
 	if(pthread_create (&thrTimer, NULL, timerThread, (void *) this) != 0 )
@@ -747,20 +764,15 @@ void CTimerManager::shutdownOnWakeup(int currEventID)
 		}
 	}
 	time_t now = time(NULL);
-	if((nextAnnounceTime-now) > 600 || nextAnnounceTime==0)
-	{ // in den naechsten 10 min steht nix an
-		//teste auf wakeup
-		char wakeup;
-		int fd = open("/dev/dbox/fp0", O_RDWR);
-		int ret=ioctl(fd, FP_IOCTL_IS_WAKEUP, &wakeup);
-		if(wakeup!=0 && !(ret<0))
-		{
-			dprintf("Programming shutdown event\n");
-			CTimerEvent_Shutdown* event = new CTimerEvent_Shutdown(now+120, now+180);
-			addEvent(event);
-		}
-		close(fd);
+	printf("[timerd] timer_wakeup = %s; a.time: %ld now: %ld\n",timer_wakeup ? "true" : "false", nextAnnounceTime, now);
+	if (timer_wakeup && ((nextAnnounceTime - now) > 600 || nextAnnounceTime == 0))
+	{ // we woke up from a timer and nothing is scheduled for the next 10 minutes
+		printf("[timerd] scheduling shutdown event\n");
+		CTimerEvent_Shutdown* event = new CTimerEvent_Shutdown(now+120, now+180);
+		addEvent(event);
 	}
+	else
+		printf("[timerd] not scheduling shutdown event\n");
 	pthread_mutex_unlock(&tm_eventsMutex);
 }
 void CTimerManager::setRecordingSafety(int pre, int post)
@@ -1237,6 +1249,17 @@ void CTimerEvent_Zapto::announceEvent()
 //------------------------------------------------------------
 void CTimerEvent_Zapto::fireEvent()
 {
+	/* this is a workaround for the following scenario:
+	   - i have a shutdown timer at 04:50
+	   - i have a zapto timer at 04:55
+	   - this is to ensure the box reboots every morning
+	   - later that day, i program a recording timer, let's say from 20:12 to 22:00
+	   - on 22:03 the box gets shut down, since it was woken up from timer
+	   - as a workaround, i cancel the wakeup timer flag if a zapto timer fires
+	 */
+	printf("[timerd] zapto::fireEvent() -> clearing wakeup flag\n");
+	CTimerManager::getInstance()->clearWakeup();
+	/* workaround ends here */
 	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_ZAPTO,
 								  CEventServer::INITID_TIMERD,
 								  &eventInfo,

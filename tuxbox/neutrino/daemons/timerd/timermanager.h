@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.46 2006/02/28 21:51:00 zwen Exp $
+	$Id: timermanager.h,v 1.47 2009/01/05 14:07:25 seife Exp $
 
 	License: GPL
 
@@ -214,6 +214,7 @@ private:
 	CEventServer		*eventServer;
 	CTimerEventMap		events;
 	pthread_t			thrTimer;
+	bool              timer_wakeup;
 	bool              m_saveEvents;
 	bool              m_isTimeSet;
 	int               m_extraTimeStart;
@@ -245,6 +246,7 @@ public:
 	void getRecordingSafety(int &pre, int &post){pre=m_extraTimeStart;post=m_extraTimeEnd;}
 	void setRecordingSafety(int pre, int post);  
 	void loadRecordingSafety();
+	void clearWakeup() { timer_wakeup = false; }
 };
 
 #endif
