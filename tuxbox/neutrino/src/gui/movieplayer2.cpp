@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.7 2009/01/03 22:44:07 seife Exp $
+  $Id: movieplayer2.cpp,v 1.8 2009/01/07 15:13:44 seife Exp $
 
   License: GPL
 
@@ -121,6 +121,10 @@ extern "C" {
 #else
 #define DBG(args...)
 #endif
+
+// if there is more than one audio stream, should it be autoselected?
+// define, if you don't that
+//#define AUDIO_STREAM_AUTOSELECT
 
 #if HAVE_DVB_API_VERSION < 3
 #define ADAP	"/dev/dvb/card0"
@@ -894,6 +898,7 @@ ReadTSFileThread(void *parm)
 	find_all_avpids(fd, &pidv, g_apids, g_ac3flags, &g_numpida);
 	pida = g_apids[0];
 	g_currentac3 = g_ac3flags[0];
+	g_currentapid = -1;
 	INFO("found pida: 0x%04X pidv: 0x%04X ac3: %d numpida: %d\n", pida, pidv, g_currentac3, g_numpida);
 	if (g_numpida > 1)
 	{
@@ -902,7 +907,12 @@ ReadTSFileThread(void *parm)
 			printf(" 0x%04X", g_apids[i]);
 		printf("\n");
 	}
+#ifndef AUDIO_STREAM_AUTOSELECT
+	else
+		g_currentapid = pida;
+#else
 	g_currentapid = pida;
+#endif
 
 	bufferingBox->paint();
 	INFO("Buffering...\n");
@@ -977,9 +987,8 @@ ReadTSFileThread(void *parm)
 			bufferfilled = false;
 			ringbuffer_reset(ringbuf);
 			bufferreset = false;
-			/* PlayStreamThread() sets g_playstate to SOFTRESET */
 			DBG("BUFFERRESET done.\n");
-			/* PlayStreamThread() sets g_playstate to SOFTRESET */
+			/* OutputThread() sets g_playstate to SOFTRESET */
 			while (g_playstate == CMoviePlayerGui::SKIP)
 				usleep(100000);
 			INFO("skip ends\n");
@@ -1189,6 +1198,7 @@ ReadMPEGFileThread(void *parm)
 
 	while (g_playstate != CMoviePlayerGui::STOPPED && !failed)
 	{
+#ifdef AUDIO_STREAM_AUTOSELECT
 		/* Try to find the lowest numbered audio stream. The "bufferfilled" check
 		   is to make sure that there is already some data parsed. */
 		if (bufferfilled && g_currentapid == -1)
@@ -1199,6 +1209,7 @@ ReadMPEGFileThread(void *parm)
 					g_currentapid = j;
 					break;
 				}
+#endif
 
 		switch(g_playstate)
 		{
@@ -1233,7 +1244,7 @@ ReadMPEGFileThread(void *parm)
 			ringbuffer_reset(buf_in);
 			bufferreset = false;
 			INFO("BUFFERRESET done.\n");
-			/* PlayStreamThread() sets g_playstate to SOFTRESET */
+			/* OutputThread() sets g_playstate to SOFTRESET */
 			while (g_playstate == CMoviePlayerGui::SKIP)
 				usleep(100000);
 			INFO("skip ends\n");
@@ -1620,7 +1631,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 
 //------------------------------------------------------------------------
 void *
-PlayStreamThread (void *mrl)
+OutputThread (void *mrl)
 {
 	//-- lcd stuff --
 	int cPercent = 0;
@@ -1712,18 +1723,18 @@ PlayStreamThread (void *mrl)
 
 	while (g_playstate > CMoviePlayerGui::STOPPED && !failed)
 	{
-		if (!driverready && bufferfilled)
+		if (!driverready && bufferfilled && g_currentapid != -1)
 		{
 			driverready = true;
 			// pida and pidv should have been set by ReceiveStreamThread now
 			INFO("while streaming found pida: 0x%04X ; pidv: 0x%04X ac3: %d\n",
 			      pida, pidv, g_currentac3);
 
-			g_playstate= CMoviePlayerGui::SOFTRESET;
+			g_playstate = CMoviePlayerGui::SOFTRESET;
 			// Calculate diffrence between vlc time and play time
 			// movieplayer is about to start playback so ask vlc for his position
 			if (remote && (buffer_time = VlcGetStreamTime()) < 0)
-				buffer_time=0;
+				buffer_time = 0;
 		}
 
 		if (g_startposition > 0 && g_startpts != - 1)
@@ -1827,7 +1838,7 @@ PlayStreamThread (void *mrl)
 				break;
 			case CMoviePlayerGui::PLAY:
 			{
-				if (!bufferfilled)
+				if (!bufferfilled || !driverready)
 				{
 					//fprintf(stderr, "!");
 					usleep(10000);	// non busy wait
@@ -1873,7 +1884,7 @@ PlayStreamThread (void *mrl)
 							usleep(10000);
 							continue;
 						}
-						perror("[movieplayer.cpp] PlayStreamThread write");
+						perror("[movieplayer.cpp] OutputThread write");
 						g_playstate = CMoviePlayerGui::STOPPED;
 						break;
 					}
@@ -1982,7 +1993,7 @@ PlayStreamThread (void *mrl)
 	delete hintBox;	// TODO is this allowed here?
 
 	pthread_exit(NULL);
-} // PlayStreamThread
+} // OutputThread
 
 //== updateLcd ==
 //===============
@@ -2102,9 +2113,10 @@ CMoviePlayerGui::PlayFile(int parental)
 	return;
 }
 
-//=================================
-//== CMoviePlayerGui::PlayStream ==
-//=================================
+/*
+ CMoviePlayerGui::PlayStream()
+ This is actually the "Control" or "GUI"-Thread
+*/
 void
 CMoviePlayerGui::PlayStream(int streamtype)
 {
@@ -2275,6 +2287,31 @@ CMoviePlayerGui::PlayStream(int streamtype)
 						strncpy(mrl, filename, sizeof(mrl) - 1);
 					INFO("Generated FILE MRL: %s\n", mrl);
 
+					if (filelist.size() == 1 && !stream)
+					{
+						char *ext;
+						ext = strrchr(filename, '.');	// FOO-xxx-2007-12-31.001.ts <- the dot before "ts"
+										// 001.vdr <- the dot before "vdr"
+						if (((ext - 7 >= filename) && (*(ext - 4) == '.') && !strcmp(ext, ".ts")) ||
+						    ((ext - 4 >= filename) && !strcmp(ext, ".vdr")))
+						{
+							int num = 0;
+							CFile *file = new CFile;
+							sscanf(ext - 3, "%d", &num);
+							do {
+								num++;
+								char nextfile[strlen(filename) + 1];
+								memcpy(nextfile, filename, strlen(filename)-strlen(ext)-3);
+								sprintf(nextfile+strlen(filename)-strlen(ext)-3,"%03d%s", num, ext);
+								if (access(nextfile, R_OK))
+									break; // file does not exist
+								file->Name = nextfile;
+								INFO("auto-adding '%s' to playlist\n", nextfile);
+								filelist.push_back(*file);
+							} while (true);
+							delete file;
+						}
+					}
 					update_info = true;
 					start_play = true;
 					selected = 0;
@@ -2319,13 +2356,17 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			hintBox->paint();
 			buffer_time=0;
 
-			if (pthread_create(&rct, 0, PlayStreamThread, (void *)mrl) != 0)
+			if (pthread_create(&rct, 0, OutputThread, (void *)mrl) != 0)
 				break;
 
 			g_playstate = CMoviePlayerGui::SOFTRESET;
 		}
 
-//###########################################################################
+#ifndef AUDIO_STREAM_AUTOSELECT
+		if (bufferfilled && g_currentapid == -1)
+			g_showaudioselectdialog = true;
+#endif
+
 		if (g_showaudioselectdialog)
 		{
 			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
@@ -2667,7 +2708,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.7 $");
+	return imageinfo.getModulVersion("","$Revision: 1.8 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
