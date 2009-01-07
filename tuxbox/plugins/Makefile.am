@@ -6,6 +6,7 @@ SUBDIRS = \
 else
 SUBDIRS = \
 	include tuxmail tuxtxt tuxcom tuxcal fx2 vncviewer enigma pluginx
+endif
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
