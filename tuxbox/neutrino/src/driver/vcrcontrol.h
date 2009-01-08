@@ -110,7 +110,7 @@ class CVCRControl
 			void RestoreNeutrino(void);
 			void CutBackNeutrino(const t_channel_id channel_id, const int mode);
 			std::string getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string& epgTitle, unsigned char apids);
-			std::string getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids, const time_t epg_time);
+			std::string getMovieInfoString(const t_channel_id channel_id, const event_id_t epgid, const time_t epg_time);
 
 		public:
 			bool	StopPlayBack;

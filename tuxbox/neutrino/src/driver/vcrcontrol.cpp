@@ -4,6 +4,8 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
+	Copyright (C) 2009 Stefan Seyfried
+
 	Kommentar:
 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
@@ -250,7 +252,8 @@ bool CVCRControl::CVCRDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string& epgTitle, unsigned char apids,const time_t epg_time)
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid,
+				     const std::string& /*epgTitle*/, unsigned char apids, const time_t /*epg_time*/)
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -405,7 +408,8 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 	g_Zapit->setRecordMode( true );					// recordmode einschalten
 }
 
-std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids,const time_t epg_time)
+std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const t_channel_id channel_id,
+								  const event_id_t epgid, const time_t epg_time)
 {
 	std::string extMessage;
 	CMovieInfo cMovieInfo;
@@ -830,7 +834,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	} else
 	{
 		error_msg = ::start_recording(filename,
-					      getMovieInfoString(CMD_VCR_RECORD, channel_id, epgid, apids,epg_time).c_str(),
+					      getMovieInfoString(channel_id, epgid, epg_time).c_str(),
 					      Use_O_Sync,
 					      Use_Fdatasync,
 					      ((unsigned long long)SplitSize) * 1048576ULL,
@@ -1019,7 +1023,8 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string &epgTitle, unsigned char apids,const time_t epg_time) 
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid,
+					const std::string &epgTitle, unsigned char apids, const time_t /*epg_time*/)
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
