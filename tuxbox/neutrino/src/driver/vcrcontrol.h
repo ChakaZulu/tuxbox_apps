@@ -34,7 +34,6 @@
 #include <string>
 //#include <map>
 #include <list>
-#define MOVIEBROWSER
 
 #include <sectionsdclient/sectionsdclient.h>
 #include <timerdclient/timerdclient.h>
@@ -70,11 +69,8 @@ class CVCRControl
 			virtual CVCRDevices getDeviceType(void) const = 0;
 			CVCRStates  deviceState;
 			virtual bool Stop() = 0;
-#ifdef MOVIEBROWSER
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0,const time_t epg_time=0) = 0; // epg_time added for .xml (MovieBrowser)
-#else /* MOVIEBROWSER */
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0) = 0; 
-#endif /* MOVIEBROWSER */
+			virtual bool Record(const t_channel_id channel_id = 0, int mode = 1, const event_id_t epgid = 0,
+					    const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time = 0) = 0;
 			virtual bool Pause() = 0;
 			virtual bool Resume() = 0;
 			virtual bool IsAvailable() = 0;
@@ -99,11 +95,8 @@ class CVCRControl
 					return DEVICE_VCR;
 				};
 			virtual bool Stop(); 
-#ifdef MOVIEBROWSER
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
-#else /* MOVIEBROWSER */
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0);	
-#endif /* MOVIEBROWSER */
+			virtual bool Record(const t_channel_id channel_id = 0, int mode = 1, const event_id_t epgid = 0,
+					    const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time = 0);
 			virtual bool Pause();
 			virtual bool Resume();
 			virtual bool IsAvailable() { return true; };
@@ -117,9 +110,7 @@ class CVCRControl
 			void RestoreNeutrino(void);
 			void CutBackNeutrino(const t_channel_id channel_id, const int mode);
 			std::string getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string& epgTitle, unsigned char apids);
-#ifdef MOVIEBROWSER  			
 			std::string getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids, const time_t epg_time);
-#endif /* MOVIEBROWSER */
 
 		public:
 			bool	StopPlayBack;
@@ -160,11 +151,8 @@ class CVCRControl
 				};
 				
 			virtual bool Stop(); 
-#ifdef MOVIEBROWSER
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
-#else /* MOVIEBROWSER */
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0);	
-#endif /* MOVIEBROWSER */
+			virtual bool Record(const t_channel_id channel_id = 0, int mode = 1, const event_id_t epgid = 0,
+					    const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time = 0);
 			
 			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool use_fdatasync, const bool stream_vtxt_pid, const bool stream_subtitle_pid, const unsigned int ringbuffers, bool createTemplateDirectories)
 				
@@ -205,11 +193,8 @@ class CVCRControl
 				};
 
 			virtual bool Stop();
-#ifdef MOVIEBROWSER
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
-#else /* MOVIEBROWSER */
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0);
-#endif /* MOVIEBROWSER */
+			virtual bool Record(const t_channel_id channel_id = 0, int mode = 1, const event_id_t epgid = 0,
+					    const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time = 0);
 
 			CServerDevice(const bool stopplayback, const bool stopsectionsd, const char * const serveraddress, const unsigned int serverport)
 				{

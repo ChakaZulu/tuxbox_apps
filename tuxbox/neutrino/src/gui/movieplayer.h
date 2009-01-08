@@ -39,7 +39,9 @@
 #include "gui/bookmarkmanager.h"
 #include "gui/widget/menue.h"
 
+#ifndef MOVIEPLAYER2
 #define MOVIEBROWSER
+#endif
 #ifdef MOVIEBROWSER
 #include "gui/moviebrowser.h"
 #include "gui/movieinfo.h"
@@ -109,8 +111,10 @@ class CMoviePlayerGui : public CMenuTarget
     CMoviePlayerGui();
     ~CMoviePlayerGui();
     int exec(CMenuTarget* parent, const std::string & actionKey);
+#ifdef MOVIEBROWSER
     void fileInfoStale(){if(moviebrowser != NULL)moviebrowser->fileInfoStale();};
-	std::string getMoviePlayerVersion(void);
+#endif
+    std::string getMoviePlayerVersion(void);
 };
 
 

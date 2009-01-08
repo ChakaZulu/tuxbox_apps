@@ -33,13 +33,9 @@
 #include <config.h>
 #endif
 
-#define MOVIEBROWSER
-
 #include <driver/vcrcontrol.h>
 
-#ifdef MOVIEBROWSER
 #include <gui/movieinfo.h>
-#endif /* MOVIEBROWSER */
 
 #include <driver/encoding.h>
 #include <driver/stream2file.h>
@@ -130,11 +126,7 @@ bool CVCRControl::Record(const CTimerd::RecordingInfo * const eventinfo)
 {
 	int mode = g_Zapit->isChannelTVChannel(eventinfo->channel_id) ? NeutrinoMessages::mode_tv : NeutrinoMessages::mode_radio;
 
-#ifdef MOVIEBROWSER
-	return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->epgTitle, eventinfo->apids,eventinfo->epg_starttime); 
-#else /* MOVIEBROWSER */
-	return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->epgTitle, eventinfo->apids); 
-#endif /* MOVIEBROWSER */
+	return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->epgTitle, eventinfo->apids, eventinfo->epg_starttime);
 }
 
 //-------------------------------------------------------------------------
@@ -258,11 +250,7 @@ bool CVCRControl::CVCRDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-#ifdef MOVIEBROWSER
 bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string& epgTitle, unsigned char apids,const time_t epg_time)
-#else /* MOVIEBROWSER */
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string& epgTitle, unsigned char apids)
-#endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -417,8 +405,6 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 	g_Zapit->setRecordMode( true );					// recordmode einschalten
 }
 
-#ifdef MOVIEBROWSER  		
-
 std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids,const time_t epg_time)
 {
 	std::string extMessage;
@@ -499,7 +485,6 @@ std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const CVCRComm
 
 	return extMessage;
 }
-#endif /* MOVIEBROWSER */
 
 std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string& epgTitle, unsigned char apids)
 {
@@ -656,11 +641,7 @@ bool CVCRControl::CFileDevice::Stop()
 	return return_value;
 }
 
-#ifdef MOVIEBROWSER
 bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string &epgTitle, unsigned char apids,const time_t epg_time) 
-#else /* MOVIEBROWSER */
-bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string &epgTitle, unsigned char apids) 
-#endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -849,11 +830,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	} else
 	{
 		error_msg = ::start_recording(filename,
-#ifdef MOVIEBROWSER  		
 					      getMovieInfoString(CMD_VCR_RECORD, channel_id, epgid, apids,epg_time).c_str(),
-#else /* MOVIEBROWSER */
-					      getCommandString(CMD_VCR_RECORD, channel_id, epgid, epgTitle, apids).c_str(),
-#endif /* MOVIEBROWSER */
 					      Use_O_Sync,
 					      Use_Fdatasync,
 					      ((unsigned long long)SplitSize) * 1048576ULL,
@@ -1042,11 +1019,7 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-#ifdef MOVIEBROWSER
 bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string &epgTitle, unsigned char apids,const time_t epg_time) 
-#else /* MOVIEBROWSER */
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string &epgTitle, unsigned char apids) 
-#endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS

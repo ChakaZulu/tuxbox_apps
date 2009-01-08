@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.10 2008/12/19 21:02:31 seife Exp $
+	$Id: movieviewer.cpp,v 1.11 2009/01/08 17:13:43 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -40,6 +40,7 @@
 #endif
 
 #include <gui/movieviewer.h>
+#include <gui/movieinfo.h>
 
 #include <gui/widget/icons.h>
 #include <gui/widget/hintbox.h>
