@@ -65,6 +65,12 @@ AC_ARG_ENABLE(flac,
 	,[enable_flac=no])
 AM_CONDITIONAL(ENABLE_FLAC,test "$enable_flac" = "yes")
 
+# neutrino movieplayer2 (experimental) #########################
+AC_ARG_ENABLE(movieplayer2,
+	AS_HELP_STRING(--enable-movieplayer2,enable experimental neutrino movieplayer2),
+	,[enable_movieplayer2=no])
+AM_CONDITIONAL(ENABLE_MOVIEPLAYER2,test "$enable_movieplayer2" = "yes")
+
 AC_ARG_ENABLE(use-libxml2,
    [  --enable-use-libxml2    use libxml2 instead of libxmltree],
       [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
