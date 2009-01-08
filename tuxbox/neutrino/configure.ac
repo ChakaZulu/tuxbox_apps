@@ -83,6 +83,9 @@ fi
 if test "$BOXTYPE" = "dm500" ; then
 	CPPFLAGS="$CPPFLAGS -DHAVE_DREAMBOX_DM500"
 fi
+
+CPPFLAGS="$CPPFLAGS -Wextra"
+
 AC_OUTPUT([
 Makefile
 lib/Makefile
