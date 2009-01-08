@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.201 2009/01/02 22:38:19 houdini Exp $
+	$Id: neutrino.h,v 1.202 2009/01/08 17:56:35 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -253,7 +253,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 								CMenuWidget &miscSettings,
 								CMenuWidget &driverSettings,
 								CMenuWidget &service,
-								CMenuWidget &fontSettings,
 								CMenuWidget &audiopl_picSettings,
 								CMenuWidget &streamingSettings,
 								CMenuWidget &moviePlayer);

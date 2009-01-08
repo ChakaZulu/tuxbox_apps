@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.913 2009/01/02 22:38:19 houdini Exp $
+	$Id: neutrino.cpp,v 1.914 2009/01/08 17:56:35 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2067,7 +2067,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 					miscSettings,
 					driverSettings,
 					service,
-					fontSettings,
 					audioplPicSettings,
 					streamingSettings,
 					moviePlayer);
