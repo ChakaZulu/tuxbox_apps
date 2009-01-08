@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.8 2009/01/07 15:13:44 seife Exp $
+  $Id: movieplayer2.cpp,v 1.9 2009/01/08 00:57:53 seife Exp $
 
   License: GPL
 
@@ -161,7 +161,7 @@ static bool isTS, isPES, isBookmark;
 ringbuffer_t *ringbuf;
 bool bufferfilled;
 bool bufferreset = false;
-int fPercent = 0;	// percentage of the file position
+int g_percent = 0;	// percentage of the file position
 
 unsigned short pida, pidv, pidt;
 CHintBox *hintBox;
@@ -461,7 +461,7 @@ CURLcode sendGetRequest (const std::string & url, std::string & response)
 	curl_easy_setopt(curl, CURLOPT_FILE, (void *)&response);
 	curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
 	httpres = curl_easy_perform(curl);
-	//printf ("[movieplayer.cpp] HTTP Result: %d\n", httpres);
+	//INFO("HTTP url: '%s' Result: %d\n", url.c_str(), httpres);
 	curl_easy_cleanup(curl);
 	return httpres;
 }
@@ -473,11 +473,16 @@ CURLcode sendGetRequest (const std::string & url, std::string & response)
 bool VlcRequestStream(char* mrl, int  transcodeVideo, int transcodeAudio)
 {
 	CURLcode httpres;
+	std::string response;
 	std::string baseurl = "http://";
 	baseurl += g_settings.streaming_server_ip;
 	baseurl += ':';
 	baseurl += g_settings.streaming_server_port;
 	baseurl += '/';
+
+	std::string reseturl = baseurl;
+	reseturl += "requests/status.xml?command=pl_empty";
+	httpres = sendGetRequest(reseturl, response);
 
 	// add sout (URL encoded)
 	// Example(mit transcode zu mpeg1): ?sout=#transcode{vcodec=mpgv,vb=2000,acodec=mpga,ab=192,channels=2}:duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
@@ -542,21 +547,19 @@ bool VlcRequestStream(char* mrl, int  transcodeVideo, int transcodeAudio)
 	
 	std::string url = baseurl;
 	url += "requests/status.xml?command=in_play&input=";
-	url += mrl;	
+	url += mrl;
 	url += "%20%3Asout%3D";
 	url += url_escape(souturl.c_str());
 	printf("[movieplayer.cpp] URL(enc) : %s\n", url.c_str());
-	std::string response;
 	httpres = sendGetRequest(url, response);
 
 	return true; // TODO error checking
 }
 
 //------------------------------------------------------------------------
-int VlcGetStreamTime()
+int VlcGetStatus(const char *attribute)
 {
-	// TODO: check if answer_parser leaks memory
-	// TODO calculate REAL position as position returned by VLC does not take the ringbuffer into consideration
+	int ret = -1;
 	std::string positionurl = "http://";
 	positionurl += g_settings.streaming_server_ip;
 	positionurl += ':';
@@ -565,7 +568,7 @@ int VlcGetStreamTime()
 	//printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
 	std::string response = "";
 	CURLcode httpres = sendGetRequest(positionurl, response);
-	//printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_length = %s\n",httpres,response.length(),response.c_str());
+	//printf("[movieplayer.cpp] httpres=%d, response.length()=%d, resp='%s'\n",httpres,response.length(),response.c_str());
 	if (httpres == 0 && response.length() > 0)
 	{
 		xmlDocPtr answer_parser = parseXml(response.c_str());
@@ -573,51 +576,31 @@ int VlcGetStreamTime()
 		{
 			xmlNodePtr element = xmlDocGetRootElement(answer_parser);
 			element = element->xmlChildrenNode;
-			while (element) {
-				char* tmp = xmlGetName(element);
-				if (strcmp(tmp, "time") == 0)
-					return atoi(xmlGetData(element));
-				element = element->xmlNextNode;
-			}
-		}
-		return -1;
-	}
-	else
-		return -1;
-}
-
-//------------------------------------------------------------------------
-int VlcGetStreamLength()
-{
-	// TODO: check if answer_parser leaks memory
-	// TODO calculate REAL position as position returned by VLC does not take the ringbuffer into consideration
-	std::string positionurl = "http://";
-	positionurl += g_settings.streaming_server_ip;
-	positionurl += ':';
-	positionurl += g_settings.streaming_server_port;
-	positionurl += "/requests/status.xml";
-	//printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
-	std::string response = "";
-	CURLcode httpres = sendGetRequest(positionurl, response);
-	//printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_length = %s\n",httpres,response.length(),response.c_str());
-	if(httpres == 0 && response.length() > 0)
-	{
-		xmlDocPtr answer_parser = parseXml(response.c_str());
-		if (answer_parser) {
-			xmlNodePtr element = xmlDocGetRootElement(answer_parser);
-			element = element->xmlChildrenNode;
 			while (element)
 			{
 				char* tmp = xmlGetName(element);
-				if (strcmp(tmp, "length") == 0)
-					return atoi(xmlGetData(element));
+				if (strcmp(tmp, attribute) == 0)
+				{
+					ret = atoi(xmlGetData(element));
+					break;
+				}
 				element = element->xmlNextNode;
 			}
+			xmlFreeDoc(answer_parser);
 		}
-		return -1;
 	}
-	else
-		return -1;
+
+	return ret;
+}
+
+inline int VlcGetStreamTime()
+{
+	return VlcGetStatus("time");
+}
+
+inline int VlcGetStreamLength()
+{
+	return VlcGetStatus("length");
 }
 
 //------------------------------------------------------------------------
@@ -636,8 +619,17 @@ ReceiveStreamThread (void *mrl)
 	baseurl += ':';
 	baseurl += g_settings.streaming_server_port;
 	baseurl += '/';
-	baseurl += "requests/status.xml";
-	CURLcode httpres = sendGetRequest(baseurl, response);
+
+	std::string statusurl = baseurl;
+	statusurl += "requests/status.xml";
+
+	std::string pauseurl = baseurl;
+	pauseurl += "requests/status.xml?command=vlc_pause";
+	std::string unpauseurl = baseurl;
+	unpauseurl += "requests/status.xml?command=vlc_play";
+
+
+	CURLcode httpres = sendGetRequest(statusurl, response);
 	if (httpres != 0)
 	{
 		DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER));	// UTF-8
@@ -691,6 +683,7 @@ ReceiveStreamThread (void *mrl)
 
 	INFO("Server: %s\n", server);
 	INFO("Port: %d\n", port);
+	time_t start = time(NULL);
 
 	while (true)
 	{
@@ -725,7 +718,8 @@ ReceiveStreamThread (void *mrl)
 		char line[200];
 		buf[0] = buf[1] = '\0';
 		strcpy(line, "");
-		while (true)
+		time_t now = time(NULL);
+		while (g_playstate != CMoviePlayerGui::STOPPED && (now - start < 30))
 		{
 			len = recv(skt, buf, 1, 0);
 			strncat(line, buf, 1);
@@ -733,6 +727,7 @@ ReceiveStreamThread (void *mrl)
 			{
 				printf("[movieplayer.cpp] VLC still does not send. Retrying...\n");
 				close(skt);
+				usleep(500000);
 				break;
 			}
 			if ((((found & (~2)) == 0) && (buf[0] == '\r')) || /* found == 0 || found == 2 */
@@ -747,8 +742,9 @@ ReceiveStreamThread (void *mrl)
 			{
 				found = 0;
 			}
+			now = time(NULL);
 		}
-		if (g_playstate == CMoviePlayerGui::STOPPED)
+		if (g_playstate == CMoviePlayerGui::STOPPED || (now - start >= 30))
 		{
 			close(skt);
 			pthread_exit(NULL);
@@ -769,12 +765,73 @@ ReceiveStreamThread (void *mrl)
 	int pollret;
 	ringbuffer_data_t vec[2];
 
-	while (true)
+
+	int length = 0;
+	int counter = 0;
+	length = VlcGetStreamLength();
+	INFO("VLC Stream length: %d\n", length);
+
+	while (g_playstate != CMoviePlayerGui::STOPPED)
 	{
-		if (g_playstate == CMoviePlayerGui::STOPPED)
+		switch (g_playstate)
 		{
-			close(skt);
-			pthread_exit(NULL);
+		case CMoviePlayerGui::SKIP:
+		{
+			std::string skipurl;
+			char skipvalue[20];
+			time_t s = abs(skipseconds);
+			int o = 0;
+			if (!skipabsolute)
+			{
+				if (skipseconds < 0)
+					skipvalue[0] = '-';
+				else
+					skipvalue[0] = '+';
+				o = 1;
+			}
+			strftime(&skipvalue[o], 9, "%T", gmtime(&s));
+			counter = 0;
+			skipurl = baseurl;
+			skipurl += "requests/status.xml?command=seek&val=";
+			skipurl += url_escape(skipvalue);
+			INFO("skipping URL(enc) : %s\n",skipurl.c_str());
+			DBG("BUFFERRESET!\n");
+			while (!bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
+				usleep(100000);
+			bufferfilled = false;
+//			int bytes = (ringbuffer_read_space(ringbuf) / 188) * 188;
+//			ringbuffer_read_advance(ringbuf, bytes);
+			ringbuffer_reset(ringbuf);
+			bufferreset = false;
+			INFO("BUFFERRESET done.\n");
+			httpres = sendGetRequest(skipurl, response);
+			/* OutputThread() sets g_playstate to SOFTRESET */
+			while (g_playstate == CMoviePlayerGui::SKIP)
+				usleep(100000);
+			break;
+		}
+		case CMoviePlayerGui::PAUSE:
+			// pause VLC
+			httpres = sendGetRequest(pauseurl, response);
+			while (g_playstate == CMoviePlayerGui::PAUSE)
+				usleep(100000); // no busy wait
+			// unpause VLC
+			httpres = sendGetRequest(unpauseurl, response);
+			break;
+		case CMoviePlayerGui::PLAY:
+			if (length == 0)
+				length = VlcGetStreamLength();
+			if (length != 0)
+			{
+				if (--counter < 0) // initialized to 0;
+				{
+					g_percent = (VlcGetStreamTime() * 100) / length;
+					counter = 119;
+				}
+			}
+			break;
+		default:
+			break;
 		}
 
 		ringbuffer_get_write_vector(ringbuf, &(vec[0]));
@@ -808,6 +865,12 @@ ReceiveStreamThread (void *mrl)
 				INFO("ReceiveStreamThread: found pida: 0x%04X pidv: 0x%04X ac3: %d\n",
 				      pida, pidv, g_currentac3);
 				avpids_found = true;
+				// Calculate diffrence between vlc time and play time
+				// The buffer is filled for the first time, ask vlc for his position
+				buffer_time = VlcGetStreamTime();
+				INFO("VLC buffer time: %d\n", buffer_time);
+				if (buffer_time < 0)
+					buffer_time = 0;
 			}
 			if (!bufferfilled)
 			{
@@ -827,8 +890,7 @@ ReceiveStreamThread (void *mrl)
 			{
 				perror("Error while polling()");
 				g_playstate = CMoviePlayerGui::STOPPED;
-				close(skt);
-				pthread_exit(NULL);
+				break;
 			}
 
 			if ((poller[0].revents & (POLLIN | POLLPRI)) != 0)
@@ -841,7 +903,7 @@ ReceiveStreamThread (void *mrl)
 				ringbuffer_write_advance(ringbuf, len);
 
 				nothingreceived = 0;
-				//printf ("[movieplayer.cpp] bytes received:%d\n", len);
+				DBG("bytes received:%d\n", len);
 				if (!avpids_found)
 					write (fd, vec[0].buf, len);
 			}
@@ -850,7 +912,8 @@ ReceiveStreamThread (void *mrl)
 				if (g_playstate == CMoviePlayerGui::PLAY)
 				{
 					nothingreceived++;
-					if (nothingreceived > (buffer_time + 3) * 100) // wait at least buffer time secs +3 to play buffer when stream ends
+fprintf(stderr,".");
+					if (nothingreceived > (buffer_time + 4) * 100) // wait at least buffer time secs +3 to play buffer when stream ends
 					{
 						printf("[movieplayer.cpp] ReceiveStreamthread: Didn't receive for a while. Stopping.\n");
 						g_playstate = CMoviePlayerGui::STOPPED;
@@ -860,7 +923,13 @@ ReceiveStreamThread (void *mrl)
 			}
 		}
 	}
+	// stop VLC
+	std::string stopurl = baseurl;
+	stopurl += "requests/status.xml?command=pl_stop";
+	httpres = sendGetRequest(stopurl, response);
 	close(skt);
+
+	remove("/tmp/tmpts");
 	INFO("ends now.\n");
 	pthread_exit(NULL);
 } // ReceiveStreamThread
@@ -883,7 +952,7 @@ ReadTSFileThread(void *parm)
 	int i;
 	ringbuffer_data_t vec[2];
 	
-	fPercent = 0;
+	g_percent = 0;
 	hintBox->hide(); // the "connecting to streaming server" hintbox
 
 	filesize = lseek(fd, 0, SEEK_END);
@@ -946,6 +1015,7 @@ ReadTSFileThread(void *parm)
 			INFO("PTS at file start: %d\n", g_startpts);
 
 		lastpts = g_startpts;
+		g_pts = g_startpts;
 		if (len % 188)
 		{
 			ringbuffer_reset(ringbuf); // not aligned anymore, so reset...
@@ -1018,7 +1088,7 @@ ReadTSFileThread(void *parm)
 				} else
 					printf(" not updated");
 				printf(" new: %lld, diff PTS:%5d diff_pos %lld, filepos: %d%%\n",
-					bytes_per_second, diff_pts, diff_pos, fPercent);
+					bytes_per_second, diff_pts, diff_pos, g_percent);
 				last = now;
 				// should not happen...
 				if (g_startpts == -1)
@@ -1128,7 +1198,7 @@ ReadTSFileThread(void *parm)
 		}
 
 		if (filesize)
-			fPercent = filepos * 100 / filesize;	// overflow? not with 64 bits...
+			g_percent = filepos * 100 / filesize;	// overflow? not with 64 bits...
 	}
 	close(fd);
 	INFO("ends now.\n");
@@ -1150,7 +1220,7 @@ ReadMPEGFileThread(void *parm)
 	off_t bytes_per_second = 500000;
 	off_t filesize;
 	off_t filepos = 0;
-	fPercent = 0;
+	g_percent = 0;
 	char *ppes;
 	char ts[188];
 	unsigned char acc = 0;		// continutiy counter for audio packets
@@ -1273,7 +1343,7 @@ ReadMPEGFileThread(void *parm)
 					bytes_per_second = (smooth * bytes_per_second + diff_bps) / (smooth + 1);
 				} else
 					printf(" not updated");
-				printf(" new: %lld, diff PTS:%5d diff_pos %lld, smooth %d %d%%\n", bytes_per_second, diff_pts, diff_pos, smooth, fPercent);
+				printf(" new: %lld, diff PTS:%5d diff_pos %lld, smooth %d %d%%\n", bytes_per_second, diff_pts, diff_pos, smooth, g_percent);
 				last = now;
 			}
 			break;
@@ -1619,7 +1689,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 		ringbuffer_read_advance(buf_in, pesPacketLen);
 
 		if (filesize)
-			fPercent = filepos * 100 / filesize;	// overflow? not with 64 bits...
+			g_percent = filepos * 100 / filesize;	// overflow? not with 64 bits...
 	}
 	close(fd);
 	ringbuffer_free(buf_in);
@@ -1634,9 +1704,7 @@ void *
 OutputThread (void *mrl)
 {
 	//-- lcd stuff --
-	int cPercent = 0;
-	int lPercent = -1;
-	CURLcode httpres;
+	int last_percent = -1;
 	struct dmx_pes_filter_params p;
 	ssize_t wr;
 	char buf[MAXREADSIZE];
@@ -1661,12 +1729,6 @@ OutputThread (void *mrl)
 	}
 
 	bufferingBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MOVIEPLAYER_BUFFERING));	// UTF-8
-
-	std::string baseurl = "http://";
-	baseurl += g_settings.streaming_server_ip;
-	baseurl += ':';
-	baseurl += g_settings.streaming_server_port;
-	baseurl += '/';
 
 	printf("[movieplayer.cpp] mrl:%s\n", (char *) mrl);
 
@@ -1710,16 +1772,10 @@ OutputThread (void *mrl)
 	g_playstate = CMoviePlayerGui::SOFTRESET;
 	printf("[movieplayer.cpp] read starting\n");
 	bool driverready = false;
-	std::string pauseurl = baseurl;
-	pauseurl += "requests/status.xml?command=pl_pause";
-	std::string unpauseurl = pauseurl;
-	std::string skipurl;
-	std::string response;
+	size_t readsize, len;
 
 	bool init = true;
 	checkAspectRatio(vdec, true);
-	int length = 0;
-	int counter = 120;
 
 	while (g_playstate > CMoviePlayerGui::STOPPED && !failed)
 	{
@@ -1731,10 +1787,6 @@ OutputThread (void *mrl)
 			      pida, pidv, g_currentac3);
 
 			g_playstate = CMoviePlayerGui::SOFTRESET;
-			// Calculate diffrence between vlc time and play time
-			// movieplayer is about to start playback so ask vlc for his position
-			if (remote && (buffer_time = VlcGetStreamTime()) < 0)
-				buffer_time = 0;
 		}
 
 		if (g_startposition > 0 && g_startpts != - 1)
@@ -1765,56 +1817,43 @@ OutputThread (void *mrl)
 		switch (g_playstate)
 		{
 			case CMoviePlayerGui::PAUSE:
+				ioctl(vdec, VIDEO_FREEZE);
+#if HAVE_DVB_API_VERSION >= 3
+				ioctl(adec, AUDIO_STOP);
 				ioctl(dmxa, DMX_STOP);
-				// pause VLC
-				if (remote)
-					httpres = sendGetRequest(pauseurl, response);
-
+#else
+				if (ioctl(adec, AUDIO_SET_AV_SYNC, 0UL))
+					perror("AUDIO_SET_AV_SYNC");
+				if (ioctl(adec, AUDIO_SET_MUTE, 1))
+					perror("AUDIO_SET_MUTE");
+#endif
 				while (g_playstate == CMoviePlayerGui::PAUSE)
 					usleep(100000); // no busy wait
-
-				// unpause VLC
-				if (remote)
-					httpres = sendGetRequest(unpauseurl, response);
+#if HAVE_DVB_API_VERSION >= 3
+				ioctl(vdec, VIDEO_STOP);
+				ioctl(dmxv, DMX_STOP);
+				ioctl(vdec, VIDEO_PLAY);
+				ioctl(adec, AUDIO_PLAY);
+				ioctl(dmxv, DMX_START);
+				ioctl(dmxa, DMX_START);
+#else
+				ioctl(vdec, VIDEO_CONTINUE);
+				if (ioctl(adec, AUDIO_SET_AV_SYNC, 1UL))
+					perror("AUDIO_SET_AV_SYNC");
+				if (ioctl(adec, AUDIO_SET_MUTE, 0))
+					perror("AUDIO_SET_MUTE");
+#endif
 				break;
 			case CMoviePlayerGui::SKIP:
-				if (remote)
+				INFO("requesting buffer reset\n");
+				bufferreset = true;
+				while (bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
 				{
-					char skipvalue[20];
-					time_t s = abs(skipseconds);
-					int o = 0;
-					if (!skipabsolute)
-					{
-						if (skipseconds < 0)
-							skipvalue[0] = '-';
-						else
-							skipvalue[0] = '+';
-						o = 1;
-					}
-					strftime(&skipvalue[o], 9, "%T", gmtime(&s));
-					counter = 0;
-					skipurl = baseurl;
-					skipurl += "requests/status.xml?command=seek&val=";
-					skipurl += url_escape(skipvalue);
-					printf("[movieplayer.cpp] skipping URL(enc) : %s\n",skipurl.c_str());
-					int bytes = (ringbuffer_read_space(ringbuf) / 188) * 188;
-					ringbuffer_read_advance(ringbuf, bytes);
-//					bufferingBox->paint();
-//					bufferfilled = false;
-					httpres = sendGetRequest(skipurl, response);
-				}
-				else
-				{
-					printf("[mp] requesting buffer reset\n");
-					bufferreset = true;
-					while (bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
-					{
-						INFO("WAITING FOR BUFFERRESET\n");
-						usleep(250000);
-					}
+					INFO("WAITING FOR BUFFERRESET\n");
+					usleep(250000);
 				}
 				g_playstate = CMoviePlayerGui::SOFTRESET;
-				printf("[mp] skipping end\n");
+				INFO("skipping end\n");
 				break;
 			case CMoviePlayerGui::RESYNC:
 				INFO("Resyncing\n");
@@ -1845,7 +1884,6 @@ OutputThread (void *mrl)
 					continue;
 				}
 
-				size_t readsize, len;
 				len = 0;
 				readsize = ringbuffer_read_space(ringbuf);
 				//fprintf(stderr, "XX readsize = %d MAX %d\n", readsize, MAXREADSIZE);
@@ -1896,30 +1934,10 @@ OutputThread (void *mrl)
 				init = false;
 
 				//-- lcd progress bar --
-				if (remote)
+				if (last_percent != g_percent)
 				{
-					if (length == 0)
-						length = VlcGetStreamLength();
-					if (length != 0)
-					{
-						if (counter == 0 || counter == 120)
-						{
-							cPercent = (VlcGetStreamTime() * 100) / length;
-							if (lPercent != cPercent)
-							{
-								lPercent = cPercent;
-								CLCD::getInstance()->showPercentOver(cPercent, true, CLCD::MODE_MOVIE);
-							}
-							counter = 119;
-						}
-						else
-							counter--;
-					}
-				}
-				else if (lPercent != fPercent)
-				{
-					lPercent = fPercent;
-					CLCD::getInstance()->showPercentOver(fPercent, true, CLCD::MODE_MOVIE);
+					last_percent = g_percent;
+					CLCD::getInstance()->showPercentOver(last_percent, true, CLCD::MODE_MOVIE);
 				}
 				break;
 			}
@@ -1975,11 +1993,6 @@ OutputThread (void *mrl)
 	ioctl(dmxa, DMX_STOP);
 	close_devices(__FUNCTION__);
 
-	// stop VLC
-	std::string stopurl = baseurl;
-	stopurl += "requests/status.xml?command=pl_stop";
-	if (remote)
-		httpres = sendGetRequest(stopurl, response);
 	// request reader termination
 	g_playstate = CMoviePlayerGui::STOPPED;
 
@@ -2128,15 +2141,17 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	bool update_info = true, start_play = false, exit = false;
 	bool open_filebrowser = true, cdDvd = false, aborted = false;
 	bool stream = true;
-	char mrl[200];
+	const char *mrl = "";
+	std::string mrl_str;
 	int selected = 0;
 	CTimeOSD StreamTime;
 	CFileList filelist;
 
 	if (streamtype == STREAMTYPE_DVD)
 	{
-		strcpy(mrl, "dvdsimple:");
-		strcat(mrl, g_settings.streaming_server_cddrive);
+		mrl_str = "dvdsimple:";
+		mrl_str += g_settings.streaming_server_cddrive;
+		mrl = mrl_str.c_str();
 		INFO("Generated MRL: %s\n", mrl);
 		sel_filename = "DVD";
 		open_filebrowser = false;
@@ -2145,8 +2160,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	}
 	else if (streamtype == STREAMTYPE_SVCD)
 	{
-		strcpy(mrl, "vcd:");
-		strcat(mrl, g_settings.streaming_server_cddrive);
+		mrl_str = "vcd:";
+		mrl_str += g_settings.streaming_server_cddrive;
+		mrl = mrl_str.c_str();
 		INFO("Generated MRL: %s\n", mrl);
 		sel_filename = "(S)VCD";
 		open_filebrowser = false;
@@ -2159,6 +2175,8 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		Path = Path_local;
 		stream = false;
 	}
+	else
+		INFO("strange streamtype? %d\n", streamtype);
 
 	g_apidchanged = false;
 	g_playstate = CMoviePlayerGui::STOPPED;
@@ -2187,13 +2205,12 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				if (stream)
 				{
 					int namepos = filelist[selected].Name.rfind("vlc://");
-					std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
-					char *tmp = curl_escape(mrl_str.c_str(), 0);
-					strncpy(mrl, tmp, sizeof(mrl) - 1);
-					curl_free(tmp);
+					mrl_str = filelist[selected].Name.substr(namepos + 6);
+					mrl_str = url_escape(mrl_str.c_str());
+					mrl = mrl_str.c_str();
 				}
 				else
-					strncpy(mrl, filename, sizeof(mrl) - 1);
+					mrl = filelist[selected].Name.c_str();
 				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 
 				update_info = true;
@@ -2223,10 +2240,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			isBookmark = false;
 			filename = startfilename.c_str();
 			int namepos = startfilename.rfind("vlc://");
-			std::string mrl_str = startfilename.substr(namepos + 6);
-			char *tmp = curl_escape(mrl_str.c_str(), 0);
-			strncpy(mrl, tmp, sizeof(mrl) - 1);
-			curl_free(tmp);
+			mrl_str = startfilename.substr(namepos + 6);
+			mrl_str = url_escape(mrl_str.c_str());
+			mrl = mrl_str.c_str();
 			printf("[movieplayer.cpp] Generated Bookmark FILE MRL: %s\n", mrl);
 			namepos = startfilename.rfind("/");
 			sel_filename = startfilename.substr(namepos + 1);
@@ -2278,13 +2294,12 @@ CMoviePlayerGui::PlayStream(int streamtype)
 					if (stream)
 					{
 						int namepos = filelist[0].Name.rfind("vlc://");
-						std::string mrl_str = filelist[0].Name.substr(namepos + 6);
-						char *tmp = curl_escape(mrl_str.c_str(), 0);
-						strncpy(mrl, tmp, sizeof(mrl) - 1);
-						curl_free(tmp);
+						mrl_str = filelist[0].Name.substr(namepos + 6);
+						mrl_str = url_escape(mrl_str.c_str());
+						mrl = mrl_str.c_str();
 					}
 					else
-						strncpy(mrl, filename, sizeof(mrl) - 1);
+						mrl = filelist[0].Name.c_str();
 					INFO("Generated FILE MRL: %s\n", mrl);
 
 					if (filelist.size() == 1 && !stream)
@@ -2465,14 +2480,15 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		else if (msg == CRCInput::RC_yellow)
 		{
 			update_info = true;
-			g_playstate = (g_playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::SOFTRESET : CMoviePlayerGui::PAUSE;
+			g_playstate = (g_playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::PLAY : CMoviePlayerGui::PAUSE;
 			if (stream) // stream time is only counting seconds...
 				StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_green)
 		{
 			if (g_playstate == CMoviePlayerGui::PLAY)
-				g_playstate = CMoviePlayerGui::RESYNC;
+				g_playstate = CMoviePlayerGui::SOFTRESET;
+				// g_playstate = CMoviePlayerGui::RESYNC;
 			if (stream)
 				StreamTime.hide();
 		}
@@ -2608,12 +2624,11 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				{
 					int namepos = filelist[selected].Name.rfind("vlc://");
 					std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
-					char *tmp = curl_escape(mrl_str.c_str(), 0);
-					strncpy(mrl, tmp, sizeof(mrl) - 1);
-					curl_free(tmp);
+					mrl_str = url_escape(mrl_str.c_str());
+					mrl = mrl_str.c_str();
 				}
 				else
-					strncpy(mrl, filename, sizeof(mrl) - 1);
+					mrl = filelist[selected].Name.c_str();
 				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 				update_info = true;
 				start_play = true;
@@ -2636,7 +2651,6 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			StreamTime.hide();
 	}
 	while (true);
-	remove("/tmp/tmpts");
 	INFO("waiting for rct\n");
 	pthread_join(rct, NULL);
 	INFO("ends here\n");
@@ -2708,7 +2722,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.8 $");
+	return imageinfo.getModulVersion("","$Revision: 1.9 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
@@ -2861,8 +2875,10 @@ std::string url_escape(const char *url)
 	return escaped;
 }
 
-size_t curl_dummywrite (void * /*ptr*/, size_t size, size_t nmemb, void * /*data*/)
+size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data)
 {
+	std::string* pStr = (std::string*) data;
+	*pStr += (char*) ptr;
 	return size * nmemb;
 }
 
