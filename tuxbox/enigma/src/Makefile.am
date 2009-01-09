@@ -51,7 +51,7 @@ enigma_LDADD = \
 	@GETTEXT_LIBS@ \
 	@VORBISIDEC_LIBS@ \
 	-ldl -lpthread -lcrypt -lresolv -ljpeg -lungif
-if WITH_SQLITE
+if ENABLE_SQLITE
 	-lsqlite3
 endif
 
