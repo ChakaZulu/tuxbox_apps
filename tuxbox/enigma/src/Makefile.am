@@ -51,6 +51,9 @@ enigma_LDADD = \
 	@GETTEXT_LIBS@ \
 	@VORBISIDEC_LIBS@ \
 	-ldl -lpthread -lcrypt -lresolv -ljpeg -lungif
+if WITH_SQLITE
+	-lsqlite3
+endif
 
 enigma$(EXEEXT): $(enigma_OBJECTS) $(enigma_DEPENDENCIES) $(enigma_LDADD_WHOLE)
 	@rm -f enigma$(EXEEXT)

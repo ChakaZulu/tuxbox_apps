@@ -68,6 +68,13 @@ AC_SUBST(ENIGMA_DEBUG)
 AM_CONDITIONAL(ENIGMA_DEBUG_NO,test "$ENIGMA_DEBUG" != "yes")
 AM_CONDITIONAL(ENIGMA_DEBUG_YES,test "$ENIGMA_DEBUG" = "yes")
 
+AC_ARG_WITH(sqlite,
+	[  --with-sqlite          enable sql storage (default off)],
+	[SQLITE="$withval"],[SQLITE="no"])
+
+AC_SUBST(SQLITE)
+AM_CONDITIONAL(WITH_SQLITE,test "$SQLITE" = "yes")
+
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 
@@ -123,6 +130,10 @@ fi
 
 if test "$ENIGMA_DEBUG" = "yes" ; then
 	CPPFLAGS="$CPPFLAGS -DDEBUG"
+fi
+
+if test "$SQLITE" = "yes" ; then
+	CPPFLAGS="$CPPFLAGS -WITH_SQLITE"
 fi
 
 if test "$BOXTYPE" = "dm56x0" ; then
