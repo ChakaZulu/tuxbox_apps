@@ -89,8 +89,15 @@ class CInfoViewer
 	CChannelEventList::iterator 	eli;
 	
 
+	void paintBackground(int col_Numbox);
 	void show_Data( bool calledFromEvent = false );
+	void display_Info(const char *current, const char *next, bool UTF8 = true,
+			  bool starttimes = true, const int pb_pos = -1,
+			  const char *runningStart = NULL, const char *runningRest = NULL,
+			  const char *nextStart = NULL, const char *nextDuration = NULL,
+			  bool update_current = true, bool update_next = true);
 	void paintTime( bool show_dot, bool firstPaint );
+	void infobarLoop(bool calledFromNumZap, bool fadeIn);
 	
 	void showButton_Audio();
 	void showButton_SubServices();
@@ -119,6 +126,8 @@ class CInfoViewer
 	void	start();
 	void showEpgInfo();
 	void	showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false, int epgpos = 0); // Channel must be UTF-8 encoded
+	void	showMovieTitle(const int playstate, const std::string &title, const std::string &sub_title,
+			       const int percent, const int ac3state, const int num_apids);
 	void	lookAheadEPG(const int ChanNum, const std::string & Channel, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false); //alpha: fix for nvod subchannel update
 	void	killTitle();
 	CSectionsdClient::CurrentNextInfo getEPG(const t_channel_id for_channel_id);
