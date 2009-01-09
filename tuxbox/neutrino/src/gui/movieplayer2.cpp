@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.9 2009/01/08 00:57:53 seife Exp $
+  $Id: movieplayer2.cpp,v 1.10 2009/01/09 21:27:32 seife Exp $
 
   License: GPL
 
@@ -106,7 +106,7 @@ extern "C" {
 
 #include <gui/movieplayer.h>
 #include <gui/timeosd.h>
-#include <gui/movieviewer.h>
+#include <gui/movieinfo.h>
 #include <gui/imageinfo.h>
 
 #include <gui/widget/icons.h>
@@ -2095,25 +2095,6 @@ void CMoviePlayerGui::ParentalEntrance(void)
 		PlayFile(1);
 	}
 }
-//=======================================
-//== CMoviePlayerGui::showMovieViewer      ==
-//=======================================
-void CMoviePlayerGui::showMovieViewer(void)
-{
-	uint aspect = 0;
-	CMovieViewer mv;
-	g_has_ac3 = 0;
-	for (unsigned int count = 0; count < g_numpida; count++)
-		if (g_ac3flags[count] == 1)
-			g_has_ac3 = 1;
-
-#if HAVE_DVB_API_VERSION >=3
-	aspect = (g_size.aspect_ratio == VIDEO_FORMAT_4_3)? 0:1;
-#endif // HAVE_DVB_API_VERSION >=3
-
-	mv.setData(aspect, g_playstate, g_currentac3, g_has_ac3, g_numpida, g_prozent, filename);
-	mv.exec();
-}
 
 //===============================
 //== CMoviePlayerGui::PlayFile ==
@@ -2137,7 +2118,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	neutrino_msg_data_t data;
 
 	std::string Path = Path_vlc;
-	std::string sel_filename;
+	std::string sel_filename, title;
 	bool update_info = true, start_play = false, exit = false;
 	bool open_filebrowser = true, cdDvd = false, aborted = false;
 	bool stream = true;
@@ -2146,6 +2127,8 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	int selected = 0;
 	CTimeOSD StreamTime;
 	CFileList filelist;
+	MI_MOVIE_INFO movieinfo;
+	bool movieinfo_valid = false;
 
 	if (streamtype == STREAMTYPE_DVD)
 	{
@@ -2343,8 +2326,15 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 		if (update_info)
 		{
+			CMovieInfo mi;
+			movieinfo.file.Name = filename;
+			movieinfo_valid = mi.loadMovieInfo(&movieinfo);
+			if (movieinfo_valid)
+				title = movieinfo.epgTitle;
+			else
+				title = sel_filename;
 			update_info = false;
-			updateLcd(sel_filename);
+			updateLcd(title);
 		}
 
 		if (start_play)
@@ -2448,6 +2438,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		}
 
 		g_RCInput->getMsg(&msg, &data, 10);	// 1 secs..
+		DBG("msg: 0x%08x\n", msg);
 
 		if (StreamTime.IsVisible())
 		{
@@ -2457,10 +2448,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				StreamTime.show(get_filetime());
 		}
 
-		if (msg == CRCInput::RC_red)
+		if (msg == CRCInput::RC_green)
 			g_showaudioselectdialog = true;
-		else
-		if (msg == CRCInput::RC_home || msg == CRCInput::RC_red)
+		else if (msg == CRCInput::RC_home)
 		{
 			if (g_playstate >= CMoviePlayerGui::PLAY)
 			{
@@ -2483,8 +2473,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			g_playstate = (g_playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::PLAY : CMoviePlayerGui::PAUSE;
 			if (stream) // stream time is only counting seconds...
 				StreamTime.hide();
+			g_RCInput->postMsg(NeutrinoMessages::SHOW_INFOBAR, data);
 		}
-		else if (msg == CRCInput::RC_green)
+		else if (msg == CRCInput::RC_red)
 		{
 			if (g_playstate == CMoviePlayerGui::PLAY)
 				g_playstate = CMoviePlayerGui::SOFTRESET;
@@ -2598,13 +2589,31 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				}
 			}
 		}
-		else if (msg == CRCInput::RC_help)
-			showHelpVLC();
-		else if (msg == CRCInput::RC_ok)
+		else if (msg == CRCInput::RC_help || msg == NeutrinoMessages::SHOW_INFOBAR)
 		{
-			if (stream) // TODO: local files
-				showFileInfoVLC();
+			std::string sub_title = "";
+			if (movieinfo_valid)
+			{
+				sub_title = movieinfo.epgInfo1;
+				if (sub_title.empty())
+					sub_title = sel_filename;
+			}
+			int ac3state = 0;
+			if (g_currentac3)
+				ac3state = 2;
+			else
+			{
+				for (int i = 0; i < g_numpida; i++)
+					if (g_ac3flags[i] == 1) // AC3
+					{
+						ac3state = 1;
+						break;
+					}
+			}
+			g_InfoViewer->showMovieTitle(g_playstate, title, sub_title, g_percent, ac3state, g_numpida);
 		}
+		else if (msg == CRCInput::RC_ok)
+			showHelpVLC();
 		else if (msg == CRCInput::RC_left || msg == CRCInput::RC_right)
 		{
 			if (msg == CRCInput::RC_left)
@@ -2643,6 +2652,16 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			// Exit for Record/Zapto Timers
 			exit = true;
 			g_RCInput->postMsg(msg, data);
+		}
+		else if (msg == NeutrinoMessages::SHOW_EPG)
+		{
+			if (stream)
+				showFileInfoVLC();
+			else if (movieinfo_valid)
+			{
+				CMovieInfo mi;
+				mi.showMovieInfo(movieinfo);
+			}
 		}
 		else if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 			exit = true;
@@ -2722,7 +2741,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.9 $");
+	return imageinfo.getModulVersion("","$Revision: 1.10 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
