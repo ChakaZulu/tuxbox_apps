@@ -81,6 +81,9 @@ TUXBOX_APPS_LIB_PKGCONFIG(SIGC,sigc++-1.2)
 TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
 TUXBOX_APPS_LIB_PKGCONFIG(TUXTXT,tuxbox-tuxtxt)
 TUXBOX_APPS_LIB_PKGCONFIG(VORBISIDEC,vorbisidec)
+if test "$enable_sqlite" = "yes" ; then
+	TUXBOX_APPS_LIB_PKGCONFIG(SQLITE,sqlite3)
+fi
 if test "$BOXTYPE" = "dbox2" ; then
 	TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 	TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
@@ -126,7 +129,7 @@ if test "$ENIGMA_DEBUG" = "yes" ; then
 fi
 
 if test "$SQLITE" = "yes" ; then
-	CPPFLAGS="$CPPFLAGS -WITH_SQLITE"
+	CPPFLAGS="$CPPFLAGS -DENABLE_SQLITE"
 fi
 
 if test "$BOXTYPE" = "dm56x0" ; then
