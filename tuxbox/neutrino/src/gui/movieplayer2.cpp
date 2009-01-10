@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.11 2009/01/10 19:21:50 seife Exp $
+  $Id: movieplayer2.cpp,v 1.12 2009/01/10 22:43:58 seife Exp $
 
   License: GPL
 
@@ -455,6 +455,7 @@ CURLcode sendGetRequest (const std::string & url, std::string & response)
 	CURLcode httpres;
 
 	curl = curl_easy_init();
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15); // "15 seconds should be enough for everyone"
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_dummywrite);
 	curl_easy_setopt(curl, CURLOPT_FILE, (void *)&response);
@@ -631,6 +632,7 @@ ReceiveStreamThread (void *mrl)
 	CURLcode httpres = sendGetRequest(statusurl, response);
 	if (httpres != 0)
 	{
+		hintBox->hide();
 		DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER));	// UTF-8
 		g_playstate = CMoviePlayerGui::STOPPED;
 		pthread_exit(NULL);
@@ -2763,7 +2765,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.11 $");
+	return imageinfo.getModulVersion("","$Revision: 1.12 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
