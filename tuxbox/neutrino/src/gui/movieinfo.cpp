@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.11 2009/01/10 00:20:47 seife Exp $
+	$Id: movieinfo.cpp,v 1.12 2009/01/10 18:45:20 seife Exp $
 
 	Kommentar:
 
@@ -831,6 +831,7 @@ bool CMovieInfo::parseInfoVDR(char* text, MI_MOVIE_INFO* movie_info)
 			tmp = convertVDRline(text, nl - text);
 			if (sscanf(tmp.c_str(), "%d %d %d %x %x", &epgid, &start, &length, &table, &ver) == 5)
 			{
+				movie_info->file.Time = start;	//ugly, but there is no other field for the recording date
 				movie_info->epgId = epgid;
 				movie_info->length = length / 60;
 			}
@@ -960,7 +961,7 @@ bool CMovieInfo::loadFile(CFile& file,char* buffer, int buffer_size)
 	{
 		result = loadFile_vlc(file, buffer,buffer_size);
 		if (result)
-			filetype = FT_VDR;
+			filetype = FT_VLC;
 	}
 	else
 	{
