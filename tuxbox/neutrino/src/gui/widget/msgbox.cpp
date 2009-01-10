@@ -41,9 +41,12 @@
 	Author: Gnther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
 
+	Copyright (C) 2009 Stefan Seyfried
+
 	Revision History:
 	Date		Author	Change Description
 	Nov 2005	Gnther	initial implementation
+	Jan 2009	seife	add the possibility to enlarge the font with "?"
 */
 
 #ifdef HAVE_CONFIG_H
@@ -628,7 +631,7 @@ void CMsgBox::refresh(void)
 // Return:		
 // Notes:		
 //////////////////////////////////////////////////////////////////////
-int CMsgBox::exec( int timeout, int returnDefaultOnTimeout)
+int CMsgBox::exec(int timeout, int returnDefaultOnTimeout, bool helpkey)
 {
 	//TRACE("->CMsgBox::exec\r\n");
 #ifdef VC
@@ -710,6 +713,11 @@ int CMsgBox::exec( int timeout, int returnDefaultOnTimeout)
 		}
 		else if(msg == CRCInput::RC_ok)
 		{
+			loop = false;
+		}
+		else if(msg == CRCInput::RC_help && helpkey)
+		{
+			res = -1; // whoever calls us with helpkey == true should check for returning -1...
 			loop = false;
 		}
 		else if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
@@ -839,8 +847,12 @@ int ShowMsg2UTF(	const char * const Title,
 					g_settings.screen_EndX - g_settings.screen_StartX-60,
 					g_settings.screen_EndY - g_settings.screen_StartY-60);
 	
+	int oldfontsize = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize();
+	bool bigfonts = false;
+	int ret, res;
+	do {
 	//TRACE("\r\n->ShowTextUTF %s\r\n",Text);
-	CMsgBox* msgBox = new CMsgBox(	Text,
+		CMsgBox* msgBox = new CMsgBox(	Text,
 					g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2],
 					mode,
 					&position,
@@ -850,11 +862,19 @@ int ShowMsg2UTF(	const char * const Title,
 					ShowButtons,
 					Default);
 
-	msgBox->exec( timeout, returnDefaultOnTimeout);
+		ret = msgBox->exec(timeout, returnDefaultOnTimeout, true);
+		res = msgBox->result();
 
-	int res = msgBox->result();
+		delete msgBox;
+		bigfonts = !bigfonts;
+		if (bigfonts)
+			g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize(oldfontsize * 15 / 10);
+		else
+			g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize(oldfontsize);
+	} while (ret == -1);
 
-	delete msgBox;
+	if (bigfonts)
+		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize(oldfontsize);
 	
 	return res;
 }

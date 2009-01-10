@@ -139,7 +139,7 @@ class CMsgBox
 		/* Functions */
 		bool    paint(void);
 		bool    hide(void);
-		int     exec(int timeout,int returnDefaultOnTimeout = false);
+		int     exec(int timeout,int returnDefaultOnTimeout = false, bool ret_on_helpkey = false);
 		void    refresh(void);
 		void    scrollPageDown(const int pages);
 		void    scrollPageUp(const int pages);
