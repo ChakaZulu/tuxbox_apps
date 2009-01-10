@@ -4,7 +4,7 @@
 
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: textbox.cpp,v 1.3 2009/01/10 01:43:34 seife Exp $
+	$Id: textbox.cpp,v 1.4 2009/01/10 18:13:39 seife Exp $
 
 	Kommentar: 
   
@@ -49,6 +49,10 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: textbox.cpp,v $
+	Revision 1.4  2009/01/10 18:13:39  seife
+	Make the scrollbar of the textbox consistent with the rest of neutrino
+	(width 15 pixels, rounded corners)
+	
 	Revision 1.3  2009/01/10 01:43:34  seife
 	Fix the textbox swallowing the last character, if it is not a newline.
 	
@@ -66,7 +70,7 @@
 #include <gui/widget/icons.h>
 
 #define	TEXT_BORDER_WIDTH			 8
-#define	SCROLL_FRAME_WIDTH			10
+#define	SCROLL_FRAME_WIDTH			15
 #define	SCROLL_MARKER_BORDER		 2
 
 #define MAX_WINDOW_WIDTH  (g_settings.screen_EndX - g_settings.screen_StartX - 40)
@@ -526,7 +530,8 @@ void CTextBox::refreshScroll(void)
 								m_cFrameScrollRel.iY + m_nCurrentPage * marker_size, 
 								m_cFrameScrollRel.iWidth - 2*SCROLL_MARKER_BORDER, 
 								marker_size, 
-								COL_MENUCONTENT_PLUS_3);
+								COL_MENUCONTENT_PLUS_3,
+								RADIUS_SMALL);
 	}
 	else
 	{
