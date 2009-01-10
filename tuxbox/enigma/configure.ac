@@ -68,6 +68,13 @@ AC_SUBST(ENIGMA_DEBUG)
 AM_CONDITIONAL(ENIGMA_DEBUG_NO,test "$ENIGMA_DEBUG" != "yes")
 AM_CONDITIONAL(ENIGMA_DEBUG_YES,test "$ENIGMA_DEBUG" = "yes")
 
+AC_ARG_ENABLE(sqlite,
+	[  --enable-sqlite          enable sql storage (default off)],
+	[SQLITE="$enableval"],[SQLITE="no"])
+
+AC_SUBST(SQLITE)
+AM_CONDITIONAL(ENABLE_SQLITE,test "$SQLITE" = "yes")
+
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 
