@@ -4,7 +4,7 @@
 
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: textbox.cpp,v 1.2 2006/02/20 01:10:36 guenther Exp $
+	$Id: textbox.cpp,v 1.3 2009/01/10 01:43:34 seife Exp $
 
 	Kommentar: 
   
@@ -49,6 +49,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: textbox.cpp,v $
+	Revision 1.3  2009/01/10 01:43:34  seife
+	Fix the textbox swallowing the last character, if it is not a newline.
+	
 	Revision 1.2  2006/02/20 01:10:36  guenther
 	- temporary parental lock updated - remove 1s debug prints in movieplayer- Delete file without rescan of movies- Crash if try to scroll in list with 2 movies only- UTF8XML to UTF8 conversion in preview- Last file selection recovered- use of standard folders adjustable in config- reload and remount option in config
 	
@@ -444,7 +447,8 @@ void CTextBox::refreshTextLineArray(void)
 					loop == false)
 				{
 					// current line ends with an carriage return, make new line
-					aktLine.erase(aktLine.size() - 1,1);
+					if (m_cText[pos] == '\n')
+						aktLine.erase(aktLine.size() - 1,1);
 					m_cLineArray.push_back(aktLine);
 					m_nNrOfLines++;
 					aktLine = "";
