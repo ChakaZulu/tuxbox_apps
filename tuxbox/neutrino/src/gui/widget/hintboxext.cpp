@@ -11,6 +11,7 @@
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 
+	Copyright (C) 2008, 2009 Stefan Seyfried
 
 	License: GPL
 
@@ -42,7 +43,7 @@
 
 #include <iostream>
 
-#define HINTBOXEXT_MAX_HEIGHT 420
+#define HINTBOXEXT_MAX_HEIGHT (h_max(576, (m_theight + m_fheight) + 20)) // 10 pixels space from top and bottom
 
 CHintBoxExt::CHintBoxExt(const neutrino_locale_t Caption, const char * const Text, const int Width, const char * const Icon)
 {
@@ -270,7 +271,7 @@ void CHintBoxExt::refresh(void)
 		yPos = m_theight;
 		m_window->paintBoxRel(m_width - 15, yPos, 15, (m_maxEntriesPerPage * m_fheight) + 16, COL_MENUCONTENT_PLUS_1);
 		unsigned int marker_size = ((m_maxEntriesPerPage * m_fheight) + 16) / m_pages;
-		m_window->paintBoxRel(m_width - 13, yPos + m_currentPage * marker_size, 11, marker_size, COL_MENUCONTENT_PLUS_3);
+		m_window->paintBoxRel(m_width - 13, yPos + m_currentPage * marker_size, 11, marker_size, COL_MENUCONTENT_PLUS_3, RADIUS_SMALL);
 	}
 }
 
