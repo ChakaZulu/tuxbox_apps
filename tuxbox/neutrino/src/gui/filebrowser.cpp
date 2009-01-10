@@ -510,6 +510,8 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 	CURLcode httpres;
 	/* init the curl session */
 	curl_handle = curl_easy_init();
+	/* timeout. 15 seconds should be enough */
+	curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 15);
 	/* specify URL to get */
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
 	/* send all data to this function  */
