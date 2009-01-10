@@ -166,6 +166,13 @@ typedef struct
 	int	 epgVTXPID;			// currently not used, we just do not want to loose this info if movie info is saved backed 
 }MI_MOVIE_INFO;
 
+typedef enum
+{
+	FT_UNKNOWN,
+	FT_TS,
+	FT_VLC,
+	FT_VDR
+} MI_FILETYPE;
 
 class CMovieInfo
 {
@@ -186,13 +193,16 @@ class CMovieInfo
 	private:// Functions
 		bool parseXmlTree (char* text, MI_MOVIE_INFO* movie_info);			// this is the 'good' function, but it needs the xmllib which is not currently linked within neutrino. Might be to slow as well. If used, add bookmark parsing
 		bool parseXmlQuickFix(char* text, MI_MOVIE_INFO* movie_info);		// OK, this is very quick an dirty. It does not waist execution time nor flash (this is QUICK). But, do not play to much with the xml files (e.g. with MS Notepad) since small changes in the structure could cause the parser to fail (this it DIRTY). 
+		bool parseInfoVDR(char* text, MI_MOVIE_INFO* movie_info);
 		bool loadFile_std(CFile& file,char* buffer, int buffer_size);
 		bool loadFile_vlc(CFile& file,char* buffer, int buffer_size);
 		bool loadFile(CFile& file,char* buffer, int buffer_size);
 		bool saveFile_std(const CFile& file, const char* text, const int text_size);
 		bool saveFile_vlc(const CFile& file, const char* text, const int text_sizet);
+		bool saveFile_vdr(const CFile& file, const char* text, const int text_size);
 		bool saveFile(const CFile& file, const char* text, const int text_size);
 	private:// variables
+		MI_FILETYPE filetype;
 };
 
 #endif /*MOVIEINFO_H_*/

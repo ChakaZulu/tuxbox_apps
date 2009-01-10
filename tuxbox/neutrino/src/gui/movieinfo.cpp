@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.10 2008/05/01 00:08:24 dbt Exp $
+	$Id: movieinfo.cpp,v 1.11 2009/01/10 00:20:47 seife Exp $
 
 	Kommentar:
 
@@ -39,7 +39,7 @@
 	Date:	  Nov 2005
 
 	Author: Günther@tuxbox.berlios.org
-
+	Copyright (C) 2009 Stefan Seyfried
 
 ****************************************************************************/			
 #ifdef HAVE_CONFIG_H
@@ -51,7 +51,7 @@
 #include <sys/types.h>
 #include <gui/widget/msgbox.h>
 #include <gui/movieinfo.h>
-
+#include <zapit/client/zapittools.h> /* ZapitTools::Latin1_to_UTF8 */
 #define TRACE printf
 #define VLC_URI "vlc://"
 
@@ -61,6 +61,7 @@
 CMovieInfo::CMovieInfo()
 {
 	//TRACE("[mi] new\r\n");
+	filetype = FT_UNKNOWN;
 }
 
 CMovieInfo::~CMovieInfo()
@@ -198,7 +199,7 @@ bool CMovieInfo::encodeMovieInfoXml(std::string* extMessage,MI_MOVIE_INFO &movie
 	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_PRODUCT_DATE,		movie_info.productionDate);
 	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_QUALITY,			movie_info.quality);
 	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_PARENTAL_LOCKAGE,	movie_info.parentalLockAge);
-	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_DATE_OF_LAST_PLAY,	movie_info.dateOfLastPlay);
+	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_DATE_OF_LAST_PLAY,	(unsigned int)movie_info.dateOfLastPlay);
 	*extMessage +=	"\t\t<"MI_XML_TAG_BOOKMARK">\n";
 	*extMessage +=	"\t";XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_BOOKMARK_START,	movie_info.bookmarks.start);
 	*extMessage +=	"\t";XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_BOOKMARK_END,		movie_info.bookmarks.end);
@@ -285,7 +286,20 @@ bool CMovieInfo::loadMovieInfo( MI_MOVIE_INFO* movie_info, CFile* file )
 	{
 		// if there is no give file, we use the file name from movie info but we have to convert the ts name to xml name first
 		file_xml.Name = movie_info->file.Name;
-		result = convertTs2XmlName(&file_xml.Name);
+		int pos = file_xml.Name.rfind(".vdr");
+		if (pos == (int)file_xml.Name.length() - 4)
+		{
+			file_xml.Name = movie_info->file.getPath() + "/info.vdr";
+			result = !access(file_xml.Name.c_str(), R_OK);
+			if (result)
+				filetype = FT_VDR;
+		}
+		else
+		{
+			result = convertTs2XmlName(&file_xml.Name);
+			if (result)
+				filetype = FT_TS;
+		}
 	}
 	else
 	{
@@ -295,16 +309,23 @@ bool CMovieInfo::loadMovieInfo( MI_MOVIE_INFO* movie_info, CFile* file )
 	if(result == true)
 	{
 		// load xml file in buffer
-	 	char text[6000];
-	 	result = loadFile(file_xml,text, 6000);
-	    if(result == true)  
-	    { 
+		char text[6000];
+		result = loadFile(file_xml,text, 6000);
+		if(result == true)  
+		{
+			if (filetype == FT_VDR)
+			{
+				result = parseInfoVDR(text, movie_info);
+			}
+			else
+			{
 #ifdef XMLTREE_LIB
-			a result = parseXmlTree (text, movie_info);
+				a result = parseXmlTree(text, movie_info);
 #else /* XMLTREE_LIB */
-			result = parseXmlQuickFix(text,movie_info);
+				result = parseXmlQuickFix(text, movie_info);
 #endif /* XMLTREE_LIB */
-	    } 
+			}
+		}
 	}
     if(movie_info->productionDate >50 && movie_info->productionDate <200)// backwardcompaibility
         movie_info->productionDate += 1900;
@@ -359,7 +380,7 @@ bool CMovieInfo::parseXmlTree (char* text, MI_MOVIE_INFO* movie_info)
 				XML_GET_DATA_INT	(xam1, MI_XML_TAG_ID,			movie_info->epgId);
 				XML_GET_DATA_STRING	(xam1, MI_XML_TAG_INFO1,		movie_info->epgInfo1);
 				XML_GET_DATA_STRING	(xam1, MI_XML_TAG_INFO2,		movie_info->epgInfo2);
-				XML_GET_DATA_INT	(xam1, MI_XML_TAG_EPGID,		movie_info->epgEpgId); // %llu
+				XML_GET_DATA_LONGLONG	(xam1, MI_XML_TAG_EPGID,		movie_info->epgEpgId); // %llu
 				XML_GET_DATA_INT	(xam1, MI_XML_TAG_MODE,			movie_info->epgMode);//%d
 				XML_GET_DATA_INT	(xam1, MI_XML_TAG_VIDEOPID,		movie_info->epgVideoPid);//%u
 
@@ -637,10 +658,9 @@ int find_next_char(char to_find,char* text,int start_pos, int end_pos)
 		_pos_ += sizeof(_tag_) ;\
 		int pos_prev = _pos_;\
 		while(_pos_ < bytes && _text_[_pos_] != '<' ) pos++;\
-		_dest_ = atol(&_text_[pos_prev]);\
+		_dest_ = atoll(&_text_[pos_prev]);\
 		continue;\
 	}
-#warning  _atoi64 not available use other funktion for EPGID (so far atol is used which is not correct at all)
 
  /************************************************************************
 
@@ -774,6 +794,71 @@ bool CMovieInfo::parseXmlQuickFix(char* text, MI_MOVIE_INFO* movie_info)
 	return(true);
 }
 
+static inline std::string convertVDRline(char *text, int len)
+{
+	std::string s;
+	s = ((std::string)text).substr(2, len - 2);
+	s = ZapitTools::Latin1_to_UTF8(s.c_str());
+	return s;
+}
+
+bool CMovieInfo::parseInfoVDR(char* text, MI_MOVIE_INFO* movie_info)
+{
+	movie_info->dateOfLastPlay = 0;//100*366*24*60*60; 		// (date, month, year)
+	char *nl = NULL;
+	int epgid, start, length, table, ver;
+	std::string tmp;
+
+	EPG_AUDIO_PIDS audio_pids;
+
+	while((nl = strchr(text, '\n')))
+	{
+		switch (*text)
+		{
+		case 'C':	// Channel ID
+		case 'V':	// VPS time?
+			break;
+		case 'T':	// Title
+			movie_info->epgTitle = convertVDRline(text, nl - text);
+			break;
+		case 'S':	// Short EPG
+			movie_info->epgInfo1 = convertVDRline(text, nl - text);
+			break;
+		case 'D':	// Long EPG
+			movie_info->epgInfo2 = convertVDRline(text, nl - text);
+			break;
+		case 'E':	// EPG ID, start time, duration
+			tmp = convertVDRline(text, nl - text);
+			if (sscanf(tmp.c_str(), "%d %d %d %x %x", &epgid, &start, &length, &table, &ver) == 5)
+			{
+				movie_info->epgId = epgid;
+				movie_info->length = length / 60;
+			}
+			else
+				printf("COULD NOT CONVERT VDR LINE: '%s'\n", tmp.c_str());
+			break;
+		case 'X':
+			if (*(text + 2) == '1')
+				movie_info->format = *(text + 5) - '1'; // 0 - 4:3, 2 - 16:9, not used anyway ATM.
+			/*
+			   No idea how to find out the audio PIDs, or how to map it to the audio streams...
+			   X 2 03 deu Stereo
+			   X 2 03 deu Stereo
+			   X 2 05 deu Dolby Digital 5.1
+			   X 1 03 deu Breitwand
+			 */
+			break;
+		default:
+			break;
+		}
+		text = nl + 1;
+		if (*text == 0)	// end of string
+			break;
+	}
+
+	return true;
+}
+
 /************************************************************************
 
 ************************************************************************/
@@ -874,6 +959,8 @@ bool CMovieInfo::loadFile(CFile& file,char* buffer, int buffer_size)
 	if (strncmp(file.getFileName().c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 	{
 		result = loadFile_vlc(file, buffer,buffer_size);
+		if (result)
+			filetype = FT_VDR;
 	}
 	else
 	{
@@ -899,6 +986,7 @@ bool CMovieInfo::loadFile_std(CFile& file,char* buffer, int buffer_size)
     int bytes = read(fd, buffer, buffer_size-1); 
     if(bytes <= 0) // cannot read file into buffer, return!!!! 
     { 
+		close(fd);
    		//TRACE( "[mi] !read:%s\r\n" ,file.getFileName().c_str() );
    		TRACE("#");
  		return(false); 
@@ -921,11 +1009,15 @@ bool CMovieInfo::loadFile_vlc(CFile& file,char* buffer, int buffer_size)
 bool CMovieInfo::saveFile(const CFile& file, const char* text, const int text_size)
 {
 	bool result = false;
-	if (strncmp(file.getFileName().c_str(), VLC_URI, strlen(VLC_URI)) == 0)
+	if (filetype == FT_VLC)
 	{
 		result = saveFile_vlc(file, text,text_size);
 	}
-	else
+	else if (filetype == FT_VDR)
+	{
+		result = saveFile_vdr(file, text, text_size);
+	}
+	else if (filetype == FT_TS)
 	{
 		result = saveFile_std(file, text,text_size);
 	}
@@ -957,6 +1049,11 @@ bool CMovieInfo::saveFile_vlc(const CFile& file,const char* text, const int text
 {
 	bool result = false;
 	return(result);
+}
+
+bool CMovieInfo::saveFile_vdr(const CFile& , const char* , const int)
+{
+	return false;
 }
 
 
