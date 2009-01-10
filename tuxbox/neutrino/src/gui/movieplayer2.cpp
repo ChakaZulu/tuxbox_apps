@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.10 2009/01/09 21:27:32 seife Exp $
+  $Id: movieplayer2.cpp,v 1.11 2009/01/10 19:21:50 seife Exp $
 
   License: GPL
 
@@ -42,7 +42,7 @@
   * MPEG1 like e.g. the "Warriors Of The Net" movie from
     http://ftp.sunet.se/pub/tv+movies/warriors/warriors-700-VBR.mpg
 
-  The VLC code should still work, but is not tested at all.
+  The VLC code does still work, as far as I could test.
 
   TODO:
   * the whole g_playstate state machine is too complicated and probably
@@ -53,11 +53,10 @@
   * MPEG1 parser
   * Test and fix AC3
   * the hintBox creation and deletion is fishy.
-  * GUI improvements (infobar...)
   * check if the CLCD->setMode(MODE_MOVIE) are all correct (and needed)
   * ...lots more... ;)
 
-  To build it, just copy it over to movieplayer.cpp and build.
+  To build it, configure with "--enable-movieplayer2":
   Enjoy.
  */
 
@@ -1079,16 +1078,16 @@ ReadTSFileThread(void *parm)
 				off_t diff_bps = diff_pos * 1000 / diff_pts;
 				lastpos = ptspos;
 				lastpts = g_pts;
-				printf("bytes p/s old: %lld", bytes_per_second);
+				// printf("bytes p/s old: %lld", bytes_per_second);
 				if (diff_bps > 0 && diff_pos > 0) // discontinuity, startup...
 				{
 					if (smooth < 8)
 						smooth++;
 					bytes_per_second = (smooth * bytes_per_second + diff_bps) / (smooth + 1);
-				} else
-					printf(" not updated");
-				printf(" new: %lld, diff PTS:%5d diff_pos %lld, filepos: %d%%\n",
-					bytes_per_second, diff_pts, diff_pos, g_percent);
+				}
+				// else printf(" not updated");
+				// printf(" new: %lld, diff PTS:%5d diff_pos %lld, filepos: %d%%\n",
+				// 	bytes_per_second, diff_pts, diff_pos, g_percent);
 				last = now;
 				// should not happen...
 				if (g_startpts == -1)
@@ -1335,15 +1334,16 @@ ReadMPEGFileThread(void *parm)
 				off_t diff_bps = diff_pos * 1000 / diff_pts;
 				lastpos = ptspos;
 				lastpts = g_pts;
-				printf("bytes p/s old: %lld", bytes_per_second);
+				// printf("bytes p/s old: %lld", bytes_per_second);
 				if (diff_bps > 0 && diff_pos > 0) // discontinuity, startup...
 				{
 					if (smooth < 8)
 						smooth++;
 					bytes_per_second = (smooth * bytes_per_second + diff_bps) / (smooth + 1);
-				} else
-					printf(" not updated");
-				printf(" new: %lld, diff PTS:%5d diff_pos %lld, smooth %d %d%%\n", bytes_per_second, diff_pts, diff_pos, smooth, g_percent);
+				}
+				// else printf(" not updated");
+				// printf(" new: %lld, diff PTS:%5d diff_pos %lld, smooth %d %d%%\n",
+				//	 bytes_per_second, diff_pts, diff_pos, smooth, g_percent);
 				last = now;
 			}
 			break;
@@ -1730,7 +1730,7 @@ OutputThread (void *mrl)
 
 	bufferingBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MOVIEPLAYER_BUFFERING));	// UTF-8
 
-	printf("[movieplayer.cpp] mrl:%s\n", (char *) mrl);
+	INFO("mrl:%s\n", (char *) mrl);
 
 	pthread_t rcvt;	// the input / "receive" thread
 	if (remote)
@@ -1770,7 +1770,6 @@ OutputThread (void *mrl)
 	}
 
 	g_playstate = CMoviePlayerGui::SOFTRESET;
-	printf("[movieplayer.cpp] read starting\n");
 	bool driverready = false;
 	size_t readsize, len;
 
@@ -2010,7 +2009,7 @@ OutputThread (void *mrl)
 
 //== updateLcd ==
 //===============
-void updateLcd(const std::string & sel_filename)
+void updateLcd(const std::string &s)
 {
 	static int  l_playstate = -1;
 	std::string lcd;
@@ -2021,15 +2020,13 @@ void updateLcd(const std::string & sel_filename)
 	switch (g_playstate)
 	{
 	case CMoviePlayerGui::PAUSE:
-		lcd = "|| (";
-		lcd += sel_filename;
-		lcd += ')';
+		lcd = "|| ";
 		break;
 	default:
 		lcd = "> ";
-		lcd += sel_filename;
 		break;
 	}
+	lcd += s;
 	StrSearchReplace(lcd,"_", " ");
 	CLCD::getInstance()->setMovieInfo("", lcd);
 }
@@ -2117,7 +2114,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
-	std::string Path = Path_vlc;
+	static std::string Path = Path_vlc;
 	std::string sel_filename, title;
 	bool update_info = true, start_play = false, exit = false;
 	bool open_filebrowser = true, cdDvd = false, aborted = false;
@@ -2132,8 +2129,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 	if (streamtype == STREAMTYPE_DVD)
 	{
-		mrl_str = "dvdsimple:";
+		mrl_str = "dvd://";
 		mrl_str += g_settings.streaming_server_cddrive;
+		mrl_str += "@1";
 		mrl = mrl_str.c_str();
 		INFO("Generated MRL: %s\n", mrl);
 		sel_filename = "DVD";
@@ -2152,10 +2150,22 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		start_play = true;
 		cdDvd = true;
 	}
+	else if (streamtype == STREAMTYPE_FILE) // "file via VLC"
+	{
+		if (Path.find("vlc://") != 0)
+		{
+			INFO("old path was not vlc, setting to vlc\n");
+			Path = Path_vlc;
+		}
+	}
 	else if (streamtype == STREAMTYPE_LOCAL)
 	{
 		INFO("STREAMTYPE_LOCAL\n");
-		Path = Path_local;
+		if (Path.find("vlc://") == 0)
+		{
+			INFO("old path was vlc, setting to local\n");
+			Path = Path_local;
+		}
 		stream = false;
 	}
 	else
@@ -2194,7 +2204,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				}
 				else
 					mrl = filelist[selected].Name.c_str();
-				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
+				INFO ("Generated FILE MRL: %s\n", mrl);
 
 				update_info = true;
 				start_play = true;
@@ -2226,7 +2236,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			mrl_str = startfilename.substr(namepos + 6);
 			mrl_str = url_escape(mrl_str.c_str());
 			mrl = mrl_str.c_str();
-			printf("[movieplayer.cpp] Generated Bookmark FILE MRL: %s\n", mrl);
+			INFO("Generated Bookmark FILE MRL: %s\n", mrl);
 			namepos = startfilename.rfind("/");
 			sel_filename = startfilename.substr(namepos + 1);
 			update_info = true;
@@ -2327,12 +2337,15 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		if (update_info)
 		{
 			CMovieInfo mi;
-			movieinfo.file.Name = filename;
-			movieinfo_valid = mi.loadMovieInfo(&movieinfo);
-			if (movieinfo_valid)
-				title = movieinfo.epgTitle;
-			else
-				title = sel_filename;
+			mi.clearMovieInfo(&movieinfo);
+			title = sel_filename;
+			if (!cdDvd)
+			{
+				movieinfo.file.Name = filename;
+				movieinfo_valid = mi.loadMovieInfo(&movieinfo);
+				if (movieinfo_valid)
+					title = movieinfo.epgTitle;
+			}
 			update_info = false;
 			updateLcd(title);
 		}
@@ -2369,7 +2382,16 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 #ifndef AUDIO_STREAM_AUTOSELECT
 		if (bufferfilled && g_currentapid == -1)
-			g_showaudioselectdialog = true;
+		{
+			if (g_numpida == 1)	// if there is only one audio stream...
+			{			// ...we can as well just use that.
+				g_currentapid = g_apids[0];
+				g_currentac3 = g_ac3flags[0];
+				g_apidchanged = true;
+			}
+			else
+				g_showaudioselectdialog = true;
+		}
 #endif
 
 		if (g_showaudioselectdialog)
@@ -2741,15 +2763,16 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.10 $");
+	return imageinfo.getModulVersion("","$Revision: 1.11 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
 {
 	std::string version = "Movieplayer2 Version: " + getMoviePlayerVersion();
 	Helpbox helpbox;
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP1));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_GREEN, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP2));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP1));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP2));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_GREEN, g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_YELLOW, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP3));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP4));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DBOX, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP5));
@@ -2762,8 +2785,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP13));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_RIGHT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP15));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
-// 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_DBOX, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
 	helpbox.addLine(version);
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
