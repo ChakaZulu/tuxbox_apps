@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.12 2009/01/10 22:43:58 seife Exp $
+  $Id: movieplayer2.cpp,v 1.13 2009/01/11 11:42:28 seife Exp $
 
   License: GPL
 
@@ -179,7 +179,8 @@ int dmxa = -1 , dmxv = -1, dvr = -1, adec = -1, vdec = -1;
 static CMoviePlayerGui::state g_playstate;
 // the input thread requests skipping (e.g. for retrying)
 static bool g_skiprequest = false;
-//static bool g_EOF;
+// input thread signals end-of-file
+static bool g_EOF;
 
 static off_t g_startposition = 0L;
 // 32 MPEG audio streams + 8 AC3 streams, theoretically.
@@ -941,6 +942,7 @@ ReadTSFileThread(void *parm)
 	/* reads a TS file into *ringbuf */
 	char *fn = (char *)parm;
 	int fd = open(fn, O_RDONLY);
+	g_EOF = false;
 	INFO("start, filename = '%s', fd = %d\n", fn, fd);
 	ssize_t len;
 	size_t readsize;
@@ -1189,6 +1191,7 @@ ReadTSFileThread(void *parm)
 					perror("ReadTSFileThread read");
 				INFO("error or EOF => exiting\n");
 				failed = true;
+				g_EOF = true; // does not matter if EOF or read error...
 				break;
 			}
 			done += len;
@@ -1215,6 +1218,7 @@ ReadMPEGFileThread(void *parm)
 	 */
 	char *fn = (char *)parm;
 	int fd = open(fn, O_RDONLY);
+	g_EOF = false;
 	INFO("start, filename = '%s', fd = %d\n", fn, fd);
 	int len, size;
 	size_t rd;
@@ -1425,6 +1429,8 @@ ReadMPEGFileThread(void *parm)
 			filepos += len;
 			if (len && input_empty)
 				continue;
+			if (!len)
+				g_EOF = true;
 		}
 		input_empty = false;
 #endif
@@ -1896,6 +1902,8 @@ OutputThread (void *mrl)
 				len = ringbuffer_read(ringbuf, buf, readsize); // readsize is n*188
 				if (len < MINREADSIZE)
 				{
+					if (g_EOF && len == 0) // end of file and buffer empty...
+						g_playstate = CMoviePlayerGui::STOPPED;
 					ioctl(dmxa, DMX_STOP);
 					INFO("len: %d, buffering...\n", len);
 					/*
@@ -2128,6 +2136,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	CFileList filelist;
 	MI_MOVIE_INFO movieinfo;
 	bool movieinfo_valid = false;
+	int last_apid = -1; // for auto-playlists...
 
 	if (streamtype == STREAMTYPE_DVD)
 	{
@@ -2193,6 +2202,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		{
 			if (selected + 1 < (int)filelist.size() && !aborted)
 			{
+				last_apid = g_currentapid;
 				selected++;
 				filename = filelist[selected].Name.c_str();
 				sel_filename = filelist[selected].getFileName();
@@ -2283,6 +2293,17 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 				if (!filelist.empty())
 				{
+					/* ugly hack */
+					if (filelist.size() == 1)
+					{
+						if (filelist[0].getFileName() == "info.vdr" ||
+						    filelist[0].getFileName() == "index.vdr")
+						{
+							std::string fn = filelist[0].getPath() + "001.vdr";
+							if (!access(fn.c_str(), R_OK)) // file does exist
+								filelist[0].Name = fn;
+						}
+					}
 					filename = filelist[0].Name.c_str();
 					sel_filename = filelist[0].getFileName();
 					INFO("sel_filename: %s\n", filename);
@@ -2391,7 +2412,21 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				g_currentac3 = g_ac3flags[0];
 				g_apidchanged = true;
 			}
-			else
+			else if (last_apid != -1)
+			{
+				// check if the last apid is still present...
+				for (int i = 0; i < g_numpida; i++)
+				{
+					if (g_apids[i] == last_apid)
+					{
+						g_currentapid = g_apids[i];
+						g_currentac3 = g_ac3flags[i];
+						g_apidchanged = true;
+						break;
+					}
+				}
+			}
+			if (g_currentapid == -1) // not automatically determined -> ask user
 				g_showaudioselectdialog = true;
 		}
 #endif
@@ -2765,7 +2800,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.12 $");
+	return imageinfo.getModulVersion("","$Revision: 1.13 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
