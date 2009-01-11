@@ -91,6 +91,7 @@ TUXBOX_APPS_LIB_PKGCONFIG(VORBISIDEC,vorbisidec)
 if test "$enable_sqlite" = "yes" ; then
 	TUXBOX_APPS_LIB_PKGCONFIG(SQLITE,sqlite3)
 fi
+TUXBOX_APPS_LIB_PKGCONFIG(FRIBIDI,fribidi)
 
 if test "$BOXTYPE" = "dbox2" ; then
 	TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
