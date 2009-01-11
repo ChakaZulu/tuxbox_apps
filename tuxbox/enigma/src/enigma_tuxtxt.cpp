@@ -608,8 +608,8 @@ eTuxtxtWidget::eTuxtxtWidget()
 	addActionToHelpList(i_shortcutActions->number0.setDescription(_("show previously selected page")));
 	addActionToHelpList(i_shortcutActions->number9.setDescription(_("go to next favourite page")));
 
-	gethotlist();
 	tuxtxt_cache.vtxtpid = Decoder::current.tpid;
+	gethotlist();
 }
 eTuxtxtWidget::~eTuxtxtWidget()
 {
@@ -1017,14 +1017,17 @@ void eTuxtxtWidget::ConfigMenu()
 	oldscreenmode = renderinfo.screenmode;
 	if (renderinfo.screenmode)
 		tuxtxt_SwitchScreenMode(&renderinfo,0); /* turn off divided screen */
+	int tpid = tuxtxt_cache.vtxtpid;
 	lock.unlock();
 	hide();
 	eTuxtxtSetup wnd(&renderinfo,&hotlist);
 	wnd.show();
 	int res = wnd.exec();
 	wnd.hide();
-	if (res)
+	if (res >= 0)
 		gethotlist();
+	else
+		tuxtxt_cache.vtxtpid = tpid;
 
 	show();
 	if (oldscreenmode)
