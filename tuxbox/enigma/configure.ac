@@ -91,12 +91,7 @@ TUXBOX_APPS_LIB_PKGCONFIG(VORBISIDEC,vorbisidec)
 if test "$enable_sqlite" = "yes" ; then
 	TUXBOX_APPS_LIB_PKGCONFIG(SQLITE,sqlite3)
 fi
-TUXBOX_APPS_LIB_PKGCONFIG(FRIBIDI,fribidi)
-if test -n "FRIBIDI_CFLAGS" ; then
-AC_DEFINE(HAVE_FRIBIDI,1,[Define to 1 if libfribidi is available])
-else
-AC_MSG_NOTICE([libfribidi not available, no RTL support available]);
-fi
+
 if test "$BOXTYPE" = "dbox2" ; then
 	TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 	TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
