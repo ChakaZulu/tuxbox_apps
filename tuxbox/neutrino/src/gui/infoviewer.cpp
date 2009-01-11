@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.243 2009/01/09 21:08:07 seife Exp $
+	$Id: infoviewer.cpp,v 1.244 2009/01/11 22:18:41 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -640,6 +640,7 @@ void CInfoViewer::infobarLoop(bool calledFromNumZap, bool fadeIn)
 
 	if ( !calledFromNumZap )
 	{
+		bool tsmode = (neutrino->getMode() == NeutrinoMessages::mode_ts);
 		bool show_dot= true;
 		if ( fadeIn )
 			fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
@@ -737,7 +738,7 @@ requests to sectionsd.
 				 msg == CRCInput::RC_0 ||
 				 msg == NeutrinoMessages::SHOW_INFOBAR)
 			{
-				hideIt = false;
+				hideIt = tsmode; // in movieplayer mode, hide infobar
 				g_RCInput->postMsg( msg, data );
 				res = messages_return::cancel_info;
 			}
@@ -745,9 +746,12 @@ requests to sectionsd.
 			{
 				// Handle anyway!
 				neutrino->handleMsg(msg, data);
-				g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
-				hideIt = false;
-				res = messages_return::cancel_all;
+				if (!tsmode)
+				{
+					g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
+					hideIt = false;
+					res = messages_return::cancel_all;
+				}
 			}
 			else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == sec_timer_id ) )
 			{
@@ -755,7 +759,8 @@ requests to sectionsd.
 				showRecordIcon(show_dot);
 				show_dot = !show_dot;
 			}
-			else if ( g_settings.virtual_zap_mode && ((msg == CRCInput::RC_right) || msg == CRCInput::RC_left ))
+			else if (!tsmode && g_settings.virtual_zap_mode &&
+				 (msg == CRCInput::RC_right || msg == CRCInput::RC_left))
 			{
 				virtual_zap_mode = true;
 				res = messages_return::cancel_all;
