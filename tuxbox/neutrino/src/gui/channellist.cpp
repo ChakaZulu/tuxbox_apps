@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.204 2009/01/08 18:23:39 seife Exp $
+	$Id: channellist.cpp,v 1.205 2009/01/12 20:35:38 houdini Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -1274,7 +1274,7 @@ struct button_label CChannelListButtons[] =
 	{ NEUTRINO_ICON_BUTTON_RED, LOCALE_INFOVIEWER_EVENTLIST},
 	{ NEUTRINO_ICON_BUTTON_BLUE, LOCALE_INFOVIEWER_NEXT},
 	{ NEUTRINO_ICON_BUTTON_HELP_SMALL, LOCALE_EPGMENU_EVENTINFO},
-	{ "", } // icon for bouquet list button
+	{ "", LOCALE_GENERIC_EMPTY } // icon for bouquet list button
 };
 
 void CChannelList::paintFoot()
