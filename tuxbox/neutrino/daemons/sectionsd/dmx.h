@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.14 2008/11/30 19:54:59 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.15 2009/01/15 09:31:39 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -25,6 +25,8 @@
 #define __sectionsd__dmx_h__
 
 #include <pthread.h>
+#include <stdint.h>
+#include <sys/types.h>
 #include <vector>
 
 typedef uint64_t sections_id_t;

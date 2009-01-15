@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.13 2006/02/08 21:15:50 houdini Exp $
+// $Id: SIservices.hpp,v 1.14 2009/01/15 09:31:38 seife Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -27,6 +27,7 @@
 
 
 #include <algorithm>
+#include <cstring> // memset
 #include <endian.h>
 
 #include <sectionsdclient/sectionsdMsg.h>

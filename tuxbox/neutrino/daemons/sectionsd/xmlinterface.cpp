@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/Attic/xmlinterface.cpp,v 1.1 2005/11/20 15:11:40 mogway Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/Attic/xmlinterface.cpp,v 1.2 2009/01/15 09:31:39 seife Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -22,7 +22,7 @@
  */
 
 #include <cstdio>
-
+#include <cstdlib>
 #include <zapit/debug.h>
 #include <zapit/xmlinterface.h>
 

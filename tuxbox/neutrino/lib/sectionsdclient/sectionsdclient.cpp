@@ -1,7 +1,7 @@
 /*
   Client-Interface fuer sectionsd  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.61 2008/10/11 21:39:21 seife Exp $
+  $Id: sectionsdclient.cpp,v 1.62 2009/01/15 09:31:45 seife Exp $
 
   License: GPL
 
@@ -21,7 +21,8 @@
 
 */
 
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
 
 #include <eventserver.h>
 
@@ -448,6 +449,7 @@ bool CSectionsdClient::getEventsServiceKeySearchAdd(CChannelEventList& eList,con
 
 		if( nBufSize > 0)
 		{
+			char* dp;
 			char* pData = new char[nBufSize];
 			if (!receive_data(pData, nBufSize))
 			{
@@ -455,7 +457,7 @@ bool CSectionsdClient::getEventsServiceKeySearchAdd(CChannelEventList& eList,con
 				goto out_pData;
 			}
 
-			char* dp = pData;
+			dp = pData;
 
 //			int a = eList.size();
 

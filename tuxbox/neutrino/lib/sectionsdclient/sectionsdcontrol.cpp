@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.7 2008/11/28 22:15:37 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.8 2009/01/15 09:31:45 seife Exp $
  *
  * Sectionsd command line interface - The Tuxbox Project
  *
@@ -23,6 +23,7 @@
  *
  */
 
+#include <cstring>
 #include <sectionsdclient/sectionsdclient.h>
 
 CSectionsdClient client;

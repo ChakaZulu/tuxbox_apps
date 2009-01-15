@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.282 2009/01/01 22:19:16 seife Exp $
+//  $Id: sectionsd.cpp,v 1.283 2009/01/15 09:31:39 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -55,6 +55,7 @@
 #include <map>
 #include <algorithm>
 #include <string>
+#include <limits>
 
 #include <sys/wait.h>
 #include <sys/time.h>
@@ -2244,6 +2245,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 {
 #define MAX_SIZE_EVENTLIST	64*1024
 	char *evtList = new char[MAX_SIZE_EVENTLIST]; // 64kb should be enough and dataLength is unsigned short
+	char *liste;
 	long count=0;
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
@@ -2257,7 +2259,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 	dprintf("sendAllEvents for " PRINTF_CHANNEL_ID_TYPE "\n", serviceUniqueKey);
 	*evtList = 0;
-	char *liste = evtList;
+	liste = evtList;
 
 	if (serviceUniqueKey != 0)
 	{
@@ -2460,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.282 2009/01/01 22:19:16 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.283 2009/01/15 09:31:39 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2603,7 +2605,8 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
-	char* pResultData = 0;
+	char *pResultData = 0;
+	char *p;
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
 	MySIeventsOrderUniqueKey::iterator eFirst;
@@ -2646,7 +2649,7 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 		goto out;
 	}
 
-	char *p = pResultData;
+	p = pResultData;
 
 	if (eFirst != mySIeventsOrderUniqueKey.end())
 	{
@@ -2694,16 +2697,18 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
-	char* pResultData = 0;
+	char *pResultData = 0;
+	char *p;
 	MySIeventsOrderUniqueKey::iterator eFirst;
 	int countDescs = 0;
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
+	event_id_t uniqueKey;
 
 	if (dataLength != 8)
 		goto out;
 
-	event_id_t uniqueKey = *(event_id_t *)data;
+	uniqueKey = *(event_id_t *)data;
 
 	dprintf("Request of LinkageDescriptors for 0x%llx\n", uniqueKey);
 
@@ -2743,7 +2748,7 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 		goto out;
 	}
 
-	char *p = pResultData;
+	p = pResultData;
 
 	*((int *)p) = countDescs;
 	p += sizeof(int);
@@ -2828,15 +2833,15 @@ static t_transponder_id messaging_sdt_tid[MAX_SDTs];							// 0x42,0x46
 
 static void commandserviceChanged(int connfd, char *data, const unsigned dataLength)
 {
+	t_channel_id *uniqueServiceKey;
 	if (dataLength != sizeof(sectionsd::commandSetServiceChanged))
 		goto out;
 
-	t_channel_id * uniqueServiceKey = &(((sectionsd::commandSetServiceChanged *)data)->channel_id);
+	uniqueServiceKey = &(((sectionsd::commandSetServiceChanged *)data)->channel_id);
 
 	dprintf("[sectionsd] commandserviceChanged: Service changed to " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
 
-	time_t zeit = time(NULL);
-	messaging_last_requested = zeit;
+	messaging_last_requested = time(NULL);
 
 	if(checkBlacklist(*uniqueServiceKey))
 	{
@@ -2927,6 +2932,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 {
 	int nResultDataSize = 0;
 	char* pResultData = 0;
+	char* p;
 	SIevent currentEvt;
 	SIevent nextEvt;
 	unsigned flag = 0, flag2=0;
@@ -2934,10 +2940,10 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	bool change = false;
 	struct sectionsd::msgResponseHeader pmResponse;
 
+	t_channel_id * uniqueServiceKey = (t_channel_id *)data;
+
 	if (dataLength != sizeof(t_channel_id))
 		goto out;
-
-	t_channel_id * uniqueServiceKey = (t_channel_id *)data;
 
 	dprintf("[sectionsd] Request of current/next information for " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
 
@@ -3090,6 +3096,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	    ;
 
 	pResultData = new char[nResultDataSize];
+	time_t now;
 
 	if (!pResultData)
 	{
@@ -3105,7 +3112,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 
 	CSectionsdClient::sectionsdTime time_cur;
 	CSectionsdClient::sectionsdTime time_nxt;
-	time_t now = time(NULL);
+	now = time(NULL);
 	time_cur.startzeit = currentEvt.times.begin()->startzeit;
 	time_cur.dauer = currentEvt.times.begin()->dauer;
 	time_nxt.startzeit = nextEvt.times.begin()->startzeit;
@@ -3131,7 +3138,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		}
 	}
 
-	char *p = pResultData;
+	p = pResultData;
 	*((event_id_t *)p) = currentEvt.uniqueKey();
 	p += sizeof(event_id_t);
 	*((CSectionsdClient::sectionsdTime *)p) = time_cur;
@@ -3544,6 +3551,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 #define MAX_SIZE_BIGEVENTLIST	128*1024
 
 	char *evtList = new char[MAX_SIZE_BIGEVENTLIST]; // 128k mssen reichen... schaut euch mal das Ergebnis fr loop an, jedesmal wenn die Senderliste aufgerufen wird
+	char *liste;
 	long count=0;
 	t_channel_id uniqueNow = 0;
 	t_channel_id uniqueOld = 0;
@@ -3560,8 +3568,8 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	}
 
 	*evtList = 0;
+	liste = evtList;
 
-	char *liste = evtList;
 	readLockEvents();
 
 	/* !!! FIX ME: if the box starts on a channel where there is no EPG sent, it hangs!!!	*/
@@ -3906,11 +3914,12 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 	char *msgData = 0;
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
+	t_channel_id uniqueServiceKey;
 
 	if (dataLength != sizeof(t_channel_id))
 		goto out;
 
-	t_channel_id uniqueServiceKey = *(t_channel_id *)data;
+	uniqueServiceKey = *(t_channel_id *)data;
 
 	dprintf("Request of NVOD times for " PRINTF_CHANNEL_ID_TYPE "\n", uniqueServiceKey);
 
@@ -6169,7 +6178,7 @@ static void *nitThread(void *)
 			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
 							((SI_section_header*)buf)->section_length_lo;
 			// copy the header
-			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
+			memcpy(&header, buf, std::min((size_t)section_length + 3, sizeof(header)));
 
 			if (header.current_next_indicator)
 			{
@@ -6394,7 +6403,7 @@ static void *sdtThread(void *)
 			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
 							((SI_section_header*)buf)->section_length_lo;
 			// copy the header
-			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
+			memcpy(&header, buf, std::min((size_t)section_length + 3, sizeof(header)));
 
 			if (header.current_next_indicator)
 			{
@@ -7050,7 +7059,7 @@ static void *eitThread(void *)
 							((SI_section_header*)buf)->section_length_lo;
 
 			// copy the header
-			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
+			memcpy(&header, buf, std::min((size_t)section_length + 3, sizeof(header)));
 
 			if (header.current_next_indicator)
 			{
@@ -7564,7 +7573,7 @@ static void *pptThread(void *)
 							((SI_section_header*)buf)->section_length_lo;
 
 			// copy the header
-			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
+			memcpy(&header, buf, std::min((size_t)section_length + 3, sizeof(header)));
 
 			if (header.current_next_indicator)
 			{
@@ -8065,7 +8074,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.282 2009/01/01 22:19:16 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.283 2009/01/15 09:31:39 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 

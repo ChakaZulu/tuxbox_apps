@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.62 2008/12/25 16:20:22 houdini Exp $
+	$Id: timerd.cpp,v 1.63 2009/01/15 09:31:41 seife Exp $
 
 	License: GPL
 
@@ -28,6 +28,7 @@
 #include <sstream>
 #include <signal.h>
 #include <unistd.h> /* fork */
+#include <cstdlib>
 
 #include <timermanager.h>
 #include <debug.h>
