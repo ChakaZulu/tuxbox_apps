@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.110 2007/05/13 20:14:40 houdini Exp $
+ * $Id: bouquets.cpp,v 1.111 2009/01/16 16:19:32 seife Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -37,8 +37,8 @@
 #include <zapit/getservices.h> /* LoadServices */
 #include <zapit/sdt.h>
 #include <zapit/settings.h>
-#include <zapit/xmlinterface.h>
 #include <zapit/frontend.h>
+#include <xmltree/xmlinterface.h>
 
 extern tallchans allchans;   //  defined in zapit.cpp
 extern CConfigFile config;   //  defined in zapit.cpp

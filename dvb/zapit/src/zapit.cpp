@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.414 2008/12/25 16:17:42 houdini Exp $
+ * $Id: zapit.cpp,v 1.415 2009/01/16 16:19:32 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -71,7 +71,7 @@
 #include <zapit/scan.h>
 #include <zapit/settings.h>
 #include <zapit/video.h>
-#include <zapit/xmlinterface.h>
+#include <xmltree/xmlinterface.h>
 #include <zapit/zapit.h>
 
 /* the conditional access module */
@@ -2649,7 +2649,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.414 2008/12/25 16:17:42 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.415 2009/01/16 16:19:32 seife Exp $\n");
 
 	bool check_lock = true;
 

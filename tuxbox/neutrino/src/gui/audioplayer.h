@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.h,v 1.20 2008/10/05 17:40:51 seife Exp $
+  $Id: audioplayer.h,v 1.21 2009/01/16 16:19:34 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -39,7 +39,7 @@
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"
 
-#include <system/xmlinterface.h>
+#include <xmltree/xmlinterface.h>
 
 #include <string>
 #include <set>

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.283 2009/01/15 09:31:39 seife Exp $
+//  $Id: sectionsd.cpp,v 1.284 2009/01/16 16:19:33 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -63,7 +63,7 @@
 #include <connection/basicsocket.h>
 #include <connection/basicserver.h>
 
-#include <zapit/xmlinterface.h>
+#include <xmltree/xmlinterface.h>
 #include <zapit/settings.h>
 #include <zapit/frontend.h>
 #include <configfile.h>
@@ -2462,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.283 2009/01/15 09:31:39 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.284 2009/01/16 16:19:33 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -8074,7 +8074,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.283 2009/01/15 09:31:39 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.284 2009/01/16 16:19:33 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 

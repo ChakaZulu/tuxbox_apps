@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.57 2008/12/30 19:13:29 seife Exp $
+  $Id: audioplayer.cpp,v 1.58 2009/01/16 16:19:34 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -68,7 +68,7 @@
 #include <gui/widget/stringinput_ext.h>
 
 #include <system/settings.h>
-#include <system/xmlinterface.h>
+#include <xmltree/xmlinterface.h>
 
 #include <irsend/irsend.h>
 

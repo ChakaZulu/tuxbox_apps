@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.157 2008/03/21 12:21:35 houdini Exp $
+ * $Id: scan.cpp,v 1.158 2009/01/16 16:19:32 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,7 +35,7 @@
 #include <zapit/scan.h>
 #include <zapit/sdt.h>
 #include <zapit/settings.h>
-#include <zapit/xmlinterface.h>
+#include <xmltree/xmlinterface.h>
 
 #if HAVE_DVB_API_VERSION < 3
 #define frequency Frequency

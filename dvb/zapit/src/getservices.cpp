@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.101 2007/06/24 11:46:03 dbluelle Exp $
+ * $Id: getservices.cpp,v 1.102 2009/01/16 16:19:32 seife Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -25,7 +25,7 @@
 #include <zapit/frontend.h>
 #include <zapit/getservices.h>
 #include <zapit/settings.h>
-#include <zapit/xmlinterface.h>
+#include <xmltree/xmlinterface.h>
 #include <configfile.h>
 #include <sys/stat.h>
 

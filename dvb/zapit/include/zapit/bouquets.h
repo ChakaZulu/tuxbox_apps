@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.61 2006/05/19 21:25:50 houdini Exp $
+ * $Id: bouquets.h,v 1.62 2009/01/16 16:19:31 seife Exp $
  */
 
 #ifndef __bouquets_h__
@@ -17,7 +17,7 @@
 #include <zapit/client/zapitclient.h>
 
 #include "channel.h"
-#include "xmlinterface.h"
+#include <xmltree/xmlinterface.h>
 
 using namespace std;
 

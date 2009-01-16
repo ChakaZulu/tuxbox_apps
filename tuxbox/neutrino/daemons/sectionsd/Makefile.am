@@ -16,7 +16,7 @@ nit_SOURCES = nit.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp SIlangu
 sdt_SOURCES = sdt.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp SIlanguage.cpp
 endif
 
-sectionsd_SOURCES = sectionsd.cpp dmxapi.cpp debug.cpp dmx.cpp SIsections.cpp SIevents.cpp SIutils.cpp xmlinterface.cpp dvbstring.cpp SIlanguage.cpp
+sectionsd_SOURCES = sectionsd.cpp dmxapi.cpp debug.cpp dmx.cpp SIsections.cpp SIevents.cpp SIutils.cpp dvbstring.cpp SIlanguage.cpp
 
 sectionsd_LDADD = \
 	@CONNECTION_LIBS@ \

@@ -26,7 +26,7 @@ udpstreampes_LDADD = \
 
 zapit_SOURCES = \
 	bouquets.cpp channel.cpp dvbstring.cpp \
-	getservices.cpp scan.cpp xmlinterface.cpp \
+	getservices.cpp scan.cpp \
 	zapit.cpp
 
 zapit_LDADD = \

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dvbstring.cpp,v 1.2 2006/12/25 20:13:33 houdini Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dvbstring.cpp,v 1.3 2009/01/16 16:19:33 seife Exp $
  *
  * Strings conforming to the DVB Standard - d-box2 linux project
  *
@@ -22,7 +22,7 @@
  */
 
 #include <zapit/dvbstring.h>
-#include <zapit/xmlinterface.h>
+#include <xmltree/xmlinterface.h>
 
 static const int ISO_6937_mapping [0xBA - 0xA8 + 1] = {0x00A4, // 0xA8
 						       0x2018, // 0xA9

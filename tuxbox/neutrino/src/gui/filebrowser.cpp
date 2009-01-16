@@ -61,7 +61,7 @@
 
 #include <driver/encoding.h>
 
-#include <system/xmlinterface.h>
+#include <xmltree/xmlinterface.h>
 
 #ifdef __USE_FILE_OFFSET64
 typedef struct dirent64 dirent_struct;
