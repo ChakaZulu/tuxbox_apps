@@ -23,7 +23,7 @@
 int main(int argc, char **argv)
 {
 	FILE *f;
-	char *s = malloc(128);
+	char *s = (char *)malloc(128);
 	unsigned int pic_pts = 0, aud_pts = 0;
 	unsigned int pic_ms, aud_ms, tmp;
 	while (1)
