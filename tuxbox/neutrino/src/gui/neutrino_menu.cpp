@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.36 2009/01/08 17:56:36 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.37 2009/01/16 20:40:16 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -83,6 +83,10 @@
 
 #ifdef _EXPERIMENTAL_SETTINGS_
 #include "gui/experimental_menu.h"
+#endif
+
+#ifndef MOVIEPLAYER2
+#define MOVIEBROWSER
 #endif
 
 CZapitClient::SatelliteList satList;
