@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.65 2009/01/02 21:05:11 seife Exp $
+	$Id: lcdd.cpp,v 1.66 2009/01/17 12:40:55 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -334,7 +334,11 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 		0x04	show separator line if big and small are present / shown
 		0x08	show only one line of "big" string
 	 */
-	display.draw_fill_rect (0,10,120,51, CLCDDisplay::PIXEL_OFF);
+
+	/* draw_fill_rect is braindead: it actually fills _inside_ the described rectangle,
+	   so that you have to give it one pixel additionally in every direction ;-(
+	   this is where the "-1 to 120" intead of "0 to 119" comes from */
+	display.draw_fill_rect(-1, 10, 120, 51, CLCDDisplay::PIXEL_OFF);
 
 	std::string cname[2];
 	std::string event[4];
