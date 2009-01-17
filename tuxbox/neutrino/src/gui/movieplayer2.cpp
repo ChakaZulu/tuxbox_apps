@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.15 2009/01/16 16:19:36 seife Exp $
+  $Id: movieplayer2.cpp,v 1.16 2009/01/17 22:13:33 seife Exp $
 
   License: GPL
 
@@ -52,7 +52,6 @@
   * parental code
   * MPEG1 parser
   * Test and fix AC3
-  * the hintBox creation and deletion is fishy.
   * check if the CLCD->setMode(MODE_MOVIE) are all correct (and needed)
   * ...lots more... ;)
 
@@ -172,7 +171,6 @@ int skipseconds = 0;
 bool skipabsolute = false;
 
 int buffer_time = 0;
-int dmxa = -1 , dmxv = -1, dvr = -1, adec = -1, vdec = -1;
 
 // global variables shared by playthread and PlayFile
 static CMoviePlayerGui::state g_playstate;
@@ -180,6 +178,10 @@ static CMoviePlayerGui::state g_playstate;
 static bool g_skiprequest = false;
 // input thread signals end-of-file
 static bool g_EOF;
+// input thread failed.
+static bool g_input_failed;
+// output thread is running <= TODO: fix this ugly kludge
+static bool g_output_thread = false;
 
 static off_t g_startposition = 0L;
 // 32 MPEG audio streams + 8 AC3 streams, theoretically.
@@ -211,7 +213,6 @@ static inline int get_filetime(void);
 static inline int get_pts(char *p, bool pes);
 std::string url_escape(const char *url);
 size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data);
-static void close_devices(const char *function);
 //------------------------------------------------------------------------
 
 int CAPIDSelectExec::exec(CMenuTarget* /*parent*/, const std::string & actionKey)
@@ -272,6 +273,7 @@ CMoviePlayerGui::CMoviePlayerGui()
 	vlcfilefilter.addFilter("mp4");
 
 	filebrowser->Filter = &tsfilefilter;
+	INFO("Initialized!\n");
 }
 
 //------------------------------------------------------------------------
@@ -287,10 +289,9 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 		INFO("g_playstate != STOPPED: %d!\n", g_playstate);
 	// just to make sure...
 	g_playstate = CMoviePlayerGui::STOPPED;
-	while (dmxa != -1 || dmxv != -1 || adec != -1 || vdec != -1 || dvr != -1)
+	while (g_output_thread)
 	{
-		INFO("want zapit wakeup, but dmxa = %d, dmxv = %d adec = %d vdec = %d dvr = %d\n",
-		      dmxa, dmxv, adec, vdec, dvr);
+		INFO("waiting for output thread to terminate...\n");
 		sleep(1);
 	}
 
@@ -419,10 +420,9 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	// Restore last mode
 	if (g_ZapitsetStandbyState)
 	{
-		while (dmxa != -1 || dmxv != -1 || adec != -1 || vdec != -1 || dvr != -1)
+		while (g_output_thread)
 		{
-			INFO("want zapit wakeup, but dmxa = %d, dmxv = %d adec = %d vdec = %d dvr = %d\n",
-			      dmxa, dmxv, adec, vdec, dvr);
+			INFO("waiting for output thread to terminate...\n");
 			sleep(1);
 		}
 		g_Zapit->setStandby(false);
@@ -456,6 +456,8 @@ CURLcode sendGetRequest (const std::string & url, std::string & response)
 	CURLcode httpres;
 
 	curl = curl_easy_init();
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); // no signals, please.
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30); // nothing should take longer than 30 seconds. hopefully
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15); // "15 seconds should be enough for everyone"
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_dummywrite);
@@ -472,9 +474,10 @@ CURLcode sendGetRequest (const std::string & url, std::string & response)
 int box2box_request_stream(const char *fn)
 {
 	char tmpbuf[512];
+	char id_s[33]; // long long hex == 32 char's + \0
 	int fd = -1;
-	char ip[512];
-//	char name[512];
+	char *ip;
+	char *name;
 	int port, vp, ap, ret;
 	long long id;
 	char *p1, *p2;
@@ -485,40 +488,49 @@ int box2box_request_stream(const char *fn)
 
 	if (!fgets(tmpbuf, 1024, fp))
 		goto nofile;
-	INFO("tmpbuf: %s", tmpbuf);
+	DBG("tmpbuf: %s", tmpbuf);
 	if (strcmp(tmpbuf, "#DBOXSTREAM\n") != 0)
+	{
+		INFO("invalid file signature: no #DBOXSTREAM found\n");
 		goto nofile;
-	INFO("found #DBOXSTREAM\n");
+	}
+	DBG("found #DBOXSTREAM\n");
 	if (!fgets(tmpbuf, 1024, fp))
 		goto nofile;
-	INFO("got nextline: '%s'\n",tmpbuf);
+	if (tmpbuf[strlen(tmpbuf) - 1] == '\n')
+		tmpbuf[strlen(tmpbuf) - 1] = 0; // remove \n, cosmetic
+	DBG("got nextline: '%s'\n", tmpbuf);
 	p1 = tmpbuf;
 	p2 = strchr(tmpbuf, '=');
 	if (!p2)
 		goto nofile;
-//	strncpy(name, p1, p2 - p1);
-//	INFO("name: %s\n", name);
+	*p2 = 0;
+	name = p1;
+	INFO("name: '%s'\n", name); // just info for now...
 	p1 = p2 + 1;
 	p2 = strchr(p1, ';');
 	if (!p2)
 		goto nofile;
-	strncpy(ip, p1, p2 - p1);
-	INFO("ip: %s\n", ip);
+	*p2 = 0;
+	ip = p1;;
+	DBG("ip: '%s'\n", ip);
 	p1 = p2 + 1;
 	ret = sscanf(p1, "%d;0x%x;0x%x;0x%llx", &port, &vp, &ap, &id);
-	INFO("sscanf result: %d\n", ret);
+	DBG("sscanf result: %d. port: %d vpid: 0x%x, apid: 0x%x, zapid: 0x%llx\n", ret, port, vp, ap, id);
 	if (ret != 4)
 		goto nofile;
 
 	url = "http://";
 	url += ip;
 	url += "/control/zapto?0x";
-	sprintf(tmpbuf, "%llx", id);
-	url += tmpbuf;
+	snprintf(id_s, 33, "%llx", id);
+	url += id_s;
 	INFO("get zapto: '%s'\n", url.c_str());
 	CURLcode httpres = sendGetRequest(url, response);
 	if (httpres == 0)
 	{
+		INFO("zapto response: %s\n", response.c_str());
+		// usleep(250000); should not be necessary, since the zapto is (or should be) blocking
 		struct sockaddr_in ads;
 		socklen_t ads_len = sizeof(sockaddr_in);
 		bzero((char *)&ads, ads_len);
@@ -533,8 +545,8 @@ int box2box_request_stream(const char *fn)
 			INFO("connect failed (%m)\n");
 			goto nostream;
 		}
-
-		sprintf(tmpbuf, "GET /0x%x,0x%x HTTP/1.0\r\n", ap, vp);
+		// do not use "ip" or "name" below here, since the tmpbuf gets reused!
+		sprintf(tmpbuf, "GET /0x%x,0x%x HTTP/1.0\r\n", vp, ap);
 		INFO("get request: %s", tmpbuf);
 		write(fd, &tmpbuf, strlen(tmpbuf));
 		ret = read(fd, &tmpbuf, 17); // HTTP/1.1 200 OK\r\n
@@ -566,13 +578,14 @@ int box2box_request_stream(const char *fn)
 		pida = ap;
 		pidv = vp;
 		g_currentapid = pida;
-INFO("isstream == true, numpida: %d pida: %d, pidv: %d\n", g_numpida, pida, pidv);
+		DBG("isstream == true, numpida: %d pida: %d, pidv: %d\n", g_numpida, pida, pidv);
 	}
 	return fd;
 
  nostream:
 	close(fd);
  nofile:
+	INFO("no file. Sorry.\n");
 	fclose(fp);
 	return -1;
 }
@@ -581,7 +594,7 @@ INFO("isstream == true, numpida: %d pida: %d, pidv: %d\n", g_numpida, pida, pidv
 #define TRANSCODE_VIDEO_MPEG1 1
 #define TRANSCODE_VIDEO_MPEG2 2
 //------------------------------------------------------------------------
-bool VlcRequestStream(char* mrl, int  transcodeVideo, int transcodeAudio)
+bool VlcRequestStream(std::string mrl, int transcodeVideo, int transcodeAudio)
 {
 	CURLcode httpres;
 	std::string response;
@@ -716,16 +729,17 @@ inline int VlcGetStreamLength()
 
 //------------------------------------------------------------------------
 void *
-ReceiveStreamThread (void *mrl)
+ReceiveStreamThread(void *arg)
 {
 	INFO("started\n", __FUNCTION__);
 	int skt;
 	int len;
 
 	int nothingreceived = 0;
-	std::string sMRL = (char*)mrl;
+	std::string sMRL = (char*)arg;
 	bool is_box2box = false;
 	bool avpids_found = false;
+	g_input_failed = false;
 
 	// Get Server and Port from Config	
 	std::string response;
@@ -748,11 +762,11 @@ ReceiveStreamThread (void *mrl)
 	if (sMRL.rfind(".dbox") == sMRL.length() - 5)
 	{
 		// dbox2dbox playlist file
-		skt = box2box_request_stream((char *)mrl);
+		skt = box2box_request_stream(sMRL.c_str());
 		if (skt < 0)
 		{
 			INFO("box2box playlist open failed\n");
-			g_playstate = CMoviePlayerGui::STOPPED;
+			g_input_failed = true;
 			pthread_exit(NULL);
 		}
 		is_box2box = true;
@@ -765,14 +779,14 @@ ReceiveStreamThread (void *mrl)
 		{
 			hintBox->hide();
 			DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER));	// UTF-8
-			g_playstate = CMoviePlayerGui::STOPPED;
+			g_input_failed = true;
 			pthread_exit(NULL);
 			// Assume safely that all succeeding HTTP requests are successful
 		}
 
 		int transcodeVideo, transcodeAudio;
 		//Menu Option Force Transcode: Transcode all Files, including mpegs.
-		if (!memcmp((char*)mrl, "vcd:", 4) ||
+		if (!strncmp(sMRL.c_str(), "vcd:", 4) ||
 		    !strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "mpg") ||
 		    !strcasecmp(sMRL.substr(sMRL.length()-4).c_str(), "mpeg") ||
 		    !strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "m2p"))
@@ -786,7 +800,7 @@ ReceiveStreamThread (void *mrl)
 		else
 		{
 			transcodeVideo = g_settings.streaming_transcode_video_codec + 1;
-			if ((!memcmp((char*)mrl, "dvd", 3) && !g_settings.streaming_transcode_audio) ||
+			if ((!strncmp(sMRL.c_str(), "dvd", 3) && !g_settings.streaming_transcode_audio) ||
 			    (!strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "vob") && !g_settings.streaming_transcode_audio) ||
 			    (!strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "ac3") && !g_settings.streaming_transcode_audio) ||
 			    g_settings.streaming_force_avi_rawaudio)
@@ -794,7 +808,7 @@ ReceiveStreamThread (void *mrl)
 			else
 				transcodeAudio = 1;
 		}
-		VlcRequestStream((char*)mrl, transcodeVideo, transcodeAudio);
+		VlcRequestStream(sMRL, transcodeVideo, transcodeAudio);
 
 		// TODO: Better way to detect if http://<server>:8080/dboxstream is already alive. For example repetitive checking for HTTP 404.
 		// Unfortunately HTTP HEAD requests are not supported by VLC :(
@@ -811,8 +825,7 @@ ReceiveStreamThread (void *mrl)
 		servAddr.sin_port = htons(port);
 		servAddr.sin_addr.s_addr = inet_addr(server);
 
-		INFO("Server: %s\n", server);
-		INFO("Port: %d\n", port);
+		INFO("Server: %s Port: %d\n", server, port);
 		time_t start = time(NULL);
 
 		while (true)
@@ -820,27 +833,26 @@ ReceiveStreamThread (void *mrl)
 			//printf ("[movieplayer.cpp] Trying to call socket\n");
 			skt = socket (AF_INET, SOCK_STREAM, 0);
 
-			INFO("Trying to connect socket\n");
 			if (connect(skt, (struct sockaddr *) &servAddr, sizeof (servAddr)) < 0)
 			{
-				perror("SOCKET");
-				g_playstate = CMoviePlayerGui::STOPPED;
+				INFO("Socket connect failed: %m\n");
+				g_input_failed = true;
 				pthread_exit(NULL);
 			}
 			fcntl(skt, O_NONBLOCK);
-			INFO("Socket OK\n");
+			DBG("Connect OK\n");
 
 			// Skip HTTP header
 			const char * msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
 			int msglen = strlen(msg);
 			if (send (skt, msg, msglen, 0) == -1)
 			{
-				perror("send()");
-				g_playstate = CMoviePlayerGui::STOPPED;
+				INFO("Socket send failed: %m\n");
+				g_input_failed = true;
 				pthread_exit(NULL);
 			}
 
-			printf("[movieplayer.cpp] GET Sent\n");
+			DBG("GET Sent\n");
 
 			// Skip HTTP Header
 			int found = 0;
@@ -855,9 +867,9 @@ ReceiveStreamThread (void *mrl)
 				strncat(line, buf, 1);
 				if (strcmp(line, "HTTP/1.0 404") == 0)
 				{
-					printf("[movieplayer.cpp] VLC still does not send. Retrying...\n");
+					INFO("VLC still does not send. Retrying...\n");
 					close(skt);
-					usleep(500000);
+					sleep(1);
 					break;
 				}
 				if ((((found & (~2)) == 0) && (buf[0] == '\r')) || /* found == 0 || found == 2 */
@@ -899,7 +911,8 @@ ReceiveStreamThread (void *mrl)
 
 	int length = 0;
 	int counter = 0;
-	length = VlcGetStreamLength();
+	if (!is_box2box)
+		length = VlcGetStreamLength();
 	INFO("VLC Stream length: %d\n", length);
 
 	while (g_playstate != CMoviePlayerGui::STOPPED)
@@ -999,7 +1012,7 @@ ReceiveStreamThread (void *mrl)
 			}
 			else
 			{
-				printf("[movieplayer.cpp] Searching for vpid and apid\n");
+				INFO("Searching for vpid and apid\n");
 				// find apid and vpid. Easiest way to do that is to write the TS to a file
 				// and use the usual find_avpids function. This is not even overhead as the
 				// buffer needs to be prefilled anyway
@@ -1032,14 +1045,19 @@ ReceiveStreamThread (void *mrl)
 		else
 		{
 			//printf("[movieplayer.cpp] ringbuf write space:%d\n",size);
-
-			pollret = poll(poller, 1UL, -1);
+			pollret = poll(poller, 1UL, 10000); // ten second timeout, don't block.
+			if (pollret == 0) // timeout;
+			{
+				INFO("nothing received for 10 seconds... => get out!\n");
+				g_input_failed = true;
+				break;
+			}
 
 			if (pollret < 0 ||
 			    (poller[0].revents & (POLLHUP | POLLERR | POLLNVAL)) != 0)
 			{
 				perror("Error while polling()");
-				g_playstate = CMoviePlayerGui::STOPPED;
+				g_input_failed = true;
 				break;
 			}
 
@@ -1066,7 +1084,8 @@ fprintf(stderr,".");
 					if (nothingreceived > (buffer_time + 4) * 100) // wait at least buffer time secs +3 to play buffer when stream ends
 					{
 						INFO("Didn't receive for a while. Stopping.\n");
-						g_playstate = CMoviePlayerGui::STOPPED;
+						g_input_failed = true;
+						break;
 					}
 					usleep(10000);	//sleep 10 ms
 				}
@@ -1076,11 +1095,16 @@ fprintf(stderr,".");
 	// stop VLC
 	std::string stopurl = baseurl;
 	stopurl += "requests/status.xml?command=pl_stop";
-	httpres = sendGetRequest(stopurl, response);
+	if (!is_box2box)
+		httpres = sendGetRequest(stopurl, response);
 	close(skt);
 
 	remove("/tmp/tmpts");
-	INFO("ends now.\n");
+	INFO("ends now. input_failed: %s\n", g_input_failed ? "true" : "false");
+	/* for testing thread interaction
+	sleep(10);
+	INFO("ends really\n");
+	*/
 	pthread_exit(NULL);
 } // ReceiveStreamThread
 
@@ -1101,14 +1125,15 @@ ReadTSFileThread(void *parm)
 	time_t last = 0;
 	int skipretry = 0;
 	int i;
+	char *ts;
 	ringbuffer_data_t vec[2];
-	
+
 	g_percent = 0;
 	hintBox->hide(); // the "connecting to streaming server" hintbox
 	bufferingBox->paint();
 	INFO("Buffering...\n");
 
-	bool failed = false;
+	g_input_failed = false;
 
 	filesize = lseek(fd, 0, SEEK_END);
 	filepos = mp_seekSync(fd, 0);
@@ -1146,38 +1171,40 @@ ReadTSFileThread(void *parm)
 	if (len < 0)
 	{
 		INFO("first read failed (%m)\n");
-		failed = true;
+		close(fd);
+		INFO("ends now.\n");
+		g_input_failed = true;
+		pthread_exit(NULL);
+	}
+
+	ts = vec[0].buf;
+	i = 0;
+	while (i + 188 < len)
+	{
+		g_startpts = get_pts(ts + i, false);
+		if (g_startpts != -1)
+			break;
+		i  += 188;
+	}
+	if (g_startpts == -1)
+		INFO("could not determine PTS at file start\n");
+	else
+		INFO("PTS at file start: %d\n", g_startpts);
+
+	lastpts = g_startpts;
+	g_pts = g_startpts;
+	if (len % 188)
+	{
+		ringbuffer_reset(ringbuf); // not aligned anymore, so reset...
+		lseek(fd, filepos, SEEK_SET);
 	}
 	else
-	{
-		char *ts = vec[0].buf;
-		i = 0;
-		while (i + 188 < len)
-		{
-			g_startpts = get_pts(ts + i, false);
-			if (g_startpts != -1)
-				break;
-			i  += 188;
-		}
-		if (g_startpts == -1)
-			INFO("could not determine PTS at file start\n");
-		else
-			INFO("PTS at file start: %d\n", g_startpts);
+		filepos += len;
 
-		lastpts = g_startpts;
-		g_pts = g_startpts;
-		if (len % 188)
-		{
-			ringbuffer_reset(ringbuf); // not aligned anymore, so reset...
-			lseek(fd, filepos, SEEK_SET);
-		}
-		else
-			filepos += len;
-	}
 	skipabsolute = false;
 	skipseconds = 0;
 
-	while (g_playstate != CMoviePlayerGui::STOPPED && !failed)
+	while (g_playstate != CMoviePlayerGui::STOPPED && !g_EOF && !g_input_failed)
 	{
 		switch(g_playstate)
 		{
@@ -1280,7 +1307,7 @@ ReadTSFileThread(void *parm)
 				len = read(fd, vec[0].buf, todo);
 				if (todo == readsize) // only first read of the while() loop, so we are still TS-aligned
 				{
-					char *ts = vec[0].buf;
+					ts = vec[0].buf;
 					while (ts - vec[0].buf < (int)todo)
 					{
 						int pts = get_pts(ts, false);
@@ -1317,7 +1344,7 @@ ReadTSFileThread(void *parm)
 				if (len < 0)
 				{
 					perror("ReadTSFileThread read");
-					failed = true;
+					g_input_failed = true;
 					break;
 				}
 				done += len;
@@ -1328,17 +1355,20 @@ ReadTSFileThread(void *parm)
 			{
 				INFO("something is wrong. vec[0].len: %ld vec[1].len: %ld, todo: %ld\n",
 				      vec[0].len, vec[1].len, todo);
-				failed = true;
+				g_input_failed = true;
 				break;
 			}
 
 			if (len <= 0 && !skipabsolute) // len < 0 => error, len == 0 => EOF
 			{
-				if (len < 0)
-					perror("ReadTSFileThread read");
 				INFO("error or EOF => exiting\n");
-				failed = true;
-				g_EOF = true; // does not matter if EOF or read error...
+				if (len < 0)
+				{
+					perror("ReadTSFileThread read");
+					g_input_failed = true;
+				}
+				else
+					g_EOF = true; // does not matter if EOF or read error...
 				break;
 			}
 			done += len;
@@ -1414,11 +1444,11 @@ ReadMPEGFileThread(void *parm)
 	g_numpida = 0;
 	g_startpts = -1;
 	bool input_empty = true;
-	bool failed = false;
+	g_input_failed = false;
 	skipabsolute = false;
 	skipseconds = 0;
 
-	while (g_playstate != CMoviePlayerGui::STOPPED && !failed)
+	while (g_playstate != CMoviePlayerGui::STOPPED)
 	{
 #ifdef AUDIO_STREAM_AUTOSELECT
 		/* Try to find the lowest numbered audio stream. The "bufferfilled" check
@@ -1529,7 +1559,7 @@ ReadMPEGFileThread(void *parm)
 				if (len < 0)
 				{
 					perror("ReadMPEGFileThread read");
-					failed = true;
+					g_input_failed = true;
 					break;
 				}
 				done += len;
@@ -1540,7 +1570,7 @@ ReadMPEGFileThread(void *parm)
 			{
 				INFO("something is wrong. vec[0].len: %ld vec[1].len: %ld, todo: %ld\n",
 				      vec_in[0].len, vec_in[1].len, todo);
-				failed = true;
+				g_input_failed = true;
 				break;
 			}
 
@@ -1549,7 +1579,7 @@ ReadMPEGFileThread(void *parm)
 				if (len < 0)
 					perror("ReadMPEGFileThread read");
 				INFO("error or EOF => exiting\n");
-				failed = true;
+				g_input_failed = true;
 				break;
 			}
 			done += len;
@@ -1562,7 +1592,7 @@ ReadMPEGFileThread(void *parm)
 			continue;
 #else
 		ringbuffer_get_write_vector(buf_in, &vec_in[0]);
-		if ((size = vec_in[0].len) != 0)
+		if ((size = vec_in[0].len) != 0 && !g_EOF)
 		{
 			len = read(fd, vec_in[0].buf, size);
 			if (len > 0)
@@ -1570,6 +1600,7 @@ ReadMPEGFileThread(void *parm)
 			else if (len < 0)
 			{
 				perror("ReadMPEGFileThread read");
+				g_input_failed = true;
 				break;
 			}
 			DBG("read %d bytes, size %d\n", len, size);
@@ -1600,8 +1631,10 @@ ReadMPEGFileThread(void *parm)
 		rd = ringbuffer_get_readpointer(buf_in, &ppes, 10); // we need 10 bytes for AC3
 		if (rd < 10)
 		{
-			INFO("rd:%d\n", rd);
+			INFO("rd:%d, EOF: %s\n", rd, g_EOF ? "true" : "false");
 			usleep(300000);
+			if (g_EOF)
+				break;
 			continue;
 		}
 
@@ -1804,8 +1837,8 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 
 			// divide PES packet into small TS packets
 			bool first = true;
-			int i;
-			for (i = 0; i < tsPacksCount; i++) 
+			int j;
+			for (j = 0; j < tsPacksCount; j++) 
 			{
 				ts[0] = 0x47;			//SYNC Byte
 				if (first)
@@ -1816,7 +1849,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				ts[3] = 0x10 | ((*cc) & 0x0F);	// No adaptation field, payload only, continuity counter
 				++(*cc);
 				ringbuffer_write(ringbuf, ts, 4);
-				ringbuffer_write(ringbuf, ppes + i * 184, 184);
+				ringbuffer_write(ringbuf, ppes + j * 184, 184);
 				first = false;
 			}
 
@@ -1837,7 +1870,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 					memset(ts + 6, 0xFF, ts[4] - 1);
 				}
 				ringbuffer_write(ringbuf, ts, 188 - rest);
-				ringbuffer_write(ringbuf, ppes + i * 184, rest);
+				ringbuffer_write(ringbuf, ppes + j * 184, rest);
 			}
 		} //if (av)
 
@@ -1856,8 +1889,9 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 
 //------------------------------------------------------------------------
 void *
-OutputThread (void *mrl)
+OutputThread(void *arg)
 {
+	g_output_thread = true;
 	//-- lcd stuff --
 	int last_percent = -1;
 	struct dmx_pes_filter_params p;
@@ -1868,9 +1902,8 @@ OutputThread (void *mrl)
 	// use global pida and pidv
 	pida = 0, pidv = 0, g_currentac3 = 0;
 	int ret, done;
-	/* paranoia checks, should never trigger */
-	close_devices(__FUNCTION__);
-	char *fn = (char *)mrl;
+	char *fn = (char *)arg;
+	int dmxa = -1 , dmxv = -1, dvr = -1, adec = -1, vdec = -1;
 
 	if (fn[0] == '/')
 		remote = false;	// we are playing a "local" file (hdd or NFS)
@@ -1895,9 +1928,10 @@ OutputThread (void *mrl)
 
 	INFO("mrl:%s\n", fn);
 
+	g_input_failed = false; // there is no input thread running now... hopefully.
 	pthread_t rcvt;	// the input / "receive" thread
 	if (remote)
-		ret = pthread_create(&rcvt, NULL, ReceiveStreamThread, mrl);
+		ret = pthread_create(&rcvt, NULL, ReceiveStreamThread, arg);
 	else
 	{
 		std::string tmp = fn;
@@ -1906,14 +1940,14 @@ OutputThread (void *mrl)
 			INFO("found TS file\n");
 			isPES = false;
 			isTS = true;
-			ret = pthread_create(&rcvt, NULL, ReadTSFileThread, mrl);
+			ret = pthread_create(&rcvt, NULL, ReadTSFileThread, arg);
 		}
 		else
 		{
 			INFO("found non-TS file, hoping for MPEG\n");
 			isTS = false;
 			isPES = true;
-			ret = pthread_create(&rcvt, NULL, ReadMPEGFileThread, mrl);
+			ret = pthread_create(&rcvt, NULL, ReadMPEGFileThread, arg);
 		}
 	}
 
@@ -1965,15 +1999,24 @@ OutputThread (void *mrl)
 				// TS: need to reset dmx...
 				INFO("APID changed from 0x%04x to 0x%04x\n", pida, g_currentapid);
 				pida = g_currentapid;
-				g_playstate= CMoviePlayerGui::SOFTRESET;
+				g_playstate = CMoviePlayerGui::SOFTRESET;
 			}
 			else if (g_ac3changed)
 			{
 				// PES/PS: need to enable/disable AC3 passthrough...
-				g_playstate= CMoviePlayerGui::SOFTRESET;
+				g_playstate = CMoviePlayerGui::SOFTRESET;
 			}
 			g_ac3changed = false;
 			g_apidchanged = false;
+		}
+
+		if (g_input_failed)
+		{
+			INFO("g_input_failed == true!\n");
+			g_playstate = CMoviePlayerGui::STOPPED;
+
+			if (!bufferfilled)
+				bufferingBox->hide();
 		}
 
 		switch (g_playstate)
@@ -2041,7 +2084,6 @@ OutputThread (void *mrl)
 			{
 				if (!bufferfilled || !driverready)
 				{
-					//fprintf(stderr, "!");
 					usleep(10000);	// non busy wait
 					continue;
 				}
@@ -2059,7 +2101,10 @@ OutputThread (void *mrl)
 				{
 					//INFO("len (%d/%d) < MINREAD, empty_counter = %d\n",len, readsize, empty_counter);
 					if (g_EOF) // end of file and buffer empty...
+					{
+						INFO("BUFFER EMPTY AND EOF!\n");
 						g_playstate = CMoviePlayerGui::STOPPED;
+					}
 					if (empty_counter++ < 5)
 					{
 						/* The ringbuffer might be empty, but video still playing fine,
@@ -2079,7 +2124,7 @@ OutputThread (void *mrl)
 					 */
 					bufferingBox->paint();
 					bufferfilled = false;
-					while (g_playstate == CMoviePlayerGui::PLAY && !bufferfilled)
+					while (g_playstate == CMoviePlayerGui::PLAY && !bufferfilled && !g_input_failed)
 						usleep(125000);
 					INFO("...buffering ends\n");
 					ioctl(dmxa, DMX_START);
@@ -2170,20 +2215,29 @@ OutputThread (void *mrl)
 	ioctl(adec, AUDIO_STOP);
 	ioctl(dmxv, DMX_STOP);
 	ioctl(dmxa, DMX_STOP);
-	close_devices(__FUNCTION__);
+	if (dmxa > -1)
+		close(dmxa);
+	if (dmxv > -1)
+		close(dmxv);
+	if (dvr > -1)
+		close(dvr);
+	if (adec > -1)
+		close(adec);
+	if (vdec > -1)
+		close(vdec);
 
 	// request reader termination
 	g_playstate = CMoviePlayerGui::STOPPED;
 
 	INFO("Waiting for input thread to stop\n");
 	pthread_join(rcvt, NULL);
-	INFO("Seems that input thread was stopped succesfully\n");
+	DBG("Seems that input thread was stopped succesfully\n");
 
 	// Some memory clean up
 	ringbuffer_free(ringbuf);
 	delete bufferingBox;
-	delete hintBox;	// TODO is this allowed here?
 
+	INFO("ends here.\n");
 	pthread_exit(NULL);
 } // OutputThread
 
@@ -2299,7 +2353,6 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	bool update_info = true, start_play = false, exit = false;
 	bool open_filebrowser = true, cdDvd = false, aborted = false;
 	bool stream = true;
-	const char *mrl = "";
 	std::string mrl_str;
 	int selected = 0;
 	CTimeOSD StreamTime;
@@ -2307,14 +2360,14 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	MI_MOVIE_INFO movieinfo;
 	bool movieinfo_valid = false;
 	int last_apid = -1; // for auto-playlists...
+	hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MOVIEPLAYER_PLEASEWAIT)); // UTF-8
 
 	if (streamtype == STREAMTYPE_DVD)
 	{
 		mrl_str = "dvd://";
 		mrl_str += g_settings.streaming_server_cddrive;
 		mrl_str += "@1";
-		mrl = mrl_str.c_str();
-		INFO("Generated MRL: %s\n", mrl);
+		INFO("Generated MRL: %s\n", mrl_str.c_str());
 		sel_filename = "DVD";
 		open_filebrowser = false;
 		start_play = true;
@@ -2324,8 +2377,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	{
 		mrl_str = "vcd:";
 		mrl_str += g_settings.streaming_server_cddrive;
-		mrl = mrl_str.c_str();
-		INFO("Generated MRL: %s\n", mrl);
+		INFO("Generated MRL: %s\n", mrl_str.c_str());
 		sel_filename = "(S)VCD";
 		open_filebrowser = false;
 		start_play = true;
@@ -2382,11 +2434,10 @@ CMoviePlayerGui::PlayStream(int streamtype)
 					int namepos = filelist[selected].Name.rfind("vlc://");
 					mrl_str = filelist[selected].Name.substr(namepos + 6);
 					mrl_str = url_escape(mrl_str.c_str());
-					mrl = mrl_str.c_str();
 				}
 				else
-					mrl = filelist[selected].Name.c_str();
-				INFO ("Generated FILE MRL: %s\n", mrl);
+					mrl_str = filelist[selected].Name;
+				INFO ("Generated FILE MRL: %s\n", mrl_str.c_str());
 
 				update_info = true;
 				start_play = true;
@@ -2417,8 +2468,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			int namepos = startfilename.rfind("vlc://");
 			mrl_str = startfilename.substr(namepos + 6);
 			mrl_str = url_escape(mrl_str.c_str());
-			mrl = mrl_str.c_str();
-			INFO("Generated Bookmark FILE MRL: %s\n", mrl);
+			INFO("Generated Bookmark FILE MRL: %s\n", mrl_str.c_str());
 			namepos = startfilename.rfind("/");
 			sel_filename = startfilename.substr(namepos + 1);
 			update_info = true;
@@ -2431,11 +2481,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			if (g_settings.streaming_show_tv_in_browser == true &&
 			    g_ZapitsetStandbyState == true)
 			{
-				while (dmxa != -1 || dmxv != -1 || adec != -1 || vdec != -1 || dvr != -1)
+				while (g_output_thread)
 				{
-					INFO("want zapit wakeup, but dmxa = %d, "
-					     "dmxv = %d adec = %d vdec = %d dvr = %d\n",
-					      dmxa, dmxv, adec, vdec, dvr);
+					INFO("waiting for output thread to terminate...\n");
 					usleep(250000);
 				}
 				g_Zapit->setStandby(false);
@@ -2482,11 +2530,10 @@ CMoviePlayerGui::PlayStream(int streamtype)
 						int namepos = filelist[0].Name.rfind("vlc://");
 						mrl_str = filelist[0].Name.substr(namepos + 6);
 						mrl_str = url_escape(mrl_str.c_str());
-						mrl = mrl_str.c_str();
 					}
 					else
-						mrl = filelist[0].Name.c_str();
-					INFO("Generated FILE MRL: %s\n", mrl);
+						mrl_str = filelist[0].Name;
+					INFO("Generated FILE MRL: %s\n", mrl_str.c_str());
 
 					if (filelist.size() == 1 && !stream)
 					{
@@ -2554,21 +2601,20 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			start_play = false;
 			bufferfilled = false;
 
-			if (g_playstate >= CMoviePlayerGui::PLAY)
+			if (g_output_thread) // there is an output thread still running...
 			{
 				g_playstate = CMoviePlayerGui::STOPPED;
-				INFO("waiting for rct...\n");
+				INFO("waiting for output thread...\n");
 				pthread_join(rct, NULL);
+				g_output_thread = false;
 				INFO("done\n");
 			}
 			//TODO: Add Dialog (Remove Dialog later)
-			hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MOVIEPLAYER_PLEASEWAIT)); // UTF-8
 			hintBox->paint();
 			buffer_time=0;
-
+			const char *mrl = mrl_str.c_str(); // todo: is const char * allowed as pthread_create arg?
 			if (pthread_create(&rct, 0, OutputThread, (void *)mrl) != 0)
 				break;
-
 			g_playstate = CMoviePlayerGui::SOFTRESET;
 		}
 
@@ -2848,6 +2894,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				selected--;
 			else
 				selected++;
+INFO("selected: %d/%d  state: %d\n", selected, (int)filelist.size(), g_playstate);
 			if (selected < 0)
 				selected = 0;
 			else if (selected >= (int)filelist.size())
@@ -2860,13 +2907,12 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				if (stream)
 				{
 					int namepos = filelist[selected].Name.rfind("vlc://");
-					std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
+					mrl_str = filelist[selected].Name.substr(namepos + 6);
 					mrl_str = url_escape(mrl_str.c_str());
-					mrl = mrl_str.c_str();
 				}
 				else
-					mrl = filelist[selected].Name.c_str();
-				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
+					mrl_str = filelist[selected].Name;
+				INFO("Generated FILE MRL: %s\n", mrl_str.c_str());
 				update_info = true;
 				start_play = true;
 			}
@@ -2898,8 +2944,11 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			StreamTime.hide();
 	}
 	while (true);
-	INFO("waiting for rct\n");
+	INFO("waiting for output thread\n");
 	pthread_join(rct, NULL);
+	g_output_thread = false;
+
+	delete hintBox;
 	INFO("ends here\n");
 } // PlayStream()
 
@@ -2969,7 +3018,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.15 $");
+	return imageinfo.getModulVersion("","$Revision: 1.16 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
@@ -3127,34 +3176,4 @@ size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data)
 	std::string* pStr = (std::string*) data;
 	*pStr += (char*) ptr;
 	return size * nmemb;
-}
-
-static void close_devices(const char *function)
-{
-	if (dmxa != -1)
-	{
-		printf("[mp:%s] dmxa != -1\n", function);
-		close(dmxa);
-	}
-	if (dmxv != -1)
-	{
-		printf("[mp:%s] dmxv != -1\n", function);
-		close(dmxv);
-	}
-	if (dvr != -1)
-	{
-		printf("[mp:%s] dvr != -1\n", function);
-		close(dvr);
-	}
-	if (adec != -1)
-	{
-		printf("[mp:%s] adec != -1\n", function);
-		close(adec);
-	}
-	if (vdec != -1)
-	{
-		printf("[mp:%s] vdec != -1\n", function);
-		close(vdec);
-	}
-	dmxa = -1; dmxv = -1; dvr = -1; adec = -1; vdec = -1;
 }
