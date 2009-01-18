@@ -1,5 +1,5 @@
 /*
-	$Id: menue.h,v 1.74 2008/05/23 00:46:49 dbt Exp $
+	$Id: menue.h,v 1.75 2009/01/18 00:34:45 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -357,12 +357,12 @@ class CLockedMenuForwarder : public CMenuForwarder, public CPINProtection
 	protected:
 		virtual CMenuTarget* getParent(){ return Parent;};
 	public:
-		CLockedMenuForwarder(const neutrino_locale_t Text, char* validPIN, bool alwaysAsk=false, const bool Active=true, char *Option=NULL,
+		CLockedMenuForwarder(const neutrino_locale_t Text, char* _validPIN, bool alwaysAsk=false, const bool Active=true, char *Option=NULL,
 		                     CMenuTarget* Target=NULL, const char * const ActionKey = NULL,
 		                     neutrino_msg_t DirectKey = CRCInput::RC_nokey, const char * const IconName = NULL)
 
 		                     : CMenuForwarder(Text, Active, Option, Target, ActionKey, DirectKey, IconName) ,
-		                       CPINProtection( validPIN){AlwaysAsk = alwaysAsk;};
+		                       CPINProtection(_validPIN){AlwaysAsk = alwaysAsk;};
 
 		virtual int exec(CMenuTarget* parent);
 };
