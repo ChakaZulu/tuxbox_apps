@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.284 2009/01/16 16:19:33 seife Exp $
+//  $Id: sectionsd.cpp,v 1.285 2009/01/20 15:24:44 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2462,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.284 2009/01/16 16:19:33 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.285 2009/01/20 15:24:44 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -3130,7 +3130,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	/* ...and the one after that. */
 	if (nextEvt.times.size() > 1) {
 		for (SItimes::iterator t = nextEvt.times.begin(); t != nextEvt.times.end(); ++t) {
-			if ((long)(time_cur.startzeit + time_cur.dauer) < (long)(t->startzeit)) {
+			if ((long)(time_cur.startzeit + time_cur.dauer) <= (long)(t->startzeit)) { // TODO: it's not "long", it's "time_t"
 				time_nxt.startzeit = t->startzeit;
 				time_nxt.dauer =t->dauer;
 				break;
@@ -8074,7 +8074,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.284 2009/01/16 16:19:33 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.285 2009/01/20 15:24:44 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
