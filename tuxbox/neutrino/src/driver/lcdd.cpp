@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.66 2009/01/17 12:40:55 seife Exp $
+	$Id: lcdd.cpp,v 1.67 2009/01/20 16:37:25 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -269,14 +269,14 @@ void CLCD::setlcdparameter(void)
 	int dim_time = atoi(g_settings.lcd_setting_dim_time);
 	int dim_brightness = atoi(g_settings.lcd_setting_dim_brightness);
 	bool timeouted = (dim_time > 0) && (timeout_cnt == 0);
-	int brightness, power = last_toggle_state_power;
+	int brightness, power = 0;
 
 	if (timeouted)
 		brightness = dim_brightness;
 	else
 		brightness = g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS];
 
-	if (! timeouted || (dim_brightness > 0))
+	if (last_toggle_state_power && (!timeouted || dim_brightness > 0))
 		power = 1;
 
 	if (mode == MODE_STANDBY)
