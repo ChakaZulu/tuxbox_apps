@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.18 2009/01/23 22:23:02 seife Exp $
+  $Id: movieplayer2.cpp,v 1.19 2009/01/23 22:45:01 seife Exp $
 
   License: GPL
 
@@ -49,7 +49,6 @@
     horribly broken - clean it up.
   * more error checking (end of file, anyone?)
   * bookmarks? what bookmarks?
-  * parental code
   * MPEG1 parser
   * Test and fix AC3
   * check if the CLCD->setMode(MODE_MOVIE) are all correct (and needed)
@@ -151,7 +150,7 @@ extern "C" {
 
 bool g_ZapitsetStandbyState = false;
 
-static bool isTS, isPES, isBookmark;
+static bool isPES, isBookmark;
 
 #ifndef __USE_FILE_OFFSET64
 #error not using 64 bit file offsets
@@ -370,7 +369,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	isBookmark=false;
 	startfilename = "";
 	g_startposition = 0;
-	isTS=false;
 	isPES=false;
 
 	if (actionKey == "fileplayback")
@@ -385,7 +383,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	}
 	else if (actionKey=="tsplayback_pc")
 	{
-		//isPES=true;
 		ParentalEntrance();
 	}
 	else if (actionKey=="bookmarkplayback")
@@ -1939,13 +1936,11 @@ OutputThread(void *arg)
 		{
 			INFO("found TS file\n");
 			isPES = false;
-			isTS = true;
 			ret = pthread_create(&rcvt, NULL, ReadTSFileThread, arg);
 		}
 		else
 		{
 			INFO("found non-TS file, hoping for MPEG\n");
-			isTS = false;
 			isPES = true;
 			ret = pthread_create(&rcvt, NULL, ReadMPEGFileThread, arg);
 		}
@@ -2333,7 +2328,22 @@ void CMoviePlayerGui::ParentalEntrance(void)
 void
 CMoviePlayerGui::PlayFile(int parental)
 {
-	//TODO: parental...
+	/* there's a lastParental variable in the header file, but i
+	   apparently can't use it since it's "private static" */
+	static int last_parental = -1;
+	if(parental != last_parental)
+	{
+		INFO("setting parental to (%d)\n", parental);
+		last_parental = parental;
+
+		std::string hlpstr = "/var/bin/parental.sh";
+		if (parental == 1)
+			hlpstr += " 1";
+		else
+			hlpstr += " 0";
+		system(hlpstr.c_str());
+	}
+
 	PlayStream(STREAMTYPE_LOCAL);
 	return;
 }
@@ -3020,7 +3030,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.18 $");
+	return imageinfo.getModulVersion("","$Revision: 1.19 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
