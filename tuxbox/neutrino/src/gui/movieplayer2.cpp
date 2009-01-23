@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.17 2009/01/18 00:36:05 seife Exp $
+  $Id: movieplayer2.cpp,v 1.18 2009/01/23 22:23:02 seife Exp $
 
   License: GPL
 
@@ -2481,10 +2481,12 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			if (g_settings.streaming_show_tv_in_browser == true &&
 			    g_ZapitsetStandbyState == true)
 			{
-				while (g_output_thread)
+				if (g_output_thread) // the output thread is using the devices
 				{
 					INFO("waiting for output thread to terminate...\n");
-					usleep(250000);
+					pthread_join(rct, NULL);
+					g_output_thread = false;
+					INFO("done\n");
 				}
 				g_Zapit->setStandby(false);
 				g_ZapitsetStandbyState = false;
@@ -3018,7 +3020,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.17 $");
+	return imageinfo.getModulVersion("","$Revision: 1.18 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
