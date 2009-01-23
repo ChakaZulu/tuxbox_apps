@@ -50,7 +50,7 @@ print("\n* constellation:\n\t");
 foreach $k (sort {$MODULATION{$a} <=> $MODULATION{$b}} keys(%MODULATION)) { printf("\"%d\"-%s ", $MODULATION{$k}, $k); }
 print("\n* transmission_mode:\n\t");
 foreach $k (sort {$T_MODE{$a} <=> $T_MODE{$b}} keys(%T_MODE)) { printf("\"%d\"-%s ", $T_MODE{$k}, $k); }
-print("\n* code_rate_(h|l)p:\n\t");
+print("\n* code_rate_[HL]P:\n\t");
 foreach $k (sort {$CODE_RATE{$a} <=> $CODE_RATE{$b}} keys(%CODE_RATE)) { printf("\"%d\"-%s ", $CODE_RATE{$k}, $k); }
 print("\n* guard_interval:\n\t");
 foreach $k (sort {$GINTERVAL{$a} <=> $GINTERVAL{$b}} keys(%GINTERVAL)) { printf("\"%d\"-%s ", $GINTERVAL{$k}, $k); }
@@ -80,7 +80,7 @@ foreach $sourcefile (@sourcefiles)
 		if ($cr_hp eq "NONE") { $cr_hp="AUTO" }; # same as scan.c
 		if ($cr_lp eq "NONE") { $cr_lp="AUTO" }; # same as scan.c
 		printf("\t\t<transponder frequency=\"%d\" bandwidth=\"%d\" constellation=\"%d\" ".
-		       "transmission_mode=\"%d\" code_rate_hp=\"%d\" code_rate_lp=\"%d\" ".
+		       "transmission_mode=\"%d\" code_rate_HP=\"%d\" code_rate_LP=\"%d\" ".
 		       " guard_interval=\"%d\" hierarchy=\"%d\">\n",
 			$freq, $BWIDTH{$bw}, $MODULATION{$mod},
 			$T_MODE{$tmode}, $CODE_RATE{$cr_hp}, $CODE_RATE{$cr_lp},
