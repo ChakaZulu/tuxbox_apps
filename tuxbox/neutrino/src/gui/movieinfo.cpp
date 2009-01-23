@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.12 2009/01/10 18:45:20 seife Exp $
+	$Id: movieinfo.cpp,v 1.13 2009/01/23 16:57:50 seife Exp $
 
 	Kommentar:
 
@@ -61,7 +61,6 @@
 CMovieInfo::CMovieInfo()
 {
 	//TRACE("[mi] new\r\n");
-	filetype = FT_UNKNOWN;
 }
 
 CMovieInfo::~CMovieInfo()
@@ -243,6 +242,7 @@ bool CMovieInfo::saveMovieInfo(MI_MOVIE_INFO& movie_info, CFile* file)
 	{
 		file_xml.Name = movie_info.file.Name;
 		result = convertTs2XmlName(&file_xml.Name);
+		// result is always false for .vdr files...
 	}
 	else
 	{
@@ -252,6 +252,7 @@ bool CMovieInfo::saveMovieInfo(MI_MOVIE_INFO& movie_info, CFile* file)
 	
 	if( result == true )
 	{
+		// ...so we don't need to worry about what happens here in the vdr case
 		result = encodeMovieInfoXml(&text,movie_info);
 		if(result == true)
 		{
@@ -281,6 +282,7 @@ bool CMovieInfo::loadMovieInfo( MI_MOVIE_INFO* movie_info, CFile* file )
 	//TRACE("[mi]->loadMovieInfo \r\n");
 	bool result = true;
 	CFile file_xml;
+	bool is_vdr = false;
 
 	if(file == NULL)
 	{
@@ -289,16 +291,13 @@ bool CMovieInfo::loadMovieInfo( MI_MOVIE_INFO* movie_info, CFile* file )
 		int pos = file_xml.Name.rfind(".vdr");
 		if (pos == (int)file_xml.Name.length() - 4)
 		{
+			is_vdr = true;
 			file_xml.Name = movie_info->file.getPath() + "/info.vdr";
 			result = !access(file_xml.Name.c_str(), R_OK);
-			if (result)
-				filetype = FT_VDR;
 		}
 		else
 		{
 			result = convertTs2XmlName(&file_xml.Name);
-			if (result)
-				filetype = FT_TS;
 		}
 	}
 	else
@@ -313,7 +312,7 @@ bool CMovieInfo::loadMovieInfo( MI_MOVIE_INFO* movie_info, CFile* file )
 		result = loadFile(file_xml,text, 6000);
 		if(result == true)  
 		{
-			if (filetype == FT_VDR)
+			if (is_vdr)
 			{
 				result = parseInfoVDR(text, movie_info);
 			}
@@ -960,8 +959,6 @@ bool CMovieInfo::loadFile(CFile& file,char* buffer, int buffer_size)
 	if (strncmp(file.getFileName().c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 	{
 		result = loadFile_vlc(file, buffer,buffer_size);
-		if (result)
-			filetype = FT_VLC;
 	}
 	else
 	{
@@ -1010,16 +1007,20 @@ bool CMovieInfo::loadFile_vlc(CFile& file,char* buffer, int buffer_size)
 bool CMovieInfo::saveFile(const CFile& file, const char* text, const int text_size)
 {
 	bool result = false;
-	if (filetype == FT_VLC)
+	std::string fn = file.getFileName();
+	if (strncmp(fn.c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 	{
 		result = saveFile_vlc(file, text,text_size);
 	}
-	else if (filetype == FT_VDR)
+	// paranoia check, but saveFile should not even be called for .vdr files...
+	else if (fn.rfind(".vdr") == fn.length() - 4 && fn.length() > 3)
 	{
+		fprintf(stderr, "ERROR! CMovieInfo::saveFile called for VDR file %s\n", fn.c_str());
 		result = saveFile_vdr(file, text, text_size);
 	}
-	else if (filetype == FT_TS)
+	else
 	{
+		fprintf(stderr, "%s:%d saving TS movieinfo: %s\n", __FUNCTION__, __LINE__, fn.c_str());
 		result = saveFile_std(file, text,text_size);
 	}
 	return(result);

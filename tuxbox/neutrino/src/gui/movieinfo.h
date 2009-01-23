@@ -166,13 +166,6 @@ typedef struct
 	int	 epgVTXPID;			// currently not used, we just do not want to loose this info if movie info is saved backed 
 }MI_MOVIE_INFO;
 
-typedef enum
-{
-	FT_UNKNOWN,
-	FT_TS,
-	FT_VLC,
-	FT_VDR
-} MI_FILETYPE;
 
 class CMovieInfo
 {
@@ -202,7 +195,6 @@ class CMovieInfo
 		bool saveFile_vdr(const CFile& file, const char* text, const int text_size);
 		bool saveFile(const CFile& file, const char* text, const int text_size);
 	private:// variables
-		MI_FILETYPE filetype;
 };
 
 #endif /*MOVIEINFO_H_*/
