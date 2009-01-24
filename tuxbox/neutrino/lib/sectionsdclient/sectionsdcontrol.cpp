@@ -1,9 +1,11 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.8 2009/01/15 09:31:45 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.9 2009/01/24 17:47:03 seife Exp $
  *
  * Sectionsd command line interface - The Tuxbox Project
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
+ *
+ * (C) 2008-2009 Stefan Seyfried
  *
  * License: GPL
  *
@@ -105,6 +107,11 @@ int main(int argc, char** argv)
 		}
 		else if (!strcmp(argv[i], "--ping"))
 			printf("sectionsd %s\n", client.ping() ? "running" : "dead");
+		else
+		{
+			usage();
+			return 1;
+		}
 	}
 
 	return 0;
