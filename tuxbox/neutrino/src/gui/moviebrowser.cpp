@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.20 2008/12/05 22:06:19 seife Exp $
+	$Id: moviebrowser.cpp,v 1.21 2009/01/24 17:12:47 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.21  2009/01/24 17:12:47  dbt
+	fix broken statusbar in lcd, hope it works now correct see: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=2&t=48312&start=0
+	
 	Revision 1.20  2008/12/05 22:06:19  seife
 	Rework neutrino's RC input routines, making it possible to use "key repeat"
 	and "key release" flags in the future.
@@ -453,7 +456,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.20 2008/12/05 22:06:19 seife Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.21 2009/01/24 17:12:47 dbt Exp $\r\n");
 	init();
 }
 
@@ -1155,7 +1158,9 @@ int CMovieBrowser::exec(const char* path)
 	m_prevRecordSelection = m_currentRecordSelection;
 	m_prevPlaySelection = m_currentPlaySelection;
 
-	saveSettings(&m_settings);	// might be better done in ~CMovieBrowser, but for any reason this does not work if MB is killed by neutrino shutdown	
+	saveSettings(&m_settings);	// might be better done in ~CMovieBrowser, but for any reason this does not work if MB is killed by neutrino shutdown
+	
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 
 	// make stale if we should reload the next time, but not if movie has to be played
 	if(m_settings.reload == true && res == false)
@@ -3882,7 +3887,7 @@ std::string CMovieBrowser::getMovieBrowserVersion(void)
 /************************************************************************/
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.20 $");
+	return imageinfo.getModulVersion("","$Revision: 1.21 $");
 }
 
 /************************************************************************/
