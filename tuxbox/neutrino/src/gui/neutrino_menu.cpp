@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.37 2009/01/16 20:40:16 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.38 2009/01/24 15:24:46 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -716,15 +716,19 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_WRITEFLASHMTD, true, NULL, fe, "writeflashmtd"   , CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 		mtdexpert->addItem(GenericMenuSeparatorLine);
 
+#ifndef DISABLE_INTERNET_UPDATE
 		CStringInputSMS * updateSettings_url_file = new CStringInputSMS(LOCALE_FLASHUPDATE_URL_FILE, g_settings.softupdate_url_file, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789!""$%&/()=?-. ");
 		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_URL_FILE, true, g_settings.softupdate_url_file, updateSettings_url_file));
+#endif
 
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_EXPERTFUNCTIONS, true, NULL, mtdexpert, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 
+#ifndef DISABLE_INTERNET_UPDATE
 #ifndef HAVE_DREAMBOX_HARDWARE
 		updateSettings->addItem(GenericMenuSeparatorLine);
 		CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_FLASHUPDATE_UPDATEMODE, &g_settings.softupdate_mode, FLASHUPDATE_UPDATEMODE_OPTIONS, FLASHUPDATE_UPDATEMODE_OPTION_COUNT, true);
 		updateSettings->addItem( oj );
+#endif
 #endif
 
 		/* show current version */
@@ -747,6 +751,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		/* versionInfo.getType() returns const char * which is never deallocated */
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONSNAPSHOT, false, versionInfo.getType()));
 
+#ifndef DISABLE_INTERNET_UPDATE
 #ifndef HAVE_DREAMBOX_HARDWARE
 		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FLASHUPDATE_PROXYSERVER_SEP));
 
@@ -758,6 +763,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 		CStringInputSMS * updateSettings_proxypass = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYPASSWORD, g_settings.softupdate_proxypassword, 20, LOCALE_FLASHUPDATE_PROXYPASSWORD_HINT1, LOCALE_FLASHUPDATE_PROXYPASSWORD_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_PROXYPASSWORD, true, g_settings.softupdate_proxypassword, updateSettings_proxypass));
+#endif
 #endif
 
 		updateSettings->addItem(GenericMenuSeparatorLine);

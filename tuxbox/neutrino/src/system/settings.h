@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.200 2008/11/16 22:29:20 dbt Exp $
+  $Id: settings.h,v 1.201 2009/01/24 15:24:47 seife Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -315,12 +315,14 @@ struct SNeutrinoSettings
 	int screen_EndX;
 	int screen_EndY;
 
+#ifndef DISABLE_INTERNET_UPDATE
 	//Software-update
 	int softupdate_mode;
 	char softupdate_url_file[31];
 	char softupdate_proxyserver[31];
 	char softupdate_proxyusername[31];
 	char softupdate_proxypassword[31];
+#endif
 
 	//BouquetHandling
 	int bouquetlist_mode;

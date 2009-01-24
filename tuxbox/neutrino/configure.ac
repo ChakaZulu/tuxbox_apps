@@ -77,6 +77,11 @@ AC_ARG_ENABLE(use-libxml2,
                TUXBOX_APPS_LIB_PKGCONFIG(XML,libxml-2.0)],
                        [TUXBOX_APPS_LIB_PKGCONFIG(XML,tuxbox-xmltree)])
 
+AC_ARG_ENABLE(http-update,
+	AS_HELP_STRING(--enable-http-update,activate http update),
+	,[enable_http_update=yes])
+AM_CONDITIONAL(DISABLE_INTERNET_UPDATE,test "$enable_http_update" = "no")
+
 if test "$enable_upnp" = "yes"; then
 TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
 AC_DEFINE(ENABLE_UPNP,1,[include upnp support])
@@ -84,6 +89,10 @@ fi
 
 if test "$enable_flac" = "yes"; then
 AC_DEFINE(ENABLE_FLAC,1,[include FLAC support])
+fi
+
+if test "$enable_http_update" = "no"; then
+AC_DEFINE(DISABLE_INTERNET_UPDATE,1,[deactivate http update])
 fi
 
 if test "$BOXTYPE" = "dm500" ; then

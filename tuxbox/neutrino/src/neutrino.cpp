@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.916 2009/01/24 12:12:21 seife Exp $
+	$Id: neutrino.cpp,v 1.917 2009/01/24 15:24:44 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -604,12 +604,14 @@ int CNeutrinoApp::loadSetup()
 	g_settings.screen_EndX = configfile.getInt32( "screen_EndX", 668 );
 	g_settings.screen_EndY = configfile.getInt32( "screen_EndY", 555 );
 
+#ifndef DISABLE_INTERNET_UPDATE
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
 	strcpy(g_settings.softupdate_url_file, configfile.getString("softupdate_url_file", "/etc/update.urls").c_str());
 	strcpy(g_settings.softupdate_proxyserver, configfile.getString("softupdate_proxyserver", "" ).c_str());
 	strcpy(g_settings.softupdate_proxyusername, configfile.getString("softupdate_proxyusername", "" ).c_str());
 	strcpy(g_settings.softupdate_proxypassword, configfile.getString("softupdate_proxypassword", "" ).c_str());
+#endif
 
 	//BouquetHandling
 	g_settings.bouquetlist_mode = configfile.getInt32( "bouquetlist_mode", 0 );
@@ -1098,12 +1100,14 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "screen_EndX", g_settings.screen_EndX );
 	configfile.setInt32( "screen_EndY", g_settings.screen_EndY );
 
+#ifndef DISABLE_INTERNET_UPDATE
 	//Software-update
 	configfile.setInt32 ("softupdate_mode"          , g_settings.softupdate_mode          );
 	configfile.setString("softupdate_url_file"      , g_settings.softupdate_url_file      );
 	configfile.setString("softupdate_proxyserver"   , g_settings.softupdate_proxyserver   );
 	configfile.setString("softupdate_proxyusername" , g_settings.softupdate_proxyusername );
 	configfile.setString("softupdate_proxypassword" , g_settings.softupdate_proxypassword );
+#endif
 
 	//BouquetHandling
 	configfile.setInt32( "bouquetlist_mode", g_settings.bouquetlist_mode );

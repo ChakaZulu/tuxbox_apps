@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.130 2008/11/30 22:30:58 dbt Exp $
+	$Id: update.cpp,v 1.131 2009/01/24 15:24:46 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -54,7 +54,9 @@
 #include <gui/widget/hintbox.h>
 
 #include <system/flashtool.h>
+#ifndef DISABLE_INTERNET_UPDATE
 #include <system/httptool.h>
+#endif
 
 #include <sectionsdclient/sectionsdclient.h>
 
@@ -132,6 +134,7 @@ public:
 		}
 };
 
+#ifndef DISABLE_INTERNET_UPDATE
 bool CFlashUpdate::selectHttpImage(void)
 {
 	CHTTPTool httpTool;
@@ -243,6 +246,7 @@ bool CFlashUpdate::getUpdateImage(const std::string & version)
 	printf("[update] get update (url): %s - %s\n", filename.c_str(), gTmpPath UPDATE_LOCAL_FILENAME);
 	return httpTool.downloadFile(filename, gTmpPath UPDATE_LOCAL_FILENAME, 40 );
 }
+#endif
 
 bool CFlashUpdate::checkVersion4Update()
 {
@@ -250,6 +254,7 @@ bool CFlashUpdate::checkVersion4Update()
 	CFlashVersionInfo * versionInfo=0;
 	neutrino_locale_t msg_body;
 
+#ifndef DISABLE_INTERNET_UPDATE
 #ifndef HAVE_DREAMBOX_HARDWARE
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
@@ -271,6 +276,7 @@ bool CFlashUpdate::checkVersion4Update()
 		msg_body = LOCALE_FLASHUPDATE_MSGBOX;
 	}
 	else
+#endif
 #endif
 	{
 		CFileBrowser UpdatesBrowser;
@@ -382,6 +388,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	showGlobalStatus(20);
 
 	bool looks_like_cramfs = filename.find(".cramfs") != unsigned(-1);
+#ifndef DISABLE_INTERNET_UPDATE
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
 		if(!getUpdateImage(newVersion))
@@ -392,6 +399,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 		}
 		filename = std::string(gTmpPath UPDATE_LOCAL_FILENAME);
 	}
+#endif
 
 	showGlobalStatus(40);
 
