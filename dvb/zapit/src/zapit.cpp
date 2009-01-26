@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.415 2009/01/16 16:19:32 seife Exp $
+ * $Id: zapit.cpp,v 1.416 2009/01/26 11:18:12 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -39,12 +39,13 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#ifdef HAVE_DREAMBOX_HARDWARE
-#include <sys/ioctl.h>
-#endif
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
+#ifdef HAVE_DREAMBOX_HARDWARE
+#include <sys/ioctl.h>
 #endif
 
 /* AudioPIDs per channel are saved here between sessions. */
@@ -57,7 +58,7 @@
 
 /* zapit headers */
 #include <zapit/audio.h>
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 #include <zapit/aviaext.h>
 #endif
 #include <zapit/cam.h>
@@ -82,7 +83,7 @@ CConfigFile config(',', false);
 CEventServer *eventServer = NULL;
 /* the dvb audio device */
 CAudio *audioDecoder = NULL;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 /* the aviaEXT device */
 CAViAext *aviaExtDriver = NULL;
 #endif
@@ -1222,7 +1223,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	if ((standby) && 
 			((rmsg.cmd != CZapitMessages::CMD_SET_STANDBY) &&
 			(rmsg.cmd != CZapitMessages::CMD_SHUTDOWN) &&
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 			(rmsg.cmd != CZapitMessages::CMD_SET_AE_IEC_ON) &&
 			(rmsg.cmd != CZapitMessages::CMD_SET_AE_IEC_OFF) &&
 			(rmsg.cmd != CZapitMessages::CMD_GET_AE_IEC_STATE) &&
@@ -2043,7 +2044,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	case CZapitMessages::CMD_SET_AE_IEC_ON:
 	{
 		setIec(1);
@@ -2083,7 +2084,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger));
 		break;
 	}
-#else
+#endif
+#ifdef HAVE_DREAMBOX_HARDWARE
 	case CZapitMessages::CMD_SET_FASTZAP:
 	{
 		CZapitMessages::commandBoolean msgBoolean;
@@ -2436,7 +2438,7 @@ void setVideoSystem_t(int video_system)
 		videoDecoder->setVideoSystem(NTSC);
 }
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 void setIec(int iec_active)
 {
 	if (iec_active == 0)
@@ -2461,8 +2463,9 @@ void setDemuxMode(int demux_mode)
 		startPlayBack(cc);
 	}
 }
-#else
+#endif
 
+#ifdef HAVE_DREAMBOX_HARDWARE
 void setFastZap(int mode)
 {
 #define VIDEO_SET_FASTZAP       _IOW('o', 4, int)
@@ -2550,7 +2553,7 @@ void leaveStandby(void)
 	if (!videoDecoder) {
 		videoDecoder = new CVideo();
 	}
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if (!aviaExtDriver) {
 		aviaExtDriver = new CAViAext();
 	}
@@ -2649,7 +2652,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.415 2009/01/16 16:19:32 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.416 2009/01/26 11:18:12 seife Exp $\n");
 
 	bool check_lock = true;
 
