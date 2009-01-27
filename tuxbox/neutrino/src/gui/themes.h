@@ -17,8 +17,9 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.h,v 1.4 2007/11/16 05:47:15 ecosys Exp $ 
+	$Id: themes.h,v 1.5 2009/01/27 02:24:19 ecosys Exp $ 
 
+	Copyright (C) 2007, 2008, 2009 (flasher) Frank Liebelt
 */
 
 #ifndef __cthemes__
