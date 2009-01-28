@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.38 2009/01/24 15:24:46 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.39 2009/01/28 23:37:04 ecosys Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -714,9 +714,9 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		mtdexpert->addItem(GenericMenuSeparatorLine);
 		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_READFLASHMTD , true, NULL, fe, "readflashmtd"    , CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_WRITEFLASHMTD, true, NULL, fe, "writeflashmtd"   , CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+#ifndef DISABLE_INTERNET_UPDATE
 		mtdexpert->addItem(GenericMenuSeparatorLine);
 
-#ifndef DISABLE_INTERNET_UPDATE
 		CStringInputSMS * updateSettings_url_file = new CStringInputSMS(LOCALE_FLASHUPDATE_URL_FILE, g_settings.softupdate_url_file, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789!""$%&/()=?-. ");
 		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_URL_FILE, true, g_settings.softupdate_url_file, updateSettings_url_file));
 #endif
