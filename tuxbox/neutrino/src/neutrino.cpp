@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.917 2009/01/24 15:24:44 seife Exp $
+	$Id: neutrino.cpp,v 1.918 2009/02/01 10:59:27 barf Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -118,6 +118,7 @@ const char* usermenu_button_def[SNeutrinoSettings::BUTTON_MAX]={"red","green","y
 CVCRControl::CDevice * recordingdevice = NULL;
 
 #define NEUTRINO_SETTINGS_FILE          CONFIGDIR "/neutrino.conf"
+#define NEUTRINO_ZAPTO_TIMER_SCRIPT	CONFIGDIR "/zapto.timer"
 #define NEUTRINO_RECORDING_TIMER_SCRIPT CONFIGDIR "/recording.timer"
 #define NEUTRINO_RECORDING_START_SCRIPT CONFIGDIR "/recording.start"
 #define NEUTRINO_RECORDING_ENDED_SCRIPT CONFIGDIR "/recording.end"
@@ -2742,6 +2743,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
 	{
+		execute_start_file(NEUTRINO_ZAPTO_TIMER_SCRIPT);
 		if( mode == mode_standby )
 		{
 			// WAKEUP
