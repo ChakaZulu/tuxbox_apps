@@ -869,6 +869,7 @@ void CControlAPI::VideoOutputCGI(CyhookHandler *hh)
 		videooutput = CControldClient::VIDEOOUTPUT_YUV_CVBS;
 	else {
 		hh->SendError();
+		return;
 	}
 
 	NeutrinoAPI->Controld->setVideoOutput(videooutput);
