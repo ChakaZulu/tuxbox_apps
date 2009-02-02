@@ -2,3 +2,4 @@
 Makefile
 controldclient.lo
 libcontroldclient.la
+controldc
