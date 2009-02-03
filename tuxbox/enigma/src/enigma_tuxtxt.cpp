@@ -746,11 +746,15 @@ int eTuxtxtWidget::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_cursorActions->help)
 		{
+			int vtxtpid = tuxtxt_cache.vtxtpid;
+			int page = tuxtxt_cache.page;
 			CancelPageCatching();
 			lock.unlock();
 			hide();
 			eWidget::eventHandler(event);
+			tuxtxt_cache.vtxtpid = vtxtpid;
 			show();
+			tuxtxt_cache.page = page;
 			return 1;
 		}
 		else if (event.action == &i_cursorActions->ok)
