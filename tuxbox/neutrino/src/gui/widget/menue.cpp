@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.147 2009/01/01 23:36:38 seife Exp $
+	$Id: menue.cpp,v 1.148 2009/02/03 18:28:21 barf Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -272,6 +272,7 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 					break;
 
 				case (CRCInput::RC_timeout):
+					retval = menu_return::RETURN_EXIT_ALL;
 					break;
 
 				//close any menue on dbox-key
