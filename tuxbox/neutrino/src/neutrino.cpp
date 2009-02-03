@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.919 2009/02/03 17:40:49 barf Exp $
+	$Id: neutrino.cpp,v 1.920 2009/02/03 18:18:28 barf Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2473,7 +2473,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 	res = res | g_InfoViewer->handleMsg(msg, data);
 	res = res | channelList->handleMsg(msg, data);
 
-	if( res != messages_return::unhandled )
+	if ( res != messages_return::unhandled )
 	{
 		if( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
 			delete (unsigned char*) data;
@@ -2490,67 +2490,67 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 	}
 
 	if (!waitforshutdown) {
-	if ((msg == CRCInput::RC_home || msg == CRCInput::RC_ok) && mode == mode_standby && data == 0)
-		g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
-	else if (msg == CRCInput::RC_standby)
-	{
-		if (data == 0)
+		if ((msg == CRCInput::RC_home || msg == CRCInput::RC_ok) && mode == mode_standby && data == 0)
+			g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
+		else if (msg == CRCInput::RC_standby)
 		{
-			neutrino_msg_t new_msg;
-
-			/* Note: pressing the power button on the dbox (not the remote control) over 1 second */
-			/*       shuts down the system even if !g_settings.shutdown_real_rcdelay (see below)  */
-			gettimeofday(&standby_pressed_at, NULL);
-
-			if ((mode != mode_standby) && (g_settings.shutdown_real))
+			if (data == 0)
 			{
-				new_msg = NeutrinoMessages::SHUTDOWN;
-			}
-			else
-			{
-				new_msg = (mode == mode_standby) ? NeutrinoMessages::STANDBY_OFF : NeutrinoMessages::STANDBY_ON;
+				neutrino_msg_t new_msg;
 
-				if ((g_settings.shutdown_real_rcdelay))
+				/* Note: pressing the power button on the dbox (not the remote control) over 1 second */
+				/*       shuts down the system even if !g_settings.shutdown_real_rcdelay (see below)  */
+				gettimeofday(&standby_pressed_at, NULL);
+
+				if ((mode != mode_standby) && (g_settings.shutdown_real))
 				{
-					neutrino_msg_t      msg;
-					neutrino_msg_data_t data;
-					struct timeval      endtime;
-					time_t              seconds;
+					new_msg = NeutrinoMessages::SHUTDOWN;
+				}
+				else
+				{
+					new_msg = (mode == mode_standby) ? NeutrinoMessages::STANDBY_OFF : NeutrinoMessages::STANDBY_ON;
 
-					int timeout = 0;
-					int timeout1 = 0;
-
-					sscanf(g_settings.repeat_blocker, "%d", &timeout);
-					sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
-
-					if (timeout1 > timeout)
-						timeout = timeout1;
-
-					timeout += 500;
-
-					while(true)
+					if ((g_settings.shutdown_real_rcdelay))
 					{
-						g_RCInput->getMsg_ms(&msg, &data, timeout);
-						/* if the power key gets released, then get out of here */
-						if (msg == (CRCInput::RC_standby | CRCInput::RC_Release))
-							break;
+						neutrino_msg_t      msg;
+						neutrino_msg_data_t data;
+						struct timeval      endtime;
+						time_t              seconds;
 
-						gettimeofday(&endtime, NULL);
-						seconds = endtime.tv_sec - standby_pressed_at.tv_sec;
-						if (endtime.tv_usec < standby_pressed_at.tv_usec)
-							seconds--;
-						if (seconds >= 1)
+						int timeout = 0;
+						int timeout1 = 0;
+
+						sscanf(g_settings.repeat_blocker, "%d", &timeout);
+						sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
+
+						if (timeout1 > timeout)
+							timeout = timeout1;
+
+						timeout += 500;
+
+						while(true)
 						{
-							new_msg = NeutrinoMessages::SHUTDOWN;
-							break;
+							g_RCInput->getMsg_ms(&msg, &data, timeout);
+							/* if the power key gets released, then get out of here */
+							if (msg == (CRCInput::RC_standby | CRCInput::RC_Release))
+								break;
+
+							gettimeofday(&endtime, NULL);
+							seconds = endtime.tv_sec - standby_pressed_at.tv_sec;
+							if (endtime.tv_usec < standby_pressed_at.tv_usec)
+								seconds--;
+							if (seconds >= 1)
+							{
+								new_msg = NeutrinoMessages::SHUTDOWN;
+								break;
+							}
 						}
 					}
 				}
+				g_RCInput->postMsg(new_msg, 0);
+				return messages_return::cancel_all | messages_return::handled;
 			}
-			g_RCInput->postMsg(new_msg, 0);
-			return messages_return::cancel_all | messages_return::handled;
-		}
-		else                                        /* data == 1: KEY_POWER released                         */
+			else                                        /* data == 1: KEY_POWER released                         */
 			if (standby_pressed_at.tv_sec != 0) /* check if we received a KEY_POWER pressed event before */
 			{                                   /* required for correct handling of KEY_POWER events of  */
 				                            /* the power button on the dbox (not the remote control) */
@@ -2565,509 +2565,515 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 					return messages_return::cancel_all | messages_return::handled;
 				}
 			}
-	}
-	else if ((msg == CRCInput::RC_plus) ||
-		 (msg == CRCInput::RC_minus) ||
-		 (msg == NeutrinoMessages::EVT_VOLCHANGED))
-	{
-		setVolume(msg, (mode != mode_scart));
-		return messages_return::handled;
-	}
-	else if(msg == CRCInput::RC_spkr && !repeat)
-	{
-		if( mode == mode_standby )
-		{
-			//switch lcd off/on
-			CLCD::getInstance()->togglePower();
 		}
-		else
+		else if ((msg == CRCInput::RC_plus) ||
+			 (msg == CRCInput::RC_minus) ||
+			 (msg == NeutrinoMessages::EVT_VOLCHANGED))
 		{
-			//mute
-			AudioMute( !current_muted );
-		}
-		return messages_return::handled;	
-	}
-
-	/* HACK: mark all key-repeat and key-release events as "handled" in order not to
-	   screw up all the menus and hintboxes that do not yet handle them correctly */
-	if (msg <= CRCInput::RC_MaxRC)
-		if (repeat || (msg & CRCInput::RC_Release))
+			setVolume(msg, (mode != mode_scart));
 			return messages_return::handled;
-		else
-			return messages_return::unhandled;
-	/* no remotecontrol/keyboard events below here... */
-
-	if (msg == NeutrinoMessages::EVT_VCRCHANGED)
-	{
-		if (g_settings.vcr_AutoSwitch)
+		}
+		else if(msg == CRCInput::RC_spkr && !repeat)
 		{
-			if (data != VCR_STATUS_OFF)
-				g_RCInput->postMsg(NeutrinoMessages::VCR_ON, 0);
-			else
-				g_RCInput->postMsg(NeutrinoMessages::VCR_OFF, 0);
-		}
-		return messages_return::handled | messages_return::cancel_info;
-	}
-	else if( msg == NeutrinoMessages::EVT_MUTECHANGED )
-	{
-		CControldMsg::commandMute* cmd = (CControldMsg::commandMute*) data;
-		if(cmd->type == (CControld::volume_type)g_settings.audio_avs_Control)
-			AudioMute( cmd->mute, true );
-		delete (unsigned char*) data;
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::EVT_RECORDMODE )
-	{
-		dprintf(DEBUG_DEBUG, "neutrino - recordmode %s\n", ( data ) ? "on":"off" );
-
-		recordingstatus = data;
-
-		if( ( !g_InfoViewer->is_visible ) && data )
-			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
-
-		static t_channel_id old_parent_id;
-		t_channel_id old_id = g_Zapit->getCurrentServiceID();
-		if (data) {
-			old_parent_id = channelList->getActiveChannel_ChannelID();
-			// if record on - get channelList from zapit
-//			channelsInit(init_mode_init);
-			channelsInit4Record();
-		} else {
-			// if record off - switch channelList to old mode
-			if (g_Zapit->isChannelTVChannel(old_parent_id))
-				channelsInit(init_mode_switch, mode_tv);
-			else 
-				channelsInit(init_mode_switch, mode_radio);
-		}
-
-		// if a neutrino channel for current channel_id cannot be found (eg tuned to a sub service)
-		// adjust to old main channel
-		if (!channelList->adjustToChannelID(old_id) && !data)
-			channelList->adjustToChannelID(old_parent_id);
-
-		if(old_id == 0)
-			channelList->zapTo(0);
-	}
-	else if( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED )			// EVT_BOUQUETSCHANGED: initiated by zapit ; EVT_SERVICESCHANGED: no longer used
-	{
-		t_channel_id old_id = channelList->getActiveChannel_ChannelID();
-
-		channelsInit(init_mode_init);
-
-		if((old_id == 0) || (!(channelList->adjustToChannelID(old_id))))
-			channelList->zapTo(0);
-
-		return messages_return::handled;
-	}
-	else if (msg == NeutrinoMessages::RECORD_START)
-	{
-		execute_start_file(NEUTRINO_RECORDING_START_SCRIPT);
-		/* set nextRecordingInfo to current event (replace other scheduled recording if available) */
-
-		/*
-		 * Note: CTimerd::RecordingInfo is a class!
-		 * What a brilliant idea to send classes via the eventserver!
-		 * => typecast to avoid destructor call
-		 */
-		if (nextRecordingInfo != NULL)
-			delete (unsigned char *) nextRecordingInfo;
-
-		nextRecordingInfo = (CTimerd::RecordingInfo *) data;
-
-		startNextRecording();
-
-		return messages_return::handled | messages_return::cancel_all;
-	}
-	else if( msg == NeutrinoMessages::RECORD_STOP)
-	{
-		if(((CTimerd::RecordingStopInfo*)data)->eventID==recording_id)
-		{ // passendes stop zur Aufnahme
-			CVCRControl * vcr_control = CVCRControl::getInstance();
-			if (vcr_control->isDeviceRegistered())
+			if( mode == mode_standby )
 			{
-				if ((vcr_control->getDeviceState() == CVCRControl::CMD_VCR_RECORD) ||
-				    (vcr_control->getDeviceState() == CVCRControl::CMD_VCR_PAUSE ))
-				{
-					vcr_control->Stop();
-					recordingstatus = 0;
-				}
-				else
-					printf("falscher state\n");
+				//switch lcd off/on
+				CLCD::getInstance()->togglePower();
 			}
 			else
-				puts("[neutrino.cpp] no recording devices");
+			{
+				//mute
+				AudioMute( !current_muted );
+			}
+			return messages_return::handled;	
+		}
+
+		/* HACK: mark all key-repeat and key-release events as "handled" in order not to
+		   screw up all the menus and hintboxes that do not yet handle them correctly */
+		if (msg <= CRCInput::RC_MaxRC)
+			if (repeat || (msg & CRCInput::RC_Release))
+				return messages_return::handled;
+			else
+				return messages_return::unhandled;
+		/* no remotecontrol/keyboard events below here... */
+
+		if (msg == NeutrinoMessages::EVT_VCRCHANGED)
+		{
+			if (g_settings.vcr_AutoSwitch)
+			{
+				if (data != VCR_STATUS_OFF)
+					g_RCInput->postMsg(NeutrinoMessages::VCR_ON, 0);
+				else
+					g_RCInput->postMsg(NeutrinoMessages::VCR_OFF, 0);
+			}
+			return messages_return::handled | messages_return::cancel_info;
+		}
+		else if( msg == NeutrinoMessages::EVT_MUTECHANGED )
+		{
+			CControldMsg::commandMute* cmd = (CControldMsg::commandMute*) data;
+			if(cmd->type == (CControld::volume_type)g_settings.audio_avs_Control)
+				AudioMute( cmd->mute, true );
+			delete (unsigned char*) data;
+			return messages_return::handled;
+		}
+		else if( msg == NeutrinoMessages::EVT_RECORDMODE )
+		{
+			dprintf(DEBUG_DEBUG, "neutrino - recordmode %s\n", ( data ) ? "on":"off" );
+
+			recordingstatus = data;
+
+			if( ( !g_InfoViewer->is_visible ) && data )
+				g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
+
+			static t_channel_id old_parent_id;
+			t_channel_id old_id = g_Zapit->getCurrentServiceID();
+			if (data)
+			{
+				old_parent_id = channelList->getActiveChannel_ChannelID();
+				// if record on - get channelList from zapit
+				//			channelsInit(init_mode_init);
+				channelsInit4Record();
+			}
+			else
+			{
+				// if record off - switch channelList to old mode
+				if (g_Zapit->isChannelTVChannel(old_parent_id))
+					channelsInit(init_mode_switch, mode_tv);
+				else 
+					channelsInit(init_mode_switch, mode_radio);
+			}
+
+			// if a neutrino channel for current channel_id cannot be found (eg tuned to a sub service)
+			// adjust to old main channel
+			if (!channelList->adjustToChannelID(old_id) && !data)
+				channelList->adjustToChannelID(old_parent_id);
+
+			if(old_id == 0)
+				channelList->zapTo(0);
+		}
+		else if( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED )			// EVT_BOUQUETSCHANGED: initiated by zapit ; EVT_SERVICESCHANGED: no longer used
+		{
+			t_channel_id old_id = channelList->getActiveChannel_ChannelID();
+
+			channelsInit(init_mode_init);
+
+			if((old_id == 0) || (!(channelList->adjustToChannelID(old_id))))
+				channelList->zapTo(0);
+
+			return messages_return::handled;
+		}
+		else if (msg == NeutrinoMessages::RECORD_START)
+		{
+			execute_start_file(NEUTRINO_RECORDING_START_SCRIPT);
+			/* set nextRecordingInfo to current event (replace other scheduled recording if available) */
+
+			/*
+			 * Note: CTimerd::RecordingInfo is a class!
+			 * What a brilliant idea to send classes via the eventserver!
+			 * => typecast to avoid destructor call
+			 */
+			if (nextRecordingInfo != NULL)
+				delete (unsigned char *) nextRecordingInfo;
+
+			nextRecordingInfo = (CTimerd::RecordingInfo *) data;
 
 			startNextRecording();
 
-			if (recordingstatus == 0)
-			{
-				execute_start_file(NEUTRINO_RECORDING_ENDED_SCRIPT);
-			}
+			return messages_return::handled | messages_return::cancel_all;
 		}
-		else if(nextRecordingInfo!=NULL)
+		else if( msg == NeutrinoMessages::RECORD_STOP)
 		{
-			if(((CTimerd::RecordingStopInfo*)data)->eventID == nextRecordingInfo->eventID)
-			{
-
-				/*
-				 * Note: CTimerd::RecordingInfo is a class!
-				 * What a brilliant idea to send classes via the eventserver!
-				 * => typecast to avoid destructor call
-				 */
-				delete (unsigned char *) nextRecordingInfo;
-
-				nextRecordingInfo=NULL;
-			}
-		}
-		delete (unsigned char*) data;
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::ZAPTO)
-	{
-		CTimerd::EventInfo * eventinfo;
-		eventinfo = (CTimerd::EventInfo *) data;
-		if(recordingstatus==0)
-		{
-			bool isTVMode = g_Zapit->isChannelTVChannel(eventinfo->channel_id);
-
-			if ((!isTVMode) && (mode != mode_radio))
-			{
-				radioMode(false);
-				channelsInit(init_mode_switch, mode_radio);
-			}
-			else if (isTVMode && (mode != mode_tv))
-			{
-				tvMode(false);
-				channelsInit(init_mode_switch, mode_tv);
-			}
-			channelList->zapTo_ChannelID(eventinfo->channel_id);
-		}
-		delete (unsigned char*) data;
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
-	{
-		execute_start_file(NEUTRINO_ZAPTO_TIMER_SCRIPT);
-		if( mode == mode_standby )
-		{
-			// WAKEUP
-			standbyMode( false );
-		}
-		if( mode != mode_scart )
-		{
-			CTimerd::TimerList tmpTimerList;
-			CTimerdClient tmpTimerdClient;
-
-			tmpTimerList.clear();
-			tmpTimerdClient.getTimerList( tmpTimerList );
-			std::string name = g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE);
-			name += "\n";
-			std::string zAddData;
-
-			if (tmpTimerList.size() > 0) {
-				sort( tmpTimerList.begin(), tmpTimerList.end() );
-				CTimerd::responseGetTimer &timer = tmpTimerList[0];
-
-				CZapitClient Zapit;
-				zAddData = Zapit.getChannelName( timer.channel_id ); // UTF-8
-				if( zAddData.empty() )
+			if(((CTimerd::RecordingStopInfo*)data)->eventID==recording_id)
+			{ // passendes stop zur Aufnahme
+				CVCRControl * vcr_control = CVCRControl::getInstance();
+				if (vcr_control->isDeviceRegistered())
 				{
-					zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
-				}
-
-				if(timer.epgID!=0)
-				{
-					CEPGData epgdata;
-#warning fixme sectionsd should deliver data in UTF-8 format
-					zAddData += " :\n";
-					if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
+					if ((vcr_control->getDeviceState() == CVCRControl::CMD_VCR_RECORD) ||
+					    (vcr_control->getDeviceState() == CVCRControl::CMD_VCR_PAUSE ))
 					{
-						zAddData += Latin1_to_UTF8(epgdata.title);
+						vcr_control->Stop();
+						recordingstatus = 0;
+					}
+					else
+						printf("falscher state\n");
+				}
+				else
+					puts("[neutrino.cpp] no recording devices");
+
+				startNextRecording();
+
+				if (recordingstatus == 0)
+				{
+					execute_start_file(NEUTRINO_RECORDING_ENDED_SCRIPT);
+				}
+			}
+			else if(nextRecordingInfo!=NULL)
+			{
+				if(((CTimerd::RecordingStopInfo*)data)->eventID == nextRecordingInfo->eventID)
+				{
+
+					/*
+					 * Note: CTimerd::RecordingInfo is a class!
+					 * What a brilliant idea to send classes via the eventserver!
+					 * => typecast to avoid destructor call
+					 */
+				 	delete (unsigned char *) nextRecordingInfo;
+
+					nextRecordingInfo=NULL;
+				}
+			}
+			delete (unsigned char*) data;
+			return messages_return::handled;
+		}
+		else if( msg == NeutrinoMessages::ZAPTO)
+		{
+			CTimerd::EventInfo * eventinfo;
+			eventinfo = (CTimerd::EventInfo *) data;
+			if(recordingstatus==0)
+			{
+				bool isTVMode = g_Zapit->isChannelTVChannel(eventinfo->channel_id);
+
+				if ((!isTVMode) && (mode != mode_radio))
+				{
+					radioMode(false);
+					channelsInit(init_mode_switch, mode_radio);
+				}
+				else if (isTVMode && (mode != mode_tv))
+				{
+					tvMode(false);
+					channelsInit(init_mode_switch, mode_tv);
+				}
+				channelList->zapTo_ChannelID(eventinfo->channel_id);
+			}
+			delete (unsigned char*) data;
+			return messages_return::handled;
+		}
+		else if( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
+		{
+			execute_start_file(NEUTRINO_ZAPTO_TIMER_SCRIPT);
+			if( mode == mode_standby )
+			{
+				// WAKEUP
+				standbyMode( false );
+			}
+			if( mode != mode_scart )
+			{
+				CTimerd::TimerList tmpTimerList;
+				CTimerdClient tmpTimerdClient;
+
+				tmpTimerList.clear();
+				tmpTimerdClient.getTimerList( tmpTimerList );
+				std::string name = g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE);
+				name += "\n";
+				std::string zAddData;
+
+				if (tmpTimerList.size() > 0)
+				{
+					sort( tmpTimerList.begin(), tmpTimerList.end() );
+					CTimerd::responseGetTimer &timer = tmpTimerList[0];
+
+					CZapitClient Zapit;
+					zAddData = Zapit.getChannelName( timer.channel_id ); // UTF-8
+					if( zAddData.empty() )
+					{
+						zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
+					}
+
+					if (timer.epgID!=0)
+					{
+						CEPGData epgdata;
+#warning fixme sectionsd should deliver data in UTF-8 format
+						zAddData += " :\n";
+						if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
+						{
+							zAddData += Latin1_to_UTF8(epgdata.title);
+						}
+						else if(strlen(timer.epgTitle)!=0)
+						{
+							zAddData += Latin1_to_UTF8(timer.epgTitle);
+						}
 					}
 					else if(strlen(timer.epgTitle)!=0)
 					{
 						zAddData += Latin1_to_UTF8(timer.epgTitle);
 					}
 				}
-				else if(strlen(timer.epgTitle)!=0)
+				else
 				{
-					zAddData += Latin1_to_UTF8(timer.epgTitle);
+					zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
+				}
+				name += zAddData;
+				ShowHintUTF( LOCALE_MESSAGEBOX_INFO, name.c_str() );
+				//			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE));
+			}
+
+			return messages_return::handled;
+		}
+		else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
+		{
+			execute_start_file(NEUTRINO_RECORDING_TIMER_SCRIPT);
+
+			if( g_settings.recording_server_wakeup )
+			{
+				std::string command = "etherwake ";
+				command += g_settings.recording_server_mac;
+				if(system(command.c_str()) != 0)
+					perror("etherwake failed");
+			}
+			if (g_settings.recording_type == RECORDING_FILE)
+			{
+				char * recDir = ((CTimerd::RecordingInfo*)data)->recordingDir;
+				for (int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
+				{
+					if (strcmp(g_settings.network_nfs_local_dir[i],recDir) == 0)
+					{
+						printf("[neutrino] waking up %s (%s)\n",g_settings.network_nfs_ip[i].c_str(),recDir);
+						std::string command = "etherwake ";
+						command += g_settings.network_nfs_mac[i];
+						if(system(command.c_str()) != 0)
+							perror("etherwake failed");
+						break;
+					}
 				}
 			}
-			else {
-				zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
-			}
-			name += zAddData;
-			ShowHintUTF( LOCALE_MESSAGEBOX_INFO, name.c_str() );
-//			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE));
-		}
-
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
-	{
-		execute_start_file(NEUTRINO_RECORDING_TIMER_SCRIPT);
-
-		if( g_settings.recording_server_wakeup )
-		{
-			std::string command = "etherwake ";
-			command += g_settings.recording_server_mac;
-			if(system(command.c_str()) != 0)
-				perror("etherwake failed");
-		}
-		if (g_settings.recording_type == RECORDING_FILE)
-		{
-			char * recDir = ((CTimerd::RecordingInfo*)data)->recordingDir;
-			for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
+			if( g_settings.recording_zap_on_announce )
 			{
-				if (strcmp(g_settings.network_nfs_local_dir[i],recDir) == 0)
+				if(recordingstatus==0)
 				{
-					printf("[neutrino] waking up %s (%s)\n",g_settings.network_nfs_ip[i].c_str(),recDir);
-					std::string command = "etherwake ";
-					command += g_settings.network_nfs_mac[i];
-					if(system(command.c_str()) != 0)
-						perror("etherwake failed");
-					break;
+					t_channel_id channel_id=((CTimerd::RecordingInfo*)data)->channel_id;
+					g_Zapit->zapTo_serviceID_NOWAIT(channel_id);
 				}
 			}
+			delete (unsigned char*) data;
+			if( mode != mode_scart )
+				ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_RECORDTIMER_ANNOUNCE));
+			return messages_return::handled;
 		}
-		if( g_settings.recording_zap_on_announce )
+		else if( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
 		{
-			if(recordingstatus==0)
-			{
-				t_channel_id channel_id=((CTimerd::RecordingInfo*)data)->channel_id;
-				g_Zapit->zapTo_serviceID_NOWAIT(channel_id);
-			}
+			if( mode != mode_scart )
+				ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SLEEPTIMERBOX_ANNOUNCE));
+			return messages_return::handled;
 		}
-		delete (unsigned char*) data;
-		if( mode != mode_scart )
-			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_RECORDTIMER_ANNOUNCE));
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
-	{
-		if( mode != mode_scart )
-			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SLEEPTIMERBOX_ANNOUNCE));
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::SLEEPTIMER)
-	{
-		CIRSend irs("sleep");
-		irs.Send();
+		else if( msg == NeutrinoMessages::SLEEPTIMER)
+		{
+			CIRSend irs("sleep");
+			irs.Send();
 
-		if(g_settings.shutdown_real)
-			ExitRun(true);
-		else
-			standbyMode( true );
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::STANDBY_TOGGLE )
-	{
-		standbyMode( !(mode & mode_standby) );
-		g_RCInput->clearRCMsg();
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::STANDBY_ON )
-	{
-		if( mode != mode_standby )
-		{
-			// noch nicht im Standby-Mode...
-			standbyMode( true );
-		}
-		g_RCInput->clearRCMsg();
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::STANDBY_OFF )
-	{
-		if( mode == mode_standby )
-		{
-			// WAKEUP
-			standbyMode( false );
-		}
-		g_RCInput->clearRCMsg();
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
-	{
-		if( mode != mode_scart )
-			skipShutdownTimer = (ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_SHUTDOWNTIMER_ANNOUNCE, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes);
-	}
-	else if( msg == NeutrinoMessages::SHUTDOWN )
-	{
-		// AUSSCHALTEN...
-		if(!skipShutdownTimer)
-		{
-			ExitRun(true);
-		}
-		else
-		{
-			skipShutdownTimer=false;
-		}
-		return messages_return::handled;
-	}
-	else if (msg == NeutrinoMessages::EVT_POPUP)
-	{
-		if (mode != mode_scart)
-			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data); // UTF-8
-		delete (unsigned char*) data;
-		return messages_return::handled;
-	}
-	else if (msg == NeutrinoMessages::EVT_EXTMSG)
-	{
-		if (mode != mode_scart)
-			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
-		delete (unsigned char*) data;
-		return messages_return::handled;
-	}
-	else if (msg == NeutrinoMessages::EVT_RECORDING_ENDED)
-	{
-		if (mode != mode_scart)
-		{
-			neutrino_locale_t msgbody;
-
-			if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_IDLE)
-				msgbody = LOCALE_STREAMING_SUCCESS;
-			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_BUFFER_OVERFLOW)
-				msgbody = LOCALE_STREAMING_BUFFER_OVERFLOW;
-			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_WRITE_OPEN_FAILURE)
-				msgbody = LOCALE_STREAMING_WRITE_ERROR_OPEN;
-			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_WRITE_FAILURE)
-				msgbody = LOCALE_STREAMING_WRITE_ERROR;
-			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_RECORDING_THREADS_FAILED)
-				msgbody = LOCALE_STREAMING_OUT_OF_MEMORY;
+			if(g_settings.shutdown_real)
+				ExitRun(true);
 			else
-				goto skip_message;
-
-			/*
-			 * use a short timeout of only 5 seconds in case it was only a temporary network problem
-			 * in case of STREAM2FILE_STATUS_IDLE we might even have to immediately start the next recording
-			 */
-#warning TODO: it might make some sense to have some log-file (but where do we store this information? nfs/flash/ram?) that collects these messages and maybe a menu-entry to view the lasted XXX messages
-			ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, msgbody, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO, 450, 5);
-
-		skip_message:
-			;
-		}
-		if (((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_IDLE) && ((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_RECORDING_THREADS_FAILED))
-		{
-#warning TODO: count restart-rate to catch endless loops
-			/*
-			 * note that changeNotify does not distinguish between LOCALE_MAINMENU_RECORDING_START and LOCALE_MAINMENU_RECORDING_STOP
-			 * instead it checks the state of the variable recordingstatus
-			 */
-			/* restart recording */
-			doGuiRecord((*(stream2file_status2_t *) data).dir, false, (*(stream2file_status2_t *) data).filename);
-			//changeNotify(LOCALE_MAINMENU_RECORDING_START, data);
-		}
-
-		delete (unsigned char*) data;
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::REMIND)
-	{
-		std::string text = (char*)data;
-		std::string::size_type pos;
-		while((pos=text.find('/'))!= std::string::npos)
-		{
-			text[pos] = '\n';
-		}
-		if( mode != mode_scart )
-			ShowMsgUTF(LOCALE_TIMERLIST_TYPE_REMIND, text, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
-		delete (unsigned char*) data;
-		return messages_return::handled;
-	}
-	else if (msg == NeutrinoMessages::LOCK_RC)
-	{
-		this->rcLock->exec(NULL,CRCLock::NO_USER_INPUT);
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::CHANGEMODE )
-	{
-		if((data & mode_mask)== mode_radio)
-		{
-			if( mode != mode_radio )
-				if((data & norezap)==norezap)
-					radioMode(false);
-				else
-					radioMode(true);
-		}
-		if((data & mode_mask)== mode_tv)
-		{
-			if( mode != mode_tv )
-				if((data & norezap)==norezap)
-					tvMode(false);
-				else
-					tvMode(true);
-		}
-		if((data &mode_mask)== mode_standby)
-		{
-			if(mode != mode_standby)
 				standbyMode( true );
+			return messages_return::handled;
 		}
-		if((data &mode_mask)== mode_audio)
+		else if( msg == NeutrinoMessages::STANDBY_TOGGLE )
 		{
-			lastMode=mode;
-			mode=mode_audio;
+			standbyMode( !(mode & mode_standby) );
+			g_RCInput->clearRCMsg();
+			return messages_return::handled;
 		}
-		if((data &mode_mask)== mode_pic)
+		else if( msg == NeutrinoMessages::STANDBY_ON )
 		{
-			lastMode=mode;
-			mode=mode_pic;
+			if( mode != mode_standby )
+			{
+				// noch nicht im Standby-Mode...
+				standbyMode( true );
+			}
+			g_RCInput->clearRCMsg();
+			return messages_return::handled;
 		}
-		if((data &mode_mask)== mode_ts)
+		else if( msg == NeutrinoMessages::STANDBY_OFF )
 		{
-			lastMode=mode;
-			mode=mode_ts;
+			if( mode == mode_standby )
+			{
+				// WAKEUP
+				standbyMode( false );
+			}
+			g_RCInput->clearRCMsg();
+			return messages_return::handled;
 		}
-	}
-	else if( msg == NeutrinoMessages::VCR_ON )
-	{
-		if( mode != mode_scart )
+		else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 		{
-			// noch nicht im Scart-Mode...
-			scartMode( true );
+			if( mode != mode_scart )
+				skipShutdownTimer = (ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_SHUTDOWNTIMER_ANNOUNCE, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes);
 		}
-		else // sonst nur lcd akt.
-			CLCD::getInstance()->setMode(CLCD::MODE_SCART);
-	}
+		else if( msg == NeutrinoMessages::SHUTDOWN )
+		{
+			// AUSSCHALTEN...
+			if(!skipShutdownTimer)
+			{
+				ExitRun(true);
+			}
+			else
+			{
+				skipShutdownTimer=false;
+			}
+			return messages_return::handled;
+		}
+		else if (msg == NeutrinoMessages::EVT_POPUP)
+		{
+			if (mode != mode_scart)
+				ShowHintUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data); // UTF-8
+			delete (unsigned char*) data;
+			return messages_return::handled;
+		}
+		else if (msg == NeutrinoMessages::EVT_EXTMSG)
+		{
+			if (mode != mode_scart)
+				ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
+			delete (unsigned char*) data;
+			return messages_return::handled;
+		}
+		else if (msg == NeutrinoMessages::EVT_RECORDING_ENDED)
+		{
+			if (mode != mode_scart)
+			{
+				neutrino_locale_t msgbody;
 
-	else if( msg == NeutrinoMessages::VCR_OFF )
-	{
-		if( mode == mode_scart )
-		{
-			// noch nicht im Scart-Mode...
-			scartMode( false );
+				if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_IDLE)
+					msgbody = LOCALE_STREAMING_SUCCESS;
+				else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_BUFFER_OVERFLOW)
+					msgbody = LOCALE_STREAMING_BUFFER_OVERFLOW;
+				else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_WRITE_OPEN_FAILURE)
+					msgbody = LOCALE_STREAMING_WRITE_ERROR_OPEN;
+				else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_WRITE_FAILURE)
+					msgbody = LOCALE_STREAMING_WRITE_ERROR;
+				else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_RECORDING_THREADS_FAILED)
+					msgbody = LOCALE_STREAMING_OUT_OF_MEMORY;
+				else
+					goto skip_message;
+
+				/*
+				 * use a short timeout of only 5 seconds in case it was only a temporary network problem
+				 * in case of STREAM2FILE_STATUS_IDLE we might even have to immediately start the next recording
+				 */
+#warning TODO: it might make some sense to have some log-file (but where do we store this information? nfs/flash/ram?) that collects these messages and maybe a menu-entry to view the lasted XXX messages
+				ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, msgbody, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO, 450, 5);
+
+			skip_message:
+				;
+			}
+			if (((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_IDLE) && ((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_RECORDING_THREADS_FAILED))
+			{
+#warning TODO: count restart-rate to catch endless loops
+				/*
+				 * note that changeNotify does not distinguish between LOCALE_MAINMENU_RECORDING_START and LOCALE_MAINMENU_RECORDING_STOP
+				 * instead it checks the state of the variable recordingstatus
+				 */
+				/* restart recording */
+				doGuiRecord((*(stream2file_status2_t *) data).dir, false, (*(stream2file_status2_t *) data).filename);
+				//changeNotify(LOCALE_MAINMENU_RECORDING_START, data);
+			}
+
+			delete (unsigned char*) data;
+			return messages_return::handled;
 		}
-	}
-	else if (msg == NeutrinoMessages::EVT_START_PLUGIN)
-	{
-		g_PluginList->startPlugin((const char *)data);
-		std::string output = g_PluginList->getScriptOutput();
-		if (!g_PluginList->getScriptOutput().empty())
+		else if( msg == NeutrinoMessages::REMIND)
 		{
-			ShowMsgUTF(LOCALE_PLUGINS_RESULT, Latin1_to_UTF8(g_PluginList->getScriptOutput()),
+			std::string text = (char*)data;
+			std::string::size_type pos;
+			while((pos=text.find('/'))!= std::string::npos)
+			{
+				text[pos] = '\n';
+			}
+			if( mode != mode_scart )
+				ShowMsgUTF(LOCALE_TIMERLIST_TYPE_REMIND, text, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
+			delete (unsigned char*) data;
+			return messages_return::handled;
+		}
+		else if (msg == NeutrinoMessages::LOCK_RC)
+		{
+			this->rcLock->exec(NULL,CRCLock::NO_USER_INPUT);
+			return messages_return::handled;
+		}
+		else if( msg == NeutrinoMessages::CHANGEMODE )
+		{
+			if((data & mode_mask)== mode_radio)
+			{
+				if( mode != mode_radio )
+					if((data & norezap)==norezap)
+						radioMode(false);
+					else
+						radioMode(true);
+			}
+			if((data & mode_mask)== mode_tv)
+			{
+				if( mode != mode_tv )
+					if((data & norezap)==norezap)
+						tvMode(false);
+					else
+						tvMode(true);
+			}
+			if((data &mode_mask)== mode_standby)
+			{
+				if(mode != mode_standby)
+					standbyMode( true );
+			}
+			if((data &mode_mask)== mode_audio)
+			{
+				lastMode=mode;
+				mode=mode_audio;
+			}
+			if((data &mode_mask)== mode_pic)
+			{
+				lastMode=mode;
+				mode=mode_pic;
+			}
+			if((data &mode_mask)== mode_ts)
+			{
+				lastMode=mode;
+				mode=mode_ts;
+			}
+		}
+		else if( msg == NeutrinoMessages::VCR_ON )
+		{
+			if( mode != mode_scart )
+			{
+				// noch nicht im Scart-Mode...
+				scartMode( true );
+			}
+			else // sonst nur lcd akt.
+				CLCD::getInstance()->setMode(CLCD::MODE_SCART);
+		}
+
+		else if( msg == NeutrinoMessages::VCR_OFF )
+		{
+			if( mode == mode_scart )
+			{
+				// noch nicht im Scart-Mode...
+				scartMode( false );
+			}
+		}
+		else if (msg == NeutrinoMessages::EVT_START_PLUGIN)
+		{
+			g_PluginList->startPlugin((const char *)data);
+			std::string output = g_PluginList->getScriptOutput();
+			if (!g_PluginList->getScriptOutput().empty())
+			{
+				ShowMsgUTF(LOCALE_PLUGINS_RESULT, Latin1_to_UTF8(g_PluginList->getScriptOutput()),
 					   CMessageBox::mbrBack,CMessageBox::mbBack,NEUTRINO_ICON_SHELL);
-		}
+			}
 
-		delete (unsigned char*) data;
-		return messages_return::handled;
+			delete (unsigned char*) data;
+			return messages_return::handled;
+		}
+		else if (msg == NeutrinoMessages::EVT_SERVICES_UPD)
+		{
+			CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO,
+							  g_Locale->getText(LOCALE_SERVICEMENU_RELOAD_HINT));
+			hintBox->paint();
+			g_Zapit->reloadCurrentServices();
+			hintBox->hide();
+			delete hintBox;
+		}
 	}
-	else if (msg == NeutrinoMessages::EVT_SERVICES_UPD)
+	else
 	{
-		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO,
-		g_Locale->getText(LOCALE_SERVICEMENU_RELOAD_HINT));
-		hintBox->paint();
-		g_Zapit->reloadCurrentServices();
-		hintBox->hide();
-		delete hintBox;
-	}
-	}
-	else {
-	if (msg == NeutrinoMessages::EVT_SI_FINISHED)
-	{
-		waitforshutdown = false;
-		ExitRun(false);
-	}
+		if (msg == NeutrinoMessages::EVT_SI_FINISHED)
+		{
+			waitforshutdown = false;
+			ExitRun(false);
+		}
 	}
 	if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000))
 		delete (unsigned char*) data;
