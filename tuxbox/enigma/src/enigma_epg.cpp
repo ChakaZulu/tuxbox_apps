@@ -40,6 +40,10 @@ eZapEPG::eZapEPG()
 	:eWidget(0,1), offs(0), focusColumn(0), hours(3)
 	,numservices(8), eventWidget(0), NowTimeLineXPos(-1)
 {
+	init_eZapEPG();
+}
+void eZapEPG::init_eZapEPG()
+{
 	eConfig::getInstance()->getKey("/elitedvb/multiepg/hours", hours);
 	move(ePoint(70, 50));
 	resize(eSize(590, 470));

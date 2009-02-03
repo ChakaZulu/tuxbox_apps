@@ -9,6 +9,7 @@ class eZapBouquetSetup: public eSetupWindow
 	void createNewEmptyBouquet();
 	void editModeSelected();
 	void lockUnlockServices();
+	void init_eZapBouquetSetup();
 public:
 	eZapBouquetSetup();
 };

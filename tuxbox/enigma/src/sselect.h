@@ -15,6 +15,7 @@ class eLabel;
 class eEPGStyleSelector: public eListBoxWindow<eListBoxEntryText>
 {
 	int ssel;
+	void init_eEPGStyleSelector();
 public:
 	eEPGStyleSelector(int ssel=0);
 	int eventHandler( const eWidgetEvent &event );
@@ -40,6 +41,7 @@ class eListBoxEntryService: public eListBoxEntry
 	int flags;
 	int num;
 	int curEventId;
+	void init_eListBoxEntryService();
 public:
 	const eString &getText() const { return sort; }
 	static eListBoxEntryService *selectedToMove;
@@ -177,6 +179,7 @@ public:
 class eFileSelector: public eServiceSelector
 {
 	eServicePath getDirRoot(int list, int _mode);
+	void init_eFileSelector(eString startPath);
 public:
 	eFileSelector(eString startPath);
 

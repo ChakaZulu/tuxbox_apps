@@ -22,6 +22,7 @@ class eSocketMMIHandler: public Object
 	void closeConn();
 	const char *sockname;
 	char *name;
+	void init_eSocketMMIHandler();
 public:
 	const char *getName() const { return name; }
 	Signal2<void, const char*, int> mmi_progress;
@@ -36,6 +37,7 @@ class eSocketMMI : public enigmaMMI
 	void beginExec();
 	void sendAnswer( AnswerType ans, int param, unsigned char *data );
 	static std::map<eSocketMMIHandler*,eSocketMMI*> exist;
+	void init_eSocketMMI();
 public:
 	static eSocketMMI *getInstance( eSocketMMIHandler *handler );
 	eSocketMMI(eSocketMMIHandler *handler);

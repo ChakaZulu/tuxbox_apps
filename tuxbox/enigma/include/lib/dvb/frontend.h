@@ -132,6 +132,7 @@ class eFrontend: public Object
 	void tuneFailed();
 	void tuneOK();
 	void tune_all(eTransponder *trans);
+	void init_eFrontend(int type, const char *demod, const char *sec);
 public:
 	void abortTune() { transponder=0; }
 	void disableRotor() { noRotorCmd = 1, lastRotorCmd=-1; } // no more rotor cmd is sent when tune

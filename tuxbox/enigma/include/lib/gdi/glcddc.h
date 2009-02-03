@@ -12,6 +12,7 @@ class gLCDDC: public gPixmapDC
 	static gLCDDC *instance;
 	int update;
 	void exec(gOpcode *opcode);
+	void init_gLCDDC();
 public:
 	gLCDDC(eLCD *lcd);
 	~gLCDDC();

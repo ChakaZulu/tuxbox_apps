@@ -30,6 +30,10 @@ ePluginThread *ePluginThread::instance = NULL;
 ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, eSimpleConfigFile &config, const char* descr)
 	: eListBoxEntryText((eListBox<eListBoxEntryText>*)parent)
 {
+	init_ePlugin(cfgfile, config,descr);
+}
+void ePlugin::init_ePlugin(const char *cfgfile, eSimpleConfigFile &config, const char* descr)
+{
 	eDebug(cfgfile);
 
 	name = text = config.getInfo("name");
@@ -111,6 +115,10 @@ const char *eZapPlugins::PluginPath[] = { "/var/tuxbox/plugins/", PLUGINDIR "/",
 
 eZapPlugins::eZapPlugins(Types type, eWidget* lcdTitle, eWidget* lcdElement)
 	:eListBoxWindow<ePlugin>(type == StandardPlugin ? _("Plugins") : _("Games"), 8, 400,true), type(type),reordering(0)
+{
+	init_eZapPlugins(lcdTitle, lcdElement);
+}
+void eZapPlugins::init_eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 {
 	setHelpText(_("select plugin and press ok"));
 #ifndef DISABLE_LCD

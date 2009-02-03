@@ -14,6 +14,7 @@ private:
 #endif
 #endif
 //	void satellite_update();
+	void init_eSoftwareUpdate();
 public:
 	eSoftwareUpdate();
 };

@@ -28,6 +28,7 @@ private:
 	eLabel* tmpDescr; // used for description Label in LCD
 	bool neg;
 	int saved_keyboard_mode;
+	void init_eNumber(int _len, int _min, int _max, int _maxdigits, int *init);
 protected:
 	int getActive()	{ return active; }
 	int keyDown(int key);

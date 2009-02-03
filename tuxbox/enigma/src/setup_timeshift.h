@@ -23,6 +23,7 @@ class eZapTimeshiftSetup: public eWindow
 	eButton *seldir;
 	eButton *store;
 	eStatusBar* sbar;
+	void init_eZapTimeshiftSetup();
 private:
 	void storePressed();
 	void selectDir();

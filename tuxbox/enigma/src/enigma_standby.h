@@ -10,6 +10,7 @@ class eZapStandby: public eWidget
 	eServiceReference ref;
 	int rezap;
 	int oldpin8;
+	void init_eZapStandby();
 protected:
 	int eventHandler(const eWidgetEvent &);
 public:

@@ -24,6 +24,10 @@ eSystemInfo::eSystemInfo()
 	,alphaincrement(10), hasstandbywakeuptimer(0), cantimeshift(0)
 	,hasscartswitch(1)
 {
+	init_eSystemInfo();
+}
+void eSystemInfo::init_eSystemInfo()
+{
 	instance=this;
 #if HAVE_DVB_API_VERSION == 3
 	int fd=::open(DEMOD_DEV, O_RDONLY);

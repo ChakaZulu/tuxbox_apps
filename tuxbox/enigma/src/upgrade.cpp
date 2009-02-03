@@ -32,6 +32,7 @@
 
 class ProgressWindow: public eWindow
 {
+	void init_ProgressWindow( const char *wtext );
 public:
 	eProgress progress;
 	ProgressWindow( const char * );
@@ -39,6 +40,10 @@ public:
 
 ProgressWindow::ProgressWindow( const char *wtext )
 	:eWindow(0), progress(this)
+{
+	init_ProgressWindow(wtext);
+}
+void ProgressWindow::init_ProgressWindow( const char *wtext )
 {
 	move(ePoint(100,250));
 	cresize(eSize(470,50));
@@ -83,6 +88,10 @@ eListBoxEntryImage::eListBoxEntryImage
 }
 
 eHTTPDownload::eHTTPDownload(eHTTPConnection *c, const char *filename): eHTTPDataSource(c), filename(filename)
+{
+	init_eHTTPDownload(c,filename);
+}
+void eHTTPDownload::init_eHTTPDownload(eHTTPConnection *c,const char *filename)
 {
 	if (c->remote_header.count("Content-Length"))
 		total=atoi(c->remote_header["Content-Length"].c_str());
@@ -131,6 +140,10 @@ void eHTTPDownloadXML::haveData(void *data, int len)
 
 eUpgrade::eUpgrade(bool manual)
 :http(0), changelog(0)
+{
+	init_eUpgrade(manual);
+}
+void eUpgrade::init_eUpgrade(bool manual)
 {
 	status = new eStatusBar(this);
 	status->setFlags(eStatusBar::flagOwnerDraw);

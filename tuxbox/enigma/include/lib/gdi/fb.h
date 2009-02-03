@@ -16,6 +16,7 @@ class fbClass
 	__u16 red[256], green[256], blue[256], trans[256];
 	static fbClass *instance;
 	int locked;
+	void init_fbClass(const char *fb);
 public:
 	unsigned char *lfb;
 	int showConsole(int state);

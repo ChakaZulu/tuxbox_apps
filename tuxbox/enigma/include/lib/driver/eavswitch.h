@@ -37,6 +37,7 @@ class eAVSwitch
 	void muteAvsAudio(bool);
 	void muteOstAudio(bool);
 	bool loadScartConfig();
+	void init_eAVSwitch();
 protected:
 	enum {NOKIA, SAGEM, PHILIPS} Type;
 	int scart[6];

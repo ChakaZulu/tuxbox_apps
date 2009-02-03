@@ -155,6 +155,7 @@ class eHTTPLog: public eHTTPDataSource, public Object
 	int ok, last;
 	void recvMessage(int lvl, const eString &str);
 	eString toWrite;
+	void init_eHTTPLog();
 public:
 	eHTTPLog(eHTTPConnection *c, int mask, int format);
 	~eHTTPLog();
@@ -164,6 +165,10 @@ public:
 
 eHTTPLog::eHTTPLog(eHTTPConnection *c, int mask, int format):
 	eHTTPDataSource(c), mask(mask), format(format), ok(0)
+{
+	init_eHTTPLog();
+}
+void eHTTPLog::init_eHTTPLog()
 {
 	if (format == 0)
 		connection->local_header["Content-Type"]="text/plain";

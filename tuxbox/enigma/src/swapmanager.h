@@ -66,7 +66,7 @@ class eSwapManager: public eWindow
 	eString status, store, found, swapstring, swaps[10], hdddir, mntbase;
 	int swapfound, swapstatus, swapstate, bytesize, filename, pathname, s;
 	char* swap;
-	
+	void init_eSwapManager();
 public:
 	eSwapManager();
 	~eSwapManager();

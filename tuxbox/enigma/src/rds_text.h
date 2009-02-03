@@ -24,6 +24,7 @@ class RDSTextDecoder : public Object
 	void process_data(int);
 	void process_qdar(unsigned char*);
 	void globalFocusHasChanged(const eWidget* newFocus);
+	void init_RDSTextDecoder();
 public:
 	RDSTextDecoder();
 	~RDSTextDecoder();
@@ -42,6 +43,7 @@ class RassInteractivemode : public eWidget
 	int check_file(char* fname);
 	int check_avail(int page);
 	int eventHandler( const eWidgetEvent &e );
+	void init_RassInteractivemode();
 public:
 	RassInteractivemode();
 	~RassInteractivemode();

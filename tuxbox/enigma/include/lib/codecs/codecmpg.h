@@ -18,6 +18,7 @@ struct syncAudioPacket
 // mpeg-2 ps demuxer.
 class eDemux: public eAudioDecoder
 {
+	void init_eDemux(int sourcefd);
 protected:
 	eIOBuffer &input, &video, &audio;
 	int minFrameLength;

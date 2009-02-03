@@ -1,7 +1,7 @@
 #ifdef ENABLE_FLASHTOOL
 /**********************************************
 *
-*	$Revision: 1.3 $
+*	$Revision: 1.4 $
 *
 **********************************************/
 
@@ -33,6 +33,7 @@ class eFlashtoolMain: public eListBoxWindow<eListBoxEntryText>
 {
 private:
 	void sel_item(eListBoxEntryText *sel);
+	void init_eFlashtoolMain();
 public:
 	eFlashtoolMain();
 	~eFlashtoolMain();

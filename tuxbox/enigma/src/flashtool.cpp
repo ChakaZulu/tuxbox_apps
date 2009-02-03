@@ -1,7 +1,7 @@
 #ifdef ENABLE_FLASHTOOL
 /**********************************************
 *
-*	$Revision: 1.11 $
+*	$Revision: 1.12 $
 *
 **********************************************/
 
@@ -29,6 +29,7 @@
 
 class FlashProgressWindow: public eWindow
 {
+	void init_FlashProgressWindow(const char* wtext);
 public:
 	eProgress progress;
 	FlashProgressWindow(const char *);
@@ -36,6 +37,10 @@ public:
 
 FlashProgressWindow::FlashProgressWindow(const char *wtext)
 	:eWindow(0), progress(this)
+{
+	init_FlashProgressWindow(wtext);
+}
+void FlashProgressWindow::init_FlashProgressWindow(const char* wtext)
 {
 	move(ePoint(100,250));
 	cresize(eSize(470,50));
@@ -47,6 +52,10 @@ FlashProgressWindow::FlashProgressWindow(const char *wtext)
 
 eFlashtoolMain::eFlashtoolMain()
 	:eListBoxWindow<eListBoxEntryText>(_("Flashtool"), 2, 350)
+{
+	init_eFlashtoolMain();
+}
+void eFlashtoolMain::init_eFlashtoolMain()
 {
 	move(ePoint(150, 100));
 	new eListBoxEntryText(&list, _("Save image or part of it"), (void *)0);

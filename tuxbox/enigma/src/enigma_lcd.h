@@ -20,6 +20,7 @@ class eServiceReferenceDVB;
 class eZapLCD: public eWidget
 {
 	static eZapLCD* instance;
+	void init_eZapLCD();
 public:
 	static eZapLCD* getInstance() { return instance; }
 	eZapLCDMain* lcdMain;

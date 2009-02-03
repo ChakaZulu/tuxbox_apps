@@ -24,6 +24,7 @@ private:
 #ifndef DISABLE_LCD
 	void lcd_settings();
 #endif
+	void init_eSystemSettings();
 public:
 	eSystemSettings();
 };

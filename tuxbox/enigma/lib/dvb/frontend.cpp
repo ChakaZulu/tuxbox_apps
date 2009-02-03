@@ -39,6 +39,10 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 	checkRotorLockTimer(eApp), checkLockTimer(eApp), 
 	updateTransponderTimer(eApp), sn(0), noRotorCmd(0)
 {
+	init_eFrontend(type,demod,sec);
+}
+void eFrontend::init_eFrontend(int type, const char *demod, const char *sec)
+{
 	CONNECT(rotorTimer1.timeout, eFrontend::RotorStartLoop );
 	CONNECT(rotorTimer2.timeout, eFrontend::RotorRunningLoop );
 	CONNECT(checkRotorLockTimer.timeout, eFrontend::checkRotorLock );

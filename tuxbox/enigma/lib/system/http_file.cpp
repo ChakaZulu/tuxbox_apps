@@ -9,6 +9,10 @@
 
 eHTTPFile::eHTTPFile(eHTTPConnection *c, int _fd, int method, const char *mime): eHTTPDataSource(c), method(method)
 {
+	init_eHTTPFile(c,_fd,mime);
+}
+void eHTTPFile::init_eHTTPFile(eHTTPConnection *c, int _fd, const char *mime)
+{
 	fd=_fd;
 	if (method == methodGET)
 	{
@@ -61,6 +65,10 @@ eHTTPFile::~eHTTPFile()
 
 eHTTPMovie::eHTTPMovie(eHTTPConnection *c, int _fd, int method, const char *mime, const eString &_filename )
 	:eHTTPDataSource(c), fd(_fd), slice(0), size(0), filename(_filename), method(method)
+{
+	init_eHTTPMovie(c,mime);
+}
+void eHTTPMovie::init_eHTTPMovie(eHTTPConnection *c,const char *mime)
 {
 	if (method == methodGET)
 	{

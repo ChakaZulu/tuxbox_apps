@@ -31,6 +31,7 @@ class PluginOffsetScreen: public eWidget
 	void redrawRightBottom( gPainter *target );
 	void redrawWidget(gPainter *target, const eRect &where);
 	gColor foreColor, backColor;
+	void init_PluginOffsetScreen();
 public:
 	PluginOffsetScreen();
 };
@@ -156,6 +157,10 @@ void PluginOffsetScreen::redrawWidget(gPainter *target, const eRect &where)
 PluginOffsetScreen::PluginOffsetScreen()
 	:eWidget(0, 1), curPos( posLeftTop ),
 		left(20), top(20), right( 699 ), bottom( 555 )
+{
+	init_PluginOffsetScreen();
+}
+void PluginOffsetScreen::init_PluginOffsetScreen()
 {
 	foreColor = eSkin::getActive()->queryColor("eWindow.titleBarFont");
 	setForegroundColor( foreColor );

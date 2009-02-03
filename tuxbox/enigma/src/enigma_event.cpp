@@ -214,6 +214,10 @@ void eEventDisplay::setEPGSearchEvent(eServiceReferenceDVB &Ref, EITEvent *event
 eEventDisplay::eEventDisplay(eString service, eServiceReferenceDVB &ref, const ePtrList<EITEvent>* e, EITEvent* evt )
 : eWindow(1), service(service), ref(ref), evt(evt)
 {
+	init_eEventDisplay(e);
+}
+void eEventDisplay::init_eEventDisplay(const ePtrList<EITEvent>* e)
+{
 	eventlist=0;
 	events=0;
 

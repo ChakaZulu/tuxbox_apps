@@ -22,6 +22,10 @@
 ENgrabSetup::ENgrabSetup():
 	eWindow(0)
 {
+	init_ENgrabSetup();
+}
+void ENgrabSetup::init_ENgrabSetup()
+{
 	setText(_("Ngrab Server"));
 	cmove(ePoint(170, 146));
 	cresize(eSize(390, 310));

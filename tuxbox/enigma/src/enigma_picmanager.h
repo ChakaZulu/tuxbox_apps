@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_picmanager.h,v 1.5 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_picmanager.h,v 1.6 2009/02/03 18:54:33 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -39,6 +39,7 @@ private:
 	void fieldSelected(int *number);
 	void okPressed();
 	void abortPressed();
+	void init_ePicViewerSettings();
 public:
 	ePicViewerSettings();
 	~ePicViewerSettings();

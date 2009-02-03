@@ -8,14 +8,16 @@
 eStatusBar::eStatusBar( eWidget* parent, const char *deco)
 	:eLabel(parent, 0, 0, deco), current(0)
 {
+	init_eStatusBar();
+}
+void eStatusBar::init_eStatusBar()
+{
 	setFont( eSkin::getActive()->queryFont("eStatusBar") );
 	setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
 	setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
 	eLabel::setFlags( RS_WRAP | eLabel::flagVCenter );
 	initialize();
 }
-
-
 void eStatusBar::initialize()
 {
 	if ( parent )

@@ -25,6 +25,10 @@ fbClass *fbClass::getInstance()
 
 fbClass::fbClass(const char *fb)
 {
+	init_fbClass(fb);
+}
+void fbClass::init_fbClass(const char *fb)
+{
 	instance=this;
 	locked=0;
 	available=0;

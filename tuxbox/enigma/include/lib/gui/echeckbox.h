@@ -14,6 +14,7 @@ private:
 	void gotFocus();
 	void lostFocus();
 	bool swapTxtPixmap;
+	void init_eCheckbox(int checked);
 public:
 	Signal1<void, int> checked;
 	eCheckbox(eWidget *parent, int checked=0, int takefocus=1, bool swapTxtPixmap=false, const char *deco="eCheckBox" );

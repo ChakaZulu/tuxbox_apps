@@ -11,6 +11,7 @@ class eLNBSelector: public eListBoxWindow<eListBoxEntryText>
 {
 	private:
 		void selected( eListBoxEntryText* e);
+		void init_eLNBSelector();
 	public:
 		eLNBSelector();
 };
@@ -25,6 +26,7 @@ private:
 	void sel_multiScan();
 	void sel_manualScan();
 	void sel_satfind();
+	void init_eZapScan();
 public:
 	static eLNB* getRotorLNB(int silent);
 	eZapScan();

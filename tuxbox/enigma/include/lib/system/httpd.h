@@ -43,6 +43,7 @@ public:
 class eHTTPError: public eHTTPDataSource
 {
 	int errcode;
+	void init_eHTTPError();
 public:
 	eHTTPError(eHTTPConnection *c, int errcode);
 	~eHTTPError() { }
@@ -84,6 +85,7 @@ private:
 	void bytesWritten(int);
 	void hostConnected();
 	void destruct();
+	void init_eHTTPConnection();
 public:
 	Signal1<void,int> transferDone;
 	Signal1<eHTTPDataSource*,eHTTPConnection*> createDataSource;

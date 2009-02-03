@@ -546,6 +546,10 @@ int eSkin::build(eWidget *widget, XMLTreeNode *node)
 
 eSkin::eSkin()
 {
+	init_eSkin();
+}
+void eSkin::init_eSkin()
+{
 	maxcolors=256;
 
 	palette=new gRGB[maxcolors];

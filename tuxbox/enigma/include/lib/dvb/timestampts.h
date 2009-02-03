@@ -28,6 +28,7 @@ class eTimeStampParserTS
 	int sec_duration;
 	int sec_currentpos;
 	int type;
+	void init_eTimeStampParserTS(eString _filename);
 public:
 	eTimeStampParserTS(eString _filename);
 	void parseData(const void *data, unsigned int len);

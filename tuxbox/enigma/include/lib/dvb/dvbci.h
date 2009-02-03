@@ -78,6 +78,7 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	static int instance_count;
 	std::priority_queue<queueData> sendqueue;
 	bool newTransponder;
+	void init_eDVBCI();
 protected:
 	enum
 	{

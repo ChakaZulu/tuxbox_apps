@@ -62,6 +62,7 @@ class eZapEPG: public eWidget
 	void selService(int dir);
 	void selEntry(int dir);
 	void drawTimeLines();
+	void init_eZapEPG();
 public:
 	std::list<serviceentry>::iterator& getCurSelected() { return current_service; }
 	void addToList( const eServiceReference& ref );

@@ -14,6 +14,7 @@ class eSlider: public eProgress
 	int eventHandler( const eWidgetEvent& event );
 	eWidget *tmpDescr;
 	void update();
+	void init_eSlider(int min,int max);
 public:
 	void setMin( int i );
 	void setMax( int i );

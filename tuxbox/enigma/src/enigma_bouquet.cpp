@@ -10,12 +10,17 @@
 class eModeSelector: public eListBoxWindow<eListBoxEntryText>
 {
 	void entrySelected(eListBoxEntryText *s);
+	void init_eModeSelector();;
 public:
 	eModeSelector();
 };
 
 eModeSelector::eModeSelector()
 	:eListBoxWindow<eListBoxEntryText>(_("Bouquet Type"), 5, 400)
+{
+	init_eModeSelector();
+}
+void eModeSelector::init_eModeSelector()
 {
 	move( ePoint(100,100) );
 	new eListBoxEntryText( &list, _("TV"), (void*)  eZapMain::modeTV );
@@ -36,7 +41,11 @@ void eModeSelector::entrySelected( eListBoxEntryText *e )
 
 eZapBouquetSetup::eZapBouquetSetup()
 	:eSetupWindow(_("Service Organising"), 6, 430)
-{                                        
+{
+	init_eZapBouquetSetup();
+}
+void eZapBouquetSetup::init_eZapBouquetSetup()
+{
 	move(ePoint(150, 166));
 	int entry=0;
 	CONNECT((new eListBoxEntryMenu(&list, _("Create new bouquet"), eString().sprintf("(%d) %s", ++entry, _("create new empty bouquet"))))->selected, eZapBouquetSetup::createNewEmptyBouquet );

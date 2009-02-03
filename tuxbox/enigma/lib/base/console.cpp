@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.16 2007/12/15 16:22:55 pieterg Exp $
+ * $Id: console.cpp,v 1.17 2009/02/03 18:52:52 dbluelle Exp $
  */
 
 #include <lib/base/console.h>
@@ -74,6 +74,10 @@ int bidirpipe(int pfd[], char *cmd , char *argv[])
 
 eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 :pid(-1), killstate(0)
+{
+	init_eConsoleAppContainer(cmd);
+}
+void eConsoleAppContainer::init_eConsoleAppContainer( const eString &cmd )
 {
 //	eDebug("cmd = %s", cmd.c_str() );
 	for (int i=0; i < 3; ++i)

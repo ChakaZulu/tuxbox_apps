@@ -7,6 +7,7 @@
 class eRCConsoleDriver: public eRCDriver
 {
 	struct termios ot;
+	void init_eRCConsoleDriver(const char *filename);
 protected:
 	int handle;
 	eSocketNotifier *sn;

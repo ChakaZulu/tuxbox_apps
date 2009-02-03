@@ -148,6 +148,10 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	,inputsn(0), audio_tracks(0), checkVideoFinishedTimer(this)
 	,prevVideoPTS(0xFFFFFFFF), messages(this, 1)
 {
+	init_eMP3Decoder(filename);
+}
+void eMP3Decoder::init_eMP3Decoder(const char* filename)
+{
 	state=stateInit;
 
 	pthread_mutexattr_t attr;
@@ -1240,6 +1244,10 @@ eServiceID3::eServiceID3( const eServiceID3 &ref )
 
 eServiceMP3::eServiceMP3(const char *filename, const char *descr)
 : eService(""), id3tags(filename)
+{
+	init_eServiceMP3(filename, descr);
+}
+void eServiceMP3::init_eServiceMP3(const char *filename, const char *descr)
 {
 //	eDebug("*************** servicemp3.cpp FILENAME: %s", filename);
 	if (descr)

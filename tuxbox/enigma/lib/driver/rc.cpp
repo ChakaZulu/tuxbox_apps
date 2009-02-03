@@ -216,6 +216,10 @@ eAutoInitP0<eRCInput> init_rcinput(eAutoInitNumbers::rc, "RC Input layer");
 #if HAVE_DVB_API_VERSION < 3
 eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getInstance())
 {
+	init_eRCShortDriver(filename);
+}
+void eRCShortDriver::init_eRCShortDriver(const char *filename)
+{
 	handle=open(filename, O_RDONLY|O_NONBLOCK);
 	if (handle<0)
 	{
@@ -254,6 +258,10 @@ void eRCShortDriver::keyPressed(int)
 #endif
 
 eRCInputEventDriver::eRCInputEventDriver(const char *filename): eRCDriver(eRCInput::getInstance())
+{
+	init_eRCInputEventDriver(filename);
+}
+void eRCInputEventDriver::init_eRCInputEventDriver(const char *filename)
 {
 	handle=open(filename, O_RDONLY|O_NONBLOCK);
 

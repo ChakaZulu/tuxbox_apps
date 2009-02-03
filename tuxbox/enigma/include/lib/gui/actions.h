@@ -117,6 +117,7 @@ class eActionMapList
 	XMLTreeNode *searchDevice(const eString &id);
 
 	static eActionMapList *instance;
+	void init_eActionMapList();
 public:
 	eActionMapList();
 	~eActionMapList();

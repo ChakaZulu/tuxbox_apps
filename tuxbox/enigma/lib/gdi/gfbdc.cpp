@@ -9,6 +9,10 @@ gFBDC *gFBDC::instance;
 
 gFBDC::gFBDC()
 {
+	init_gFBDC();
+}
+void gFBDC::init_gFBDC()
+{
 	instance=this;
 	fb=new fbClass;
 

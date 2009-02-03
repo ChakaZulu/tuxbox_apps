@@ -604,6 +604,10 @@ eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 ,bufptr(0), PmtData(NULL), PatData(NULL)
 ,PmtCC(0), PatCC(0), writePatPmt(true)
 {
+	init_eDVBRecorder(pmt,pat);
+}
+void eDVBRecorder::init_eDVBRecorder(PMT *pmt,PAT *pat)
+{
 	CONNECT(rmessagepump.recv_msg, eDVBRecorder::gotBackMessage);
 	rmessagepump.start();
 

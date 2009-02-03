@@ -7,6 +7,7 @@ class eHTTPDyn: public eHTTPDataSource
 {
 	eString result;
 	int wptr, size;
+	void init_eHTTPDyn(eHTTPConnection *c);
 public:
 	eHTTPDyn(eHTTPConnection *c, eString result);
 	~eHTTPDyn();

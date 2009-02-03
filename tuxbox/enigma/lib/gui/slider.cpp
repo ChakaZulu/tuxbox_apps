@@ -16,6 +16,10 @@ inline void swap( gColor& a, gColor& b )
 eSlider::eSlider( eWidget* parent, const eWidget *descr, int min, int max )
 	:eProgress( parent, 1), descr(descr)
 {
+	init_eSlider(min,max);
+}
+void eSlider::init_eSlider(int min,int max)
+{
 	activated_left = eSkin::getActive()->queryScheme( "eSlider.activated.left" );
 	activated_right = eSkin::getActive()->queryScheme( "eSlider.activated.right" );
 	setMin(min);

@@ -27,8 +27,11 @@ using namespace std;
 
 //Main GUI
 eSwapManager::eSwapManager(): eWindow(0), createSwapfile(0)
-{	
-
+{
+	init_eSwapManager();
+}
+void eSwapManager::init_eSwapManager()
+{
 	cmove(ePoint(100,120));
 	cresize(eSize(500, 370)); 
 	setText(_("Swap Manager"));	

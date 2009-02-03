@@ -54,6 +54,10 @@ bool eListBoxEntryTransponder::operator < ( const eListBoxEntry& e ) const
 eSatEditDialog::eSatEditDialog( tpPacket *tp )
 	:eWindow(0), tp(tp)
 {
+	init_eSatEditDialog();
+}
+void eSatEditDialog::init_eSatEditDialog()
+{
 	setText(_("Satellite Edit"));
 	cmove(ePoint(100,100));
 	cresize(eSize(470,360));
@@ -136,6 +140,10 @@ void eSatEditDialog::savePressed()
 eTPEditDialog::eTPEditDialog( eTransponder *tp )
 	:eWindow(0), tp(tp)
 {
+	init_eTPEditDialog();
+}
+void eTPEditDialog::init_eTPEditDialog()
+{
 	setText(_("Transponder Edit"));
 	cmove( ePoint( 120, 200 ) );
 	cresize( eSize( 460, 210 ) );
@@ -185,6 +193,10 @@ eAutoInitP0<TransponderEditWindowActions> i_TransponderEditWindowActions(eAutoIn
 
 eTransponderEditWindow::eTransponderEditWindow()
 	:eWindow(0), changed(0)
+{
+	init_eTransponderEditWindow();
+}
+void eTransponderEditWindow::init_eTransponderEditWindow()
 {
 	addActionMap(&i_TransponderEditWindowActions->map);
 	sat = new eButton(this);

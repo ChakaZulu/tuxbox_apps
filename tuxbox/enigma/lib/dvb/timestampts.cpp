@@ -1,5 +1,5 @@
 /*
- * $Id: timestampts.cpp,v 1.4 2008/12/13 16:32:01 dbluelle Exp $
+ * $Id: timestampts.cpp,v 1.5 2009/02/03 18:52:55 dbluelle Exp $
  *
  * (C) 2008 by Dr. Best  <dr.best@dreambox-tools.info>
  *
@@ -32,6 +32,10 @@
 
 eTimeStampParserTS::eTimeStampParserTS(eString _filename): pktptr(0), pid(-1), needNextPacket(0), skip(0), MovieCurrentTime(0),
 	MovieBeginTime(0), MovieEndTime(0),MovieDuration(0),filelength(-1),sec_duration(-1),sec_currentpos(-1), type(0)
+{
+	init_eTimeStampParserTS(_filename);
+}
+void eTimeStampParserTS::init_eTimeStampParserTS(eString _filename)
 {
 	// VPID ermitteln
 	int fd=open(_filename.c_str(), O_RDONLY|O_LARGEFILE);

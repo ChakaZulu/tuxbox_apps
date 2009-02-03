@@ -34,6 +34,10 @@ eWidget::eWidget(eWidget *_parent, int takefocus)
 	,LCDTmp(0)
 #endif
 {
+	init_eWidget();
+}
+void eWidget::init_eWidget()
+{
 	if (takefocus)
 		getTLW()->focusList()->push_back(this);
 
@@ -42,7 +46,6 @@ eWidget::eWidget(eWidget *_parent, int takefocus)
 
 	addActionMap(&i_cursorActions->map);
 }
-
 eWidget::~eWidget()
 {
 	if (pixmap)

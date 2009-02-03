@@ -123,6 +123,7 @@ class eDVBServiceController
 #ifndef DISABLE_FILE
 	void FillPIDsFromFile(eService *sp);
 #endif
+	void init_eDVBServiceController(eDVB &dvb);
 public:
 	int lastTpTimeDifference;
 	int service_state;

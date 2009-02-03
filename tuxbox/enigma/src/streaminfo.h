@@ -18,6 +18,7 @@ class eStreaminfo: public eWindow
 	eLabel* descr;
 	eListBox<eListBoxEntryMenu>* lb;
 	static eStreaminfo *instance;
+	void init_eStreaminfo(int mode, const eServiceReference &ref, decoderParameters *parms);
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:

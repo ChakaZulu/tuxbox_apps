@@ -8,6 +8,10 @@
 eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, bool swapTxtPixmap, const char *deco)
 	:eButton(parent, 0, takefocus, deco), swapTxtPixmap(swapTxtPixmap)
 {
+	init_eCheckbox(checked);
+}
+void eCheckbox::init_eCheckbox(int checked)
+{
 	align=eTextPara::dirLeft;
 	ischecked = -1;
 	setCheck(checked);

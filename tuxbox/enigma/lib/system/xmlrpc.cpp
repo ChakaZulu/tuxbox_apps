@@ -10,6 +10,10 @@ static std::map<eString, int (*)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCV
 eXMLRPCVariant::eXMLRPCVariant(const eXMLRPCVariant &c)
 	:type(c.type)
 {
+	init_eXMLRPCVariant(c);
+}
+void eXMLRPCVariant::init_eXMLRPCVariant(const eXMLRPCVariant &c)
+{
 	switch ( type )
 	{
 		case STRUCT:

@@ -105,6 +105,11 @@ static const char * getCountry(const char *language)
 
 eWizardLanguage::eWizardLanguage()
 {
+	init_eWizardLanguage();
+}
+void eWizardLanguage::init_eWizardLanguage()
+{
+
 	list=new eListBox<eLanguageEntry>(this);
 	list->setName("list");
 	

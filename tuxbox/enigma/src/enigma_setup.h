@@ -19,6 +19,7 @@ private:
 	void timeshift_setup();
 #endif
 #endif
+	void init_eZapSetup();
 public:
 	eZapSetup();
 };

@@ -33,6 +33,10 @@ eStreamWatchdog *eStreamWatchdog::instance;
 
 eStreamWatchdog::eStreamWatchdog()
 {
+	init_eStreamWatchdog();
+}
+void eStreamWatchdog::init_eStreamWatchdog()
+{
 	sn=0;
 	handle=open( EVENT_DEVICE, O_RDONLY | O_NONBLOCK );
 

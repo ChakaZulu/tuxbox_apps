@@ -3,6 +3,7 @@
 class enigmaVCR : public eMessageBox
 {
 		static enigmaVCR *instance;
+		void init_enigmaVCR();
 	public:
 		static enigmaVCR* getInstance() { return instance; }
 		enigmaVCR(eString string, eString caption);

@@ -920,6 +920,10 @@ int eSatelliteConfigurationManager::eventHandler(const eWidgetEvent &event)
 eLNBSetup::eLNBSetup( eSatellite* sat, eWidget* lcdTitle, eWidget* lcdElement )
 	:sat(sat), service(eServiceInterface::getInstance()->service)
 {
+	init_eLNBSetup(lcdTitle, lcdElement );
+}
+void eLNBSetup::init_eLNBSetup(eWidget* lcdTitle, eWidget* lcdElement )
+{
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eLNBSetup"))
 		eFatal("skin load of \"eLNBSetup\" failed");
@@ -1044,6 +1048,10 @@ struct eLNBPage::selectlnb
 
 eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
   :eWidget(parent), sat(sat)
+{
+	init_eLNBPage(parent);
+}
+void eLNBPage::init_eLNBPage( eWidget *parent)
 {
 #ifndef DISABLE_LCD
 	LCDTitle=parent->LCDTitle;

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.25 2006/02/05 23:41:01 pieterg Exp $
+ * $Id: enigma_scan.cpp,v 1.26 2009/02/03 18:54:33 dbluelle Exp $
  */
 
 #include <enigma_scan.h>
@@ -40,6 +40,10 @@ eZapScan::eZapScan()
 	:eSetupWindow(_("Service Searching"),
 	eSystemInfo::getInstance()->getFEType()
 		== eSystemInfo::feSatellite ? 9 : 7, 400)
+{
+	init_eZapScan();
+}
+void eZapScan::init_eZapScan()
 {
 	int entry=0;
 	move(ePoint(160, 130));
@@ -196,6 +200,10 @@ void eZapScan::sel_rotorConfig()
 
 eLNBSelector::eLNBSelector()
 	:eListBoxWindow<eListBoxEntryText>(_("Select LNB"), 5, 300, true)
+{
+	init_eLNBSelector();
+}
+void eLNBSelector::init_eLNBSelector()
 {
 	move(ePoint(140, 156));
 	int cnt=0;

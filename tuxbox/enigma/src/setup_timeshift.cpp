@@ -20,6 +20,10 @@
 eZapTimeshiftSetup::eZapTimeshiftSetup()
 	:eWindow(0)
 {
+	init_eZapTimeshiftSetup();
+}
+void eZapTimeshiftSetup::init_eZapTimeshiftSetup()
+{
 	delay=new eNumber(this,1,1, 60, 3, 0, 0); delay->setName("delay");
 	minutes=new eNumber(this,1,1, MAX_PERMANENT_TIMESHIFT_MINUTES, 3, 0, 0); minutes->setName("minutes");
 	active=new eCheckbox(this);active->setName("active");

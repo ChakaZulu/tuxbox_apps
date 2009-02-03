@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: software_update.cpp,v 1.5 2005/02/04 17:27:57 ghostrider Exp $
+ * $Id: software_update.cpp,v 1.6 2009/02/03 18:54:33 dbluelle Exp $
  */
 
 #include <software_update.h>
@@ -27,6 +27,10 @@
 
 eSoftwareUpdate::eSoftwareUpdate()
 	:eSetupWindow(_("Software Update"), 6, 400)
+{
+	init_eSoftwareUpdate();
+}
+void eSoftwareUpdate::init_eSoftwareUpdate()
 {
 	move(ePoint(140, 100));
 #ifndef DISABLE_NETWORK

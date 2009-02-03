@@ -50,6 +50,7 @@ class eFEStatusWidget: public eWidget
 	eTimer updatetimer;
 	void update();
 	int eventHandler(const eWidgetEvent &);
+	void init_eFEStatusWidget();
 public:
 	eFEStatusWidget(eWidget *parent, eFrontend *fe);
 };

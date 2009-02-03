@@ -18,6 +18,7 @@ protected:
 	int eventHandler(const eWidgetEvent &event);
 	void gotFocus();
 	void lostFocus();
+	void init_eButton();
 public:
 	int setProperty(const eString &prop, const eString &val);
 	/**

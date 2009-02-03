@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.44 2008/03/01 17:40:17 dbluelle Exp $
+ * $Id: enigma_setup.cpp,v 1.45 2009/02/03 18:54:33 dbluelle Exp $
  */
 
 #include <enigma_setup.h>
@@ -35,6 +35,10 @@
 
 eZapSetup::eZapSetup()
 	:eSetupWindow(_("Setup"), 10, 400)
+{
+	init_eZapSetup();
+}
+void eZapSetup::init_eZapSetup()
 {
 	move(ePoint(160, 100));
 	int entry=0;

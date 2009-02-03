@@ -16,6 +16,10 @@
 eSatfind::eSatfind(eFrontend *fe)
 	:eWindow(0), updateTimer(eApp), fe(fe), current(0)
 {
+	init_eSatfind();
+}
+void eSatfind::init_eSatfind()
+{
 	p_snr=new eProgress(this);
 	p_snr->setName("snr");
 

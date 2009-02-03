@@ -22,6 +22,10 @@ int eSocketMMIHandler::send_to_mmisock( void* buf, size_t len)
 eSocketMMIHandler::eSocketMMIHandler()
 	:connfd(-1), connsn(0), sockname("/tmp/mmi.socket"), name(0)
 {
+	init_eSocketMMIHandler();
+}
+void eSocketMMIHandler::init_eSocketMMIHandler()
+{
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
 	unlink(sockname);
@@ -192,6 +196,10 @@ eSocketMMI* eSocketMMI::getInstance( eSocketMMIHandler *handler  )
 
 eSocketMMI::eSocketMMI( eSocketMMIHandler *handler )
 	:handler(handler)
+{
+	init_eSocketMMI();
+}
+void eSocketMMI::init_eSocketMMI()
 {
 	setText(eString().sprintf("%s - mmi", handler->getName()));
 	lText->setText(eString().sprintf("waiting for %s answer...", handler->getName()));

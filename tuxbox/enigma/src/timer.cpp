@@ -274,6 +274,10 @@ void eTimerManager::writeToLogfile( eString str )
 eTimerManager::eTimerManager()
 	:actionTimer(eApp), timer(eApp), setdeepstandbywakeup(true)
 {
+	init_eTimerManager();
+}
+void eTimerManager::init_eTimerManager()
+{
 	if (!instance)
 		instance = this;
 
@@ -2049,6 +2053,10 @@ void normalize( struct tm &t )
 eTimerListView::eTimerListView()
 	:eWindow(0)
 {
+	init_eTimerListView();
+}
+void eTimerListView::init_eTimerListView()
+{
 	events = new eListBox<eListBoxEntryTimer>(this);
 	events->setName("events");
 	events->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
@@ -2334,6 +2342,10 @@ void eTimerEditView::createWidgets()
 
 eTimerEditView::eTimerEditView( ePlaylistEntry* e)
 	:curEntry(e), event_id(-1)
+{
+	init_eTimerEditView(e);
+}
+void eTimerEditView::init_eTimerEditView( ePlaylistEntry* e)
 {
 	createWidgets();
 

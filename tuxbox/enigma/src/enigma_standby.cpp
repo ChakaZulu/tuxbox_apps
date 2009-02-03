@@ -169,6 +169,10 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 
 eZapStandby::eZapStandby(): eWidget(0, 1)
 {
+	init_eZapStandby();
+}
+void eZapStandby::init_eZapStandby()
+{
 	addActionMap(&i_enigmaStandbyActions->map);
 	if (!instance)
 		instance=this;

@@ -19,7 +19,7 @@ public:
 	eString depend, sopath, pluginname, requires, cfgname, desc, name;
 	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
 	int posx, posy, sizex, sizey;
-
+	void init_ePlugin(const char *cfgfile, eSimpleConfigFile &config, const char* descr);
 public:
 	ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, eSimpleConfigFile &config, const char* descr = NULL);
 
@@ -64,6 +64,7 @@ private:
 	void renamePlugin();
 	void showContextMenu();
 	gColor selectedBackColor;
+	void init_eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement);
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:

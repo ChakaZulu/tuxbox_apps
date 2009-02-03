@@ -4,6 +4,10 @@
 
 eHTTPDyn::eHTTPDyn(eHTTPConnection *c, eString result): eHTTPDataSource(c), result(result)
 {
+	init_eHTTPDyn(c);
+}
+void eHTTPDyn::init_eHTTPDyn(eHTTPConnection *c)
+{
 	wptr=0;
 	char buffer[10];
 	snprintf(buffer, 10, "%d", size=result.length());

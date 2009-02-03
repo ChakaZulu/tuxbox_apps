@@ -19,6 +19,7 @@ class eAudioDecoderMP3: public eAudioDecoder
 	mad_synth synth;
 	mad_timer_t timer;
 	eIOBuffer &input, &output;
+	void init_eAudioDecoderMP3();
 public:
 	eAudioDecoderMP3(eIOBuffer &input, eIOBuffer &output);
 	~eAudioDecoderMP3();

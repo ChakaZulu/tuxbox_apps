@@ -27,6 +27,10 @@ int eDVBCI::instance_count=0;
 eDVBCI::eDVBCI()
 	:pollTimer(this), caidcount(0), ml_bufferlen(0), messages(this, 1)
 {
+	init_eDVBCI();
+}
+void eDVBCI::init_eDVBCI()
+{
 	instance_count++;
 
 	state=stateInit;

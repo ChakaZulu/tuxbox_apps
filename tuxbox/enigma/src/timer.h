@@ -54,6 +54,7 @@ class eTimerManager: public Object
 
 	void writeToLogfile( const char *str );
 	void writeToLogfile( eString str );
+	void init_eTimerManager();
 public:
 	enum { erase, update };
 	eTimerManager();
@@ -113,6 +114,7 @@ class eTimerListView:public eWindow
 {
 	eListBox<eListBoxEntryTimer>* events;
 	eButton *add, *erase, *cleanup;
+	void init_eTimerListView();
 public:
 	eTimerListView();
 	void fillTimerList();
@@ -152,6 +154,7 @@ private:
 	bool getData( time_t& beginTime, int& duration );
 	int eventHandler( const eWidgetEvent &e );
 	void changeTime( int dir );
+	void init_eTimerEditView( ePlaylistEntry* e);
 public:
 	eTimerEditView(ePlaylistEntry* e=0);
 	eTimerEditView( const EITEvent &e, int type, eServiceReference ref );

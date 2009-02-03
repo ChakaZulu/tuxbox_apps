@@ -7,6 +7,7 @@
 class eServiceStructureHandler: public eServiceHandler
 {
 	eServiceCache<eServiceStructureHandler> cache;
+	void init_eServiceStructureHandler();
 public:
 	void loadNode(eServiceCache<eServiceStructureHandler>::eNode &node, const eServiceReference &ref);
 	eService *createService(const eServiceReference &node);

@@ -200,6 +200,7 @@ class eAudioSelector: public eListBoxWindow<AudioStream>
 	int eventHandler(const eWidgetEvent &);
 	eListBox<eListBoxEntryText> *m_subtitles, *m_stereo_mono;
 	void subtitleSelected(eListBoxEntryText *entry);
+	void init_eAudioSelector();
 public:
 	eAudioSelector();
 	void clear();
@@ -215,6 +216,7 @@ class ePSAudioSelector: public eListBoxWindow<eListBoxEntryText>
 	int eventHandler(const eWidgetEvent &);	
 	eAudioDynamicConfig *m_dyncfg;
 	eListBox<eListBoxEntryText> *m_stereo_mono;
+	void init_ePSAudioSelector();
 public:
 	int getCount() { return list.getCount(); }
 	ePSAudioSelector();
@@ -250,6 +252,7 @@ class eSubServiceSelector
 	virtual void willShow();
 	void addPressed();
 	void quickZapPressed();
+	void init_eSubServiceSelector(bool showbuttons);
 public:
 	Signal2<void, eServiceReference*, int> addToUserBouquet;
 	bool quickzapmode();
@@ -269,6 +272,7 @@ class eServiceNumberWidget: public eWindow
 	eNumber *number;
 	int chnum;
 	eTimer *timer;
+	void init_eServiceNumberWidget(int initial);
 private:
 	void selected(int*);
 	void timeout();
@@ -295,6 +299,7 @@ class TextEditWindow: public eWindow
 	eTextInputFieldHelpWidget *image;
 	eLabel *descr;
 	int eventHandler( const eWidgetEvent &e );
+	void init_TextEditWindow( const char *InputFieldDescr, const char* useableChars );
 public:
 	TextEditWindow( const char *InputFieldDescr, const char* useableChar=0 );
 	const eString& getEditText() { return input->getText(); }
@@ -724,6 +729,7 @@ class eRecordContextMenu: public eListBoxWindow<eListBoxEntryText>
 {
 	eServiceReference ref;
 	void entrySelected(eListBoxEntryText *s);
+	void init_eRecordContextMenu();
 public:
 	eRecordContextMenu(eWidget *LCDTitle=0, eWidget *LCDElement=0);
 };
@@ -731,6 +737,7 @@ public:
 class eRecTimeInput: public eShutdownStandbySelWindow
 {
 	void setPressed();
+	void init_eRecTimeInput();
 public:
 	eRecTimeInput();
 };

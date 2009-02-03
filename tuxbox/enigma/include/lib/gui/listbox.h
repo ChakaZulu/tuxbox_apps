@@ -32,6 +32,7 @@ class eListBoxBase: public eDecoWidget
 	bool atomic_selected;
 	unsigned int entries;
 	int currentPos;
+	void init_eListBoxBase();
 protected:
 	ePtrList<eListBoxEntry>::iterator top, bottom, current;
 	eListBoxBase(eWidget* parent, const eWidget* descr=0, int takefocus=1, int item_height=0, const char *deco="eListBox" );

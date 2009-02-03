@@ -77,6 +77,10 @@ color;return; RightAndUp2: AfbAddr+=fbXYincr; BfbAddr-=fbXYincr; P+=dPru; if ((d
 
 eDBoxLCD::eDBoxLCD(): eLCD(eSize(128, 64))
 {
+	init_eDBoxLCD();
+}
+void eDBoxLCD::init_eDBoxLCD()
+{
 #ifndef NO_LCD
 	lcdfd=open("/dev/dbox/lcd0", O_RDWR);
 #else

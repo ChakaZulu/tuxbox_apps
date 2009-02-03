@@ -51,6 +51,10 @@ bool eDVBScanController::abort()
 eDVBScanController::eDVBScanController(eDVB &dvb)
 	: eDVBController(dvb), transponder(0)
 {
+	init_eDVBScanController(dvb);
+}
+void eDVBScanController::init_eDVBScanController(eDVB &dvb)
+{
 	CONNECT(dvb.tPAT.tableReady, eDVBScanController::PATready);
 	CONNECT(dvb.tSDT.tableReady, eDVBScanController::SDTready);
 	CONNECT(dvb.tNIT.tableReady, eDVBScanController::NITready);

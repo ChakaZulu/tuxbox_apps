@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.18 2005/11/10 21:54:50 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.19 2009/02/03 18:52:06 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -69,6 +69,7 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	int requestStream();
 	int playStream(eString mrl);
 	void setErrorStatus();
+	void init_eMoviePlayer();
 public:
 	eMoviePlayer();
 	~eMoviePlayer();

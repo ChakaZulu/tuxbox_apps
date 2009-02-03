@@ -89,6 +89,7 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	eTimer checkVideoFinishedTimer;
 	unsigned int prevVideoPTS;
 	void InitCodec(const char* filename);
+	void init_eMP3Decoder(const char* filename);
 public:
 	int getType() { return type; }
 	struct eMP3DecoderMessage
@@ -211,6 +212,7 @@ public:
 class eServiceMP3: public eService
 {
 	eServiceID3 id3tags;
+	void init_eServiceMP3(const char *filename, const char *descr);
 public:
 	eServiceMP3(const char *filename, const char *descr=0);
 	eServiceMP3(const eServiceMP3 &c);

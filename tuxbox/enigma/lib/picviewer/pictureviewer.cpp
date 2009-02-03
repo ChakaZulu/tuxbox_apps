@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.cpp,v 1.46 2008/01/19 16:46:53 dbluelle Exp $
+ * $Id: pictureviewer.cpp,v 1.47 2009/02/03 18:53:43 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -106,6 +106,10 @@ void ePictureViewer::showNameOnLCD(const eString& filename)
 
 ePictureViewer::ePictureViewer(const eString &filename)
 	:eWidget(0, 1), slideshowTimer(eApp), filename(filename)
+{
+	init_ePictureViewer();
+}
+void ePictureViewer::init_ePictureViewer()
 {
 //	eDebug("[PICTUREVIEWER] Constructor...");
 

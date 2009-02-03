@@ -143,6 +143,10 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb)
 , DVBCI2(dvb.DVBCI2)
 #endif
 {
+	init_eDVBServiceController(dvb);
+}
+void eDVBServiceController::init_eDVBServiceController(eDVB &dvb)
+{
 	CONNECT(disableFrontendTimer.timeout, eDVBServiceController::disableFrontend);
 	CONNECT(updateTDTTimer.timeout, eDVBServiceController::startTDT);
 	CONNECT(dvb.tPAT.tableReady, eDVBServiceController::PATready);

@@ -31,6 +31,7 @@ class eTransponderEditWindow: public eWindow
 	eListBox<eListBoxEntryTransponder> *transponders;
 	eButton *sat, *add, *edit, *remove;
 	int changed;
+	void init_eTransponderEditWindow();
 public:
 	eTransponderEditWindow();
 	~eTransponderEditWindow();
@@ -51,6 +52,7 @@ class eTPEditDialog: public eWindow
 	eButton *save;
 	eTransponder *tp;
 	void savePressed();
+	void init_eTPEditDialog();
 public:
 	eTPEditDialog( eTransponder *tp );
 };
@@ -65,6 +67,7 @@ class eSatEditDialog: public eWindow
 	eStatusBar *sbar;
 	tpPacket *tp;
 	void savePressed();
+	void init_eSatEditDialog();
 public:
 	eSatEditDialog( tpPacket *tp );
 };

@@ -30,6 +30,10 @@ eAutoInitP0<enigmaHelpWindowActions> i_helpwindowActions(eAutoInitNumbers::actio
 eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 	eWindow(1), curPage(0)
 {
+	init_eHelpWindow(parseActionHelpList,helpID);
+}
+void eHelpWindow::init_eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID)
+{
 	int xpos=60, ypos=0, labelheight, imgheight;
 
 	scrollbar = new eProgress(this);

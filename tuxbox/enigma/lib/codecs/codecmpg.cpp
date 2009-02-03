@@ -60,6 +60,10 @@ eDemux::eDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd, int
 	mpegtype(-1), curAudioStreamID(0), synced(0), fd(fd), sheader(0)
 
 {
+	init_eDemux(sourcefd);
+}
+void eDemux::init_eDemux(int sourcefd)
+{
 	remaining=0;
 	memset(&pcmsettings, 0, sizeof(pcmsettings));
 

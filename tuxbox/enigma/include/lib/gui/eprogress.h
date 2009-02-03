@@ -16,6 +16,7 @@ protected:
 	int direction;
 	gColor left, right;
 	gPixmap *sliderPixmap;
+	void init_eProgress();
 public:
 	eProgress(eWidget *parent, int takeFocus=0);
 	~eProgress();

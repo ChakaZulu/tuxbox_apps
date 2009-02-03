@@ -22,6 +22,7 @@ private:
 	void fieldSelected(int *number);
 	void okPressed();
 	void detectMAC();
+	void init_ENgrabSetup();
 public:
 	ENgrabSetup();
 	~ENgrabSetup();

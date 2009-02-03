@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: time_settings.cpp,v 1.4 2004/06/15 10:35:51 ghostrider Exp $
+ * $Id: time_settings.cpp,v 1.5 2009/02/03 18:54:33 dbluelle Exp $
  */
 
 #include <time_settings.h>
@@ -30,6 +30,10 @@
 
 eTimeSettings::eTimeSettings()
 	:eSetupWindow(_("Time Settings"), 5, 350)
+{
+	init_eTimeSettings();
+}
+void eTimeSettings::init_eTimeSettings()
 {
 	move(ePoint(130, 135));
 	int entry=0;

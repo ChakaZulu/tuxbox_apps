@@ -153,6 +153,10 @@ void eTestPicture::redrawWidget(gPainter *target, const eRect &area)
 
 eTestPicture::eTestPicture(int testmode): eWidget(0, 1), testmode(testmode), desctimer(eApp)
 {
+	init_eTestPicture();
+}
+void eTestPicture::init_eTestPicture()
+{
 	red = eSkin::getActive()->queryColor("std_red");
 	green = eSkin::getActive()->queryColor("std_green");
 	blue = eSkin::getActive()->queryColor("std_blue");

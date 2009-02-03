@@ -112,6 +112,7 @@ private:
 	__u8 ByteSize;
 	static descriptorMap descriptors;
 	static __u8 data[4108];
+	void init_eventData(const eit_event_struct* e, int size, int type);
 public:
 	__u8 type;
 	static int CacheSize;
@@ -359,6 +360,7 @@ private:
 	void timeUpdated();
 	void save();
 	void load();
+	void init_eEPGCache();
 public:
 	eEPGCache();
 	~eEPGCache();

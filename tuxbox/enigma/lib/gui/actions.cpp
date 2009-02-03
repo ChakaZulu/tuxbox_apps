@@ -131,6 +131,10 @@ eActionMapList *eActionMapList::instance;
 
 eActionMapList::eActionMapList()
 {
+	eActionMapList::init_eActionMapList();
+}
+void eActionMapList::init_eActionMapList()
+{
 	if (!instance)
 		instance=this;
 	char * tmp;

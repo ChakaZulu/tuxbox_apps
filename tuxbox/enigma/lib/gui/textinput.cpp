@@ -37,6 +37,10 @@ eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFiel
 	"ĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîï°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"
 	" +-.,:?!\"';_*/()<=>%#@&"), capslock(false), swapNum(false), editLabel(0), helpwidget(hlp)
 {
+	init_eTextInputField();
+}
+void eTextInputField::init_eTextInputField()
+{
 	if ( eConfig::getInstance()->getKey("/ezap/rc/TextInputField/nextCharTimeout", nextCharTimeout ) )
 		nextCharTimeout=0;
 	CONNECT( nextCharTimer.timeout, eTextInputField::nextChar );

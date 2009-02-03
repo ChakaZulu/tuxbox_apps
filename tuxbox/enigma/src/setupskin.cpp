@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.23 2008/10/25 14:24:36 dbluelle Exp $
+ * $Id: setupskin.cpp,v 1.24 2009/02/03 18:54:33 dbluelle Exp $
  */
 
 #include <setupskin.h>
@@ -167,6 +167,10 @@ void eSkinSetup::skinSelected(eListBoxEntrySkin *skin)
 }
 
 eSkinSetup::eSkinSetup()
+{
+	init_eSkinSetup();
+}
+void eSkinSetup::init_eSkinSetup()
 {
         lb3     = new eLabel(this);
         move(ePoint(50,50));

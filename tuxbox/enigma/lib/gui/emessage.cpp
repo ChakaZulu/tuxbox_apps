@@ -9,6 +9,10 @@
 eMessageBox::eMessageBox(eString message, eString caption, int flags, int def, int timeout )
 	:eWindow(0), timer(0), sectimer(0), icon(0), def(0), timeout(timeout)
 {
+	init_eMessageBox(message,caption,flags,def,timeout);
+}
+void eMessageBox::init_eMessageBox(eString message, eString caption, int flags, int def, int timeout )
+{
 	if ( timeout )
 	{
 		timer = new eTimer(eApp);

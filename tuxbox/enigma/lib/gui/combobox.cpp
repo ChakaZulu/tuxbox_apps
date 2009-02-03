@@ -7,6 +7,10 @@ listbox(0, 0, takefocus),
 button( this, 0, 0, eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0)?"eButton":""),
 pm(0), entries(OpenEntries), current(0)
 {
+	init_eComboBox();
+}
+void eComboBox::init_eComboBox()
+{
 	align=eTextPara::dirLeft;
 	if ( eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0) )
 		button.loadDeco();

@@ -25,6 +25,7 @@ class eSystemInfo
 	std::set<int> caids;
 	const char *helpstr, *midstr, *modelstr, *manufactstr, *cpustr;
 	eString getInfo(const char *info, bool dreambox=false);
+	void init_eSystemInfo();
 public:
 	static eSystemInfo *getInstance() { return instance; }
 	eSystemInfo();

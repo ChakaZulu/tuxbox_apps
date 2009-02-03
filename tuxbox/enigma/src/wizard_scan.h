@@ -12,6 +12,7 @@ class eWizardSelectDiseqc: public eWindow
 	eLabel *description;
 	void selected(eDiseqcChoice *choice);
 	void selchanged(eDiseqcChoice *choice);
+	void init_eWizardSelectDiseqc();
 public:
 	eWizardSelectDiseqc();
 	static int run();

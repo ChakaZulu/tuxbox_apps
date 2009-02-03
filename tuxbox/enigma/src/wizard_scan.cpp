@@ -70,6 +70,10 @@ gFont eDiseqcChoice::font;
 
 eWizardSelectDiseqc::eWizardSelectDiseqc()
 {
+	init_eWizardSelectDiseqc();
+}
+void eWizardSelectDiseqc::init_eWizardSelectDiseqc()
+{
 	diseqclist=new eListBox<eDiseqcChoice>(this);
 	diseqclist->setName("choices");
 	diseqclist->setColumns(3);

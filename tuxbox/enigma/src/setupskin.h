@@ -32,7 +32,7 @@ class eSkinSetup: public eWindow
 	void accept();
 	void skinSelected(eListBoxEntrySkin *l);
 	void skinchanged(eListBoxEntrySkin *l);
-
+	void init_eSkinSetup();
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:

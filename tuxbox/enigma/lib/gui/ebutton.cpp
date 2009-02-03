@@ -16,6 +16,10 @@ eButton::eButton(eWidget *parent, eLabel* desc, int takefocus, const char *deco)
 	normalF(eSkin::getActive()->queryScheme("button.normal.foreground")),
 	descr(desc)
 {
+	init_eButton();
+}
+void eButton::init_eButton()
+{
 	align=eTextPara::dirCenter;
 	flags |= eLabel::flagVCenter;
 	addActionMap(&i_cursorActions->map);

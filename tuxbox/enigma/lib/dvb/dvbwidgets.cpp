@@ -376,6 +376,10 @@ int eFEStatusWidget::eventHandler(const eWidgetEvent &event)
 
 eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent), fe(fe), updatetimer(eApp)
 {
+	init_eFEStatusWidget();
+}
+void eFEStatusWidget::init_eFEStatusWidget()
+{
 	p_snr=new eProgress(this);
 	p_snr->setName("snr");
 

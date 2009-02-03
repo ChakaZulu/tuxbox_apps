@@ -18,6 +18,10 @@ eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)
 	cdolby(this), cstereo(this),
 	cformat(this), cscrambled(this), eit(0)
 {
+	init_eChannelInfo();
+}
+void eChannelInfo::init_eChannelInfo()
+{
 	foregroundColor=eSkin::getActive()->queryColor("eStatusBar.foreground");
 	backgroundColor=eSkin::getActive()->queryColor("eStatusBar.background");
 	gFont fn = eSkin::getActive()->queryFont("eChannelInfo");

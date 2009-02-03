@@ -19,6 +19,10 @@
 eZapTimeZoneSetup::eZapTimeZoneSetup(bool showHint)
 	:eWindow(0), showHint(showHint)
 {
+	init_eZapTimeZoneSetup();
+}
+void eZapTimeZoneSetup::init_eZapTimeZoneSetup()
+{
 	setText(_("Time Zone Setup"));
 	cmove(ePoint(110, 146));
 	cresize(eSize(530, 270));

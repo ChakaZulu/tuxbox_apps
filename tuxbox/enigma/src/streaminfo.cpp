@@ -155,6 +155,7 @@ class siTags: public eWidget
 	eString tagString, descrString;
 	bool ok;
 	eLabel *tags, *descr;
+	void init_siTags(const eService *service);
 public:
 	siTags(const eService *service, eWidget *parent);
 };
@@ -183,6 +184,10 @@ static eString getDescription(eString tag)
 
 siTags::siTags(const eService *service, eWidget *parent)
 : eWidget(parent), ok(false)
+{
+	init_siTags(service);
+}
+void siTags::init_siTags(const eService *service)
 {
 	if (!service->id3)
 		return;
@@ -461,11 +466,16 @@ void siPID::redrawWidget()
 class siCA: public eWidget
 {
 	eLabel *availca[2], *usedca[2];
+	void init_siCA();
 public:
 	siCA(eWidget *parent);
 };
 
 siCA::siCA(eWidget *parent): eWidget(parent)
+{
+	init_siCA();
+}
+void siCA::init_siCA()
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
@@ -547,6 +557,10 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 }
 
 eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParameters *parms): eWindow(1), statusbar(this)
+{
+	init_eStreaminfo(mode,ref,parms);
+}
+void eStreaminfo::init_eStreaminfo(int mode, const eServiceReference &ref, decoderParameters *parms)
 {
 	if (!instance)
 		instance = this;

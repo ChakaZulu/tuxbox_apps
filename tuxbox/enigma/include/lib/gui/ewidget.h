@@ -68,6 +68,7 @@ class eWidget: public Object
 		/// Widget is visible on screen. Implies stateShow.
 		stateVisible=2
 	};
+	void init_eWidget();
 	
 public:
 	/**

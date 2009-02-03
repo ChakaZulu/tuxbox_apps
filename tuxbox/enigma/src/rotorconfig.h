@@ -75,6 +75,7 @@ class eStoreWindow: public eWindow
 	int orbital_pos;
 	void onStorePressed();
 	void nextfield(int*);
+	void init_eStoreWindow();
 public:
 	eStoreWindow(eLNB *lnb, int orbital_pos);
 };

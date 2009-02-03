@@ -17,6 +17,7 @@ class eHarddiskSetup: public eListBoxWindow<eListBoxEntryText>
 {
 	int nr;
 	void selectedHarddisk(eListBoxEntryText *sel);
+	void init_eHarddiskSetup();
 public:
 	eHarddiskSetup();
 	int getNr() const { return nr; }
@@ -42,6 +43,7 @@ class eHarddiskMenu: public eWindow
 	void extPressed();
 	void check();
 	void readStatus();
+	void init_eHarddiskMenu();
 public:
 	eHarddiskMenu(int dev);
 	~eHarddiskMenu()
@@ -61,6 +63,7 @@ class ePartitionCheck: public eWindow
 	int eventHandler( const eWidgetEvent &e );
 	void getData( eString );
 	eConsoleAppContainer *fsck;
+	void init_ePartitionCheck();
 public:
 	ePartitionCheck( int dev );
 };

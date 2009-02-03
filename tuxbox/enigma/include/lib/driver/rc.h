@@ -120,6 +120,7 @@ protected:
 	int handle;
 	eSocketNotifier *sn;
 	void keyPressed(int);
+	void init_eRCShortDriver(const char *filename);
 public:
 	eRCShortDriver(const char *filename);
 	~eRCShortDriver();
@@ -144,6 +145,7 @@ public:
 
 class eRCInputEventDriver: public eRCDriver
 {
+	void init_eRCInputEventDriver(const char *filename);
 protected:
 	int handle;
 	eSocketNotifier *sn;

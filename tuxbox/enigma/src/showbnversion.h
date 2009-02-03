@@ -11,6 +11,7 @@ class ShowBNVersion: public eWindow
 {
 	eLabel *text, *res1, *res2;
 	BNDirectory *bnd[2];
+	void init_ShowBNVersion();
 protected:
 	void willShow();
 	void willHide();

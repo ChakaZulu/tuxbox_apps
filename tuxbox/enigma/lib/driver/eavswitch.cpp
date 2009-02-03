@@ -56,6 +56,10 @@ eAVSwitch *eAVSwitch::instance=0;
 
 eAVSwitch::eAVSwitch()
 {
+	init_eAVSwitch();
+}
+void eAVSwitch::init_eAVSwitch()
+{
 	input=0;
 	active=0;
 	audioChannel=0;

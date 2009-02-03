@@ -832,6 +832,10 @@ void eRotorManual::nextfield(int*)
 eStoreWindow::eStoreWindow(eLNB *lnb, int orbital_pos)
 	:lnb(lnb), orbital_pos(orbital_pos)
 {
+	init_eStoreWindow();
+}
+void eStoreWindow::init_eStoreWindow()
+{
 	cresize(eSize(360,140));
 	cmove(ePoint(150,150));
 	setText("Store Satellite");

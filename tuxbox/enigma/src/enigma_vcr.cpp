@@ -26,6 +26,10 @@ enigmaVCR* enigmaVCR::instance = 0;
 enigmaVCR::enigmaVCR(eString string, eString caption)
 	:eMessageBox(string,caption)
 {
+	init_enigmaVCR();
+}
+void enigmaVCR::init_enigmaVCR()
+{
 	if ( !instance )
 		instance = this;
 	else

@@ -16,6 +16,7 @@ class eTestPicture: public eWidget
 	eLabel *description;
 	eTimer desctimer;
 	void hideDesc();
+	void init_eTestPicture();
 protected:
 	int eventHandler(const eWidgetEvent &event);
 	void redrawWidget(gPainter *target, const eRect &area);

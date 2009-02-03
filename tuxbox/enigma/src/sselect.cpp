@@ -63,6 +63,10 @@ eEPGStyleSelector::eEPGStyleSelector(int ssel)
 		:eListBoxWindow<eListBoxEntryText>(_("EPG Style"), 6, 350, true)
 		,ssel(ssel)
 {
+	init_eEPGStyleSelector();
+}
+void eEPGStyleSelector::init_eEPGStyleSelector()
+{
 	addActionMap( &i_EPGStyleSelectorActions->map );
 	move(ePoint(100, 100));
 	int last=1;
@@ -160,6 +164,10 @@ eListBoxEntryService::eListBoxEntryService(eListBoxExt<eListBoxEntryService> *lb
 	:eListBoxEntry((eListBox<eListBoxEntry>*)lb), numPara(0),
 	namePara(0), descrPara(0), nameXOffs(0), flags(flags),
 	num(num), curEventId(-1), service(service)
+{
+	init_eListBoxEntryService();
+}
+void eListBoxEntryService::init_eListBoxEntryService()
 {
 	static char strfilter[4] = { 0xC2, 0x87, 0x86, 0x00 };
 	if (!(flags & flagIsReturn))
@@ -2153,6 +2161,10 @@ int eServiceSelector::toggleEditMode()
 }
 #ifndef DISABLE_FILE
 eFileSelector::eFileSelector(eString startPath) : eServiceSelector()
+{
+	init_eFileSelector(startPath);
+}
+void eFileSelector::init_eFileSelector(eString startPath)
 {
 	isFileSelector = true;
 	if (startPath.empty() || startPath[startPath.length() -1] != '/')

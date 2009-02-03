@@ -39,6 +39,7 @@ class eDBoxLCD: public eLCD
 {
 	static eDBoxLCD *instance;
 	unsigned char inverted;
+	void init_eDBoxLCD();
 public:
 	static eDBoxLCD *getInstance();
 	int switchLCD(int state);

@@ -19,6 +19,7 @@ class eZapTimeZoneSetup: public eWindow
 	eComboBox* timeZone;
 	eButton *ok;
 	bool showHint;
+	void init_eZapTimeZoneSetup();
 private:
 	void okPressed();
 

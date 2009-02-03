@@ -44,6 +44,7 @@ class eSubtitleWidget: public eWidget
 	static eSubtitleWidget *instance;
 	int eventHandler(const eWidgetEvent &event);
 	void globalFocusHasChanged(const eWidget* newFocus);
+	void init_eSubtitleWidget();
 public:
 	void start(int pid, const std::set<int> &pageids);
 #ifndef TUXTXT_CFG_STANDALONE

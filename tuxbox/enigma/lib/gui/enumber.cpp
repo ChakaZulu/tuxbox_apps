@@ -214,6 +214,10 @@ eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, 
 	have_focus(0), digit(isactive), isactive(isactive), flags(0), descr(descr), tmpDescr(0),
 	neg(false), saved_keyboard_mode(0)
 {
+	init_eNumber(_len, _min, _max, _maxdigits, init);
+}
+void eNumber::init_eNumber(int _len, int _min, int _max, int _maxdigits, int *init)
+{
 	setNumberOfFields(_len);
 	setLimits(_min, _max);
 	setMaximumDigits(_maxdigits);

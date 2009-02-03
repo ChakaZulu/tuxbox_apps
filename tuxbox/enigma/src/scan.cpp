@@ -26,6 +26,10 @@
 tsSelectType::tsSelectType(eWidget *parent)
 	:eWidget(parent), check(NULL)
 {
+	init_tsSelectType();
+}
+void tsSelectType::init_tsSelectType()
+{
 	list=new eListBox<eListBoxEntryMenu>(this);
 	list->setName("menu");
 	eSkin *skin=eSkin::getActive();
@@ -75,6 +79,10 @@ int tsSelectType::eventHandler(const eWidgetEvent &event)
 
 tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LCDTitle, eWidget *LCDElement)
 :eWidget(parent), transponder(transponder)
+{
+	init_tsManual(LCDTitle,LCDElement);
+}
+void tsManual::init_tsManual( eWidget *LCDTitle, eWidget *LCDElement)
 {
 #ifndef DISABLE_LCD
 	setLCD(LCDTitle, LCDElement);
@@ -174,6 +182,10 @@ void tsManual::retune()
 tsTryLock::tsTryLock(eWidget *parent, tpPacket *packet, eString ttext)
 	:eWidget(parent), ret(0), inProgress(0), packet(packet)
 	,current_tp(packet->possibleTransponders.begin())	
+{
+	init_tsTryLock(parent,packet, ttext);
+}
+void tsTryLock::init_tsTryLock(eWidget *parent, tpPacket *packet, eString ttext)
 {
 	l_status=new eLabel(this, RS_WRAP);
 	l_status->setName("lStatus");
@@ -293,6 +305,10 @@ int tsTryLock::eventHandler(const eWidgetEvent &e)
 
 tsAutomatic::tsAutomatic(eWidget *parent)
 	:eWidget(parent), inProgress(0)
+{
+	init_tsAutomatic();
+}
+void tsAutomatic::init_tsAutomatic()
 {
 	eLabel* l = new eLabel(this);
 	l->setName("lNet");
@@ -597,6 +613,10 @@ int tsAutomatic::eventHandler(const eWidgetEvent &event)
 tsText::tsText(eString sheadline, eString sbody, eWidget *parent)
 	:eWidget(parent,1)
 {
+	init_tsText(sheadline, sbody);
+}
+void tsText::init_tsText(eString sheadline, eString sbody)
+{
 	addActionMap(&i_cursorActions->map);
 	headline=new eLabel(this);
 	headline->setText(sheadline);
@@ -629,6 +649,10 @@ int tsText::eventHandler(const eWidgetEvent &event)
 
 tsScan::tsScan(eWidget *parent, eString sattext)
 	:eWidget(parent, 1), timer(eApp)
+{
+	init_tsScan(sattext);
+}
+void tsScan::init_tsScan(eString sattext)
 {
 	services_scanned = new eLabel(this);
 	services_scanned->setName("services_scanned");
@@ -869,6 +893,10 @@ const eString& eListBoxEntrySat::redraw(gPainter *rc, const eRect& rect, gColor 
 tsMultiSatScan::tsMultiSatScan(eWidget *parent)
 	:eWidget(parent)
 {
+	init_tsMultiSatScan();
+}
+void tsMultiSatScan::init_tsMultiSatScan()
+{
 	start = new eButton(this);
 	start->setName("start");
 
@@ -948,6 +976,10 @@ TransponderScan::TransponderScan( eWidget *LCDTitle, eWidget *LCDElement, tState
 	,LCDElement(LCDElement), LCDTitle(LCDTitle)
 #endif
 	,closeTimer(eApp), last_orbital_pos(0), remove_new_flags(false), stateInitial(init)
+{
+	init_TransponderScan();
+}
+void TransponderScan::init_TransponderScan()
 {
 	addActionMap(&i_cursorActions->map);
 	setText(_("Transponder Scan"));
@@ -1814,7 +1846,7 @@ void ManualPIDWindow::init_ManualPIDWindow(eTransponder *tp, const eServiceRefer
 		eString service_provider;
 		if ( transponder.satellite.isValid() )
 		{
-			service_provider.sprintf("%d %d.%d°%c",
+			service_provider.sprintf("%d %d.%°%c",
 				transponder.satellite.frequency/1000,
 				abs(transponder.satellite.orbital_position)/10,
 				abs(transponder.satellite.orbital_position)%10,

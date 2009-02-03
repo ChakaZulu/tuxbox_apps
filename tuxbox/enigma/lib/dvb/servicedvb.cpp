@@ -218,6 +218,10 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	:handler(handler), buffer(65424), livemode(livemode), playingPermanentTimeshift(playingPermanentTimeshift), liveupdatetimer(this), curBufferFullness(0)
 	,needasyncworkaround(false), inputsn(0), outputsn(0), messages(this, 1)
 {
+	init_eDVRPlayerThread(_filename);
+}
+void eDVRPlayerThread::init_eDVRPlayerThread(const char *_filename)
+{
 	state=stateInit;
 	int nodetect=0;
 	eConfig::getInstance()->getKey("/enigma/notimestampdetect", nodetect );
@@ -1034,6 +1038,10 @@ eServiceHandlerDVB::eServiceHandlerDVB()
 	playingPermanentTimeshift(0),
 #endif
 	cache(*this)
+{
+	init_eServiceHandlerDVB();
+}
+void eServiceHandlerDVB::init_eServiceHandlerDVB()
 {
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);

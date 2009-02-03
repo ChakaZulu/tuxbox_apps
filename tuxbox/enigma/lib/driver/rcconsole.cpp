@@ -6,6 +6,10 @@
 
 eRCConsoleDriver::eRCConsoleDriver(const char *filename): eRCDriver(eRCInput::getInstance())
 {
+	init_eRCConsoleDriver(filename);
+}
+void eRCConsoleDriver::init_eRCConsoleDriver(const char *filename)
+{
 	handle=open(filename, O_RDONLY|O_NONBLOCK);
 	if (handle<0)
 	{

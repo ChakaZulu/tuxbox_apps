@@ -29,6 +29,10 @@ public:
 eZapKeyboardSetup::eZapKeyboardSetup()
 	:eWindow(0)
 {
+	init_eZapKeyboardSetup();
+}
+void eZapKeyboardSetup::init_eZapKeyboardSetup()
+{
 	setText(_("Keyboard Setup"));
 	cmove(ePoint(140, 170));
 	cresize(eSize(470, 210));

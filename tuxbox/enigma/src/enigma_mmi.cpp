@@ -17,6 +17,10 @@ enigmaMMI::enigmaMMI()
 	:eWindow(1), buffer(512), mmi_messages(eApp, 1), open(0),
 	responseTimer(eApp), delayTimer(eApp), closeTimer(eApp)
 {
+	init_enigmaMMI();
+}
+void enigmaMMI::init_enigmaMMI()
+{	
 	eDebug("[enigmaMMI] created successfully");
 	cmove( ePoint(150,140) );
 	cresize( eSize(450,100) );
@@ -424,6 +428,10 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 eMMIEnqWindow::eMMIEnqWindow( const eString &titleBarText, const eString &text, int num, bool blind )
 	:num(num)
 {
+	init_eMMIEnqWindow(titleBarText,text,blind);
+}
+void eMMIEnqWindow::init_eMMIEnqWindow( const eString &titleBarText, const eString &text, bool blind )
+{
 	cmove( ePoint(100,140) );
 	cresize( eSize(520,280) );
 	setText(titleBarText);
@@ -500,6 +508,10 @@ eString eMMIEnqWindow::getAnswer()
 
 eMMIListWindow::eMMIListWindow(const eString & titleBarText, const eString &titleTextT, const eString &subtitleTextT, const eString &bottomTextT, std::list< std::pair< eString, int> > &entrys )
 	:eListBoxWindow<eListBoxEntryText>(titleBarText, entrys.size() > 8 ? 8 : entrys.size() , 520, false)
+{
+	init_eMMIListWindow(titleBarText,titleTextT,subtitleTextT,bottomTextT,entrys);
+}
+void eMMIListWindow::init_eMMIListWindow(const eString & titleBarText, const eString &titleTextT, const eString &subtitleTextT, const eString &bottomTextT, std::list< std::pair< eString, int> > &entrys)
 {
 	cmove(ePoint(120, 130));
 

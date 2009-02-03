@@ -15,6 +15,10 @@ static inline unsigned short MadFixedToUshort(mad_fixed_t Fixed)
 eAudioDecoderMP3::eAudioDecoderMP3(eIOBuffer &input, eIOBuffer &output): 
 		avgbr(-1), framecnt(0), input(input), output(output)
 {
+	init_eAudioDecoderMP3();
+}
+void eAudioDecoderMP3::init_eAudioDecoderMP3()
+{
 	mad_stream_init(&stream);
 	mad_frame_init(&frame);
 	mad_synth_init(&synth);

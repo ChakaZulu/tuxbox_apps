@@ -9,6 +9,7 @@ class eHTTPFile: public eHTTPDataSource
 	off64_t size;
 	const char *mime;
 	int method;
+	void init_eHTTPFile(eHTTPConnection *c, int _fd, const char *mime);
 public:
 	enum { methodGET, methodPUT };
 	eHTTPFile(eHTTPConnection *c, int fd, int method, const char *mime);
@@ -24,6 +25,7 @@ class eHTTPMovie: public eHTTPDataSource
 	const char *mime;
 	eString filename;
 	int method;
+	void init_eHTTPMovie(eHTTPConnection *c,const char *mime);
 public:
 	enum { methodGET, methodPUT };
 	eHTTPMovie(eHTTPConnection *c, int fd, int method, const char *mime, const eString &filename);

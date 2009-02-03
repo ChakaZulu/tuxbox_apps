@@ -9,6 +9,10 @@ eConfig *eConfig::instance;
 
 eConfig::eConfig()
 {
+	init_eConfig();
+}
+void eConfig::init_eConfig()
+{
 	if (!instance)
 		instance=this;
 	DIR *configdir;

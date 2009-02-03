@@ -42,6 +42,7 @@ class fontRenderClass
 	FTC_FaceID getFaceID(const eString &face);
 	FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 	static fontRenderClass *instance;
+	void init_fontRenderClass();
 public:
 	float getLineHeight(const gFont& font);
 	eString AddFont(const eString &filename, const eString &name, int scale);

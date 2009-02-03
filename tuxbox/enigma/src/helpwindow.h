@@ -18,6 +18,7 @@ class eHelpWindow: public eWindow
 	eString loadHelpText(int helpIDtoLoad);
 	int eventHandler(const eWidgetEvent &event);
 	void updateScrollbar();
+	void init_eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID);
 public:
 	eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID=0);
 	~eHelpWindow();

@@ -30,6 +30,7 @@ class eSatfind: public eWindow
 	void tpChanged( eListBoxEntryText *tp );
 	void RotorRunning(int);
 	void tunedIn(eTransponder *, int );
+	void init_eSatfind();
 public:
 	eSatfind(eFrontend*);
 	void closeWnd();

@@ -26,6 +26,7 @@ class eChannelInfo : public eDecoWidget
 	void EITready(int err);
 	void closeEIT();
 	eString DescriptionForEPGSearch;
+	void init_eChannelInfo();
 public:
 	enum
 	{

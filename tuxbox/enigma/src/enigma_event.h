@@ -26,6 +26,7 @@ class eEventDisplay: public eWindow
 	void checkTimerIcon(EITEvent *);
 	int valid;
 	int pageHeight;
+	void init_eEventDisplay(const ePtrList<EITEvent>* e);
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:

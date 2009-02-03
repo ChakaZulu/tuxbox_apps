@@ -8,6 +8,7 @@ class eTimeSettings: public eSetupWindow
 private:
 	void time_zone();
 	void time_correction();
+	void init_eTimeSettings();
 public:
 	eTimeSettings();
 };

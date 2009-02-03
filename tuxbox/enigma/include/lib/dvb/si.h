@@ -64,6 +64,7 @@ public:
 
 class ServiceDescriptor: public Descriptor
 {
+	void init_ServiceDescriptor(sdt_service_desc *descr);
 public:
   int service_type, tsidonid;
   eString service_provider, service_name;
@@ -75,6 +76,7 @@ public:
 
 class CAIdentifierDescriptor: public Descriptor
 {
+	void init_CAIdentifierDescriptor(descr_gen_t *descr);
 public:
   __u16 *CA_system_id;
   int CA_system_ids;
@@ -85,6 +87,7 @@ public:
 
 class LinkageDescriptor: public Descriptor
 {
+	void init_LinkageDescriptor(descr_linkage_struct *descr);
 public:
   int transport_stream_id;
   int original_network_id;
@@ -121,6 +124,7 @@ public:
 
 class NVODReferenceDescriptor: public Descriptor
 {
+	void init_NVODReferenceDescriptor(descr_gen_t *descr);
 public:
   NVODReferenceDescriptor(descr_gen_t *descr);
   ~NVODReferenceDescriptor();
@@ -157,6 +161,7 @@ public:
 
 class CADescriptor: public Descriptor
 {
+	void init_CADescriptor(ca_descr_t *descr);
 public:
   __u16 CA_system_ID, CA_PID;
   __u8 *data;
@@ -176,6 +181,7 @@ public:
 
 class CableDeliverySystemDescriptor: public Descriptor
 {
+	void init_CableDeliverySystemDescriptor(descr_cable_delivery_system_struct *descr);
 public:
   __u32 frequency;
   int FEC_outer, modulation, symbol_rate, FEC_inner;
@@ -186,6 +192,7 @@ public:
 
 class SatelliteDeliverySystemDescriptor: public Descriptor
 {
+	void init_SatelliteDeliverySystemDescriptor(descr_satellite_delivery_system_struct *descr);
 public:
   __u32 frequency;
   __u16 orbital_position;
@@ -201,6 +208,7 @@ public:
 
 class TerrestrialDeliverySystemDescriptor: public Descriptor
 {
+	void init_TerrestrialDeliverySystemDescriptor(descr_terrestrial_delivery_system_struct *descr);
 public:
   __u32 centre_frequency;
   int bandwidth;
@@ -238,6 +246,7 @@ public:
 
 class ShortEventDescriptor: public Descriptor
 {
+	void init_ShortEventDescriptor(descr_gen_t *descr);
 public:
 	ShortEventDescriptor(descr_gen_t *descr, int tsidonid);
 	ShortEventDescriptor(): Descriptor((descr_gen_t*)"\x4d") { };
@@ -259,6 +268,7 @@ public:
 
 class AC3Descriptor: public Descriptor
 {
+	void init_AC3Descriptor(descr_gen_t *descr);
 public:
 	AC3Descriptor(descr_gen_t *descr);
 	eString toString();
@@ -284,6 +294,7 @@ public:
 
 class ExtendedEventDescriptor: public Descriptor
 {
+	void init_ExtendedEventDescriptor(descr_gen_t *descr);
 public:
 	ExtendedEventDescriptor(descr_gen_t *descr, int tsidonid);
 	eString toString();
@@ -297,6 +308,7 @@ public:
 
 class ComponentDescriptor: public Descriptor
 {
+	void init_ComponentDescriptor(descr_component_struct *descr);
 public:
 	ComponentDescriptor(descr_component_struct *descr);
 	eString toString();
@@ -308,6 +320,7 @@ public:
 
 class ContentDescriptor: public Descriptor
 {
+	void init_ContentDescriptor(descr_gen_t *descr);
 public:
 	ContentDescriptor(descr_gen_t *descr);
 	ePtrList< descr_content_entry_struct > contentList;	
@@ -409,6 +422,7 @@ public:
 
 class SDTEntry
 {
+	void init_SDTEntry(sdt_descr_t *descr, int tsidonid);
 public:
 	SDTEntry(sdt_descr_t *descr, int tsidonid);
 	int service_id;
@@ -433,6 +447,7 @@ public:
 
 class PMTEntry
 {
+	void init_PMTEntry(pmt_info_t* info);
 public:
 	PMTEntry(pmt_info_t* info);
 	int stream_type;
@@ -462,6 +477,7 @@ public:
 
 class NITEntry
 {
+	void init_NITEntry(nit_ts_t* ts);
 public:
 	NITEntry(nit_ts_t* ts);
 
@@ -486,6 +502,7 @@ public:
 
 class EITEvent
 {
+	void init_EITEvent(const eit_event_struct *event, int tsidonid);
 public:
 	EITEvent(const eit_event_struct *event, int tsidonid);
 	EITEvent();
@@ -534,6 +551,7 @@ public:
 
 class BATEntry
 {
+	void init_BATEntry(bat_loop_struct *entry);
 public:
 	BATEntry(bat_loop_struct *data);
 	int transport_stream_id, original_network_id;

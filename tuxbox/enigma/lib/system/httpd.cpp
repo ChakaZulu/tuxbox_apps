@@ -28,6 +28,10 @@ int eHTTPDataSource::doWrite(int)
 
 eHTTPError::eHTTPError(eHTTPConnection *c, int errcode): eHTTPDataSource(c), errcode(errcode)
 {
+	init_eHTTPError();
+}
+void eHTTPError::init_eHTTPError()
+{
 	eString error="unknown error";
 	switch (errcode)
 	{
@@ -55,6 +59,10 @@ int eHTTPError::doWrite(int w)
 
 eHTTPConnection::eHTTPConnection(int socket, int issocket, eHTTPD *parent, int persistent): eSocket(socket, issocket, parent->ml), parent(parent), persistent(persistent)
 {
+	init_eHTTPConnection();
+}
+void eHTTPConnection::init_eHTTPConnection()
+{
 #ifdef DEBUG_HTTPD
 	eDebug("eHTTPConnection");
 #endif
@@ -78,11 +86,7 @@ void eHTTPConnection::destruct()
 
 eHTTPConnection::eHTTPConnection(eMainloop *ml): eSocket(ml), parent(0), persistent(0)
 {
-	CONNECT(this->readyRead_ , eHTTPConnection::readData);
-	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
-	CONNECT(this->error_ , eHTTPConnection::gotError);
-	CONNECT(this->connected_ , eHTTPConnection::hostConnected);
-	CONNECT(this->connectionClosed_ , eHTTPConnection::destruct);
+	init_eHTTPConnection();
 
 	localstate=stateWait;
 	remotestate=stateWait;

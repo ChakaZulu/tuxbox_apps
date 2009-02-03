@@ -148,6 +148,10 @@ fontRenderClass::fontListEntry::~fontListEntry()
 fontRenderClass::fontRenderClass()
 	:fb(fbClass::getInstance())
 {
+	init_fontRenderClass();
+}
+void fontRenderClass::init_fontRenderClass()
+{
 	instance=this;
 	eDebug("[FONT] initializing lib...");
 

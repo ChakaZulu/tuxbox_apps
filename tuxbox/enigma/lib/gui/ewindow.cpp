@@ -13,6 +13,10 @@ int eWindow::globCancel = eWindow::ON;
 eWindow::eWindow(int takefocus)
 	:eWidget(0, takefocus)
 {
+	init_eWindow();
+}
+void eWindow::init_eWindow()
+{
 	deco.load("eWindow");
 
 	titleBarColor=eSkin::getActive()->queryScheme("eWindow.titleBar");

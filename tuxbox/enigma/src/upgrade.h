@@ -25,6 +25,7 @@ class eHTTPDownload: public eHTTPDataSource
 	int total;
 	int fd;
 	eString filename;
+	void init_eHTTPDownload(eHTTPConnection *c,const char *filename);
 public:
 	eHTTPDownload(eHTTPConnection *c, const char *filename);
 	Signal2<void,int,int> progress; // received, total (-1 for unknown)
@@ -93,6 +94,7 @@ class eUpgrade: public eWindow
 
 	void flashImage(int checkmd5);
 	void displayChangelog(eString oldversion, eString newversion, eString mid);
+	void init_eUpgrade(bool manual);
 public:
 	eUpgrade(bool manual);
 	~eUpgrade();

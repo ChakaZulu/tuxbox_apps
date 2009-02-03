@@ -112,6 +112,7 @@ public:
 class eDVB: public Object
 {
 	static eDVB *instance;
+	void init_eDVB();
 public:
 	static eDVB *getInstance() { return instance; }
 	eDVB();

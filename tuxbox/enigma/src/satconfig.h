@@ -91,6 +91,7 @@ class eLNBSetup : public eWindow // Selitor = "Sel"ector + Ed"itor" :-)
 	void onPrev() { mp.prev(); }  
 	int eventHandler(const eWidgetEvent &event);
 	eServiceReference service;
+	void init_eLNBSetup(eWidget* lcdTitle, eWidget* lcdElement );
 public:
 	eLNBSetup( eSatellite *sat, eWidget* lcdTitle=0, eWidget* lcdElement=0 );
 };
@@ -111,6 +112,7 @@ class eLNBPage : public eWidget
     
 	void numSelected(int*);
 	void lnbChanged( eListBoxEntryText* );
+	void init_eLNBPage( eWidget *parent);
 public:
 	eLNBPage( eWidget *parent, eSatellite *sat );
 };

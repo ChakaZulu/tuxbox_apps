@@ -84,7 +84,7 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	off64_t getCurrentSliceLength();
 
   	eTimeStampParserTS *timestampParser;
-
+	void init_eDVRPlayerThread(const char *_filename);
 public:
 	struct eDVRPlayerThreadMessage
 	{
@@ -165,6 +165,7 @@ class eServiceHandlerDVB: public eServiceHandler
 	int pcrpid;
 
 	eServiceCache<eServiceHandlerDVB> cache;
+	void init_eServiceHandlerDVB();
 public:
 	int getID() const;
 	eServiceHandlerDVB();

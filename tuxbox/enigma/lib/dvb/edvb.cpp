@@ -78,6 +78,10 @@ eDVB::eDVB()
 	,delayTimer(eApp)
 #endif
 {
+	init_eDVB();
+}
+void eDVB::init_eDVB()
+{
 #ifndef DISABLE_NETWORK
 	CONNECT(delayTimer.timeout, eDVB::restartSamba);
 #ifndef DISABLE_NFS

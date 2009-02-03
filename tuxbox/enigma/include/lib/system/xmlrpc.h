@@ -27,6 +27,7 @@ class eXMLRPCVariant
 //	QDateTime *_datetime;
 //	QByteArray *_base64;
 	};
+	void init_eXMLRPCVariant(const eXMLRPCVariant &c);
 public:
 	enum XMLRPCType { STRUCT, ARRAY, I4, BOOLEAN, STRING, DOUBLE };
 	eXMLRPCVariant(std::map<eString,eXMLRPCVariant*> *_struct);

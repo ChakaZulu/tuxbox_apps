@@ -17,6 +17,7 @@ class eComboBox: public eButton
 	eString oldHelpText;
 	int setProperty( const eString&, const eString& );
 	void lbLostFocus( const eWidget * );
+	void init_eComboBox();
 public:
 	void onOkPressed();
 	~eComboBox();

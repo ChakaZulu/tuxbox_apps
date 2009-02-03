@@ -15,6 +15,10 @@
 ParentalLockWindow::ParentalLockWindow( const char* windowText, int curNum )
 :eWindow(0)
 {
+	init_ParentalLockWindow(windowText,curNum);
+}
+void ParentalLockWindow::init_ParentalLockWindow(const char* windowText, int curNum )
+{
 	resize( eSize( 380, 150 ) );
 	move( ePoint( 200, 200 ) );
 	setText(windowText);
@@ -41,6 +45,10 @@ void ParentalLockWindow::numEntered(int *i)
 
 eParentalSetup::eParentalSetup():
 	eWindow(0)
+{
+	init_eParentalSetup();
+}
+void eParentalSetup::init_eParentalSetup()
 {
 	setText(_("Parental setup"));
 	cmove(ePoint(170, 136));

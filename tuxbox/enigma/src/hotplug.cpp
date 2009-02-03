@@ -8,6 +8,10 @@ eHotplug *eHotplug::instance = 0;
 eHotplug::eHotplug()
 	:paramsleft(0)
 {
+	init_eHotplug();
+}
+void eHotplug::init_eHotplug()
+{
 	if (!instance)
 		instance=this;
 	else

@@ -17,6 +17,7 @@ class eWindow: public eWidget
 	eDecoration deco;
 	gColor fontColor, titleBarColor;
 	static int globCancel;
+	void init_eWindow();
 protected:
 	int borderTop, borderLeft, borderBottom, borderRight;
 	int titleOffsetLeft, titleOffsetRight, titleOffsetTop, titleFontSize, titleHeight;

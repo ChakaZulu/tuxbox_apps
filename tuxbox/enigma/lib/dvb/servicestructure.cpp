@@ -5,6 +5,10 @@
 
 eServiceStructureHandler::eServiceStructureHandler(): eServiceHandler(eServiceReference::idStructure), cache(*this)
 {
+	init_eServiceStructureHandler();
+}
+void eServiceStructureHandler::init_eServiceStructureHandler()
+{
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);
 	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory, modeRoot), new eService(_("root node")));

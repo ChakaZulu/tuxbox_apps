@@ -20,6 +20,7 @@ class eMessageBox: public eWindow
 	void pressedYes();
 	void pressedNo();
 	void updateTimeoutLabel();
+	void init_eMessageBox(eString message, eString caption, int flags, int def, int timeout );
 protected:	
 	int eventHandler( const eWidgetEvent & );
 public:

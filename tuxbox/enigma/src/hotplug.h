@@ -15,6 +15,7 @@ class eHotplug: public Object
 	void dataAvail(int what);
 	int paramsleft;
 	std::map<eString,eString> params;
+	void init_eHotplug();
 public:
 	eHotplug *getInstance() { return instance; }
 	eHotplug();

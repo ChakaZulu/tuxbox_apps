@@ -112,6 +112,10 @@ eMainMenu::eMainMenu()
 	350),
 	wndShowTimer(eApp)
 {
+	init_eMainMenu();
+}
+void eMainMenu::init_eMainMenu()
+{
 	simpleMainmenu=0;
 	eConfig::getInstance()->getKey("/ezap/osd/simpleMainMenu", simpleMainmenu);
 

@@ -27,6 +27,7 @@ class eConsoleAppContainer: public Object
 	void readyErrRead(int what);
 	void readyWrite(int what);
 	void closePipes();
+	void init_eConsoleAppContainer( const eString &cmd );
 public:
 	eConsoleAppContainer( const eString &str );
 	~eConsoleAppContainer();

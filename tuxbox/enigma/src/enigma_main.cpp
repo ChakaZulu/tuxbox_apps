@@ -662,6 +662,10 @@ void AudioChannelSelectionChanged( eListBoxEntryText *e )
 ePSAudioSelector::ePSAudioSelector()
 	:eListBoxWindow<eListBoxEntryText>(_("Audio"), 10, 330)
 {
+	init_ePSAudioSelector();
+}
+void ePSAudioSelector::init_ePSAudioSelector()
+{
 	move(ePoint(200, 120));
 	CONNECT(list.selected, ePSAudioSelector::selected);
 
@@ -925,6 +929,10 @@ void eAudioSelector::selected(AudioStream *l)
 eAudioSelector::eAudioSelector()
 	:eListBoxWindow<AudioStream>(_("Audio"), 10, 330)
 {
+	init_eAudioSelector();
+}
+void eAudioSelector::init_eAudioSelector()
+{
 	move(ePoint(200, 120));
 	CONNECT(list.selected, eAudioSelector::selected);
 
@@ -1023,6 +1031,10 @@ struct selectCurSubService
 eSubServiceSelector::eSubServiceSelector( bool showbuttons )
 	:eListBoxWindow<SubService>(_("multiple Services"), 10, 530),
 	quickzap(0)
+{
+	init_eSubServiceSelector(showbuttons);
+}
+void eSubServiceSelector::init_eSubServiceSelector(bool showbuttons)
 {
 	move(ePoint(80, 70));
 	cresize( eSize( getClientSize().width(), getClientSize().height()+80 ) );
@@ -1176,6 +1188,10 @@ void eServiceNumberWidget::timeout()
 
 eServiceNumberWidget::eServiceNumberWidget(int initial)
 										:eWindow(0)
+{
+	init_eServiceNumberWidget(initial);
+}
+void eServiceNumberWidget::init_eServiceNumberWidget(int initial)
 {
 	setText(_("Channel"));
 	move(ePoint(200, 140));
@@ -8022,6 +8038,10 @@ extern ePermanentTimeshift permanentTimeshift;
 eRecordContextMenu::eRecordContextMenu( eWidget *LCDTitle, eWidget *LCDElement )
 	: eListBoxWindow<eListBoxEntryText>(_("Record Menu"), 6, 500, true)
 {
+	init_eRecordContextMenu();
+}
+void eRecordContextMenu::init_eRecordContextMenu()
+{
 #ifndef DISABLE_LCD
 	setLCD(LCDTitle, LCDElement);
 #endif
@@ -8052,6 +8072,10 @@ void eRecordContextMenu::entrySelected( eListBoxEntryText *sel )
 
 eRecTimeInput::eRecTimeInput()
 :eShutdownStandbySelWindow( this, 2, 0, 59, 2, 0, 0 )
+{
+	init_eRecTimeInput();
+}
+void eRecTimeInput::init_eRecTimeInput()
 {
 	eLabel *l = new eLabel(this);
 	l->setName("lrec_end_time");
@@ -8127,6 +8151,10 @@ void eRecTimeInput::setPressed()
 
 TextEditWindow::TextEditWindow( const char *InputFieldDescr, const char* useableChars )
 	:eWindow(0)
+{
+	init_TextEditWindow(InputFieldDescr, useableChars );
+}
+void TextEditWindow::init_TextEditWindow( const char *InputFieldDescr, const char* useableChars )
 {
 	eTextInputFieldHelpWidget *image=new eTextInputFieldHelpWidget(this);
 	image->setName("image");

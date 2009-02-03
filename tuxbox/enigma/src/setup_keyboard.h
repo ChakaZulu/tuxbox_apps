@@ -16,6 +16,7 @@ class eZapKeyboardSetup: public eWindow
 	eStatusBar *statusbar;
 	void okPressed();
 	void loadMappings();
+	void init_eZapKeyboardSetup();
 public:
 	eZapKeyboardSetup();
 	~eZapKeyboardSetup();

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.9 2006/02/05 23:41:01 pieterg Exp $
+ * $Id: system_settings.cpp,v 1.10 2009/02/03 18:54:33 dbluelle Exp $
  */
 
 #include <system_settings.h>
@@ -35,6 +35,10 @@
 
 eSystemSettings::eSystemSettings()
 	:eSetupWindow(_("System Settings"), 10, 350)
+{
+	init_eSystemSettings();
+}
+void eSystemSettings::init_eSystemSettings()
 {
 	move(ePoint(180, 100));
 	int entry=0;

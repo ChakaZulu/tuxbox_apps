@@ -32,6 +32,10 @@ extern unsigned int crc32_table[256];
 eventData::eventData(const eit_event_struct* e, int size, int type)
 	:ByteSize(size&0xFF), type(type&0xFF)
 {
+	init_eventData(e,size,type);
+}
+void eventData::init_eventData(const eit_event_struct* e, int size, int type)
+{
 	if (!e)
 		return;
 
@@ -192,6 +196,10 @@ void eventData::save(FILE *f)
 eEPGCache::eEPGCache()
 	:messages(this,1), paused(0), firstStart(1)
 	,CleanTimer(this), zapTimer(this), abortTimer(this)
+{
+	init_eEPGCache();
+}
+void eEPGCache::init_eEPGCache()
 {
 	eDebug("[EPGC] Initialized EPGCache");
 	isRunning=0;

@@ -13,6 +13,7 @@ class eWizardLanguage: public eWindow
 	void selected(eLanguageEntry *entry);
 	int eventHandler( const eWidgetEvent &e );
 	eString oldLanguage;
+	void init_eWizardLanguage();
 public:
 	eWizardLanguage();
 	static int run();

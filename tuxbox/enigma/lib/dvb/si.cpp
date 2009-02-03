@@ -237,6 +237,10 @@ eString UnknownDescriptor::toString()
 ServiceDescriptor::ServiceDescriptor(sdt_service_desc *descr, int tsidonid)
 	:Descriptor((descr_gen_t*)descr), tsidonid(tsidonid)
 {
+	init_ServiceDescriptor(descr);
+}
+void ServiceDescriptor::init_ServiceDescriptor(sdt_service_desc *descr)
+{
 	int spl=descr->service_provider_name_length;
 	service_type=descr->service_type;
 	service_provider=convertDVBUTF8((unsigned char*)(descr+1), spl, 0, tsidonid);
@@ -266,6 +270,10 @@ eString ServiceDescriptor::toString()
 
 CAIdentifierDescriptor::CAIdentifierDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
+{
+	init_CAIdentifierDescriptor(descr);
+}
+void CAIdentifierDescriptor::init_CAIdentifierDescriptor(descr_gen_t *descr)
 {
 	CA_system_ids=(len-2)/2;
 	if ( CA_system_ids > 0 )
@@ -299,6 +307,10 @@ CAIdentifierDescriptor::~CAIdentifierDescriptor()
 
 LinkageDescriptor::LinkageDescriptor(descr_linkage_struct *descr)
 	:Descriptor((descr_gen_t*)descr)
+{
+	init_LinkageDescriptor(descr);
+}
+void LinkageDescriptor::init_LinkageDescriptor(descr_linkage_struct *descr)
 {
 	private_data=0;
 	priv_len=0;
@@ -394,6 +406,10 @@ NVODReferenceEntry::~NVODReferenceEntry()
 NVODReferenceDescriptor::NVODReferenceDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
+	init_NVODReferenceDescriptor(descr);
+}
+void NVODReferenceDescriptor::init_NVODReferenceDescriptor(descr_gen_t *descr)
+{
 	entries.setAutoDelete(true);
 	for (int i=0; i<(len-2); i+=6)
 		entries.push_back(new NVODReferenceEntry((((__u8*)(descr+1))[i]<<8) | (((__u8*)(descr+1))[i+1]),
@@ -474,6 +490,10 @@ eString StreamIdentifierDescriptor::toString()
 CADescriptor::CADescriptor(ca_descr_t *descr)
 	:Descriptor((descr_gen_t*)descr)
 {
+	init_CADescriptor(descr);
+}
+void CADescriptor::init_CADescriptor(ca_descr_t *descr)
+{
 	if ( len > 0 )
 	{
 		data=new __u8[len];
@@ -523,6 +543,10 @@ eString NetworkNameDescriptor::toString()
 CableDeliverySystemDescriptor::CableDeliverySystemDescriptor(descr_cable_delivery_system_struct *descr)
 	:Descriptor((descr_gen_t*)descr)
 {
+	init_CableDeliverySystemDescriptor(descr);
+}
+void CableDeliverySystemDescriptor::init_CableDeliverySystemDescriptor(descr_cable_delivery_system_struct *descr)
+{
 	frequency= (descr->frequency1>>4) *1000000;
 	frequency+=(descr->frequency1&0xF)*100000;
 	frequency+=(descr->frequency2>>4) *10000;
@@ -563,6 +587,10 @@ eString CableDeliverySystemDescriptor::toString()
 
 SatelliteDeliverySystemDescriptor::SatelliteDeliverySystemDescriptor(descr_satellite_delivery_system_struct *descr)
 	:Descriptor((descr_gen_t*)descr)
+{
+	init_SatelliteDeliverySystemDescriptor(descr);
+}
+void SatelliteDeliverySystemDescriptor::init_SatelliteDeliverySystemDescriptor(descr_satellite_delivery_system_struct *descr)
 {
 	frequency= (descr->frequency1>>4) *100000000;
 	frequency+=(descr->frequency1&0xF)*10000000;
@@ -616,7 +644,11 @@ eString SatelliteDeliverySystemDescriptor::toString()
 
 TerrestrialDeliverySystemDescriptor::TerrestrialDeliverySystemDescriptor(descr_terrestrial_delivery_system_struct *descr)
 	:Descriptor((descr_gen_t*)descr) 
-	{ 
+{
+	init_TerrestrialDeliverySystemDescriptor(descr);
+}
+void TerrestrialDeliverySystemDescriptor::init_TerrestrialDeliverySystemDescriptor(descr_terrestrial_delivery_system_struct *descr)
+{
 		centre_frequency=(descr->centre_frequency1<<24)|
 				(descr->centre_frequency2<<16)|
 				(descr->centre_frequency3<<8)|
@@ -738,6 +770,10 @@ eString ServiceListDescriptor::toString()
 ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr, int tsidonid)
 	:Descriptor(descr), tsidonid(tsidonid)
 {
+	init_ShortEventDescriptor(descr);
+}
+void ShortEventDescriptor::init_ShortEventDescriptor(descr_gen_t *descr)
+{
 	__u8 *data=(__u8*)descr;
 	memcpy(language_code, data+2, 3);
 	int ptr=5;
@@ -789,6 +825,10 @@ eString ISO639LanguageDescriptor::toString()
 
 AC3Descriptor::AC3Descriptor(descr_gen_t *descr)
 	:Descriptor(descr)
+{
+	init_AC3Descriptor(descr);
+}
+void AC3Descriptor::init_AC3Descriptor(descr_gen_t *descr)
 {
 	__u8 *data=(__u8*)descr;
 	data+=2;
@@ -856,6 +896,10 @@ ItemEntry::~ItemEntry()
 ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr, int tsidonid)
 	:Descriptor(descr), tsidonid(tsidonid)
 {
+	init_ExtendedEventDescriptor(descr);
+}
+void ExtendedEventDescriptor::init_ExtendedEventDescriptor(descr_gen_t *descr)
+{
 	struct eit_extended_descriptor_struct *evt=(struct eit_extended_descriptor_struct *)descr;
 	items.setAutoDelete(true);
 	descriptor_number = evt->descriptor_number;
@@ -917,6 +961,10 @@ eString ExtendedEventDescriptor::toString()
 ComponentDescriptor::ComponentDescriptor(descr_component_struct *descr)
 	:Descriptor((descr_gen_t*)descr)
 {
+	init_ComponentDescriptor(descr);
+}
+void ComponentDescriptor::init_ComponentDescriptor(descr_component_struct *descr)
+{
 	stream_content=descr->stream_content;
 	component_type=descr->component_type;
 	component_tag=descr->component_tag;
@@ -942,6 +990,10 @@ eString ComponentDescriptor::toString()
 
 ContentDescriptor::ContentDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
+{
+	init_ContentDescriptor(descr);
+}
+void ContentDescriptor::init_ContentDescriptor(descr_gen_t *descr)
 {
 	contentList.setAutoDelete(true);
 	__u8 *data=(__u8*)(descr+1);
@@ -1162,6 +1214,10 @@ __u8 *PAT::getRAW()
 
 SDTEntry::SDTEntry(sdt_descr_t *descr, int tsidonid)
 {
+	init_SDTEntry(descr,tsidonid);
+}	
+void SDTEntry::init_SDTEntry(sdt_descr_t *descr, int tsidonid)
+{
 	descriptors.setAutoDelete(true);
 	service_id=HILO(descr->service_id);
 	EIT_schedule_flag=descr->EIT_schedule_flag;
@@ -1207,6 +1263,10 @@ int SDT::data(__u8 *data)
 }
 
 PMTEntry::PMTEntry(pmt_info_t* info)
+{
+	init_PMTEntry(info);
+}
+void PMTEntry::init_PMTEntry(pmt_info_t* info)
 {
 	ES_info.setAutoDelete(true);
 	stream_type=info->stream_type;
@@ -1336,6 +1396,10 @@ int PMT::data(__u8 *data)
 
 NITEntry::NITEntry(nit_ts_t* ts)
 {
+	init_NITEntry(ts);
+}
+void NITEntry::init_NITEntry(nit_ts_t* ts)
+{
 	transport_descriptor.setAutoDelete(true);
 	transport_stream_id=HILO(ts->transport_stream_id);
 	original_network_id=HILO(ts->original_network_id);
@@ -1379,6 +1443,10 @@ int NIT::data(__u8* data)
 }
 
 EITEvent::EITEvent(const eit_event_struct *event, int tsidonid)
+{
+	init_EITEvent(event, tsidonid);
+}
+void EITEvent::init_EITEvent(const eit_event_struct *event, int tsidonid)
 {
 	descriptor.setAutoDelete(true);
 	event_id=HILO(event->event_id);
@@ -1545,6 +1613,10 @@ TDT::TDT()
 }
 
 BATEntry::BATEntry(bat_loop_struct *entry)
+{
+	init_BATEntry(entry);
+}
+void BATEntry::init_BATEntry(bat_loop_struct *entry)
 {
 	transport_stream_id=HILO(entry->transport_stream_id);
 	original_network_id=HILO(entry->original_network_id);

@@ -37,6 +37,7 @@ class eMainMenu: public eWidget
 	void sel_timer();	
 	void eraseBackground(gPainter *, const eRect &where);
 	void selected(int num);
+	void init_eMainMenu();
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:

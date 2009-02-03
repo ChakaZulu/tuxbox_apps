@@ -23,6 +23,10 @@
 eProgress::eProgress(eWidget *parent, int takefocus)
 	: eWidget(parent, takefocus)
 {
+	init_eProgress();
+}
+void eProgress::init_eProgress()
+{
 	left = eSkin::getActive()->queryScheme("eProgress.left");
 	right = eSkin::getActive()->queryScheme("eProgress.right");
 	perc = start = 0;

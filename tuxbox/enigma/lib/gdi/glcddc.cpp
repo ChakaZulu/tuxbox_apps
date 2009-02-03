@@ -6,6 +6,10 @@ gLCDDC *gLCDDC::instance;
 
 gLCDDC::gLCDDC(eLCD *lcd): lcd(lcd)
 {
+	init_gLCDDC();
+}
+void gLCDDC::init_gLCDDC()
+{
 	instance=this;
 	
 	update=1;

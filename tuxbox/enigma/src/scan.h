@@ -36,6 +36,7 @@ class tsSelectType: public eWidget
 	void selected(eListBoxEntryMenu *entry);
 	int eventHandler( const eWidgetEvent &e );
 	eListBoxEntryCheck *check;
+	void init_tsSelectType();
 public:
 	tsSelectType(eWidget *parent);
 };
@@ -51,6 +52,7 @@ class tsManual: public eWidget
 	void abort();
 	void retune();
 	void manual_pids();
+	void init_tsManual( eWidget *LCDTitle, eWidget *LCDElement);
 public:
 	tsManual(eWidget *parent, const eTransponder &transponder, eWidget* LCDTitle=0, eWidget* LCDElement=0);
 	eTransponder &getTransponder() { return transponder; }
@@ -66,6 +68,7 @@ class tsTryLock: public eWidget
 	void dvbEvent(const eDVBEvent &event);
 	int nextTransponder(int next);
 	int eventHandler(const eWidgetEvent &);
+	void init_tsTryLock(eWidget *parent, tpPacket *packet, eString ttext);
 public:
 	tsTryLock(eWidget *parent, tpPacket *tppacket, eString ttext);
 };
@@ -87,6 +90,7 @@ class tsAutomatic: public eWidget
 	int nextTransponder(int next);
 	int tuneNext(int next);
 	int inProgress;
+	void init_tsAutomatic();
 public:
 	void openNetworkCombo();
 	tsAutomatic(eWidget *parent);
@@ -95,6 +99,7 @@ public:
 class tsText: public eWidget
 {
 	eLabel *headline, *body;
+	void init_tsText(eString sheadline, eString sbody);
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:
@@ -108,6 +113,7 @@ class tsScan: public eWidget
 	eLabel *timeleft, *service_name, *service_provider, *transponder_data, *services_scanned, *transponder_scanned;
 	eProgress *progress;
 	int tpLeft, scantime;
+	void init_tsScan(eString sattext);
 protected:
 	int eventHandler(const eWidgetEvent &event);
 	void dvbEvent(const eDVBEvent &event);
@@ -142,6 +148,7 @@ class tsMultiSatScan: public eWidget
 	eButton *start;
 	eListBox<eListBoxEntrySat> *satellites;
 	void entrySelected( eListBoxEntrySat * );
+	void init_tsMultiSatScan();
 public:
 	tsMultiSatScan(eWidget *parent);
 	void getSatsToScan( std::list<scanEntry> &);
@@ -165,6 +172,7 @@ class TransponderScan: public eWindow
 	void Close();
 	unsigned int last_orbital_pos;
 	bool remove_new_flags;
+	void init_TransponderScan();
 public:
 	enum tState
 	{

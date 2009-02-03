@@ -44,8 +44,13 @@ class eTOnlineDialog: public eWindow
 	eTextInputField *Kennung, *tOnlineNummer, *Mitbenutzer;
 	eButton *ok;
 	eStatusBar *sbar;
+	void init_eTOnlineDialog(eString Login);
 public:
 	eTOnlineDialog( eString Login )
+	{
+		init_eTOnlineDialog(Login);
+	}
+	void eTOnlineDialog::init_eTOnlineDialog(eString Login)
 	{
 		setText("T - Online");
 		cmove(ePoint(140,140));

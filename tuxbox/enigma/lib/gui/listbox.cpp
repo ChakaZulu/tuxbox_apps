@@ -18,6 +18,10 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, int takefocus,
 		movemode(0), MaxEntries(0), flags(0), item_height(item_height),
 		columns(1), in_atomic(0), entries(0), currentPos(-1), top(childs.end()), bottom(childs.end()), current(childs.end())
 {
+	init_eListBoxBase();
+}
+void eListBoxBase::init_eListBoxBase()
+{
 	scrollbar = new eProgress(this);
 	scrollbar->setDirection(1);
 	childs.setAutoDelete(false);	// machen wir selber

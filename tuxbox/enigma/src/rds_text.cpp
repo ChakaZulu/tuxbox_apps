@@ -28,6 +28,10 @@ RDSTextDecoder::RDSTextDecoder()
 	: m_interactive(0), wasVisible(0), bytesread(0), ptr(0), p1(-1), p2(-1), qdar_pos(0), rass_imode_active(0), leninfo(0), text_len(0), m_ptr(0), state(0)
 	, is_sync(0), paket_size(0), sync_try(0), sn(0), rass_logo( eZap::getInstance()->getDesktop( eZap::desktopFB )), qdarmvi_show(-1)
 {
+	init_RDSTextDecoder();
+}
+void RDSTextDecoder::init_RDSTextDecoder()
+{
 	int fd=open("/dev/dvb/card0/ancillary0", O_RDONLY|O_NONBLOCK );
 	if ( fd < 0 )
 		eDebug("open /dev/dvb/card0/ancillary0 failed(%m)");
@@ -738,6 +742,10 @@ void RDSTextDecoder::globalFocusHasChanged(const eWidget* newFocus)
 
 RassInteractivemode::RassInteractivemode()
 	:eWidget(0,1), active_slide(0), active_slide_sub(-1)
+{
+	init_RassInteractivemode();
+}
+void RassInteractivemode::init_RassInteractivemode()
 {
 	gFont rds_font = eSkin::getActive()->queryFont("rass");
 	

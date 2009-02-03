@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_picmanager.cpp,v 1.10 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_picmanager.cpp,v 1.11 2009/02/03 18:54:33 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -33,6 +33,10 @@
 #include "enigma_picmanager.h"
 
 ePicViewerSettings::ePicViewerSettings():eWindow(0)
+{
+	init_ePicViewerSettings();
+}
+void ePicViewerSettings::init_ePicViewerSettings()
 {
 	int slideshowtimeout = 5;
 	eConfig::getInstance()->getKey("/picviewer/slideshowtimeout", slideshowtimeout);

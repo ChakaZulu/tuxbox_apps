@@ -19,6 +19,10 @@ eZapLCD* eZapLCD::instance;
 eZapLCD::eZapLCD()
 	:eWidget(eZap::getInstance()->getDesktop(eZap::desktopLCD))
 {
+	init_eZapLCD();
+}
+void eZapLCD::init_eZapLCD()
+{
 	instance = this;
 	move(ePoint(0, 0));
 	cresize(eSize(140, 64));

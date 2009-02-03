@@ -86,6 +86,7 @@ class eDVBRecorder: private eThread, public Object
 	bool writePatPmt;
 	void PMTready(int error);
 	eLock splitlock;
+	void init_eDVBRecorder(PMT *pmt,PAT *pat);
 public:
 		/// the constructor
 	eDVBRecorder(PMT *, PAT*);
