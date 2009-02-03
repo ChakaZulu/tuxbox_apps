@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.c,v $
+ * Revision 0.17  2009/02/03 19:07:49  rhabarber1848
+ * Links webbrowser, text- and graphics mode, thx to amiga23 for kb2rcd patch: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=27&t=48280
+ *
  * Revision 0.16  2006/03/21 19:08:54  robspr1
  * - add time-delayed keys
  *
@@ -139,7 +142,11 @@ void ReadConf()
 	memset(szScripts,0,sizeof(szScripts));
 	
 	// open config-file
-	if (!(fd_conf = fopen(CFGPATH CFGFILE, "r")))
+	if (strcmp(config_file_name,"")==0)
+	{
+		config_file_name=CFGPATH CFGFILE;
+	}
+	if (!(fd_conf = fopen(config_file_name, "r")))
 	{
 		slog ? syslog(LOG_DAEMON | LOG_INFO,"Config not found, using defaults") : printf("kb2rcD <Config not found, using defaults>\n");
 		keyconv[0].in_code=KEY_MINUS; keyconv[0].out_code[0]=KEY_HELP; 
@@ -305,7 +312,11 @@ int WriteConf()
 	int i,j,k;
 
 	// open config-file
-	if (!(fd_conf = fopen(CFGPATH CFGFILE , "w")))
+	if (strcmp(config_file_name,"")==0)
+        {
+                config_file_name=CFGPATH CFGFILE;
+        }
+	if (!(fd_conf = fopen(config_file_name, "w")))
 	{
 		return 0;
 	}
@@ -794,7 +805,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 0.16 $";
+	char cvs_revision[] = "$Revision: 0.17 $";
 	int param = 0;
 	
 	sscanf(cvs_revision, "%*s %s", versioninfo_d);
@@ -812,6 +823,12 @@ int main(int argc, char **argv)
 			else if(!strcmp(argv[param], "-d"))
 			{
 				debug = 1;
+			}
+			else if ((!strncmp(argv[param], "--config", 8)) )
+			{
+				config_file_name = strtok( argv[param],"=" );
+				config_file_name = strtok( NULL, "=" );
+				printf("Config file set to: %s\n",config_file_name);
 			}
 			else if(!strcmp(argv[param], "-show"))
 			{
@@ -836,11 +853,12 @@ int main(int argc, char **argv)
 				printf("kb2rcd %s << Keyboard 2 RemoteControl daemon >>\r\n",versioninfo_d);
 				printf("(c) 2006 Robert [robspr1] Spreitzer\r\n");
 				printf("free software, license GNU GPL V2\r\n\r\n");
-				printf("kb2rcd -syslog      : log to syslog\r\n");
-				printf("       -show        : show all key-codes\r\n");
-				printf("       -v           : print version\r\n");
-				printf("       -d           : debug outputs\r\n");
-				printf("       -?           : this help\r\n");
+				printf("kb2rcd -syslog         : log to syslog\r\n");
+				printf("       -show           : show all key-codes\r\n");
+				printf("       -v              : print version\r\n");
+				printf("       -d              : debug outputs\r\n");
+				printf("       --config=<path> : set config file\r\n");
+				printf("       -?              : this help\r\n");
 				return 0;
 			}
 		}

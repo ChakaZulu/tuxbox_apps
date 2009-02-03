@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.18  2009/02/03 19:07:49  rhabarber1848
+ * Links webbrowser, text- and graphics mode, thx to amiga23 for kb2rcd patch: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=27&t=48280
+ *
  * Revision 0.17  2006/03/21 19:08:54  robspr1
  * - add time-delayed keys
  *
@@ -122,6 +125,8 @@ struct key{
 
 #define PAUSE0					0xFFFF0000
 #define SCRIPT00				0xFFF00000
+
+static char *config_file_name = "";
 
 static const struct key keyname[] = {
 	{"KEY_0", 					KEY_0},
