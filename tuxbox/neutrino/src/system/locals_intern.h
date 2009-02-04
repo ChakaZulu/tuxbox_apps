@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.126 2008/11/16 22:45:12 seife Exp $
+ * $Id: locals_intern.h,v 1.127 2009/02/04 10:41:53 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -900,6 +900,7 @@ const char * locale_real_names[] =
 	"nfs.type_cifs",
 	"nfs.type_lufs",
 	"nfs.type_nfs",
+	"nfs.type_smbfs",
 	"nfs.umount",
 	"nfs.umounterror",
 	"nfs.username",

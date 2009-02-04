@@ -101,6 +101,8 @@ bool insert_modules(const CFSMounter::FSType fstype)
 		return (system("insmod cifs") == 0);
 	else if (fstype == CFSMounter::LUFS)
 		return (system("insmod lufs") == 0);
+	else if (fstype == CFSMounter::SMBFS)
+		return (system("insmod smbfs") == 0);
 	return false;
 }
 
@@ -116,6 +118,8 @@ bool remove_modules(const CFSMounter::FSType fstype)
 		return (system("rmmod cifs") == 0);
 	else if (fstype == CFSMounter::LUFS)
 		return (system("rmmod lufs") == 0);
+	else if (fstype == CFSMounter::SMBFS)
+		return (system("rmmod smbfs") == 0);
 	return false;
 }
 
@@ -129,6 +133,8 @@ CFSMounter::FS_Support CFSMounter::fsSupported(const CFSMounter::FSType fstype, 
 		fsname = "cifs";
 	else if (fstype == CFSMounter::LUFS)
 		fsname = "lufs";
+	else if (fstype == CFSMounter::SMBFS)
+		fsname = "smbfs";
 
 	if (in_proc_filesystems(fsname))
 		return CFSMounter::FS_READY;
@@ -235,6 +241,11 @@ CFSMounter::MountRes CFSMounter::mount(const char * const ip, const char * const
 			strcpy(options1,"");
 			strcpy(options2,"");
 		}
+		else if(fstype == SMBFS)
+		{
+			strcpy(options1,"");
+			strcpy(options2,"");
+		}
 	}
 	
 	if(fstype == NFS)
@@ -245,6 +256,11 @@ CFSMounter::MountRes CFSMounter::mount(const char * const ip, const char * const
 	{
 		cmd << "mount -t cifs " << ip << "/" << dir << " " << local_dir << " -o username=" << username
 		<< ",password=" << password << ",unc=//" << ip << "/" << dir << "," << options1;
+	}
+        else if(fstype == SMBFS)
+	{
+		cmd << "smbmount //" << ip << "/" << dir << " " << password << " " << "-I" << " " << ip << " "
+		<< "-U" << " " << username << " " << "-c \"mount " << local_dir << "\"" << " ";
 	}
 	else
 	{
@@ -342,7 +358,8 @@ void CFSMounter::getMountedFS(MountInfos& info)
 		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		if (mi.type == "nfs" ||
 		    mi.type == "cifs" ||
-		    mi.type == "lufs")
+		    mi.type == "lufs" ||
+		    mi.type == "smbfs")
 		{
 			info.push_back(mi);
 			printf("[CFSMounter] mounted fs: dev: %s, mp: %s, type: %s\n",

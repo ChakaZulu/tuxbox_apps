@@ -60,7 +60,8 @@ class CFSMounter
 	{
 		NFS  = 0,
 		CIFS = 1,
-		LUFS = 2
+		LUFS = 2,
+		SMBFS = 3
 	};
 	
 	enum MountRes

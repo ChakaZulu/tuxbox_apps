@@ -51,6 +51,7 @@ class CNFSMountGui : public CMenuTarget
 	CFSMounter::FS_Support m_nfs_sup;
 	CFSMounter::FS_Support m_cifs_sup;
 	CFSMounter::FS_Support m_lufs_sup;
+	CFSMounter::FS_Support m_smbfs_sup;
 
  public:
 	CNFSMountGui();

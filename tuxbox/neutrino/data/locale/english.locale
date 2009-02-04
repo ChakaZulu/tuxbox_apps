@@ -840,7 +840,7 @@ networkmenu.dhcp DHCP
 networkmenu.gateway Default Gateway
 networkmenu.head Network Settings
 networkmenu.ipaddress IP Address
-networkmenu.mount NFS/CIFS/FTPFS
+networkmenu.mount NFS/CIFS/FTPFS/SMBFS
 networkmenu.nameserver DNS Server
 networkmenu.netmask Subnet Mask
 networkmenu.ntpenable Syncronisation via
@@ -873,10 +873,11 @@ nfs.type Type
 nfs.type_cifs CIFS
 nfs.type_lufs FTPFS
 nfs.type_nfs NFS
+nfs.type_smbfs SMBFS
 nfs.umount Unmount Network volume
 nfs.umounterror Error unmounting volume
 nfs.username Username
-nfsmenu.head NFS/CIFS/FTPFS settings
+nfsmenu.head NFS/CIFS/FTPFS/SMBFS settings
 nvod.percentage (%d%% over)
 nvod.starting (starting in %d min)
 nvodselector.directormode Direct-Mode

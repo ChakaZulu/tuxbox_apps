@@ -87,15 +87,17 @@ CNFSMountGui::CNFSMountGui()
 	m_nfs_sup = CFSMounter::FS_UNPROBED;
 	m_cifs_sup = CFSMounter::FS_UNPROBED;
 	m_lufs_sup = CFSMounter::FS_UNPROBED;
+	m_smbfs_sup = CFSMounter::FS_UNPROBED;
 
 }
 
 
-const char * nfs_entry_printf_string[3] =
+const char * nfs_entry_printf_string[4] =
 {
 	"NFS %s:%s -> %s auto: %4s",
 	"CIFS //%s/%s -> %s auto: %4s",
-	"FTPFS %s/%s -> %s auto: %4s"
+	"FTPFS %s/%s -> %s auto: %4s",
+	"SMBFS //%s%s -> %s auto: %4s"
 };
 
 
@@ -113,7 +115,10 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 	if (m_lufs_sup == CFSMounter::FS_UNPROBED)
 		m_lufs_sup = CFSMounter::fsSupported(CFSMounter::LUFS);
 
-	printf("SUPPORT: NFS: %d, CIFS: %d, LUFS: %d\n", m_nfs_sup, m_cifs_sup, m_lufs_sup);
+	if (m_smbfs_sup == CFSMounter::FS_UNPROBED)
+		m_smbfs_sup = CFSMounter::fsSupported(CFSMounter::SMBFS);
+
+	printf("SUPPORT: NFS: %d, CIFS: %d, LUFS: %d, SMBFS: %d\n", m_nfs_sup, m_cifs_sup, m_lufs_sup, m_smbfs_sup);
 
 	if (actionKey.empty())
 	{
@@ -121,7 +126,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 		for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES; i++)
 		{
 			sprintf(m_entry[i],
-				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) CFSMounter::NFS) ? 0 : ((g_settings.network_nfs_type[i] == (int) CFSMounter::CIFS) ? 1 : 2)],
+				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) CFSMounter::NFS) ? 0 : ((g_settings.network_nfs_type[i] == (int) CFSMounter::CIFS) ? 1 : ((g_settings.network_nfs_type[i] == (int) CFSMounter::SMBFS) ? 3 : 2))],
 				g_settings.network_nfs_ip[i].c_str(),
 				FILESYSTEM_ENCODING_TO_UTF8(g_settings.network_nfs_dir[i]),
 				FILESYSTEM_ENCODING_TO_UTF8(g_settings.network_nfs_local_dir[i]),
@@ -136,7 +141,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 		for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES; i++)
 		{
 			sprintf(m_entry[i],
-				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) CFSMounter::NFS) ? 0 : ((g_settings.network_nfs_type[i] == (int) CFSMounter::CIFS) ? 1 : 2)],
+				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) CFSMounter::NFS) ? 0 : ((g_settings.network_nfs_type[i] == (int) CFSMounter::CIFS) ? 1 : ((g_settings.network_nfs_type[i] == (int) CFSMounter::SMBFS) ? 3 : 2))],
 				g_settings.network_nfs_ip[i].c_str(),
 				FILESYSTEM_ENCODING_TO_UTF8(g_settings.network_nfs_dir[i]),
 				FILESYSTEM_ENCODING_TO_UTF8(g_settings.network_nfs_local_dir[i]),
@@ -203,12 +208,13 @@ const CMenuOptionChooser::keyval MESSAGEBOX_NO_YES_OPTIONS[MESSAGEBOX_NO_YES_OPT
 	{ 1, LOCALE_MESSAGEBOX_YES }
 };
 
-#define NFS_TYPE_OPTION_COUNT 3
+#define NFS_TYPE_OPTION_COUNT 4
 const CMenuOptionChooser::keyval NFS_TYPE_OPTIONS[NFS_TYPE_OPTION_COUNT] =
 {
 	{ CFSMounter::NFS , LOCALE_NFS_TYPE_NFS  },
 	{ CFSMounter::CIFS, LOCALE_NFS_TYPE_CIFS },
-	{ CFSMounter::LUFS, LOCALE_NFS_TYPE_LUFS }
+	{ CFSMounter::LUFS, LOCALE_NFS_TYPE_LUFS },
+	{ CFSMounter::SMBFS, LOCALE_NFS_TYPE_SMBFS }
 };
 
 int CNFSMountGui::menuEntry(int nr)
@@ -235,16 +241,20 @@ int CNFSMountGui::menuEntry(int nr)
    /* rewrite fstype in new entries */
    if(strlen(local_dir)==0)
    {
-	   if(m_cifs_sup != CFSMounter::FS_UNSUPPORTED && m_nfs_sup == CFSMounter::FS_UNSUPPORTED && m_lufs_sup == CFSMounter::FS_UNSUPPORTED)
+	   if(m_cifs_sup != CFSMounter::FS_UNSUPPORTED && m_nfs_sup == CFSMounter::FS_UNSUPPORTED && m_lufs_sup == CFSMounter::FS_UNSUPPORTED && m_smbfs_sup == CFSMounter::FS_UNSUPPORTED)
 		   *type = (int) CFSMounter::CIFS;
 
-	   else if(m_lufs_sup != CFSMounter::FS_UNSUPPORTED && m_cifs_sup == CFSMounter::FS_UNSUPPORTED && m_nfs_sup == CFSMounter::FS_UNSUPPORTED)
+	   else if(m_lufs_sup != CFSMounter::FS_UNSUPPORTED && m_cifs_sup == CFSMounter::FS_UNSUPPORTED && m_nfs_sup == CFSMounter::FS_UNSUPPORTED && m_smbfs_sup == CFSMounter::FS_UNSUPPORTED)
 		   *type = (int) CFSMounter::LUFS;
+
+	   else if(m_smbfs_sup != CFSMounter::FS_UNSUPPORTED && m_cifs_sup == CFSMounter::FS_UNSUPPORTED && m_nfs_sup == CFSMounter::FS_UNSUPPORTED && m_lufs_sup == CFSMounter::FS_UNSUPPORTED)
+		   *type = (int) CFSMounter::SMBFS;
    }
-   bool typeEnabled = (m_cifs_sup != CFSMounter::FS_UNSUPPORTED && m_nfs_sup != CFSMounter::FS_UNSUPPORTED && m_lufs_sup != CFSMounter::FS_UNSUPPORTED) ||
+   bool typeEnabled = (m_cifs_sup != CFSMounter::FS_UNSUPPORTED && m_nfs_sup != CFSMounter::FS_UNSUPPORTED && m_lufs_sup != CFSMounter::FS_UNSUPPORTED && m_smbfs_sup != CFSMounter::FS_UNSUPPORTED) ||
 	   (m_cifs_sup != CFSMounter::FS_UNSUPPORTED && *type != (int)CFSMounter::CIFS) ||
 	   (m_nfs_sup != CFSMounter::FS_UNSUPPORTED && *type != (int)CFSMounter::NFS) ||
-	   (m_lufs_sup != CFSMounter::FS_UNSUPPORTED && *type != (int)CFSMounter::LUFS);
+	   (m_lufs_sup != CFSMounter::FS_UNSUPPORTED && *type != (int)CFSMounter::LUFS) ||
+	   (m_smbfs_sup != CFSMounter::FS_UNSUPPORTED && *type != (int)CFSMounter::SMBFS);
 
 	CMenuWidget mountMenuEntryW(LOCALE_NFS_MOUNT, "network.raw",720);
 	mountMenuEntryW.addItem(GenericMenuSeparator);
@@ -314,7 +324,7 @@ int CNFSUmountGui::menu()
 	for (CFSMounter::MountInfos::const_iterator it = infos.begin();
 	     it != infos.end();it++)
 	{
-		if(it->type == "nfs" || it->type == "cifs" || it->type == "lufs")
+		if(it->type == "nfs" || it->type == "cifs" || it->type == "lufs" || it->type == "smbfs")
 		{
 			count++;
 			std::string s1 = it->device;
