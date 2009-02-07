@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.26 2009/02/03 18:54:33 dbluelle Exp $
+ * $Id: enigma_scan.cpp,v 1.27 2009/02/07 10:06:31 dbluelle Exp $
  */
 
 #include <enigma_scan.h>
@@ -143,10 +143,7 @@ eLNB* eZapScan::getRotorLNB(int silent)
 	}
 	if ( c > 1 )  // we have more than one LNBs with DiSEqC 1.2
 	{
-		eMessageBox mb(_("DiSEqC 1.2 is enabled on more than one LNB, please select the LNB the motor is connected to"), _("Info"), eMessageBox::iconWarning|eMessageBox::btOK );
-		mb.show();
-		mb.exec();
-		mb.hide();
+		eMessageBox::ShowBox(_("DiSEqC 1.2 is enabled on more than one LNB, please select the LNB the motor is connected to"), _("Info"), eMessageBox::iconWarning|eMessageBox::btOK );
 		eLNBSelector sel;
 		sel.show();
 		int ret = sel.exec();
@@ -157,10 +154,7 @@ eLNB* eZapScan::getRotorLNB(int silent)
 	{
 		if (!silent)
 		{
-			eMessageBox mb( _("Found no LNB with DiSEqC 1.2 enabled,\nplease goto Satellite Config first, and enable DiSEqC 1.2"), _("Warning"), eMessageBox::iconWarning|eMessageBox::btOK );
-			mb.show();
-			mb.exec();
-			mb.hide();
+			eMessageBox::ShowBox( _("Found no LNB with DiSEqC 1.2 enabled,\nplease goto Satellite Config first, and enable DiSEqC 1.2"), _("Warning"), eMessageBox::iconWarning|eMessageBox::btOK );
 		}
 		return 0;
 	}

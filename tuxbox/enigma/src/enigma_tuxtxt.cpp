@@ -596,6 +596,10 @@ int eTuxtxtSetup::GetNationalSubset(char *cc)
 eTuxtxtWidget::eTuxtxtWidget()
 	: eWidget(0, 1),timer(eApp), initialized(0),pagecatching(0),rendering_initialized(0)
 {
+	init_eTuxtxtWidget();
+}
+void eTuxtxtWidget::init_eTuxtxtWidget()
+{
 	addActionMap(&i_tuxtxtActions->map);
 	addActionMap(&i_shortcutActions->map);
 	addActionMap(&i_cursorActions->map);

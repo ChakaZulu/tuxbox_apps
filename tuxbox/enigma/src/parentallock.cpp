@@ -191,13 +191,10 @@ void eParentalSetup::changePin(eButton *p)
 			return;
 		else if ( ret != newPin )
 		{
-			eMessageBox mb(_("The PINs are not equal!\n\nDo you want to retry?"),
+			int ret = eMessageBox::ShowBox(_("The PINs are not equal!\n\nDo you want to retry?"),
 					_("PIN validation failed"),
 					eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
 					eMessageBox::btYes );
-			mb.show();
-			int ret = mb.exec();
-			mb.hide();
 			if ( ret == eMessageBox::btNo || ret == -1 )
 				return;
 		}
@@ -209,13 +206,10 @@ void eParentalSetup::changePin(eButton *p)
 	else
 		setuppin = newPin;
 
-	eMessageBox mb(_("PIN change completed"),
+	eMessageBox::ShowBox(_("PIN change completed"),
 		_("PIN changed"),
 		eMessageBox::btOK|eMessageBox::iconInfo,
 		eMessageBox::btOK );
-	mb.show();
-	mb.exec();
-	mb.hide();
 }
 
 void eParentalSetup::hidelockChecked(int i)
@@ -272,13 +266,10 @@ bool checkPin( int pin, const char * text )
 			return false;
 		else if ( ret != pin )
 		{
-			eMessageBox mb(_("The entered PIN is incorrect.\nDo you want to retry?"),
+			ret = eMessageBox::ShowBox(_("The entered PIN is incorrect.\nDo you want to retry?"),
 					_("PIN validation failed"),
 					eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
 					eMessageBox::btYes );
-			mb.show();
-			ret = mb.exec();
-			mb.hide();
 			if ( ret == eMessageBox::btNo || ret == -1 )
 				return false;
 		}

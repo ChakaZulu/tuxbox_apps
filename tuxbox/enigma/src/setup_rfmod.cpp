@@ -162,11 +162,7 @@ void eZapRFmodSetup::TestPatternEnable_selected()
 {
 	eRFmod::getInstance()->setTestPattern((int)1);		
 
-	eMessageBox box(_("if you can read this your rfmod will not work."),_("Test Pattern"),eMessageBox::iconWarning|eMessageBox::btOK);
-
-	box.show();
-	box.exec();
-	box.hide();
+	eMessageBox::ShowBox(_("if you can read this your rfmod will not work."),_("Test Pattern"),eMessageBox::iconWarning|eMessageBox::btOK);
 
 	TestPatternEnable->setCheck(0);
 	eRFmod::getInstance()->setTestPattern((int)0);		

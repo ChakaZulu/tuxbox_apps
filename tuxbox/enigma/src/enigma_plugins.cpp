@@ -211,10 +211,7 @@ int eZapPlugins::find(bool ignore_requires)
 			eDebug(err.c_str());
 			if ( i )
 			{
-				eMessageBox msg(err, _("Error"), eMessageBox::iconError|eMessageBox::btOK );
-				msg.show();
-				msg.exec();
-				msg.hide();
+				eMessageBox::ShowBox(err, _("Error"), eMessageBox::iconError|eMessageBox::btOK );
 				return -1;
 			}
 			continue;
@@ -357,10 +354,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 			else
 			{
 				eDebug("can't execute %s",plugin->sopath.c_str());
-				eMessageBox mbox(eString().sprintf(_("Cannot execute %s (check rights)"), plugin->sopath.c_str()), (_("Error")), eMessageBox::iconError | eMessageBox::btOK, eMessageBox::btOK, 5);
-  	 			mbox.show();
-   				mbox.exec();
-   				mbox.hide();
+				eMessageBox::ShowBox(eString().sprintf(_("Cannot execute %s (check rights)"), plugin->sopath.c_str()), (_("Error")), eMessageBox::iconError | eMessageBox::btOK, eMessageBox::btOK, 5);
 			}
 	}
 	else
@@ -567,10 +561,7 @@ void ePluginThread::start()
 			{
 				const char *de=dlerror();
 				eDebug(de);
-				eMessageBox msg(de, "plugin loading failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
-				msg.show();
-				msg.exec();
-				msg.hide();
+				eMessageBox::ShowBox(de, "plugin loading failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
 				break;
 			}
 		}
@@ -611,10 +602,7 @@ void ePluginThread::start()
 			if (!execPlugin)
 				// show messagebox.. and close after 5 seconds...
 			{
-				eMessageBox msg("The symbol plugin_exec was not found. sorry.", "plugin executing failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
-				msg.show();
-				msg.exec();
-				msg.hide();
+				eMessageBox::ShowBox("The symbol plugin_exec was not found. sorry.", "plugin executing failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
 			}
 			else
 			{

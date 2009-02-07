@@ -991,11 +991,9 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 			if ( ref.flags & eServiceReference::isDirectory )
 			{
 				hide();
-				eMessageBox mb(_("Select No or press Abort to lock/unlock the complete directory"), _("Enter Directory"),  eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo );
-				mb.show();
-				if ( mb.exec() == eMessageBox::btYes )
+				int ret = eMessageBox::ShowBox(_("Select No or press Abort to lock/unlock the complete directory"), _("Enter Directory"),  eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo );
+				if ( ret == eMessageBox::btYes )
 					doit=0;
-				mb.hide();
 				show();
 			}
 			if ( doit )
@@ -1933,8 +1931,7 @@ void eServiceSelector::EPGSearchEvent(eServiceReference ref)
 		if (back == 2)
 		{
 			dd.hide();
-			eMessageBox rsl(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
-			rsl.show(); rsl.exec(); rsl.hide();
+			eMessageBox::ShowBox(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
 			dd.show();
 		}
 	}
@@ -2223,10 +2220,7 @@ eServicePath eFileSelector::getDirRoot(int list, int _mode)
 				eString cmd = eString().sprintf("mkdir \"%s/%s\"",getPath().current().path.c_str(),wnd.getEditText().c_str());
 				if ( system(cmd.c_str()) )
 				{
-					eMessageBox msg(strerror(errno),_("Error creating directory"),eMessageBox::btOK|eMessageBox::iconError);
-					msg.show();
-					msg.exec();
-					msg.hide();
+					eMessageBox::ShowBox(strerror(errno),_("Error creating directory"),eMessageBox::btOK|eMessageBox::iconError);
 				}
 				else
 					actualize();
@@ -2239,19 +2233,13 @@ eServicePath eFileSelector::getDirRoot(int list, int _mode)
 				break;
 			eString s;
 			s.sprintf(_("You are trying to delete '%s'.\nReally do this?"),selected.path.c_str() );
-			eMessageBox box(s, _("Delete"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-			box.show();
-			int r=box.exec();
-			box.hide();
+			int r = eMessageBox::ShowBox(s, _("Delete"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 			if (r == eMessageBox::btYes)
 			{
 				eString cmd = eString().sprintf("rm -f -r \"%s\"",selected.path.c_str());
 				if ( system(cmd.c_str()) )
 				{
-					eMessageBox msg(strerror(errno),_("Error") ,eMessageBox::btOK|eMessageBox::iconError);
-					msg.show();
-					msg.exec();
-					msg.hide();
+					eMessageBox::ShowBox(strerror(errno),_("Error") ,eMessageBox::btOK|eMessageBox::iconError);
 				}
 				else
 					actualize();

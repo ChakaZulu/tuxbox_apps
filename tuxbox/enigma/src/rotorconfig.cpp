@@ -894,11 +894,8 @@ void eStoreWindow::onStorePressed()
 		int ret = eMessageBox::btYes;
 		if ( StorageLoc->getNumber() != it->second )
 		{
-			eMessageBox mb( eString().sprintf(_("%d.%d\xC2\xB0%c is currently stored at location %d!\nWhen you store this now at Location %d, we must remove the old Location.\nAre you sure you want to do this?"),abs(orbital_pos)/10, abs(orbital_pos)%10, orbital_pos>0?'E':'W', it->second, StorageLoc->getNumber() ), _("Warning"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
 			hide();
-			mb.show();
-			ret = mb.exec();
-			mb.hide();
+			ret = eMessageBox::ShowBox( eString().sprintf(_("%d.%d\xC2\xB0%c is currently stored at location %d!\nWhen you store this now at Location %d, we must remove the old Location.\nAre you sure you want to do this?"),abs(orbital_pos)/10, abs(orbital_pos)%10, orbital_pos>0?'E':'W', it->second, StorageLoc->getNumber() ), _("Warning"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
 			show();
 		}
 		switch( ret )

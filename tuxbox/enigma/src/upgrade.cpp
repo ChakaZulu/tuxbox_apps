@@ -436,10 +436,7 @@ void eUpgrade::setError(int err)
 	{
 		if (current_url.length())
 			errmsg+="\n(URL: " + current_url + ")";
-		eMessageBox box(errmsg, _("Error!"), eMessageBox::btOK|eMessageBox::iconError);
-		box.show();
-		box.exec();
-		box.hide();
+		eMessageBox::ShowBox(errmsg, _("Error!"), eMessageBox::btOK|eMessageBox::iconError);
 	}
 }
 
@@ -516,41 +513,32 @@ void eUpgrade::flashImage(int checkmd5)
 	if (checkmd5 && md5_file (TMP_IMAGE, 1, (unsigned char*) &md5))
 	{
 		setStatus(_("write error while downloading..."));
-		eMessageBox mb(
+		hide();
+		eMessageBox::ShowBox(
 			_("write error while downloading..."),
 			_("Error!"),
 			eMessageBox::btOK|eMessageBox::iconError);
-		hide();
-		mb.show();
-		mb.exec();
-		mb.hide();
 		show();
 	} else
 	{
 		if (checkmd5 && memcmp(md5, expected_md5, 16))
 		{
 			setStatus(_("Data error. The checksum didn't match."));
-			eMessageBox mb(
+			hide();
+			eMessageBox::ShowBox(
 				_("Data error. The checksum didn't match."),
 				_("Error!"),
 				eMessageBox::btOK|eMessageBox::iconError);
-			hide();
-			mb.show();
-			mb.exec();
-			mb.hide();
 			show();
 		} else
 		{
 			setStatus(_("Checksum OK. Ready to upgrade."));
-			eMessageBox mb(
+			hide();
+			int res = eMessageBox::ShowBox(
 				_("Are you sure you want to upgrade to this new version?"),
 				_("Ready to upgrade"),
 				eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion);
 			int mtdsize;
-			hide();
-			mb.show();
-			int res=mb.exec();
-			mb.hide();
 			if (res == eMessageBox::btYes)
 			{
 				::sync();
@@ -580,10 +568,7 @@ void eUpgrade::flashImage(int checkmd5)
 
 				if( (fd1 = open( TMP_IMAGE, O_RDONLY )) < 0 )
 				{
-					eMessageBox box(_("Can't read flashimage.img!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
-					box.show();
-					box.exec();
-					box.hide();
+					eMessageBox::ShowBox(_("Can't read flashimage.img!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
 					close(0);
 					return;
 				}
@@ -593,10 +578,7 @@ void eUpgrade::flashImage(int checkmd5)
 
 				if(filesize==0)
 				{
-					eMessageBox box(_("flashimage.img has filesize of 0byte!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
-					box.show();
-					box.exec();
-					box.hide();
+					eMessageBox::ShowBox(_("flashimage.img has filesize of 0byte!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
 					return;
 				}
 
@@ -717,10 +699,7 @@ void eUpgrade::flashImage(int checkmd5)
 					if(!erase(mtd,_("Erasing Flash...")))
 					{
 						mb.hide();
-						eMessageBox box(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
-						box.show();
-						box.exec();
-						box.hide();
+						eMessageBox::ShowBox(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
 						close(0);
 						return;
 					}
@@ -728,10 +707,7 @@ void eUpgrade::flashImage(int checkmd5)
 					if( (fd2 = open(mtd, O_RDWR )) < 0 )
 					{
 						mb.hide();
-						eMessageBox box(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
-						box.show();
-						box.exec();
-						box.hide();
+						eMessageBox::ShowBox(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
 						close(0);
 						return;
 					}
@@ -766,13 +742,10 @@ void eUpgrade::flashImage(int checkmd5)
 					mb.hide();
 					wnd.hide();
 
-					eMessageBox mbend(
+					eMessageBox::ShowBox(
 						_("upgrade successful!\nrestarting..."),
 						_("upgrade ok"),
 					eMessageBox::btOK|eMessageBox::iconInfo);
-					mbend.show();
-					mbend.exec();
-					mbend.hide();
 				}
 				eZap::getInstance()->quit(3);
 //				system("/sbin/reboot");

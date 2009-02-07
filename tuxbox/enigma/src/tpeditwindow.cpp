@@ -255,24 +255,18 @@ int eTransponderEditWindow::eventHandler( const eWidgetEvent & event )
 		case eWidgetEvent::execDone:
 			if ( changed )
 			{
-				eMessageBox mb(_("Save changed Transponders?"),
+				int ret = eMessageBox::ShowBox(_("Save changed Transponders?"),
 					_("Transponders changed"),
 					eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
 					eMessageBox::btYes );
-				mb.show();
-				int ret = mb.exec();
-				mb.hide();
 				eTransponderList::getInstance()->invalidateNetworks();
 				if ( ret == eMessageBox::btNo || ret == -1 )
 					return 0;
 				if ( eTransponderList::getInstance()->saveNetworks() )
 				{
-					eMessageBox mb(_("Transponders couldn't be written to file!"),
+					eMessageBox::ShowBox(_("Transponders couldn't be written to file!"),
 						_("Write Error"),
 						eMessageBox::btOK|eMessageBox::iconWarning);
-					mb.show();
-					mb.exec();
-					mb.hide();
 				}
 			}
 			return 0;

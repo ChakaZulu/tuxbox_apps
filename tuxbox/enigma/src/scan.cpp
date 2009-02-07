@@ -1440,12 +1440,11 @@ int TransponderScan::Exec()
 				eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 			{
 				eWindow::globalCancel( eWindow::ON );
-				eMessageBox mb(eString().sprintf(_("Do you want\nto scan another\n%s?"),stateInitial==stateManual?_("Transponder"):_("Satellite")),
+				int res = eMessageBox::ShowBox(eString().sprintf(_("Do you want\nto scan another\n%s?"),stateInitial==stateManual?_("Transponder"):_("Satellite")),
 					_("Scan finished"),
 					eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
 					eMessageBox::btYes );
-				mb.show();
-				switch ( mb.exec() )
+				switch ( res )
 				{
 					case -1:
 					case eMessageBox::btNo:
@@ -1454,7 +1453,6 @@ int TransponderScan::Exec()
 					default:
 						state=stateInitial;
 				}
-				mb.hide();
 				eWindow::globalCancel( eWindow::OFF );
 				eDVB::getInstance()->setMode(eDVB::controllerService);
 				break;
@@ -1901,11 +1899,8 @@ void ManualPIDWindow::gotNIT(int err)
 	{
 		if ( err )
 		{
-			eMessageBox mb(_("Reading NIT failed... this transponder have no NIT..\nso you can use random values for tsid and onid or set both to 0"),
+			eMessageBox::ShowBox(_("Reading NIT failed... this transponder have no NIT..\nso you can use random values for tsid and onid or set both to 0"),
 				_("Error"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK);
-			mb.show();
-			mb.exec();
-			mb.hide();
 		}
 		else
 		{
@@ -1956,11 +1951,8 @@ void ManualPIDWindow::gotNIT(int err)
 		}
 		if ( !found )
 		{
-			eMessageBox mb(_("No NIT Entry for current transponder values found...\nso you can use random values for tsid and onid or set both to 0"),
+			eMessageBox::ShowBox(_("No NIT Entry for current transponder values found...\nso you can use random values for tsid and onid or set both to 0"),
 				_("Error"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK);
-			mb.show();
-			mb.exec();
-			mb.hide();
 		}
 	}
 }
@@ -2071,12 +2063,9 @@ void ManualPIDWindow::store()
 		}
 		if (do_abort)
 		{
-			eMessageBox mb(_("A transponder with the same tsid / onid but other frequency/pol/... already exist.. create a new transponder with the same data is no possible.. please do change tsid and/or onid"),
+			eMessageBox::ShowBox(_("A transponder with the same tsid / onid but other frequency/pol/... already exist.. create a new transponder with the same data is no possible.. please do change tsid and/or onid"),
 				_("Error"),
 				eMessageBox::iconError|eMessageBox::btOK, eMessageBox::btOK);
-			mb.show();
-			mb.exec();
-			mb.hide();
 			return;
 		}
 	}
@@ -2127,13 +2116,10 @@ void ManualPIDWindow::store()
 		eString service_name =  s.service_name ? s.service_name : eString("unnamed service");
 		eString service_provider =  s.service_provider ? s.service_provider : eString("unnamed provider");
 
-		eMessageBox mb(eString().sprintf(_("A service named '%s' with this sid/onid/tsid/namespace is already exist\n"
+		int ret = eMessageBox::ShowBox(eString().sprintf(_("A service named '%s' with this sid/onid/tsid/namespace is already exist\n"
 			"in provider '%s'.\nShould i use this service name and provider name?"), service_name.c_str(), service_provider.c_str() ),
 			_("Service already exist"),
 			eMessageBox::iconQuestion|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btYes);
-		mb.show();
-		int ret = mb.exec();
-		mb.hide();
 
 		if ( ret == eMessageBox::btYes )  // change provider and service name...
 			;

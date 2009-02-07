@@ -940,10 +940,7 @@ static void errorMessage(const eString message, int type=0)
 		flags = eMessageBox::iconInfo|eMessageBox::btOK;
 	else	
 		flags = eMessageBox::iconWarning|eMessageBox::btOK;
-	eMessageBox mb(message, _("Info"), flags);
-	mb.show();
-	mb.exec();
-	mb.hide();
+	eMessageBox::ShowBox(message, _("Info"), flags);
 }
 
 eNFSSetup::eNFSSetup()
@@ -1329,11 +1326,8 @@ void eNFSSetup::okPressed()
 	eString tmp2 = _("NFS/CIFS-Setup...");
 	tmp1.strReplace("NFS/CIFS", tmp == 2 ? "SMBFS" : tmp == 1 ? "CIFS" : "NFS" );
 	tmp2.strReplace("NFS/CIFS", "NFS/CIFS/SMBFS" );
-	eMessageBox msg( tmp1, tmp2,
+	int res = eMessageBox::ShowBox( tmp1, tmp2,
 		eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo);
-	msg.show();
-	int res=msg.exec();
-	msg.hide();
 
 	if (res == eMessageBox::btYes)
 	{

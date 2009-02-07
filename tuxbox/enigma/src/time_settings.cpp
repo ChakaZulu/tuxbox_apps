@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: time_settings.cpp,v 1.5 2009/02/03 18:54:33 dbluelle Exp $
+ * $Id: time_settings.cpp,v 1.6 2009/02/07 10:06:31 dbluelle Exp $
  */
 
 #include <time_settings.h>
@@ -73,10 +73,7 @@ void eTimeSettings::time_correction()
 	else
 	{
 		hide();
-		eMessageBox mb( _("To change time correction you must tune first to any transponder"), _("time correction change error"), eMessageBox::btOK|eMessageBox::iconInfo );
-		mb.show();
-		mb.exec();
-		mb.hide();
+		eMessageBox::ShowBox( _("To change time correction you must tune first to any transponder"), _("time correction change error"), eMessageBox::btOK|eMessageBox::iconInfo );
 		show();
 	}
 }

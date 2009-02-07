@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.26 2009/02/03 18:54:33 dbluelle Exp $
+ * $Id: setup_harddisk.cpp,v 1.27 2009/02/07 10:06:31 dbluelle Exp $
  */
 
 #include <setup_harddisk.h>
@@ -314,26 +314,20 @@ void eHarddiskMenu::s_format()
 	do
 	{
 		{
-			eMessageBox msg(
+			int res = eMessageBox::ShowBox(
 				 _("Are you SURE that you want to format this disk?\n"),
 				 _("formatting harddisk..."),
 				 eMessageBox::btYes|eMessageBox::btCancel, eMessageBox::btCancel);
-			msg.show();
-			int res=msg.exec();
-			msg.hide();
 			if (res != eMessageBox::btYes)
 				break;
 		}
 		if (numpart)
 		{
-			eMessageBox msg(
+			int res = eMessageBox::ShowBox(
 				 _("There's data on this harddisk.\n"
 				 "You will lose that data. Proceed?"),
 				 _("formatting harddisk..."),
 				 eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo);
-			msg.show();
-			int res=msg.exec();
-			msg.hide();
 			if (res != eMessageBox::btYes)
 				break;
 		}
@@ -439,25 +433,19 @@ void eHarddiskMenu::s_format()
 		}
 err:
 		{
-			eMessageBox msg(
+			eMessageBox::ShowBox(
 				_("creating filesystem failed."),
 				_("formatting harddisk..."),
 				 eMessageBox::btOK|eMessageBox::iconError);
-			msg.show();
-			msg.exec();
-			msg.hide();
 			break;
 		}
 noerr:
 		{
 			eZapMain::getInstance()->clearRecordings();
-			eMessageBox msg(
+			eMessageBox::ShowBox(
 				_("successfully formatted your disk!"),
 				_("formatting harddisk..."),
 				 eMessageBox::btOK|eMessageBox::iconInfo);
-			msg.show();
-			msg.exec();
-			msg.hide();
 		}
 		readStatus();
 	} while (0);
@@ -497,10 +485,7 @@ void eHarddiskMenu::storevalues()
 	eConfig::getInstance()->setKey("/extras/hdparm-s", timeout->getNumber()*12);
 	eConfig::getInstance()->setKey("/extras/hdparm-m", acoustic->getNumber());
 
-	eMessageBox msgok(_("The settings have been saved successfully"), _("Harddisk"),eMessageBox::btOK);
-		msgok.show();
-		msgok.exec();
-		msgok.hide();
+	eMessageBox::ShowBox(_("The settings have been saved successfully"), _("Harddisk"),eMessageBox::btOK);
 }
 
 // Function to send HDD to standby immediately
@@ -630,13 +615,10 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 
 				if ( !fsck->running() )
 				{
-					eMessageBox msg(
+					eMessageBox::ShowBox(
 						_("sorry, couldn't find fsck.ext3 utility to check the ext3 filesystem."),
 						_("check filesystem..."),
 						eMessageBox::btOK|eMessageBox::iconError);
-					msg.show();
-					msg.exec();
-					msg.hide();
 					close(-1);
 				}
 				else
@@ -653,13 +635,10 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 
 				if ( !fsck->running() )
 				{
-					eMessageBox msg(
+					eMessageBox::ShowBox(
 						_("sorry, couldn't find fsck.ext2 utility to check the ext2 filesystem."),
 						_("check filesystem..."),
 						eMessageBox::btOK|eMessageBox::iconError);
-					msg.show();
-					msg.exec();
-					msg.hide();
 					close(-1);
 				}
 				else
@@ -676,13 +655,10 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 
 				if ( !fsck->running() )
 				{
-					eMessageBox msg(
+					eMessageBox::ShowBox(
 						_("sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."),
 						_("check filesystem..."),
 						eMessageBox::btOK|eMessageBox::iconError);
-					msg.show();
-					msg.exec();
-					msg.hide();
 					close(-1);
 				}
 				else
@@ -695,13 +671,10 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 			}
 			else
 			{
-				eMessageBox msg(
+				eMessageBox::ShowBox(
 					_("not supported filesystem for check."),
 					_("check filesystem..."),
 					eMessageBox::btOK|eMessageBox::iconError);
-				msg.show();
-				msg.exec();
-				msg.hide();
 				close(-1);
 			}
 		}

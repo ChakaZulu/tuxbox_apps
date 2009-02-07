@@ -9,15 +9,12 @@ int eWizardFPUpdate::run()
 	if (eDreamboxFP::isUpgradeAvailable())
 	{
 		{
-			eMessageBox msg(
+			eMessageBox::ShowBox(
 				_("New Software for the frontprocessor is avail.\n"
 					"Your Dreambox must upgrade now!\n"
 					"DO NOT TURN OFF THE POWER DURING UPDATE !!!."),
 				_("New software avail"),
 				eMessageBox::btOK|eMessageBox::iconInfo);
-			msg.show();
-			msg.exec();
-			msg.hide();
 		}
 		{
 			eMessageBox msg(

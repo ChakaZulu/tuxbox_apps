@@ -351,16 +351,12 @@ void eZapOsdSetup::skinPressed()
 	setup.hide();
 	if (!res)
 	{
-		eMessageBox msg(_("You have to restart enigma to apply the new skin\nRestart now?"), _("Skin changed"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes );
-		msg.show();
-		int ret = msg.exec();
-		msg.hide();
+		int ret = eMessageBox::ShowBox(_("You have to restart enigma to apply the new skin\nRestart now?"), _("Skin changed"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes );
 		if ( ret == eMessageBox::btYes )
 		{
 			if ( eZapMain::getInstance()->checkRecordState() )
 				eZap::getInstance()->quit(2);
 		}
-		msg.hide();
 	}
 	show();
 	setFocus(oldfocus);

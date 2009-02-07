@@ -416,8 +416,7 @@ int eEPGSelector::eventHandler(const eWidgetEvent &event)
 						if (back == 2)
 						{
 							dd->hide();
-							eMessageBox rsl(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
-							rsl.show(); rsl.exec(); rsl.hide();
+							eMessageBox::ShowBox(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
 							dd->show();
 						}
 					}

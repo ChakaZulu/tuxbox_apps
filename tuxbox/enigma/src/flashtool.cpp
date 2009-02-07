@@ -1,7 +1,7 @@
 #ifdef ENABLE_FLASHTOOL
 /**********************************************
 *
-*	$Revision: 1.12 $
+*	$Revision: 1.13 $
 *
 **********************************************/
 
@@ -160,10 +160,7 @@ void eFlashtool::sel_item(eListBoxEntryText *sel)
 				readmtd(destination);
 			else
 			{
-				eMessageBox box(_("Do you really want to flash a new image now?"), _("Flash"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btNo);
-				box.show();
-				int res = box.exec();
-				box.hide();
+				int res = eMessageBox::ShowBox(_("Do you really want to flash a new image now?"), _("Flash"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btNo);
 				if (res == eMessageBox::btYes)
 					programm(destination);
 			}
@@ -186,10 +183,7 @@ void eFlashtool::programm(char filename[])
 
 		if ((fd1 = open(filename, O_RDONLY)) < 0)
 		{
-			eMessageBox box(_("Can't read image!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
-			box.show();
-			box.exec();
-			box.hide();
+			eMessageBox::ShowBox(_("Can't read image!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			return;
 		}
 
@@ -198,19 +192,13 @@ void eFlashtool::programm(char filename[])
 
 		if (filesize==0)
 		{
-			eMessageBox box(_("Image has file size of 0 bytes!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
-			box.show();
-			box.exec();
-			box.hide();
+			eMessageBox::ShowBox(_("Image has file size of 0 bytes!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			return;
 		}
 
 		if ((fd2 = open(mtddev, O_WRONLY)) < 0)
 		{
-			eMessageBox box(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
-			box.show();
-			box.exec();
-			box.hide();
+			eMessageBox::ShowBox(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			::close(fd2);
 			return;
 		}
@@ -223,19 +211,13 @@ void eFlashtool::programm(char filename[])
 
 		if (filesize > meminfo.size)
 		{
-			eMessageBox box(_("Image size is too big! Can't flash!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
-			box.show();
-			box.exec();
-			box.hide();
+			eMessageBox::ShowBox(_("Image size is too big! Can't flash!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			return;
 		}
 
 		if (filesize < ((meminfo.size/100)*70))
 		{
-			eMessageBox box(_("Image size is too small! Do you really want to flash it?"), _("Flash"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btNo);
-			box.show();
-			int res=box.exec();
-			box.hide();
+			int res = eMessageBox::ShowBox(_("Image size is too small! Do you really want to flash it?"), _("Flash"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btNo);
 			if (res == eMessageBox::btNo)
 			{
 				return;
@@ -257,10 +239,7 @@ void eFlashtool::programm(char filename[])
 
 		if (!erase())
 		{
-			eMessageBox box(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
-			box.show();
-			box.exec();
-			box.hide();
+			eMessageBox::ShowBox(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			return;
 		}
 
@@ -289,21 +268,15 @@ void eFlashtool::programm(char filename[])
 		wnd.hide();
 		mb.hide();
 		printf("finished\n");
-		eMessageBox mbend(_("Flashing successful! restarting..."),
+		eMessageBox::ShowBox(_("Flashing successful! restarting..."),
 				_("flashing ok"),eMessageBox::btOK|eMessageBox::iconInfo);
-		mbend.show();
-		mbend.exec();
-		mbend.hide();
 		::reboot(RB_AUTOBOOT);
 		system("reboot");
 		return;
 	}
 	else
 	{
-		eMessageBox box(_("Image not found!"), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
-		box.show();
-		box.exec();
-		box.hide();
+		eMessageBox::ShowBox(_("Image not found!"), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
 	}
 }
 
@@ -375,10 +348,7 @@ bool eFlashtool::readmtd(char destination[])
 
 	if ((fd1 = open(mtddev, O_RDONLY)) < 0)
 	{
-		eMessageBox box(_("Can't open mtd device!"), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
-		box.show();
-		box.exec();
-		box.hide();
+		eMessageBox::ShowBox(_("Can't open mtd device!"), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
 		return false;
 	}
 
@@ -390,10 +360,7 @@ bool eFlashtool::readmtd(char destination[])
 	if ((fd2 = open(filename, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH)) < 0)
 	{
 		eString message = eString(_("Can't open ")) + eString(destination) + eString(_(" for writing!"));
-		eMessageBox box(message.c_str(), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
-		box.show();
-		box.exec();
-		box.hide();
+		eMessageBox::ShowBox(message.c_str(), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
 		::close(fd1);
 		return false;
 	}
@@ -422,10 +389,7 @@ bool eFlashtool::readmtd(char destination[])
 	wnd.hide();
 
 	eString message = eString(_("Image saved to: ")) + eString(filename);
-	eMessageBox boxend(message.c_str(), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
-	boxend.show();
-	boxend.exec();
-	boxend.hide();
+	eMessageBox::ShowBox(message.c_str(), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 
 	mb.hide();
 

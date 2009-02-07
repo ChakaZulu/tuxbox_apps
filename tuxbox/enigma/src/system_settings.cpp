@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.10 2009/02/03 18:54:33 dbluelle Exp $
+ * $Id: system_settings.cpp,v 1.11 2009/02/07 10:06:31 dbluelle Exp $
  */
 
 #include <system_settings.h>
@@ -127,10 +127,7 @@ void eSystemSettings::harddisc_setup()
 #endif
 	if (!setup.getNr())
 	{
-		eMessageBox msg(_("sorry, no harddisks found!"), _("Harddisk setup..."));
-		msg.show();
-		msg.exec();
-		msg.hide();
+		eMessageBox::ShowBox(_("sorry, no harddisks found!"), _("Harddisk setup..."));
 	} else
 	{
 		setup.show();

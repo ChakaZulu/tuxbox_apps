@@ -3284,10 +3284,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		{
 			if (user)
 			{
-				eMessageBox box(_("Sorry, you cannot record this service."), _("record"), eMessageBox::iconWarning|eMessageBox::btOK );
-				box.show();
-				box.exec();
-				box.hide();
+				eMessageBox::ShowBox(_("Sorry, you cannot record this service."), _("record"), eMessageBox::iconWarning|eMessageBox::btOK );
 			}
 			return -1; // cannot record this service
 		}
@@ -3492,10 +3489,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		{
 			if (!profimode)
 			{
-				eMessageBox mb(_("Show recorded movies?"), _("recording finished"),  eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-				mb.show();
-				int ret = mb.exec();
-				mb.hide();
+				int ret = eMessageBox::ShowBox(_("Show recorded movies?"), _("recording finished"),  eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 				if ( ret == eMessageBox::btYes )
 					showServiceSelector( eServiceSelector::dirLast, pathRecordings );
 			}
@@ -3818,10 +3812,7 @@ int eZapMain::handleStandby(int i)
 				break;
 			if ( ePluginThread::getInstance() ) // don't shutdown, when a plugin is running
 				break;
-			eMessageBox mb(_("Shutdown your Receiver now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30);
-			mb.show();
-			int ret = mb.exec();
-			mb.hide();
+			int ret = eMessageBox::ShowBox(_("Shutdown your Receiver now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30);
 			if (ret == eMessageBox::btYes)
 			{
 				stopPermanentTimeshift();
@@ -3841,10 +3832,7 @@ int eZapMain::handleStandby(int i)
 				break;
 			if ( !eZapStandby::getInstance() )
 			{
-				eMessageBox mb(_("Go to Standby now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30 );
-				mb.show();
-				int ret = mb.exec();
-				mb.hide();
+				int ret = eMessageBox::ShowBox(_("Go to Standby now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30 );
 				if (ret == eMessageBox::btYes)
 				{
 					stopPermanentTimeshift();
@@ -4027,10 +4015,7 @@ void eZapMain::deleteService( eServiceSelector *sel )
 			sel->movemode &= ~2;
 			return;
 		}
-		eMessageBox box(_("Sorry, you cannot delete this service."), _("delete service"), eMessageBox::iconWarning|eMessageBox::btOK );
-		box.show();
-		box.exec();
-		box.hide();
+		eMessageBox::ShowBox(_("Sorry, you cannot delete this service."), _("delete service"), eMessageBox::iconWarning|eMessageBox::btOK );
 		return;
 	}
 	bool removeEntry=true;
@@ -4055,10 +4040,7 @@ void eZapMain::deleteService( eServiceSelector *sel )
 			// recorded stream selected ( in recordings.epl )
 				eString str;
 				str.sprintf(_("You are trying to delete '%s'.\nReally do this?"), it->service.descr.c_str() );
-				eMessageBox box(str, _("Delete recorded stream"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-				box.show();
-				int r=box.exec();
-				box.hide();
+				int r = eMessageBox::ShowBox(str, _("Delete recorded stream"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 				if (r != eMessageBox::btYes)
 					removeEntry=false;
 				boundfile=true;
@@ -4086,13 +4068,10 @@ void eZapMain::deleteService( eServiceSelector *sel )
 		{
 			if ( (it->type & (ePlaylistEntry::PlaylistEntry|ePlaylistEntry::boundFile))==(ePlaylistEntry::PlaylistEntry|ePlaylistEntry::boundFile) )
 			{
-				eMessageBox box(
+				int r = eMessageBox::ShowBox(
 					_("This is a complete Bouquet!\nReally delete?"),
 					_("Delete bouquet"),
 					eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-				box.show();
-				int r=box.exec();
-				box.hide();
 				if (r != eMessageBox::btYes)
 					removeEntry=false;
 			}
@@ -4196,10 +4175,7 @@ void eZapMain::deleteFile( eServiceSelector *sel )
 	{
 		eString s;
 		s.sprintf(_("You are trying to delete '%s'.\nReally do this?"),ref.path.c_str() );
-		eMessageBox box(s, _("Delete File"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-		box.show();
-		int r=box.exec();
-		box.hide();
+		int r = eMessageBox::ShowBox(s, _("Delete File"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 		if (r != eMessageBox::btYes)
 			removeEntry=false;
 	}
@@ -5224,8 +5200,7 @@ void eZapMain::EPGSearchEvent(eServiceReferenceDVB service)
 			if (back == 2)
 			{
 				dd->hide();
-				eMessageBox rsl(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
-				rsl.show(); rsl.exec(); rsl.hide();
+				eMessageBox::ShowBox(EPGSearchName + eString(_(" was not found!")) , _("EPG Search"), eMessageBox::iconInfo|eMessageBox::btOK);
 				dd->show();
 			}
 		}
@@ -5514,10 +5489,8 @@ bool eZapMain::handleState(int justask)
 
 	if (!profimode)
 	{
-		eMessageBox box(text, _("Really do this?"), eMessageBox::iconQuestion|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
-		box.show();
-		b = (box.exec() == eMessageBox::btYes);
-		box.hide();
+		int ret = eMessageBox::ShowBox(text, _("Really do this?"), eMessageBox::iconQuestion|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
+		b = (ret == eMessageBox::btYes);
 	}
 	else
 		b=true;
@@ -5610,15 +5583,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	// timer service change in progress...
 	if ( event.type == eWidgetEvent::evtAction && Decoder::locked == 2 )
 	{
-		eMessageBox mb(
+		eMessageBox::ShowBox(
 			_("please wait until the timer has started the recording (max 10 seconds)"),
 			_("information"),
 			eMessageBox::btOK|eMessageBox::iconInfo,
 			eMessageBox::btOK,
 		10);
-		mb.show();
-		mb.exec();
-		mb.hide();
 		return 1;
 	}
 	switch (event.type)

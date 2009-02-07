@@ -107,10 +107,7 @@ void eZapKeyboardSetup::loadMappings()
 			if (i)
 			{
 				eDebug("error reading keyboard mapping directory");
-				eMessageBox msg("error reading keyboard mapping directory", "error");
-				msg.show();
-				msg.exec();
-				msg.hide();
+				eMessageBox::ShowBox("error reading keyboard mapping directory", "error");
 			}
 			continue;
 		}

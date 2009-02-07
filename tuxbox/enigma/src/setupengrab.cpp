@@ -180,14 +180,11 @@ void ENgrabSetup::detectMAC()
 	}
 	else
 	{
-		eMessageBox mb(
+		hide();
+		eMessageBox::ShowBox(
 			_("Please check your NGrab Server or the IP"),
 			_("HW Address(MAC) detection failed"),
 			eMessageBox::btOK|eMessageBox::iconInfo );
-		hide();
-		mb.show();
-		mb.exec();
-		mb.hide();
 		show();
 	}
 }

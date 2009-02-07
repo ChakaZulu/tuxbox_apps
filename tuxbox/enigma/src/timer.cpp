@@ -1598,17 +1598,11 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 			int ret = eMessageBox::btNo;
 			if ( &(*nextStartingEvent) == &entry && entry.type & ePlaylistEntry::stateRunning  )
 			{
-				eMessageBox box(str1+'\n'+str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-				box.show();
-				ret=box.exec();
-				box.hide();
+				ret = eMessageBox::ShowBox(str1+'\n'+str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 			}
 			else
 			{
-				eMessageBox box(str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-				box.show();
-				ret=box.exec();
-				box.hide();
+				ret = eMessageBox::ShowBox(str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 			}
 			if (ret == eMessageBox::btYes)
 			{
@@ -1741,14 +1735,11 @@ bool eTimerManager::eventAlreadyInList( eWidget *w, EITEvent &e, eServiceReferen
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
 		if ( ref == i->service && Overlapping(*i, tmp ) )
 		{
-			eMessageBox box(
+			w->hide();
+			eMessageBox::ShowBox(
 				_("This event is already in the timerlist."),
 				_("Add event to timerlist"),
 				eMessageBox::iconWarning|eMessageBox::btOK);
-			w->hide();
-			box.show();
-			box.exec();
-			box.hide();
 			w->show();
 			return true;
 		}
@@ -1783,22 +1774,16 @@ bool eTimerManager::addEventToTimerList( eWidget *sel, const ePlaylistEntry& ent
 		{
 			if ( entry.type & (ePlaylistEntry::doFinishOnly|ePlaylistEntry::stateRunning) )
 			{
-				eMessageBox box(_("The Endtime overlaps with another event in the timerlist"), _("Set Stop Time"), eMessageBox::iconWarning|eMessageBox::btOK);
 				sel->hide();
-				box.show();
-				box.exec();
-				box.hide();
+				eMessageBox::ShowBox(_("The Endtime overlaps with another event in the timerlist"), _("Set Stop Time"), eMessageBox::iconWarning|eMessageBox::btOK);
 				sel->show();
 			}
 			else
 			{
-				eMessageBox box(_("This event cannot added to the timerlist.\n"
+				sel->hide();
+				eMessageBox::ShowBox(_("This event cannot added to the timerlist.\n"
 					"The event overlaps with another event in the timerlist\n"
 					"Please check the timerlist manually."), _("Add event to timerlist"), eMessageBox::iconWarning|eMessageBox::btOK);
-				sel->hide();
-				box.show();
-				box.exec();
-				box.hide();
 				sel->show();
 			}
 			return false;
@@ -2573,14 +2558,11 @@ void eTimerEditView::applyPressed()
 													"This stops the running timer(recording)\n");
 						str+=_("Really update this event?");
 						hide();
-						eMessageBox box(
+						ret = eMessageBox::ShowBox(
 							str,
 							_("Update event in timerlist"),
 							eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
 							eMessageBox::btNo);
-						box.show();
-						ret=box.exec();
-						box.hide();
 						show();
 					}
 					if ( ret == eMessageBox::btYes )
@@ -2588,26 +2570,20 @@ void eTimerEditView::applyPressed()
 						if ( eTimerManager::getInstance()->updateRunningEvent(evt.duration,ttype&(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown)) )
 						{
 							hide();
-							eMessageBox box(
+							eMessageBox::ShowBox(
 								_("New endtime are now adjusted"),
 								_("Update event in timerlist"),
 								eMessageBox::iconInfo|eMessageBox::btOK);
-							box.show();
-							box.exec();
-							box.hide();
 							show();
 							close(0);
 						}
 						else
 						{
 							hide();
-							eMessageBox box(
+							eMessageBox::ShowBox(
 								_("The event has already finished... you can not change endtime!"),
 								_("Update event in timerlist"),
 								eMessageBox::iconInfo|eMessageBox::btOK);
-							box.show();
-							box.exec();
-							box.hide();
 							show();
 						}
 					}
@@ -2624,10 +2600,7 @@ void eTimerEditView::applyPressed()
 	else
 	{
 		hide();
-		eMessageBox box(_("Invalid begin or end time.!\nPlease check time and date"), _("Update event in timerlist"), eMessageBox::iconWarning|eMessageBox::btOK);
-		box.show();
-		box.exec();
-		box.hide();
+		eMessageBox::ShowBox(_("Invalid begin or end time.!\nPlease check time and date"), _("Update event in timerlist"), eMessageBox::iconWarning|eMessageBox::btOK);
 		show();
 	}
 }
@@ -2796,11 +2769,8 @@ void eTimerEditView::showServiceSelector()
 	{
 		if ( ref->data[0] == 4 ) // NVOD
 		{
-			eMessageBox box(_("Sorry, you can not add a time shifted service manually to the timer.\nPlease close the Timer and use the EPG of the service you wish to add!"), _("Information"), eMessageBox::iconInfo|eMessageBox::btOK);
 			hide();
-			box.show();
-			box.exec();
-			box.hide();
+			eMessageBox::ShowBox(_("Sorry, you can not add a time shifted service manually to the timer.\nPlease close the Timer and use the EPG of the service you wish to add!"), _("Information"), eMessageBox::iconInfo|eMessageBox::btOK);
 			show();
 		}
 		else if (tmpService != *ref)

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.80 2008/12/13 16:32:46 dbluelle Exp $
+ * $Id: setup_extra.cpp,v 1.81 2009/02/07 10:06:31 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -421,7 +421,7 @@ extern bool erase(char mtd[30], const char *titleText);
 void eExpertSetup::factory_reset()
 {
 	hide();
-	eMessageBox mb(
+	int ret = eMessageBox::ShowBox(
 		_("When you do a factory reset, you will lose ALL your configuration data\n"
 			"(including bouquets, services, satellite data ...)\n"
 			"After completion of factory reset, your receiver will restart automatically!\n\n"
@@ -429,9 +429,6 @@ void eExpertSetup::factory_reset()
 		_("Factory reset"),
 		eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
 		eMessageBox::btNo );
-	mb.show();
-	int ret = mb.exec();
-	mb.hide();
 	if ( ret == eMessageBox::btYes ) 
 	{
 		switch( eSystemInfo::getInstance()->getHwType() )

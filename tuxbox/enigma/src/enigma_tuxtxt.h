@@ -75,7 +75,7 @@ private:
 	void Init();
 	int eventHandler(const eWidgetEvent &event);
 	void RenderPage();
-	
+	void init_eTuxtxtWidget();	
 public:
 	eTuxtxtWidget();
 	~eTuxtxtWidget();

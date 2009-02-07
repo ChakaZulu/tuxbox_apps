@@ -132,11 +132,8 @@ void eSatelliteConfigurationManager::typeChanged(eListBoxEntryText* newtype)
 		oldComp=1;
 	if ( oldComp > newComp )
 	{
-		eMessageBox mb(_("Configuration contains some elements\nwhich don't fit into new DiSEqC-Type. Drop these items?"), _("Change DiSEqC-Type..."), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btCancel);
 		hide();
-		mb.show();
-		int res=mb.exec();
-		mb.hide();
+		int res = eMessageBox::ShowBox(_("Configuration contains some elements\nwhich don't fit into new DiSEqC-Type. Drop these items?"), _("Change DiSEqC-Type..."), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btCancel);
 		show();
 		if (res != eMessageBox::btYes)
 		{
