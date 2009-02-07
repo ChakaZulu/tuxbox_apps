@@ -40,10 +40,11 @@ class eConsoleAppContainer;
 
 class eSwapManager: public eWindow
 {
-	eButton *bt_crswap, *bt_acswap, *bt_delswap, *bt_stswap;
+	eButton *bt_crswap, *bt_acswap, *bt_delswap, *bt_stswap, *bt_seldir;
 	eStatusBar *statusbar;
-	eLabel *lb_file, *lb_mnt, *lb_size, *lb_status, *lb_found;
-	eComboBox *cb_size, *cb_file, *cb_mnt;
+	eLabel *lb_status, *lb_found;
+	eComboBox *cb_size, *cb_file;
+	eTextInputField* tb_path;
 
 	eMessageBox *info;
 
@@ -52,7 +53,6 @@ class eSwapManager: public eWindow
 	void stopSwap();
 	void deleteSwap();
 	void searchSwap(eListBoxEntryText *seltype);
-	void searchSwapLight();
 	void getSize();
 	void getState();
 	void appClosed(int);
@@ -60,10 +60,11 @@ class eSwapManager: public eWindow
 	void getCurrentSwaps();
 	void rewriteScript();
 	void getBoxType();
+	void selectDir();
 
 	eConsoleAppContainer *createSwapfile;
 
-	eString status, store, found, swapstring, swaps[10], hdddir, mntbase;
+	eString status, store, found, swapstring, swaps[10], mntbase;
 	int swapfound, swapstatus, swapstate, bytesize, filename, pathname, s;
 	char* swap;
 	void init_eSwapManager();

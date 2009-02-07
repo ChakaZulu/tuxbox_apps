@@ -978,8 +978,8 @@
 			<eNumber name="minutes" position="e-70:60" size="60:35" helptext="set maximum number of recorded minutes" loadDeco="" />
 			<eCheckbox name="active" text="activate timeshift" position="10:100" size="350:30" helptext="activate permanent timeshift" loadDeco="" />
 			<eCheckbox name="pause" text="activate pause button" position="10:140" size="350:30" helptext="use yellow button as pause button" loadDeco="" />
-			<eTextInputField name="path" position="10:180" size="e-150:40" loadDeco="" helptext="set directory where timeshift files will be stored" />
-			<eButton name="seldir" align="center" vcenter="on" position="e-140:180" size="130:40" loadDeco="" text="Select" helptext="set directory where timeshift files will be stored" />
+			<eTextInputField name="path" position="10:180" size="e-60:40" loadDeco="" helptext="set directory where timeshift files will be stored" />
+			<eButton name="seldir" align="center" vcenter="on" position="e-50:180" size="40:40" loadDeco="" pixmap="sselect_folder" helptext="set directory where timeshift files will be stored" />
 			<eButton name="store" text="store" position="10:e-100" size="150:40" loadDeco="" helptext="store timeshift settings and leave" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</SetupTimeshift>
@@ -1023,6 +1023,25 @@
 			<eButton name="Start" text="Start" position="230:310" size="210:40" loadDeco="" helptext="Begin EPG Search" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</eEPGSearch>
+	</object>
+
+	<object name="SwapManager">
+		<SwapManager text="Swap Manager" cposition="100:120" csize="500:370">
+			<eLabel text="Filename:" position="20:20" size="200:30" />
+			<eComboBox name="file" openEntries="4" position="250:20" size="240:30" loadDeco="" helptext="Push OK to select Filename" />
+			<eLabel text="Directory:" position="20:70" size="200:30" />
+			<eTextInputField name="path" position="250:70" size="200:40" loadDeco="" helptext="Push OK to select directory" />
+			<eButton name="seldir" align="center" vcenter="on" position="e-50:70" size="40:40" loadDeco="" pixmap="sselect_folder" helptext="Push OK to select directory" />
+			<eLabel text="Filesize:" position="20:120" size="200:30" />
+			<eComboBox name="filesize" openEntries="4" position="250:120" size="240:30" loadDeco="" helptext="Push OK to select Filesize" />
+			<eButton name="delete" text="Delete Swap-File" position="250:270" size="240:30" loadDeco="" helptext="Delete Swap-File" shortcut="yellow" />
+			<eButton name="stop" text="Stop Swap" position="10:270" size="230:30" loadDeco="" helptext="Stop Swap" shortcut="red" />
+			<eButton name="create" text="Create Swap-File" position="250:270" size="240:30" loadDeco="" helptext="Create Swap-File" shortcut="blue" />
+			<eButton name="start" text="Start Swap" position="10:270" size="230:30" loadDeco="" helptext="Start Swap" shortcut="green" />
+			<eLabel name="found" text="" position="20:220" size="400:30" />
+			<eLabel name="status" text="" position="20:170" size="400:30" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</SwapManager>
 	</object>
 
 </eskin>

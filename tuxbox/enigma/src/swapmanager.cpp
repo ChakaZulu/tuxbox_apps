@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef DISABLE_FILE
 
 #include <swapmanager.h>
+#include <sselect.h>
 
 using namespace std;
 
@@ -32,15 +33,7 @@ eSwapManager::eSwapManager(): eWindow(0), createSwapfile(0)
 }
 void eSwapManager::init_eSwapManager()
 {
-	cmove(ePoint(100,120));
-	cresize(eSize(500, 370)); 
-	setText(_("Swap Manager"));	
 
-//Statusbar
-	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-50 ) );
-	statusbar->resize( eSize( clientrect.width(), 50) );
-	statusbar->loadDeco();
 
 	setHelpID(155);
 
@@ -58,18 +51,7 @@ void eSwapManager::init_eSwapManager()
 	path = eString().sprintf("%susb/", mntbase.c_str() );
 	eConfig::getInstance()->getKey("/extras/swapfilename", swap);
 
-
-//Label und Combobox für den Dateinamen
-	lb_file=new eLabel(this);
-	lb_file->setText(_("Filename: "));//Dateiname
-	lb_file->move(ePoint(20, 20));
-	lb_file->resize(eSize(200, 30));
-
-	cb_file=new eComboBox(this, 4, lb_file);
-	cb_file->move(ePoint(250, 20));
-	cb_file->resize(eSize(240, 30));
-	cb_file->loadDeco();
-	cb_file->setHelpText(_("Push OK to select Filename"));
+	cb_file=new eComboBox(this,4);cb_file->setName("file");
 
 	new eListBoxEntryText( *cb_file, "swap", (void*)0, 0, eString().sprintf("%s%s", _("Filename: "), "swap"));
 	new eListBoxEntryText( *cb_file, "swapfile", (void*)1, 0, eString().sprintf("%s%s", _("Filename: "), "swapfile"));
@@ -100,60 +82,12 @@ void eSwapManager::init_eSwapManager()
 		path = s.substr(0, pos+1);
 	}
 
-	cb_file->setCurrent(filename, true);
-
-	CONNECT(cb_file->selchanged, eSwapManager::searchSwap);
-
-//Label und Combobox für das Verzeichnis
-	lb_mnt=new eLabel(this);
-	lb_mnt->setText(_("Directory:"));//Speicherort
-	lb_mnt->move(ePoint(20, 70));
-	lb_mnt->resize(eSize(200, 30));
 	
-	cb_mnt=new eComboBox(this,4, lb_mnt);
-	cb_mnt->move(ePoint(250, 70));
-	cb_mnt->resize(eSize(240, 30));
-	cb_mnt->loadDeco();
-	cb_mnt->setHelpText(_("Push OK to select directory"));
-	
-	new eListBoxEntryText( *cb_mnt, eString().sprintf("%susb/",mntbase.c_str()), (void*)0, 0, eString().sprintf( "%s %susb/",_("Directory:"),mntbase.c_str()));
-	new eListBoxEntryText( *cb_mnt, eString().sprintf("%s", hdddir.c_str()), (void*)1, 0, eString().sprintf( "%s %s",_("Directory:"), hdddir.c_str() ));
-	new eListBoxEntryText( *cb_mnt, eString().sprintf("%scf/",mntbase.c_str()), (void*)2, 0, eString().sprintf( "%s %scf/",_("Directory:"),mntbase.c_str()));
+	tb_path=new eTextInputField(this);tb_path->setName("path");
+	tb_path->setText(path);
+	bt_seldir=new eButton(this); bt_seldir->setName("seldir");
 
-	if(path == eString().sprintf("%susb/",mntbase.c_str()))
-	{
-		pathname=0;
-	}
-	else if(path == hdddir)
-	{
-		pathname=1;
-	}
-	else if(path == eString().sprintf("%scf/",mntbase.c_str()))
-	{
-		pathname=2;
-	}
-	else
-	{
-		pathname=3;
-		new eListBoxEntryText( *cb_mnt, path.c_str(), (void*)3, 0, eString().sprintf( "%s%s",_("Directory:"), path.c_str() ) );
-	}
-
-	cb_mnt->setCurrent(pathname, true);
-
-//Suchen nach dem Swapfile
-	CONNECT(cb_mnt->selchanged, eSwapManager::searchSwap);
-
-//Label und Combobox für die Dateigrösse
-	lb_size=new eLabel(this);
-	lb_size->setText(_("Filesize:"));//Dateigroesse
-	lb_size->move(ePoint(20, 120));
-	lb_size->resize(eSize(200, 30));
-
-	cb_size=new eComboBox(this, 4, lb_size);
-	cb_size->move(ePoint(250, 120));
-	cb_size->resize(eSize(240, 30));
-	cb_size->loadDeco();
-	cb_size->setHelpText(_("Push OK to select Filesize"));
+	cb_size=new eComboBox(this, 4);cb_size->setName("filesize");
 
 	new eListBoxEntryText( *cb_size, "0 MB", (void*)0, 0, eString().sprintf(_("Filesize: %d MB"),0).c_str());
 	new eListBoxEntryText( *cb_size, "8 MB", (void*)8, 0, eString().sprintf(_("Filesize: %d MB"),8).c_str());
@@ -165,73 +99,54 @@ void eSwapManager::init_eSwapManager()
 	new eListBoxEntryText( *cb_size, "512 MB", (void*)512, 0, eString().sprintf(_("Filesize: %d MB"),512).c_str());
 	new eListBoxEntryText( *cb_size, "1024 MB", (void*)1024, 0, eString().sprintf(_("Filesize: %d MB"),1024).c_str());
 
-//Abfragen der Grösse
-	getSize();
+	bt_delswap = new eButton(this);bt_delswap->setName("delete");
 
-//Button zum Löschen des Swapfiles
-	bt_delswap = new eButton(this);
-	bt_delswap->move(ePoint(250, 270));
-	bt_delswap->resize(eSize(240, 30));
-	bt_delswap->setShortcut("yellow");
-	bt_delswap->setShortcutPixmap("yellow");
-	bt_delswap->setText(_("Delete Swap-File"));//Swap-File loeschen
-	bt_delswap->setHelpText(_("Delete Swap-File"));
-	bt_delswap->loadDeco();
+	bt_stswap = new eButton(this);bt_stswap->setName("stop");
+
+	bt_crswap = new eButton(this);bt_crswap->setName("create");
+
+	bt_acswap = new eButton(this);bt_acswap->setName("start");
+
+	lb_found= new eLabel(this);lb_found->setName("found");
+
+	lb_status= new eLabel(this);lb_status->setName("status");
+
+	statusbar = new eStatusBar(this); statusbar->setName("statusbar");
+
+	if (eSkin::getActive()->build(this, "SwapManager"))
+		eFatal("skin load of \"SwapManager\" failed");
+
 	bt_delswap->hide();
-
-	CONNECT(bt_delswap->selected, eSwapManager::deleteSwap);
-
-//Button zum Deaktivieren des Swapfiles
-	bt_stswap = new eButton(this);
-	bt_stswap->move(ePoint(10, 270));
-	bt_stswap->resize(eSize(230, 30));
-	bt_stswap->setShortcut("red");
-	bt_stswap->setShortcutPixmap("red");
-	bt_stswap->setText(_("Stop Swap"));
-	bt_stswap->setHelpText(_("Stop Swap"));//ausschalten
-	bt_stswap->loadDeco();
 	bt_stswap->hide();
-
-	CONNECT(bt_stswap->selected, eSwapManager::stopSwap);
-
-//Button zum Erstellen des Swapfiles
-	bt_crswap = new eButton(this);
-	bt_crswap->move(ePoint(250, 270));
-	bt_crswap->resize(eSize(240, 30));
-	bt_crswap->setShortcut("blue");
-	bt_crswap->setShortcutPixmap("blue");
-	bt_crswap->setText(_("Create Swap-File"));//erstellen
-	bt_crswap->setHelpText(_("Create Swap-File"));
-	bt_crswap->loadDeco();
 	bt_crswap->hide();
-
-	CONNECT(bt_crswap->selected, eSwapManager::createSwap);
-
-//Button zum Aktivieren des Swapfiles
-	bt_acswap = new eButton(this);
-	bt_acswap->move(ePoint(10, 270));
-	bt_acswap->resize(eSize(230, 30));
-	bt_acswap->setShortcut("green");
-	bt_acswap->setShortcutPixmap("green");
-	bt_acswap->setText(_("Start Swap"));
-	bt_acswap->setHelpText(_("Start Swap"));// einschalten
-	bt_acswap->loadDeco();
 	bt_acswap->hide();
-
+	cb_file->setCurrent(filename, true);
+	CONNECT(cb_file->selchanged, eSwapManager::searchSwap);
+	getSize();
+	CONNECT(bt_seldir->selected, eSwapManager::selectDir);
+	CONNECT(bt_delswap->selected, eSwapManager::deleteSwap);
+	CONNECT(bt_stswap->selected, eSwapManager::stopSwap);
+	CONNECT(bt_crswap->selected, eSwapManager::createSwap);
 	CONNECT(bt_acswap->selected, eSwapManager::activateSwap);
 
-//Label für die Gefunden-/Nicht gefunden-Anzeige
-	lb_found= new eLabel(this);
-	lb_found->move(ePoint(20, 220));
-	lb_found->resize(eSize(400, 30));
-
-//Label für die Aktiv-/Inaktiv-Anzeige	
-	lb_status= new eLabel(this);
-	lb_status->move(ePoint(20, 170));
-	lb_status->resize(eSize(400, 30));
-
 //Abfragen, ob Swapfile existiert
-	searchSwapLight();
+	searchSwap(NULL);
+}
+void eSwapManager::selectDir()
+{
+	eFileSelector sel(tb_path->getText());
+#ifndef DISABLE_LCD
+	sel.setLCD(LCDTitle, LCDElement);
+#endif
+	hide();
+
+	const eServiceReference *ref = sel.choose(-1);
+
+	if (ref)
+		tb_path->setText(sel.getPath().current().path);
+	show();
+	setFocus(bt_seldir);
+
 }
 
 void eSwapManager::getBoxType()
@@ -246,13 +161,11 @@ void eSwapManager::getBoxType()
 		case eSystemInfo::TR_DVB272S:
 		case eSystemInfo::DM7000:
 		default:
-			hdddir = "/hdd/";
 			mntbase = "/var/mnt/";
 			break;
 		case eSystemInfo::DM500PLUS:
 		case eSystemInfo::DM600PVR:
 		case eSystemInfo::DM7020:
-			hdddir = "/media/hdd/";
 			mntbase = "/media/";
 			break; 
 
@@ -304,7 +217,7 @@ void eSwapManager::getState()
 void eSwapManager::getSize()
 {
 
-	eString tmp = cb_mnt->getCurrent()->getText() + cb_file->getCurrent()->getText();
+	eString tmp = tb_path->getText() + cb_file->getCurrent()->getText();
 
 	struct stat sw;
 	int used=0;
@@ -355,30 +268,11 @@ void eSwapManager::setButtons()
 	lb_status->setText(eString().sprintf(_("Swap-Status: %s"), status.c_str()));
 }
 
-//Swapfile suchen (mit Listbox)
+//Swapfile suchen
 void eSwapManager::searchSwap(eListBoxEntryText *seltype)
 {
-	store = cb_mnt->getCurrent()->getText() + cb_file->getCurrent()->getText();
+	store = tb_path->getText() + cb_file->getCurrent()->getText();
 
-	struct stat st;
-	if (lstat(store.c_str(),&st) != -1)
-	{
-		swapfound=1;
-		getState();
-		getSize();
-	}
-	else
-	{
-		swapfound=0;
-		swapstate=0;
-	}
-	setButtons();
-}
-
-//Swapfile suchen (ohne Listbox)
-void eSwapManager::searchSwapLight()
-{
-	store = cb_mnt->getCurrent()->getText() + cb_file->getCurrent()->getText();
 	struct stat st;
 	if (lstat(store.c_str(),&st) != -1)
 	{
@@ -399,7 +293,7 @@ void eSwapManager::createSwap()
 {
 	int bytesize=(int)cb_size->getCurrent()->getKey() * 1024;
 	
-	store = cb_mnt->getCurrent()->getText() + cb_file->getCurrent()->getText();
+	store = tb_path->getText() + cb_file->getCurrent()->getText();
 
 	info = new eMessageBox (_("The swapfile will now be created. This may take some time depending on the size of your swapfile"), _("Swap Manager"), 0);
 		info->zOrderRaise();
@@ -423,7 +317,7 @@ void eSwapManager::appClosed(int)
 
 	int byte=(int)cb_size->getCurrent()->getKey();
 
-	eString tmp = cb_mnt->getCurrent()->getText() + cb_file->getCurrent()->getText();
+	eString tmp = tb_path->getText() + cb_file->getCurrent()->getText();
 
 	struct stat crsize;
 	int created=0;
@@ -436,32 +330,17 @@ void eSwapManager::appClosed(int)
 
 	if(created == byte)
 	{
-	eMessageBox debug((eString().sprintf(_("The swapfile has been created!"))), _("Swap Manager"), eMessageBox::btOK);
-	debug.show();
-	debug.exec();
-	debug.hide();	
-
-	searchSwapLight();
-
-	lb_found->setText(eString().sprintf(_("Swap-File: %s"), found.c_str()));
-		if( system(eString().sprintf("mkswap %s", store.c_str() ).c_str()) == 0)
-			{
-				int mkvalue = 1;
-				eConfig::getInstance()->setKey("/extras/mkswap", mkvalue);
-			}
-		else
-			{
-				int mkvalue = 0;
-				eConfig::getInstance()->setKey("/extras/mkswap", mkvalue);
-			}
+		eMessageBox::ShowBox((eString().sprintf(_("The swapfile has been created!"))), _("Swap Manager"), eMessageBox::btOK);
+	
+		searchSwap(NULL);
+	
+		lb_found->setText(eString().sprintf(_("Swap-File: %s"), found.c_str()));
+		int mkvalue = ( system(eString().sprintf("mkswap %s", store.c_str() ).c_str()) == 0) ? 1 : 0;
+		eConfig::getInstance()->setKey("/extras/mkswap", mkvalue);
 	}
 	else
 	{
-			eMessageBox debug((eString().sprintf("%s\n%s",_("There has been an error during creation!"),strerror(errno))), _("Swap Manager"), eMessageBox::iconWarning|eMessageBox::btOK);
-			debug.show();
-			debug.exec();
-			debug.hide();
-
+		eMessageBox::ShowBox((eString().sprintf("%s\n%s",_("There has been an error during creation!"),strerror(errno))), _("Swap Manager"), eMessageBox::iconWarning|eMessageBox::btOK);
 	}
 	setButtons();
 }
@@ -469,23 +348,15 @@ void eSwapManager::appClosed(int)
 //Swapfile aktivieren
 void eSwapManager::activateSwap()
 {
-	store = cb_mnt->getCurrent()->getText() + cb_file->getCurrent()->getText();
+	store = tb_path->getText() + cb_file->getCurrent()->getText();
 	int mkvalue = 0;
 	eConfig::getInstance()->getKey("/extras/mkswap", mkvalue);
 	if (mkvalue == 0)
 	{
-		if( system(eString().sprintf("mkswap %s", store.c_str() ).c_str()) == 0)
-			{
-				int mkvalue = 1;
-				eConfig::getInstance()->setKey("/extras/mkswap", mkvalue);
-			}
-		else
-			{
-				int mkvalue = 0;
-				eConfig::getInstance()->setKey("/extras/mkswap", mkvalue);
-			}
+		int mkvalue = ( system(eString().sprintf("mkswap %s", store.c_str() ).c_str()) == 0) ? 1 : 0;
+		eConfig::getInstance()->setKey("/extras/mkswap", mkvalue);
 	}
-	if ( system(eString().sprintf("swapon %s%s", cb_mnt->getCurrent()->getText().c_str(), cb_file->getCurrent()->getText().c_str() ).c_str())  == 0 )
+	if ( system(eString().sprintf("swapon %s%s", tb_path->getText().c_str(), cb_file->getCurrent()->getText().c_str() ).c_str())  == 0 )
 	{
 		system("echo 0 > /proc/sys/vm/swappiness");
 		eConfig::getInstance()->setKey("/extras/swapfilename", store.c_str());
@@ -495,17 +366,14 @@ void eSwapManager::activateSwap()
 	}
 	else
 	{
-		eMessageBox debug((eString().sprintf("%s\n%s",_("Error during activation!"),strerror(errno))), _("Swap Manager"), eMessageBox::iconWarning|eMessageBox::btOK);
-		debug.show();
-		debug.exec();
-		debug.hide();
+		eMessageBox::ShowBox((eString().sprintf("%s\n%s",_("Error during activation!"),strerror(errno))), _("Swap Manager"), eMessageBox::iconWarning|eMessageBox::btOK);
 	}
 }
 
 //Swapfile deaktivieren
 void eSwapManager::stopSwap()
 {
-	eString selectedSwap = eString().sprintf("%s%s", cb_mnt->getCurrent()->getText().c_str(), cb_file->getCurrent()->getText().c_str() );
+	eString selectedSwap = eString().sprintf("%s%s", tb_path->getText().c_str(), cb_file->getCurrent()->getText().c_str() );
 
 	if ( system(eString().sprintf("swapoff %s", selectedSwap.c_str() ).c_str())  == 0 )
 	{
@@ -518,32 +386,23 @@ void eSwapManager::stopSwap()
 	}
 	else
 	{
-		eMessageBox debug((eString().sprintf("%s\n%s",_("Error during inactivation!"),strerror(errno))), _("Swap Manager"), eMessageBox::iconWarning|eMessageBox::btOK);
-		debug.show();
-		debug.exec();
-		debug.hide();
+		eMessageBox::ShowBox((eString().sprintf("%s\n%s",_("Error during inactivation!"),strerror(errno))), _("Swap Manager"), eMessageBox::iconWarning|eMessageBox::btOK);
 	}
 }
 
 //swapfile löschen
 void eSwapManager::deleteSwap()
 {
-	if ( system(eString().sprintf("rm -f %s%s", cb_mnt->getCurrent()->getText().c_str(), cb_file->getCurrent()->getText().c_str() ).c_str()) == 0 )
+	if ( system(eString().sprintf("rm -f %s%s", tb_path->getText().c_str(), cb_file->getCurrent()->getText().c_str() ).c_str()) == 0 )
 	{
 // 		eConfig::getInstance()->setKey("/extras/swapfilename", "/var/mnt/usb/myswap");
-		eMessageBox debug((_("Swapfile has been deleted!")), ("Swap Manager"), eMessageBox::iconInfo|eMessageBox::btOK);
-		debug.show();
-		debug.exec();
-		debug.hide();
+		eMessageBox::ShowBox((_("Swapfile has been deleted!")), ("Swap Manager"), eMessageBox::iconInfo|eMessageBox::btOK);
 
-		searchSwapLight();
+		searchSwap(NULL);
 	}
 	else
 	{
-		eMessageBox debug(eString().sprintf("%s\n%s",_("File has not been deleted due to an error!"),strerror(errno)), _("Swap Manager"), eMessageBox::iconWarning|eMessageBox::btOK);
-		debug.show();
-		debug.exec();
-		debug.hide();
+		eMessageBox::ShowBox(eString().sprintf("%s\n%s",_("File has not been deleted due to an error!"),strerror(errno)), _("Swap Manager"), eMessageBox::iconWarning|eMessageBox::btOK);
 	}
 }
 
