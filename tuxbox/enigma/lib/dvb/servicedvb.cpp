@@ -122,8 +122,13 @@ void ePermanentTimeshift::renameAllSlices(const char* filename)
 		eString newfilename=filename;
 		if (slice)
 			newfilename += eString().sprintf(".%03d", slice);
-//eDebug("rename timeshift:%s|%s",oldfilename.c_str(),newfilename.c_str());
-		::rename(oldfilename.c_str(),newfilename.c_str());
+		eString cmd;
+		cmd.sprintf("mv \"%s\" \"%s\"",oldfilename.c_str(),newfilename.c_str());		
+		if (system(cmd.c_str()))
+		{
+			eDebug("renaming timeshift failed:%s:%s",cmd.c_str(),strerror(errno));
+		}
+			
 		slice++;
 	}
 	slicelist.clear();
