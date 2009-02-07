@@ -4058,7 +4058,6 @@ void eZapMain::deleteService( eServiceSelector *sel )
 				fname+="eit";
 				::unlink(fname.c_str());
 				::unlink((it->service.path+".indexmarks").c_str());
-				removeFromPlaylist(it->service);
 			}
 		}
 	} // bouquet (playlist) selected
@@ -4113,6 +4112,8 @@ void eZapMain::deleteFile(eServiceReference ref)
 	bool isTS = (ref.path.right(3).upper() == ".TS");
 	int slice=0;
 	eString filename=ref.path;
+	if (eServiceInterface::getInstance()->service == ref)
+		eServiceInterface::getInstance()->stop();
 	if ( isTS )
 	{
 		for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
@@ -4129,36 +4130,22 @@ void eZapMain::deleteFile(eServiceReference ref)
 		filename+="eit";
 		::unlink(filename.c_str());
 		::unlink((ref.path+".indexmarks").c_str());
-	}
-	while (1)
-	{
-		filename=ref.path;
-		if ( isTS )
+		while (1)
 		{
+			filename=ref.path;
 			if (slice)
 				filename+=eString().sprintf(".%03d", slice);
 			slice++;
+			struct stat64 s;
+			if (::stat64(filename.c_str(), &s) < 0)
+				break;
+			eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 		}
-		struct stat64 s;
-		if (::stat64(filename.c_str(), &s) < 0)
-			break;
-		eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 	}
-	removeFromPlaylist(ref);
-}
-void eZapMain::removeFromPlaylist(eServiceReference ref)
-{
-	for ( std::list<ePlaylistEntry>::iterator it(playlist->getList().begin());
-		it != playlist->getList().end(); ++it )
+	else
 	{
-		if ( it->service.path == ref.path )
-		{
-			if (playlist->current == it)
-				playlistPrevService();
-			playlist->deleteService(it);
-			playlist->save();
-			break;
-		}
+		::unlink((ref.path+".indexmarks").c_str());
+		eBackgroundFileEraser::getInstance()->erase(ref.path.c_str());
 	}
 }
 
