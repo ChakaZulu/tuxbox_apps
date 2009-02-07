@@ -24,6 +24,14 @@ class eMessageBox: public eWindow
 protected:	
 	int eventHandler( const eWidgetEvent & );
 public:
+	static int ShowBox(eString string, eString caption, int flags=btOK, int def=btOK, int timeout=0 )
+	{
+		eMessageBox message(string, caption, flags, def, timeout);
+		message.show();
+		int res=message.exec();
+		message.hide();
+		return res;
+	}
 	enum { btOK=1, btCancel=2, btYes=4, btNo=8, btMax};
 	enum { iconInfo=16, iconWarning=32, iconQuestion=64, iconError=128 };
 	/**
