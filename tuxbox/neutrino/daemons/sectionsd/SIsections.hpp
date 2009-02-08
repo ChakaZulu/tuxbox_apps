@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.23 2007/10/02 21:47:41 houdini Exp $
+//    $Id: SIsections.hpp,v 1.24 2009/02/08 15:07:05 houdini Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -26,6 +26,8 @@
 //
 
 #include <endian.h>
+#include "SInetworks.hpp"
+#include "SIbouquets.hpp"
 
 struct SI_section_SDT_header {
 	unsigned table_id			: 8;
