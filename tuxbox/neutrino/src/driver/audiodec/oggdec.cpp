@@ -102,6 +102,10 @@ CBaseDec::RetCode COggDec::Decoder(FILE *in, const int OutputFd, State* const st
   {
 	  if ((mPcmSlots[i] = (char*) malloc(mSlotSize)) == NULL)
 	  {
+		  for (int j = i - 1; j >= 0; j--)
+		  {
+			  free(mPcmSlots[j]);
+		  }
 		  Status=INTERNAL_ERR;
 		  return Status;
 	  }
