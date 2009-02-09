@@ -1258,21 +1258,32 @@ void CFileBrowser::paintItem(unsigned int pos)
 					g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + 35 + colwidth1 , ypos+ fheight, colwidth2 - 10, modestring, color, 0, true); // UTF-8
 				}
 
+#define GIGABYTE 1073741824LL
+#define MEGABYTE 1048576LL
+#define KILOBYTE 1024LL
 				char tmpstr[256];
-				if (actual_file->Size >= 1073741824LL)
+				const char *unit = "";
+				long long factor = 0;
+				if (actual_file->Size >= GIGABYTE)
 				{
-					snprintf(tmpstr,sizeof(tmpstr),"%.4gG",
-						 (double)actual_file->Size / (1024. * 1024 * 1024));
+					factor = GIGABYTE;
+					unit = "G";
 				}
-				else if (actual_file->Size >= 1048576LL)
+				else if (actual_file->Size >= MEGABYTE)
 				{
-					snprintf(tmpstr,sizeof(tmpstr),"%.4gM",
-						 (double)actual_file->Size / (1024. * 1024));
+					factor = MEGABYTE;
+					unit = "M";
 				}
-				else if (actual_file->Size >= 1024LL)
+				else if (actual_file->Size >= KILOBYTE)
 				{
-					snprintf(tmpstr,sizeof(tmpstr),"%.4gK",
-						 (double)actual_file->Size / (1024.));
+					factor = KILOBYTE;
+					unit = "k";
+				}
+				if (factor)
+				{
+					int a = actual_file->Size / factor;
+					int b = (actual_file->Size - a * factor) * 1000 / factor;
+					snprintf(tmpstr, sizeof(tmpstr), "%d.%03d%s", a, b, unit);
 				}
 				else
 					snprintf(tmpstr,sizeof(tmpstr),"%d", (int)actual_file->Size);

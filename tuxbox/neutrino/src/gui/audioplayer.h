@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.h,v 1.21 2009/01/16 16:19:34 seife Exp $
+  $Id: audioplayer.h,v 1.22 2009/02/09 15:19:15 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -80,8 +80,7 @@ class RandomNumber
 
 	int operator()(int n)
 	{
-		return static_cast<int>(static_cast<double>(n) * rand() /
-								(RAND_MAX + 1.0));
+		return ((long long)n * rand() / RAND_MAX);
 	}
 };
 
