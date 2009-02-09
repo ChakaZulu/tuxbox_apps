@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.144 2008/12/05 22:06:19 seife Exp $
+	$Id: epgview.cpp,v 1.145 2009/02/09 15:28:24 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -220,7 +220,7 @@ void CEpgData::showText( int startPos, int ypos )
 	int textCount = epgText.size();
 	int y=ypos;
 
-	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT_PLUS_0); // background of the text box
 
 	for(int i=startPos; i<textCount && i<startPos+medlinecount; i++,y+=medlineheight)
 	{
@@ -230,12 +230,10 @@ void CEpgData::showText( int startPos, int ypos )
 			g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->RenderString(sx+10, y+medlineheight, ox- 15- 15, epgText[i], COL_MENUCONTENT, 0, true); // UTF-8
 	}
 
-	frameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT_PLUS_1);
-
 	int sbc= ((textCount- 1)/ medlinecount)+ 1;
 	int sbs= (startPos+ 1)/ medlinecount;
-
-	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ sbs*(sb-4)/sbc , 11, (sb-4)/sbc,  COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT_PLUS_1); // scrollbar bg
+	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ sbs*(sb-4)/sbc , 11, (sb-4)/sbc,  COL_MENUCONTENT_PLUS_3, RADIUS_SMALL); // scrollbar
 }
 
 #define GENRE_MOVIE_COUNT 9
