@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/encoding.cpp,v 1.2 2003/09/27 11:48:09 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/encoding.cpp,v 1.3 2009/02/09 15:23:50 rhabarber1848 Exp $
  *
  * conversion of character encodings - d-box2 linux project
  *
@@ -30,7 +30,9 @@ std::string Latin1_to_UTF8(const std::string & s)
 	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
 	{
 		unsigned char c = *it;
-		if (c < 0x80)
+		if (c == 0x8a) // 0x8a is "vertical tab". Let's just convert to newline
+			r += '\n';
+		else if (c < 0x80)
 			r += c;
 		else
 		{
