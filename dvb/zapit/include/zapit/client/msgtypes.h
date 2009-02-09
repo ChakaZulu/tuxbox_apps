@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.33 2008/03/21 12:21:04 houdini Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.34 2009/02/09 15:16:50 rhabarber1848 Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -139,6 +139,7 @@ class CZapitMessages
 			CMD_SET_SUBTITLE                   = 81,
 
 			CMD_SET_FASTZAP			   = 82,
+			CMD_REZAP			   = 83,
 		};
 
 	struct commandBoolean

@@ -1,9 +1,11 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.118 2008/12/24 15:20:58 houdini Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.119 2009/02/09 15:17:07 rhabarber1848 Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
  * (C) 2002 by thegoodguy <thegoodguy@berlios.de> & the DBoxII-Project
+ *
+ * (C) 2007, 2008, 2009 Stefan Seyfried
  *
  * License: GPL
  *
@@ -136,6 +138,18 @@ void CZapitClient::setAudioChannel(const unsigned int channel)
 	send(CZapitMessages::CMD_SET_AUDIOCHAN, (const char *) & msg, sizeof(msg));
 
 	close_connection();
+}
+
+unsigned int CZapitClient::ReZap(void)
+{
+	send(CZapitMessages::CMD_REZAP);
+
+	CZapitMessages::responseZapComplete response;
+	CBasicClient::receive_data((char* )&response, sizeof(response));
+
+	close_connection();
+
+	return response.zapStatus;
 }
 
 /* zaps to onid_sid, returns the "zap-status" */

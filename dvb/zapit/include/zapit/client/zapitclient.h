@@ -273,6 +273,9 @@ class CZapitClient:public CBasicClient
 	/* zaps to subservice, returns the "zap-status" */
 	unsigned int zapTo_subServiceID(const t_channel_id channel_id, bool nowait=false);
 
+	/* zaps to the currently tuned channel */
+	unsigned int ReZap();
+
 	/* zaps to channel, does NOT wait for completion (uses event) */
 	void zapTo_serviceID_NOWAIT(const t_channel_id channel_id);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.416 2009/01/26 11:18:12 seife Exp $
+ * $Id: zapit.cpp,v 1.417 2009/02/09 15:17:07 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1485,6 +1485,18 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
+	case CZapitMessages::CMD_REZAP:
+	{
+		CZapitMessages::responseZapComplete msgResponseZapComplete;
+		if (cc)
+			msgResponseZapComplete.zapStatus = zapTo_ChannelID(cc->getChannelID(), false);
+		else
+			msgResponseZapComplete.zapStatus = 0;
+
+		CBasicServer::send_data(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete));
+		break;
+	}
+
 	case CZapitMessages::CMD_RELOAD_CURRENTSERVICES:
 	{
 		CZapitMessages::responseCmd response;
@@ -2652,7 +2664,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.416 2009/01/26 11:18:12 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.417 2009/02/09 15:17:07 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 

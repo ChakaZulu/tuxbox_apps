@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.159 2009/01/23 16:53:49 seife Exp $
+ * $Id: scan.cpp,v 1.160 2009/02/09 15:17:07 rhabarber1848 Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -781,6 +781,7 @@ abort_scan:
 	myZapitClient.reinitChannels();
 
 	stop_scan(true);
+	myZapitClient.ReZap();
 	pthread_exit(0);
 }
 
