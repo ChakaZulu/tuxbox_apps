@@ -281,7 +281,7 @@ class CRCInput
 			RC_btn_right	= BTN_RIGHT, 	 	/* #define BTN_RIGHT		 	0x111 */
 			//////////////// End of IR Keyboard only keys ////////////////
 
-			RC_timeout	= 0xFFFFFFFF,
+			RC_timeout	= 0xFFFF0000,	// use the upper 16 bits to not collide with RC_Repeat/Release
 			RC_nokey	= 0xFFFFFFFE,	// "not defined"
 			RC_ignore	= 0xFFFFFFFD	// different from "not defined"...
 		};
