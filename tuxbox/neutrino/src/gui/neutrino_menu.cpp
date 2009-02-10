@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.39 2009/01/28 23:37:04 ecosys Exp $
+	$Id: neutrino_menu.cpp,v 1.40 2009/02/10 16:12:14 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1892,13 +1892,15 @@ const CMenuOptionChooser::keyval LCDMENU_STATUSLINE_OPTIONS[LCDMENU_STATUSLINE_O
 };
 
 /* for lcd EPG menu*/
-#define LCDMENU_EPG_OPTION_COUNT 4
+#define LCDMENU_EPG_OPTION_COUNT 6
 const CMenuOptionChooser::keyval LCDMENU_EPG_OPTIONS[LCDMENU_EPG_OPTION_COUNT] =
 {
 	{ 1, LOCALE_LCDMENU_EPG_NAME		},
 	{ 2, LOCALE_LCDMENU_EPG_TITLE		},
 	{ 3, LOCALE_LCDMENU_EPG_NAME_TITLE	},
-	{ 7, LOCALE_LCDMENU_EPG_NAME_SEPLINE_TITLE }
+	{ 7, LOCALE_LCDMENU_EPG_NAME_SEPLINE_TITLE },
+	{ 11, LOCALE_LCDMENU_EPG_NAMESHORT_TITLE },
+	{ 15, LOCALE_LCDMENU_EPG_NAMESHORT_SEPLINE_TITLE }
 };
   
 /* lcd settings menu*/

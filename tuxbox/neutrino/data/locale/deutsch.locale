@@ -540,6 +540,8 @@ lcdmenu.epg EPG-Anzeige
 lcdmenu.epg.name Standard (Kanal)
 lcdmenu.epg.name.sepline.title Kanal / Trennl. / Sendung
 lcdmenu.epg.name.title Kanal / Sendung
+lcdmenu.epg.nameshort.sepline.title Kanal (kurz) / Trennl. / Sendung
+lcdmenu.epg.nameshort.title Kanal (kurz) / Sendung
 lcdmenu.epg.title Sendung
 lcdmenu.head LCD Einstellungen
 lcdmenu.inverse Invertieren

@@ -540,6 +540,8 @@ lcdmenu.epg LCD EPG
 lcdmenu.epg.name default (Channel)
 lcdmenu.epg.name.sepline.title Channel / Sep.-Line / Title
 lcdmenu.epg.name.title Channel / Title
+lcdmenu.epg.nameshort.sepline.title Channel (short) / Sep.-Line / Title
+lcdmenu.epg.nameshort.title Channel (short) / Title
 lcdmenu.epg.title Title
 lcdmenu.head LCD Settings
 lcdmenu.inverse Invert
