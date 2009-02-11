@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: tuxinfo.c,v 1.6 2008/07/22 19:20:09 dbt Exp $
+ * $Id: tuxinfo.c,v 1.7 2009/02/11 21:29:13 rhabarber1848 Exp $
  */
 
 #include <stdio.h>
@@ -36,6 +36,8 @@ int main(int argc, char **argv)
 	unsigned char show_model_complete_str = 0;
 	unsigned char show_submodel = 0;
 	unsigned char show_submodel_str = 0;
+	unsigned char show_tuner = 0;
+	unsigned char show_chipinfo = 0;
 	unsigned char show_vendor = 0;
 	unsigned char show_vendor_str = 0;
 	unsigned char show_eval = 0;
@@ -46,7 +48,7 @@ int main(int argc, char **argv)
 	
 		int c;
 		
-		if ((c = getopt(argc, argv, "cC:mMnNsSvVe")) < 0)
+		if ((c = getopt(argc, argv, "cC:tfmMnNsSvVe")) < 0)
 			break;
 			
 		switch (c) {
@@ -66,6 +68,8 @@ int main(int argc, char **argv)
 				show_submodel_str++;
 				show_vendor++;
 				show_vendor_str++;
+				show_tuner++;
+				show_chipinfo++;
 				break;
 			case 'm':
 				show_model++;
@@ -81,6 +85,12 @@ int main(int argc, char **argv)
 				break;
 			case 'S':
 				show_submodel_str++;
+				break;
+			case 't':
+				show_tuner++;
+				break;
+			case 'f':
+				show_chipinfo++;
 				break;
 			case 'v':
 				show_vendor++;
@@ -136,6 +146,18 @@ int main(int argc, char **argv)
 		if (show_eval)
 			printf("SUBMODEL=");
 		printf ("%s\n", tuxbox_get_submodel_str ());
+	}
+
+	if (show_tuner) {
+		if (show_eval)
+			printf("TUNER=");
+		printf ("%s\n", tuxbox_get_tuner ());
+	}
+
+	if (show_chipinfo) {
+		if (show_eval)
+			printf("FLASHCHIPS=");
+		printf ("%s\n", tuxbox_get_chipinfo ());
 	}
 
 	return 0;

@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: tuxbox.c,v 1.9 2003/03/14 07:46:10 obi Exp $
+ * $Id: tuxbox.c,v 1.10 2009/02/11 21:29:13 rhabarber1848 Exp $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -116,3 +116,70 @@ const char *tuxbox_get_vendor_str (void)
 	}
 }
 
+# include <fcntl.h>
+# include <sys/ioctl.h>
+# include <linux/dvb/frontend.h>
+
+const char *tuxbox_get_tuner (void)
+{
+	int fd;
+
+	struct dvb_frontend_info info;
+
+	if ((fd = open("/dev/dvb/adapter0/frontend0", O_RDONLY)) == -1)
+	{
+		return "unknown";
+	}
+
+	if (ioctl(fd, FE_GET_INFO, &info) == -1)
+	{
+		return "unknown";
+	}
+
+	switch (info.type)
+	{
+		case FE_QPSK:
+			return "SAT";
+			break;
+		case FE_QAM:
+			return "CABLE";
+			break;
+		default:
+		case FE_OFDM:
+			return "TERRESTRIAL";
+			break;
+	}
+ }
+
+const char *tuxbox_get_chipinfo (void)
+{
+	/* the 1xI boxen have mtd0: 00020000 00020000 "BR bootloader"
+	   the 2xI boxen have mtd0: 00020000 00004000 "BR bootloader"
+	                                  (n-6)--^     ^--(n) */
+
+	char line[55];
+	FILE* fp;
+	
+	fp = fopen("/proc/mtd", "r");
+	if (fp)
+	{
+	  while (fgets(line, 55, fp) != NULL)
+	  {
+		  if (strstr(line, "00004000 \"BR bootloader\""))
+		  {
+			  fclose (fp);
+			  return "2";
+		  }
+		  else
+		  if (strstr(line, "00020000 \"BR bootloader\""))
+		  {
+			  fclose (fp);
+			  return "1";
+		  }
+		  
+	  }
+	  fclose(fp);
+	}
+
+	return "unknown";
+}
