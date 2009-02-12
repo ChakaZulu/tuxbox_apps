@@ -94,7 +94,8 @@ install-data-local: install-data-@USE_NLS@
 
 install-data-no: all
 install-data-yes: all
-	$(mkinstalldirs) $(DESTDIR)$(datadir)
+	$(mkinstalldirs) $(DESTDIR)$(localedir)
+	cp -pv $(srcdir)/locale.alias $(DESTDIR)$(localedir)
 	@catalogs='@CATALOGS@'; \
 	for cat in $$catalogs; do \
 	  cat=`basename $$cat`; \
