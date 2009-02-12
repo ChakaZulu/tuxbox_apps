@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.61 2008/12/25 18:22:09 houdini Exp $
+ * $Id: pzapit.cpp,v 1.62 2009/02/12 11:11:47 rhabarber1848 Exp $
  *
  * simple commandline client for zapit
  *
@@ -38,6 +38,7 @@ int usage (const char * basename)
 		  << "\t<bouquet> <channel>\tzap by bouquet and channel nr." << std::endl
 		  << "\t-zi <channelid>\t\tzap by channel ID" << std::endl
 		  << "\t-n <channel-name>\tzap by channel name" << std::endl
+		  << "\t-rz\t\t\tReZap only" << std::endl
 		  << "\t-gi\t\t\tget current channel ID" << std::endl
 		  << "\t-gm\t\t\tget current TV/Radio mode" << std::endl
 		  << "\t-gsi\t\t\tget current service information" << std::endl
@@ -110,6 +111,7 @@ int main (int argc, char** argv)
         bool set_ntsc = false;
 	bool scan = false;
 	bool zapByName = false;
+	bool rezap = false;
 	bool killzapit = false;
 	bool enterStandby = false;
 	bool leaveStandby = false;
@@ -176,6 +178,11 @@ int main (int argc, char** argv)
 		else if (!strncmp(argv[i], "-gi", 3))
 		{
 			getchannel = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-rz", 3))
+		{
+			rezap = true;
 			continue;
 		}
 		else if (!strncmp(argv[i], "-zi", 3))
@@ -436,6 +443,12 @@ int main (int argc, char** argv)
 	{
 		t_channel_id channel = zapit.getCurrentServiceID();
 		printf("%llx (%s)\n", channel, (zapit.getChannelName(channel)).c_str());
+		return 0;
+	}
+
+	if (rezap)
+	{
+		zapit.ReZap();
 		return 0;
 	}
 
