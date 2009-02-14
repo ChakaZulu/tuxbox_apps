@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.920 2009/02/03 18:18:28 barf Exp $
+	$Id: neutrino.cpp,v 1.921 2009/02/14 03:47:17 ecosys Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1489,7 +1489,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		}
 		else
 		{
-			dprintf(DEBUG_NORMAL, "Usage: neutrino [-u | --enable-update] [-f | --enable-flash] [-v | --verbose 0..3] [--font name sizeoffset /dir/file.ttf [/dir/bold.ttf [/dir/italic.ttf]]]\n");
+			fprintf(stderr, "Usage: neutrino [-u | --enable-update] [-f | --enable-flash] [-v | --verbose 0..3] [--font name sizeoffset /dir/file.ttf [/dir/bold.ttf [/dir/italic.ttf]]]\n");
 			exit(0);
 		}
 	}
