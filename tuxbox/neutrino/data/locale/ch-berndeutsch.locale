@@ -601,7 +601,6 @@ nfs.type_nfs NFS
 nfs.umount NFS/CIFS Verzeichnis unmounte
 nfs.umounterror Umount-Fähler
 nfs.username CIFS Benutzername
-nfsmenu.head NFS/CIFS/FTPFS Ischtöuige
 nvod.percentage (%d%% verbi)
 nvod.starting (Beginn i %d min)
 nvodselector.directormode Böudregie-Modus

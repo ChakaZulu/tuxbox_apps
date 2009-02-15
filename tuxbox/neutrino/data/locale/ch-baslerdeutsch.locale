@@ -492,7 +492,6 @@ nfs.type_nfs NFS
 nfs.umount NFS/CIFS Verzeichniss abhänge
 nfs.umounterror Abhäng-Fehler
 nfs.username CIFS Benutzername
-nfsmenu.head NFS/CIFS Iischdellige
 nvod.percentage (%d%% umme)
 nvod.starting (Goht los in %d min)
 nvodselector.directormode Bildregie-Modus

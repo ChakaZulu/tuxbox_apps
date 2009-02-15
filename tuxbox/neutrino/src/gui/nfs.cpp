@@ -349,7 +349,7 @@ int CNFSSmallMenu::exec( CMenuTarget* parent, const std::string & actionKey )
 {
 	if (actionKey.empty())
 	{
-		CMenuWidget menu(LOCALE_NFSMENU_HEAD, "network.raw");
+		CMenuWidget menu(LOCALE_NETWORKMENU_MOUNT, "network.raw");
 		CNFSMountGui mountGui;
 		CNFSUmountGui umountGui;
 		menu.addItem(GenericMenuSeparator);

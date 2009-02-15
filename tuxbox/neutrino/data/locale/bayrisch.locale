@@ -490,7 +490,6 @@ nfs.type_nfs NFS
 nfs.umount NFS/CIFS Verzeichnis freigem
 nfs.umounterror Fähla beim Freigem
 nfs.username CIFS Benutzanama
-nfsmenu.head NFS/CIFS Eistellunga
 nvod.percentage (%d%% vorbei)
 nvod.starting (Fangt in %d min o)
 nvodselector.directormode Bildregie-Modus

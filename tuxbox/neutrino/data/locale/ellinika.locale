@@ -776,7 +776,6 @@ nfs.type_nfs NFS
 nfs.umount Λίστα κάρτας δικτύου unmounten
 nfs.umounterror Umount-Λάθος
 nfs.username Όνομα χρήστη
-nfsmenu.head NFS/CIFS/FTPFS Ρυθμίσεις
 nvod.percentage (%d%% Πέρασε)
 nvod.starting (Να αρχίσει σε %d λεπτά)
 nvodselector.directormode Τρόπος-εικόνας

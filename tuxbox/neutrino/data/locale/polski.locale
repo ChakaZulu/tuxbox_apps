@@ -481,7 +481,6 @@ nfs.type_nfs NFS
 nfs.umount Odmontuj volumin NFS/CIFS
 nfs.umounterror blad odmontowania voluminu
 nfs.username CIFS uzytkownik
-nfsmenu.head ustawienia NFS/CIFS
 nvod.percentage (%d%% po starcie)
 nvod.starting (start za %d min)
 nvodselector.directormode Tryb bezposredni

@@ -842,7 +842,7 @@ networkmenu.dhcp DHCP
 networkmenu.gateway Standard Gateway
 networkmenu.head Netzwerk Einstellungen
 networkmenu.ipaddress IP-Adresse
-networkmenu.mount NFS/CIFS/FTPFS/SMBFS
+networkmenu.mount Netzwerkfreigaben einhängen
 networkmenu.nameserver Nameserver
 networkmenu.netmask Netzmaske
 networkmenu.ntpenable Syncronisation via
@@ -879,7 +879,6 @@ nfs.type_smbfs SMBFS
 nfs.umount Netzwerk Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
 nfs.username Benutzername
-nfsmenu.head NFS/CIFS/FTPFS/SMBFS Einstellungen
 nvod.percentage (%d%% vorbei)
 nvod.starting (Beginn in %d min)
 nvodselector.directormode Bildregie-Modus

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.128 2009/02/10 16:12:14 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.129 2009/02/15 18:59:53 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -906,7 +906,6 @@ const char * locale_real_names[] =
 	"nfs.umount",
 	"nfs.umounterror",
 	"nfs.username",
-	"nfsmenu.head",
 	"nvod.percentage",
 	"nvod.starting",
 	"nvodselector.directormode",

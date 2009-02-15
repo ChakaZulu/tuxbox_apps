@@ -492,7 +492,6 @@ nfs.type_nfs NFS
 nfs.umount scarica NFS/CIFS
 nfs.umounterror errore scarica NFS/CIFS
 nfs.username ime korisnika za cifs
-nfsmenu.head Impostazioni NFS /CIFS
 nvod.percentage (%d%% passati)
 nvod.starting (Inizio in %d min)
 nvodselector.directormode Modo regia-Video

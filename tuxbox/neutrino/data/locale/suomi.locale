@@ -731,7 +731,6 @@ nfs.type_nfs NFS
 nfs.umount Vapauta verkkolevy
 nfs.umounterror Virhe vapauttaessa verkkolevyä
 nfs.username Käyttäjätunnus
-nfsmenu.head Verkkolevyjen asetukset
 nvod.percentage (%d%% jäljellä)
 nvod.starting (Käynnistys %d minuutin kuluttua)
 nvodselector.directormode Suora-Tila

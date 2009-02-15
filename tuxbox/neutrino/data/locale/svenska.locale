@@ -612,7 +612,6 @@ nfs.type_nfs NFS
 nfs.umount Avmontera nätverksvolym
 nfs.umounterror Fel vid avmontering
 nfs.username Användare
-nfsmenu.head NFS/CIFS/FTPFS inställning
 nvod.percentage (%d%% över)
 nvod.starting (startar om %d min)
 nvodselector.directormode Direktläge

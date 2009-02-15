@@ -566,7 +566,6 @@ nfs.type_nfs NFS
 nfs.umount éffacer volume montage NFS/CIFS(Unmount)
 nfs.umounterror erreur éffacement montage volume NFS/CIFS
 nfs.username Nom d'utilisateur CIFS
-nfsmenu.head Réglages NFS/CIFS
 nvod.percentage (%d%% fini)
 nvod.starting (démarrage dans %d min)
 nvodselector.head Sélectionner heure démarrage

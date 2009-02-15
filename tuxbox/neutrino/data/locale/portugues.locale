@@ -566,7 +566,6 @@ nfs.type_nfs NFS
 nfs.umount Desmontar unidade NFS/CIFS
 nfs.umounterror erro ao "desmontar" unidade
 nfs.username CIFS username
-nfsmenu.head NFS/CIFS configurações
 nvod.percentage (%d%% para)
 nvod.starting (a começar em %d min)
 nvodselector.directormode Modo directo

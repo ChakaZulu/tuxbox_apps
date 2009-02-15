@@ -474,7 +474,6 @@ nfs.type_nfs nfs
 nfs.umount nfs/cifs direktorij sada demontirati
 nfs.umounterror greška pri demontiranju
 nfs.username ime korisnika za cifs
-nfsmenu.head namješćenje nfsa/cifsa
 nvod.percentage (%d%% prošlo)
 nvod.starting (početak za %d minuta)
 nvodselector.directormode režija slike

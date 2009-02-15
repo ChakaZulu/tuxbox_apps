@@ -518,7 +518,6 @@ nfs.type_nfs Network File System (NFS)
 nfs.umount Umount NFS/CIFS volume
 nfs.umounterror umountingfout: volume
 nfs.username Gebruikersnaam Common Internet File System (CIFS)
-nfsmenu.head NFS/CIFS instellingen
 nvod.percentage (%d%% over)
 nvod.starting (start binnen %d minuten)
 nvodselector.directormode Direct-Mode

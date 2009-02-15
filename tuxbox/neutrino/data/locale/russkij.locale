@@ -566,7 +566,6 @@ nfs.type_nfs NFS
 nfs.umount Размонтировать NFS/CIFS каталог
 nfs.umounterror Ошибка размонтирования каталога
 nfs.username CIFS имя пользователя
-nfsmenu.head NFS/CIFS настройки
 nvod.percentage (%d%% над)
 nvod.starting (Старт через %d минут)
 nvodselector.directormode Директ режим

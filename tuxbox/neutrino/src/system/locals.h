@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.128 2009/02/10 16:12:14 rhabarber1848 Exp $
+ * $Id: locals.h,v 1.129 2009/02/15 18:59:53 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -906,7 +906,6 @@ typedef enum
 	LOCALE_NFS_UMOUNT,
 	LOCALE_NFS_UMOUNTERROR,
 	LOCALE_NFS_USERNAME,
-	LOCALE_NFSMENU_HEAD,
 	LOCALE_NVOD_PERCENTAGE,
 	LOCALE_NVOD_STARTING,
 	LOCALE_NVODSELECTOR_DIRECTORMODE,
