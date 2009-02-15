@@ -11,3 +11,6 @@ AM_CPPFLAGS = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = tuxbox-tuxtxt.pc
 
+install-data-local:
+	$(mkinstalldirs) $(FONTDIR)
+	cp ${top_srcdir}/../plugins/tuxtxt/font/tuxtxt.otb $(FONTDIR)
