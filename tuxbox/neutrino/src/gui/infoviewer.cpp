@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.245 2009/02/18 17:48:41 seife Exp $
+	$Id: infoviewer.cpp,v 1.246 2009/02/18 17:59:43 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1169,7 +1169,7 @@ CSectionsdClient::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_cha
 				msg = NeutrinoMessages::EVT_CURRENTEPG;
 			else
 				msg = NeutrinoMessages::EVT_NEXTEPG;
-			g_RCInput->postMsg(msg, (unsigned) _info, false );
+			g_RCInput->postMsg(msg, (neutrino_msg_data_t)_info, false );
 		}
 		else
 		{

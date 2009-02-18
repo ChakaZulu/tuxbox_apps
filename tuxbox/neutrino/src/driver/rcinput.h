@@ -81,7 +81,7 @@
 
 
 typedef uint neutrino_msg_t;
-typedef uint neutrino_msg_data_t;
+typedef size_t neutrino_msg_data_t; // we are pushing pointer addresses around with this, so it needs to be long
 
 #define NEUTRINO_UDS_NAME "/tmp/neutrino.sock"
 

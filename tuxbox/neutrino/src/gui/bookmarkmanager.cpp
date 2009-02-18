@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.16 2008/12/05 22:06:19 seife Exp $
+  $Id: bookmarkmanager.cpp,v 1.17 2009/02/18 17:59:43 seife Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -257,7 +257,8 @@ const CBookmark * CBookmarkManager::getBookmark(CMenuTarget* parent)
 	int res = -1;
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
-	uint msg; uint data;
+	neutrino_msg_t msg;
+	neutrino_msg_data_t data;
 
 	bool loop=true;
 	bool update=true;
