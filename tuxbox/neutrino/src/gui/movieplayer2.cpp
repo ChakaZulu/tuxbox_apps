@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.19 2009/01/23 22:45:01 seife Exp $
+  $Id: movieplayer2.cpp,v 1.20 2009/02/18 17:55:26 seife Exp $
 
   License: GPL
 
@@ -479,6 +479,7 @@ int box2box_request_stream(const char *fn)
 	long long id;
 	char *p1, *p2;
 	std::string url, response;
+	CURLcode httpres;
 	FILE *fp = fopen(fn, "r");
 	if (!fp)
 		return -1;
@@ -523,7 +524,7 @@ int box2box_request_stream(const char *fn)
 	snprintf(id_s, 33, "%llx", id);
 	url += id_s;
 	INFO("get zapto: '%s'\n", url.c_str());
-	CURLcode httpres = sendGetRequest(url, response);
+	httpres = sendGetRequest(url, response);
 	if (httpres == 0)
 	{
 		INFO("zapto response: %s\n", response.c_str());
@@ -1203,6 +1204,7 @@ ReadTSFileThread(void *parm)
 
 	while (g_playstate != CMoviePlayerGui::STOPPED && !g_EOF && !g_input_failed)
 	{
+		time_t now;
 		switch(g_playstate)
 		{
 		case CMoviePlayerGui::SKIP:
@@ -1245,7 +1247,7 @@ ReadTSFileThread(void *parm)
 				lastpos = ptspos;
 				break;
 			}
-			time_t now = time(NULL);
+			now = time(NULL);
 			if ((now - last) > 4) // update bytes_per_second every 5 seconds
 			{
 				int diff_pts = g_pts - lastpts;
@@ -1459,6 +1461,7 @@ ReadMPEGFileThread(void *parm)
 					break;
 				}
 #endif
+		time_t now;
 
 		switch(g_playstate)
 		{
@@ -1506,7 +1509,7 @@ ReadMPEGFileThread(void *parm)
 				lastpos = ptspos;
 				break;
 			}
-			time_t now = time(NULL);
+			now = time(NULL);
 			if ((now - last) > 4)
 			{
 				int diff_pts = g_pts - lastpts;
@@ -1677,6 +1680,7 @@ ReadMPEGFileThread(void *parm)
 				continue;
 				break;
 			case 0xbd: // AC3
+			{
 				//skip = (ppes[4] << 8 | ppes[5]) + 6;
 				unsigned int offset = ppes[8] + 8 + 1; // ppes[8] is often 0
 				if (offset >= 10) // we did only make sure for 10 bytes
@@ -1727,6 +1731,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				//g_currentac3 = 1;
 				av = 2;
 				break;
+			}
 			case 0xbb:
 			case 0xbe:
 			case 0xbf:
@@ -1737,6 +1742,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				break;
 			case 0xc0 ... 0xcf:
 			case 0xd0 ... 0xdf:
+			{
 				// fprintf(stderr, "audio stream 0x%02x\n", ppes[3]);
 				int id = ppes[3] - 0xC0; // normalize to 0...31 (hex 0x0...0x1f)
 #if 0
@@ -1766,6 +1772,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				cc = &acc;
 				av = 2;
 				break;
+			}
 			case 0xe0 ... 0xef:
 				// fprintf(stderr, "video stream 0x%02x, %02x %02x \n", ppes[3], ppes[4], ppes[5]);
 				pid = 100;
@@ -3030,7 +3037,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.19 $");
+	return imageinfo.getModulVersion("","$Revision: 1.20 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()

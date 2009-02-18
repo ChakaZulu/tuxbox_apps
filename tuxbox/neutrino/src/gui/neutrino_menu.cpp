@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.41 2009/02/15 18:59:52 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.42 2009/02/18 17:55:26 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2141,6 +2141,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 	// go through any postition number
 	for(int pos = 0; pos < SNeutrinoSettings::ITEM_MAX ; pos++)
 	{
+		int dummy;
 		// now compare pos with the position of any item. Add this item if position is the same 
 		switch(g_settings.usermenu[button][pos])
 		{
@@ -2272,7 +2273,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 			case SNeutrinoSettings::ITEM_EPG_MISC: 
 				menu_items++;
 				menu_prev = SNeutrinoSettings::ITEM_EPG_MISC;
-				int dummy = g_Sectionsd->getIsScanningActive();
+				dummy = g_Sectionsd->getIsScanningActive();
 				tmpPauseSectionsdNotifier = new CPauseSectionsdNotifier;
 				keyhelper.get(&key,&icon);
 				menu_item = new CMenuOptionChooser(LOCALE_MAINMENU_PAUSESECTIONSD, &dummy, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, tmpPauseSectionsdNotifier , key, icon );
