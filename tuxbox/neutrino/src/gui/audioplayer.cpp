@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.58 2009/01/16 16:19:34 seife Exp $
+  $Id: audioplayer.cpp,v 1.59 2009/02/18 17:58:49 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -2281,7 +2281,7 @@ void CAudioPlayerGui::GetMetaData(CAudiofileExt &File)
 }
 //------------------------------------------------------------------------
 
-bool CAudioPlayerGui::getNumericInput(neutrino_msg_data_t& msg, int& val) {
+bool CAudioPlayerGui::getNumericInput(neutrino_msg_t& msg, int& val) {
 
 	neutrino_msg_data_t data;
 	int x1 = (g_settings.screen_EndX - g_settings.screen_StartX) / 2 + g_settings.screen_StartX - 50;
