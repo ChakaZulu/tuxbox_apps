@@ -49,7 +49,7 @@ public:
 
         const static int no_video_formats = 5;
 
-	typedef enum video_format 
+	enum video_format
 	{ 
 		FORMAT_CVBS	= 0,
 		FORMAT_RGB	= 1,
