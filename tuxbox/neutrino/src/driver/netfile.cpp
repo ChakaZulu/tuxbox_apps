@@ -1114,7 +1114,7 @@ int f_close(FILE *stream)
 
 	if(cache[i].fd == stream)
 	{
-		dprintf(stderr, "f_close: removing stream %x from cache[%d]\n", (uint32_t)stream, i);
+		dprintf(stderr, "f_close: removing stream %lx from cache[%d]\n", (size_t)stream, i);
 
 		cache[i].closed = 1;		/* indicate that the cache is closed */
 
@@ -1439,8 +1439,8 @@ int pop(FILE *fd, char *buf, long len)
 	if(i < 0)
 		return -1;
 
-	dprintf(stderr, "pop: %d bytes requested [filled: %d of %d], stream: %x\n",
-		len, cache[i].filled, CACHESIZE, (uint32_t)fd);
+	dprintf(stderr, "pop: %d bytes requested [filled: %d of %d], stream: %lx\n",
+		len, cache[i].filled, CACHESIZE, (size_t)fd);
 
 	if(cache[i].fd == fd)
 	{
