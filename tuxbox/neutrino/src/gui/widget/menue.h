@@ -1,5 +1,5 @@
 /*
-	$Id: menue.h,v 1.75 2009/01/18 00:34:45 seife Exp $
+	$Id: menue.h,v 1.76 2009/02/18 18:03:03 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -332,7 +332,7 @@ class CPINProtection
 	protected:
 		char* validPIN;
 		bool check();
-		virtual CMenuTarget* getParent() = NULL;
+		virtual CMenuTarget* getParent() = 0;
 	public:
 		CPINProtection( char* validpin){ validPIN = validpin;};
 		virtual ~CPINProtection(){}

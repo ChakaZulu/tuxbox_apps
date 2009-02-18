@@ -78,7 +78,7 @@ int StreamStop;
 pid_t mainProcessID;
 int TSMode;
 
-struct {
+struct SendStruct {
    int Socket;
    unsigned Packet;
    unsigned Watchdog;
@@ -87,9 +87,11 @@ struct {
    socklen_t AddrLen;    
    unsigned Port;
    pid_t ProcessID;
-} Send;
+};
 
-struct {
+SendStruct Send;
+
+struct SPktStruct {
   unsigned char *Buf[MAX_SPKT_BUF_NUM];
   unsigned char ReSend[MAX_SPKT_BUF_NUM][SPKT_BUF_PACKET_NUM];
   unsigned char ReSendStatus[MAX_SPKT_BUF_NUM];
@@ -98,7 +100,9 @@ struct {
   int ReadPkt;
   int ReadBuf;
   int BufSize;
-} SPkt;
+};
+
+SPktStruct SPkt;
 
 int NextSPktBuf[MAX_SPKT_BUF_NUM];
 
