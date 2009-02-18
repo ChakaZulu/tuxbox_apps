@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.417 2009/02/09 15:17:07 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.418 2009/02/18 17:51:54 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -170,7 +170,7 @@ uint32_t lastChannelRadio;
 uint32_t lastChannelTV;
 
 //stolen from scan.cpp - check how to include
-void cpy(char * from, char * to)
+void cpy(const char *from, const char *to)
 {
 	char cmd[256] = "cp -f ";
 	strcat(cmd, from);
@@ -2664,7 +2664,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.417 2009/02/09 15:17:07 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.418 2009/02/18 17:51:54 seife Exp $\n");
 
 	bool check_lock = true;
 

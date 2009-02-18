@@ -2,10 +2,19 @@
  *
  * XMLTree API implementation
  *
- * $Id: xmltree.cpp,v 1.2 2003/03/14 05:13:04 obi Exp $
+ * $Id: xmltree.cpp,v 1.3 2009/02/18 17:51:55 seife Exp $
  *
  * Changelog:
  * $Log: xmltree.cpp,v $
+ * Revision 1.3  2009/02/18 17:51:55  seife
+ * fix char* vs const char* compiler warnings
+ *
+ * Newer compilers are more pedantic to not allow string constants for
+ * functions with char* arguments, but only for const char*. Make libxmltree
+ * functions const char* where appropriate and adopt the usage inside zapit.
+ * There are probably more occurences throughout the source tree, but zapit
+ * is compiled with "-Werror", so those fixes are needed here ;)
+ *
  * Revision 1.2  2003/03/14 05:13:04  obi
  * compileable with -W -Werror
  *
@@ -187,7 +196,7 @@ XMLTreeNode::~XMLTreeNode()
   next=0;
 }
 
-XMLAttribute *XMLTreeNode::GetAttribute(char *name) const
+XMLAttribute *XMLTreeNode::GetAttribute(const char *name) const
 {
   XMLAttribute *a;
 
@@ -213,7 +222,7 @@ XMLAttribute *XMLTreeNode::GetAttribute(char *name) const
   return 0;
 }
 
-char *XMLTreeNode::GetAttributeValue(char *name) const
+char *XMLTreeNode::GetAttributeValue(const char *name) const
 {
   XMLAttribute *a;
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libxmltree/xmlinterface.h,v 1.1 2009/01/16 16:19:33 seife Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libxmltree/xmlinterface.h,v 1.2 2009/02/18 17:51:55 seife Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -52,14 +52,14 @@ typedef XMLTreeNode*   xmlNodePtr;
 #define xmlNextNode     GetNext()
 inline xmlNodePtr xmlDocGetRootElement(xmlDocPtr  doc)                 { return doc->RootNode(); };
 inline void       xmlFreeDoc          (xmlDocPtr  doc)                 { delete doc; };
-inline char*      xmlGetAttribute     (xmlNodePtr cur, char * s)       { return cur->GetAttributeValue(s); };
+inline char*      xmlGetAttribute     (xmlNodePtr cur, const char *s)  { return cur->GetAttributeValue(s); };
 inline char*      xmlGetName          (xmlNodePtr cur)                 { return cur->GetType();  };
 inline char*      xmlGetData          (xmlNodePtr cur)                 { return cur->GetData();  };
 #endif /* USE_LIBXML */
 
 
-unsigned long xmlGetNumericAttribute  (const xmlNodePtr node, char *name, const int base);
-long xmlGetSignedNumericAttribute     (const xmlNodePtr node, char *name, const int base);
+unsigned long xmlGetNumericAttribute  (const xmlNodePtr node, const char *name, const int base);
+long xmlGetSignedNumericAttribute     (const xmlNodePtr node, const char *name, const int base);
 xmlNodePtr xmlGetNextOccurence        (xmlNodePtr cur, const char * s);
 
 std::string Unicode_Character_to_UTF8(const int character);

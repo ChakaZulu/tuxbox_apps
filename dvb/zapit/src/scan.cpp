@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.160 2009/02/09 15:17:07 rhabarber1848 Exp $
+ * $Id: scan.cpp,v 1.161 2009/02/18 17:51:54 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -148,7 +148,7 @@ t_satellite_position driveMotorToSatellitePosition(const char * const providerNa
 	return satellite_position;
 }
 
-void cp(char * from, char * to)
+void cp(const char *from, const char *to)
 {
 	char cmd[256] = "cp -f ";
 	strcat(cmd, from);

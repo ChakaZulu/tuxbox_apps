@@ -2,10 +2,19 @@
  *
  * XMLTree API header
  *
- * $Id: xmltree.h,v 1.1 2002/01/18 20:22:39 tmbinc Exp $
+ * $Id: xmltree.h,v 1.2 2009/02/18 17:51:55 seife Exp $
  *
  * Changelog:
  * $Log: xmltree.h,v $
+ * Revision 1.2  2009/02/18 17:51:55  seife
+ * fix char* vs const char* compiler warnings
+ *
+ * Newer compilers are more pedantic to not allow string constants for
+ * functions with char* arguments, but only for const char*. Make libxmltree
+ * functions const char* where appropriate and adopt the usage inside zapit.
+ * There are probably more occurences throughout the source tree, but zapit
+ * is compiled with "-Werror", so those fixes are needed here ;)
+ *
  * Revision 1.1  2002/01/18 20:22:39  tmbinc
  * initial checkin
  *
@@ -107,8 +116,8 @@ class XMLTreeNode
     XMLTreeNode  *GetParent() const { return parent; };
 
     XMLAttribute *GetAttributes() const { return attributes; }
-    XMLAttribute *GetAttribute(char *name) const;
-    char         *GetAttributeValue(char *name) const;
+    XMLAttribute *GetAttribute(const char *name) const;
+    char         *GetAttributeValue(const char *name) const;
 
     matchmode     GetMatchingMode() const { return mmode; }
 
