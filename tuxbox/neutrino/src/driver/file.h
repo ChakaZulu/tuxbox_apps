@@ -40,7 +40,7 @@
 #error not using 64 bit file offsets
 #endif /* __USE_FILE__OFFSET64 */
 
-#include <unistd.h> /* off_t */
+#include <sys/types.h>
 
 
 #include <string>

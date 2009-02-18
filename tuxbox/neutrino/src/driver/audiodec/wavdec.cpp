@@ -33,6 +33,8 @@
 #include <unistd.h>
 #include <wavdec.h>
 #include <sstream>
+#include <cstdlib>
+#include <cstring>
 #include <driver/audioplay.h>
 #include <linux/soundcard.h>
 

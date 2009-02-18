@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <limits>
+#include <algorithm>
 // system
 #include <sys/types.h> //ntohs
 #include <netinet/in.h> //ntohs

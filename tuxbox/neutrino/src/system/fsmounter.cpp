@@ -38,6 +38,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <limits>
 
 #include <global.h>
 

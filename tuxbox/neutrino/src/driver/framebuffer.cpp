@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.68 2008/12/17 20:56:51 dbt Exp $
+	$Id: framebuffer.cpp,v 1.69 2009/02/18 17:48:25 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -41,6 +41,7 @@
 #include <linux/kd.h>
 
 #include <stdint.h>
+#include <cstdlib>
 #ifndef HAVE_DREAMBOX_HARDWARE
 #include <dbox/fb.h>
 #endif

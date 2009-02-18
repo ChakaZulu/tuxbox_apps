@@ -33,6 +33,7 @@
 #ifndef __messagebox__
 #define __messagebox__
 
+#include <sys/types.h>
 #include <gui/widget/hintboxext.h>
 
 #include <string>

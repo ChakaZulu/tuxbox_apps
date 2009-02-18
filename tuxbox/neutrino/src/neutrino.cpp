@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.921 2009/02/14 03:47:17 ecosys Exp $
+	$Id: neutrino.cpp,v 1.922 2009/02/18 17:48:43 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -58,6 +58,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <algorithm>
 
 
 #include "global.h"

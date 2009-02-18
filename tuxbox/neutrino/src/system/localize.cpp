@@ -39,6 +39,7 @@
 
 #include <fstream>
 #include <string>
+#include <cstring>
 
 static const char * iso639filename = "/share/iso-codes/iso-639.tab";
 

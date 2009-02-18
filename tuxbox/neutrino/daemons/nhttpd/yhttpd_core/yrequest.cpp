@@ -18,7 +18,8 @@
 // c++
 #include <cstdarg>
 #include <cstdio>
-#include <string.h>
+#include <cstring>
+#include <cstdlib>
 #include <errno.h>
 // system
 #include <fcntl.h>

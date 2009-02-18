@@ -38,6 +38,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 #include <dirent.h>
 #include <dlfcn.h>

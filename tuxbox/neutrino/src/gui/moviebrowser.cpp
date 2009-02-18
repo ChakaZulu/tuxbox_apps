@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.22 2009/01/30 23:05:27 dbt Exp $
+	$Id: moviebrowser.cpp,v 1.23 2009/02/18 17:48:41 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,13 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.23  2009/02/18 17:48:41  seife
+	Add missing includes for newer compilers
+	
+	Newer gcc versions (> 4.x IIRC) are more picky wrt. explicitly including
+	header which were included implicitly before. Add those header so that we
+	can compile with gcc 4.3 (note that this commit is not enough for that goal)
+	
 	Revision 1.22  2009/01/30 23:05:27  dbt
 	removed last useless patch
 	
@@ -152,6 +159,8 @@
 #ifdef MOVEMANAGER
 #include <gui/movemanager.h>
 #endif // MOVEMANAGER
+
+#include <algorithm>
 
 #include "stdlib.h"
 #include <gui/moviebrowser.h>
@@ -459,7 +468,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.22 2009/01/30 23:05:27 dbt Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.23 2009/02/18 17:48:41 seife Exp $\r\n");
 	init();
 }
 
@@ -3888,7 +3897,7 @@ std::string CMovieBrowser::getMovieBrowserVersion(void)
 /************************************************************************/
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.22 $");
+	return imageinfo.getModulVersion("","$Revision: 1.23 $");
 }
 
 /************************************************************************/

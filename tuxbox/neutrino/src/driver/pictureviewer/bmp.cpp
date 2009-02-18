@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <cstdlib>
 
 #define BMP_TORASTER_OFFSET	10
 #define BMP_SIZE_OFFSET		18

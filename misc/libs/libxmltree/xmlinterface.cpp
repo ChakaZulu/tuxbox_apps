@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libxmltree/xmlinterface.cpp,v 1.1 2009/01/16 16:19:33 seife Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libxmltree/xmlinterface.cpp,v 1.2 2009/02/18 17:47:23 seife Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -30,6 +30,8 @@
  */
 
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "xmlinterface.h"
 

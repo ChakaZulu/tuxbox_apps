@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.145 2009/02/09 15:28:24 rhabarber1848 Exp $
+	$Id: epgview.cpp,v 1.146 2009/02/18 17:48:41 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -34,6 +34,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+#include <algorithm>
 
 #include <gui/epgview.h>
 

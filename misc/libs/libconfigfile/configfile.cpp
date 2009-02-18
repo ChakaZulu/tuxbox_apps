@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.19 2003/11/23 19:16:03 obi Exp $
+ * $Id: configfile.cpp,v 1.20 2009/02/18 17:47:20 seife Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -28,6 +28,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstdlib> // atoi...
 
 #include <sys/stat.h>
 

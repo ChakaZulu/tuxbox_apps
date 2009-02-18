@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.120 2009/02/09 15:26:51 rhabarber1848 Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.121 2009/02/18 17:47:16 seife Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -26,6 +26,7 @@
  */
 
 #include <cstdio>
+#include <cstring>
 
 /* libevent */
 #include <eventserver.h>

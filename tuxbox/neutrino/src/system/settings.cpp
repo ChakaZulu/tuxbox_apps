@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.49 2008/04/13 14:53:31 houdini Exp $
+        $Id: settings.cpp,v 1.50 2009/02/18 17:48:53 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -26,6 +26,7 @@
 
 #include <zapit/settings.h>
 
+#include <cstring>
 
 const int default_timing[TIMING_SETTING_COUNT] =
 {

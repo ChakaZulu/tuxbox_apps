@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicsocket.h,v 1.2 2003/02/24 21:14:15 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicsocket.h,v 1.3 2009/02/18 17:47:21 seife Exp $
  *
  * Basic Socket Class - The Tuxbox Project
  *
@@ -26,6 +26,7 @@
 #ifndef __basicsocket__
 #define __basicsocket__
 
+#include <sys/types.h>
 #include <sys/time.h>
 
 bool send_data(int fd, const void * data, const size_t size, const timeval timeout);

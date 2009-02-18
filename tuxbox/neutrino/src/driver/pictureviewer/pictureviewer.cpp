@@ -2,10 +2,11 @@
 #include "fb_display.h"
 #include "driver/framebuffer.h"
 
-
+#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <limits.h>
 
 /* resize.cpp */
 extern unsigned char * simple_resize(unsigned char * orgin,int ox,int oy,int dx,int dy);

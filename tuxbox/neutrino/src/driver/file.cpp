@@ -37,6 +37,7 @@
 #include <sys/stat.h>
 #include <driver/file.h>
 #include <cstring>
+#include <cstdlib>
 
 /* ATTENTION: the array file_extension_list MUST BE SORTED ASCENDING (cf. sort, man bsearch) - otherwise bsearch will not work correctly! */
 const char * const file_extension_list[] =

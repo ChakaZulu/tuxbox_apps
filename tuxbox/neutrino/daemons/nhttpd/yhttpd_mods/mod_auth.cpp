@@ -3,6 +3,8 @@
 // TestHook
 //=============================================================================
 
+#include <cstdlib>
+#include <cstring>
 #include "mod_auth.h"
 #include "helper.h"
 

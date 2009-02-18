@@ -5,6 +5,8 @@
 // Normally
 //=============================================================================
 #include <cstdarg>
+#include <cstring>
+#include <cstdlib>
 
 #include "mod_weblog.h"
 #include "helper.h"

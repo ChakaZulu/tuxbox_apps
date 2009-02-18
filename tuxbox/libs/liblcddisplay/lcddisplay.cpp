@@ -30,7 +30,8 @@
 
 #include <stdint.h> /* uint8_t */
 #include <fcntl.h>
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>

@@ -1,5 +1,5 @@
 /*
-	$Id: timerlist.cpp,v 1.98 2008/12/05 22:06:19 seife Exp $
+	$Id: timerlist.cpp,v 1.99 2009/02/18 17:48:41 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -71,6 +71,7 @@
 #include <zapit/client/zapittools.h>
 
 #include <string.h>
+#include <algorithm>
 
 #define info_height 60
 

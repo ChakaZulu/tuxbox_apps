@@ -6,6 +6,7 @@
 // system
 #include <sys/time.h>
 #include <errno.h>
+#include <cstring>
 // yhttpd
 #include "yconfig.h"
 #include "ytypes_globals.h"

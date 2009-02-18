@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.11 2004/04/08 08:00:55 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.12 2009/02/18 17:47:21 seife Exp $
  *
  * Basic Server Class Class - The Tuxbox Project
  *
@@ -27,6 +27,7 @@
 #include "basicsocket.h"
 
 #include <cstdio>
+#include <cstdlib> // malloc...
 
 #include <inttypes.h>
 #include <sys/poll.h>
