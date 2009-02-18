@@ -47,7 +47,7 @@ public:
 	// copy constructor
 	CAudioMetaData( const CAudioMetaData& src );
 	// assignment operator
-	void CAudioMetaData::operator=( const CAudioMetaData& src );
+	void operator = (const CAudioMetaData& src);
 	void clear();
 
 	enum AudioType

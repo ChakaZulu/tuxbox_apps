@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.202 2009/01/08 17:56:35 seife Exp $
+	$Id: neutrino.h,v 1.203 2009/02/18 17:56:24 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -239,23 +239,23 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 								CMenuWidget &miscSettingsFilebrowser);
 		void InitScanSettings(CMenuWidget &);
 		void InitParentalLockSettings(CMenuWidget &);
-		void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
-								CMenuWidget &mainSettings,
-								CMenuWidget &audioSettings,
-								CMenuWidget &parentallockSettings,
-								CMenuWidget &networkSettings,
-								CMenuWidget &recordingSettings,
-								CMenuWidget &colorSettings,
-								CMenuWidget &lcdSettings,
-								CMenuWidget &keySettings,
-								CMenuWidget &videoSettings,
-								CMenuWidget &languageSettings,
-								CMenuWidget &miscSettings,
-								CMenuWidget &driverSettings,
-								CMenuWidget &service,
-								CMenuWidget &audiopl_picSettings,
-								CMenuWidget &streamingSettings,
-								CMenuWidget &moviePlayer);
+		void InitMainMenu(CMenuWidget &mainMenu,
+				  CMenuWidget &mainSettings,
+				  CMenuWidget &audioSettings,
+				  CMenuWidget &parentallockSettings,
+				  CMenuWidget &networkSettings,
+				  CMenuWidget &recordingSettings,
+				  CMenuWidget &colorSettings,
+				  CMenuWidget &lcdSettings,
+				  CMenuWidget &keySettings,
+				  CMenuWidget &videoSettings,
+				  CMenuWidget &languageSettings,
+				  CMenuWidget &miscSettings,
+				  CMenuWidget &driverSettings,
+				  CMenuWidget &service,
+				  CMenuWidget &audiopl_picSettings,
+				  CMenuWidget &streamingSettings,
+				  CMenuWidget &moviePlayer);
 
 		void SetupTiming();
 		void SetupFrameBuffer();
