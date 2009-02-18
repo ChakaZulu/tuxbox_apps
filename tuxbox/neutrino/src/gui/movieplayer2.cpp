@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.20 2009/02/18 17:55:26 seife Exp $
+  $Id: movieplayer2.cpp,v 1.21 2009/02/18 17:57:31 seife Exp $
 
   License: GPL
 
@@ -1760,7 +1760,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				{
 					if (!found_aid[id] && !resync) //only if we are in sync...
 					{
-						if (g_numpida < MAX_APIDS);
+						if (g_numpida < MAX_APIDS)
 							g_apids[g_numpida++] = id;
 						INFO("found aid: %02x\n", id);
 						found_aid[id] = 1;
@@ -3037,7 +3037,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.20 $");
+	return imageinfo.getModulVersion("","$Revision: 1.21 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()

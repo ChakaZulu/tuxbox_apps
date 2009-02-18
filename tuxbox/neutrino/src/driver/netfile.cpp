@@ -524,7 +524,7 @@ int request_file(URL *url)
 
 void readln(int fd, char *buf)
 {
-	for(recv(fd, buf, 1, 0); (buf && isalnum(*buf)); recv(fd, ++buf, 1, 0));
+	for(recv(fd, buf, 1, 0); (buf && isalnum(*buf)); recv(fd, ++buf, 1, 0)){};
 	if(buf)
 		*buf = 0;
 }
@@ -663,7 +663,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 		if(ptr)
 		{
 			ptr = strchr(ptr, ':') + 1;
-			for(; ((*ptr == '-') || (*ptr == ' ')); ptr++);
+			for(; ((*ptr == '-') || (*ptr == ' ')); ptr++){};
 			strcpy(station, ptr);
 			*strchr(station, '\n') = 0;
 
@@ -671,7 +671,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 			if(ptr)
 			{
 				*ptr = 0;
-				for(ptr++; ((*ptr == '-') || (*ptr == ' ')); ptr++);
+				for(ptr++; ((*ptr == '-') || (*ptr == ' ')); ptr++){};
 				strcpy(desc, ptr);
 			}
 
@@ -690,7 +690,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 		if(ptr)
 		{
 			ptr = strchr(ptr, ':') + 1;
-			for(; ((*ptr == '-') || (*ptr == ' ')); ptr++);
+			for(; ((*ptr == '-') || (*ptr == ' ')); ptr++){};
 			strcpy(str, ptr);
 			*strchr(str, '\n') = 0;
 
@@ -757,7 +757,7 @@ FILE *f_open(const char *filename, const char *acctype)
 	strcpy(url.url, filename);
 
 	/* remove leading spaces */
-	for (ptr = url.url; (ptr != NULL) && ((*ptr == ' ') || (*ptr == '	')); ptr++);
+	for (ptr = url.url; (ptr != NULL) && ((*ptr == ' ') || (*ptr == '	')); ptr++){} ;
 
 	if(ptr != url.url)
 		strcpy(url.url, ptr);
@@ -856,7 +856,7 @@ FILE *f_open(const char *filename, const char *acctype)
 						if(!compatibility_mode)
 						{
 							/* look for a free cache slot */
-							for(i=0; ((i<CACHEENTMAX) && (cache[i].cache != NULL)); i++);
+							for(i=0; ((i<CACHEENTMAX) && (cache[i].cache != NULL)); i++){};
 
 							/* no free cache slot ? return an error */
 							if(i == CACHEENTMAX)
@@ -1100,7 +1100,7 @@ int f_close(FILE *stream)
 	int i, rval;
 
 	/* at first, lookup the stream in the stream type table and remove it */
-	for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != stream); i++);
+	for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != stream); i++){};
 
 	if(i < CACHEENTMAX)
 		stream_type[i].stream = NULL;
@@ -1243,14 +1243,14 @@ char *f_type(FILE *stream, char *type)
 	int i;
 
 	/* lookup the stream in the stream type table */
-	for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != stream); i++);
+	for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != stream); i++){};
 
 	/* if the stream could not be found, look for a free slot ... */
 	if(i == CACHEENTMAX)
 	{
 	dprintf(stderr, "stream %x not in type table, ", stream);
 
-	for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != NULL); i++);
+	for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != NULL); i++){};
 
 	/* ... and copy the supplied type into the table */
 	if(i < CACHEENTMAX)
@@ -1317,7 +1317,7 @@ int getCacheSlot(FILE *fd)
 
 	for(i=0; (
 		(i<CACHEENTMAX) && ((cache[i].fd != fd) || (!cache[i].cache))
-		); i++);
+		); i++){};
 
 	return (i == CACHEENTMAX) ? -1 : i;
 }
