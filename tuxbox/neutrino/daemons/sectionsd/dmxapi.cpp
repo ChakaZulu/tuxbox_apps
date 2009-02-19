@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.cpp,v 1.5 2005/01/13 10:48:02 diemade Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.cpp,v 1.6 2009/02/19 12:59:45 seife Exp $
  *
  * DMX low level functions (sectionsd) - d-box2 linux project
  *
@@ -116,6 +116,7 @@ bool getUTC(UTC_t * const UTC, const bool TDT)
 	{
 		printf("[sectionsd] getUTC: invalid %s section received: %02x %02x %02x %02x %02x\n", 
 			TDT ? "TDT" : "TOT", cUTC[0], cUTC[1], cUTC[2], cUTC[3], cUTC[4]);
+		::close(fd);
 		return false;
 	}
 
