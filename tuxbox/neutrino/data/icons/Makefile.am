@@ -17,5 +17,6 @@ install_DATA = \
 	up.raw right.raw down.raw left.raw fta.raw ca.raw \
 	pause.raw play.raw protecting.raw epginfo.raw\
 	conflict.raw record.raw record_conflict.raw zapto.raw zapto_conflict.raw \
-	ok_small.raw up_small.raw down_small.raw plus.raw minus.raw
+	ok_small.raw up_small.raw down_small.raw plus.raw minus.raw \
+	subt.raw subt_gray.raw
 

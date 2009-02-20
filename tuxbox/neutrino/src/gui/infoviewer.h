@@ -107,6 +107,7 @@ class CInfoViewer
 	void showIcon_CA_Status() const;
 #endif
 	void showIcon_VTXT()      const;
+	void showIcon_SubT()      const;
 	void showRecordIcon(const bool show);
 
 	void showFailure();

@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.246 2009/02/18 17:59:43 seife Exp $
+	$Id: infoviewer.cpp,v 1.247 2009/02/20 15:56:28 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -537,6 +537,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 #endif
 		showIcon_16_9();
 		showIcon_VTXT();
+		showIcon_SubT();
 	}
 
 	info_CurrentNext = getEPG(channel_id);
@@ -968,6 +969,21 @@ void CInfoViewer::showIcon_VTXT() const
 #endif
 }
 
+void CInfoViewer::showIcon_SubT() const
+{
+	int subpid = 0;
+
+	for (unsigned i = 0 ;
+		i < g_RemoteControl->current_PIDs.SubPIDs.size() ; i++) {
+		if (g_RemoteControl->current_PIDs.SubPIDs[i].pid !=
+			g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
+			subpid = g_RemoteControl->current_PIDs.SubPIDs[i].pid;
+		}
+	}
+
+	frameBuffer->paintIcon((subpid != 0) ? "subt.raw" : "subt_gray.raw", BoxEndX - (ICON_SMALL_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6), BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+}
+
 void CInfoViewer::showFailure()
 {
 	ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_INFOVIEWER_NOTAVAILABLE), 430); // UTF-8
@@ -1043,8 +1059,10 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		if ((*(t_channel_id *)data) == channel_id)
 		{
-			if ( is_visible && showButtonBar )
+			if ( is_visible && showButtonBar ) {
 				showIcon_VTXT();
+				showIcon_SubT();
+			}
 		}
 	    return messages_return::handled;
 	}
