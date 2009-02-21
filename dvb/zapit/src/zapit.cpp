@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.418 2009/02/18 17:51:54 seife Exp $
+ * $Id: zapit.cpp,v 1.419 2009/02/21 17:59:09 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -812,6 +812,12 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	tallchans_iterator cit;
 	transponder_id_t current_transponder_id;
 	remember_selected_audio();
+
+	if (pmt_update_fd >= 0)
+	{
+		pmt_stop_update_filter(&pmt_update_fd);
+		pmt_update_fd = -1;
+	}
 
 #ifndef SKIP_CA_STATUS
 	eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_CLEAR, CEventServer::INITID_ZAPIT);
@@ -2664,7 +2670,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.418 2009/02/18 17:51:54 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.419 2009/02/21 17:59:09 seife Exp $\n");
 
 	bool check_lock = true;
 
