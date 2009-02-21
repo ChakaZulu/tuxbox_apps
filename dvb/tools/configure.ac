@@ -3,6 +3,7 @@ AM_INIT_AUTOMAKE(dvb-zapit,0.0.1)
 
 TUXBOX_APPS
 TUXBOX_APPS_DIRECTORY
+TUXBOX_BOXTYPE
 
 AC_PROG_CC
 
@@ -10,14 +11,6 @@ AC_PROG_CXX
 
 TUXBOX_APPS_DVB
 
-AC_ARG_WITH(boxtype,
-	[  --with-boxtype=NAME dreambox/dbox2/tripledragon [[dbox2,dreambox,tripledragon]]],
-	[BOXTYPE="$withval"],[BOXTYPE="dbox2"])
-AC_SUBST(BOXTYPE)
-AM_CONDITIONAL(BOXTYPE_DBOX2, test "$BOXTYPE" = "dbox2")
-AM_CONDITIONAL(BOXTYPE_TRIPLE, test "$BOXTYPE" = "tripledragon")
-AM_CONDITIONAL(BOXTYPE_DREAMBOX, test "$BOXTYPE" != "dbox2" -a "$BOXTYPE" != "tripledragon")
- 
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 
 AC_OUTPUT([

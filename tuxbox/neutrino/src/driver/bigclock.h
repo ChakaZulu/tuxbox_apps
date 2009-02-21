@@ -26,6 +26,7 @@
 #ifndef __bigclock__
 #define __bigclock__
 
+#include <config.h>
 #include <lcddisplay/lcddisplay.h>
 
 
