@@ -86,7 +86,11 @@ void eHTTPConnection::destruct()
 
 eHTTPConnection::eHTTPConnection(eMainloop *ml): eSocket(ml), parent(0), persistent(0)
 {
-	init_eHTTPConnection();
+	CONNECT(this->readyRead_ , eHTTPConnection::readData);
+	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
+	CONNECT(this->error_ , eHTTPConnection::gotError);
+	CONNECT(this->connected_ , eHTTPConnection::hostConnected);
+	CONNECT(this->connectionClosed_ , eHTTPConnection::destruct);
 
 	localstate=stateWait;
 	remotestate=stateWait;
