@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.419 2009/02/21 17:59:09 seife Exp $
+ * $Id: zapit.cpp,v 1.420 2009/02/22 12:02:43 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2394,18 +2394,17 @@ int startPlayBack(CZapitChannel *thisChannel)
 		if (videoDemux->start() < 0)
 			return -1;
 	}
+#ifdef HAVE_DBOX_HARDWARE
+/* AFAIK only the dbox2 can reinsert telextext... */
 	if (have_teletext) {
-#ifdef HAVE_DREAMBOX_HARDWARE
-		printf("[zapit] no teletextDemux on dreambox \n");
-#else
 		if (!teletextDemux)
 			teletextDemux = new CDemux();
 		if (teletextDemux->pesFilter(thisChannel->getTeletextPid(), DMX_OUT_DECODER, DMX_PES_TELETEXT) < 0)
 			return -1;
 		if (teletextDemux->start() < 0)
 			return -1;
-#endif
 	}
+#endif
 
 	/* start video */
 	if (have_video) {
@@ -2670,7 +2669,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.419 2009/02/21 17:59:09 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.420 2009/02/22 12:02:43 seife Exp $\n");
 
 	bool check_lock = true;
 
