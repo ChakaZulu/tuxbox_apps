@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.42 2009/02/18 17:55:26 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.43 2009/02/22 18:45:42 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -671,7 +671,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	else if (g_settings.personalize_epgrestart == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_EPGRESTART, g_settings.personalize_pincode, true, true, NULL, this, "EPGrestart", CRCInput::convertDigitToKey(shortcut3++)));
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if (g_settings.personalize_ucodecheck == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3++)));
 	else if (g_settings.personalize_ucodecheck == 2)
@@ -1070,7 +1070,7 @@ typedef struct driver_setting_files_t
 const driver_setting_files_struct_t driver_setting_files[DRIVER_SETTING_FILES_COUNT] =
 {
 	{LOCALE_DRIVERSETTINGS_BOOTINFO      , "/var/etc/.boot_info"     , OPTIONS_OFF0_ON1_OPTIONS },
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 #if HAVE_DVB_API_VERSION == 1
 	{LOCALE_DRIVERSETTINGS_STARTBHDRIVER , "/var/etc/.bh"            , OPTIONS_OFF0_ON1_OPTIONS },
 #endif
@@ -1093,7 +1093,7 @@ void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
 	driverSettings.addItem(GenericMenuBack);
 	driverSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_DRIVERSETTINGS_DRIVER_BOOT));
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	CSPTSNotifier *sptsNotifier = new CSPTSNotifier;
 	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_SPTSMODE, &g_settings.misc_spts, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, sptsNotifier));
 #endif
@@ -1125,7 +1125,7 @@ void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
 		driverSettings.addItem(new CMenuOptionChooser(driver_setting_files[i].name, &(g_settings.misc_option[i]), driver_setting_files[i].options, 2, item_enabled[i], new CTouchFileNotifier(driver_setting_files[i].filename)));
 	}
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_FB_DESTINATION, &g_settings.uboot_console, DRIVERSETTINGS_FB_DESTINATION_OPTIONS, DRIVERSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
 	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_FDX_LOAD, &g_settings.uboot_dbox_duplex, DRIVERSETTINGS_FDX_OPTIONS, DRIVERSETTINGS_FDX_OPTION_COUNT, true, FdxSettingsChanger));
 #endif

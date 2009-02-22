@@ -534,7 +534,7 @@ int main ()
    CZapitClient zapit;
 
    int RetVal, i;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
    int avia_mode;
 #endif
    unsigned u, v;
@@ -591,7 +591,7 @@ int main ()
       exit(-1);
    }
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
    avia_mode = zapit.PlaybackState();
    if (avia_mode > -1 && avia_mode != TSMode) {
       TSMode = (avia_mode == 1 ? 1 : 0);

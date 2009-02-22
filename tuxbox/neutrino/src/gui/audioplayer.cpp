@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.59 2009/02/18 17:58:49 seife Exp $
+  $Id: audioplayer.cpp,v 1.60 2009/02/22 18:45:42 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -48,9 +48,6 @@
 #include <driver/rcinput.h>
 #include <driver/audioplay.h>
 #include <driver/audiometadata.h>
-#ifndef HAVE_DREAMBOX_HARDWARE
-#define DBOX 1
-#endif
 
 #include <daemonc/remotecontrol.h>
 
@@ -310,7 +307,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	if (system(AUDIOPLAYER_START_SCRIPT) != 0) 
 		perror("Datei " AUDIOPLAYER_START_SCRIPT " fehlt.Bitte erstellen, wenn gebraucht.\nFile " AUDIOPLAYER_START_SCRIPT " not found. Please create if needed.\n");
 
-#ifdef DBOX
+#ifdef HAVE_DBOX_HARDWARE
 	// disable iec aka digi out
 	g_Zapit->IecOff();
 #endif
@@ -346,7 +343,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
 
-#ifdef DBOX
+#ifdef HAVE_DBOX_HARDWARE
 	// enable iec aka digi out
 	g_Zapit->IecOn();
 #endif

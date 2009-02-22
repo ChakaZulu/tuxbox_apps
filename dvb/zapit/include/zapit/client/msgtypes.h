@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.34 2009/02/09 15:16:50 rhabarber1848 Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.35 2009/02/22 18:45:33 seife Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -126,7 +126,7 @@ class CZapitMessages
 			CMD_GET_FE_SIGNAL                  = 71,
 			CMD_SCANSTOP                       = 72,
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 			CMD_SET_AE_IEC_ON                  = 73,
 			CMD_SET_AE_IEC_OFF                 = 74,
 			CMD_GET_AE_IEC_STATE               = 75,

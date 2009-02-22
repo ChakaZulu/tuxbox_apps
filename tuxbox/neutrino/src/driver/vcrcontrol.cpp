@@ -632,7 +632,7 @@ bool CVCRControl::CFileDevice::Stop()
 
 	bool return_value = (::stop_recording() == STREAM2FILE_OK);
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
 	if ((actmode == 1) && (!g_settings.misc_spts)) // actual mode is SPTS and settings require PES
 		g_Zapit->PlaybackPES(); // restore PES mode
@@ -658,7 +658,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	CutBackNeutrino(channel_id, mode);
 
 	int repeatcount=0;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
 	bool sptsmode=g_settings.misc_spts;   // take default from settings
 
@@ -1005,7 +1005,7 @@ bool CVCRControl::CServerDevice::Stop()
 
 	bool return_value = sendCommand(CMD_VCR_STOP);
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
 	if ((actmode == 1) && (!g_settings.misc_spts)) // actual mode is SPTS and settings require PES
 	{
@@ -1038,7 +1038,7 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 	CutBackNeutrino(channel_id, mode);
 
 	int repeatcount=0;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	int actmode=g_Zapit->PlaybackState() ; // get actual decoder mode
 
 	// aviaEXT is loaded, actual mode is not SPTS and switchoption is set , only in tvmode

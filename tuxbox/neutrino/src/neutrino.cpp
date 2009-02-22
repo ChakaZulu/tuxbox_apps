@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.923 2009/02/22 18:03:22 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.924 2009/02/22 18:45:44 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1852,7 +1852,7 @@ void CNeutrinoApp::InitZapper()
 	}
 #endif
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	// set initial PES/SPTS mode
 	if (g_settings.misc_spts != g_Zapit->PlaybackState())
 	{
@@ -2012,7 +2012,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	colorSetupNotifier		= new CColorSetupNotifier;
 	audioSetupNotifier		= new CAudioSetupNotifier;
 	APIDChanger			= new CAPIDChangeExec;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	UCodeChecker			= new CUCodeCheckExec;
 #endif
 	DVBInfo				= new CDVBInfoExec;
@@ -3394,7 +3394,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_TV_MODE, false );
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		if(g_settings.misc_spts==1)
 			g_Zapit->PlaybackSPTS();
 #endif
@@ -3542,7 +3542,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		if(g_settings.misc_spts==1)
 			g_Zapit->PlaybackPES();
 #endif

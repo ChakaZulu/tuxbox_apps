@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.172 2008/12/06 16:43:31 seife Exp $
+	$Id: setting_helpers.cpp,v 1.173 2009/02/22 18:46:08 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -307,7 +307,7 @@ bool CPauseSectionsdNotifier::changeNotify(const neutrino_locale_t, void * Data)
 	return true;
 }
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 bool CSPTSNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	if (g_settings.misc_spts)
@@ -575,7 +575,7 @@ int CMoviePluginChangeExec::exec(CMenuTarget* parent, const std::string & action
 	return menu_return::RETURN_EXIT;
 }
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	std::stringstream text;

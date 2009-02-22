@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.37 2009/01/04 22:13:14 seife Exp $
+	$Id: streaminfo2.cpp,v 1.38 2009/02/22 18:45:42 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -102,7 +102,7 @@ CStreamInfo2::CStreamInfo2()
 	if (!g_Zapit->isRecordModeActive())
 		if (mode == 1) { 
 			current_apid = -1;		
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 			actmode = g_Zapit->PlaybackState();
 			if (actmode == 0) { //PES Mode aktiv
 				CZapitClient::responseGetPIDs allpids;
@@ -134,7 +134,7 @@ CStreamInfo2::CStreamInfo2()
 
 CStreamInfo2::~CStreamInfo2()
 {
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if (!g_Zapit->isRecordModeActive()) {
 		if (actmode == 0) {
 			g_Zapit->PlaybackPES();
@@ -778,7 +778,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.37 $");
+	return imageinfo.getModulVersion("","$Revision: 1.38 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
