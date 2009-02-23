@@ -70,6 +70,7 @@ tuxtxt/font/Makefile
 tuxcom/Makefile
 vncviewer/Makefile
 vncviewer/rfb/Makefile
+dvbsub/Makefile
 pip/Makefile
 mosaic/Makefile
 enigma/Makefile

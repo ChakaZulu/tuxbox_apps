@@ -33,6 +33,7 @@ typedef int	(*PluginExec)( PluginParam *par );
 #define P_ID_END_Y		"end_y"			// screen-end-offset y
 #define	P_ID_RCBLK_ANF	"rcblk_anf"		// Key-Repeatblocker Anfang
 #define	P_ID_RCBLK_REP	"rcblk_rep"     // Key-Repeatblocker Wiederholung
+#define P_ID_SUBPID	"pid_sub"
 
 typedef enum plugin_type
 {

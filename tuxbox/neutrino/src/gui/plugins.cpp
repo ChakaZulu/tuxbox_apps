@@ -230,6 +230,10 @@ bool CPlugins::parseCfg(plugin *plugin_data)
 		{
 			plugin_data->vtxtpid = ((parm == "1")?true:false);
 		}
+		else if (cmd == "needsubpid")
+		{
+			plugin_data->subpid = ((parm == "1")?true:false);
+		}
 		else if (cmd == "pigon")
 		{
 			plugin_data->showpig = ((parm == "1")?true:false);
@@ -349,6 +353,7 @@ void CPlugins::startPlugin(int number,int param)
 	void			*handle;
 	char *        error;
 	int           vtpid      =  0;
+	int           subpid     =  0;
 	PluginParam * startparam =  0;
 #ifdef HAVE_DREAMBOX_HARDWARE
 	int rcfd = -1;
@@ -400,6 +405,17 @@ void CPlugins::startPlugin(int number,int param)
 		if(param>0)
 			vtpid=param;
 		startparam = makeParam(P_ID_VTXTPID, vtpid, startparam);
+	}
+	if (plugin_list[number].subpid)
+	{
+		for (unsigned i = 0 ;
+			i < g_RemoteControl->current_PIDs.SubPIDs.size() ; i++) {
+			if (g_RemoteControl->current_PIDs.SubPIDs[i].pid !=
+				g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
+				subpid = g_RemoteControl->current_PIDs.SubPIDs[i].pid;
+			}
+		}
+		startparam = makeParam(P_ID_SUBPID, subpid , startparam);
 	}
 	if (plugin_list[number].needoffset)
 	{

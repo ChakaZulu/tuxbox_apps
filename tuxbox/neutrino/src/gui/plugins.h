@@ -75,6 +75,7 @@ class CPlugins
 			bool rc;
 			bool lcd;
 			bool vtxtpid;
+			bool subpid;
 			int posx, posy, sizex, sizey;
 			bool showpig;
 			bool needoffset;
