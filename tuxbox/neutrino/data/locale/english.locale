@@ -26,6 +26,7 @@ EPGPlus.footer_fonteventdescription Title 1 selected Prog.
 EPGPlus.footer_fonteventshortdescription Title 2 selected Prog.
 EPGPlus.head Eventlist Overview (EPG Plus)
 EPGPlus.header_font Header
+EPGPlus.hide TV
 EPGPlus.horgap1_height height hor. gap 1
 EPGPlus.horgap2_height height hor. gap 2
 EPGPlus.next_bouquet Next bouquet
@@ -41,6 +42,7 @@ EPGPlus.save_settings Save settings
 EPGPlus.scroll_mode Scroll mode
 EPGPlus.select_font_name Font selection
 EPGPlus.settings Settings
+EPGPlus.show EPG Plus
 EPGPlus.slider_width slider width
 EPGPlus.stretch_mode Stretch mode
 EPGPlus.swap_mode skip mode

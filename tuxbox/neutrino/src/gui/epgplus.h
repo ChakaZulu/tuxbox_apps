@@ -936,7 +936,7 @@ private:
 
   bool            refreshAll;
   bool            refreshFooterButtons;
-
+  bool            is_visible;
 
   static Settings settings;
   static Fonts    fonts;

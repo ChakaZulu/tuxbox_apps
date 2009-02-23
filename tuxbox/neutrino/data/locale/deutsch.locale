@@ -26,6 +26,7 @@ EPGPlus.footer_fonteventdescription Titel 1 selekt. Sendung
 EPGPlus.footer_fonteventshortdescription Titel 2 selekt. Sendung
 EPGPlus.head EPG Plus Komplettvorschau
 EPGPlus.header_font Menütitel
+EPGPlus.hide TV
 EPGPlus.horgap1_height Höhe hor. Lücke 1
 EPGPlus.horgap2_height Höhe hor. Lücke 2
 EPGPlus.next_bouquet Bouquet vor
@@ -41,6 +42,7 @@ EPGPlus.save_settings Einstellungen speichern
 EPGPlus.scroll_mode Scroll Mode
 EPGPlus.select_font_name Schrift wählen
 EPGPlus.settings Einstellungen
+EPGPlus.show EPG Plus
 EPGPlus.slider_width Breite des Sliders
 EPGPlus.stretch_mode Stretch Mode
 EPGPlus.swap_mode Blättern

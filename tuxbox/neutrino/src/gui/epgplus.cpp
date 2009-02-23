@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.44 2008/12/05 22:06:19 seife Exp $
+	$Id: epgplus.cpp,v 1.45 2009/02/23 20:06:41 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -905,7 +905,8 @@ struct button_label buttonLabels[] =
 	{ NEUTRINO_ICON_BUTTON_GREEN  , LOCALE_EPGPLUS_PAGE_DOWN},
 	{ NEUTRINO_ICON_BUTTON_YELLOW , LOCALE_EPGPLUS_PAGE_UP},
 	{ NEUTRINO_ICON_BUTTON_BLUE   , LOCALE_EPGPLUS_OPTIONS},
-	{ NEUTRINO_ICON_BUTTON_HELP_SMALL   , LOCALE_EPGPLUS_EVENT_INFO}
+	{ NEUTRINO_ICON_BUTTON_HELP_SMALL   , LOCALE_EPGPLUS_EVENT_INFO},
+	{ NEUTRINO_ICON_BUTTON_DBOX	  , LOCALE_EPGPLUS_HIDE}
 };
 
 void EpgPlus::Footer::paintButtons
@@ -1354,6 +1355,8 @@ int EpgPlus::exec
 	{
     this->refreshAll = false;
     this->refreshFooterButtons = false;
+    this->is_visible = true;
+	
     time_t currentTime = time(NULL);
 		tm tmStartTime = *localtime(&currentTime);
 
@@ -1853,6 +1856,48 @@ int EpgPlus::exec
 							this->paint();
 						}
 					}
+				}
+			}
+			else if (msg==CRCInput::RC_setup)
+			{
+				while(loop)
+				{
+					if(msg == CRCInput::RC_setup)
+					{
+						if(is_visible)
+						{
+							std::string EPG_Plus;
+							
+							EPG_Plus = g_Locale->getText(LOCALE_EPGPLUS_SHOW);
+							EPG_Plus.insert(0, " ");  
+							
+							int epgplus_len = this->header->font->getRenderWidth(EPG_Plus, true); // UTF-8
+							int theight     = this->header->font->getHeight();
+							int dbox_icon_width = frameBuffer->getIconWidth(NEUTRINO_ICON_BUTTON_DBOX);
+							
+							is_visible = false;
+							this->hide();
+							
+							frameBuffer->paintBoxRel(this->usableScreenX+ this->usableScreenWidth- epgplus_len- dbox_icon_width- 2- 2, this->usableScreenY, epgplus_len+ dbox_icon_width+ 2+ 2, theight+0, COL_MENUHEAD_PLUS_0, RADIUS_MID);
+							frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, this->usableScreenX+ this->usableScreenWidth- epgplus_len- dbox_icon_width- 2, this->usableScreenY);
+							this->header->font->RenderString(this->usableScreenX+ this->usableScreenWidth- epgplus_len, this->usableScreenY+ theight+0, epgplus_len, EPG_Plus, this->header->color, 0, true); // UTF-8							
+						}
+						else
+						{
+							is_visible = true;
+							this->header->paint();
+							this->footer->paintButtons(buttonLabels, sizeof(buttonLabels)/sizeof(button_label));
+							this->paint();
+							
+							break;
+						}
+					}
+					else if (msg == g_settings.key_channelList_cancel)
+					{
+						loop = false;
+					}
+
+					g_RCInput->getMsg(&msg, &data, 100);
 				}
 			}
 			else

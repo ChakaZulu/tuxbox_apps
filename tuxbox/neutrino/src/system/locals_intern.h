@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.129 2009/02/15 18:59:53 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.130 2009/02/23 20:06:41 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -53,6 +53,7 @@ const char * locale_real_names[] =
 	"EPGPlus.footer_fonteventshortdescription",
 	"EPGPlus.head",
 	"EPGPlus.header_font",
+	"EPGPlus.hide",
 	"EPGPlus.horgap1_height",
 	"EPGPlus.horgap2_height",
 	"EPGPlus.next_bouquet",
@@ -68,6 +69,7 @@ const char * locale_real_names[] =
 	"EPGPlus.scroll_mode",
 	"EPGPlus.select_font_name",
 	"EPGPlus.settings",
+	"EPGPlus.show",
 	"EPGPlus.slider_width",
 	"EPGPlus.stretch_mode",
 	"EPGPlus.swap_mode",
