@@ -1,3 +1,80 @@
+2009-02-23  Andreas Oberritter <obi@saftware.de>
+
+	* Makefile.am (1.9):
+
+	changelog: ignore tags and branch names
+
+2009-02-23  Andreas Oberritter <obi@saftware.de>
+
+	* include/dvbsi++/compat.h (1.5):
+
+	fix compilation with g++ 4.3
+
+2008-11-17  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/registration_descriptor.h (1.2),
+	include/dvbsi++/service_availability_descriptor.h (1.2):
+
+	remove unused destructors
+
+2008-11-17  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* src/satellite_delivery_system_descriptor.cpp (1.7):
+
+	fix rolloff
+
+2008-06-03  Andreas Oberritter <obi@saftware.de>
+
+	* include/dvbsi++/Makefile.am (1.7),
+	include/dvbsi++/registration_descriptor.h (1.1), src/Makefile.am
+	(1.15), src/descriptor_container.cpp (1.12),
+	src/registration_descriptor.cpp (1.1):
+
+	added registration descriptor
+
+2008-06-03  Andreas Oberritter <obi@saftware.de>
+
+	* genmakefileam (1.3):
+
+	also generate src/Makefile.am automatically
+
+2008-03-31  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/short_smoothing_buffer_descriptor.h (1.1),
+	src/Makefile.am (1.14), src/descriptor_container.cpp (1.11),
+	src/short_smoothing_buffer_descriptor.cpp (1.1):
+
+	added short smoothing buffer descriptor; adjusted Makefile.am
+	activated new descriptors
+
+2008-03-31  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/service_availability_descriptor.h (1.1),
+	src/Makefile.am (1.13), src/service_availability_descriptor.cpp
+	(1.1):
+
+	added the service availability descriptor - it may be used in dvb-t
+	SDTs adjusted Makefile.am accordingly
+
+2008-03-31  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/terrestrial_delivery_system_descriptor.h (1.3),
+	src/terrestrial_delivery_system_descriptor.cpp (1.5):
+
+	fix/extend descriptor as 300468 v1.8.1 has extensions
+
+2008-03-25  Andreas Oberritter <obi@saftware.de>
+
+	* configure.ac (1.11), debian/changelog (1.2):
+
+	Increased version number after release of 0.3.3
+
+2008-03-25  Andreas Oberritter <obi@saftware.de>
+
+	* ChangeLog (1.4):
+
+	updated changelog
+
 2008-03-25  Andreas Oberritter <obi@saftware.de>
 
 	* debian/.cvsignore (1.1):
