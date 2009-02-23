@@ -23,6 +23,6 @@ endif
 
 if HAVE_CVS2CL
 changelog:
-	@cvs2cl -rbt --FSF --usermap AUTHORS -S --utc
+	@cvs2cl -r --FSF --usermap AUTHORS -S --utc
 endif
 
