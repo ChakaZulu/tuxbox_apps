@@ -93,7 +93,7 @@ std::string string_printf(const char *fmt, ...)
 //-------------------------------------------------------------------------
 bool ySplitString(std::string str, std::string delimiter, std::string& left, std::string& right)
 {
-	unsigned int pos;
+	std::string::size_type pos;
 	if ((pos = str.find_first_of(delimiter)) != std::string::npos)
 	{
 		left = str.substr(0, pos);
@@ -112,7 +112,7 @@ bool ySplitString(std::string str, std::string delimiter, std::string& left, std
 //-------------------------------------------------------------------------
 bool ySplitStringExact(std::string str, std::string delimiter, std::string& left, std::string& right)
 {
-	unsigned int pos;
+	std::string::size_type pos;
 	if ((pos = str.find(delimiter)) != std::string::npos)
 	{
 		left = str.substr(0, pos);
@@ -131,7 +131,7 @@ bool ySplitStringExact(std::string str, std::string delimiter, std::string& left
 //-------------------------------------------------------------------------
 bool ySplitStringLast(std::string str, std::string delimiter, std::string& left, std::string& right)
 {
-	unsigned int pos;
+	std::string::size_type pos;
 	if ((pos = str.find_last_of(delimiter)) != std::string::npos)
 	{
 		left = str.substr(0, pos);

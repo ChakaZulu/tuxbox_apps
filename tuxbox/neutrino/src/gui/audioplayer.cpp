@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.60 2009/02/22 18:45:42 seife Exp $
+  $Id: audioplayer.cpp,v 1.61 2009/02/24 19:27:59 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -1267,7 +1267,7 @@ bool CAudioPlayerGui::openFilebrowser(void)
 						{
 							std::string filename = sPath + '/' + cLine;
 
-							unsigned int pos;
+							std::string::size_type pos;
 							while((pos=filename.find('\\'))!=std::string::npos)
 								filename[pos]='/';
 
@@ -2255,7 +2255,7 @@ void CAudioPlayerGui::GetMetaData(CAudiofileExt &File)
 		//Set from Filename
 		std::string tmp = File.Filename.substr(File.Filename.rfind('/') + 1);
 		tmp = tmp.substr(0,tmp.length()-4);	//remove extension (.mp3)
-		unsigned int i = tmp.rfind(" - ");
+		std::string::size_type i = tmp.rfind(" - ");
 		if(i != std::string::npos)
 		{ // Trennzeichen " - " gefunden
 			File.MetaData.artist = tmp.substr(0, i);

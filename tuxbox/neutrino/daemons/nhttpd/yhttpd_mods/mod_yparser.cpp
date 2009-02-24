@@ -314,7 +314,8 @@ std::string CyParser::cgi_file_parsing(CyhookHandler *hh, std::string htmlfilena
 //-----------------------------------------------------------------------------
 std::string  CyParser::cgi_cmd_parsing(CyhookHandler *hh, std::string html_template, bool ydebug)
 {
-	unsigned int start, end, esc_len = strlen(YPARSER_ESCAPE_START);
+	std::string::size_type start, end;
+	unsigned int esc_len = strlen(YPARSER_ESCAPE_START);
 	bool is_cmd;
 	std::string ycmd,yresult;
 
@@ -614,7 +615,7 @@ std::string  CyParser::YWeb_cgi_include_block(std::string filename, std::string 
 	if(yfile.length() != 0)
 	{
 		std::string t = "start-block~"+blockname;
-		unsigned int start, end;
+		std::string::size_type start, end;
 		if((start = yfile.find(t)) != std::string::npos)
 		{
 			if((end = yfile.find("end-block~"+blockname, start+t.length())) != std::string::npos)

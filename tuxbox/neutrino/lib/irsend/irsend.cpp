@@ -5,6 +5,11 @@
 	License: GPL
 
 	Aenderungen: $Log: irsend.cpp,v $
+	Aenderungen: Revision 1.5  2009/02/24 19:27:58  seife
+	Aenderungen: fix compiler warnings (hint: std::string::npos is a negative number ;)
+	Aenderungen:
+	Aenderungen: mod_yparser.cpp:324: warning: comparison is always true due to limited range of data type
+	Aenderungen:
 	Aenderungen: Revision 1.4  2006/09/13 19:30:16  houdini
 	Aenderungen: fixed SEND_ONCE in lirc
 	Aenderungen: see http://forum.tuxbox.org/forum/viewtopic.php?p=312244#312244
@@ -85,7 +90,7 @@ bool CIRSend::Send()
 					else
 					{
 						int duration=0;
-						unsigned int space_pos1=line.find(' ');
+						std::string::size_type space_pos1=line.find(' ');
 						if(space_pos1==std::string::npos)
 						{
 							printf("[neutrino] IRSend syntax error in file %s line %d\n",m_configFile.c_str(),linenr);
@@ -94,7 +99,7 @@ bool CIRSend::Send()
 						else
 						{
 							std::string deviceName=line.substr(0,space_pos1);
-							unsigned int space_pos2=line.find(' ',space_pos1+1);
+							std::string::size_type space_pos2=line.find(' ',space_pos1+1);
 							if(space_pos2!=std::string::npos)
 							{
 								sscanf(line.substr(space_pos2+1).c_str(),"%d",&duration);

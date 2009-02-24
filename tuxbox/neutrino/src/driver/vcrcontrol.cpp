@@ -773,9 +773,9 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	{
 		expandedTemplate = std::string(basename(FilenameTemplate.c_str()));
 	}
-	unsigned int searchPos = std::string::npos;
-	unsigned int startAt = 0;
-	unsigned int dataLength = 0;
+	std::string::size_type searchPos = std::string::npos;
+	std::string::size_type startAt = 0;
+	size_t dataLength = 0;
 	char buf[256];
 	buf[255] = '\0';
 	

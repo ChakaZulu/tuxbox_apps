@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: helper.cpp,v 1.3 2005/05/18 20:56:19 mws Exp $
+	$Id: helper.cpp,v 1.4 2009/02/24 19:27:59 seife Exp $
 	
 	License: GPL
 
@@ -28,7 +28,7 @@
 
 void StrSearchReplace( std::string &s, const std::string &to_find, const std::string& repl_with )
 {
-	unsigned int location = s.find(to_find);
+	std::string::size_type location = s.find(to_find);
 	if ( location == std::string::npos )
 	{
 		return;
