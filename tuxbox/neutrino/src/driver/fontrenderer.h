@@ -108,7 +108,7 @@ class FBFontRenderClass
 
     std::string getFamily(const char * const filename) const;
 
-		const char * const AddFont(const char * const filename, const bool make_italics = false);
+		const char * AddFont(const char * const filename, const bool make_italics = false);
 
 		FBFontRenderClass();
 		~FBFontRenderClass();

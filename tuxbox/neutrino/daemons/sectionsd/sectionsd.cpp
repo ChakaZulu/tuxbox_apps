@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.286 2009/01/24 17:34:45 seife Exp $
+//  $Id: sectionsd.cpp,v 1.287 2009/02/24 19:09:10 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -1742,7 +1742,7 @@ static const SIevent& findNextSIeventForServiceUniqueKey(const t_channel_id serv
 	return nullEvt;
 }
 
-static const bool ServiceUniqueKeyHasCurrentNext(const t_channel_id serviceUniqueKey)
+static bool ServiceUniqueKeyHasCurrentNext(const t_channel_id serviceUniqueKey)
 {
 	time_t azeit = time(NULL);
 	time_t nextstart = time(NULL);
@@ -2462,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.286 2009/01/24 17:34:45 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.287 2009/02/24 19:09:10 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -8080,7 +8080,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.286 2009/01/24 17:34:45 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.287 2009/02/24 19:09:10 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 

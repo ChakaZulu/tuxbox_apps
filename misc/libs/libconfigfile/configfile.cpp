@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.20 2009/02/18 17:47:20 seife Exp $
+ * $Id: configfile.cpp,v 1.21 2009/02/24 19:09:05 seife Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -48,7 +48,7 @@ void CConfigFile::clear()
 //
 // public file operation methods
 //
-const bool CConfigFile::loadConfig(const char * const filename)
+bool CConfigFile::loadConfig(const char * const filename)
 {
 	std::ifstream configFile(filename);
 
@@ -83,12 +83,12 @@ const bool CConfigFile::loadConfig(const char * const filename)
 	}
 }
 
-const bool CConfigFile::loadConfig(const std::string & filename)
+bool CConfigFile::loadConfig(const std::string & filename)
 {
 	return loadConfig(filename.c_str());
 }
 
-const bool CConfigFile::saveConfig(const char * const filename)
+bool CConfigFile::saveConfig(const char * const filename)
 {
 	std::ofstream configFile(filename);
 
@@ -112,7 +112,7 @@ const bool CConfigFile::saveConfig(const char * const filename)
 	}
 }
 
-const bool CConfigFile::saveConfig(const std::string & filename)
+bool CConfigFile::saveConfig(const std::string & filename)
 {
 	return saveConfig(filename.c_str());
 }

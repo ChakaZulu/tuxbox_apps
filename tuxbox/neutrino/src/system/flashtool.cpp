@@ -477,22 +477,22 @@ bool CFlashVersionInfo::load(const std::string & versionString)
 	return true;
 }
 
-const char * const CFlashVersionInfo::getDate(void) const
+const char *CFlashVersionInfo::getDate(void) const
 {
 	return date;
 }
 
-const char * const CFlashVersionInfo::getTime(void) const
+const char *CFlashVersionInfo::getTime(void) const
 {
 	return time;
 }
 
-const char * const CFlashVersionInfo::getReleaseCycle(void) const
+const char *CFlashVersionInfo::getReleaseCycle(void) const
 {
 	return releaseCycle;
 }
 
-const char * const CFlashVersionInfo::getType(void) const
+const char *CFlashVersionInfo::getType(void) const
 {
 	switch (snapshot)
 	{

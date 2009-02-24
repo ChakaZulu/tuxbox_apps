@@ -1,7 +1,7 @@
 /*
   Client-Interface fuer sectionsd  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.62 2009/01/15 09:31:45 seife Exp $
+  $Id: sectionsdclient.cpp,v 1.63 2009/02/24 19:09:12 seife Exp $
 
   License: GPL
 
@@ -30,12 +30,12 @@
 #include <sectionsdclient/sectionsdMsg.h>
 
 
-const unsigned char   CSectionsdClient::getVersion   () const
+unsigned char CSectionsdClient::getVersion() const
 {
 	return sectionsd::ACTVERSION;
 }
 
-const          char * CSectionsdClient::getSocketName() const
+const char * CSectionsdClient::getSocketName() const
 {
 	return SECTIONSD_UDS_NAME;
 }

@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.48 2008/10/11 21:39:21 seife Exp $
+  $Id: sectionsdclient.h,v 1.49 2009/02/24 19:09:12 seife Exp $
 
   License: GPL
 
@@ -63,8 +63,8 @@ typedef std::vector<CChannelEvent> CChannelEventList;
 class CSectionsdClient : private CBasicClient
 {
  private:
-	virtual const unsigned char   getVersion   () const;
-	virtual const          char * getSocketName() const;
+	virtual unsigned char   getVersion   () const;
+	virtual const    char * getSocketName() const;
 
 	int readResponse(char* data = NULL, unsigned int size = 0);
 	bool send(const unsigned char command, const char* data = NULL, const unsigned int size = 0);

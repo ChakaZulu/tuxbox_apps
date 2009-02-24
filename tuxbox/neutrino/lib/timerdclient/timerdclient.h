@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.48 2009/02/18 17:48:01 seife Exp $
+	$Id: timerdclient.h,v 1.49 2009/02/24 19:09:13 seife Exp $
 
 	License: GPL
 
@@ -37,8 +37,8 @@
 class CTimerdClient:private CBasicClient
 {
  private:
-	virtual const unsigned char   getVersion   () const;
-	virtual const          char * getSocketName() const;
+	virtual unsigned char   getVersion   () const;
+	virtual const    char * getSocketName() const;
 
  public:
 		enum events

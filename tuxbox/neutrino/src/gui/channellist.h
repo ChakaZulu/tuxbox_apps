@@ -2,7 +2,7 @@
 #define __channellist__
 
 /*
-	$Id: channellist.h,v 1.76 2008/11/16 00:52:26 seife Exp $
+	$Id: channellist.h,v 1.77 2009/02/24 19:09:15 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -112,7 +112,7 @@ class CChannelList
  		CChannel* operator[]( uint index) { if (chanlist.size() > index) return chanlist[index]; else return NULL;};
 		int getKey(int);
 
-		const char * const   getName                   (void) const { return name.c_str(); };
+		const char         * getName                   (void) const { return name.c_str(); };
 		const std::string &  getActiveChannelName      (void) const; // UTF-8
 		t_satellite_position getActiveSatellitePosition(void) const;
 		int                  getActiveChannelNumber    (void) const;

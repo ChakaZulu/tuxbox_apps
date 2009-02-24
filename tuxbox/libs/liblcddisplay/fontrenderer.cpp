@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.10 2004/04/12 00:28:04 zwen Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.11 2009/02/24 19:09:06 seife Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -122,7 +122,7 @@ FT_Error LcdFontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph
 	return FTC_SBit_Cache_Lookup(sbitsCache, font, glyph_index, sbit);
 }
 
-const char * const LcdFontRenderClass::AddFont(const char * const filename)
+const char * LcdFontRenderClass::AddFont(const char * const filename)
 {
 	printf("[LCDFONT] adding font %s...", filename);
 	fflush(stdout);

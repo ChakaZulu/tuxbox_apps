@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.24 2009/02/08 15:07:05 houdini Exp $
+//    $Id: SIsections.hpp,v 1.25 2009/02/24 19:09:09 seife Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -522,7 +522,7 @@ public:
 		return evts;
 	}
 
-	const int is_parsed(void) const {
+	int is_parsed(void) const {
 		return parsed;
 	}
 
@@ -616,7 +616,7 @@ public:
 		return evts;
 	}
 
-	const int is_parsed(void) const {
+	int is_parsed(void) const {
 		return parsed;
 	}
 

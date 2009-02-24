@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.14 2009/01/15 09:31:38 seife Exp $
+// $Id: SIservices.hpp,v 1.15 2009/02/24 19:09:10 seife Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -100,7 +100,7 @@ public:
 			*(t_transport_stream_id *)p = transport_stream_id;		p += sizeof(t_transport_stream_id);
 		}
 
-	const t_service_id getServiceID() const
+	t_service_id getServiceID() const
 		{
 			return service_id;
 		}

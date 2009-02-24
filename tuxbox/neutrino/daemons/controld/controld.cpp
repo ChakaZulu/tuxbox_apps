@@ -893,7 +893,7 @@ void setBoxType()
 // input:   0 (min volume) <=     volume           <= 100 (max volume)
 // output: 63 (min volume) >= map_volume(., true)  >=   0 (max volume)
 // output:  0 (min volume) <= map_volume(., false) <= 255 (max volume)
-const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
+unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 {
 #ifndef HAVE_DREAMBOX_HARDWARE
 	const unsigned char invlog63[101]={
@@ -1199,7 +1199,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.132 2008/12/25 16:35:46 houdini Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.133 2009/02/24 19:09:09 seife Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{

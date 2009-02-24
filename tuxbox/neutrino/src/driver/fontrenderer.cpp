@@ -146,7 +146,7 @@ FT_Error FBFontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_
 	return FTC_SBit_Cache_Lookup(sbitsCache, font, glyph_index, sbit);
 }
 
-const char * const FBFontRenderClass::AddFont(const char * const filename, const bool make_italics)
+const char *FBFontRenderClass::AddFont(const char * const filename, const bool make_italics)
 {
 	fflush(stdout);
 	int error;

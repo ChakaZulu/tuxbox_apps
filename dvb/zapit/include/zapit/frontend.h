@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.33 2008/03/16 12:20:09 seife Exp $
+ * $Id: frontend.h,v 1.34 2009/02/24 19:09:04 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -100,7 +100,7 @@ class CFrontend
 		uint32_t			getUncorrectedBlocks(void) const;
 
 
-		const int32_t 			getCurrentSatellitePosition() { return currentSatellitePosition; }
+		int32_t				getCurrentSatellitePosition() { return currentSatellitePosition; }
 
 		void				setDiseqcRepeats(const uint8_t repeats)	{ diseqcRepeats = repeats; }
 		void				setDiseqcType(const diseqc_t type);

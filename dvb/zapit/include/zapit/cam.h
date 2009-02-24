@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.25 2003/02/09 19:22:08 thegoodguy Exp $
+ * $Id: cam.h,v 1.26 2009/02/24 19:09:04 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>,
  *               thegoodguy         <thegoodguy@berlios.de>
@@ -29,7 +29,7 @@
 class CCam : public CBasicClient
 {
 	private:
-		virtual const unsigned char getVersion(void) const;
+		virtual unsigned char getVersion(void) const;
 		virtual const char *getSocketName(void) const;
 		bool sendMessage(const char * const data, const size_t length);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.33 2004/04/04 20:20:45 obi Exp $
+ * $Id: cam.cpp,v 1.34 2009/02/24 19:09:05 seife Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -26,7 +26,7 @@
 #include <messagetools.h>   /* get_length_field_size */
 
 
-const unsigned char CCam::getVersion(void) const
+unsigned char CCam::getVersion(void) const
 {
 	return 0x9F;
 }

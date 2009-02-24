@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.55 2007/10/09 20:46:05 guenther Exp $
+	$Id: timerdclient.cpp,v 1.56 2009/02/24 19:09:13 seife Exp $
 
 	License: GPL
 
@@ -29,12 +29,12 @@
 #include <timerdclient/timerdclient.h>
 
 
-const unsigned char   CTimerdClient::getVersion   () const
+unsigned char CTimerdClient::getVersion() const
 {
 	return CTimerdMsg::ACTVERSION;
 }
 
-const          char * CTimerdClient::getSocketName() const
+const char * CTimerdClient::getSocketName() const
 {
 	return TIMERD_UDS_NAME;
 }

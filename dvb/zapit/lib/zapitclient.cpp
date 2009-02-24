@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.122 2009/02/22 18:45:37 seife Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.123 2009/02/24 19:09:05 seife Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -36,12 +36,12 @@
 #include <zapit/client/msgtypes.h>
 #include <zapit/client/zapittools.h>
 
-const unsigned char   CZapitClient::getVersion   () const
+unsigned char CZapitClient::getVersion() const
 {
 	return CZapitMessages::ACTVERSION;
 }
 
-const          char * CZapitClient::getSocketName() const
+const char * CZapitClient::getSocketName() const
 {
 	return ZAPIT_UDS_NAME;
 }
