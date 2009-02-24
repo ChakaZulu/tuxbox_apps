@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.63 2009/02/22 12:02:43 seife Exp $
+ * $Id: pzapit.cpp,v 1.64 2009/02/24 13:50:25 seife Exp $
  *
  * simple commandline client for zapit
  *
@@ -441,8 +441,8 @@ int main (int argc, char** argv)
 
 	if (getchannel)
 	{
-		t_channel_id channel = zapit.getCurrentServiceID();
-		printf("%llx (%s)\n", channel, (zapit.getChannelName(channel)).c_str());
+		t_channel_id c = zapit.getCurrentServiceID();
+		printf("%llx (%s)\n", c, (zapit.getChannelName(c)).c_str());
 		return 0;
 	}
 
@@ -517,7 +517,7 @@ int main (int argc, char** argv)
 	{
 #define NEUTRINO_UDS_NAME "/tmp/neutrino.sock"
 		std::cout << "registering neutrino" << std::endl;
-		for (int i = CZapitClient::FIRST_EVENT_MARKER; i < CZapitClient::LAST_EVENT_MARKER; i++)
+		for (i = CZapitClient::FIRST_EVENT_MARKER; i < CZapitClient::LAST_EVENT_MARKER; i++)
 			zapit.registerEvent(i, 222, NEUTRINO_UDS_NAME);
 		return 0;
 	}

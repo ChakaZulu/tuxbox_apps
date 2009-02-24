@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.53 2009/02/18 17:55:25 seife Exp $
+ * $Id: pmt.cpp,v 1.54 2009/02/24 13:50:26 seife Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -84,7 +84,7 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 	for (pos = 5; pos < ES_info_length + 5; pos += descriptor_length + 2) {
 		descriptor_tag = buffer[pos];
 		descriptor_length = buffer[pos + 1];
-		unsigned char fieldCount = descriptor_length / 5;
+		unsigned char fieldCount;
 
 		switch (descriptor_tag) {
 			case 0x02:
@@ -140,6 +140,7 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 				break;
 
 			case 0x56: /* teletext descriptor */
+			    fieldCount = descriptor_length / 5;
 			    for (unsigned char fIdx=0;fIdx<fieldCount;fIdx++){
 				char tmpLang[4];
 				memcpy(tmpLang, &buffer[pos + 5*fIdx + 2], 3);
@@ -163,7 +164,7 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 			case 0x59:
 			    if (esInfo->stream_type==0x06){
 				// private data
-				unsigned char fieldCount=descriptor_length/8;
+				fieldCount=descriptor_length / 8;
 				for (unsigned char fIdx=0;fIdx<fieldCount;fIdx++){
                                     char tmpLang[4];
                                     memcpy(tmpLang,&buffer[pos + 8*fIdx + 2],3);

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.420 2009/02/22 12:02:43 seife Exp $
+ * $Id: zapit.cpp,v 1.421 2009/02/24 13:50:25 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1136,7 +1136,7 @@ void unsetRecordMode(void)
 	eventServer->sendEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, CEventServer::INITID_ZAPIT );
 }
 
-int prepare_channels(fe_type_t frontendType, diseqc_t diseqcType)
+int prepare_channels(fe_type_t frontendType, diseqc_t dType)
 {
 	// for the case this function is NOT called for the first time (by main())
 	// we clear all cannel lists, they are refilled
@@ -1144,7 +1144,7 @@ int prepare_channels(fe_type_t frontendType, diseqc_t diseqcType)
 	transponders.clear();
 	bouquetManager->clearAll();
 	allchans.clear();  // <- this invalidates all bouquets, too!
-	if (LoadServices(frontendType, diseqcType, false) < 0)
+	if (LoadServices(frontendType, dType, false) < 0)
 		return -1;
 
 	INFO("LoadServices: success");
@@ -2669,7 +2669,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.420 2009/02/22 12:02:43 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.421 2009/02/24 13:50:25 seife Exp $\n");
 
 	bool check_lock = true;
 
