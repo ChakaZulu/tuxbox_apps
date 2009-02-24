@@ -14,16 +14,6 @@ epg_SOURCES = epg.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp SIlangu
 epgMini_SOURCES = epgMini.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp SIlanguage.cpp dvbstring.cpp
 nit_SOURCES = nit.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp SIlanguage.cpp dvbstring.cpp
 sdt_SOURCES = sdt.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp SIlanguage.cpp dvbstring.cpp
-endif
-
-sectionsd_SOURCES = sectionsd.cpp dmxapi.cpp debug.cpp dmx.cpp SIsections.cpp SIevents.cpp SIutils.cpp dvbstring.cpp SIlanguage.cpp
-
-sectionsd_LDADD = \
-	@CONNECTION_LIBS@ \
-	@CONFIGFILE_LIBS@ \
-	@EVENTSERVER_LIBS@ \
-	@XML_LIBS@ \
-	-lpthread
 
 bat_LDADD = \
 	@XML_LIBS@
@@ -39,3 +29,14 @@ nit_LDADD = \
 
 sdt_LDADD = \
 	@XML_LIBS@
+
+endif
+
+sectionsd_SOURCES = sectionsd.cpp dmxapi.cpp debug.cpp dmx.cpp SIsections.cpp SIevents.cpp SIutils.cpp dvbstring.cpp SIlanguage.cpp
+
+sectionsd_LDADD = \
+	@CONNECTION_LIBS@ \
+	@CONFIGFILE_LIBS@ \
+	@EVENTSERVER_LIBS@ \
+	@XML_LIBS@ \
+	-lpthread
