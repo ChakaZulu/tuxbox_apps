@@ -64,6 +64,12 @@ eZapLCDMain::eZapLCDMain(eWidget *parent)
 	ServiceName = new eLabel(this);
 	ServiceName->setName("service_name");
 	
+	LcdEpgNow = new eLabel(this);
+	LcdEpgNow->setName("lcd_now");
+	
+	LcdEpgNext = new eLabel(this);
+	LcdEpgNext->setName("lcd_next");
+	
 	Clock = new eLabel(this);
 	Clock->setName("clock");
 	
@@ -108,6 +114,54 @@ void eZapLCDMain::setServiceName(eString name)
 		ServiceName->setText( shortname );
 	else*/
 		ServiceName->setText(name);
+}
+
+void eZapLCDMain::setLcdEpgNow(eString name)
+{
+	static char strfilter[4] = { 0xC2, 0x87, 0x86, 0x00 };
+	// filter short name brakets...
+	for (eString::iterator it(name.begin()); it != name.end();)
+		strchr( strfilter, *it ) ? it = name.erase(it) : it++;
+
+/*	static char stropen[3] = { 0xc2, 0x86, 0x00 };
+	static char strclose[3] = { 0xc2, 0x87, 0x00 };
+	unsigned int open=eString::npos-1;
+	eString shortname;
+
+  while ( (open = name.find(stropen, open+2)) != eString::npos )
+	{
+		unsigned int close = name.find(strclose, open);
+		if ( close != eString::npos )
+			shortname+=name.mid( open+2, close-(open+2) );
+	}
+	if (shortname)
+		LcdEpgNow->setText( shortname );
+	else*/
+		LcdEpgNow->setText(name);
+}
+
+void eZapLCDMain::setLcdEpgNext(eString name)
+{
+	static char strfilter[4] = { 0xC2, 0x87, 0x86, 0x00 };
+	// filter short name brakets...
+	for (eString::iterator it(name.begin()); it != name.end();)
+		strchr( strfilter, *it ) ? it = name.erase(it) : it++;
+
+/*	static char stropen[3] = { 0xc2, 0x86, 0x00 };
+	static char strclose[3] = { 0xc2, 0x87, 0x00 };
+	unsigned int open=eString::npos-1;
+	eString shortname;
+
+  while ( (open = name.find(stropen, open+2)) != eString::npos )
+	{
+		unsigned int close = name.find(strclose, open);
+		if ( close != eString::npos )
+			shortname+=name.mid( open+2, close-(open+2) );
+	}
+	if (shortname)
+		LcdEpgNext->setText( shortname );
+	else*/
+		LcdEpgNext->setText(name);
 }
 
 void eZapLCDMain::leaveService(const eServiceReferenceDVB &service)

@@ -2323,12 +2323,18 @@ void eZapMain::setEIT(EIT *eit)
 		{
 			fileinfos->setText(nowtext);
 			EINow->setText(nowtext);
+#ifndef DISABLE_LCD
+		lcdmain.lcdMain->setLcdEpgNow(nowtext);
+#endif
 			EINowTime->setText(nowtime);
 		}
 
 		if (val&2)
 		{
 			EINext->setText(nexttext);
+#ifndef DISABLE_LCD
+		lcdmain.lcdMain->setLcdEpgNext(nexttext);
+#endif
 			EINextTime->setText(nexttime);
 		}
 		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();

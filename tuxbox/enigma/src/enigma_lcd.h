@@ -45,6 +45,10 @@ public:
 	eProgress *Progress;
 	void setServiceName(eString name);
 	eLabel *ServiceName;
+	void setLcdEpgNow(eString name);
+	eLabel *LcdEpgNow;
+	void setLcdEpgNext(eString name);
+	eLabel *LcdEpgNext;
 	eZapLCDMain(eWidget *parent);
 	void gotRDSText(eString);
 };
