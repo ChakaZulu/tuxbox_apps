@@ -2324,7 +2324,7 @@ void eZapMain::setEIT(EIT *eit)
 			fileinfos->setText(nowtext);
 			EINow->setText(nowtext);
 #ifndef DISABLE_LCD
-		lcdmain.lcdMain->setLcdEpgNow(nowtext);
+			lcdmain.lcdMain->setLcdEpgNow(nowtext);
 #endif
 			EINowTime->setText(nowtime);
 		}
@@ -2333,7 +2333,7 @@ void eZapMain::setEIT(EIT *eit)
 		{
 			EINext->setText(nexttext);
 #ifndef DISABLE_LCD
-		lcdmain.lcdMain->setLcdEpgNext(nexttext);
+			lcdmain.lcdMain->setLcdEpgNext(nexttext);
 #endif
 			EINextTime->setText(nexttime);
 		}
@@ -2346,6 +2346,10 @@ void eZapMain::setEIT(EIT *eit)
 		fileinfos->setText("");
 		EINow->setText(_("no EPG available"));
 		EINext->setText("");
+#ifndef DISABLE_LCD
+		lcdmain.lcdMain->setLcdEpgNow(_("no EPG available"));
+		lcdmain.lcdMain->setLcdEpgNext("");
+#endif
 		EINowDuration->setText("");
 		EINextDuration->setText("");
 		EINowTime->setText("");
