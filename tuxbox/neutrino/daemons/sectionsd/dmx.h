@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.15 2009/01/15 09:31:39 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.16 2009/02/28 13:57:50 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -89,7 +89,7 @@ class DMX
 	void lock(void);
 	void unlock(void);
 
-	char * getSection(const unsigned timeoutInMSeconds, int &timeouts);
+	int getSection(char *buf, const unsigned timeoutInMSeconds, int &timeouts);
 	// section with size < 3 + 5 are skipped !
 	int setPid(const unsigned short new_pid);
 	int setCurrentService(int new_current_service);

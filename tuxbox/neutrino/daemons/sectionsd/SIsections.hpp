@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.25 2009/02/24 19:09:09 seife Exp $
+//    $Id: SIsections.hpp,v 1.26 2009/02/28 13:57:50 seife Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -248,6 +248,7 @@ class SIsection
 public:
 	SIsection(void) { buffer = 0; bufferLength = 0;}
 
+#if 0
 	// Kopierte den Puffer in eigenen Puffer
 	SIsection(const char *buf, unsigned bufLength) {
 		buffer = 0; bufferLength = 0;
@@ -259,6 +260,7 @@ public:
 			}
 		}
 	}
+#endif
 
 	// Benutzt den uebergebenen Puffer (sollte mit new char[n] allokiert sein)
 	SIsection(unsigned bufLength, char *buf) {
@@ -269,6 +271,7 @@ public:
 		}
 	}
 
+#if 0
 	// Konstruktor um eine (leere) SIsection mit den fuer Vergleiche
 	// noetigen Inhalte (s. key) zu erstellen
 	SIsection(const struct SI_section_header *header) {
@@ -291,14 +294,11 @@ public:
 			}
 		}
 	}
+#endif
 
 	// Destruktor
 	virtual ~SIsection(void) {
-		if (buffer) {
-			delete[] buffer;
-			buffer = 0;
-			bufferLength = 0;
-		}
+		bufferLength = 0;
 	}
 
 	unsigned char tableID(void) const {

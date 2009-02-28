@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.287 2009/02/24 19:09:10 seife Exp $
+//  $Id: sectionsd.cpp,v 1.288 2009/02/28 13:57:50 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -155,6 +155,9 @@ static unsigned int max_events;
 #define TIME_EIT_VERSION_WAIT		35
 // number of timeouts after which we stop waiting for an EIT version number
 #define TIMEOUTS_EIT_VERSION_WAIT	(2 * CHECK_RESTART_DMX_AFTER_TIMEOUTS)
+
+// the maximum length of a section (0x0fff) + header (3)
+#define MAX_SECTION_LENGTH (0x0fff + 3)
 
 // Wieviele Sekunden EPG gecached werden sollen
 //static long secondsToCache=4*24*60L*60L; // 4 Tage - weniger Prozessorlast?!
@@ -2462,7 +2465,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.287 2009/02/24 19:09:10 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.288 2009/02/28 13:57:50 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6069,8 +6072,7 @@ static int getscanType()
 static void *nitThread(void *)
 {
 
-	struct SI_section_header header;
-	char *buf;
+	struct SI_section_header *header;
 	const unsigned timeoutInMSeconds = 2500;
 	bool is_new;
 	t_network_id nid = 0;
@@ -6087,6 +6089,12 @@ static void *nitThread(void *)
 		dprintf("[%sThread] pid %d (%lu) start\n", "nit", getpid(), pthread_self());
 
 		int timeoutsDMX = 0;
+		char *static_buf = new char[MAX_SECTION_LENGTH];
+		int rc;
+
+		if (static_buf == NULL)
+			throw std::bad_alloc();
+
 		for ( i = 0; i < MAX_NIDs; i++)
 			messaging_nit_nid[i] = 0;
 		dmxNIT.start(); // -> unlock
@@ -6171,24 +6179,28 @@ static void *nitThread(void *)
 				dputs("\n !!! dmxNIT restarted !!!\n");
 			}
 
-			buf = dmxNIT.getSection(timeoutInMSeconds, timeoutsDMX);
+			rc = dmxNIT.getSection(static_buf, timeoutInMSeconds, timeoutsDMX);
 
-			if (buf == NULL)
+			if (rc < 0)
 				continue;
 
-			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
-							((SI_section_header*)buf)->section_length_lo;
-			// copy the header
-			memcpy(&header, buf, std::min((size_t)section_length + 3, sizeof(header)));
-
-			if (header.current_next_indicator)
+			if (rc < (int)sizeof(struct SI_section_header))
 			{
-				if ((header.table_id == 0x40) || (header.table_id == 0x41))
+				xprintf("%s rc < sizeof(SI_section_header) (%d < %d)\n", __FUNCTION__, rc, sizeof(struct SI_section_header));
+				continue;
+			}
+
+			header = (SI_section_header*)static_buf;
+			unsigned short section_length = header->section_length_hi << 8 | header->section_length_lo;
+
+			if (header->current_next_indicator)
+			{
+				if ((header->table_id == 0x40) || (header->table_id == 0x41))
 				{
 					// Wir wollen nur aktuelle sections
-					SIsectionNIT nit(section_length + 3, buf);
+					SIsectionNIT nit(section_length + 3, static_buf);
 
-					is_actual = ( header.table_id == 0x40) ? true : false;
+					is_actual = (header->table_id == 0x40) ? true : false;
 
 					is_new = false;
 
@@ -6197,10 +6209,10 @@ static void *nitThread(void *)
 							is_new = true;
 
 					if (is_new) {
-						nid = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
+						nid = header->table_id_extension_hi << 8 | header->table_id_extension_lo;
 						lastData = time(NULL);
 						dprintf("[nitThread] adding %d transponders [table 0x%x]\n",
-								nit.networks().size(), header.table_id);
+								nit.networks().size(), header->table_id);
 						i = 0;
 						while ((i < MAX_NIDs) && (messaging_nit_nid[i] != 0) && (messaging_nit_nid[i] != nid))
 							i++;
@@ -6208,19 +6220,11 @@ static void *nitThread(void *)
 							messaging_nit_nid[i] = nid;
 					}
 				}
-				else {
-					delete[] buf;
-					buf = NULL;
-				}
 			} // if
-			else
-			{
-				delete[] buf;
-				buf = NULL;
-			}
 		} // for
 
 		dmxNIT.closefd();
+		delete[] static_buf;
 	} // try
 	catch (std::exception& e)
 	{
@@ -6254,9 +6258,7 @@ static int get_bat_slot( t_bouquet_id bouquet_id, int last_section)
 //---------------------------------------------------------------------
 static void *sdtThread(void *)
 {
-
-	struct SI_section_header header;
-	char *buf;
+	struct SI_section_header *header;
 	const unsigned timeoutInMSeconds = 2500;
 	bool is_new;
 	int scanType = 3;	//default scan all
@@ -6276,6 +6278,12 @@ static void *sdtThread(void *)
 		dprintf("[%sThread] pid %d (%lu) start\n", "sdt", getpid(), pthread_self());
 
 		int timeoutsDMX = 0;
+		char *static_buf = new char[MAX_SECTION_LENGTH];
+		int rc;
+
+		if (static_buf == NULL)
+			throw std::bad_alloc();
+
 		for ( i = 0; i < MAX_SDTs; i++)
 			messaging_sdt_tid[i] = 0;
 		writeLockMessaging();
@@ -6396,26 +6404,30 @@ static void *sdtThread(void *)
 				dputs("\n !!! dmxSDT restarted !!!\n");
 			}
 
-			buf = dmxSDT.getSection(timeoutInMSeconds, timeoutsDMX);
+			rc = dmxSDT.getSection(static_buf, timeoutInMSeconds, timeoutsDMX);
 
-			if (buf == NULL)
+			if (rc < 0)
 				continue;
 
-			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
-							((SI_section_header*)buf)->section_length_lo;
-			// copy the header
-			memcpy(&header, buf, std::min((size_t)section_length + 3, sizeof(header)));
-
-			if (header.current_next_indicator)
+			if (rc <= (int)sizeof(struct SI_section_header))
 			{
-				if ((header.table_id == 0x42) || (header.table_id == 0x46))
+				xprintf("%s rc < sizeof(SI_Section_header) (%d < %d)\n", __FUNCTION__, rc, sizeof(struct SI_section_header));
+				continue;
+			}
+
+			header = (SI_section_header*)static_buf;
+			unsigned short section_length = header->section_length_hi << 8 | header->section_length_lo;
+
+			if (header->current_next_indicator)
+			{
+				if ((header->table_id == 0x42) || (header->table_id == 0x46))
 				{
 				// Wir wollen nur aktuelle sections
-					SIsectionSDT sdt(section_length + 3, buf);
+					SIsectionSDT sdt(section_length + 3, static_buf);
 
-					is_actual = ( header.table_id == 0x42) ? 1 : 0;
+					is_actual = (header->table_id == 0x42) ? 1 : 0;
 
-					if ((is_actual) && (!header.last_section_number))
+					if (is_actual && !header->last_section_number)
 						is_actual = 2;
 
 					is_new = false;
@@ -6432,7 +6444,7 @@ static void *sdtThread(void *)
 						lastData = time(NULL);
 
 						dprintf("[sdtThread] added %d services [table 0x%x TID: %08x]\n",
-								sdt.services().size(), header.table_id, tid);
+								sdt.services().size(), header->table_id, tid);
 
 						i = 0;
 						while ((i < MAX_SDTs) && (messaging_sdt_tid[i] != 0) && (messaging_sdt_tid[i] != tid))
@@ -6441,8 +6453,8 @@ static void *sdtThread(void *)
 							messaging_sdt_tid[i] = tid;
 					}
 				}
-				else if (header.table_id == 0x4a) {
-					t_bouquet_id bid = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
+				else if (header->table_id == 0x4a) {
+					t_bouquet_id bid = header->table_id_extension_hi << 8 | header->table_id_extension_lo;
 
 					bouquet_filtered = checkBouquetFilter(bid);
 
@@ -6450,10 +6462,10 @@ static void *sdtThread(void *)
 						((bouquet_filtered) && (bouquet_filter_is_whitelist))) {
 
 					// This is 0 .. MAX_BAT - 1 if already started or new and free or -1 if no free slot available.
-					int current_bouquet = get_bat_slot(bid, (int) header.last_section_number);
+					int current_bouquet = get_bat_slot(bid, (int)header->last_section_number);
 
-					if ((current_bouquet != -1) && (!messaging_bat_sections_so_far[current_bouquet][header.section_number])) {
-						SIsectionBAT bat(section_length + 3, buf);
+					if (current_bouquet != -1 && !messaging_bat_sections_so_far[current_bouquet][header->section_number]) {
+						SIsectionBAT bat(section_length + 3, static_buf);
 
 						dprintf("[sdtThread] adding %d bouquet entries\n", bat.bouquets().size());
 
@@ -6479,9 +6491,9 @@ static void *sdtThread(void *)
 
 						if (is_new) {
 							lastData = time(NULL);
-							messaging_bat_sections_so_far[current_bouquet][header.section_number] = 1;
+							messaging_bat_sections_so_far[current_bouquet][header->section_number] = 1;
 						} else
-							messaging_bat_sections_so_far[current_bouquet][header.section_number] = 2;
+							messaging_bat_sections_so_far[current_bouquet][header->section_number] = 2;
 
 						unlockMessaging();
 
@@ -6489,19 +6501,11 @@ static void *sdtThread(void *)
 					}
 					}
 				}
-				else {
-					delete[] buf;
-					buf = NULL;
-				}
 			} // if
-			else
-			{
-				delete[] buf;
-				buf = NULL;
-			}
 		} // for
 
 		dmxSDT.closefd();
+		delete[] static_buf;
 	} // try
 	catch (std::exception& e)
 	{
@@ -6803,8 +6807,7 @@ int eit_stop_update_filter(int *fd)
 static void *eitThread(void *)
 {
 
-	struct SI_section_header header;
-	char *buf;
+	struct SI_section_header *header;
 	/* we are holding the start_stop lock during this timeout, so don't
 	   make it too long... */
 	unsigned timeoutInMSeconds = EIT_READ_TIMEOUT;
@@ -6838,6 +6841,12 @@ static void *eitThread(void *)
 	{
 		dprintf("[%sThread] pid %d (%lu) start\n", "eit", getpid(), pthread_self());
 		int timeoutsDMX = 0;
+		char *static_buf = new char[MAX_SECTION_LENGTH];
+		int rc;
+
+		if (static_buf == NULL)
+			throw std::bad_alloc();
+
 		dmxEIT.start(); // -> unlock
 		if (!scanning)
 			dmxEIT.request_pause();
@@ -6851,7 +6860,7 @@ static void *eitThread(void *)
 				sleep(1);
 			time_t zeit = time(NULL);
 
-			buf = dmxEIT.getSection(timeoutInMSeconds, timeoutsDMX);
+			rc = dmxEIT.getSection(static_buf, timeoutInMSeconds, timeoutsDMX);
 #if 0
 /* comment out for now - will be removed later -- seife */
 			if (update_eit) {
@@ -7056,23 +7065,26 @@ static void *eitThread(void *)
 				unlockMessaging();
 			}
 
-			if (buf == NULL)
+			if (rc < 0)
 				continue;
 
-			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
-							((SI_section_header*)buf)->section_length_lo;
+			if (rc < (int)sizeof(struct SI_section_header))
+			{
+				xprintf("%s rc < sizeof(SI_Section_header) (%d < %d)\n", __FUNCTION__, rc, sizeof(struct SI_section_header));
+				continue;
+			}
 
-			// copy the header
-			memcpy(&header, buf, std::min((size_t)section_length + 3, sizeof(header)));
+			header = (SI_section_header*)static_buf;
+			unsigned short section_length = header->section_length_hi << 8 | header->section_length_lo;
 
-			if (header.current_next_indicator)
+			if (header->current_next_indicator)
 			{
 				// Wir wollen nur aktuelle sections
 
 // Houdini: added new constructor where the buffer is given as a parameter and must be allocated outside
 // -> no allocation and copy of data into a 2nd buffer
 //				SIsectionEIT eit(SIsection(section_length + 3, buf));
-				SIsectionEIT eit(section_length + 3, buf);
+				SIsectionEIT eit(section_length + 3, static_buf);
 // Houdini: if section is not parsed (too short) -> no need to check events
 				if (eit.is_parsed() && eit.header())
 				{
@@ -7089,7 +7101,7 @@ static void *eitThread(void *)
 							        ( ( e->times.begin()->startzeit + (long)e->times.begin()->dauer ) > zeit - oldEventsAre ) )
 							{
 								//fprintf(stderr, "%02x ", header.table_id);
-								addEvent(*e, header.table_id, zeit);
+								addEvent(*e, header->table_id, zeit);
 							}
 						}
 						else
@@ -7117,12 +7129,10 @@ static void *eitThread(void *)
 			} // if
 			else
 			{
-				delete[] buf;
-				buf = NULL;
-
-//				dprintf("[eitThread] skipped sections for table 0x%x\n", header.table_id);
+				dprintf("[eitThread] skipped sections for table 0x%x\n", header->table_id);
 			}
 		} // for
+		delete[] static_buf;
 	} // try
 	catch (std::exception& e)
 	{
@@ -7145,7 +7155,6 @@ static void *cnThread(void *)
 {
 
 	struct SI_section_header *header;
-	char *buf;
 	/* we are holding the start_stop lock during this timeout, so don't
 	   make it too long... */
 	unsigned timeoutInMSeconds = EIT_READ_TIMEOUT;
@@ -7158,6 +7167,12 @@ static void *cnThread(void *)
 	{
 		dprintf("[%sThread] pid %d (%lu) start\n", "cn", getpid(), pthread_self());
 		int timeoutsDMX = 0;
+		char *static_buf = new char[MAX_SECTION_LENGTH];
+		int rc;
+
+		if (static_buf == NULL)
+			throw std::bad_alloc();
+
 		dmxCN.start(); // -> unlock
 		if (!scanning)
 			dmxCN.request_pause();
@@ -7178,7 +7193,7 @@ static void *cnThread(void *)
 				sleep(1);
 			time_t zeit = time(NULL);
 
-			buf = dmxCN.getSection(timeoutInMSeconds, timeoutsDMX);
+			rc = dmxCN.getSection(static_buf, timeoutInMSeconds, timeoutsDMX);
 			if (update_eit) {
 				if (dmxCN.get_eit_version() != 0xff) {
 					writeLockMessaging();
@@ -7326,23 +7341,27 @@ static void *cnThread(void *)
 				continue;
 			}
 
-			if (buf == NULL)
+			if (rc < 0)
 				continue;
 
-			header = (SI_section_header *)buf; 
+			if (rc < (int)sizeof(struct SI_section_header))
+			{
+				xprintf("%s: rc < sizeof(SI_Section_header) (%d < %d)\n", __FUNCTION__, rc, sizeof(struct SI_section_header));
+				continue;
+			}
+
+			header = (SI_section_header *)static_buf;
 			unsigned short section_length = (header->section_length_hi << 8) | header->section_length_lo;
 			unsigned table_id = header->table_id;
 
 			if (!header->current_next_indicator)
 			{
 				// Wir wollen nur aktuelle sections
-				delete[] buf;
-				buf = NULL;
 				//dprintf("[cnThread] skipped sections for table 0x%x\n", table_id);
 				continue;
 			}
 
-			SIsectionEIT eit(section_length + 3, buf);
+			SIsectionEIT eit(section_length + 3, static_buf);
 // Houdini: if section is not parsed (too short) -> no need to check events
 			if (!eit.is_parsed() || !eit.header())
 				continue;
@@ -7383,6 +7402,7 @@ printdate_ms(stderr); fprintf(stderr, "NVOD-EVENT in CN-THREAD!!!!!!!!!!!!!!!!!!
 			} // for
 			//dprintf("[cnThread] added %d events (end)\n",  eit.events().size());
 		} // for
+		delete[] static_buf;
 	} // try
 	catch (std::exception& e)
 	{
@@ -7406,8 +7426,7 @@ printdate_ms(stderr); fprintf(stderr, "NVOD-EVENT in CN-THREAD!!!!!!!!!!!!!!!!!!
 
 static void *pptThread(void *)
 {
-	struct SI_section_header header;
-	char *buf;
+	struct SI_section_header *header;
 	unsigned timeoutInMSeconds = EIT_READ_TIMEOUT;
 	bool sendToSleepNow = false;
 	unsigned short start_section = 0;
@@ -7423,6 +7442,12 @@ static void *pptThread(void *)
 	{
 		dprintf("[%sThread] pid %d (%lu) start\n", "ppt", getpid(), pthread_self());
 		int timeoutsDMX = 0;
+		char *static_buf = new char[MAX_SECTION_LENGTH];
+		int rc;
+
+		if (static_buf == NULL)
+			throw std::bad_alloc();
+
 		time_t lastRestarted = time(NULL);
 		time_t lastData = time(NULL);
 
@@ -7561,9 +7586,9 @@ static void *pptThread(void *)
 				dmxPPT.setPid(pptpid);
 			}
 
-			buf = dmxPPT.getSection(timeoutInMSeconds, timeoutsDMX);
+			rc = dmxPPT.getSection(static_buf, timeoutInMSeconds, timeoutsDMX);
 
-			if (buf == NULL) {
+			if (rc < 0) {
 				if (zeit > lastData + 5)
 				{
 					sendToSleepNow = true; // if there are no data for 5 seconds -> sleep
@@ -7571,28 +7596,32 @@ static void *pptThread(void *)
 				}
 				continue;
 			}
+
+			if (rc < (int)sizeof(struct SI_section_header))
+			{
+				xprintf("%s: ret < sizeof(SI_Section_header) (%d < %d)\n", __FUNCTION__, rc, sizeof(struct SI_section_header));
+				continue;
+			}
+
 			lastData = zeit;
 
-			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
-							((SI_section_header*)buf)->section_length_lo;
+			header = (SI_section_header*)static_buf;
+			unsigned short section_length = header->section_length_hi << 8 | header->section_length_lo;
 
-			// copy the header
-			memcpy(&header, buf, std::min((size_t)section_length + 3, sizeof(header)));
-
-			if (header.current_next_indicator)
+			if (header->current_next_indicator)
 			{
 				// Wir wollen nur aktuelle sections
-				if (start_section == 0) start_section = header.section_number;
-				else if (start_section == header.section_number)
+				if (start_section == 0)
+					start_section = header->section_number;
+				else if (start_section == header->section_number)
 				{
 					sendToSleepNow = true; // no more scanning
 					dprintf("[pptThread] got all sections\n");
-					delete[] buf;
 					continue;
 				}
 
 //				SIsectionPPT ppt(SIsection(section_length + 3, buf));
-				SIsectionPPT ppt(section_length + 3, buf);
+				SIsectionPPT ppt(section_length + 3, static_buf);
 				if (ppt.is_parsed())
 					if (ppt.header())
 				{
@@ -7639,12 +7668,12 @@ static void *pptThread(void *)
 									if (already_exists)
 									{
 										// Zusaetzliche Zeiten in ein Event einfuegen
-										addEventTimes(*e, header.table_id);
+										addEventTimes(*e, header->table_id);
 									}
 									else
 									{
 										// Ein Event in alle Mengen einfuegen
-										addEvent(*e, header.table_id, zeit);
+										addEvent(*e, header->table_id, zeit);
 									}
 
 //									unlockEvents();
@@ -7684,12 +7713,8 @@ static void *pptThread(void *)
 					//dprintf("[pptThread] added %d events (end)\n",  ppt.events().size());
 				} // if
 			} // if
-			else
-			{
-				delete[] buf;
-				buf = NULL;
-			}
 		} // for
+		delete[] static_buf;
 	} // try
 	catch (std::exception& e)
 	{
@@ -8080,7 +8105,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.287 2009/02/24 19:09:10 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.288 2009/02/28 13:57:50 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 

@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.55 2009/02/28 12:45:50 seife Exp $
+// $Id: SIsections.cpp,v 1.56 2009/02/28 13:57:50 seife Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -302,8 +302,6 @@ void SIsectionEIT::parse(void)
 		return;
 
 	if (bufferLength < sizeof(SI_section_EIT_header) + sizeof(struct eit_event)) {
-		delete [] buffer;
-		buffer=0;
 		bufferLength=0;
 		return;
 	}
@@ -604,8 +602,6 @@ void SIsectionPPT::parse(void)
 		return;
 
 	if (bufferLength < sizeof(SI_section_PPT_header)) {
-		delete [] buffer;
-		buffer=0;
 		bufferLength=0;
 		return;
 	}
@@ -714,8 +710,6 @@ void SIsectionSDT::parse(void)
 		return;
 
 	if (bufferLength < sizeof(SI_section_SDT_header) + sizeof(struct sdt_service)) {
-		delete [] buffer;
-		buffer=0;
 		bufferLength=0;
 		return;
 	}
@@ -816,8 +810,6 @@ void SIsectionBAT::parse(void)
 
 	if (bufferLength < sizeof(SI_section_BAT_header) + sizeof(struct bat_service)) {
 		printf("BAT fix?\n");	//No Services possible - length too short
-		delete [] buffer;
-		buffer=0;
 		bufferLength=0;
 		return;
 	}
@@ -1104,8 +1096,6 @@ void SIsectionNIT::parse(void)
 
 	if (bufferLength < sizeof(SI_section_NIT_header) + sizeof(struct nit_transponder)) {
 		printf("NIT fix?\n");	//No Services possible - length too short
-		delete [] buffer;
-		buffer=0;
 		bufferLength=0;
 		return;
 	}
