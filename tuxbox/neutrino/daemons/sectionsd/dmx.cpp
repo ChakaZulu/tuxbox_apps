@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.44 2009/01/15 09:31:38 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.45 2009/02/28 13:54:36 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -748,69 +748,54 @@ int DMX::change(const int new_filter_index)
 // und -1 bei Fehler
 // ansonsten die Anzahl gelesener Bytes
 /* inline */
-ssize_t DMX::readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSeconds)
+ssize_t DMX::readNbytes(int _fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
 {
-	size_t j;
+	int rc;
+	struct pollfd ufds;
+	ufds.fd = _fd;
+	ufds.events = POLLIN;
+	ufds.revents = 0;
 
-	for (j = 0; j < n;)
+	rc = ::poll(&ufds, 1, timeoutInMSeconds);
+
+	if (!rc)
+		return 0; // timeout
+	else if (rc < 0)
 	{
-		struct pollfd ufds;
-		ufds.fd = fd;
-		ufds.events = POLLIN;
-		ufds.revents = 0;
-		int rc = ::poll(&ufds, 1, timeoutInMSeconds);
-
-		if (!rc)
-			return 0; // timeout
-		else if (rc < 0 && errno == EINTR)
-			continue; // interuppted
-		else if (rc < 0)
-		{
-			perror ("[sectionsd] DMX::readNbytes poll");
-			//printf("errno: %d\n", errno);
-			return -1;
-		}
+		/* we consciously ignore EINTR, since it does not happen in practice */
+		perror ("[sectionsd] DMX::readNbytes poll");
+		return -1;
+	}
 #ifdef PAUSE_EQUALS_STOP
-		if ((ufds.revents & POLLERR) != 0) /* POLLERR means buffer error, i.e. buffer overflow */
-		{
-			printdate_ms(stderr);
-			fprintf(stderr, "[sectionsd] DMX::readNbytes received POLLERR, pid 0x%x, filter[%d] "
-			       "filter 0x%02x mask 0x%02x\n", pID, filter_index,
-			       filters[filter_index].filter, filters[filter_index].mask);
-			return -1;
-		}
+	if ((ufds.revents & POLLERR) != 0) /* POLLERR means buffer error, i.e. buffer overflow */
+	{
+		printdate_ms(stderr);
+		fprintf(stderr, "[sectionsd] DMX::readNbytes received POLLERR, pid 0x%x, filter[%d] "
+		       "filter 0x%02x mask 0x%02x\n", pID, filter_index,
+		       filters[filter_index].filter, filters[filter_index].mask);
+		return -1;
+	}
 #endif
-		if (!(ufds.revents&POLLIN))
-		{
-			// POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT
-			// kommt wenn ein Timeout im Filter gesetzt wurde
-			// dprintf("revents: 0x%hx\n", ufds.revents);
-
-			usleep(100*1000UL); // wir warten 100 Millisekunden bevor wir es nochmal probieren
-
-			if (timeoutInMSeconds <= 200000)
-				return 0; // timeout
-
-			timeoutInMSeconds -= 200000;
-
-			continue;
-		}
-
-		int r = ::read(fd, buf, n - j);
-
-		if (r > 0)
-		{
-			j += r;
-			buf += r;
-		}
-		else if (r <= 0 && errno != EINTR)
-		{
-			perror ("[sectionsd] DMX::readNbytes read");
-			return -1;
-		}
+	if (!(ufds.revents&POLLIN))
+	{
+		xprintf("%s: not ufds.revents&POLLIN, please report!\n", __FUNCTION__);
+		// POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT
+		// kommt wenn ein Timeout im Filter gesetzt wurde
+		// dprintf("revents: 0x%hx\n", ufds.revents);
+		// usleep(100*1000UL); // wir warten 100 Millisekunden bevor wir es nochmal probieren
+		// if (timeoutInMSeconds <= 200000)
+		return 0; // timeout
+		// timeoutInMSeconds -= 200000;
+		// goto retry;
 	}
 
-	return j;
+	int r = ::read(_fd, buf, n);
+
+	if (r >= 0)
+		return r;
+
+	perror ("[sectionsd] DMX::readNbytes read");
+	return -1;
 }
 
 
