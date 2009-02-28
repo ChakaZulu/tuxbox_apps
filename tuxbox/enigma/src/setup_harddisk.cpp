@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.27 2009/02/07 10:06:31 dbluelle Exp $
+ * $Id: setup_harddisk.cpp,v 1.28 2009/02/28 17:14:58 dbluelle Exp $
  */
 
 #include <setup_harddisk.h>
@@ -563,7 +563,7 @@ void eHarddiskMenu::init_eHarddiskMenu()
 ePartitionCheck::ePartitionCheck( int dev )
 :eWindow(1), dev(dev), fsck(0)
 {
-	void init_ePartitionCheck();
+	init_ePartitionCheck();
 }
 void ePartitionCheck::init_ePartitionCheck()
 {
