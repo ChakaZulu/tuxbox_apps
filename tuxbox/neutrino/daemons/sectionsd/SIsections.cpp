@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.54 2008/06/06 21:11:14 houdini Exp $
+// $Id: SIsections.cpp,v 1.55 2009/02/28 12:45:50 seife Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -264,6 +264,10 @@ void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e, unsign
 void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
 {
 	struct descr_generic_header *desc;
+	/* we pass the buffer including the eit_event header, so we have to
+	   skip it here... */
+	des += sizeof(struct eit_event);
+	len -= sizeof(struct eit_event);
 	while(len>=sizeof(struct descr_generic_header)) {
 		desc=(struct descr_generic_header *)des;
 		// printf("Type: %s\n", decode_descr(desc->descriptor_tag));
@@ -290,6 +294,7 @@ void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
 void SIsectionEIT::parse(void)
 {
 	const char *actPos;
+	const char *bufEnd;
 	struct eit_event *evt;
 	unsigned short descriptors_loop_length;
 
@@ -303,18 +308,19 @@ void SIsectionEIT::parse(void)
 		return;
 	}
 
-	actPos = &buffer[sizeof(SI_section_EIT_header)];
+	actPos = buffer + sizeof(SI_section_EIT_header);
+	bufEnd = buffer + bufferLength;
 
-	while (actPos < &buffer[bufferLength - sizeof(struct eit_event)]) {
+	while (actPos < bufEnd - sizeof(struct eit_event)) {
 		evt = (struct eit_event *) actPos;
 		SIevent e(evt);
 		e.service_id = service_id();
 		e.original_network_id = original_network_id();
 		e.transport_stream_id = transport_stream_id();
-		descriptors_loop_length = (evt->descriptors_loop_length_hi << 8) | evt->descriptors_loop_length_lo;
-		parseDescriptors(((const char *)evt) + sizeof(struct eit_event), min((unsigned)(buffer + bufferLength - actPos), descriptors_loop_length), e);
+		descriptors_loop_length = sizeof(struct eit_event) + ((evt->descriptors_loop_length_hi << 8) | evt->descriptors_loop_length_lo);
+		parseDescriptors(actPos, min((unsigned)(bufEnd - actPos), descriptors_loop_length), e);
 		evts.insert(e);
-		actPos += sizeof(struct eit_event) + descriptors_loop_length;
+		actPos += descriptors_loop_length;
 	}
 
 	parsed = 1;
@@ -671,6 +677,8 @@ void SIsectionSDT::parsePrivateDataDescriptor(const char *buf, SIservice &s)
 void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
 {
   struct descr_generic_header *desc;
+  des += sizeof(struct sdt_service);
+  len -= sizeof(struct sdt_service);
   while(len>=sizeof(struct descr_generic_header)) {
     desc=(struct descr_generic_header *)des;
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
@@ -698,6 +706,7 @@ void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
 void SIsectionSDT::parse(void)
 {
 	const char *actPos;
+	const char *bufEnd;
 	struct sdt_service *sv;
 	unsigned short descriptors_loop_length;
 
@@ -711,18 +720,19 @@ void SIsectionSDT::parse(void)
 		return;
 	}
 
-	actPos = &buffer[sizeof(SI_section_SDT_header)];
+	actPos = buffer + sizeof(SI_section_SDT_header);
+	bufEnd = buffer + bufferLength;
 
-	while (actPos <= &buffer[bufferLength - sizeof(struct sdt_service)]) {
+	while (actPos <= bufEnd - sizeof(struct sdt_service)) {
 		sv = (struct sdt_service *)actPos;
 		SIservice s(sv);
 		s.original_network_id = original_network_id();
 		s.transport_stream_id = transport_stream_id();
-		descriptors_loop_length = (sv->descriptors_loop_length_hi << 8) | sv->descriptors_loop_length_lo;
+		descriptors_loop_length = sizeof(struct sdt_service) + (sv->descriptors_loop_length_hi << 8) | sv->descriptors_loop_length_lo;
 		//printf("actpos: %p buf+bl: %p sid: %hu desclen: %hu\n", actPos, buffer+bufferLength, sv->service_id, sv->descriptors_loop_length);
-		parseDescriptors(((const char *)sv) + sizeof(struct sdt_service), descriptors_loop_length, s);
+		parseDescriptors(actPos, min((unsigned)(bufEnd - actPos), descriptors_loop_length), s);
 		svs.insert(s);
-		actPos += sizeof(struct sdt_service) + descriptors_loop_length;
+		actPos += descriptors_loop_length;
 	}
 
 	parsed = 1;
@@ -1053,6 +1063,9 @@ void SIsectionNIT::parseDescriptors(const char *des, unsigned len, SInetwork &s)
 //  unsigned short orbital_pos;
 
   struct descr_generic_header *desc;
+  des += sizeof(struct nit_transponder);
+  len -= sizeof(struct nit_transponder);
+
   while(len>=sizeof(struct descr_generic_header)) {
     desc=(struct descr_generic_header *)des;
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
@@ -1078,6 +1091,7 @@ void SIsectionNIT::parse(void)
 {
 
 	const char *actPos;
+	const char *bufEnd;
 	struct nit_transponder *tp;
 	struct SI_section_NIT_header *nh;
 	unsigned short descriptors_loop_length;
@@ -1096,7 +1110,8 @@ void SIsectionNIT::parse(void)
 		return;
 	}
 	
-	actPos = &buffer[0];				// We need Bouquet ID and bouquet descriptor length from header
+	actPos = buffer;				// We need Bouquet ID and bouquet descriptor length from header
+	bufEnd = buffer + bufferLength;
 	nh = (struct SI_section_NIT_header *)actPos;	// Header
 //	printf("hi: %hu lo: %hu\n", bh->bouquet_descriptors_length_hi, bh->bouquet_descriptors_length_lo);
 	descriptors_loop_length = (nh->network_descriptors_length_hi << 8) | nh->network_descriptors_length_lo;
@@ -1110,16 +1125,16 @@ void SIsectionNIT::parse(void)
 //	printf("desclen: %hu\n", descriptors_loop_length);
 	actPos += sizeof(loop_len);
 	
-	while (actPos <= &buffer[bufferLength - sizeof(struct nit_transponder)]) {
+	while (actPos <= bufEnd - sizeof(struct nit_transponder)) {
 		tp = (struct nit_transponder *)actPos;
 		SInetwork s(tp);
 		s.network_id = (nh->network_id_hi << 8) | nh->network_id_lo;
 		s.transport_stream_id = (tp->transport_stream_id_hi << 8) | tp->transport_stream_id_lo;
 		s.original_network_id = (tp->original_network_id_hi << 8) | tp->original_network_id_lo;
-		descriptors_length = (tp->descriptors_loop_length_hi << 8) | tp->descriptors_loop_length_lo;
-		parseDescriptors(((const char *)tp) + sizeof(struct nit_transponder), descriptors_length, s); // Transport Stream Loop
+		descriptors_length = sizeof(struct nit_transponder) + ((tp->descriptors_loop_length_hi << 8) | tp->descriptors_loop_length_lo);
+		parseDescriptors(actPos, min((unsigned)(bufEnd - actPos), descriptors_length), s); // Transport Stream Loop
 		ntw.insert(s);
-		actPos += sizeof(struct nit_transponder) + descriptors_length;
+		actPos += descriptors_length;
 	}
 	parsed = 1;
 }
