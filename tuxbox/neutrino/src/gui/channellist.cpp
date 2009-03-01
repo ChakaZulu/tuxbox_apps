@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.206 2009/02/06 21:29:21 rhabarber1848 Exp $
+	$Id: channellist.cpp,v 1.207 2009/03/01 14:01:11 rhabarber1848 Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -327,7 +327,7 @@ int CChannelList::show()
 			selected += step;
 
 			if(selected >= chanlist.size())
-				selected = 0;
+				selected = ((step==listmaxshow)&&(selected<(((chanlist.size()/listmaxshow)+1)*listmaxshow)))?(chanlist.size()-1):0;
 
 			paintItem(prev_selected - liststart);
 			unsigned int oldliststart = liststart;
