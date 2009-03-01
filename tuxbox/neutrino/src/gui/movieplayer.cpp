@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.164 2009/01/16 16:19:35 seife Exp $
+  $Id: movieplayer.cpp,v 1.165 2009/03/01 13:53:00 rhabarber1848 Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1280,6 +1280,9 @@ PlayStreamThread (void *mrl)
 	printf ("[movieplayer.cpp] Waiting for RCST to stop\n");
 	pthread_join (rcst, NULL);
 	printf ("[movieplayer.cpp] Seems that RCST was stopped succesfully\n");
+
+	// empty VLC playlist, otherwise it is not possible to watch another movie via VLC
+	sendGetRequest(baseurl+"requests/status.xml?command=pl_empty",response);
 
 	// Some memory clean up
 	ringbuffer_free(ringbuf);
@@ -2780,7 +2783,7 @@ if(g_settings.streaming_use_buffer)
 					sprintf
 					(
 						ctx->tmpBuf,
-						"GET /control/zapto?0x%llx HTTP/1.0\r\n",
+						"GET /control/zapto?0x%llx HTTP/1.0\r\nHost: 127.0.0.1\r\n",
 						lstIt->zapid
 					);
 
@@ -4010,8 +4013,9 @@ CMoviePlayerGui::PlayStream (int streamtype)
 
 	if(streamtype == STREAMTYPE_DVD)
 	{
-		strcpy (mrl, "dvdsimple:");
+		strcpy (mrl, "dvd://");
 		strcat (mrl, g_settings.streaming_server_cddrive);
+		strcat (mrl, "@1");
 		printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
 		sel_filename = "DVD";
 		open_filebrowser = false;
@@ -4444,7 +4448,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.164 $");
+	return imageinfo.getModulVersion("","$Revision: 1.165 $");
 }
 
 void CMoviePlayerGui::showHelpTS()
