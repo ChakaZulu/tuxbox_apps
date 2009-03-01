@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.165 2009/03/01 13:53:00 rhabarber1848 Exp $
+  $Id: movieplayer.cpp,v 1.166 2009/03/01 13:58:30 rhabarber1848 Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -348,6 +348,7 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 #endif /* MOVIEBROWSER */
 	if(bookmarkmanager)
 		delete bookmarkmanager;
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	g_Zapit->setStandby (false);
 	g_Sectionsd->setPauseScanning (false);
 
@@ -487,7 +488,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 			startfilename = theBookmark->getUrl();
 			sscanf (theBookmark->getTime(), "%lld", &g_startposition);
 			int vlcpos = startfilename.rfind("vlc://");
-			CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
+			CLCD::getInstance()->setMode (CLCD::MODE_MOVIE);
 			if(vlcpos==0)
 			{
 				PlayStream (STREAMTYPE_FILE);
@@ -531,7 +532,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE, m_LastMode);
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
-	CLCD::getInstance()->showServicename(g_RemoteControl->getCurrentChannelName());
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	// always exit all
 	if(bookmarkmanager)
 	{
@@ -977,7 +978,6 @@ PlayStreamThread (void *mrl)
 	//-- lcd stuff --
 	int cPercent   = 0;
 	int lPercent   = -1;
-	g_lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]; 
 	CURLcode httpres;
 	struct dmx_pes_filter_params p;
 	ssize_t wr;
@@ -1203,10 +1203,8 @@ PlayStreamThread (void *mrl)
 							if (counter == 0 || counter == 120) {
     					  		cPercent = (VlcGetStreamTime() * 100) / length;
     					  		if (lPercent != cPercent)	{
-    						  		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] = g_lcdSetting;
     						  		lPercent = cPercent;
-    						  		CLCD::getInstance()->showPercentOver(cPercent);
-    						  		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] = 1;
+    						  		CLCD::getInstance()->showPercentOver(lPercent, true, CLCD::MODE_MOVIE);
     						  	}
 						  	   counter = 119;
 							} else {
@@ -1260,7 +1258,6 @@ PlayStreamThread (void *mrl)
 
 		checkAspectRatio(vdec, false);
 	}
-	g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=g_lcdSetting;
 
 	ioctl (vdec, VIDEO_STOP);
 	ioctl (adec, AUDIO_STOP);
@@ -1331,7 +1328,7 @@ void updateLcd(const std::string & sel_filename)
 			StrSearchReplace(lcd,"_", " ");
 			break;
 	}
-	CLCD::getInstance()->showMoviename(lcd);
+	CLCD::getInstance()->setMovieInfo("", lcd);
 }
 
 // GMO snip start ...
@@ -2361,7 +2358,6 @@ static void mp_checkEvent(MP_CTX *ctx)
 			if(ctx->isStream)	break;
 			if(g_lcdSetting != -1)
 			{
-				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=g_lcdSetting;
 				g_lcdUpdateTsMode=true;
 			}
 if(g_settings.streaming_use_buffer)
@@ -2902,7 +2898,6 @@ if(g_settings.streaming_use_buffer)
 		//-- lcd stuff --
 		int cPercent   = 0;
 		int lPercent   = -1;
-		g_lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]; 
 		
 		//== (II) player loop: consists of "writer" in this thread and   ==
 		//== "reader" in an extra thread encapsulated by a queue object, ==
@@ -2932,10 +2927,8 @@ if(g_settings.streaming_use_buffer)
 						{
 				  			if (lPercent != cPercent)
 				  			{
-					  			g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=g_lcdSetting;
 					  			lPercent = cPercent;
-					  			CLCD::getInstance()->showPercentOver(cPercent);
-					  			g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=1;
+					  			CLCD::getInstance()->showPercentOver(lPercent, true, CLCD::MODE_MOVIE);
 							}
 						}
 					}
@@ -2966,7 +2959,6 @@ else
 		//lcd
 		short last_prozent=1;
 		g_prozent = 0;
-		g_lcdSetting=g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME];
 		while( (ctx->itChanged == false) &&
 				 (g_playstate >= CMoviePlayerGui::PLAY) )
 		{
@@ -2998,20 +2990,15 @@ else
 			g_prozent=(ctx->pos*100)/ctx->fileSize;
 			if((last_prozent !=g_prozent && g_lcdSetting!=1) || g_lcdUpdateTsMode)
 			{
-				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=g_lcdSetting;
-				last_prozent=g_prozent;
-				g_lcdUpdateTsMode=false;
-				CLCD::getInstance()->showPercentOver(g_prozent);
-				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=1;
+				last_prozent = g_prozent;
+				g_lcdUpdateTsMode = false;
+				CLCD::getInstance()->showPercentOver(last_prozent, true, CLCD::MODE_MOVIE);
 			}
 			//-- write stream data now --
 			write(ctx->dvr, ctx->tmpBuf, rd);
 		}
 }
 
-		//-- restore original lcd settings --			
-		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=g_lcdSetting;
-		
 		//-- close input stream --
 		//------------------------
 		if(ctx->inFd != -1)
@@ -3433,7 +3420,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				break;
 			}
 
-			CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
+			CLCD::getInstance()->setMode (CLCD::MODE_MOVIE);
 			update_lcd = true;
 		}
 
@@ -3729,8 +3716,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 						}
 					}
 				}
-				break; // do not process the old stuff
-	#endif /* MOVIEBROWSER */
+#else
 				if(bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount())
 				{
 					char timerstring[200];
@@ -3747,6 +3733,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 					fprintf(stderr, "too many bookmarks\n");
 					DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
 				}
+#endif /* MOVIEBROWSER */
 
 				break;
 
@@ -4143,7 +4130,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 					break;
 			}
 
-			CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
+			CLCD::getInstance ()->setMode (CLCD::MODE_MOVIE);
 		}
 
 		if(update_info)
@@ -4448,7 +4435,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.165 $");
+	return imageinfo.getModulVersion("","$Revision: 1.166 $");
 }
 
 void CMoviePlayerGui::showHelpTS()
