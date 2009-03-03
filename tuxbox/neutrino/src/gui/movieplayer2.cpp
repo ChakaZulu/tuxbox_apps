@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.21 2009/02/18 17:57:31 seife Exp $
+  $Id: movieplayer2.cpp,v 1.22 2009/03/03 21:06:05 seife Exp $
 
   License: GPL
 
@@ -182,7 +182,8 @@ static bool g_input_failed;
 // output thread is running <= TODO: fix this ugly kludge
 static bool g_output_thread = false;
 
-static off_t g_startposition = 0L;
+// start position in seconds for bookmarks...
+static int g_startposition = 0;
 // 32 MPEG audio streams + 8 AC3 streams, theoretically.
 #define MAX_APIDS 40
 uint16_t g_apids[MAX_APIDS];
@@ -222,7 +223,7 @@ int CAPIDSelectExec::exec(CMenuTarget* /*parent*/, const std::string & actionKey
 	if (g_currentapid != g_apids[sel-1])
 	{
 		g_currentapid = g_apids[sel-1];
-		if (g_currentac3 = g_ac3flags[sel-1])
+		if (g_currentac3 != g_ac3flags[sel-1])
 			g_ac3changed = true;
 		g_currentac3 = g_ac3flags[sel-1];
 		g_apidchanged = true;
@@ -391,7 +392,7 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 		if (theBookmark != NULL)
 		{
 			startfilename = theBookmark->getUrl();
-			sscanf(theBookmark->getTime(), "%lld", &g_startposition);
+			sscanf(theBookmark->getTime(), "%d", &g_startposition);
 			int vlcpos = startfilename.rfind("vlc://");
 			CLCD::getInstance()->setMode(CLCD::MODE_MOVIE);
 			if (vlcpos == 0)
@@ -729,7 +730,7 @@ inline int VlcGetStreamLength()
 void *
 ReceiveStreamThread(void *arg)
 {
-	INFO("started\n", __FUNCTION__);
+	INFO("started\n");
 	int skt;
 	int len;
 
@@ -1137,7 +1138,7 @@ ReadTSFileThread(void *parm)
 	filepos = mp_seekSync(fd, 0);
 	if (filepos < 0)
 		perror("ReadTSFileThread lseek");
-	INFO("file starts at %lld\n", filepos);
+	INFO("file starts at %ld\n", filepos);
 
 	pidv = 0;
 	memset(&g_apids, 0, sizeof(g_apids));
@@ -1187,7 +1188,7 @@ ReadTSFileThread(void *parm)
 	if (g_startpts == -1)
 		INFO("could not determine PTS at file start\n");
 	else
-		INFO("PTS at file start: %d\n", g_startpts);
+		INFO("PTS at file start: %ld\n", g_startpts);
 
 	lastpts = g_startpts;
 	g_pts = g_startpts;
@@ -1208,7 +1209,7 @@ ReadTSFileThread(void *parm)
 		switch(g_playstate)
 		{
 		case CMoviePlayerGui::SKIP:
-			INFO("lseek from %lld, seconds %d\n", filepos, skipseconds);
+			INFO("lseek from %ld, seconds %d\n", filepos, skipseconds);
 			filesize = lseek(fd, 0, SEEK_END);
 			if (!(g_startpts == -1 && skipabsolute)) // only jump absolute if startpts is known
 			{
@@ -1223,7 +1224,7 @@ ReadTSFileThread(void *parm)
 				// smooth = 0;
 				last = 0;
 				bufferingBox->paint();
-				INFO("lseek to %lld, size %lld\n", filepos, filesize);
+				INFO("lseek to %ld, size %ld\n", filepos, filesize);
 				if (mp_seekSync(fd, filepos) < 0)
 					perror("ReadTSFileThread lseek");
 			}
@@ -1319,7 +1320,7 @@ ReadTSFileThread(void *parm)
 								time_t timediff = skipseconds - get_filetime();
 								if (skipretry++ < 10 && abs(timediff) > 10)
 								{
-									INFO("offset > 10 seconds (%d), retry skipping...(%d)\n", timediff, skipretry);
+									INFO("offset > 10 seconds (%ld), retry skipping...(%d)\n", timediff, skipretry);
 									g_skiprequest = true;
 								}
 								else
@@ -1466,7 +1467,7 @@ ReadMPEGFileThread(void *parm)
 		switch(g_playstate)
 		{
 		case CMoviePlayerGui::SKIP:
-			INFO("lseek from %lld, seconds %d\n", filepos, skipseconds);
+			INFO("lseek from %ld, seconds %d\n", filepos, skipseconds);
 			filesize = lseek(fd, 0, SEEK_END);
 			if (!(g_startpts == -1 && skipabsolute)) // only jump absolute if startpts is known
 			{
@@ -1484,7 +1485,7 @@ ReadMPEGFileThread(void *parm)
 				// smooth = 0; // reset the bitrate smoothing counter after seek?
 				last = 0;
 				bufferingBox->paint();
-				INFO("lseek to %lld, size %lld\n", filepos, filesize);
+				INFO("lseek to %ld, size %ld\n", filepos, filesize);
 				if (lseek(fd, filepos, SEEK_SET) < 0)
 					perror("ReadMPEGFileThread lseek");
 			}
@@ -1631,7 +1632,7 @@ ReadMPEGFileThread(void *parm)
 		rd = ringbuffer_get_readpointer(buf_in, &ppes, 10); // we need 10 bytes for AC3
 		if (rd < 10)
 		{
-			INFO("rd:%d, EOF: %s\n", rd, g_EOF ? "true" : "false");
+			INFO("rd:%ld, EOF: %s\n", rd, g_EOF ? "true" : "false");
 			usleep(300000);
 			if (g_EOF)
 				break;
@@ -1795,7 +1796,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 		pesPacketLen = ((ppes[4] << 8) | ppes[5]) + 6;
 		if (ringbuffer_read_space(buf_in) < pesPacketLen)
 		{
-			INFO("ringbuffer: %ld, pesPacketLen: %ld :-(\n", ringbuffer_read_space(buf_in), pesPacketLen);
+			INFO("ringbuffer: %ld, pesPacketLen: %d :-(\n", ringbuffer_read_space(buf_in), pesPacketLen);
 			continue;
 		}
 
@@ -1816,14 +1817,14 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 					if (g_startpts == -1) // only works if we are starting from the start of the file
 					{
 						g_startpts = pts;
-						INFO("startpts = %d\n", g_startpts);
+						INFO("startpts = %ld\n", g_startpts);
 					}
 					if (skipabsolute && !g_skiprequest)
 					{
 						time_t timediff = skipseconds - get_filetime();
 						if (skipretry++ < 10 && abs(timediff) > 10)
 						{
-							INFO("offset > 10 seconds (%d), retry skipping...(%d)\n", timediff, skipretry);
+							INFO("offset > 10 seconds (%ld), retry skipping...(%d)\n", timediff, skipretry);
 							g_skiprequest = true;
 						}
 						else
@@ -1921,7 +1922,7 @@ OutputThread(void *arg)
 
 	ringbuf = ringbuffer_create(RINGBUFFERSIZE);
 	if (ringbuf)
-		INFO("ringbuffer (size %d) created\n", ringbuffer_write_space(ringbuf));
+		INFO("ringbuffer (size %ld) created\n", ringbuffer_write_space(ringbuf));
 	else
 	{
 		INFO("ringbuffer_create failed!\n");
@@ -2117,7 +2118,7 @@ OutputThread(void *arg)
 						break;
 					}
 					ioctl(dmxa, DMX_STOP);
-					INFO("len: %d, buffering...\n", len);
+					INFO("len: %ld, buffering...\n", len);
 					/*
 					 * always call bufferingBox->paint() before setting bufferfilled to false
 					 * to ensure that it is painted completely before bufferingBox->hide()
@@ -2281,7 +2282,7 @@ static off_t mp_seekSync(int fd, off_t pos)
 
 	ret = lseek(fd, npos, SEEK_SET);
 	if (ret < 0)
-		INFO("lseek ret = %d (%m)\n", ret);
+		INFO("lseek ret < 0 (%m)\n");
 
 	while (read(fd, pkt, 1) > 0)
 	{
@@ -2296,14 +2297,14 @@ static off_t mp_seekSync(int fd, off_t pos)
 				{
 					ret = lseek(fd, npos-1, SEEK_SET); // assume sync ok
 					if (ret < 0)
-						INFO("lseek ret = %d (%m)\n", ret);
+						INFO("lseek ret < 0 (%m)\n");
 					return ret;
 				}
 				else
 				{
 					ret = lseek(fd, npos, SEEK_SET); // oops, next pkt doesn't start with sync
 					if (ret < 0)
-						INFO("lseek ret = %d (%m)\n", ret);
+						INFO("lseek ret < 0 (%m)\n");
 				}
 			}
 		}
@@ -3037,7 +3038,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.21 $");
+	return imageinfo.getModulVersion("","$Revision: 1.22 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
