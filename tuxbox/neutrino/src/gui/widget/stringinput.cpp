@@ -802,7 +802,7 @@ int CPLPINInput::exec( CMenuTarget* parent, const std::string & )
 	if (pixbuf != NULL)
 	{
 		frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
-		delete pixbuf;
+		delete[] pixbuf;
 	}
 
 	return ( res );
