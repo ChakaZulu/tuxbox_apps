@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.207 2009/03/01 14:01:11 rhabarber1848 Exp $
+	$Id: channellist.cpp,v 1.208 2009/03/03 15:33:32 rhabarber1848 Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -1283,6 +1283,7 @@ void CChannelList::paintHead()
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+width-10-timestr_len, y+theight+0, timestr_len+1, timestr, COL_MENUHEAD, 0, true); // UTF-8
 	}
 
+	delete[] timestr;
 	paintFoot();
 }
 
