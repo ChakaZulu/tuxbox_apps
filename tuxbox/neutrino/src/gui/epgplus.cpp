@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.45 2009/02/23 20:06:41 rhabarber1848 Exp $
+	$Id: epgplus.cpp,v 1.46 2009/03/05 20:47:56 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1878,7 +1878,7 @@ int EpgPlus::exec
 							is_visible = false;
 							this->hide();
 							
-							frameBuffer->paintBoxRel(this->usableScreenX+ this->usableScreenWidth- epgplus_len- dbox_icon_width- 2- 2, this->usableScreenY, epgplus_len+ dbox_icon_width+ 2+ 2, theight+0, COL_MENUHEAD_PLUS_0, RADIUS_MID);
+							frameBuffer->paintBoxRel(this->usableScreenX+ this->usableScreenWidth- epgplus_len- dbox_icon_width- 2- 2, this->usableScreenY, epgplus_len+ dbox_icon_width+ 2+ 2, theight+0, COL_MENUHEAD_PLUS_0, RADIUS_SMALL);
 							frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, this->usableScreenX+ this->usableScreenWidth- epgplus_len- dbox_icon_width- 2, this->usableScreenY);
 							this->header->font->RenderString(this->usableScreenX+ this->usableScreenWidth- epgplus_len, this->usableScreenY+ theight+0, epgplus_len, EPG_Plus, this->header->color, 0, true); // UTF-8							
 						}
