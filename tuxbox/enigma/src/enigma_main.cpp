@@ -2170,6 +2170,10 @@ void eZapMain::setEPGButton(bool b)
 		ButtonRedDis->hide();
 		ButtonRedEn->show();
 		isEPG = 1;
+		
+		int eitcache=0;
+		(eConfig::getInstance()->getKey("/ezap/osd/useEPGCache", eitcache));
+		if (eitcache) gotEIT();
 	}
 	else
 	{
@@ -2363,6 +2367,124 @@ void eZapMain::setEIT(EIT *eit)
 	ePtrList<EITEvent> dummy;
 	if (actual_eventDisplay)
 		actual_eventDisplay->setList(eit?eit->events:dummy);
+}
+int eZapMain::setEITcache()
+{
+	eDebug("eZapMain::setEITcache");
+	cur_event_text="";
+	int ret=0;
+
+	eServiceReferenceDVB &ref=(eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
+
+	eEPGCache::getInstance()->Lock();
+	const timeMap* pMap = eEPGCache::getInstance()->getTimeMap(ref);
+
+	if (pMap)
+	{
+		timeMap::const_iterator It;
+		int tsidonid = (ref.getTransportStreamID().get()<<16)|ref.getOriginalNetworkID().get();
+		
+		eString nowtext, nexttext, nowtime="", nexttime="", descr;
+		int val=0, p=0;
+
+		for (It = pMap->begin(); It != pMap->end(); It++)
+		{
+			EITEvent event(*It->second,tsidonid);
+
+			if ((event.running_status>=2) || ((!p) && (!event.running_status)))
+			{
+				cur_event_id=event.event_id;
+				cur_start=event.start_time;
+				cur_duration=event.duration;
+				clockUpdate();
+			}
+
+			LocalEventData led;
+			switch(p)
+			{
+				case 0:
+					led.getLocalData(&event, &nowtext, &descr);
+					cur_event_text=nowtext;
+
+					if (nowtext)
+						val|=1;
+					break;
+
+				case 1:
+					led.getLocalData(&event, &nexttext);
+
+					if (nexttext)
+						val|=2;
+					break;
+			}
+ 
+			tm *t=event.start_time!=-1?localtime(&event.start_time):0;
+			eString start="";
+			if (t && event.duration)
+				start.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
+			eString duration;
+			if (event.duration>0)
+				duration.sprintf("%d min", event.duration/60);
+			else
+				duration="";
+			switch (p)
+			{
+				case 0:
+				{
+					int show_current_remaining=1;
+					eConfig::getInstance()->getKey("/ezap/osd/showCurrentRemaining", show_current_remaining);
+					if (!show_current_remaining || !eDVB::getInstance()->time_difference )
+						EINowDuration->setText(duration);
+					nowtime=start;
+					EINowTime->setText(nowtime);
+					break;
+				}
+				case 1:
+				{
+					EINextDuration->setText(duration);
+					nexttime=start;
+					EINextTime->setText(nexttime);
+					break;
+				}
+			}
+			Description->setText(descr);
+			p++;
+		}
+
+		if (val&1)
+		{
+			fileinfos->setText(nowtext);
+			EINow->setText(nowtext);
+#ifndef DISABLE_LCD
+			lcdmain.lcdMain->setLcdEpgNow(nowtext);
+#endif
+		}
+
+		if (val&2)
+			EINext->setText(nexttext);
+#ifndef DISABLE_LCD
+			lcdmain.lcdMain->setLcdEpgNext(nexttext);
+#endif
+
+		ret=1;
+	}
+	else
+	{
+		fileinfos->setText("");
+		EINow->setText(_("no EPG available"));
+		EINext->setText("");
+#ifndef DISABLE_LCD
+		lcdmain.lcdMain->setLcdEpgNow(_("no EPG available"));
+		lcdmain.lcdMain->setLcdEpgNext("");
+#endif
+		EINowDuration->setText("");
+		EINextDuration->setText("");
+		EINowTime->setText("");
+		EINextTime->setText("");
+	}
+
+	eEPGCache::getInstance()->Unlock();
+	return ret;
 }
 
 void eZapMain::updateServiceNum( const eServiceReference &_serviceref )
@@ -6757,9 +6879,15 @@ void eZapMain::gotEIT()
 
 	EIT *eit=sapi->getEIT();
 	int old_start=cur_start;
-	setEIT(eit);
+	int cache=0, cset=0;
+	eConfig::getInstance()->getKey("/ezap/osd/useEPGCache", cache);	
 
-	if (eit)
+	if (isEPG && cache)
+		cset = setEITcache();
+	else
+		setEIT(eit);
+
+	if (eit || cset)	
 	{
 		int state=0;
 		if (old_start != cur_start)
@@ -6781,7 +6909,8 @@ void eZapMain::gotEIT()
 				}
 			}
 		}
-		eit->unlock();
+		if (eit)
+			eit->unlock();		
 	}
 	else
 		eDebug("no eit");
