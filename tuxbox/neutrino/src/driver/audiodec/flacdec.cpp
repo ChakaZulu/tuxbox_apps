@@ -475,15 +475,24 @@ CBaseDec::RetCode CFlacDec::Decoder(FILE *in, const int OutputFd, State* const s
 			}
 		}
 
+		if (FLAC__stream_decoder_get_state(mFlacDec) == FLAC__STREAM_DECODER_END_OF_STREAM) {
+		    rval = false;
+		    break;
+		}
+
 		rval = FLAC__stream_decoder_process_single(mFlacDec);
 		// TODO: calculate time_played from the actual file position so that REW/FF actions will be included
 		*time_played = (mSamplesProcessed * (mLengthInMsec/1000)) / mTotalSamples;
 
-	} while (rval == FLAC__stream_decoder_process_single(mFlacDec) && *state!=STOP_REQ && Status==OK);
+	} while (rval && *state!=STOP_REQ && Status==OK);
 
 	// let buffer run dry
-	while(rval==0 && *state!=STOP_REQ && Status==OK /* && mReadSlot != mWriteSlot*/)
+	printf("let buffer run dry\n");
+	while (rval==true && *state!=STOP_REQ && Status==OK /* && mReadSlot != mWriteSlot*/)
+	{
+		printf("...drying - *state=%x, Status=%x\n", *state, Status);
 		usleep(100000);
+	}
 
 	/* clean up the junk from the party */
 	if (mMetadata)
