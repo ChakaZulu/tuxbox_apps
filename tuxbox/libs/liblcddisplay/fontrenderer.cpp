@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.11 2009/02/24 19:09:06 seife Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.12 2009/03/05 20:50:09 rhabarber1848 Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -133,6 +133,7 @@ const char * LcdFontRenderClass::AddFont(const char * const filename)
 	if ((error=FT_New_Face(library, filename, 0, &face)))
 	{
 		printf(" failed: %i\n", error);
+		delete n;
 		return NULL;
 	}
 	n->filename = strdup(filename);

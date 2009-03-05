@@ -512,6 +512,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 #endif
 		}
 		fclose(fp);
+		free(line);
 	}
 
 	fd = open( GAMESDIR "/tetris.hscore", O_RDONLY );

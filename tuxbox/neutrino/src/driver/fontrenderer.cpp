@@ -156,6 +156,7 @@ const char *FBFontRenderClass::AddFont(const char * const filename, const bool m
 	if ((error=FT_New_Face(library, filename, 0, &face)))
 	{
 		dprintf(DEBUG_NORMAL, "[FONT] adding font %s, failed: %i\n", filename, error);
+		delete n;
 		return NULL;
 	}
 	n->filename = strdup(filename);

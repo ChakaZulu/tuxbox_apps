@@ -231,9 +231,10 @@ std::vector<UPnPEntry> *CUpnpBrowserGui::decodeResult(std::string result)
 	parser = new XMLTreeParser("UTF-8");
 	parser->Parse(result.c_str(), result.size(), 1);
 	root=parser->RootNode();
-	if (!root)
+	if (!root){
+		delete parser;
 		return NULL;
-
+	}
 	entries = new std::vector<UPnPEntry>;
 
 	for (node=root->GetChild(); node; node=node->GetNext())
@@ -378,6 +379,7 @@ std::vector<UPnPEntry> *CUpnpBrowserGui::decodeResult(std::string result)
 			entries->push_back(entry);
 		}
 	}
+	delete parser;
 	return entries;
 }
 

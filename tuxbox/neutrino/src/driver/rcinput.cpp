@@ -856,7 +856,7 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 									gettimeofday( &tv, NULL );
 									long long timeNew = tv.tv_usec + tv.tv_sec * 1000000LL;
 
-									delete p;
+									delete [] p;
 									p= new unsigned char[ sizeof(long long) ];
 									*(long long*) p = timeNew - timeOld;
 
@@ -1105,7 +1105,7 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 						printf("[neutrino] event - unknown initiatorID 0x%x\n",  emsg.initiatorID);
 			 		if ( !dont_delete_p )
 			 		{
-			 			delete p;
+			 			delete [] p;
 			 			p= NULL;
 			 		}
 			 	}

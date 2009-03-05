@@ -188,7 +188,7 @@ int	Compress( const char* filename )
 	fclose( out );
 
 	Decompress( filename_out );
-	
+	free(filename_out);
 
 	return 0;
 }
@@ -214,6 +214,7 @@ int Decompress( const char* filename )
 	if( cursor == 255 || EOF == filename_out[cursor] )
 	{
 		printf( "Decompress: invalid file format!\n" );
+		fclose( in );
 		return 3;
 	}
 
@@ -225,6 +226,7 @@ int Decompress( const char* filename )
 	if( NULL == out )
 	{
 		printf("Cannot create [%s] for output\n", filename_out );
+		fclose( in );
 		return 2;
 	}
 
@@ -237,6 +239,8 @@ int Decompress( const char* filename )
 		if( !(byte&128) )
 		{
 			printf("Some error while decompressing!");
+			fclose( in );
+			fclose( out );
 			return 3;
 		}
 

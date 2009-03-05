@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimagecramfs.cpp,v 1.5 2002/06/29 14:31:50 waldi Exp $
+ * $Id: flashimagecramfs.cpp,v 1.6 2009/03/05 20:50:09 rhabarber1848 Exp $
  */
 
 #include <flashimagecramfs.hpp>
@@ -190,7 +190,7 @@ unsigned long FlashImage::FlashImageCramFS::readdir ( std::istream &, unsigned l
         if ( S_ISDIR ( CRAMFS_16 ( inode -> mode ) ) )
         {
           unsigned int ret = readdir ( stream, CRAMFS_GET_OFFSET ( inode ) << 2, CRAMFS_24 ( inode -> size ), filename );
-          delete buf;
+          delete [] buf;
           return ret;
         }
         else if ( S_ISREG ( CRAMFS_16 ( inode -> mode ) ) )
@@ -207,7 +207,7 @@ unsigned long FlashImage::FlashImageCramFS::readdir ( std::istream &, unsigned l
 
   catch ( ... )
   {
-    delete buf;
+    delete [] buf;
     throw;
   }
 }
@@ -271,11 +271,9 @@ void FlashImage::FlashImageCramFS::decompress ( std::istream & stream, std::ostr
   catch ( ... )
   {
     inflateEnd ( & z );
-    delete buf_in;
-    delete buf_block;
   }
 
-  delete buf_in;
-  delete buf_block;
+  delete [] buf_in;
+  delete [] buf_block;
 }
 

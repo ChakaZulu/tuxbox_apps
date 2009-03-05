@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.131 2009/01/24 15:24:46 seife Exp $
+	$Id: update.cpp,v 1.132 2009/03/05 20:50:10 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -652,6 +652,7 @@ void CFlashExpert::showMTDSelector(const std::string & actionkey)
 		mtdselector->addItem(new CMenuForwarderNonLocalized(mtdInfo->getMTDName(x).c_str(), true, NULL, this, sActionKey));
 	}
 	mtdselector->exec(NULL,"");
+	delete mtdselector;
 }
 
 void CFlashExpert::showFileSelector(const std::string & actionkey)
@@ -687,6 +688,7 @@ void CFlashExpert::showFileSelector(const std::string & actionkey)
 		free(namelist);
 	}
 	fileselector->exec(NULL,"");
+	delete fileselector;
 }
 
 
