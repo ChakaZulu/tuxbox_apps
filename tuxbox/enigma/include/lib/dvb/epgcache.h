@@ -137,6 +137,7 @@ public:
 	{
 		return fromBCD(EITdata[7])*3600+fromBCD(EITdata[8])*60+fromBCD(EITdata[9]);
 	}
+	bool search(int tsidonid, const eString &search, int intExactMatch, int intCaseSensitive, int genre, int Range);
 };
 
 class eEPGCache;

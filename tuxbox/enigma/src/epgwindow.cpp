@@ -25,12 +25,7 @@ eString LocalEventData::primary_language;
 eString LocalEventData::secondary_language;
 eString now_text;
 int myEPGSearch;
-vecEPGSearch mEPGSearch;
 
-bool sortByEventStart(const EPGSEARCHDATA& a, const EPGSEARCHDATA& b)
-{
-	return a.EventStart < b.EventStart;
-}
 
 eAutoInitP0<epgSelectorActions> i_epgSelectorActions(eAutoInitNumbers::actions, "epg selector actions");
 
@@ -332,6 +327,10 @@ void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)
 eEPGSelector::eEPGSelector(const eServiceReferenceDVB &service)
 	:eWindow(0), current(service)
 {
+	init_eEPGSelector(NULL);
+}
+void eEPGSelector::init_eEPGSelector(eString* pSearchString)
+{
 	events = new eListBox<eListBoxEntryEPG>(this);
 	events->setName("events");
 	events->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
@@ -341,7 +340,14 @@ eEPGSelector::eEPGSelector(const eServiceReferenceDVB &service)
 
 	CONNECT(events->selected, eEPGSelector::entrySelected);
 	myEPGSearch = 0;
-	fillEPGList();
+	if (pSearchString)
+	{
+		myEPGSearch = 1;
+		fillEPGSearchList();
+		setText(eString(_("EPG Search")) +": " + *pSearchString);
+	}
+	else
+		fillEPGList();
 	addActionMap( &i_epgSelectorActions->map );
 #ifndef DISABLE_FILE
 	addActionToHelpList( &i_epgSelectorActions->addDVRTimerEvent );
@@ -356,25 +362,7 @@ eEPGSelector::eEPGSelector(const eServiceReferenceDVB &service)
 
 eEPGSelector::eEPGSelector(eString SearchString):eWindow(0)
 {
-	events = new eListBox<eListBoxEntryEPG>(this);
-	events->setName("events");
-	events->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
-	if (eSkin::getActive()->build(this, "eEPGSelector"))
-		eWarning("EPG selector widget build failed!");
-	CONNECT(events->selected, eEPGSelector::entrySelected);
-	myEPGSearch = 1;
-	fillEPGSearchList();
-	setText(eString(_("EPG Search")) +": " + SearchString);
-	addActionMap( &i_epgSelectorActions->map );
-#ifndef DISABLE_FILE
-	addActionToHelpList( &i_epgSelectorActions->addDVRTimerEvent );
-#endif
-#ifndef DISABLE_NETWORK
-	addActionToHelpList( &i_epgSelectorActions->addNGRABTimerEvent );
-#endif
-	addActionToHelpList( &i_epgSelectorActions->addSwitchTimerEvent );
-	addActionToHelpList( &i_epgSelectorActions->removeTimerEvent );
-	setHelpID(12);
+	init_eEPGSelector(&SearchString);
 }
 void eEPGSelector::fillEPGSearchList()
 {
@@ -382,15 +370,19 @@ void eEPGSelector::fillEPGSearchList()
 	SearchEPGDATA1 = eEPGSearchDATA::getInstance()->getSearchData();
 	for (SearchEPGDATA::iterator a = SearchEPGDATA1.begin(); a != SearchEPGDATA1.end(); a++)
 	{
-		EITEvent *e = new EITEvent();
-		e->start_time = a->start_time;
-		e->duration = a->duration;
-		e->event_id = -1;
+		EITEvent e;
+		e.start_time = a->start_time;
+		e.duration = a->duration;
+		e.event_id = -1;
 		eServiceReference Ref;
 		Ref = a->ref;
-		Ref.descr = a->name + "/" + a->title;
-		now_text = a->name + ": " + a->title;
-		new eListBoxEntryEPG(*e, events, Ref);
+		eService *s = eTransponderList::getInstance()->searchService( a->ref );
+		if (s)
+		{
+			Ref.descr = s->service_name + "/" + a->title;
+			now_text = s->service_name + ": " + a->title;
+			new eListBoxEntryEPG(e, events, Ref);
+		}
 	}
 	eEPGSearchDATA::getInstance()->clearList();
 }
@@ -406,7 +398,7 @@ int eEPGSelector::eventHandler(const eWidgetEvent &event)
 				if (!myEPGSearch)
 				{
 					hide();
-					eEPGSearch *dd = new eEPGSearch(current, events->getCurrent()->event);
+					eEPGSearch *dd = new eEPGSearch(current,NULL, &events->getCurrent()->event);
 					dd->show();
 					int back = 2;
 					do

@@ -42,6 +42,7 @@ private:
 	void entrySelected(eListBoxEntryEPG *entry);
 	int eventHandler(const eWidgetEvent &event);
 	eString EPGSearchName;
+	void init_eEPGSelector(eString* pSearchString);
 public:
 	eEPGSelector(const eServiceReferenceDVB &service);
 	eEPGSelector(eString SearchString); // EPG Search :-)

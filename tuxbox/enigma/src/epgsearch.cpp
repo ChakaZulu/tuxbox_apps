@@ -1,5 +1,5 @@
 /*
- * $Id: epgsearch.cpp,v 1.1 2008/10/25 14:22:07 dbluelle Exp $
+ * $Id: epgsearch.cpp,v 1.2 2009/03/05 17:32:39 dbluelle Exp $
  *
  * (C) 2008 by Dr. Best  <dr.best@dreambox-tools.info>
  *
@@ -19,6 +19,7 @@
  *
  */
 
+#include <enigma.h>
 #include <epgsearch.h>
 #include <lib/gdi/font.h> // eTextPara
 #include <stdio.h>
@@ -32,509 +33,87 @@ bool sortByEventStart(const SEARCH_EPG_DATA& a, const SEARCH_EPG_DATA& b)
         return a.start_time < b.start_time;
 }
 
-static int searchforEvent(EITEvent *ev, const eString &search, eString &titlefound, eServiceReferenceDVB &new_ref, int intExactMatch, int intCaseSensitive, int genre)
+
+struct eSearchService
 {
-	eString title;
-	eString sFind;
-	
-	int intFound = 0;
-
-	// Genre Suchkriterium schlägt immer Titelsuche ;)
-	if ( genre != 0)
-	{
-		int Range = 0;
-		switch (genre)
-		{
-			case 32:
-				Range = 36;
-				break;
-			case 48:
-				Range = 51;
-				break;
-			case 64:
-				Range = 75;
-				break;
-			case 80:
-				Range = 85;
-				break;
-			case 96:
-				Range = 102;
-				break;
-			case 112:
-				Range = 123;
-				break;
-			case 128:
-				Range = 131;
-				break;
-			case 144:
-				Range = 151;
-				break;
-			case 160:
-				Range = 167;
-				break;
-			case 176:
-				Range = 179;
-				break;
-			default:
-				break;
-
-		}
-
-		for (ePtrList<Descriptor>::iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
-		{
-			Descriptor *descriptor=*d;
-			if(descriptor->Tag()==DESCR_CONTENT)
-			{
-				ContentDescriptor *cod=(ContentDescriptor*)descriptor;
-
-				for(ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
-				{
-
-					if ( genre < 32 )
-					{
-						if (genre  == ce->content_nibble_level_1*16+ce->content_nibble_level_2)
-							intFound = 1;
-					}
-					else
-					{
-						int genreID = ce->content_nibble_level_1*16+ce->content_nibble_level_2;
-						if ( (genreID >= genre) && (genreID <= Range))
-							intFound = 1;
-					}
-				}
-			}
-		}
-		if (intFound)
-		{
-			LocalEventData led;
-			led.getLocalData(ev, &title, 0);
-			titlefound = title;
-		}
-	}
-	else
-	{
-		if (search != "")
-		{
-			LocalEventData led;
-			
-			led.getLocalData(ev, &title, 0);
-			titlefound = title;
-			if (intExactMatch || intCaseSensitive) 
-				sFind = title;
-			else
-				sFind = title.upper();
-			if (!intExactMatch)
-			{
-				if (sFind.find(search) != eString::npos)
-					intFound = 1;
-			}
-			else
-			{
-				if (!strcmp(search.c_str(),sFind.c_str()))
-					intFound = 1;
-			}
-		}
-	}
-	if (intFound)
-	{
-		for (ePtrList<Descriptor>::iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
-		{
-			Descriptor *descriptor=*d;
-			if (descriptor->Tag() == DESCR_LINKAGE)
-			{
-					LinkageDescriptor *ld=(LinkageDescriptor*)descriptor;
-					if (ld->linkage_type==0xB0)
-					{
-						eServiceReferenceDVB MySubService(new_ref.getDVBNamespace(),
-							eTransportStreamID(ld->transport_stream_id),
-							eOriginalNetworkID(ld->original_network_id),
-							eServiceID(ld->service_id), 7);
-						new_ref = MySubService;
-						break;
-					}
-			}
-		}
-	}
-	return intFound;
-}
-
-static void SearchInChannel(const eServiceReference &e, eString search, int begin, int intExactMatch, int intCaseSensitive, int genre)
-{
-	int duration = 0;
-	if ((search != "") || (genre != 0))
-	{
-		eEPGCache *epgcache=eEPGCache::getInstance();
-		eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
-		epgcache->Lock();
-		const timeMap *evmap = epgcache->getTimeMap((eServiceReferenceDVB&)ref);
-		if (!evmap)
-		{
-			epgcache->Unlock();
-			// nix gefunden :-(
-		}
-		else
-		{
-			eServiceReferenceDVB &rref=(eServiceReferenceDVB&)ref;
-			timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
-			if (begin != 0)
-			{
-				ibegin = evmap->lower_bound(begin);
-				if ((ibegin != evmap->end()) && (ibegin != evmap->begin()))
-					--ibegin;
-				else
-					ibegin=evmap->begin();
-		
-				timeMap::const_iterator iend = evmap->upper_bound(begin + duration);
-				if (iend != evmap->end())
-					++iend;
-			}
-			int tsidonid =(rref.getTransportStreamID().get()<<16)|rref.getOriginalNetworkID().get();
-			eService* current;
-			eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-			if (sapi)
-			{
-				current = eDVB::getInstance()->settings->getTransponders()->searchService(e);
-				if (current)
-				{
-					for (timeMap::const_iterator event(ibegin); event != iend; ++event)
-					{
-						EITEvent *ev = new EITEvent(*event->second, tsidonid);
-						eString titleFound = "";
-						int intFound = 0;
-						eServiceReferenceDVB _ref = rref;
-						intFound = searchforEvent( ev, search, titleFound, _ref, intExactMatch, intCaseSensitive, genre);
-						if (intFound)
-						{
-							SEARCH_EPG_DATA tempSEARCH_EPG_DATA;
-							tempSEARCH_EPG_DATA.ref = (eServiceReference)_ref;
-							tempSEARCH_EPG_DATA.name = current->service_name;
-							tempSEARCH_EPG_DATA.start_time = ev->start_time;
-							tempSEARCH_EPG_DATA.duration = ev->duration;
-							tempSEARCH_EPG_DATA.title = titleFound;
-							SearchResultsEPG.push_back(tempSEARCH_EPG_DATA);
-						}
-						delete ev;
-					}
-				}
-			}
-			epgcache->Unlock();
-			if ( SearchResultsEPG.size())
-				sort(SearchResultsEPG.begin(), SearchResultsEPG.end(), sortByEventStart);
-		}
-	}
-}
-
-static void SearchInChannel(const eServiceReference &e, eString search, int intExactMatch, int intCaseSensitive, int TimeSpanSearch, tm beginTime, tm endTime, int Days, int Max_Duration)
-{
-	if (search != "")
-	{
-		eEPGCache *epgcache=eEPGCache::getInstance();
-		eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
-		epgcache->Lock();
-		const timeMap *evmap = epgcache->getTimeMap((eServiceReferenceDVB&)ref);
-		if (!evmap)
-		{
-			epgcache->Unlock();
-			// nix gefunden :-(
-		}
-		else
-		{
-			eServiceReferenceDVB &rref=(eServiceReferenceDVB&)ref;
-			timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
-			int tsidonid =(rref.getTransportStreamID().get()<<16)|rref.getOriginalNetworkID().get();
-			eService* current;
-			eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-			if (sapi)
-			{
-				current = eDVB::getInstance()->settings->getTransponders()->searchService(e);
-				if (current)
-				{
-					for (timeMap::const_iterator event(ibegin); event != iend; ++event)
-					{
-						EITEvent *ev = new EITEvent(*event->second, tsidonid);
-						int Event_duration = ev->duration;
-						int dosearch = 0;
-						// Anfangs+Endzeit
-						if ( TimeSpanSearch )
-						{
-							tm Event_beginTime = *localtime( &ev->start_time);
-
-							beginTime.tm_year = Event_beginTime.tm_year;
-							beginTime.tm_mon = Event_beginTime.tm_mon;
-							beginTime.tm_mday = Event_beginTime.tm_mday;
-							time_t StartTime = mktime(&beginTime);
-
-							time_t tmp = ev->start_time + ev->duration;
-							tm Event_endTime = *localtime( &tmp );
-							
-							endTime.tm_year = Event_endTime.tm_year;
-							endTime.tm_mon = Event_endTime.tm_mon;
-							endTime.tm_mday = Event_endTime.tm_mday;
-							time_t EndTime = mktime(&endTime);
-
-							if (( StartTime <= ev->start_time) && ( EndTime >= tmp))
-								dosearch = 1;
-						}
-						else
-							dosearch = 1;
-						// max. Laenge
-						if ((Max_Duration != -1) && dosearch)
-						{
-							if ((Max_Duration*60) < Event_duration)
-								dosearch = 0;
-						}
-						// Tage
-						if ((Days != -1) && dosearch)
-						{
-							tm Event_beginTime = *localtime( &ev->start_time);	
-							int i = ePlaylistEntry::Su;
-							for ( int x = 0; x < Event_beginTime.tm_wday; x++ )
-								i*=2;
-							if (!( Days & i ))
-								dosearch = 0;
-						}
-						if ( dosearch )
-						{
-							eString titleFound = "";
-							int intFound = 0;
-							eServiceReferenceDVB _ref = rref;
-							intFound = searchforEvent( ev, search, titleFound, _ref, intExactMatch, intCaseSensitive, 0);
-							if (intFound)
-							{
-								SEARCH_EPG_DATA tempSEARCH_EPG_DATA;
-								tempSEARCH_EPG_DATA.ref = (eServiceReference)_ref;
-								tempSEARCH_EPG_DATA.name = current->service_name;
-								tempSEARCH_EPG_DATA.start_time = ev->start_time;
-								tempSEARCH_EPG_DATA.duration = ev->duration;
-								tempSEARCH_EPG_DATA.title = titleFound;
-								SearchResultsEPG.push_back(tempSEARCH_EPG_DATA);
-							}
-						}
-						delete ev;
-					}
-				}
-			}
-			epgcache->Unlock();
-			if ( SearchResultsEPG.size())
-				sort(SearchResultsEPG.begin(), SearchResultsEPG.end(), sortByEventStart);
-		}
-	}
-}
-
-
-class eSearchAllTVServices: public Object
-{
-	eServiceInterface &iface;
 	eString search;
-	time_t begin;
 	int intExactMatch;
 	int intCaseSensitive;
 	int genre;
-	
+	int Range;
 public:
-	eSearchAllTVServices(eServiceInterface &iface, eString search, time_t begin, int intExactMatch, int intCaseSensitive, int genre): iface(iface), search(search), begin(begin), intExactMatch(intExactMatch), intCaseSensitive(intCaseSensitive), genre(genre)
+	eSearchService(const eString &search, int intExactMatch, int intCaseSensitive, int genre, int Range):search(search),intExactMatch(intExactMatch),intCaseSensitive(intCaseSensitive),genre(genre),Range(Range)
 	{
 	}
-	void addEntry(const eServiceReference &e)
+	void operator()(const eServiceReference &e)
 	{
-		int duration = 0;
-		if ((search != "") || (genre != 0))
+		eEPGCache *epgcache=eEPGCache::getInstance();
+		eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
+		const timeMap *evmap = epgcache->getTimeMap((eServiceReferenceDVB&)ref);
+		if (evmap)
 		{
-			eEPGCache *epgcache=eEPGCache::getInstance();
-			eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
-			epgcache->Lock();
-			const timeMap *evmap = epgcache->getTimeMap((eServiceReferenceDVB&)ref);
-			if (!evmap)
+			int tsidonid = (ref.getTransportStreamID().get()<<16)|ref.getOriginalNetworkID().get();
+			timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
+			for (timeMap::const_iterator event(ibegin); event != iend; ++event)
 			{
-				epgcache->Unlock();
-				// nix gefunden :-(
-			}
-			else
-			{
-				eServiceReferenceDVB &rref=(eServiceReferenceDVB&)ref;
-				timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
-				if (begin != 0)
+				if (event->second->search(tsidonid,search,intExactMatch,intCaseSensitive,genre,Range))
 				{
-					ibegin = evmap->lower_bound(begin);
-					if ((ibegin != evmap->end()) && (ibegin != evmap->begin()))
-						--ibegin;
-					else
-						ibegin=evmap->begin();
+					EITEvent *ev = new EITEvent(*event->second, tsidonid);
+					for (ePtrList<Descriptor>::iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
+					{
+						Descriptor *descriptor=*d;
+						if (descriptor->Tag() == DESCR_LINKAGE)
+						{
+								LinkageDescriptor *ld=(LinkageDescriptor*)descriptor;
+								if (ld->linkage_type==0xB0)
+								{
+									eServiceReferenceDVB MySubService(ref.getDVBNamespace(),
+										eTransportStreamID(ld->transport_stream_id),
+										eOriginalNetworkID(ld->original_network_id),
+										eServiceID(ld->service_id), 7);
+									ref = MySubService;
+									break;
+								}
+						}
+					}
+					eString titlefound;
+					LocalEventData led;
+					led.getLocalData(ev, &titlefound, 0);
 			
-					timeMap::const_iterator iend = evmap->upper_bound(begin + duration);
-					if (iend != evmap->end())
-						++iend;
+					SEARCH_EPG_DATA tempSEARCH_EPG_DATA;
+					tempSEARCH_EPG_DATA.ref = (eServiceReference)ref;
+					tempSEARCH_EPG_DATA.start_time = ev->start_time;
+					tempSEARCH_EPG_DATA.duration = ev->duration;
+					tempSEARCH_EPG_DATA.title = titlefound;
+					SearchResultsEPG.push_back(tempSEARCH_EPG_DATA);
+					delete ev;
 				}
-				int tsidonid = (rref.getTransportStreamID().get()<<16)|rref.getOriginalNetworkID().get();
-				eService *service=iface.addRef(e);
-				if (service)
-				{
-					for (timeMap::const_iterator event(ibegin); event != iend; ++event)
-					{
-						EITEvent *ev = new EITEvent(*event->second, tsidonid);
-						int intFound = 0;
-						eString titleFound = "";
-						eServiceReferenceDVB _ref = rref;
-						intFound = searchforEvent( ev, search, titleFound, _ref, intExactMatch, intCaseSensitive, genre);
-						if (intFound)
-						{
-
-							SEARCH_EPG_DATA tempSEARCH_EPG_DATA;
-							tempSEARCH_EPG_DATA.ref = (eServiceReference)_ref;
-							tempSEARCH_EPG_DATA.name = service->service_name;
-							tempSEARCH_EPG_DATA.start_time = ev->start_time;
-							tempSEARCH_EPG_DATA.duration = ev->duration;
-							tempSEARCH_EPG_DATA.title = titleFound;
-							SearchResultsEPG.push_back(tempSEARCH_EPG_DATA);
-							
-						}
-						delete ev;
-					}
-				}
-				epgcache->Unlock();
-				if ( SearchResultsEPG.size())
-					sort(SearchResultsEPG.begin(), SearchResultsEPG.end(), sortByEventStart);
-				iface.removeRef(e);
 			}
 		}
 	}
 };
 
-class eSearchAllTVServices2: public Object
+eEPGSearch::eEPGSearch(eServiceReference& ref, const eString& CurrentEventName, EITEvent* e): eWindow(1)
 {
-	eServiceInterface &iface;
-	eString search;
-	int intExactMatch;
-	int intCaseSensitive;
-	int TimeSpanSearch;
-	tm beginTime;
-	tm endTime;
-	int Days;
-	int Max_Duration;
-	
-public:
-	eSearchAllTVServices2(eServiceInterface &iface, eString search,int intExactMatch, int intCaseSensitive, int TimeSpanSearch, tm beginTime, tm endTime, int Days, int Max_Duration): iface(iface), search(search), intExactMatch(intExactMatch), intCaseSensitive(intCaseSensitive), TimeSpanSearch(TimeSpanSearch), beginTime(beginTime), endTime(endTime), Days(Days), Max_Duration(Max_Duration)
-	{
-	}
-	void addEntry(const eServiceReference &e)
-	{
-		if (search != "")
-		{
-			eEPGCache *epgcache=eEPGCache::getInstance();
-			eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
-			epgcache->Lock();
-			const timeMap *evmap = epgcache->getTimeMap((eServiceReferenceDVB&)ref);
-			if (!evmap)
-			{
-				epgcache->Unlock();
-				// nix gefunden :-(
-			}
-			else
-			{
-				eServiceReferenceDVB &rref=(eServiceReferenceDVB&)ref;
-				timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
-				int tsidonid = (rref.getTransportStreamID().get()<<16)|rref.getOriginalNetworkID().get();
-				eService *service=iface.addRef(e);
-				if (service)
-				{
-					for (timeMap::const_iterator event(ibegin); event != iend; ++event)
-					{
-						EITEvent *ev = new EITEvent(*event->second, tsidonid);
-						int Event_duration = ev->duration;
-						int dosearch = 0;
-						// Anfangs+Endzeit
-						if ( TimeSpanSearch )
-						{
-							tm Event_beginTime = *localtime( &ev->start_time);
-
-							beginTime.tm_year = Event_beginTime.tm_year;
-							beginTime.tm_mon = Event_beginTime.tm_mon;
-							beginTime.tm_mday = Event_beginTime.tm_mday;
-							time_t StartTime = mktime(&beginTime);
-
-							time_t tmp = ev->start_time + ev->duration;
-							tm Event_endTime = *localtime( &tmp );
-							
-							endTime.tm_year = Event_endTime.tm_year;
-							endTime.tm_mon = Event_endTime.tm_mon;
-							endTime.tm_mday = Event_endTime.tm_mday;
-							time_t EndTime = mktime(&endTime);
-
-							if (( StartTime <= ev->start_time) && ( EndTime >= tmp))
-								dosearch = 1;
-						}
-						else
-							dosearch = 1;
-						// max. Laenge
-						if ((Max_Duration != -1) && dosearch)
-						{
-							if ((Max_Duration*60) < Event_duration)
-								dosearch = 0;
-						}
-						// Tage
-						if ((Days != -1) && dosearch)
-						{
-							tm Event_beginTime = *localtime( &ev->start_time);	
-							int i = ePlaylistEntry::Su;
-							for ( int x = 0; x < Event_beginTime.tm_wday; x++ )
-								i*=2;
-							if (!( Days & i ))
-								dosearch = 0;
-						}
-						if ( dosearch )
-						{
-							eString titleFound = "";
-							int intFound = 0;
-							eServiceReferenceDVB _ref = rref;
-							intFound = searchforEvent( ev, search, titleFound, _ref, intExactMatch, intCaseSensitive, 0);
-							if (intFound)
-							{
-								SEARCH_EPG_DATA tempSEARCH_EPG_DATA;
-								tempSEARCH_EPG_DATA.ref = (eServiceReference)_ref;
-								tempSEARCH_EPG_DATA.name = service->service_name;
-								tempSEARCH_EPG_DATA.start_time = ev->start_time;
-								tempSEARCH_EPG_DATA.duration = ev->duration;
-								tempSEARCH_EPG_DATA.title = titleFound;
-								SearchResultsEPG.push_back(tempSEARCH_EPG_DATA);
-							}
-						}
-						delete ev;
-					}
-				}
-				epgcache->Unlock();
-				if ( SearchResultsEPG.size())
-					sort(SearchResultsEPG.begin(), SearchResultsEPG.end(), sortByEventStart);
-			}
-			iface.removeRef(e);
-		}
-	}
-};
-
-
-eEPGSearch::eEPGSearch(eServiceReference ref, EITEvent e): eWindow(1)
+	init_eEPGSearch(ref,CurrentEventName,e);
+}
+void eEPGSearch::init_eEPGSearch(eServiceReference& ref, const eString& CurrentEventName, EITEvent* e)
 {
-	eString descr;
-	
-	for (ePtrList<Descriptor>::const_iterator d(e.descriptor); d != e.descriptor.end(); ++d)
+	SearchName = "";
+	eString descr = CurrentEventName;
+	if (e)
 	{
-		if ( d->Tag() == DESCR_SHORT_EVENT)
+		for (ePtrList<Descriptor>::const_iterator d(e->descriptor); d != e->descriptor.end(); ++d)
 		{
-			ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
-			descr=s->event_name;
-			break;
+			if ( d->Tag() == DESCR_SHORT_EVENT)
+			{
+				ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
+				descr=s->event_name;
+				break;
+			}
 		}
 	}
 	Titel = descr;
-	init_eEPGSearch(ref);
-}
-eEPGSearch::eEPGSearch(eServiceReference ref, eString CurrentEventName): eWindow(1)
-{
-	Titel = CurrentEventName;
-	init_eEPGSearch(ref);
-}
-
-void eEPGSearch::init_eEPGSearch(eServiceReference ref)
-{
 	status  = new eStatusBar(this); status->setName("statusbar");
 	
 	sServiceReference = ref2string(ref);
@@ -607,11 +186,6 @@ void eEPGSearch::init_eEPGSearch(eServiceReference ref)
 	setFocus(InputName);
 	canCheck = 1;
 }
-eEPGSearch::eEPGSearch()
-{
-	SearchName = "";
-}
-
 void eEPGSearch::cboGenreChanged(eListBoxEntryText *item)
 {
 	if (item)
@@ -662,7 +236,6 @@ void eEPGSearch::chkAllServicesStateChanged(int state)
 }
 void eEPGSearch::Search()
 {
-	hide();
 	eString h;
 	if (chkAllServices->isChecked())
 		h = _("all services");
@@ -682,9 +255,9 @@ void eEPGSearch::Search()
 		Anzeige = eString(_("Searching for ")) + eString(_("Genre:")) + cboGenre->getText() + "\nin " + h + "...";
 		SearchName = eString(_("Genre:")) + cboGenre->getText();
 	}
+	//hide();
 	eMessageBox msg(Anzeige, _("EPG Search"), eMessageBox::iconInfo);
 	msg.show();
-	sleep(1);
 	int back = Searching(InputName->getText());
 	msg.hide();
 	close(back);
@@ -697,10 +270,7 @@ eString eEPGSearch::getSearchName()
 int eEPGSearch::Searching(eString SearchName)
 {
 	eString search;
-	time_t begin = 0; //1184515200;
 	eString mDescription = SearchName;
-	eString current;
-	int intFound = 2;
 	if (chkExactMatch->isChecked())
 	{
 		intExactMatch = 1;
@@ -727,114 +297,65 @@ int eEPGSearch::Searching(eString SearchName)
 
 	int genre = 0;
 	genre = (int)cboGenre->getCurrent()->getKey();
+	int Range = 0;
+	if ( genre )
+	{
+		switch (genre)
+		{
+			case 32:
+				Range = 36;
+				break;
+			case 48:
+				Range = 51;
+				break;
+			case 64:
+				Range = 75;
+				break;
+			case 80:
+				Range = 85;
+				break;
+			case 96:
+				Range = 102;
+				break;
+			case 112:
+				Range = 123;
+				break;
+			case 128:
+				Range = 131;
+				break;
+			case 144:
+				Range = 151;
+				break;
+			case 160:
+				Range = 167;
+				break;
+			case 176:
+				Range = 179;
+				break;
+			default:
+				break;
+		}
+	}
+	eEPGCache *epgcache=eEPGCache::getInstance();
+	epgcache->Lock();
 
 	if (chkAllServices->isChecked())
 	{
-		current = "1:15:fffffffe:12:ffffffff:0:0:0:0:0:";
-		eServiceInterface *iface=eServiceInterface::getInstance();
-		if (iface)
-		{		
-			if ((search != "") || (genre != 0))
-			{
-				eServiceReference current_service=string2ref(current);
-				eSearchAllTVServices conv( *iface, search, begin, intExactMatch, intCaseSensitive, genre);
-				Signal1<void,const eServiceReference&> signal;
-				signal.connect(slot(conv, &eSearchAllTVServices::addEntry));
-				iface->enterDirectory(current_service, signal);
-				iface->leaveDirectory(current_service);
-			}
+		if ((search != "") || (genre != 0))
+		{
+			eTransponderList::getInstance()->forEachServiceReference(eSearchService(search, intExactMatch, intCaseSensitive, genre,Range));
 		}
 	}
 	else
 	{
 		eServiceReference current_service=string2ref(sServiceReference);
-		SearchInChannel(current_service, search, begin,intExactMatch, intCaseSensitive, genre);
+		eSearchService ss(search, intExactMatch, intCaseSensitive, genre,Range);
+		ss(current_service);
 	}
-	if (SearchResultsEPG.size() )
-		intFound = 0;
-	return intFound;
-}
-int eEPGSearch::EPGSearching(eString title, eServiceReference SearchRef, int AllServices, int ExactMatch, int CaseSensitive, int genre)
-{
-	eString search;
-	time_t begin = 0; //1184515200;
-	eString current;
-	int intFound = 0;
-	search = title;
-
-	
-	if (!ExactMatch && !CaseSensitive)
-		search = title.upper();
-
-	SearchResultsEPG.clear();
-	if (AllServices)
-	{
-		current = "1:15:fffffffe:12:ffffffff:0:0:0:0:0:";
-		eServiceInterface *iface=eServiceInterface::getInstance();
-		if (iface)
-		{		
-			if ((search != "") || (genre != 0))
-			{
-				eServiceReference current_service=string2ref(current);
-				eSearchAllTVServices conv( *iface, search, begin, ExactMatch, CaseSensitive, genre);
-				Signal1<void,const eServiceReference&> signal;
-				signal.connect(slot(conv, &eSearchAllTVServices::addEntry));
-				iface->enterDirectory(current_service, signal);
-				iface->leaveDirectory(current_service);
-			}
-		}
-	}
-	else
-		SearchInChannel(SearchRef, search, begin,ExactMatch, CaseSensitive, genre);
-	if (SearchResultsEPG.size() )
-		intFound = 1;
-	return intFound;
-}
-
-int eEPGSearch::EPGSearching(eString title, int ExactMatch, int CaseSensitive, int TimeSpanSearch, tm beginTime, tm endTime, int Days, int Max_Duration )
-{
-	eString search;
-	eString current;
-	int intFound = 0;
-	search = title;
-
-	
-	if (!ExactMatch && !CaseSensitive)
-		search = title.upper();
-
-	SearchResultsEPG.clear();
-	current = "1:15:fffffffe:12:ffffffff:0:0:0:0:0:";
-	eServiceInterface *iface=eServiceInterface::getInstance();
-	if (iface)
-	{		
-		if (search != "")
-		{
-			eServiceReference current_service=string2ref(current);
-			eSearchAllTVServices2 conv( *iface, search,ExactMatch, CaseSensitive, TimeSpanSearch, beginTime, endTime, Days, Max_Duration);
-			Signal1<void,const eServiceReference&> signal;
-			signal.connect(slot(conv, &eSearchAllTVServices2::addEntry));
-			iface->enterDirectory(current_service, signal);
-			iface->leaveDirectory(current_service);
-		}
-	}
-	if (SearchResultsEPG.size() )
-		intFound = 1;
-	return intFound;
-}
-
-int eEPGSearch::EPGSearching(eString title, SearchReferences SearchRefs, int ExactMatch, int CaseSensitive, int TimeSpanSearch, tm beginTime, tm endTime, int Days, int Max_Duration )
-{
-	eString search;
-	int intFound = 0;
-	search = title;
-	if (!ExactMatch && !CaseSensitive)
-		search = title.upper();
-	SearchResultsEPG.clear();
-	for (SearchReferences::iterator a = SearchRefs.begin(); a != SearchRefs.end(); a++)
-		SearchInChannel(a->SearchRef, search,ExactMatch, CaseSensitive, TimeSpanSearch, beginTime, endTime, Days, Max_Duration);
-	if (SearchResultsEPG.size() )
-		intFound = 1;
-	return intFound;
+	epgcache->Unlock();
+	if ( SearchResultsEPG.size())
+		sort(SearchResultsEPG.begin(), SearchResultsEPG.end(), sortByEventStart);
+	return SearchResultsEPG.size() ? 0: 2;
 }
 eEPGSearchDATA::eEPGSearchDATA()
 {

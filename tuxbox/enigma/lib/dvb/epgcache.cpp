@@ -126,6 +126,77 @@ const eit_event_struct* eventData::get() const
 	return (eit_event_struct*)data;
 }
 
+bool eventData::search(int tsidonid, const eString &search, int intExactMatch, int intCaseSensitive, int genre, int Range)
+{
+	int tmp = ByteSize-10;
+	__u32 *p = (__u32*)(EITdata+10);
+	char language_code[3];
+	__u8* data ;
+	eString event_name;
+	bool bGenreFound = (genre == 0);
+	bool bTextFound = (search == "");
+	while(tmp>3)
+	{
+		descriptorMap::iterator it =
+			descriptors.find(*p++);
+		if ( it != descriptors.end() )
+		{
+			switch (it->second.second[0])
+			{
+				case DESCR_SHORT_EVENT:
+					{
+						data = it->second.second;
+						memcpy(language_code, data+2, 3);
+						int ptr=5;
+						int len=data[ptr++];
+						int table = 0;
+						std::map<eString, int>::iterator it =
+							eString::CountryCodeDefaultMapping.find(eString(language_code,3));
+						if ( it != eString::CountryCodeDefaultMapping.end() )
+							table = it->second;
+						event_name=convertDVBUTF8((unsigned char*)data+ptr, len,table,tsidonid);
+						event_name.strReplace("\xc2\x8a",": ");
+						if (!(intExactMatch || intCaseSensitive))
+							event_name = event_name.upper();
+						bTextFound = (intExactMatch ? !strcmp(search.c_str(),event_name.c_str()) : (event_name.find(search) != eString::npos));
+						if (bGenreFound)
+							return bTextFound;
+						break;
+					}
+				case DESCR_CONTENT:
+					if (genre)
+					{
+						data = (it->second.second+1);
+						int len = *data;
+						__u8 *work=data+1;
+					
+						while( work < (data+len) )
+						{
+							descr_content_entry_struct *tmp = (descr_content_entry_struct*)work;
+							if ( genre < 32 )
+							{
+								bGenreFound = (genre  == tmp->content_nibble_level_1*16+tmp->content_nibble_level_2);
+							}
+							else
+							{
+								int genreID = tmp->content_nibble_level_1*16+tmp->content_nibble_level_2;
+								bGenreFound =  (genreID >= genre) && (genreID <= Range);
+							}
+							if (bGenreFound)
+								break;
+							work+=2;
+						}
+						if (bTextFound)
+							return bGenreFound;
+					}
+					break;
+			}
+		}
+		tmp-=4;
+	}
+	return false;
+}
+
 eventData::~eventData()
 {
 	if ( ByteSize )

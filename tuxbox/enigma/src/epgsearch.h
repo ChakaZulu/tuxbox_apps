@@ -51,40 +51,15 @@
 #include <lib/gui/textinput.h>
 #include <lib/gui/echeckbox.h>
 
-struct SEARCH_REFERENCES
-{
-	eServiceReference SearchRef;
-};
-typedef std::vector<SEARCH_REFERENCES> SearchReferences;
-
 struct SEARCH_EPG_DATA
 {
 	eServiceReference ref;
-	eString name;
 	int start_time;
 	int duration;
 	eString title;
 	
 };
-
 typedef std::vector<SEARCH_EPG_DATA> SearchEPGDATA;
-
-struct EPGSEARCHDATA
-{
-	int EventStart;
-	eString title;
-	EITEvent *event;
-	eServiceReference ref;
-};
-typedef std::vector<EPGSEARCHDATA> vecEPGSearch;
-
-struct EPGSEARCHLIST
-{
-	eServiceReference ref;
-	eString name;
-	vecEPGSearch EPGSearchData;
-};
-typedef std::vector<EPGSEARCHLIST> EPGSearchList;
 
 class eEPGSearch: public eWindow
 {
@@ -112,15 +87,10 @@ class eEPGSearch: public eWindow
 	void cboGenreChanged(eListBoxEntryText*);
 	int Searching(eString SearchName);
 	eString SearchName;
-	void init_eEPGSearch(eServiceReference ref);
+	void init_eEPGSearch(eServiceReference& ref,const eString& CurrentEventName, EITEvent* e);
 public:
-	eEPGSearch(eServiceReference ref, EITEvent e);
-	eEPGSearch(eServiceReference ref, eString CurrentEventName);
-	eEPGSearch();
+	eEPGSearch(eServiceReference& ref,const eString& CurrentEventName, EITEvent* e = NULL);
 	eString getSearchName();
-	int EPGSearching(eString SearchName, eServiceReference SearchRef, int AllServices, int ExactMatch, int CaseSensitive, int genre);
-	int EPGSearching(eString SearchName, SearchReferences SearchRefs, int ExactMatch, int CaseSensitive, int TimeSpanSearch, tm beginTime, tm endTime, int Days, int Max_Duration );
-	int EPGSearching(eString SearchName, int ExactMatch, int CaseSensitive, int TimeSpanSearch, tm beginTime, tm endTime, int Days, int Max_Duration );
 };
 
 class eEPGSearchDATA
