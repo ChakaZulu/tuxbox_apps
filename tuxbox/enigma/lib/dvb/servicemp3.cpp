@@ -405,7 +405,7 @@ eHTTPDataSource *eMP3Decoder::createStreamSink(eHTTPConnection *conn)
 	CONNECT(stream->metaDataUpdated, eMP3Decoder::metaDataUpdated);
 	singleLock s(lock);  // must protect access on http_status
 //eDebug("Stream-Type:%s",conn->remote_header["Content-Type"].c_str());
-	if (conn->remote_header["Content-Type"].find("ogg") != eString::npos)
+	if (conn->remote_header["Content-Type"].upper().find("OGG") != eString::npos)
 		type = eMP3Decoder::codecOGG;
 	http_status=_("buffering...");
 	handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
