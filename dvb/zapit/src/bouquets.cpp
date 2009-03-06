@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.111 2009/01/16 16:19:32 seife Exp $
+ * $Id: bouquets.cpp,v 1.112 2009/03/06 18:37:37 rhabarber1848 Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -261,7 +261,7 @@ void CBouquetManager::saveBouquets(bool includeBouquetOthers)
 	chmod(BOUQUETS_XML, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 }
 
-void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode, const char * const providerName)
+void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode)
 {
 /* //	printf("[zapit] b size %d\n", Bouquets.size());
 	if (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET)

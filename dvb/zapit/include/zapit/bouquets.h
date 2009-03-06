@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.62 2009/01/16 16:19:31 seife Exp $
+ * $Id: bouquets.h,v 1.63 2009/03/06 18:37:37 rhabarber1848 Exp $
  */
 
 #ifndef __bouquets_h__
@@ -111,7 +111,7 @@ class CBouquetManager
 		BouquetList Bouquets;
 
 		void saveBouquets(bool includeBouquetOthers = false);
-		void saveBouquets(const CZapitClient::bouquetMode bouquetMode, const char * const providerName);
+		void saveBouquets(const CZapitClient::bouquetMode bouquetMode);
 		void loadBouquets(bool ignoreBouquetFile = false);
 		void renumServices();
 

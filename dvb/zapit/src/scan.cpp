@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.161 2009/02/18 17:51:54 seife Exp $
+ * $Id: scan.cpp,v 1.162 2009/03/06 18:37:37 rhabarber1848 Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -362,7 +362,7 @@ void write_xml_footer(FILE *fd)
 	fclose(fd);
 }
 
-void write_bouquets(const char * const providerName)
+void write_bouquets(void)
 {
 	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS)
 	{
@@ -374,7 +374,7 @@ void write_bouquets(const char * const providerName)
 		INFO("leaving bouquets untouched");
 
 	else
-		scanBouquetManager->saveBouquets(bouquetMode, providerName);
+		scanBouquetManager->saveBouquets(bouquetMode);
 }
 
 void write_transponder(FILE *fd, const transponder_id_t transponder_id, const transponder & transponder)
@@ -769,7 +769,7 @@ void *start_scanthread(void *imsg)
 
 		/* write bouquets if transponders were found */
 		if (scan_success)
-			write_bouquets(providerName);
+			write_bouquets();
 	}
 
 abort_scan:
@@ -931,7 +931,7 @@ int scan_transponder(TP_params *TP)
 
 	write_xml_footer(fd);
 
-	write_bouquets(providerName);
+	write_bouquets();
 	status = 1;
 
 abort_scan:

@@ -206,7 +206,7 @@ void * UdpSender( void * Ptr )
    }
 }
 
-void * DmxTSReader( void * Ptr )
+void * DmxTSReader(void *)
 {
    unsigned BufLen, BufSize;
    int  RetVal;
