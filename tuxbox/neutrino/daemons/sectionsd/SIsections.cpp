@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.56 2009/02/28 13:57:50 seife Exp $
+// $Id: SIsections.cpp,v 1.57 2009/03/06 23:24:28 seife Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -722,7 +722,7 @@ void SIsectionSDT::parse(void)
 		SIservice s(sv);
 		s.original_network_id = original_network_id();
 		s.transport_stream_id = transport_stream_id();
-		descriptors_loop_length = sizeof(struct sdt_service) + (sv->descriptors_loop_length_hi << 8) | sv->descriptors_loop_length_lo;
+		descriptors_loop_length = sizeof(struct sdt_service) + ((sv->descriptors_loop_length_hi << 8) | sv->descriptors_loop_length_lo);
 		//printf("actpos: %p buf+bl: %p sid: %hu desclen: %hu\n", actPos, buffer+bufferLength, sv->service_id, sv->descriptors_loop_length);
 		parseDescriptors(actPos, min((unsigned)(bufEnd - actPos), descriptors_loop_length), s);
 		svs.insert(s);
