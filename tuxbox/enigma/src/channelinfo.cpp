@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <epgwindow.h>
+#include <sselect.h>
 
 eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)
 	:eDecoWidget(parent, 0, deco),
@@ -239,6 +240,13 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 			copos.setText(eString().sprintf("%d.%d\xC2\xB0%c", abs(opos / 10), abs(opos % 10), opos>0?'E':'W') );
 		EITEvent *e = 0;
 		e = eEPGCache::getInstance()->lookupEvent(service);
+		if (e && eListBoxEntryService::nownextEPG)
+		{
+			time_t t = e->start_time+e->duration+61;
+			delete e;
+			e = eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)service,t);
+		}
+			
 		if (e)  // data is in cache...
 		{
 			ParseEITInfo(e);

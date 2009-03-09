@@ -910,6 +910,7 @@ void eServiceSelector::SwitchNowNext()
 	eListBoxEntryService::nownextEPG = 1-eListBoxEntryService::nownextEPG;
 	services->forEachEntry( invalidateServiceDescr() );
 	services->invalidate();
+	updateCi();
 }
 
 void eServiceSelector::pathUp()
@@ -1486,6 +1487,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					eZapMain::getInstance()->toggleMoveMode(this);
 				if (editMode)
 					eZapMain::getInstance()->toggleEditMode(this);
+				if (eListBoxEntryService::nownextEPG)
+					SwitchNowNext();
 				break;
 			}
 			else if ( event.action == &i_serviceSelectorActions->markPressed )
