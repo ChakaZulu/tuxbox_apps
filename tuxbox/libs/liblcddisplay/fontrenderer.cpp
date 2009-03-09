@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.13 2009/03/09 09:14:15 seife Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.14 2009/03/09 22:05:07 rhabarber1848 Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -150,9 +150,9 @@ const char * LcdFontRenderClass::AddFont(const char * const filename)
 
 LcdFontRenderClass::fontListEntry::~fontListEntry()
 {
-	delete[] filename;
-	delete[] family;
-	delete[] style;
+	free(filename);
+	free(family);
+	free(style);
 }
 
 LcdFont *LcdFontRenderClass::getFont(const char *family, const char *style, int size)
