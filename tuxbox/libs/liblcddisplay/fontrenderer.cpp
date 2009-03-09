@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.12 2009/03/05 20:50:09 rhabarber1848 Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.13 2009/03/09 09:14:15 seife Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -56,6 +56,7 @@ LcdFontRenderClass::LcdFontRenderClass(CLCDDisplay * fb)
 	}
 	printf("\n");
 	font=0;
+	pthread_mutex_init(&render_mutex, NULL);
 }
 
 LcdFontRenderClass::~LcdFontRenderClass()
@@ -226,9 +227,11 @@ int UTF8ToUnicode(const char * &text, const bool utf8_encoded) // returns -1 on 
 void LcdFont::RenderString(int x, int y, const int width, const char * text, const int color, const int selected, const bool utf8_encoded)
 {
 	int err;
+	pthread_mutex_lock(&renderer->render_mutex);
 	if ((err=FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size))!=0)
 	{ 
 		printf("FTC_Manager_Lookup_Size failed! (%d)\n",err);
+		pthread_mutex_unlock(&renderer->render_mutex);
 		return;
 	}
 	int left=x, step_y=(size->metrics.height >> 6 )*3/4 + 4;
@@ -241,7 +244,7 @@ void LcdFont::RenderString(int x, int y, const int width, const char * text, con
 		//if ((x + size->metrics.x_ppem > (left+width)) || (*text=='\n'))
 		if (x + size->metrics.x_ppem > (left+width))
 		{ //width clip
-			return;
+			break;
 		}
 		if (*text=='\n')
 		{
@@ -286,15 +289,18 @@ void LcdFont::RenderString(int x, int y, const int width, const char * text, con
 		ry++;
 		}
 
-    x+=glyph->xadvance+1;
-    }
+		x+=glyph->xadvance+1;
+	}
+	pthread_mutex_unlock(&renderer->render_mutex);
 }
 
 int LcdFont::getRenderWidth(const char * text, const bool utf8_encoded)
 {
+	pthread_mutex_lock(&renderer->render_mutex);
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
 		printf("FTC_Manager_Lookup_Size failed!\n");
+		pthread_mutex_unlock(&renderer->render_mutex);
 		return -1;
 	}
 	int x=0;
@@ -319,6 +325,7 @@ int LcdFont::getRenderWidth(const char * text, const bool utf8_encoded)
     
 		x+=glyph->xadvance+1;
 	}
+	pthread_mutex_unlock(&renderer->render_mutex);
 	return x;
 }
 

@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.h,v 1.10 2009/02/24 19:09:06 seife Exp $
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.h,v 1.11 2009/03/09 09:14:15 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -82,6 +82,7 @@ class LcdFontRenderClass
 	FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 
 	public:
+		pthread_mutex_t render_mutex;
 		const char * AddFont(const char * const filename);
 		void InitFontCache();
 
