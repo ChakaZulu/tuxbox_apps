@@ -313,6 +313,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{
 		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
+		pthread_mutex_unlock(&renderer->render_mutex);
 		return;
 	}
 
@@ -539,6 +540,7 @@ int Font::getRenderWidth(const char *text, const bool utf8_encoded)
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{
 		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
+		pthread_mutex_unlock(&renderer->render_mutex);
 		return -1;
 	}
 
