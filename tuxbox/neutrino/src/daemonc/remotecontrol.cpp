@@ -260,8 +260,8 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 			g_Zapit->getPIDS( current_PIDs );
 			g_Sectionsd->setPrivatePid( current_PIDs.PIDs.privatepid );
 
-			t_channel_id * p = new t_channel_id;
-			*p = current_channel_id;
+			char *p = new char[sizeof(t_channel_id)];
+			memcpy(p, &current_channel_id, sizeof(t_channel_id));
 			g_RCInput->postMsg(NeutrinoMessages::EVT_ZAP_GOTPIDS, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 
 			processAPIDnames();
@@ -330,8 +330,8 @@ void CRemoteControl::getSubChannels()
 				}
 				copySubChannelsToZapit();
 
-				t_channel_id * p = new t_channel_id;
-				*p = current_channel_id;
+				char *p = new char[sizeof(t_channel_id)];
+				memcpy(p, &current_channel_id, sizeof(t_channel_id));
 				g_RCInput->postMsg(NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 			}
 		}
@@ -370,8 +370,8 @@ void CRemoteControl::getNVODs()
 
 			copySubChannelsToZapit();
 
-			t_channel_id * p = new t_channel_id;
-			*p = current_channel_id;
+			char *p = new char[sizeof(t_channel_id)];
+			memcpy(p, &current_channel_id, sizeof(t_channel_id));
 			g_RCInput->postMsg(NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 
 			if ( selected_subchannel == -1 )
@@ -402,7 +402,10 @@ void CRemoteControl::processAPIDnames()
 		if ( strlen( current_PIDs.APIDs[count].desc ) == 3 )
 		{
 			// unaufgeloeste Sprache...
-			strcpy( current_PIDs.APIDs[count].desc, getISO639Description( current_PIDs.APIDs[count].desc ) );
+			// getISO639Description returns its argument if nothing is found, so...
+			const char *p = getISO639Description(current_PIDs.APIDs[count].desc);
+			if (p != current_PIDs.APIDs[count].desc) // ...check, because arguments of strcpy must not overlap
+				strcpy(current_PIDs.APIDs[count].desc, p);
 		}
 
 		if ( current_PIDs.APIDs[count].is_ac3 )
@@ -469,8 +472,8 @@ void CRemoteControl::processAPIDnames()
 		}
 	}
 
-	t_channel_id * p = new t_channel_id;
-	*p = current_channel_id;
+	char *p = new char[sizeof(t_channel_id)];
+	memcpy(p, &current_channel_id, sizeof(t_channel_id));
 	g_RCInput->postMsg(NeutrinoMessages::EVT_ZAP_GOTAPIDS, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 }
 

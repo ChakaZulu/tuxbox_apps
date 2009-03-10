@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.247 2009/02/20 15:56:28 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.248 2009/03/10 08:46:49 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1180,8 +1180,8 @@ CSectionsdClient::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_cha
 	{
 		if (info.flags & (CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_next))
 		{
-			CSectionsdClient::CurrentNextInfo*	_info = new CSectionsdClient::CurrentNextInfo;
-			*_info = info;
+			char *_info = new char[sizeof(CSectionsdClient::CurrentNextInfo)];
+			memcpy(_info, &info, sizeof(CSectionsdClient::CurrentNextInfo));
 			neutrino_msg_t msg;
 			if (info.flags & CSectionsdClient::epgflags::has_current)
 				msg = NeutrinoMessages::EVT_CURRENTEPG;
@@ -1191,8 +1191,8 @@ CSectionsdClient::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_cha
 		}
 		else
 		{
-			t_channel_id * p = new t_channel_id;
-			*p = for_channel_id;
+			char *p = new char[sizeof(t_channel_id)];
+			memcpy(p, &for_channel_id, sizeof(t_channel_id));
 			g_RCInput->postMsg(NeutrinoMessages::EVT_NOEPG_YET, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 		}
 		oldinfo = info;
