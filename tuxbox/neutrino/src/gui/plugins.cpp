@@ -104,11 +104,14 @@ void CPlugins::scanDir(const char *dir)
 
 	int number_of_files = scandir(dir, &namelist, 0, alphasort);
 
+	if (number_of_files < 0)
+		return;
+
 	for (int i = 0; i < number_of_files; i++)
 	{
-		std::string filename;
+		std::string filename(namelist[i]->d_name);
+		free(namelist[i]);
 
-		filename = namelist[i]->d_name;
 		int pos = filename.find(".cfg");
 		if (pos > -1)
 		{
@@ -144,6 +147,7 @@ void CPlugins::scanDir(const char *dir)
 			}
 		}
 	}
+	free(namelist);
 }
 
 void CPlugins::loadPlugins()
