@@ -161,7 +161,7 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 
     if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
 	{
-		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
+		const CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
 
 //		printf("Current/Next channelID: old(%llx) -> new(%llx)\n", current_channel_id, info_CN->current_uniqueKey >> 16);
 		if ( ((info_CN->current_uniqueKey >> 16) == current_channel_id ) || ((info_CN->current_uniqueKey >> 16) == current_sub_channel_id ) )
