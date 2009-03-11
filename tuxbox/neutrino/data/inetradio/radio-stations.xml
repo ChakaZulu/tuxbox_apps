@@ -5,310 +5,110 @@
     -->
 <list>
 	<station
-		name="Flaix FM"
-		url="http://flaix.stream.flumotion.com/flaix/FLAIXfm.mp3.m3u"
+		url="http://www.dradio.de/streaming/dlf.m3u"
+		name="Deutschlandfunk"
 		/>
 
 	<station
-		name="Flaixbac"
-		url="http://www.listenlive.eu/flaixbac.m3u"
+		url="http://www.dradio.de/streaming/dlr.m3u"
+		name="DeutschlandRadio Kultur"
 		/>
 
 	<station
-		name="Mas Radio"
-		url="http://ftp.elite-online.es:8000/masradio.m3u"
+		url="http://c13010-ls.i.core.cdn.streamfarm.net/dwworldlive-live/13010dwren64.mp3"
+		name="Deutsche Welle"
 		/>
 
 	<station
-		name="Xtra FM"
-		url="http://server-06.stream-server.nl:8702/listen.pls"
+		url="http://streams.br-online.de/bayern1_2.m3u"
+		name="Bayern 1"
 		/>
 
 	<station
-		name="Ibiza Radio Global"
-		url="http://s6.viastreaming.net:7010/listen.pls"
+		url="http://streams.br-online.de/bayern2_2.m3u"
+		name="Bayern 2"
 		/>
 
 	<station
-		name="Chanquete FM"
-		url="http://radiostream.de/stream/34230.pls"
+		url="http://streams.br-online.de/bayern3_2.m3u"
+		name="Bayern 3"
 		/>
 
 	<station
-		name="Cadena Latino"
-		url="http://radiostream.de/stream/34180.pls"
-		/>
-	
-	<station
-		name="Cadena Digital"
-		url="http://radiostream.de/stream/34210.pls"
+		url="http://streams.br-online.de/bayern4klassik_2.m3u"
+		name="Bayern 4 Klassik"
 		/>
 
 	<station
-		name="Fantasy Radio"
-		url="http://www.italo.nu/listen.pls"
+		url="http://streams.br-online.de/b5aktuell_2.m3u"
+		name="Bayern 5 Aktuell"
 		/>
 
 	<station
-		name="Hurricane FM"
-		url="http://82.94.204.92/listen.pls"
+		url="http://streams.br-online.de/b5plus_2.m3u"
+		name="Bayern 5 Plus"
 		/>
 
 	<station
-		name="106!8 Rock n Pop"
-		url="http://62.75.132.19:80/listen.pls"
-		/>
-		
-	<station
-		name="Antenne AC"
-		url="http://www.antenne-ac.de/antenneac.pls"
+		url="http://streams.br-online.de/bayernmobil_2.m3u"
+		name="Bayern Mobil"
 		/>
 
 	<station
-		name="Antenne Bayern"
-		url="http://webradio.antenne.de/antenne/webradio/ant_mp3.m3u"
+		url="http://streams.br-online.de/bayernplus_2.m3u"
+		name="Bayern Plus"
 		/>
 
 	<station
-		name="Apollo Radio"
-		url="http://217.68.161.157:6300/listen.pls"
+		url="http://streams.br-online.de/jugend-radio_2.m3u"
+		name="Bayern on3radio"
 		/>
 
 	<station
-		name="bermuda.funk"
-		url="http://209.9.233.11:8616/bermudafunk.ogg.m3u"
-		/>
-	
-	<station
-		name="Big FM"
-		url="http://www.bigfm.de/webradio/bigfm-low.pls"
-		/>
-	
-	<station
-		name="Big FM"
-		url="http://www.bigfm.de/webradio/bigfm-high.pls"
-		/>
-	
-	<station
-		name="Big FM Saarland"
-		url="http://bigfmlive.de:8000/listen.pls"
-		/>
-	
-	<station
-		name="central fm"
-		url="http://213.168.78.204:8000/live.m3u"
-		/>
-	
-	<station
-		name="Charivari 95.5"
-		url="http://stream.novalnet.de:8000/charivari.m3u"
-		/>
-	
-	<station
-		name="Classic Rock Radio"
-		url="http://salue.inlimedia.com/classicrock/classicrock_playlist64.m3u"
+		url="http://metafiles.gl-systemhaus.de/hr/hr1_2.m3u"
+		name="HR 1"
 		/>
 
 	<station
-		name="Classic Rock Radio"
-		url="http://salue.inlimedia.com/classicrock/classicrock_playlist96.m3u"
+		url="http://metafiles.gl-systemhaus.de/hr/hr2_2.m3u"
+		name="HR 2 Kultur"
 		/>
 
 	<station
-		name="coloRadio"
-		url="http://217.172.183.184:8000/stream128.mp3.m3u"
+		url="http://metafiles.gl-systemhaus.de/hr/hr3_2.m3u"
+		name="HR 3"
 		/>
 
 	<station
-		name="Defjay Radio"
-		url="http://www.defjay.de/listen.pls"
+		url="http://metafiles.gl-systemhaus.de/hr/hr4_2.m3u"
+		name="HR 4"
 		/>
 
 	<station
-		name="Die Neue 107,7"
-		url="http://www.dieneue1077.de/redirect.php?id=33"
-		/>
-	
-	<station
-		name="Donau 3 FM"
-		url="http://webradiostreaming.de:4615/listen.pls"
-		/>
-	
-	<station
-		name="elDOradio 93.0"
-		url="http://www.eldoradio.de/broadcast/low.pls"
-		/>
-	
-	<station
-		name="elDOradio 93.0"
-		url="http://www.eldoradio.de/broadcast/high.pls"
-		/>
-	
-	<station
-		name="elDOradio 93.0"
-		url="http://www.eldoradio.de/broadcast/128.pls"
-		/>
-	
-	<station
-		name="ERF 1"
-		url="http://cms.streamfarm.net/cms/_v/radios/rebroadcast/erf/nb/live.pls"
-		/>
-	
-	<station
-		name="ERF 1"
-		url="http://cms.streamfarm.net/cms/_v/radios/rebroadcast/erf/bb/live.pls"
-		/>
-	
-	<station
-		name="Fantasy Dance FM"
-		url="http://www.radio-fantasy.de/Webradio/codecs/modem_stream.mp3.m3u"
-		/>
-	
-	<station
-		name="Fantasy Dance FM"
-		url="http://www.radio-fantasy.de/Webradio/codecs/dsl_stream.mp3.m3u"
-		/>
-	
-	<station
-		name="Fantasy Dance FM"
-		url="http://www.radio-fantasy.de/Webradio/codecs/modem_stream.aac.m3u"
-		/>
-	
-	<station
-		name="Fantasy Dance FM"
-		url="http://www.radio-fantasy.de/Webradio/codecs/dsl_stream.ogg.m3u"
-		/>
-	
-	<station
-		name="Freies Radio für Stuttgart"
-		url="http://frs.kumbi.org:8000/frs_stereo.ogg.m3u"
-		/>
-	
-	<station
-		name="Hellweg Radio"
-		url="http://s2.global-streaming.net:8100/listen.pls"
-		/>
-	
-	<station
-		name="Hertz 87.9"
-		url="http://radio.uni-bielefeld.de:8000/hertz-q5.ogg.m3u"
-		/>
-	
-	<station
-		name="Hitradio MS One"
-		url="http://hitradio-msone.de/streams/high/MP3stream.m3u"
-		/>
-	
-	<station
-		name="Hitradio Ohr"
-		url="http://www.hitradio-ohr.de/module/ohr32.m3u"
-		/>
-	
-	<station
-		name="Hitradio Ohr"
-		url="http://www.hitradio-ohr.de/module/ohr48.m3u"
-		/>
-	
-	<station
-		name="Hitradio Ohr"
-		url="http://www.hitradio-ohr.de/module/ohr96.m3u"
-		/>
-	
-	<station
-		name="Hitradio RT1 Nordschwaben"
-		url="http://radiostream.de/stream/32175.m3u"
-		/>
-	
-	<station
-		name="Hitradio RT1 Südschwaben"
-		url="http://radiostream.de/stream/31855.m3u"
-		/>
-	
-	<station
-		name="Hochschulradio Aachen"
-		url="http://evans.hochschulradio.rwth-aachen.de:8000/hoeren/high.m3u"
-		/>
-	
-	<station
-		name="HR You FM Club Channel"
-		url="http://cms.streamfarm.net/cms/_v/channel/youfm/club.pls"
-		/>
-	
-	<station
-		name="HR You FM Rock Channel"
-		url="http://cms.streamfarm.net/cms/_v/channel/youfm/rock.pls"
-		/>
-	
-	<station
-		name="HR You FM Phunk Channel"
-		url="http://cms.streamfarm.net/cms/_v/channel/youfm/phunk.pls"
-		/>
-	
-	<station
-		name="Jack FM"
-		url="http://sc1.streamfox.com:8050/listen.pls"
-		/>
-	
-	<station
-		name="Jam FM"
-		url="http://www.jamfm.de/listen/listen.pls"
-		/>
-	
-	<station
-		name="Kanal Ratte"
-		url="http://kanalrattefm.de/rkr-hi.m3u"
+		url="http://metafiles.gl-systemhaus.de/hr/youfm_2.m3u"
+		name="HR You FM"
 		/>
 
 	<station
-		name="Klassik Radio"
-		url="http://str6.creacast.com:443/listen.pls"
+		url="http://metafiles.gl-systemhaus.de/hr/youfm_club.m3u"
+		name="HR You FM Club"
 		/>
-	
+
 	<station
-		name="Klassik Radio"
-		url="http://players.creacast.com/creacast/klassik/playlist.pls"
+		url="http://metafiles.gl-systemhaus.de/hr/youfm_rock.m3u"
+		name="HR You FM Rock"
 		/>
-	
+
 	<station
-		name="Kölncampus"
-		url="http://zaik-vs2.ad.uni-koeln.de:7998/listen.pls"
+		url="http://metafiles.gl-systemhaus.de/hr/youfm_black.m3u"
+		name="HR You FM Black Music"
 		/>
-	
+
 	<station
-		name="Kölncampus"
-		url="http://zaik-vs2.ad.uni-koeln.de:8002/listen.pls"
+		url="http://metafiles.gl-systemhaus.de/hr/hrinfo_2.m3u"
+		name="HR Info"
 		/>
-	
-	<station
-		name="LOHRO 90,2FM"
-		url="http://86.56.35.34:8000/lohro.m3u"
-		/>
-	
-	<station
-		name="m94,5"
-		url="http://stream.lrz-muenchen.de:31337/m945-lq.mp3.m3u"
-		/>
-	
-	<station
-		name="m94,5"
-		url="http://stream.lrz-muenchen.de:31337/m945-hq.mp3.m3u"
-		/>
-	
-	<station
-		name="Main FM"
-		url="http://87.106.14.18:8000/listen.pls"
-		/>
-	
-	<station
-		name="Metropol FM"
-		url="metropolfm.m3u"
-		/>
-	
-	<station
-		name="Motor FM"
-		url="http://85.25.145.179/motorfm.mp3.m3u"
-		/>
-	
+
 	<station
 		name="NDR 90,3"
                url="http://213.200.97.110:80/ndr/ndr903.mp3"
@@ -348,10 +148,360 @@
 		name="N-Joy Radio"
                url="http://213.200.97.110:80/ndr/n-joy.mp3"
 		/>
+
+	<station
+		url="http://avw.mdr.de/livestreams/mdr1_radio_sachsen_live_128.m3u"
+		name="MDR 1 Sachsen"
+		/>
+
+	<station
+		url="http://avw.mdr.de/livestreams/mdr1_radio_sachsen-anhalt_live_128.m3u"
+		name="MDR 1 Sachsen-Anhalt"
+		/>
+
+	<station
+		url="http://avw.mdr.de/livestreams/mdr1_radio_thueringen_live_128.m3u"
+		name="MDR 1 Thüringen"
+		/>
+
+	<station
+		url="http://mdr.streamfarm.net/cms/_v/radios/mdr/live/jump/mp3.pls"
+		name="MDR Jump"
+		/>
+
+	<station
+		url="http://mdr.streamfarm.net/cms/radios/mdr/live/info_mp3.m3u"
+		name="MDR Info"
+		/>
+
+	<station
+		url="http://avw.mdr.de/livestreams/mdr_figaro_live_128.m3u"
+		name="MDR Figaro"
+		/>
+
+	<station
+		url="http://cms.streamfarm.net/cms/_v/radios/mdr/live/klassik.pls"
+		name="MDR Klassik"
+		/>
+
+	<station
+		url="http://www.sputnik.de/pls/cms/_v/radios/mdr/live/sputnik.pls"
+		name="MDR Sputnik"
+		/>
+
+	<station
+		url="http://www.sputnik.de/pls/cms/_v/radios/mdr/sputnik_black_mp3.pls"
+		name="MDR Sputnik Black"
+		/>
+
+	<station
+		url="http://www.sputnik.de/pls/cms/_v/radios/mdr/sputnik_rock_mp3.pls"
+		name="MDR Sputnik Rock"
+		/>
+
+	<station
+		url="http://www.sputnik.de/pls/cms/_v/radios/mdr/sputnik_club_mp3.pls"
+		name="MDR Sputnik Club"
+		/>
+
+	<station
+		url="http://www.sputnik.de/pls/cms/_v/radios/mdr/sputnik_cd1_mp3.pls"
+		name="MDR Sputnik Insomnia"
+		/>
+
+	<station
+		url="http://sc1.lon.llnw.net/stream/gffstream_mp3_w48a.m3u"
+		name="Radio Bremen 1"
+		/>
+
+	<station
+		url="http://www.radiobremen.de/stream/live/bremenvier.m3u"
+		name="Radio Bremen 4"
+		/>
+
+	<station
+		url="http://sc9.ams.llnw.net:80/stream/gffstream_w20a.m3u"
+		name="Nordwestradio"
+		/>
+
+	<station
+		name="SR 1 Europawelle"
+		url="http://streaming01.sr-online.de/sr1_1.m3u"
+		/>
+
+	<station
+		name="SR 1 Klassiker"
+		url="http://webchannels.sr-online.de:8000/sr1klassiker.m3u"
+		/>
+
+	<station
+		name="SR 1 Lounge"
+		url="http://webchannels.sr-online.de:8000/sr1lounge.m3u"
+		/>
+
+	<station
+		name="SR 2 Kulturradio"
+		url="http://streaming01.sr-online.de/sr2_2.m3u"
+		/>
+
+	<station
+		name="SR 2 Off-Beat"
+		url="http://webchannels.sr-online.de:8000/sr2offbeat.m3u"
+		/>
+
+	<station
+		name="SR 3 Saarlandwelle"
+		url="http://streaming01.sr-online.de/sr3_2.m3u"
+		/>
+
+	<station
+		name="SR 3 - Schlagerwelt"
+		url="http://webchannels.sr-online.de:8000/sr3schlagerwelt.m3u"
+		/>
+
+	<station
+		name="SR 3 - Oldiewelt"
+		url="http://webchannels.sr-online.de:8000/sr3oldiewelt.m3u"
+		/>
+
+	<station
+		url="http://213.200.97.110/swr1rplive/livestream.mp3.m3u"
+		name="SWR1 RP"
+		/>
+
+	<station
+		url="http://213.200.97.110/swr1bwlive/livestream.mp3.m3u"
+		name="SWR1 BW"
+		/>
+
+	<station
+		url="http://213.200.97.110/swr2live/livestream.mp3.m3u"
+		name="SWR2"
+		/>
+
+	<station
+		url="http://213.200.97.110/swr3live/livestream.mp3.m3u"
+		name="SWR3"
+		/>
+
+	<station
+		url="http://213.200.97.110/swr4rplive/livestream.mp3.m3u"
+		name="SWR4 RP"
+		/>
+
+	<station
+		url="http://213.200.97.110/swr4bwlive/livestream.mp3.m3u"
+		name="SWR4 BW"
+		/>
+
+	<station
+		url="http://213.200.97.110/swrcontralive/livestream.mp3.m3u"
+		name="SWR cont.ra"
+		/>
+
+	<station
+		url="http://213.200.97.110/swrdasdinglive/livestream.mp3.m3u"
+		name="SWR DasDing"
+		/>
+
+	<station
+		name="WDR 1LIVE"
+		url="http://www.wdr.de/wdrlive/media/einslive.m3u"
+		/>
+
+	<station
+		name="WDR 1LIVE Kunst"
+		url="http://www.wdr.de/wdrlive/media/einslivekunst.m3u"
+		/>
+
+	<station
+		name="WDR 1LIVE Diggi"
+		url="http://www.wdr.de/wdrlive/media/einslivedigi.m3u"
+		/>
+
+	<station
+		name="WDR 2"
+		url="http://www.wdr.de/wdrlive/media/wdr2.m3u"
+		/>
+
+	<station
+		name="WDR 2 Klassik"
+		url="http://www.wdr.de/wdrlive/media/wdr2klassik.m3u"
+		/>
+
+	<station
+		name="WDR 3"
+		url="http://www.wdr.de/wdrlive/media/wdr3.m3u"
+		/>
+
+	<station
+		name="WDR 4"
+		url="http://www.wdr.de/wdrlive/media/wdr4.m3u"
+		/>
+
+	<station
+		name="WDR 5"
+		url="http://www.wdr.de/wdrlive/media/wdr5.m3u"
+		/>
+
+	<station
+		name="WDR 5 Kiraka"
+		url="http://www.wdr.de/wdrlive/media/kiraka.m3u"
+		/>
+
+	<station
+		name="WDR Funkhaus Europa"
+		url="http://www.wdr.de/wdrlive/media/fhe.m3u"
+		/>
+
+	<station
+		name="Flaixbac"
+		url="http://www.listenlive.eu/flaixbac.m3u"
+		/>
+
+	<station
+		name="Mas Radio"
+		url="http://ftp.elite-online.es:8000/masradio.m3u"
+		/>
+
+	<station
+		name="Fantasy Radio"
+		url="http://www.italo.nu/listen.pls"
+		/>
+
+	<station
+		name="106!8 Rock n Pop"
+		url="http://62.75.132.19:80/listen.pls"
+		/>
+
+	<station
+		name="Antenne Bayern"
+		url="http://webradio.antenne.de/antenne/webradio/ant_mp3.m3u"
+		/>
+
+	<station
+		name="Apollo Radio"
+		url="http://217.68.161.157:6300/listen.pls"
+		/>
+
+	<station
+		name="Charivari 95.5"
+		url="http://stream.novalnet.de:8000/charivari.m3u"
+		/>
 	
 	<station
-		name="Die Neue Welle"
-		url="http://85.214.16.80/dieneuewelle.ogg.m3u"
+		name="Classic Rock Radio"
+		url="http://salue.inlimedia.com/classicrock/classicrock_playlist64.m3u"
+		/>
+
+	<station
+		name="Classic Rock Radio"
+		url="http://salue.inlimedia.com/classicrock/classicrock_playlist96.m3u"
+		/>
+
+	<station
+		name="coloRadio"
+		url="http://217.172.183.184:8000/stream128.mp3.m3u"
+		/>
+
+	<station
+		name="Defjay Radio"
+		url="http://www.defjay.de/listen.pls"
+		/>
+
+	<station
+		name="elDOradio 93.0"
+		url="http://www.eldoradio.de/broadcast/low.pls"
+		/>
+	
+	<station
+		name="elDOradio 93.0"
+		url="http://www.eldoradio.de/broadcast/high.pls"
+		/>
+	
+	<station
+		name="elDOradio 93.0"
+		url="http://www.eldoradio.de/broadcast/128.pls"
+		/>
+	
+	<station
+		name="ERF 1"
+		url="http://cms.streamfarm.net/cms/_v/radios/rebroadcast/erf/nb/live.pls"
+		/>
+	
+	<station
+		name="ERF 1"
+		url="http://cms.streamfarm.net/cms/_v/radios/rebroadcast/erf/bb/live.pls"
+		/>
+	
+	<station
+		name="Fantasy Dance FM"
+		url="http://www.radio-fantasy.de/Webradio/codecs/dsl_stream.mp3.m3u"
+		/>
+	
+	<station
+		name="Freies Radio für Stuttgart"
+		url="http://frs.kumbi.org:8000/frs_stereo.ogg.m3u"
+		/>
+	
+	<station
+		name="Hellweg Radio"
+		url="http://s2.global-streaming.net:8100/listen.pls"
+		/>
+	
+	<station
+		name="Hertz 87.9"
+		url="http://radio.uni-bielefeld.de:8000/hertz-q5.ogg.m3u"
+		/>
+	
+	<station
+		name="Hitradio MS One"
+		url="http://hitradio-msone.de/streams/high/MP3stream.m3u"
+		/>
+	
+	<station
+		name="Hitradio RT1 Nordschwaben"
+		url="http://radiostream.de/stream/32175.m3u"
+		/>
+	
+	<station
+		name="Hitradio RT1 Südschwaben"
+		url="http://radiostream.de/stream/31855.m3u"
+		/>
+	
+	<station
+		name="Hochschulradio Aachen"
+		url="http://evans.hochschulradio.rwth-aachen.de:8000/hoeren/high.m3u"
+		/>
+	
+	<station
+		name="Jack FM"
+		url="http://sc1.streamfox.com:8050/listen.pls"
+		/>
+	
+	<station
+		name="Kanal Ratte"
+		url="http://kanalrattefm.de/rkr-hi.m3u"
+		/>
+
+	<station
+		name="Klassik Radio"
+		url="http://str6.creacast.com:443/listen.pls"
+		/>
+	
+	<station
+		name="Klassik Radio"
+		url="http://players.creacast.com/creacast/klassik/playlist.pls"
+		/>
+	
+	<station
+		name="Kölncampus"
+		url="http://zaik-vs2.ad.uni-koeln.de:7998/listen.pls"
+		/>
+	
+	<station
+		name="Kölncampus"
+		url="http://zaik-vs2.ad.uni-koeln.de:8002/listen.pls"
 		/>
 	
 	<station
@@ -371,12 +521,7 @@
 	
 	<station
 		name="Radio 21"
-		url="http://213.168.78.212:8000/stream4.m3u"
-		/>
-	
-	<station
-		name="Radio 21"
-		url="http://213.168.78.212:8000/stream5.m3u"
+		url="http://www.radio21.de/cms/fileadmin/playlist/radio21.m3u"
 		/>
 	
 	<station
@@ -397,21 +542,6 @@
 	<station
 		name="Radio Arabella"
 		url="http://www.radio-arabella.de/radioarabella-live.m3u"
-		/>
-	
-	<station
-		name="Radio Bamberg"
-		url="http://212.112.227.130:8100/listen.pls"
-		/>
-	
-	<station
-		name="Radio Bielefeld"
-		url="http://212.100.52.56:8000/live.m3u"
-		/>
-	
-	<station
-		name="Radio Blau"
-		url="http://www.radioblau.de/stream/128.m3u"
 		/>
 	
 	<station
@@ -460,11 +590,6 @@
 		/>
 	
 	<station
-		name="Radio Flora"
-		url="http://212.48.125.69:8760/listen.pls"
-		/>
-	
-	<station
 		name="Radio freeFM"
 		url="http://freefm.lauschangriff.org/freefm128k.m3u"
 		/>
@@ -490,53 +615,8 @@
 		/>
 	
 	<station
-		name="Radio Gütersloh"
-		url="http://www.radioguetersloh.de/fileadmin/webradio-playlists/guetersloh.m3u"
-		/>
-	
-	<station
-		name="Radio Hochstift"
-		url="http://stream.radiohochstift.de:8000/live.m3u"
-		/>
-	
-	<station
 		name="Radio Jade"
 		url="http://radiojade.ath.cx/winamp.m3u"
-		/>
-	
-	<station
-		name="Radio Kiepenkerl"
-		url="http://rs1.radiostreamer.com:8810/listen.pls"
-		/>
-	
-	<station
-		name="Radio Lippe"
-		url="http://87.245.7.178:8000/live.m3u"
-		/>
-	
-	<station
-		name="Radio Melodie"
-		url="http://cms.streamfarm.net/cms/_v/radios/rebroadcast/radio_melodie_live.pls"
-		/>
-	
-	<station
-		name="Radio MikroWelle"
-		url="http://www.radiomikrowelle.de:8001/listen.pls"
-		/>
-	
-	<station
-		name="Radio Oberland"
-		url="http://cms.streamfarm.net/cms/radios/radio_oberland_live.pls"
-		/>
-	
-	<station
-		name="Radio Okerwelle"
-		url="http://62.141.48.8:5072/listen.pls"
-		/>
-	
-	<station
-		name="Radio PrimaTon"
-		url="http://webradio.radioprimaton.de:8000/listen.pls"
 		/>
 	
 	<station
@@ -630,16 +710,6 @@
 		/>
 	
 	<station
-		name="Radio WAF"
-		url="http://stream.radiowaf.de:8000/live.m3u"
-		/>
-	
-	<station
-		name="Radio Westfalica"
-		url="http://stream.radiowestfalica.de:8000/live.m3u"
-		/>
-	
-	<station
 		name="Radio Z"
 		url="http://www.distler-tontechnik.de/Radio-Z-Live.m3u"
 		/>
@@ -660,11 +730,6 @@
 		/>
 	
 	<station
-		name="Rockland Radio"
-		url="http://cdn1.ice.muc.streamin.de/rockland.m3u"
-		/>
-	
-	<station
 		name="Stadtradio Göttingen"
 		url="http://stream.stadtradio-goettingen.de:8000/stadtradiolower.ogg.m3u"
 		/>
@@ -680,60 +745,6 @@
 		/>
 	
 	<station
-		name="SR 1 - Klassiker"
-		url="http://webchannels.sr-online.de:8000/sr1klassiker.m3u"
-		/>
-	
-	<station
-		name="SR 1 - Lounge"
-		url="http://webchannels.sr-online.de:8000/sr1lounge.m3u"
-		/>
-	
-	<station
-		name="SR 2 - Off-Beat"
-		url="http://webchannels.sr-online.de:8000/sr2offbeat.m3u"
-		/>
-	
-	<station
-		name="SR 3 - Schlagerwelt"
-		url="http://webchannels.sr-online.de:8000/sr3schlagerwelt.m3u"
-		/>
-	
-	<station
-		name="SR 3 - Oldiewelt"
-		url="http://webchannels.sr-online.de:8000/sr3oldiewelt.m3u"
-		/>
-	
-	<station
-		name="Top FM"
-		url="http://www.top-fm-webstream.de/stream_lq.m3u"
-		/>
-	
-	<station
-		name="Top FM"
-		url="http://www.top-fm-webstream.de/stream_hq.m3u"
-		/>
-	
-	<station
-		name="Truck Radio"
-		url="http://stream.truckradio.de:8000/listen.pls"
-		/>
-	
-	<station
-		name="WDR 1LIVE Kunst"
-		url="http://metafiles.gl-systemhaus.de/wdr/channel_einslivekunst.m3u"
-		/>
-	
-	<station
-		name="WDR Kiraka"
-		url="http://www.wdr.de/radio/home/kiraka/channel.m3u"
-		/>
-	
-	<station
-		name="Wüste Welle"
-		url="http://rs3.radiostreamer.com:8870/listen.pls"
-		/>
-	<station
 		url="http://84.19.188.7:8010"
 		name="Munichs Hardest Hits München 2 (256 Kbps)"
 		/>
@@ -741,31 +752,6 @@
 	<station
 		url="http://zusamatic.lemm.ws/zusa.m3u"
 		name="Radio ZUSA Wendland (192 Kbps)"
-		/>
-	
-	<station
-		url="http://metafiles.gl-systemhaus.de/wdr/channel_einslivediggi.m3u"
-		name="Eins Live Diggi"
-		/>
-	
-	<station
-		url="http://metafiles.gl-systemhaus.de/wdr/channel_einslive.m3u"
-		name="1Live"
-		/>
-	
-	<station
-		url="http://metafiles.gl-systemhaus.de/wdr/channel_einslivekunst.m3u"
-		name="Eins Live Kunst (128kbits)"
-		/>
-	
-	<station
-		url="http://www.bigfm.de/webradio/bigfm-high.m3u"
-		name="bigFM Stuttgart (128 Kbits)"
-		/>
-	
-	<station
-		url="http://213.168.78.204:8000/live.m3u"
-		name="central fm Pulheim (128 Kbits)"
 		/>
 	
 	<station
@@ -779,33 +765,13 @@
 		/>
 	
 	<station
-		url="http://www.joyfm.de/listen.pls"
-		name="Joy FM Berlin (128 Kbits)"
-		/>
-	
-	<station
 		url="http://evans.hochschulradio.rwth-aachen.de:8000/hoeren/high.m3u"
 		name="Hochschulradio Aachen (128 Kbits)"
 		/>
 	
 	<station
-		url="http://137.250.37.61:8000/kanalc.m3u"
-		name="Kanal C Augsburg (128 Kbits)"
-		/>
-	
-	<station
-		url="http://stream.lrz-muenchen.de:31337/m945-hq.mp3.m3u"
-		name="m94,5 München (128 Kbits)"
-		/>
-	
-	<station
 		url="http://www.oldiestar.de/oldie.pls"
 		name="OldieStar Radio Berlin (128 Kbits)"
-		/>
-	
-	<station
-		url="http://live.radioct.de:8008/listen.pls"
-		name="Radio c.t. Bochum (128 Kbits)"
 		/>
 	
 	<station
@@ -816,11 +782,6 @@
 	<station
 		url="http://stream.fantasy.de:8000/radiofantasy.mp3.m3u"
 		name="Radio Fantasy Augsburg (128 Kbits)"
-		/>
-	
-	<station
-		url="http://www.radioq.de/stream/gross.m3u"
-		name="Radio Q Münster (128 Kbits)"
 		/>
 	
 	<station
@@ -839,18 +800,8 @@
 		/>
 	
 	<station
-		url="http://livestream.triquency.de:8000/live128.mp3.m3u"
-		name="Radio Triquency Lemgo (128 Kbits)"
-		/>
-
-	<station
 		url="http://radio-unicc.hrz.tu-chemnitz.de:8000/unicc128.mp3"
 		name="Radio Uni CC Chemniz (128 Kbits)"
-		/>
-
-	<station
-		url="http://radio.studiyoo.de/8000.pls"
-		name="RADIyoo Berlin (128 Kbits)"
 		/>
 
 	<station
@@ -859,22 +810,78 @@
 		/>
 
 	<station
-		url="http://www.sputnik.de/pls/cms/_v/radios/mdr/live/sputnik.pls"
-		name="MDR Sputnik"
-		/>
-
-	<station
-		url="http://cms.streamfarm.net/cms/_v/radios/mdr/live/klassik.pls"
-		name="MDR Klassik 128 kbit/s"
-		/>
-
-	<station
-		url="http://62.146.11.19:80/22008mdrklassik/live/3087mdrklassik/klassik_128mp3"
-		name="MDR Klassik 128 kbit/s"
-		/>
-
-	<station
 		url="http://s8.mediastreaming.it:7050"
 		name="Radio Luxembourg (128 kbps)"
 		/>
+
+	<station
+		url="http://radiostream.de/stream/36525.m3u"
+		name="Radio multicult2.0"
+		/>
+
+	<station
+		url="http://www.radio.pionier.net.pl/stream.pls?radio=radiotok"
+		name="Tok FM (PL)"
+		/>
+
+	<station
+		url="http://www.radio.pionier.net.pl/stream.pls?radio=radio88"
+		name="Zlote Przeboje Poznan (PL)"
+		/>
+
+	<station
+		url="http://www.radio.pionier.net.pl/stream.pls?radio=merkury"
+		name="PR Radio Merkury Poznan (PL)"
+		/>
+
+	<station
+		url="http://radiopik.streamhost.pl:8072/listen.pls"
+		name="PR Radio Pik (PL)"
+		/>
+
+	<station
+		url="http://sask1-1.radio.pionier.net.pl:8000/pl/wawa.ogg.m3u"
+		name="Radio WaWa (PL)"
+		/>
+
+	<station
+		url="http://145.58.33.31:8100/listen.pls"
+		name="Radio 1 (NL)"
+		/>
+
+	<station
+		url="http://145.58.33.31:8102/listen.pls"
+		name="Radio 2 (NL)"
+		/>
+
+	<station
+		url="http://145.58.33.31:8104/listen.pls"
+		name="Radio 3FM (NL)"
+		/>
+
+	<station
+		url="http://145.58.33.31:8106/listen.pls"
+		name="Radio 4 Classic (NL)"
+		/>
+
+	<station
+		url="http://145.58.33.31:8108/listen.pls"
+		name="Radio 5 Nieuws (NL)"
+		/>
+
+	<station
+		url="http://145.58.33.31:8110/listen.pls"
+		name="Radio 6 World Music/Jazz (NL)"
+		/>
+
+	<station
+		url="http://www.vpr.net/vpr_files/stream_playlists/vpr_bbc_mp3.pls"
+		name="BBC World Service"
+		/>
+
+	<station
+		url="http://stream.npr.org:8002/listen.pls"
+		name="NPR National Public Radio (USA)"
+		/>
+
 </list>
