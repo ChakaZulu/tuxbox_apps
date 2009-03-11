@@ -1,5 +1,5 @@
 /*
- * $Id: utils.cpp,v 1.12 2005/10/12 20:46:23 digi_casi Exp $
+ * $Id: utils.cpp,v 1.13 2009/03/11 20:42:11 rhabarber1848 Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -56,7 +56,7 @@ int tcpOpen(eString serverIP, int serverPort, int i)
 	int rc = -1;
 	int retry = 0;
 
-	bzero((char *)&ads, sizeof(ads));
+	memset((char *)&ads, 0, sizeof(ads));
 	ads.sin_family = AF_INET;
 	ads.sin_addr.s_addr = inet_addr(serverIP.c_str());
 	ads.sin_port = htons(serverPort);

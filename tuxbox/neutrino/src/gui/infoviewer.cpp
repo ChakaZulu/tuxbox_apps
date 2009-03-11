@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.249 2009/03/10 08:50:07 seife Exp $
+	$Id: infoviewer.cpp,v 1.250 2009/03/11 20:42:18 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -55,7 +55,6 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #include <string>
 #include <system/settings.h>
 
-#include <sys/timeb.h>
 #include <time.h>
 #include <sys/param.h>
 
@@ -146,10 +145,10 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 	    ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 
 		char timestr[10];
-		struct timeb tm;
+		struct timeval tm;
 
-		ftime(&tm);
-		strftime((char*) &timestr, 10, "%H:%M", localtime(&tm.time) );
+		gettimeofday(&tm, NULL);
+		strftime((char*) &timestr, 10, "%H:%M", localtime(&tm.tv_sec) );
 
 		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
 		{

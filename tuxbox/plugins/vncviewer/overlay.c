@@ -190,7 +190,7 @@ open_emergency_xterm() {
 		fprintf(stderr, "screen invalid (port=%d)\n", port);
 	}
 
-	pos = index(cmd, ':');
+	pos = strchr(cmd, ':');
 	if (pos) *(pos+1) = '0'+screen;
 
 	system(cmd);

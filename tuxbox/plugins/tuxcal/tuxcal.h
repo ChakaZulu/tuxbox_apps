@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.h,v $
+ * Revision 1.08  2009/03/11 20:42:21  rhabarber1848
+ * remove SuSv3 legacy functions: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=364177#p364177
+ *
  * Revision 1.07  2007/05/17 16:19:47  dbluelle
  * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
  *
@@ -51,7 +54,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/time.h>
-#include <sys/timeb.h>
 #include <time.h>
 #include <ft2build.h>
 

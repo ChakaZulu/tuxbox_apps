@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.173 2009/02/22 18:46:08 seife Exp $
+	$Id: setting_helpers.cpp,v 1.174 2009/03/11 20:42:20 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -649,7 +649,7 @@ long CNetAdapter::mac_addr_sys ( u_char *addr) //only for function getMacAddr()
 	close(s);
 	if (ok)
 	{
-		bcopy( ifr.ifr_hwaddr.sa_data, addr, 6);
+		memmove(addr, ifr.ifr_hwaddr.sa_data, 6);
 	}
 	else
 	{

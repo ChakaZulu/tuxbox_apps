@@ -250,7 +250,7 @@ std::vector<UPnPEntry> *CUpnpBrowserGui::decodeResult(std::string result)
 			for (snode=node->GetChild(); snode; snode=snode->GetNext())
 			{
 				type=snode->GetType();
-				p = index(type,':');
+				p = strchr(type,':');
 				if (p)
 					type=p+1;
 				if (!strcmp(type,"title"))
@@ -286,7 +286,7 @@ std::vector<UPnPEntry> *CUpnpBrowserGui::decodeResult(std::string result)
 				std::string duration, url, size;
 				unsigned int i;
 				type=snode->GetType();
-				p = index(type,':');
+				p = strchr(type,':');
 				if (p)
 					type=p+1;
 

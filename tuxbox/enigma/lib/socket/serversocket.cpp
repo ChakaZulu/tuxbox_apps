@@ -32,7 +32,7 @@ eServerSocket::eServerSocket(int port, eMainloop *ml): eSocket(ml)
 	struct sockaddr_in serv_addr;
 	strRemoteHost = "";
 
-	bzero(&serv_addr, sizeof(serv_addr));
+	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family=AF_INET;
 	serv_addr.sin_addr.s_addr=INADDR_ANY;
 	serv_addr.sin_port=htons(port);
@@ -59,7 +59,7 @@ eServerSocket::eServerSocket(eString path, eMainloop *ml) : eSocket(ml, AF_LOCAL
 	struct sockaddr_un serv_addr;
 	strRemoteHost = "";
 
-	bzero(&serv_addr, sizeof(serv_addr));
+	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sun_family = AF_LOCAL;
 	strcpy(serv_addr.sun_path, path.c_str());
 

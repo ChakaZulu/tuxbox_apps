@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.166 2009/03/01 13:58:30 rhabarber1848 Exp $
+  $Id: movieplayer.cpp,v 1.167 2009/03/11 20:42:18 rhabarber1848 Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -93,7 +93,6 @@
 #include <poll.h>
 
 #ifdef MOVIEBROWSER
-#include <sys/timeb.h>
 #define MOVIE_HINT_BOX_TIMER 5 // time to show bookmark hints in seconds
 #endif /* MOVIEBROWSER */
 
@@ -2650,7 +2649,7 @@ static int mp_tcpOpen(const char *serverIp, unsigned short serverPort)
 
 	//-- tcp server (dbox) --
 	//-----------------------
-	bzero((char *)&ads, sizeof(ads));
+	memset((char *)&ads, 0, sizeof(ads));
 	ads.sin_family      = AF_INET;
 	ads.sin_addr.s_addr = inet_addr(serverIp);
 	ads.sin_port        = htons(serverPort);
@@ -3132,7 +3131,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 	std::string hlpstr;
 
 #ifdef MOVIEBROWSER
-	timeb current_time;
+	timeval current_time;
 	CMovieInfo cMovieInfo;				// funktions to save and load movie info
 	MI_MOVIE_INFO* p_movie_info = NULL;	// movie info handle which comes from the MovieBrowser, if not NULL MoviePlayer is able to save new bookmarks
 	CBox position(200,480,280,65);	// window position for the hint boxes 
@@ -3559,9 +3558,9 @@ void CMoviePlayerGui::PlayFile (int parental)
 				if(isMovieBrowser == true && p_movie_info != NULL)
 				{ 
 					// if we have a movie information, try to save the stop position
-					ftime(&current_time);
-					p_movie_info->dateOfLastPlay = current_time.time;
-					current_time.time = time( NULL );
+					gettimeofday(&current_time, NULL);
+					p_movie_info->dateOfLastPlay = current_time.tv_sec;
+					current_time.tv_sec = time( NULL );
 					p_movie_info->bookmarks.lastPlayStop = g_fileposition / SECONDOFFSET;
 					
 					cMovieInfo.saveMovieInfo(*p_movie_info);
@@ -4435,7 +4434,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.166 $");
+	return imageinfo.getModulVersion("","$Revision: 1.167 $");
 }
 
 void CMoviePlayerGui::showHelpTS()

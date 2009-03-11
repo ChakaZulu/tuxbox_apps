@@ -279,8 +279,8 @@ int ConnectToServer(char *hostname, int port)
 		return -1;
 	}
 
-	bzero(&sock, sizeof(sock));
-	bcopy(host->h_addr, (char*)&sock.sin_addr, host->h_length);
+	memset(&sock, 0, sizeof(sock));
+	memmove((char*)&sock.sin_addr, host->h_addr, host->h_length);
 
 	sock.sin_family = AF_INET;
 	sock.sin_port = htons(port);
@@ -395,7 +395,7 @@ int request_file(URL *url)
 					/* since we convert the integer into a pointer instead of */
 					/* passing along a pointer/reference !*/
 					if(cache[slot].filter_arg->state)
-						bcopy(&tmp, cache[slot].filter_arg->state, sizeof(CSTATE));
+						memmove(cache[slot].filter_arg->state, &tmp, sizeof(CSTATE));
 				}
 
 				/* push the created ID3 header into the stream cache */
@@ -465,7 +465,7 @@ int request_file(URL *url)
 				/* since we convert the integer into a pointer instead of */
 				/* passing along a pointer/reference !*/
 				if(cache[slot].filter_arg->state)
-					bcopy(&tmp, cache[slot].filter_arg->state, sizeof(CSTATE));
+					memmove(cache[slot].filter_arg->state, &tmp, sizeof(CSTATE));
 			}
 
 			/* push the created ID3 header into the stream cache */
@@ -538,7 +538,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 	int fd = url->fd;
 	ID3 *id3 = (ID3*)opt;
 
-	bzero(header, 2048);
+	memset(header, 0, 2048);
 	ptr = header;
 
 	/* extract the http header from the stream */
@@ -655,7 +655,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 		uint32_t sz;
 		char *ptr, station[2048], desc[2048], str[2048];
 
-		bcopy("ID3", id3->magic, 3);
+		memmove(id3->magic, "ID3", 3);
 		id3->version[0] = 3;
 		id3->version[1] = 0;
 
@@ -677,12 +677,12 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 
 			FRAME("TPE1", station);
 			id3frame.size = SSIZE(id3frame.size + 1);
-			bcopy(&id3frame, id3->base + cnt, fcnt);
+			memmove(id3->base + cnt, &id3frame, fcnt);
 			cnt += fcnt;
 
 			FRAME("TALB", desc);
 			id3frame.size = SSIZE(id3frame.size + 1);
-			bcopy(&id3frame, id3->base + cnt, fcnt);
+			memmove(id3->base + cnt, &id3frame, fcnt);
 			cnt += fcnt;
 		}
 
@@ -696,13 +696,13 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 
 			FRAME("TIT2", str);
 			id3frame.size = SSIZE(id3frame.size + 1);
-			bcopy(&id3frame, id3->base + cnt, fcnt);
+			memmove(id3->base + cnt, &id3frame, fcnt);
 			cnt += fcnt;
 		}
 
 		FRAME("COMM", "dbox streamconverter");
 		id3frame.size = SSIZE(id3frame.size + 1);
-		bcopy(&id3frame, id3->base + cnt, fcnt);
+		memmove(id3->base + cnt, &id3frame, fcnt);
 		cnt += fcnt;
 
 		sz = 14 + cnt - 10;
@@ -751,7 +751,7 @@ FILE *f_open(const char *filename, const char *acctype)
 	dprintf(stderr, "f_open: %s %s\n", (compatibility_mode) ? "(compatibility mode)" : "", filename);
 
 	/* set default protocol and port */
-	bzero(&url, sizeof(URL));
+	memset(&url, 0, sizeof(URL));
 	url.proto_version = HTTP11;
 	url.port = 80;
 	strcpy(url.url, filename);
@@ -1151,7 +1151,7 @@ int f_close(FILE *stream)
 		pthread_mutex_destroy(&cache[i].writeable);
 
 		/* completely blank out all data */
-		bzero(&cache[i], sizeof(STREAM_CACHE));
+		memset(&cache[i], 0, sizeof(STREAM_CACHE));
 	}
 	else
 		rval = fclose(stream);
@@ -1381,7 +1381,7 @@ int push(FILE *fd, char *buf, long len)
 
 					if(amt[j])
 					{
-						bcopy(buf, cache[i].wptr, amt[j]);
+						memmove(cache[i].wptr, buf, amt[j]);
 						cache[i].wptr = cache[i].cache +
 							(((int)(cache[i].wptr - cache[i].cache) + amt[j]) % cache[i].csize);
 
@@ -1489,7 +1489,7 @@ int pop(FILE *fd, char *buf, long len)
 						dprintf(stderr, "pop(): rptr: 0x%08x, buf: 0x%08x, amt[%d]=%d, blen=%d, len=%d, rval=%d\n",
 							cache[i].rptr, buf, j, amt[j], blen, len, rval);
 
-						bcopy(cache[i].rptr, buf, amt[j]);
+						memmove(buf, cache[i].rptr, amt[j]);
 
 						cache[i].rptr = cache[i].cache +
 							(((int)(cache[i].rptr - cache[i].cache) + amt[j]) % cache[i].csize);
@@ -1761,7 +1761,7 @@ void ShoutCAST_MetaFilter(STREAM_FILTER *arg)
 		{
 			dprintf(stderr, "filter : ********* partitioned metadata block part 2 ******\n");
 
-			bcopy(buf, filterdata->meta_data + filterdata->stored, bsize);
+			memmove(filterdata->meta_data + filterdata->stored, buf, bsize);
 
 			ShoutCAST_ParseMetaData(filterdata->meta_data, arg->state);
 
@@ -1811,8 +1811,8 @@ void ShoutCAST_MetaFilter(STREAM_FILTER *arg)
 			/* there can be zero size blocks too */
 			if(filterdata->len)
 			{
-				bzero(filterdata->meta_data, 4096);
-				bcopy(buf + meta_start, filterdata->meta_data, filterdata->len);
+				memset(filterdata->meta_data, 0, 4096);
+				memmove(filterdata->meta_data, buf + meta_start, filterdata->len);
 
 				ShoutCAST_ParseMetaData(filterdata->meta_data, arg->state);
 
@@ -1844,9 +1844,9 @@ void ShoutCAST_MetaFilter(STREAM_FILTER *arg)
 			/* there can be zero size blocks too */
 			if(filterdata->len)
 			{
-				bzero(filterdata->meta_data, 4096);
+				memset(filterdata->meta_data, 0, 4096);
 				filterdata->stored = len - meta_start;
-				bcopy(buf + meta_start, filterdata->meta_data, filterdata->stored);
+				memmove(filterdata->meta_data, buf + meta_start, filterdata->stored);
 			}
 
 			*arg->len = meta_start;

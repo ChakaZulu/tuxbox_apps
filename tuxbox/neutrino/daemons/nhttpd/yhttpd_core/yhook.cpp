@@ -351,7 +351,7 @@ void CyhookHandler::SendHTMLFooter(void)
 void CyhookHandler::printf ( const char *fmt, ... )
 {
 	char outbuf[OUTBUFSIZE];
-	bzero(outbuf,OUTBUFSIZE);
+	memset(outbuf, 0, OUTBUFSIZE);
 	va_list arglist;
 	va_start( arglist, fmt );
 	vsnprintf( outbuf,OUTBUFSIZE, fmt, arglist );

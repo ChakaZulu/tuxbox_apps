@@ -158,7 +158,7 @@ void CStringInput::keyBackspacePressed(void)
 
 void CStringInput::keyRedPressed()
 {
-	if (index(validchars, ' ') != NULL)
+	if (strchr(validchars, ' ') != NULL)
 	{
 		value[selected] = ' ';
 
@@ -187,7 +187,7 @@ void CStringInput::keyBluePressed()
 	if (((value[selected] | 32) >= 'a') && ((value[selected] | 32) <= 'z'))
 	{
 		char newValue = value[selected] ^ 32;
-		if (index(validchars, newValue) != NULL) 
+		if (strchr(validchars, newValue) != NULL) 
 		{
 			value[selected] = newValue;
 			paintChar(selected);
@@ -329,7 +329,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		{
 			keyYellowPressed();
 		}
-		else if ( (msg==CRCInput::RC_green) && (index(validchars, '.') != NULL))
+		else if ( (msg==CRCInput::RC_green) && (strchr(validchars, '.') != NULL))
 		{
 			value[selected] = '.';
 

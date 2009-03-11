@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.21 2004/04/04 20:27:57 obi Exp $
+ * $Id: camd.c,v 1.22 2009/03/11 20:42:29 rhabarber1848 Exp $
  *
  * (C) 2001, 2002, 2003 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -733,7 +733,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	bzero(&dsfp, sizeof(struct dmx_sct_filter_params));
+	memset(&dsfp, 0, sizeof(struct dmx_sct_filter_params));
 	dsfp.filter.filter[0] = 0x01;	/* table_id */
 	dsfp.filter.filter[3] = 0x01;	/* current_next_indicator */
 	dsfp.filter.filter[4] = 0x00;	/* section_number */

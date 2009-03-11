@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.54 2009/02/24 13:50:26 seife Exp $
+ * $Id: pmt.cpp,v 1.55 2009/03/11 20:42:10 rhabarber1848 Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -435,7 +435,7 @@ int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 		return -1;
 	}
 
-	bzero(&dsfp, sizeof(struct dmx_sct_filter_params));
+	memset(&dsfp, 0, sizeof(struct dmx_sct_filter_params));
 	dsfp.filter.filter[0] = 0x02;	/* table_id */
 	dsfp.filter.filter[1] = channel->getServiceId() >> 8;
 	dsfp.filter.filter[2] = channel->getServiceId();

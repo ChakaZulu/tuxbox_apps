@@ -1,5 +1,5 @@
 /*
- * $Id: request.cpp,v 1.3 2005/10/18 11:30:19 digi_casi Exp $
+ * $Id: request.cpp,v 1.4 2009/03/11 20:42:11 rhabarber1848 Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
   * based on nhttpd (C) 2001/2002 Dirk Szymanski
@@ -596,7 +596,7 @@ void CWebserverRequest::SendError()
 
 void CWebserverRequest::printf ( const char *fmt, ... )
 {
-	bzero(outbuf,OUTBUFSIZE);
+	memset(outbuf, 0, OUTBUFSIZE);
 	va_list arglist;
 	va_start( arglist, fmt );
 	vsnprintf( outbuf,OUTBUFSIZE, fmt, arglist );

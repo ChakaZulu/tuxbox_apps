@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.19  2009/03/11 20:42:30  rhabarber1848
+ * remove SuSv3 legacy functions: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=364177#p364177
+ *
  * Revision 0.18  2009/02/03 19:07:49  rhabarber1848
  * Links webbrowser, text- and graphics mode, thx to amiga23 for kb2rcd patch: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=27&t=48280
  *
@@ -88,7 +91,6 @@
 #include <sys/types.h>
 #include <sys/un.h>
 #include <sys/time.h>
-#include <sys/timeb.h>
 #include <arpa/inet.h>
 #include <time.h>
 #include <syslog.h>

@@ -36,7 +36,6 @@
 
 #include <dbox/fp.h>
 #include <fcntl.h>
-#include <sys/timeb.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -322,11 +321,11 @@ void CLCD::showTime()
 	if (showclock)
 	{
 		char timestr[21];
-		struct timeb tm;
+		struct timeval tm;
 		struct tm * t;
 
-		ftime(&tm);
-		t = localtime(&tm.time);
+		gettimeofday(&tm, NULL);
+		t = localtime(&tm.tv_sec);
 
 		if (mode == MODE_STANDBY)
 		{

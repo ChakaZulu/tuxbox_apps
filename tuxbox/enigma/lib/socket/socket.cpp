@@ -254,9 +254,9 @@ int eSocket::connectToHost(eString hostname, int port)
 		error_(errno);
 		return(-2);
 	}
-	bzero(&serv_addr, sizeof(serv_addr));
+	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family=AF_INET;
-	bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
+	memmove(&serv_addr.sin_addr.s_addr, server->h_addr, server->h_length);
 	serv_addr.sin_port=htons(port);
 	res=::connect(socketdesc, (const sockaddr*)&serv_addr, sizeof(serv_addr));
 	if ((res < 0) && (errno != EINPROGRESS) && (errno != EINTR))
@@ -333,7 +333,7 @@ int eUnixDomainSocket::connectToPath(eString path)
 		error_(errno);
 		return(-1);
 	}
-	bzero(&serv_addr_un, sizeof(serv_addr_un));
+	memset(&serv_addr_un, 0, sizeof(serv_addr_un));
 	serv_addr_un.sun_family = AF_LOCAL;
 	strcpy(serv_addr_un.sun_path, path.c_str());
 	res=::connect(socketdesc, (const sockaddr*)&serv_addr_un, sizeof(serv_addr_un));

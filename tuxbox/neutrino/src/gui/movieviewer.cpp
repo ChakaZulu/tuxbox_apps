@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.11 2009/01/08 17:13:43 seife Exp $
+	$Id: movieviewer.cpp,v 1.12 2009/03/11 20:42:18 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -54,8 +54,6 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 #include <string>
 #include <system/settings.h>
-
-#include <sys/timeb.h>
 #include <time.h>
 #include <sys/param.h>
 
@@ -521,10 +519,10 @@ void CMovieViewer::paintTime( bool show_dot, bool firstPaint )
 	    int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 
 		char timestr[10];
-		struct timeb tm;
+		struct timeval tm;
 
-		ftime(&tm);
-		strftime((char*) &timestr, 10, "%H:%M", localtime(&tm.time) );
+		gettimeofday(&tm, NULL);
+		strftime((char*) &timestr, 10, "%H:%M", localtime(&tm.tv_sec) );
 
 		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
 		{

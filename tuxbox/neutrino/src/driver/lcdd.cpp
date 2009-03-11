@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.68 2009/02/09 15:20:22 rhabarber1848 Exp $
+	$Id: lcdd.cpp,v 1.69 2009/03/11 20:42:17 rhabarber1848 Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -42,7 +42,6 @@
 
 #include <dbox/fp.h>
 #include <fcntl.h>
-#include <sys/timeb.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -486,11 +485,11 @@ void CLCD::showTime()
 	if (showclock)
 	{
 		char timestr[21];
-		struct timeb tm;
+		struct timeval tm;
 		struct tm * t;
 
-		ftime(&tm);
-		t = localtime(&tm.time);
+		gettimeofday(&tm, NULL);
+		t = localtime(&tm.tv_sec);
 
 		if (mode == MODE_STANDBY)
 		{

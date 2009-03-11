@@ -410,7 +410,7 @@ void eZap::reconfigureHTTPServer()
 		else
 		{
 			struct termios tio;
-			bzero(&tio, sizeof(tio));
+			memset(&tio, 0, sizeof(tio));
 			tio.c_cflag = B115200 /*| CRTSCTS*/ | CS8 | CLOCAL | CREAD;
 			tio.c_iflag = IGNPAR;
 			tio.c_oflag = 0;

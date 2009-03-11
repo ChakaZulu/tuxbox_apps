@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.h,v $
+ * Revision 1.10  2009/03/11 20:42:23  rhabarber1848
+ * remove SuSv3 legacy functions: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=364177#p364177
+ *
  * Revision 1.09  2007/05/17 16:19:46  dbluelle
  * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
  *
@@ -61,7 +64,6 @@
 #include <sys/types.h>
 #include <sys/un.h>
 #include <sys/time.h>
-#include <sys/timeb.h>
 #include <arpa/inet.h>
 #include <time.h>
 #include <syslog.h>

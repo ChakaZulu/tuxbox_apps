@@ -462,9 +462,9 @@ void CControlAPI::GetDateCGI(CyhookHandler *hh)
 	{
 		//paramlos
 		char *timestr = new char[50];
-		struct timeb tm;
-		ftime(&tm);
-		strftime(timestr, 20, "%d.%m.%Y\n", localtime(&tm.time) );
+		struct timeval tm;
+		gettimeofday(&tm, NULL);
+		strftime(timestr, 20, "%d.%m.%Y\n", localtime(&tm.tv_sec) );
 		hh->Write(timestr);
 		delete[] timestr;
 	}
@@ -1195,7 +1195,7 @@ void CControlAPI::EpgCGI(CyhookHandler *hh)
 				struct tm *mtime = localtime(&eventIterator->startTime);
 				strftime(zbuffer,20,"%H:%M",mtime);
 				hh->printf("\t<start_t>%s</start_t>\r\n", zbuffer);
-				bzero(zbuffer,25);
+				memset(zbuffer, 0, 25);
 				strftime(zbuffer,20,"%d.%m.%Y",mtime);
 				hh->printf("\t<date>%s</date>\r\n", zbuffer);
 				hh->printf("\t<stop_sec>%ld</stop_sec>\r\n", eventIterator->startTime+eventIterator->duration);

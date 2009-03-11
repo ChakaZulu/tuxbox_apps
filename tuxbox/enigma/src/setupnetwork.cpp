@@ -361,7 +361,7 @@ static void getIP( char *dev, __u32 &ip, __u32 &mask)
 	if ( !fd )
 		return;
 
-	bzero(&req,sizeof(req));
+	memset(&req, 0, sizeof(req));
 	strcpy(req.ifr_name,dev);
 	saddr = (struct sockaddr_in *) &req.ifr_addr;
 	addr = (unsigned char*) &saddr->sin_addr.s_addr;
