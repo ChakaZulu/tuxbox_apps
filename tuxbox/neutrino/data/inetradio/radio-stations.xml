@@ -545,8 +545,13 @@
 		/>
 	
 	<station
-		name="Radio Bonn/Rhein-Sieg"
+		name="Radio Bonn/Rhein-Sieg - 128 KBit/s"
 		url="http://ga-stream01.ga-bonn.de/live128.m3u"
+		/>
+	
+	<station
+		name="Radio Bonn/Rhein-Sieg - 32 KBit/s"
+		url="http://ga-stream01.ga-bonn.de/live32.m3u"
 		/>
 	
 	<station
@@ -717,6 +722,11 @@
 	<station
 		name="Radio Zusa"
 		url="http://zusamatic.lemm.ws/zusa.m3u"
+		/>
+	
+	<station
+		name="Rockland Radio"
+		url="http://www.rockland.de/fileadmin/user_upload/Streams/rockland.m3u"
 		/>
 	
 	<station
