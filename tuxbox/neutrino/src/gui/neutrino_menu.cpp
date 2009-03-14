@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.44 2009/03/10 08:52:20 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.45 2009/03/14 16:20:20 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1166,7 +1166,6 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 					oj->addOption(locale);
 					languageSettings.addItem( oj );
 				}
-				free(namelist[count]);
 			}
 			free(namelist);
 		}
