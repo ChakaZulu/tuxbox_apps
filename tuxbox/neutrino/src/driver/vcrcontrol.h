@@ -114,7 +114,7 @@ class CVCRControl
 
 		public:
 			bool	StopPlayBack;
-			bool	StopSectionsd;
+			int	StopSectionsd;
 
 			virtual bool Pause()
 				{
@@ -154,7 +154,7 @@ class CVCRControl
 			virtual bool Record(const t_channel_id channel_id = 0, int mode = 1, const event_id_t epgid = 0,
 					    const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time = 0);
 			
-			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool use_fdatasync, const bool stream_vtxt_pid, const bool stream_subtitle_pid, const unsigned int ringbuffers, bool createTemplateDirectories)
+			CFileDevice(const bool stopplayback, const int stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool use_fdatasync, const bool stream_vtxt_pid, const bool stream_subtitle_pid, const unsigned int ringbuffers, bool createTemplateDirectories)
 				
 				: Directory(directory), FilenameTemplate(""), CreateTemplateDirectories(createTemplateDirectories),
 				SplitSize(splitsize), Use_O_Sync(use_o_sync), Use_Fdatasync(use_fdatasync),
@@ -196,7 +196,7 @@ class CVCRControl
 			virtual bool Record(const t_channel_id channel_id = 0, int mode = 1, const event_id_t epgid = 0,
 					    const std::string& epgTitle = "", unsigned char apids = 0, const time_t epg_time = 0);
 
-			CServerDevice(const bool stopplayback, const bool stopsectionsd, const char * const serveraddress, const unsigned int serverport)
+			CServerDevice(const bool stopplayback, const int stopsectionsd, const char * const serveraddress, const unsigned int serverport)
 				{
 					StopPlayBack       = stopplayback;
 					StopSectionsd      = stopsectionsd;

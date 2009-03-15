@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.130 2009/02/23 20:06:41 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.131 2009/03/15 22:47:21 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1034,6 +1034,10 @@ const char * locale_real_names[] =
 	"recordingmenu.record_in_spts_mode",
 	"recordingmenu.recording_type",
 	"recordingmenu.ringbuffers",
+	"recordingmenu.sectionsd",
+	"recordingmenu.sectionsd.restart",
+	"recordingmenu.sectionsd.run",
+	"recordingmenu.sectionsd.stop",
 	"recordingmenu.server",
 	"recordingmenu.server_ip",
 	"recordingmenu.server_mac",
@@ -1042,7 +1046,6 @@ const char * locale_real_names[] =
 	"recordingmenu.setupnow",
 	"recordingmenu.splitsize",
 	"recordingmenu.stopplayback",
-	"recordingmenu.stopsectionsd",
 	"recordingmenu.stream_subtitle_pid",
 	"recordingmenu.stream_vtxt_pid",
 	"recordingmenu.use_fdatasync",

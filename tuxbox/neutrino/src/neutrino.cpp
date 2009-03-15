@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.925 2009/03/10 08:46:50 seife Exp $
+	$Id: neutrino.cpp,v 1.926 2009/03/15 22:47:19 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -517,7 +517,7 @@ int CNeutrinoApp::loadSetup()
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32("recording_type", RECORDING_OFF);
 	g_settings.recording_stopplayback = configfile.getBool("recording_stopplayback", false);
-	g_settings.recording_stopsectionsd = configfile.getBool("recording_stopsectionsd", true );
+	g_settings.recording_stopsectionsd = configfile.getInt32("recording_stopsectionsd", 1);
 	g_settings.recording_server_ip = configfile.getString("recording_server_ip", "10.10.10.10");
 	strcpy( g_settings.recording_server_port, configfile.getString( "recording_server_port", "4000").c_str() );
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
@@ -563,6 +563,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.streaming_resolution = configfile.getInt32( "streaming_resolution", 0 );
 	g_settings.streaming_use_buffer = configfile.getInt32("streaming_use_buffer", 1);
 	g_settings.streaming_buffer_segment_size = configfile.getInt32("streaming_buffer_segment_size", 24);
+	g_settings.streaming_stopsectionsd = configfile.getInt32("streaming_stopsectionsd", 1);
 	g_settings.streaming_show_tv_in_browser = configfile.getInt32("streaming_show_tv_in_browser", 0);
 	g_settings.streaming_allow_multiselect = configfile.getBool("streaming_allow_multiselect", false);
 
@@ -1020,7 +1021,7 @@ void CNeutrinoApp::saveSetup()
 	//recording (server + vcr)
 	configfile.setInt32 ("recording_type",                      g_settings.recording_type);
 	configfile.setBool  ("recording_stopplayback"             , g_settings.recording_stopplayback         );
-	configfile.setBool  ("recording_stopsectionsd"            , g_settings.recording_stopsectionsd        );
+	configfile.setInt32 ("recording_stopsectionsd"            , g_settings.recording_stopsectionsd        );
 	configfile.setString("recording_server_ip",                 g_settings.recording_server_ip);
 	configfile.setString("recording_server_port",               g_settings.recording_server_port);
 	configfile.setInt32 ("recording_server_wakeup",             g_settings.recording_server_wakeup);
@@ -1065,6 +1066,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "streaming_resolution", g_settings.streaming_resolution );
 	configfile.setInt32 ( "streaming_use_buffer", g_settings.streaming_use_buffer);
 	configfile.setInt32 ( "streaming_buffer_segment_size", g_settings.streaming_buffer_segment_size);
+	configfile.setInt32 ( "streaming_stopsectionsd", g_settings.streaming_stopsectionsd);
 	configfile.setInt32 ( "streaming_show_tv_in_browser", g_settings.streaming_show_tv_in_browser);
 	configfile.setBool ("streaming_allow_multiselect", g_settings.streaming_allow_multiselect);
 

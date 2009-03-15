@@ -1007,6 +1007,10 @@ recordingmenu.off aus
 recordingmenu.record_in_spts_mode in SPTS-Modus aufnehmen
 recordingmenu.recording_type Aufnahme Gerät
 recordingmenu.ringbuffers Anz. Ringpuffer
+recordingmenu.sectionsd EPG (Sectionsd)
+recordingmenu.sectionsd.restart neu starten
+recordingmenu.sectionsd.run nicht anhalten
+recordingmenu.sectionsd.stop anhalten
 recordingmenu.server Server
 recordingmenu.server_ip Aufnahmeserver IP
 recordingmenu.server_mac Mac Adresse
@@ -1015,7 +1019,6 @@ recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.setupnow Einstellungen jetzt übernehmen
 recordingmenu.splitsize Max. Dateigröße (MB)
 recordingmenu.stopplayback Playback anhalten
-recordingmenu.stopsectionsd Sectionsd anhalten
 recordingmenu.stream_subtitle_pid Untertitel aufzeichnen
 recordingmenu.stream_vtxt_pid Videotext aufzeichnen
 recordingmenu.use_fdatasync Synchrones Schreiben (fdatasync)

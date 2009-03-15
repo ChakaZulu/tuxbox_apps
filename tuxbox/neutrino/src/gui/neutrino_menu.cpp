@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.45 2009/03/14 16:20:20 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.46 2009/03/15 22:47:20 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1363,6 +1363,14 @@ const CMenuOptionChooser::keyval RECORDINGMENU_RECORDING_TYPE_OPTIONS[RECORDINGM
 	{ CNeutrinoApp::RECORDING_FILE  , LOCALE_RECORDINGMENU_FILE   }
 };
 
+#define RECORDINGMENU_STOPSECTIONSD_OPTION_COUNT 3
+const CMenuOptionChooser::keyval RECORDINGMENU_STOPSECTIONSD_OPTIONS[RECORDINGMENU_STOPSECTIONSD_OPTION_COUNT] =
+{
+	{ 0, LOCALE_RECORDINGMENU_SECTIONSD_RUN     },
+	{ 1, LOCALE_RECORDINGMENU_SECTIONSD_STOP    },
+	{ 2, LOCALE_RECORDINGMENU_SECTIONSD_RESTART }
+};
+
 /* record settings menu */
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 {
@@ -1381,7 +1389,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPPLAYBACK, &g_settings.recording_stopplayback, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER || g_settings.recording_type == RECORDING_FILE));
 
-	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPSECTIONSD, &g_settings.recording_stopsectionsd, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER || g_settings.recording_type == RECORDING_FILE));
+	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SECTIONSD, &g_settings.recording_stopsectionsd, RECORDINGMENU_STOPSECTIONSD_OPTIONS, RECORDINGMENU_STOPSECTIONSD_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER || g_settings.recording_type == RECORDING_FILE));
 
 	CMenuOptionChooser* oj4b = new CMenuOptionChooser(LOCALE_RECORDINGMENU_ZAP_ON_ANNOUNCE, &g_settings.recording_zap_on_announce, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
@@ -1536,6 +1544,14 @@ const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_TYPE_OPTIONS[STREAMINGM
 	{ 1, LOCALE_STREAMINGMENU_ON  }
 };
 
+#define STREAMINGMENU_STOPSECTIONSD_OPTION_COUNT 3
+const CMenuOptionChooser::keyval STREAMINGMENU_STOPSECTIONSD_OPTIONS[STREAMINGMENU_STOPSECTIONSD_OPTION_COUNT] =
+{
+	{ 0, LOCALE_RECORDINGMENU_SECTIONSD_RUN     },
+	{ 1, LOCALE_RECORDINGMENU_SECTIONSD_STOP    },
+	{ 2, LOCALE_RECORDINGMENU_SECTIONSD_RESTART }
+};
+
 /* streaming settings menu */
 void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 {
@@ -1579,8 +1595,9 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	COnOffNotifier *bufferNotifier = new COnOffNotifier(mf9);
 	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_USE_BUFFER , &g_settings.streaming_use_buffer  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true,bufferNotifier);
 #endif
-	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_SHOW_TV_IN_BROWSER , &g_settings.streaming_show_tv_in_browser  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_FILEBROWSER_ALLOW_MULTISELECT , &g_settings.streaming_allow_multiselect  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
+	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SECTIONSD , &g_settings.streaming_stopsectionsd  , STREAMINGMENU_STOPSECTIONSD_OPTIONS, STREAMINGMENU_STOPSECTIONSD_OPTION_COUNT, true);
+	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_SHOW_TV_IN_BROWSER , &g_settings.streaming_show_tv_in_browser  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
+	CMenuOptionChooser* oj9 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_FILEBROWSER_ALLOW_MULTISELECT , &g_settings.streaming_allow_multiselect  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
 
 
 	streamingSettings.addItem(new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TYPE                  , &g_settings.streaming_type                 , STREAMINGMENU_STREAMING_TYPE_OPTIONS, STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT, true, StreamingNotifier));
@@ -1608,6 +1625,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 #endif
 	streamingSettings.addItem( oj7 );
 	streamingSettings.addItem( oj8 );
+	streamingSettings.addItem( oj9 );
 }
 
 /* for font settings menu */

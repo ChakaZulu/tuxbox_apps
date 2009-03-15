@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.201 2009/01/24 15:24:47 seife Exp $
+  $Id: settings.h,v 1.202 2009/03/15 22:47:21 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -277,6 +277,7 @@ struct SNeutrinoSettings
 	int streaming_resolution;
 	int streaming_use_buffer;
 	int streaming_buffer_segment_size;
+	int streaming_stopsectionsd;
 	int streaming_show_tv_in_browser;
 	int streaming_allow_multiselect;
 
