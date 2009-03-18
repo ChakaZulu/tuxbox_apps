@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.168 2009/03/15 22:47:20 dbt Exp $
+  $Id: movieplayer.cpp,v 1.169 2009/03/18 07:16:47 rhabarber1848 Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -208,7 +208,9 @@ bool get_movie_info_apid_name(int apid,MI_MOVIE_INFO* movie_info,std::string* ap
        if( movie_info->audioPids[i].epgAudioPid == apid && 
           !movie_info->audioPids[i].epgAudioPidName.empty())
        {
-            *apidtitle = movie_info->audioPids[i].epgAudioPidName;
+            char show_pid_number[4];
+            sprintf(show_pid_number, "%u", apid);
+            *apidtitle = movie_info->audioPids[i].epgAudioPidName + " [" + show_pid_number + "]";
             return true;
        }
     }
@@ -4453,7 +4455,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.168 $");
+	return imageinfo.getModulVersion("","$Revision: 1.169 $");
 }
 
 void CMoviePlayerGui::showHelpTS()
