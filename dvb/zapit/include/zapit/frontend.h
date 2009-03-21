@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.34 2009/02/24 19:09:04 seife Exp $
+ * $Id: frontend.h,v 1.35 2009/03/21 14:29:11 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -92,6 +92,9 @@ class CFrontend
 		static fe_modulation_t		getModulation(const uint8_t modulation);
 		uint8_t				getPolarization(void) const;
 		const dvb_frontend_info *getInfo(void) const			{ return &info; };
+		/* those two don't really belong to frontend, but they are hardware/API dependent, so i put them here */
+		static fe_code_rate_t		xml2FEC(const uint8_t fec);
+		static uint8_t			FEC2xml(fe_code_rate_t fec);
 
 		uint32_t			getBitErrorRate(void) const;
 		uint16_t			getSignalNoiseRatio(void) const;

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.61 2008/03/16 12:20:10 seife Exp $
+ * $Id: frontend.cpp,v 1.62 2009/03/21 14:29:12 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -124,6 +124,70 @@ fe_code_rate_t CFrontend::getCodeRate(const uint8_t fec_inner)
 		return FEC_NONE;
 	default:
 		return FEC_AUTO;
+	}
+}
+
+#if HAVE_DVB_API_VERSION < 3
+#define FEC_4_5 FEC_AUTO
+#define FEC_6_7 FEC_AUTO
+#define FEC_8_9 FEC_AUTO
+#endif
+
+/* converts the number from {cables,sattelites,services}.xml to 
+   values the frontend can use
+   with new API this is a 1:1 conversion */
+fe_code_rate_t CFrontend::xml2FEC(const uint8_t fec)
+{
+	switch (fec) {
+	case 0x00:
+		return FEC_NONE;
+	case 0x01:
+		return FEC_1_2;
+	case 0x02:
+		return FEC_2_3;
+	case 0x03:
+		return FEC_3_4;
+	case 0x04:
+		return FEC_4_5;
+	case 0x05:
+		return FEC_5_6;
+	case 0x06:
+		return FEC_6_7;
+	case 0x07:
+		return FEC_7_8;
+	case 0x08:
+		return FEC_8_9;
+	default:
+		return FEC_AUTO;
+	}
+}
+
+uint8_t CFrontend::FEC2xml(const fe_code_rate_t fec)
+{
+	switch (fec)
+	{
+	case FEC_NONE:
+		return 0;
+	case FEC_1_2:
+		return 1;
+	case FEC_2_3:
+		return 2;
+	case FEC_3_4:
+		return 3;
+	case FEC_5_6:
+		return 5;
+	case FEC_7_8:
+		return 7;
+#if HAVE_DVB_API_VERSION >= 3
+	case FEC_4_5:
+		return 4;
+	case FEC_6_7:
+		return 6;
+	case FEC_8_9:
+		return 8;
+#endif
+	default:
+		return 9;
 	}
 }
 

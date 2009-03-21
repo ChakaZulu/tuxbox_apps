@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.163 2009/03/21 14:10:19 seife Exp $
+ * $Id: scan.cpp,v 1.164 2009/03/21 14:29:12 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -403,7 +403,7 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 						transponder.feparams.frequency,
 						transponder.feparams.inversion,
 						transponder.feparams.u.qam.symbol_rate,
-						transponder.feparams.u.qam.fec_inner,
+						CFrontend::FEC2xml(transponder.feparams.u.qam.fec_inner),
 						transponder.feparams.u.qam.modulation);
 					break;
 
@@ -415,7 +415,7 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 						transponder.feparams.frequency,
 						transponder.feparams.inversion,
 						transponder.feparams.u.qpsk.symbol_rate,
-						transponder.feparams.u.qpsk.fec_inner,
+						CFrontend::FEC2xml(transponder.feparams.u.qpsk.fec_inner),
 						transponder.polarization);
 					break;
 
@@ -542,8 +542,8 @@ int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellit
 	if (frontend->getInfo()->type == FE_QAM)
 	{
 		feparams.u.qam.symbol_rate = xmlGetNumericAttribute(transponder, "symbol_rate", 0);
-		feparams.u.qam.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0);
-		feparams.u.qam.modulation = (fe_modulation_t) xmlGetNumericAttribute(transponder, "modulation", 0);
+		feparams.u.qam.fec_inner = CFrontend::xml2FEC(xmlGetNumericAttribute(transponder, "fec_inner", 0));
+		feparams.u.qam.modulation = CFrontend::getModulation(xmlGetNumericAttribute(transponder, "modulation", 0));
 		diseqc_pos = 0;
 	}
 
@@ -551,7 +551,7 @@ int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellit
 	else if (frontend->getInfo()->type == FE_QPSK)
 	{
 		feparams.u.qpsk.symbol_rate = xmlGetNumericAttribute(transponder, "symbol_rate", 0);
-		feparams.u.qpsk.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0);
+		feparams.u.qpsk.fec_inner = CFrontend::xml2FEC(xmlGetNumericAttribute(transponder, "fec_inner", 0));
 		polarization = xmlGetNumericAttribute(transponder, "polarization", 0);
 	}
 
@@ -808,7 +808,7 @@ int copy_to_satellite_inc(TP_params * TP, FILE * fd, FILE * fd1, char * provider
 
 	sprintf(freq, "frequency=\"%d\"", TP->feparams.frequency);
 	sprintf(rate, "symbol_rate=\"%d\"", TP->feparams.u.qpsk.symbol_rate);
-	sprintf(fec, "fec_inner=\"%d\"", TP->feparams.u.qpsk.fec_inner);
+	sprintf(fec, "fec_inner=\"%d\"", CFrontend::FEC2xml(TP->feparams.u.qpsk.fec_inner));
 	sprintf(pol, "polarization=\"%d\"", TP->polarization);
 
 	DBG("%s %s %s %s", freq, rate, fec, pol);
@@ -877,8 +877,7 @@ int scan_transponder(TP_params *TP)
 			break;
 		}
 	printf("[scan_transponder] scanning sat %s diseqc %d\n", providerName, diseqc_pos);
-	printf("[scan_transponder] freq %d rate %d fec %d pol %d\n", TP->feparams.frequency, TP->feparams.u.qpsk.symbol_rate, TP->feparams.u.qpsk.fec_inner, TP->polarization);
-	printf("[scan_transponder] freq %d rate %d fec %d pol %d mod %d\n", TP->feparams.frequency, TP->feparams.u.qam.symbol_rate, TP->feparams.u.qam.fec_inner, TP->polarization, TP->feparams.u.qam.modulation);
+	printf("[scan_transponder] freq %d rate %d fec %d pol %d mod %d\n", TP->feparams.frequency, TP->feparams.u.qam.symbol_rate, CFrontend::FEC2xml(TP->feparams.u.qam.fec_inner), TP->polarization, TP->feparams.u.qam.modulation);
 
 	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, providerName, strlen(providerName) + 1);
 

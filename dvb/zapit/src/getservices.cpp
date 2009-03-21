@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.102 2009/01/16 16:19:32 seife Exp $
+ * $Id: getservices.cpp,v 1.103 2009/03/21 14:29:12 seife Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -74,7 +74,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 		/* cable */
 		if (DiSEqC == 0xFF) {
 			feparams.u.qam.symbol_rate = xmlGetNumericAttribute(node, "symbol_rate", 0);
-			feparams.u.qam.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(node, "fec_inner", 0);
+			feparams.u.qam.fec_inner = CFrontend::xml2FEC(xmlGetNumericAttribute(node, "fec_inner", 0));
 			feparams.u.qam.modulation = CFrontend::getModulation(xmlGetNumericAttribute(node, "modulation", 0));
 		}
 
@@ -92,7 +92,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 		/* satellite */
 		else {
 			feparams.u.qpsk.symbol_rate = xmlGetNumericAttribute(node, "symbol_rate", 0);
-			feparams.u.qpsk.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(node, "fec_inner", 0);
+			feparams.u.qpsk.fec_inner = CFrontend::xml2FEC(xmlGetNumericAttribute(node, "fec_inner", 0));
 			polarization = xmlGetNumericAttribute(node, "polarization", 0);
 		}
 
