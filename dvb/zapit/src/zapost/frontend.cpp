@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.63 2009/03/21 15:03:41 seife Exp $
+ * $Id: frontend.cpp,v 1.64 2009/03/21 15:06:12 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -386,15 +386,47 @@ dvb_frontend_event CFrontend::getEvent(void)
                                 break;
 
                         case FE_FAILURE_EV:
-                                printf("[CFrontend::getEvent] FE_FAILURE_EV\n");
+                                printf("[CFrontend::getEvent] FE_FAILURE_EV ");
+#if 0
+				if (event.u.failureEvent & FE_HAS_POWER) printf("FE_HAS_POWER ");
+				if (event.u.failureEvent & FE_HAS_SIGNAL) printf("FE_HAS_SIGNAL ");
+				if (event.u.failureEvent & FE_SPECTRUM_INV) printf("FE_SPECTRUM_INV ");
+				if (event.u.failureEvent & FE_HAS_LOCK) printf("FE_HAS_LOCK ");
+				if (event.u.failureEvent & FE_HAS_CARRIER) printf("FE_HAS_CARRIER ");
+				if (event.u.failureEvent & FE_HAS_VITERBI) printf("FE_HAS_VITERBI ");
+				if (event.u.failureEvent & FE_HAS_SYNC) printf("FE_HAS_SYNC ");
+				if (event.u.failureEvent & FE_TUNER_HAS_LOCK) printf("FE_TUNER_HAS_LOCK ");
+#endif
+				printf("\n");
                                 break;
 
                         case FE_COMPLETION_EV:
                                 currentTransponder.feparams.Frequency = event.u.completionEvent.Frequency;
-				printf("[CFrontend::getEvent] FE_COMPLETION_EV: freq %d\n", event.u.completionEvent.Frequency);
-                                tuned = true;
-                                break;
-                        }
+				printf("[CFrontend::getEvent] FE_COMPLETION_EV: freq %d inv: %d ", event.u.completionEvent.Frequency, event.u.completionEvent.Inversion);
+				switch (info.type) {
+				case FE_QPSK:
+					printf("sr: %d, fec: %d", event.u.completionEvent.u.qpsk.SymbolRate, event.u.completionEvent.u.qpsk.FEC_inner);
+					break;
+				default:
+					break;
+				}
+				printf("\n");
+				if (1) {
+					FrontendParameters f;
+					fop(ioctl, FE_GET_FRONTEND, &f);
+					printf("[CFrontend::getEvent] FE_GET_FRONTEND: freq %d inv: %d ", f.Frequency, f.Inversion);
+					switch (info.type) {
+					case FE_QPSK:
+						printf("sr: %d, fec: %d", f.u.qpsk.SymbolRate, f.u.qpsk.FEC_inner);
+						break;
+					default:
+						break;
+					}
+					printf("\n");
+				}
+				tuned = true;
+				break;
+			}
 		}
 	}
 
