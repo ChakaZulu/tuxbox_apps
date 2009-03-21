@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.422 2009/03/21 14:51:58 seife Exp $
+ * $Id: zapit.cpp,v 1.423 2009/03/21 14:58:59 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2623,38 +2623,38 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.422 2009/03/21 14:51:58 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.423 2009/03/21 14:58:59 seife Exp $\n");
 
 	bool check_lock = true;
+	int opt;
 
-	for (int i = 1; i < argc ; i++) {
-		if (!strcmp(argv[i], "-d")) {
+	while ((opt = getopt(argc, argv, "dqunl")) > 0) {
+		switch (opt) {
+		case 'd':
 			debug = true;
-		}
-		else if (!strcmp(argv[i], "-q")) {
+			break;
+		case 'q':
 			/* don't say anything */
 			int fd;
-
 			close(STDOUT_FILENO);
 			if ((fd = open("/dev/null", O_WRONLY)) != STDOUT_FILENO)
 				close(fd);
-
 			close(STDERR_FILENO);
 			if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
 				close(fd);
-		}
-		else if (!strcmp(argv[i], "-u")) {
-			update_pmt=true;
+			break;
+		case 'u':
+			update_pmt = true;
 			printf("[zapit] PMT update enabled\n");
-		}
-		else if (!strcmp(argv[i], "-n")) {
-			fastzap=0;
-		}
-		else if (!strcmp(argv[i], "-l")) {
+			break;
+		case 'n':
+			fastzap = 0;
+			break;
+		case 'l':
 			printf("[zapit] lock loss check disabled\n");
-			check_lock=false;
-		}
-		else {
+			check_lock = false;
+			break;
+		default:
 			fprintf(stderr,
 				"Usage: %s [-d] [-q] [-u] [-l]\n"
 				"-d : debug mode\n"
