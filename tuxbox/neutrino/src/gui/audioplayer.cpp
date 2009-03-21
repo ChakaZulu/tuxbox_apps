@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.61 2009/02/24 19:27:59 seife Exp $
+  $Id: audioplayer.cpp,v 1.62 2009/03/21 10:25:16 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -675,7 +675,7 @@ int CAudioPlayerGui::show()
 					}
 					update=true;
 				}
-				else if ( shuffelPlaylist() )
+				else if ( shufflePlaylist() )
 				{
 					update = true;
 				}
@@ -889,7 +889,7 @@ bool CAudioPlayerGui::clearPlaylist(void)
 	return(result);
 }
 
-bool CAudioPlayerGui::shuffelPlaylist(void)
+bool CAudioPlayerGui::shufflePlaylist(void)
 {	
 	RandomNumber rnd;
 	bool result = false;

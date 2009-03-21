@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.h,v 1.22 2009/02/09 15:19:15 rhabarber1848 Exp $
+  $Id: audioplayer.h,v 1.23 2009/03/21 10:25:16 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -241,7 +241,7 @@ class CAudioPlayerGui : public CMenuTarget
 	bool openFilebrowser(void);
 	bool openSCbrowser(void);
 	bool clearPlaylist(void);
-	bool shuffelPlaylist(void);	
+	bool shufflePlaylist(void);
 	bool playNext(bool allow_rotate = false);
 	bool playPrev(bool allow_rotate = false);
 	
