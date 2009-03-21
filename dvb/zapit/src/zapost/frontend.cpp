@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.62 2009/03/21 14:29:12 seife Exp $
+ * $Id: frontend.cpp,v 1.63 2009/03/21 15:03:41 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -533,20 +533,20 @@ void CFrontend::sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms)
 	if (fop(ioctl, FE_DISEQC_SEND_BURST, burst) == 0)
 #else
 	secCmdSequence sequence;
-	secCommand command;
+	secCommand *command = NULL;
 	memset(&sequence, 0, sizeof(sequence));
-	memset(&command, 0, sizeof(command));
 
-	command.type = SEC_CMDTYPE_DISEQC_RAW;
 	sequence.miniCommand = burst;
-	sequence.continuousTone = currentToneMode;
-	sequence.voltage = currentTransponder.polarization;
-	sequence.commands = &command;
+	sequence.continuousTone = (secToneMode)currentToneMode;
+	sequence.voltage = (secVoltage)currentTransponder.polarization;
+	sequence.commands = command;
 	sequence.numCommands = 0;
 
-	if (fop_sec(ioctl, SEC_SEND_SEQUENCE, sequence) == 0)
+	if (fop_sec(ioctl, SEC_SEND_SEQUENCE, &sequence) == 0)
 #endif
 		usleep(1000 * ms);
+	else
+		perror("SEC_SEND_SEQUENCE");
 
 	TIMER_STOP();
 }
