@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.26 2009/02/24 19:09:04 seife Exp $
+ * $Id: cam.h,v 1.27 2009/03/21 13:01:37 rhabarber1848 Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>,
  *               thegoodguy         <thegoodguy@berlios.de>
@@ -35,6 +35,7 @@ class CCam : public CBasicClient
 
 	public:
 		bool setCaPmt(CCaPmt * const caPmt);
+		virtual ~CCam(void);
 };
 
 #endif /* __cam_h__ */
