@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.162 2009/03/06 18:37:37 rhabarber1848 Exp $
+ * $Id: scan.cpp,v 1.163 2009/03/21 14:10:19 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -215,7 +215,7 @@ void get_transponder (TP_params *TP)
 	return;
 }
 
-int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(transponder_id_t transponder_id, dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
+int add_transponder(transponder_id_t transponder_id, dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
 {
 	if (transponder_id == TRANSPONDER_ID_NOT_TUNED)
 		return 1;
@@ -247,7 +247,6 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(transponder_id_t transpon
 				)
 			)
 		);
-
 		return 0;
 	}
 
@@ -264,7 +263,10 @@ int get_nits(dvb_frontend_parameters *feparams, uint8_t polarization, const t_sa
 	if(scan_mode)
 	{
 		fake_tid++; fake_nid++;
-		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(zfrequency, satellite_position,fake_nid,fake_tid), feparams, polarization, DiSEqC);
+		status = add_transponder(
+				CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(
+					zfrequency, satellite_position,fake_nid,fake_tid),
+				feparams, polarization, DiSEqC);
 		return status;
 	}
 	eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &(feparams->frequency),sizeof(feparams->frequency));
@@ -276,7 +278,11 @@ int get_nits(dvb_frontend_parameters *feparams, uint8_t polarization, const t_sa
 	{
 		uint32_t tsid_onid = get_sdt_TsidOnid();
 	
-		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(zfrequency, satellite_position,(t_original_network_id)tsid_onid, (t_transport_stream_id)(tsid_onid >> 16)), feparams, polarization, DiSEqC);
+		status = add_transponder(
+				CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(
+					zfrequency, satellite_position, (t_original_network_id)tsid_onid,
+					(t_transport_stream_id)(tsid_onid >> 16)),
+				feparams, polarization, DiSEqC);
 	}
 
 	return status;
