@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.421 2009/02/24 13:50:25 seife Exp $
+ * $Id: zapit.cpp,v 1.422 2009/03/21 14:51:58 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -275,63 +275,17 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 
 void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sat)
 {
-	/*
-	char tp_str[256] = "";
-	std::string tsid_str;
-	std::string onid_str;	
-	std::string frequency;
-	std::string symbol_rate;
-	std::string inversion;
-	std::string fec_inner;
-	std::string modulation;
-	
-	onid_str = xmlGetAttribute(transponder, "onid");
-	tsid_str = xmlGetAttribute(transponder, "id");
-	frequency = xmlGetAttribute(transponder, "frequency");
-	symbol_rate = xmlGetAttribute(transponder, "symbol_rate");
-	inversion =  xmlGetAttribute(transponder, "inversion");
-	fec_inner =  xmlGetAttribute(transponder, "fec_inner");
-	*/
-	if (is_sat) {
-	/*
-		modulation =  xmlGetAttribute(transponder, "polarization");
-		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" polarization=\"%s\">\n",tsid_str.c_str(),
-				onid_str.c_str(),
-				frequency.c_str(),
-				inversion.c_str(),
-				symbol_rate.c_str(),
-				fec_inner.c_str(),
-				modulation.c_str());
-	*/
-		fprintf(tmp, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n", 
-				(t_transport_stream_id) xmlGetNumericAttribute(transponder, "id", 16),
-				(t_original_network_id) xmlGetNumericAttribute(transponder, "onid", 16),
-				(uint32_t) xmlGetNumericAttribute(transponder, "frequency", 0),
-				(fe_spectral_inversion_t) xmlGetNumericAttribute(transponder, "inversion", 0),
-				(uint32_t) xmlGetNumericAttribute(transponder, "symbol_rate", 0),
-				(fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0),
-				(uint8_t) xmlGetNumericAttribute(transponder, "polarization", 0));
-	}
-	else {
-	/*
-		modulation =  xmlGetAttribute(transponder, "modulation");
-		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" modulation=\"%s\">\n",tsid_str.c_str(),
-				onid_str.c_str(),
-				frequency.c_str(),
-				inversion.c_str(),
-				symbol_rate.c_str(),
-				fec_inner.c_str(),
-				modulation.c_str());
-	*/
-		fprintf(tmp, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n", 
-				(t_transport_stream_id) xmlGetNumericAttribute(transponder, "id", 16),
-				(t_original_network_id) xmlGetNumericAttribute(transponder, "onid", 16),
-				(uint32_t) xmlGetNumericAttribute(transponder, "frequency", 0),
-				(fe_spectral_inversion_t) xmlGetNumericAttribute(transponder, "inversion", 0),
-				(uint32_t) xmlGetNumericAttribute(transponder, "symbol_rate", 0),
-				(fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0),
-				(fe_modulation_t) xmlGetNumericAttribute(transponder, "modulation", 0));
-	}
+	fprintf(tmp, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%d\" inversion=\"%d\" symbol_rate=\"%d\" fec_inner=\"%d\"",
+		(int)xmlGetNumericAttribute(transponder, "id", 16),
+		(int)xmlGetNumericAttribute(transponder, "onid", 16),
+		(int)xmlGetNumericAttribute(transponder, "frequency", 0),
+		(int)xmlGetNumericAttribute(transponder, "inversion", 0),
+		(int)xmlGetNumericAttribute(transponder, "symbol_rate", 0),
+		(int)xmlGetNumericAttribute(transponder, "fec_inner", 0));
+	if (is_sat)
+		fprintf(tmp, " polarization=\"%d\">\n", (int)xmlGetNumericAttribute(transponder, "polarization", 0));
+	else
+		fprintf(tmp, " modulation=\"%d\">\n", (int) xmlGetNumericAttribute(transponder, "modulation", 0));
 }
 
 void copy_transponder(FILE * tmp, xmlNodePtr transponder, const bool is_sat)
@@ -2669,7 +2623,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.421 2009/02/24 13:50:25 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.422 2009/03/21 14:51:58 seife Exp $\n");
 
 	bool check_lock = true;
 
