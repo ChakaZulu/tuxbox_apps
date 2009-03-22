@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.69 2009/03/11 20:42:17 rhabarber1848 Exp $
+	$Id: lcdd.cpp,v 1.70 2009/03/22 22:07:51 houdini Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -131,7 +131,7 @@ enum backgrounds {
 	BACKGROUND_LCD2  = 2,
 	BACKGROUND_LCD3  = 3,
 	BACKGROUND_LCD   = 4,
-    BACKGROUND_LCD4  = 5
+	BACKGROUND_LCD4  = 5
 };
 const char * const background_name[LCD_NUMBER_OF_BACKGROUNDS] = {
 	"setup",
@@ -139,7 +139,7 @@ const char * const background_name[LCD_NUMBER_OF_BACKGROUNDS] = {
 	"lcd2",
 	"lcd3",
 	"lcd",
-    "lcd4"
+	"lcd4"
 };
 #define NUMBER_OF_PATHS 2
 const char * const background_path[NUMBER_OF_PATHS] = {
@@ -214,7 +214,7 @@ void CLCD::displayUpdate()
 		display.update();
 }
 
-void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const int inverse)
+void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const int inverse, const int bias)
 {
 	if (!display.isAvailable())
 		return;
@@ -258,6 +258,13 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 			perror("[lcdd] set invert failed!");
 		}
 
+		if (g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) 
+		{
+			if (ioctl(fd, LCD_IOCTL_BIAS, &bias) < 0)
+			{
+				perror("[lcdd] set bias failed!");
+			}
+		}
 		close(fd);
 	}
 }
@@ -284,7 +291,8 @@ void CLCD::setlcdparameter(void)
 	setlcdparameter(brightness,
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST],
 			power,
-			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
+			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE],
+			g_settings.lcd_setting[SNeutrinoSettings::LCD_BIAS]);
 }
 
 static std::string removeLeadingSpaces(const std::string & text)
@@ -892,7 +900,8 @@ void CLCD::togglePower(void)
 	setlcdparameter((mode == MODE_STANDBY) ? g_settings.lcd_setting[SNeutrinoSettings::LCD_STANDBY_BRIGHTNESS] : g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS],
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST],
 			last_toggle_state_power,
-			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
+			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE],
+			g_settings.lcd_setting[SNeutrinoSettings::LCD_BIAS]);
 }
 
 void CLCD::setInverse(int inverse)

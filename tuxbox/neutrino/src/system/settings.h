@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.202 2009/03/15 22:47:21 dbt Exp $
+  $Id: settings.h,v 1.203 2009/03/22 22:06:45 houdini Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -364,16 +364,18 @@ struct SNeutrinoSettings
 	};
 
 	// lcdd
-#define LCD_SETTING_COUNT 8
 	enum LCD_SETTINGS {
 		LCD_BRIGHTNESS         = 0,
-		LCD_STANDBY_BRIGHTNESS = 1,
-		LCD_CONTRAST           = 2,
-		LCD_POWER              = 3,
-		LCD_INVERSE            = 4,
-		LCD_SHOW_VOLUME        = 5,
-		LCD_AUTODIMM           = 6,
-		LCD_EPGMODE            = 7,
+		LCD_STANDBY_BRIGHTNESS ,
+		LCD_CONTRAST           ,
+		LCD_POWER              ,
+		LCD_INVERSE            ,
+		LCD_SHOW_VOLUME        ,
+		LCD_AUTODIMM           ,
+		LCD_EPGMODE            ,
+		LCD_BIAS               ,
+
+		LCD_SETTING_COUNT
 	};
 	int lcd_setting[LCD_SETTING_COUNT];
 
@@ -423,11 +425,12 @@ struct SNeutrinoSettings
 	//uboot
 	int	uboot_baudrate;
 	int	uboot_dbox_duplex;
-	int uboot_dbox_duplex_bak;
+	int	uboot_dbox_duplex_bak;
 	int	uboot_console;
 	int	uboot_console_bak;
 	int	uboot_lcd_inverse;
 	int	uboot_lcd_contrast;
+	int	uboot_lcd_bias;
 
 	// USERMENU
 	typedef enum
@@ -437,7 +440,8 @@ struct SNeutrinoSettings
 		BUTTON_YELLOW = 2,
 		BUTTON_BLUE = 3,
 		BUTTON_MAX   // MUST be always the last in the list
-	}USER_BUTTON;
+	} USER_BUTTON;
+
 	typedef enum
 	{
 		ITEM_NONE = 0, // Do not change ordering of members, add new item just before ITEM_MAX!!!
@@ -458,7 +462,8 @@ struct SNeutrinoSettings
 		ITEM_FAVORITS = 15,
 		ITEM_TECHINFO = 16,
 		ITEM_MAX   // MUST be always the last in the list
-	}USER_ITEM;
+	} USER_ITEM;
+
 	std::string usermenu_text[BUTTON_MAX];
 	int usermenu[BUTTON_MAX][ITEM_MAX];  // (USER_ITEM)  [button][position in Menue] = feature item
 };
@@ -490,6 +495,7 @@ extern const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT];
 #define DEFAULT_LCD_AUTODIMM			0x00
 #define DEFAULT_LCD_SHOW_VOLUME			0x01
 #define DEFAULT_LCD_EPGMODE			0x01	/* 0x1 = name 0x2 = epgtitle 0x4 = separator */
+#define DEFAULT_LCD_BIAS			0x00	/* 0x0 = default for philips rev 2, 0x1 = default for all others */
 
 /* end default values */
 

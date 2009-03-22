@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.47 2009/03/18 07:15:01 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.48 2009/03/22 22:07:18 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1938,6 +1938,11 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_LCDMENU_INVERSE, &g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE], OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, lcdnotifier);
 	lcdSettings.addItem(oj);
+
+	if (g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) {
+		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_LCDMENU_BIAS, &g_settings.lcd_setting[SNeutrinoSettings::LCD_BIAS], OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, lcdnotifier);
+		lcdSettings.addItem(oj);
+	}
 
 	oj = new CMenuOptionChooser(LOCALE_LCDMENU_POWER, &g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER], OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, lcdnotifier);
 	lcdSettings.addItem(oj);

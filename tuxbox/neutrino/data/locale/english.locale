@@ -536,6 +536,7 @@ lcdcontroler.brightnessstandby Standby Brightness
 lcdcontroler.contrast Contrast
 lcdcontroler.head LCD Stettings
 lcdmenu.autodimm Auto dimm
+lcdmenu.bias Bias Mode (Enable for Philips rc2 displays)
 lcdmenu.dim_brightness Dim Brightness
 lcdmenu.dim_time Dim Timeout
 lcdmenu.epg LCD EPG
