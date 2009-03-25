@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.928 2009/03/22 22:09:23 houdini Exp $
+	$Id: neutrino.cpp,v 1.929 2009/03/25 14:08:07 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -528,8 +528,19 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_use_fdatasync         = configfile.getBool("recordingmenu.use_fdatasync"        , false);
 	g_settings.recording_audio_pids_default    = configfile.getInt32("recording_audio_pids_default", TIMERD_APIDS_STD );
 	g_settings.recording_stream_vtxt_pid       = configfile.getBool("recordingmenu.stream_vtxt_pid"      , false);
-	g_settings.recording_stream_subtitle_pid        = configfile.getBool("recordingmenu.stream_subtitle_pid"      , false);
-	strcpy( g_settings.recording_ringbuffers, configfile.getString( "recordingmenu.ringbuffers", "20").c_str() );
+	g_settings.recording_stream_subtitle_pid   = configfile.getBool("recordingmenu.stream_subtitle_pid"  , false);
+	g_settings.recording_ringbuffers           = configfile.getInt32("recordingmenu.ringbuffers", 2);
+	// compatibility conversion...
+	if (g_settings.recording_ringbuffers > 4) {
+		/* the "unit" for ringbuffers was 188*362 == 68056, but
+		   the ringbuffer code can only take powers of two */
+		if (g_settings.recording_ringbuffers > 61)
+			g_settings.recording_ringbuffers = 4;	// --> 8MB
+		else if (g_settings.recording_ringbuffers > 30)
+			g_settings.recording_ringbuffers = 3;	// --> 4MB
+		else						// the minimum value was 20
+			g_settings.recording_ringbuffers = 2;	// --> 2MB
+	}
 	g_settings.recording_choose_direct_rec_dir = configfile.getInt32( "recording_choose_direct_rec_dir", 0 );
 	g_settings.recording_epg_for_filename      = configfile.getBool("recording_epg_for_filename"         , true);
 	g_settings.recording_in_spts_mode          = configfile.getBool("recording_in_spts_mode"         , true);
@@ -1042,8 +1053,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool  ("recordingmenu.use_fdatasync"        , g_settings.recording_use_fdatasync        );
 	configfile.setInt32 ("recording_audio_pids_default"       , g_settings.recording_audio_pids_default);
 	configfile.setBool  ("recordingmenu.stream_vtxt_pid"      , g_settings.recording_stream_vtxt_pid      );
-	configfile.setBool  ("recordingmenu.stream_subtitle_pid"       , g_settings.recording_stream_subtitle_pid      );
-	configfile.setString("recordingmenu.ringbuffers"          , g_settings.recording_ringbuffers);
+	configfile.setBool  ("recordingmenu.stream_subtitle_pid"  , g_settings.recording_stream_subtitle_pid);
+	configfile.setInt32 ("recordingmenu.ringbuffers"          , g_settings.recording_ringbuffers);
 	configfile.setInt32 ("recording_choose_direct_rec_dir"    , g_settings.recording_choose_direct_rec_dir);
 	configfile.setBool  ("recording_epg_for_filename"         , g_settings.recording_epg_for_filename     );
 	configfile.setBool  ("recording_in_spts_mode"             , g_settings.recording_in_spts_mode         );
@@ -1904,7 +1915,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 	{
 		unsigned int splitsize, ringbuffers;
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
-		sscanf(g_settings.recording_ringbuffers, "%u", &ringbuffers);
+		ringbuffers = g_settings.recording_ringbuffers;
 
 		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.recording_dir[0].c_str(), splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_vtxt_pid, g_settings.recording_stream_subtitle_pid, ringbuffers,true);
 

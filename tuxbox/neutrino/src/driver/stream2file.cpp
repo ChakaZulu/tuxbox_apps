@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.30 2008/10/06 07:15:32 seife Exp $
+ * $Id: stream2file.cpp,v 1.31 2009/03/25 14:08:08 seife Exp $
  * 
  * streaming to file/disc
  * 
@@ -304,6 +304,8 @@ void * DMXThread(void * v_arg)
 		exit_flag = STREAM2FILE_STATUS_RECORDING_THREADS_FAILED;
 		puts("[stream2file]: error allocating ringbuffer! (out of memory?)"); 
 	}
+	else
+		fprintf(stderr, "[stream2file] allocated ringbuffer size: %ld\n", ringbuffer_write_space(ringbuf));
 
 	filename_data.ringbuffer = ringbuf;
 
@@ -515,16 +517,11 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	use_o_sync    = with_o_sync;
 	use_fdatasync = with_fdatasync;
 
-	if (ringbuffers < 20)
-	{
-		puts("[stream2file]: using minimum ringbuffers (20)");
-		ringbuffersize = IN_SIZE * 20;
-	}
+	if (ringbuffers > 4)
+		ringbuffersize = ((1 << 19) << 4);
 	else
-	{
-		printf("[stream2file]: using %i ringbuffers\n", ringbuffers);
-		ringbuffersize = IN_SIZE * ringbuffers;
-	}
+		ringbuffersize = ((1 << 19) << ringbuffers);
+	printf("[stream2file]: ringbuffersize %d\n", ringbuffersize);
 
 	for (unsigned int i = 0; i < numpids; i++)
 	{

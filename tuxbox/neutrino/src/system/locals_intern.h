@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.132 2009/03/22 22:06:45 houdini Exp $
+ * $Id: locals_intern.h,v 1.133 2009/03/25 14:08:08 seife Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -238,7 +238,7 @@ const char * locale_real_names[] =
 	"bouqueteditor.savechanges?",
 	"bouqueteditor.savingchanges",
 	"bouqueteditor.switch",
-	"bouqueteditor.switch_to_channel",	
+	"bouqueteditor.switch_to_channel",
 	"bouqueteditor.switchmode",
 	"bouquetlist.bouquetselect",
 	"bouquetlist.head",
@@ -1035,6 +1035,11 @@ const char * locale_real_names[] =
 	"recordingmenu.record_in_spts_mode",
 	"recordingmenu.recording_type",
 	"recordingmenu.ringbuffers",
+	"recordingmenu.ringbuffers_05M",
+	"recordingmenu.ringbuffers_1M",
+	"recordingmenu.ringbuffers_2M",
+	"recordingmenu.ringbuffers_4M",
+	"recordingmenu.ringbuffers_8M",
 	"recordingmenu.sectionsd",
 	"recordingmenu.sectionsd.restart",
 	"recordingmenu.sectionsd.run",

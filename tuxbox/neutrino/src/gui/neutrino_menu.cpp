@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.48 2009/03/22 22:07:18 houdini Exp $
+	$Id: neutrino_menu.cpp,v 1.49 2009/03/25 14:08:08 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1374,6 +1374,16 @@ const CMenuOptionChooser::keyval RECORDINGMENU_STOPSECTIONSD_OPTIONS[RECORDINGME
 	{ 2, LOCALE_RECORDINGMENU_SECTIONSD_RESTART }
 };
 
+#define RECORDINGMENU_RINGBUFFER_SIZE_COUNT 5
+const CMenuOptionChooser::keyval RECORDINGMENU_RINGBUFFER_SIZES[RECORDINGMENU_RINGBUFFER_SIZE_COUNT] =
+{
+	{ 0, LOCALE_RECORDINGMENU_RINGBUFFERS_05M },
+	{ 1, LOCALE_RECORDINGMENU_RINGBUFFERS_1M },
+	{ 2, LOCALE_RECORDINGMENU_RINGBUFFERS_2M },
+	{ 3, LOCALE_RECORDINGMENU_RINGBUFFERS_4M },
+	{ 4, LOCALE_RECORDINGMENU_RINGBUFFERS_8M }
+};
+
 /* record settings menu */
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 {
@@ -1463,8 +1473,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	CMenuOptionChooser* oj9 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_SUBTITLE_PID, &g_settings.recording_stream_subtitle_pid, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
-	CStringInput * recordingSettings_ringbuffers = new CStringInput(LOCALE_RECORDINGMENU_RINGBUFFERS, g_settings.recording_ringbuffers, 2, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
-	CMenuForwarder* mf10 = new CMenuForwarder(LOCALE_RECORDINGMENU_RINGBUFFERS, true, g_settings.recording_ringbuffers,recordingSettings_ringbuffers);
+	CMenuOptionChooser* oj13 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RINGBUFFERS, &g_settings.recording_ringbuffers, RECORDINGMENU_RINGBUFFER_SIZES, RECORDINGMENU_RINGBUFFER_SIZE_COUNT, true);
 	CMenuOptionChooser* oj10 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_CHOOSE_DIRECT_REC_DIR, &g_settings.recording_choose_direct_rec_dir, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
 	CMenuOptionChooser* oj11 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_EPG_FOR_FILENAME, &g_settings.recording_epg_for_filename, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
@@ -1510,7 +1519,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	directRecordingSettings->addItem(new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, true, NULL, dirMenu));
 	directRecordingSettings->addItem(GenericMenuSeparatorLine);
 	directRecordingSettings->addItem(mf9);
-	directRecordingSettings->addItem(mf10);
+	directRecordingSettings->addItem(oj13);
 	directRecordingSettings->addItem(oj6);
 	directRecordingSettings->addItem(oj7);
 	directRecordingSettings->addItem(oj8);

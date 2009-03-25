@@ -1007,7 +1007,12 @@ recordingmenu.no_scart Unterdrücke Scart-Umschaltung
 recordingmenu.off aus
 recordingmenu.record_in_spts_mode in SPTS-Modus aufnehmen
 recordingmenu.recording_type Aufnahme Gerät
-recordingmenu.ringbuffers Anz. Ringpuffer
+recordingmenu.ringbuffers Grösse Ringpuffer
+recordingmenu.ringbuffers_05M 512 KB
+recordingmenu.ringbuffers_1M 1 MB
+recordingmenu.ringbuffers_2M 2 MB
+recordingmenu.ringbuffers_4M 4 MB
+recordingmenu.ringbuffers_8M 8 MB
 recordingmenu.sectionsd EPG (Sectionsd)
 recordingmenu.sectionsd.restart neu starten
 recordingmenu.sectionsd.run nicht anhalten

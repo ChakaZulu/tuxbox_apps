@@ -1007,7 +1007,12 @@ recordingmenu.no_scart Switch to SCART
 recordingmenu.off off
 recordingmenu.record_in_spts_mode Use spts mode
 recordingmenu.recording_type Recording Device
-recordingmenu.ringbuffers Ringbuffers
+recordingmenu.ringbuffers Ringbuffer Size
+recordingmenu.ringbuffers_05M 512 KB
+recordingmenu.ringbuffers_1M 1 MB
+recordingmenu.ringbuffers_2M 2 MB
+recordingmenu.ringbuffers_4M 4 MB
+recordingmenu.ringbuffers_8M 8 MB
 recordingmenu.sectionsd EPG (Sectionsd)
 recordingmenu.sectionsd.restart restart
 recordingmenu.sectionsd.run don't stop

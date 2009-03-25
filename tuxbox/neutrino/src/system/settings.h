@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.203 2009/03/22 22:06:45 houdini Exp $
+  $Id: settings.h,v 1.204 2009/03/25 14:08:08 seife Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -251,7 +251,7 @@ struct SNeutrinoSettings
 	int recording_audio_pids_ac3;
 	int  recording_stream_vtxt_pid;
 	int  recording_stream_subtitle_pid;
-	char recording_ringbuffers[10];
+	int recording_ringbuffers;
 	int recording_in_spts_mode;
 	int recording_choose_direct_rec_dir;
 	int recording_epg_for_filename;
