@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.929 2009/03/25 14:08:07 seife Exp $
+	$Id: neutrino.cpp,v 1.930 2009/03/26 13:43:11 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1963,6 +1963,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CmdParser(argc, argv);
 
 	prepareEnviroment();
+	current_muted = false;
 	int loadSettingsErg = loadSetup();
 	
 	/* load locales before setting up any fonts to determine whether we need a true unicode font */
@@ -2081,6 +2082,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD              , "streaming.raw"       );
 	
 
+	// needs to run before initMainMenu()
+	firstChannel();
 
 	InitMainMenu(	mainMenu,
 					mainSettings,

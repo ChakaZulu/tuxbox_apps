@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.70 2009/03/22 22:07:51 houdini Exp $
+	$Id: lcdd.cpp,v 1.71 2009/03/26 13:43:10 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -63,6 +63,10 @@ CLCD::CLCD()
 	m_progressGlobal = 0;
 	m_progressLocal = 0;
 #endif // LCD_UPDATE
+	muted = false;
+	percentOver = 0;
+	volume = 0;
+	timeout_cnt = 0;
 }
 
 CLCD* CLCD::getInstance()

@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.48 2008/05/04 22:24:34 dbt Exp $
+	$Id: framebuffer.h,v 1.49 2009/03/26 13:43:10 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -91,7 +91,7 @@ class CFrameBuffer
 		__u16 red[256], green[256], blue[256], trans[256];
 
 		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
-		const char  * getIconFilePath(const std::string & filename); //return alternatively or default path for user-defined icons
+		std::string getIconFilePath(const std::string & filename); //return alternatively or default path for user-defined icons
 
 		int 	kd_mode;
 		struct	vt_mode vt_mode;

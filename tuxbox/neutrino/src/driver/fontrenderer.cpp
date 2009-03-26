@@ -536,13 +536,13 @@ int Font::getRenderWidth(const char *text, const bool utf8_encoded)
 {
 	pthread_mutex_lock( &renderer->render_mutex );
 
-	int use_kerning=FT_HAS_KERNING(face);
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{
 		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
 		pthread_mutex_unlock(&renderer->render_mutex);
 		return -1;
 	}
+	int use_kerning=FT_HAS_KERNING(face);
 
 	int x=0;
 	int lastindex=0; // 0==missing glyph (never has kerning)

@@ -975,15 +975,12 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 #ifndef SKIP_CA_STATUS
 						case CZapitClient::EVT_ZAP_CA_CLEAR:
 							*msg  = NeutrinoMessages::EVT_ZAP_CA_CLEAR;
-							*data = *(unsigned*) p;
 							break;
 						case CZapitClient::EVT_ZAP_CA_LOCK:
 							*msg  = NeutrinoMessages::EVT_ZAP_CA_LOCK;
-							*data = *(unsigned*) p;
 							break;
 						case CZapitClient::EVT_ZAP_CA_FTA:
 							*msg  = NeutrinoMessages::EVT_ZAP_CA_FTA;
-							*data = *(unsigned*) p;
 							break;
 #endif
 						case CZapitClient::EVT_SCAN_FAILED:
