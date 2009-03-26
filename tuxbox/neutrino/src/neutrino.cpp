@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.933 2009/03/26 16:03:04 seife Exp $
+	$Id: neutrino.cpp,v 1.934 2009/03/26 16:04:34 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3309,6 +3309,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	unsigned long long timeoutEnd;
 
 	char current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
+	char last_volume = 101; // make sure the volume bar is shown initially
 
 	do
 	{
@@ -3372,8 +3373,9 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			break;
 		}
 
-		if (bDoPaint && volumeBarIsVisible && !lirc) //not visible if lirc in use
+		if (bDoPaint && volumeBarIsVisible && current_volume != last_volume && !lirc) //not visible if lirc in use
 		{
+			last_volume = current_volume;
 			int vol = current_volume * 2;
 			char p[4]; /* 3 digits + '\0' */
 			sprintf(p, "%3d", current_volume);
