@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.22 2009/03/03 21:06:05 seife Exp $
+  $Id: movieplayer2.cpp,v 1.23 2009/03/26 15:27:59 seife Exp $
 
   License: GPL
 
@@ -2560,8 +2560,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 						char *ext;
 						ext = strrchr(filename, '.');	// FOO-xxx-2007-12-31.001.ts <- the dot before "ts"
 										// 001.vdr <- the dot before "vdr"
-						if (((ext - 7 >= filename) && (*(ext - 4) == '.') && !strcmp(ext, ".ts")) ||
-						    ((ext - 4 >= filename) && !strcmp(ext, ".vdr")))
+						if (ext &&
+						    ((ext - 7 >= filename && *(ext - 4) == '.' && !strcmp(ext, ".ts")) ||
+						     (ext - 4 >= filename &&                      !strcmp(ext, ".vdr"))))
 						{
 							int num = 0;
 							CFile *file = new CFile;
@@ -3038,7 +3039,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.22 $");
+	return imageinfo.getModulVersion("","$Revision: 1.23 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
