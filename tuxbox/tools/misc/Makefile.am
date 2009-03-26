@@ -1,6 +1,9 @@
 sbin_SCRIPTS = init_hdd.sh
 
-bin_PROGRAMS = aviafbtool fbclear lcddump saa switch rcsim aviaext audioplay avswitch
+bin_PROGRAMS = fbclear
+if BOXTYPE_DBOX2
+bin_PROGRAMS += aviafbtool lcddump saa switch rcsim aviaext audioplay avswitch
+endif
 
 aviafbtool_SOURCES = aviafbtool.c
 aviaext_SOURCES = aviaext.c
