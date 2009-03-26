@@ -463,7 +463,7 @@ CDateInput::CDateInput(const neutrino_locale_t Name, time_t* Time, const neutrin
 }
 CDateInput::~CDateInput()
 {
-	delete value;
+	delete [] value;
 }
 void CDateInput::onBeforeExec()
 {
