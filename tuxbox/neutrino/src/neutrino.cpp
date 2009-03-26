@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.930 2009/03/26 13:43:11 seife Exp $
+	$Id: neutrino.cpp,v 1.931 2009/03/26 16:00:03 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3161,20 +3161,20 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 
 bool CNeutrinoApp::doShowMuteIcon()
 {
-	char current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
-	
-	if ( current_volume == 0 )	// show mute icon if volume = 0
-	{		
-		if ( g_settings.show_mute_icon == 1 )		// show_mute_icon sets to "yes"
-			return true;
-		else if (( g_settings.show_mute_icon == 2 ) && ( g_settings.audio_DolbyDigital == false ))	// show mute icon if volume = 0 in dependence of enabled or disabled AC3-Mode
-			return true;
-		else
-			return false;
-	}	
-	else
-		return false;
-		
+	char current_volume;
+	if (g_settings.show_mute_icon)
+	{
+		current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
+		if (current_volume == 0)	// show mute icon if volume = 0
+		{
+			if (g_settings.show_mute_icon == 1)	// show_mute_icon sets to "yes"
+				return true;
+			else if (g_settings.show_mute_icon == 2 && g_settings.audio_DolbyDigital == false)
+				// show mute icon if volume = 0 in dependence of enabled or disabled AC3-Mode
+				return true;
+		}
+	}
+	return false;
 }
 
 void CNeutrinoApp::paintMuteIcon( bool is_visible )
