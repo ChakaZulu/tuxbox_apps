@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.71 2009/03/26 13:51:58 seife Exp $
+	$Id: framebuffer.cpp,v 1.72 2009/03/26 14:51:31 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -477,23 +477,23 @@ int CFrameBuffer::getIconHeight(const char * const filename)
 {
 	struct rawHeader header;
 	uint16_t         height;
-	int              fd;
+	int              icon_fd;
 	std::string      iconfile = getIconFilePath(filename);
 
-	fd = open(iconfile.c_str(), O_RDONLY);
+	icon_fd = open(iconfile.c_str(), O_RDONLY);
 
-	if (fd == -1)
+	if (icon_fd == -1)
 	{
 		printf("Framebuffer getIconHeight: error while loading icon: %s\n", iconfile.c_str());
 		return 0;
 	}
 	else
 	{	
-		read(fd, &header, sizeof(struct rawHeader));
+		read(icon_fd, &header, sizeof(struct rawHeader));
 		height = (header.height_hi << 8) | header.height_lo;
 	}
 
-	close(fd);
+	close(icon_fd);
 	return height;
 }
 
@@ -501,23 +501,23 @@ int CFrameBuffer::getIconWidth(const char * const filename)
 {
 	struct rawHeader header;
 	uint16_t         width;
-	int              fd;
+	int              icon_fd;
 	std::string      iconfile = getIconFilePath(filename);
 
-	fd = open(iconfile.c_str(), O_RDONLY);
+	icon_fd = open(iconfile.c_str(), O_RDONLY);
 
-	if (fd == -1)
+	if (icon_fd == -1)
 	{
 		printf("Framebuffer getIconWidth: error while loading icon: %s\n", iconfile.c_str());
 		width = 0;
 	}
 	else
 	{	
-		read(fd, &header, sizeof(struct rawHeader));
+		read(icon_fd, &header, sizeof(struct rawHeader));
 		width = (header.width_hi << 8) | header.width_lo;
 	}
-	
-	close(fd);
+
+	close(icon_fd);
 	return width;
 }
 
@@ -528,18 +528,17 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 
 	struct rawHeader header;
 	uint16_t         width, height;
-	int              fd;
+	int              icon_fd;
 	std::string      iconfile = getIconFilePath(filename);
 
-	fd = open(iconfile.c_str(), O_RDONLY);
+	icon_fd = open(iconfile.c_str(), O_RDONLY);
 
-	if (fd == -1)
+	if (icon_fd == -1)
 	{
 		printf("Framebuffer paintIcon8: error while loading icon: %s\n", iconfile.c_str());
 		return false;
 	}
-	
-	read(fd, &header, sizeof(struct rawHeader));
+	read(icon_fd, &header, sizeof(struct rawHeader));
 
 	width  = (header.width_hi  << 8) | header.width_lo;
 	height = (header.height_hi << 8) | header.height_lo;
@@ -550,7 +549,7 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 	fb_pixel_t * d2;
 	for (int count=0; count<height; count ++ )
 	{
-		read(fd, &pixbuf, width );
+		read(icon_fd, &pixbuf, width );
 		unsigned char *pixpos = (unsigned char*) &pixbuf;
 		d2 = (fb_pixel_t *) d;
 		for (int count2=0; count2<width; count2 ++ )
@@ -565,7 +564,7 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 		}
 		d += stride;
 	}
-	close(fd);
+	close(icon_fd);
 	return true;
 }	
 
@@ -576,18 +575,18 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 
 	struct rawHeader header;
 	uint16_t         width, height;
-	int              fd;
+	int              icon_fd;
 	std::string      iconfile = getIconFilePath(filename);
 
-	fd = open(iconfile.c_str(), O_RDONLY);
+	icon_fd = open(iconfile.c_str(), O_RDONLY);
 
-	if (fd == -1)
+	if (icon_fd == -1)
 	{
 		printf("Framebuffer paintIcon: error while loading icon: %s\n", iconfile.c_str());
 		return false;
 	}
 
-	read(fd, &header, sizeof(struct rawHeader));
+	read(icon_fd, &header, sizeof(struct rawHeader));
 
 	width  = (header.width_hi  << 8) | header.width_lo;
 	height = (header.height_hi << 8) | header.height_lo;
@@ -597,7 +596,7 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 	fb_pixel_t * d2;
 	for (int count=0; count<height; count ++ )
 	{
-		read(fd, &pixbuf, width >> 1 );
+		read(icon_fd, &pixbuf, width >> 1 );
 		unsigned char *pixpos = (unsigned char*) &pixbuf;
 		d2 = (fb_pixel_t *) d;
 		for (int count2=0; count2<width >> 1; count2 ++ )
@@ -621,7 +620,7 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 		d += stride;
 	}
 
-	close(fd);
+	close(icon_fd);
 	return true;
 }
 
@@ -636,19 +635,19 @@ void CFrameBuffer::loadPal(const std::string & filename, const unsigned char off
 		return;
 
 	struct rgbData rgbdata;
-	int            fd;
+	int            pal_fd;
 	std::string  palfile = getIconFilePath(filename);
 
-	fd = open(palfile.c_str(), O_RDONLY);
+	pal_fd = open(palfile.c_str(), O_RDONLY);
 
-	if (fd == -1)
+	if (pal_fd == -1)
 	{
 		printf("error while loading palette: %s\n", palfile.c_str());
 		return;
 	}
 
 	int pos = 0;
-	int readb = read(fd, &rgbdata,  sizeof(rgbdata) );
+	int readb = read(pal_fd, &rgbdata,  sizeof(rgbdata) );
 	while(readb)
 	{
 		__u32 rgb = (rgbdata.r<<16) | (rgbdata.g<<8) | (rgbdata.b);
@@ -656,11 +655,11 @@ void CFrameBuffer::loadPal(const std::string & filename, const unsigned char off
 		if( colpos>endidx)
 			break;
 		paletteSetColor(colpos, rgb ,0);
-		readb = read(fd, &rgbdata,  sizeof(rgbdata) );
+		readb = read(pal_fd, &rgbdata,  sizeof(rgbdata) );
 		pos++;
 	}
 	paletteSet(&cmap);
-	close(fd);
+	close(pal_fd);
 }
 
 void CFrameBuffer::paintPixel(const int x, const int y, const fb_pixel_t col)
@@ -887,22 +886,22 @@ void CFrameBuffer::setBackgroundColor(const fb_pixel_t color)
 	backgroundColor = color;
 }
 
-bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t width, const uint16_t height, const uint16_t stride, fb_pixel_t * memp)
+bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t width, const uint16_t height, const uint16_t _stride, fb_pixel_t * memp)
 {
 	struct rawHeader header;
-	int              fd;
+	int              pic_fd;
 
 	std::string  picturefile = getIconFilePath(filename);
 	
-	fd = open(picturefile.c_str(), O_RDONLY );
+	pic_fd = open(picturefile.c_str(), O_RDONLY );
 
-	if (fd == -1)
+	if (pic_fd == -1)
 	{
 		printf("error while loading icon: %s\n", picturefile.c_str());
 		return false;
 	}
 
-	read(fd, &header, sizeof(struct rawHeader));
+	read(pic_fd, &header, sizeof(struct rawHeader));
 
 	if ((width  != ((header.width_hi  << 8) | header.width_lo)) ||
 	    (height != ((header.height_hi << 8) | header.height_lo)))
@@ -911,13 +910,13 @@ bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t
 		return false;
 	}
 
-	if ((stride == 0) || (stride == width * sizeof(fb_pixel_t)))
-		read(fd, memp, height * width * sizeof(fb_pixel_t));
+	if ((_stride == 0) || (_stride == width * sizeof(fb_pixel_t)))
+		read(pic_fd, memp, height * width * sizeof(fb_pixel_t));
 	else
 		for (int i = 0; i < height; i++)
-			read(fd, ((uint8_t *)memp) + i * stride, width * sizeof(fb_pixel_t));
+			read(pic_fd, ((uint8_t *)memp) + i * _stride, width * sizeof(fb_pixel_t));
 
-	close(fd);
+	close(pic_fd);
 	return true;
 }
 
@@ -938,7 +937,7 @@ bool CFrameBuffer::savePictureFromMem(const std::string & filename, const fb_pix
 {
 	struct rawHeader header;
 	uint16_t         width, height;
-	int              fd;
+	int              pic_fd;
 	
 	width = BACKGROUNDIMAGEWIDTH;
 	height = 576;
@@ -951,19 +950,19 @@ bool CFrameBuffer::savePictureFromMem(const std::string & filename, const fb_pix
 	
 	std::string picturefile = getIconFilePath(filename);
 
-	fd = open(picturefile.c_str(), O_WRONLY | O_CREAT);
+	pic_fd = open(picturefile.c_str(), O_WRONLY | O_CREAT);
 
-	if (fd==-1)
+	if (pic_fd==-1)
 	{
 		printf("error while saving icon: %s", picturefile.c_str() );
 		return false;
 	}
 
-	write(fd, &header, sizeof(struct rawHeader));
+	write(pic_fd, &header, sizeof(struct rawHeader));
 
-	write(fd, memp, width * height * sizeof(fb_pixel_t));
+	write(pic_fd, memp, width * height * sizeof(fb_pixel_t));
 
-	close(fd);
+	close(pic_fd);
 	return true;
 }
 
