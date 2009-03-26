@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.932 2009/03/26 16:01:59 seife Exp $
+	$Id: neutrino.cpp,v 1.933 2009/03/26 16:03:04 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3235,6 +3235,11 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	neutrino_msg_t msg = key;
 	neutrino_msg_t msg_repeatok = key & ~CRCInput::RC_Repeat;
 
+#ifdef HAVE_DBOX_HARDWARE
+	const bool lirc = (CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC;
+#else
+	const bool lirc = false;
+#endif
 	const int dy = 28; 	// height
 	// if you want a non-rounded volumebar, set r=0 here...
 	const int r = RADIUS_LARGE;	// radius
@@ -3289,7 +3294,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 	fb_pixel_t * pixbuf = NULL;
 
-	if( (bDoPaint) && ( volumeBarIsVisible ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) // not visible if lirc in use 
+	if (bDoPaint && volumeBarIsVisible && !lirc) // not visible if lirc in use
 	{
 		pixbuf = new fb_pixel_t[dx * dy];
 		if(pixbuf!= NULL)
@@ -3314,13 +3319,11 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 				if (current_muted)
 					AudioMute(false); // switch off mute on pressing the plus button
 				
-#ifndef HAVE_DREAMBOX_HARDWARE
-				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
+				if (lirc)
 				{
 					current_volume = 60; //>50 is plus
 				}
 				else
-#endif
 				{
 					if (current_volume < 100 - a_step)
 						current_volume += a_step;
@@ -3330,14 +3333,11 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			}
 			else if (msg_repeatok == CRCInput::RC_minus)
 			{
-				
-#ifndef HAVE_DREAMBOX_HARDWARE
-				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
+				if (lirc)
 				{
 					current_volume = 40; //<40 is minus
 				}
 				else
-#endif
 				{
 					if (current_volume > a_step)
 						current_volume -= a_step;
@@ -3355,12 +3355,10 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 			g_Controld->setVolume(current_volume, (CControld::volume_type)g_settings.audio_avs_Control);
 
-#ifndef HAVE_DREAMBOX_HARDWARE
-			if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
+			if (lirc)
 			{
 				current_volume = 50;
 			}
-#endif
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR] / 2);
 		}
 		else if (msg == NeutrinoMessages::EVT_VOLCHANGED)
@@ -3374,7 +3372,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			break;
 		}
 
-		if( (bDoPaint) && (volumeBarIsVisible ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) //not visible if lirc in use
+		if (bDoPaint && volumeBarIsVisible && !lirc) //not visible if lirc in use
 		{
 			int vol = current_volume * 2;
 			char p[4]; /* 3 digits + '\0' */
@@ -3404,7 +3402,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	}
 	while (msg != CRCInput::RC_timeout);
 
-	if( (bDoPaint) && ( volumeBarIsVisible ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC) && (pixbuf!= NULL))
+	if (bDoPaint && volumeBarIsVisible && !lirc && (pixbuf != NULL))
 	{
 		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 		delete [] pixbuf;
