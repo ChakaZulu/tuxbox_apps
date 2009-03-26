@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.935 2009/03/26 16:06:08 seife Exp $
+	$Id: neutrino.cpp,v 1.936 2009/03/26 16:07:41 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2640,7 +2640,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			CControldMsg::commandMute* cmd = (CControldMsg::commandMute*) data;
 			if(cmd->type == (CControld::volume_type)g_settings.audio_avs_Control)
 				AudioMute( cmd->mute, true );
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			return messages_return::handled;
 		}
 		else if( msg == NeutrinoMessages::EVT_RECORDMODE )
@@ -2772,7 +2772,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 				}
 				channelList->zapTo_ChannelID(eventinfo->channel_id);
 			}
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			return messages_return::handled;
 		}
 		else if( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
@@ -2871,7 +2871,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 					g_Zapit->zapTo_serviceID_NOWAIT(channel_id);
 				}
 			}
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			if( mode != mode_scart )
 				ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_RECORDTIMER_ANNOUNCE));
 			return messages_return::handled;
@@ -2941,14 +2941,14 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		{
 			if (mode != mode_scart)
 				ShowHintUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data); // UTF-8
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			return messages_return::handled;
 		}
 		else if (msg == NeutrinoMessages::EVT_EXTMSG)
 		{
 			if (mode != mode_scart)
 				ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			return messages_return::handled;
 		}
 		else if (msg == NeutrinoMessages::EVT_RECORDING_ENDED)
