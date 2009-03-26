@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.27 2009/03/26 15:37:45 seife Exp $
+  $Id: movieplayer2.cpp,v 1.28 2009/03/26 15:39:12 seife Exp $
 
   License: GPL
 
@@ -2365,7 +2365,7 @@ OutputThread(void *arg)
 void updateLcd(const std::string &s)
 {
 	static int  l_playstate = -1;
-	std::string lcd;
+	std::string lcd = "";
 
 	if (l_playstate == g_playstate)
 		return;
@@ -2373,10 +2373,10 @@ void updateLcd(const std::string &s)
 	switch (g_playstate)
 	{
 	case CMoviePlayerGui::PAUSE:
-		lcd = "|| ";
+		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PAUSE);
 		break;
 	default:
-		lcd = "> ";
+		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
 		break;
 	}
 	lcd += s;
@@ -2863,6 +2863,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			if (g_currentapid == -1) // exit if inital pid is not selected
 				g_playstate = CMoviePlayerGui::STOPPED;
 			g_showaudioselectdialog = false;
+			updateLcd(title);
 		}
 
 		g_RCInput->getMsg(&msg, &data, 10);	// 1 secs..
@@ -3178,7 +3179,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.27 $");
+	return imageinfo.getModulVersion("","$Revision: 1.28 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
