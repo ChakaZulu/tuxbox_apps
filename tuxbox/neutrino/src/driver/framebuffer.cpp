@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.70 2009/03/26 13:43:10 seife Exp $
+	$Id: framebuffer.cpp,v 1.71 2009/03/26 13:51:58 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -1060,6 +1060,17 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 {
 	if (!getActive())
 		return;
+
+	if (x + dx > xRes)
+	{
+		fprintf(stderr, "%s:%d invalid x (%d), dx (%d), sum = %d > xRes (%d)\n", __FUNCTION__, __LINE__, x, dx, x+dx, xRes);
+		dx = xRes - x;
+	}
+	if (y + dy > yRes)
+	{
+		fprintf(stderr, "%s:%d invalid y (%d), dy (%d), sum = %d > yRes (%d)\n", __FUNCTION__, __LINE__, y, dy, y+dy, yRes);
+		dy = yRes - y;
+	}
 
 	if(!useBackgroundPaint)
 	{
