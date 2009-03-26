@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.26 2009/03/26 15:36:05 seife Exp $
+  $Id: movieplayer2.cpp,v 1.27 2009/03/26 15:37:45 seife Exp $
 
   License: GPL
 
@@ -1111,11 +1111,11 @@ void *
 ReadTSFileThread(void *parm)
 {
 	/* reads a TS file into *ringbuf */
-	CFileList f = CFileList((*(CFileList *)parm));
-	const char *fn = f[0].Name.c_str();
+	CFileList *f = (CFileList *)parm;
+	const char *fn = (*f)[0].Name.c_str();
 	int fd = open(fn, O_RDONLY);
 	g_EOF = false;
-	INFO("start, filename = '%s', fd = %d, f.size = %d\n", fn, fd, f.size());
+	INFO("start, filename = '%s', fd = %d, f.size = %d\n", fn, fd, (*f).size());
 	ssize_t len;
 	size_t readsize;
 	off_t bytes_per_second = 500000;
@@ -1129,7 +1129,7 @@ ReadTSFileThread(void *parm)
 	int i;
 	char *ts;
 	ringbuffer_data_t vec[2];
-	int numfiles = f.size();
+	int numfiles = (*f).size();
 	int fileno = 0;
 
 	g_percent = 0;
@@ -1140,7 +1140,7 @@ ReadTSFileThread(void *parm)
 	g_input_failed = false;
 
 	for (int i = 0; i < numfiles; i++)
-		filesize += f[i].Size;
+		filesize += (*f)[i].Size;
 	INFO("Number of files: %d overall size: %lld\n", numfiles, filesize);
 
 	filepos = mp_seekSync(fd, 0);
@@ -1228,15 +1228,15 @@ ReadTSFileThread(void *parm)
 				last = 0;
 				bufferingBox->paint();
  repeat:
-				INFO("lseek to %lld, partsize %lld fileno %d numfiles %d\n", filepos, f[fileno].Size, fileno, numfiles);
-				if (filepos > f[fileno].Size && fileno + 1 < numfiles)
+				INFO("lseek to %lld, partsize %lld fileno %d numfiles %d\n", filepos, (*f)[fileno].Size, fileno, numfiles);
+				if (filepos > (*f)[fileno].Size && fileno + 1 < numfiles)
 				{
 					INFO("skipping to next file...\n");
 					close(fd);
-					offset  += f[fileno].Size;
-					filepos -= f[fileno].Size;
+					offset  += (*f)[fileno].Size;
+					filepos -= (*f)[fileno].Size;
 					fileno++;
-					fn = f[fileno].Name.c_str();
+					fn = (*f)[fileno].Name.c_str();
 					fd = (open (fn, O_RDONLY));
 					if (fd < 0)
 					{
@@ -1252,9 +1252,9 @@ ReadTSFileThread(void *parm)
 					INFO("skipping to previous file...\n");
 					close(fd);
 					fileno--;
-					offset  -= f[fileno].Size;
-					filepos += f[fileno].Size;
-					fn = f[fileno].Name.c_str();
+					offset  -= (*f)[fileno].Size;
+					filepos += (*f)[fileno].Size;
+					fn = (*f)[fileno].Name.c_str();
 					fd = (open (fn, O_RDONLY));
 					if (fd < 0)
 					{
@@ -1266,8 +1266,8 @@ ReadTSFileThread(void *parm)
 					goto repeat;
 				}
 
-				if (filepos >= f[fileno].Size)
-					filepos -= (filepos - f[fileno].Size + 30 * bytes_per_second) / 188 * 188;
+				if (filepos >= (*f)[fileno].Size)
+					filepos -= (filepos - (*f)[fileno].Size + 30 * bytes_per_second) / 188 * 188;
 				if (filepos < 0)
 					filepos = 0;
 				if (mp_seekSync(fd, filepos) < 0)
@@ -1414,8 +1414,8 @@ ReadTSFileThread(void *parm)
 				else if (fileno + 1 < numfiles)
 				{
 					close(fd);
-					offset += f[fileno].Size;
-					fn = f[++fileno].Name.c_str();
+					offset += (*f)[fileno].Size;
+					fn = (*f)[++fileno].Name.c_str();
 					fd = (open (fn, O_RDONLY));
 					if (fd > -1)
 					{
@@ -1451,11 +1451,11 @@ ReadMPEGFileThread(void *parm)
 	   then remultiplexes it as a TS into *ringbuf.
 	   TODO: get rid of the input ringbuffer if possible
 	 */
-	CFileList f = CFileList((*(CFileList *)parm));
-	const char *fn = f[0].Name.c_str();
+	CFileList *f = (CFileList *)parm;
+	const char *fn = (*f)[0].Name.c_str();
 	int fd = open(fn, O_RDONLY);
 	g_EOF = false;
-	INFO("start, filename = '%s', fd = %d, f.size = %d\n", fn, fd, f.size());
+	INFO("start, filename = '%s', fd = %d, f.size = %d\n", fn, fd, (*f).size());
 	int len, size;
 	size_t rd;
 	off_t bytes_per_second = 500000;
@@ -1473,13 +1473,13 @@ ReadMPEGFileThread(void *parm)
 	unsigned int pesPacketLen;
 	int tsPacksCount;
 	unsigned char rest;
-	int numfiles = f.size();
+	int numfiles = (*f).size();
 	int fileno = 0;
 
 	hintBox->hide(); // the "connecting to streaming server" hintbox
 
 	for (int i = 0; i < numfiles; i++)
-		filesize += f[i].Size;
+		filesize += (*f)[i].Size;
 	INFO("Number of files: %d overall size: %lld\n", numfiles, filesize);
 	pidv = 100;
 	pida = 101;
@@ -1540,15 +1540,15 @@ ReadMPEGFileThread(void *parm)
 				last = 0;
 				bufferingBox->paint();
  repeat:
-				INFO("lseek to %lld, partsize %lld\n", filepos, f[fileno].Size);
-				if (filepos > f[fileno].Size && fileno + 1 < numfiles)
+				INFO("lseek to %lld, partsize %lld\n", filepos, (*f)[fileno].Size);
+				if (filepos > (*f)[fileno].Size && fileno + 1 < numfiles)
 				{
 					INFO("skipping to next file...\n");
 					close(fd);
-					offset  += f[fileno].Size;
-					filepos -= f[fileno].Size;
+					offset  += (*f)[fileno].Size;
+					filepos -= (*f)[fileno].Size;
 					fileno++;
-					fn = f[fileno].Name.c_str();
+					fn = (*f)[fileno].Name.c_str();
 					fd = (open (fn, O_RDONLY));
 					if (fd < 0)
 					{
@@ -1564,9 +1564,9 @@ ReadMPEGFileThread(void *parm)
 					INFO("skipping to previous file...\n");
 					close(fd);
 					fileno--;
-					offset  -= f[fileno].Size;
-					filepos += f[fileno].Size;
-					fn = f[fileno].Name.c_str();
+					offset  -= (*f)[fileno].Size;
+					filepos += (*f)[fileno].Size;
+					fn = (*f)[fileno].Name.c_str();
 					fd = (open (fn, O_RDONLY));
 					if (fd < 0)
 					{
@@ -1578,9 +1578,9 @@ ReadMPEGFileThread(void *parm)
 					goto repeat;
 				}
 				/* if this is true, we must be on the last file */
-				if (filepos >= f[fileno].Size)
+				if (filepos >= (*f)[fileno].Size)
 				{
-					filepos = f[fileno].Size - 30 * bytes_per_second;
+					filepos = (*f)[fileno].Size - 30 * bytes_per_second;
 					skipabsolute = false;
 				}
 				/* if this is true, we must be on the first file... */
@@ -1714,8 +1714,8 @@ ReadMPEGFileThread(void *parm)
 				if (fileno + 1 < numfiles)
 				{
 					close(fd);
-					offset += f[fileno].Size;
-					fn = f[++fileno].Name.c_str();
+					offset += (*f)[fileno].Size;
+					fn = (*f)[++fileno].Name.c_str();
 					fd = (open (fn, O_RDONLY));
 					if (fd > -1)
 					{
@@ -2023,8 +2023,8 @@ OutputThread(void *arg)
 	// use global pida and pidv
 	pida = 0, pidv = 0, g_currentac3 = 0;
 	int ret, done;
-	CFileList f = CFileList(*(CFileList *)arg);
-	const char *fn = f[0].Name.c_str();
+	CFileList *f = (CFileList *)arg;
+	const char *fn = (*f)[0].Name.c_str();
 	int dmxa = -1 , dmxv = -1, dvr = -1, adec = -1, vdec = -1;
 	if (fn[0] == '/')
 		remote = false;	// we are playing a "local" file (hdd or NFS)
@@ -3178,7 +3178,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.26 $");
+	return imageinfo.getModulVersion("","$Revision: 1.27 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
