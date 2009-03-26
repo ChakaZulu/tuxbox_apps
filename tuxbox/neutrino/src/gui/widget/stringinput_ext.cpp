@@ -414,14 +414,14 @@ void CIPInput::onBeforeExec()
 	}
 	unsigned char _ip[4];
 	sscanf(ip->c_str(), "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
-	sprintf( value, "%03hhu.%03hhu.%03hhu.%03hhu", _ip[0], _ip[1], _ip[2], _ip[3]);
+	snprintf(value, 20, "%03hhu.%03hhu.%03hhu.%03hhu", _ip[0], _ip[1], _ip[2], _ip[3]);
 }
 
 void CIPInput::onAfterExec()
 {
 	int _ip[4];
 	sscanf( value, "%3d.%3d.%3d.%3d", &_ip[0], &_ip[1], &_ip[2], &_ip[3] );
-	sprintf( value, "%d.%d.%d.%d", _ip[0], _ip[1], _ip[2], _ip[3]);
+	snprintf(value, 20, "%d.%d.%d.%d", _ip[0], _ip[1], _ip[2], _ip[3]);
 	if(strcmp(value,"0.0.0.0")==0)
 	{
 		(*ip) = "";
@@ -437,7 +437,7 @@ CDateInput::CDateInput(const neutrino_locale_t Name, time_t* Time, const neutrin
 	time=Time;
 	value= new char[20];
 	struct tm *tmTime = localtime(time);
-	sprintf( value, "%02d.%02d.%04d %02d:%02d", tmTime->tm_mday, tmTime->tm_mon+1,
+	snprintf(value, 20, "%02d.%02d.%04d %02d:%02d", tmTime->tm_mday, tmTime->tm_mon+1,
 				tmTime->tm_year+1900,
 				tmTime->tm_hour, tmTime->tm_min);
 	
@@ -468,7 +468,7 @@ CDateInput::~CDateInput()
 void CDateInput::onBeforeExec()
 {
 	struct tm *tmTime = localtime(time);
-	sprintf( value, "%02d.%02d.%04d %02d:%02d", tmTime->tm_mday, tmTime->tm_mon+1,
+	snprintf(value, 20, "%02d.%02d.%04d %02d:%02d", tmTime->tm_mday, tmTime->tm_mon+1,
 				tmTime->tm_year+1900,
 				tmTime->tm_hour, tmTime->tm_min);
 	dst = tmTime->tm_isdst;
@@ -511,7 +511,7 @@ void CDateInput::onAfterExec()
       tmTime.tm_sec=0;
 	*time=mktime(&tmTime);
 	struct tm *tmTime2 = localtime(time);
-	sprintf( value, "%02d.%02d.%04d %02d:%02d", tmTime2->tm_mday, tmTime2->tm_mon+1,
+	snprintf(value, 20, "%02d.%02d.%04d %02d:%02d", tmTime2->tm_mday, tmTime2->tm_mon+1,
 				tmTime2->tm_year+1900,
 				tmTime2->tm_hour, tmTime2->tm_min);
 }
@@ -552,14 +552,14 @@ void CMACInput::onBeforeExec()
 	}
 	int _mac[6];
 	sscanf( value, "%x:%x:%x:%x:%x:%x", &_mac[0], &_mac[1], &_mac[2], &_mac[3], &_mac[4], &_mac[5] );
-	sprintf( value, "%02x:%02x:%02x:%02x:%02x:%02x", _mac[0], _mac[1], _mac[2], _mac[3], _mac[4], _mac[5]);
+	snprintf(value, 20, "%02x:%02x:%02x:%02x:%02x:%02x", _mac[0], _mac[1], _mac[2], _mac[3], _mac[4], _mac[5]);
 }
 
 void CMACInput::onAfterExec()
 {
 	int _mac[6];
 	sscanf( value, "%x:%x:%x:%x:%x:%x", &_mac[0], &_mac[1], &_mac[2], &_mac[3], &_mac[4], &_mac[5] );
-	sprintf( value, "%02x:%02x:%02x:%02x:%02x:%02x", _mac[0], _mac[1], _mac[2], _mac[3], _mac[4], _mac[5]);
+	snprintf(value, 20, "%02x:%02x:%02x:%02x:%02x:%02x", _mac[0], _mac[1], _mac[2], _mac[3], _mac[4], _mac[5]);
 	if(strcmp(value,"00:00:00:00:00:00")==0)
 		value[0] = 0; /* strcpy(value, ""); */
 }
