@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.931 2009/03/26 16:00:03 seife Exp $
+	$Id: neutrino.cpp,v 1.932 2009/03/26 16:01:59 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3274,19 +3274,13 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		x = g_settings.screen_EndX - dx - bwx;
 		y = g_settings.screen_EndY- bwbot;
 	}
-	else if( g_settings.volumebar_disp_pos == 4 )
-	{
-		// center default
-		x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
-		y = g_settings.screen_EndY - bwbot;
-	}
 	else if( g_settings.volumebar_disp_pos == 5 )
 	{
 		// center higher
 		x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 		y = g_settings.screen_EndY - bwbot-140;
 	}
-	else
+	else /* if (g_settings.volumebar_disp_pos == 4) */
 	{
 		// center default
 		x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
