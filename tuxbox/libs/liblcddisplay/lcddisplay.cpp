@@ -383,7 +383,7 @@ bool CLCDDisplay::load_png(const char * const filename)
 					if (
 						(color_type == PNG_COLOR_TYPE_PALETTE) &&
 						(bit_depth  == 1                     ) &&
-						(width      == LCD_COLS              ) &&
+						(width      <= LCD_COLS              ) &&
 						(height     == (LCD_ROWS * 8))
 						)
 					{
@@ -399,8 +399,13 @@ bool CLCDDisplay::load_png(const char * const filename)
 							for (pass = 0; pass < number_passes; pass++)
 							{
 								fbptr = (png_byte *)raw;
-								for (i = 0; i < height; i++, fbptr += width)
+								for (i = 0; i < height; i++, fbptr += LCD_COLS)
+								{
 									png_read_row(png_ptr, fbptr, NULL);
+									/* if the PNG is smaller, than the display width... */
+									if (width < LCD_COLS)	/* clear the area right of the PNG */
+										memset(fbptr + width, 0, LCD_COLS - width);
+								}
 							}
 							png_read_end(png_ptr, info_ptr);
 						}
@@ -411,5 +416,5 @@ bool CLCDDisplay::load_png(const char * const filename)
 		}
 		fclose(fh);
 	}
-	return ret_value;	
+	return ret_value;
 }
