@@ -73,6 +73,7 @@ class CExtendedInput : public CMenuTarget
 	public:
 
 		CExtendedInput(const neutrino_locale_t Name, char* Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL, bool* cancel = NULL);
+		~CExtendedInput();
 
 		void hide();
 		int exec( CMenuTarget* parent, const std::string & actionKey );

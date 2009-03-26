@@ -74,6 +74,12 @@ CExtendedInput::CExtendedInput(const neutrino_locale_t Name, char* Value, const 
 	y = ((500-height)>>1);
 }
 
+CExtendedInput::~CExtendedInput()
+{
+	for (std::vector<CExtendedInput_Item*>::iterator it = inputFields.begin(); it < inputFields.end(); it++)
+		delete *it;
+}
+
 void CExtendedInput::addInputField( CExtendedInput_Item* fld )
 {
 	inputFields.push_back(fld);
