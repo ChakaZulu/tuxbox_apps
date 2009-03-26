@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.934 2009/03/26 16:04:34 seife Exp $
+	$Id: neutrino.cpp,v 1.935 2009/03/26 16:06:08 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3354,7 +3354,8 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 				break;
 			}
 
-			g_Controld->setVolume(current_volume, (CControld::volume_type)g_settings.audio_avs_Control);
+			if (!(msg & CRCInput::RC_Release)) // no need to set on RC_minus release...
+				g_Controld->setVolume(current_volume, (CControld::volume_type)g_settings.audio_avs_Control);
 
 			if (lirc)
 			{
