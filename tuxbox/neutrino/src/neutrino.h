@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.203 2009/02/18 17:56:24 seife Exp $
+	$Id: neutrino.h,v 1.204 2009/03/26 20:26:27 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -256,6 +256,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 				  CMenuWidget &audiopl_picSettings,
 				  CMenuWidget &streamingSettings,
 				  CMenuWidget &moviePlayer);
+		void addMenueIntroItems(CMenuWidget &item);
 
 		void SetupTiming();
 		void SetupFrameBuffer();
