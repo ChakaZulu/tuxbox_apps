@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.250 2009/03/11 20:42:18 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.251 2009/03/26 15:21:46 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1009,9 +1009,8 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		if ((*(t_channel_id *)data) == channel_id)
 		{
-			CSectionsdClient::CurrentNextInfo info = getEPG( *(t_channel_id *)data );
-			info_CurrentNext = info;
-			CLCD::getInstance()->setEPGTitle(info.current_name);
+			info_CurrentNext = getEPG(*(t_channel_id *)data);
+			CLCD::getInstance()->setEPGTitle(info_CurrentNext.current_name);
 			if ( is_visible )
 				show_Data( true );
 			showLcdPercentOver();

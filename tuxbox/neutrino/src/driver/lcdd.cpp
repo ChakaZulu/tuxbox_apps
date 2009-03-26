@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.71 2009/03/26 13:43:10 seife Exp $
+	$Id: lcdd.cpp,v 1.72 2009/03/26 15:21:46 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -437,7 +437,7 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 	displayUpdate();
 }
 
-void CLCD::showMoviename(const std::string & name) // UTF-8
+void CLCD::showMoviename(const std::string name) // UTF-8
 {
 	// is this needed?
 	if (mode != MODE_TVRADIO)
@@ -446,7 +446,7 @@ void CLCD::showMoviename(const std::string & name) // UTF-8
 	showTextScreen(name, "", 1, false, false);
 }
 
-void CLCD::showServicename(const std::string & name, const bool perform_wakeup) // UTF-8
+void CLCD::showServicename(const std::string name, const bool perform_wakeup) // UTF-8
 {
 	/*
 	   1 = show servicename
@@ -467,7 +467,7 @@ void CLCD::showServicename(const std::string & name, const bool perform_wakeup) 
 	return;
 }
 
-void CLCD::setEPGTitle(const std::string & title)
+void CLCD::setEPGTitle(const std::string title)
 {
 	if (title == epg_title)
 	{
@@ -478,7 +478,7 @@ void CLCD::setEPGTitle(const std::string & title)
 	showServicename("", false);
 }
 
-void CLCD::setMovieInfo(const std::string &big, const std::string &small)
+void CLCD::setMovieInfo(const std::string big, const std::string small)
 {
 	int showmode = g_settings.lcd_setting[SNeutrinoSettings::LCD_EPGMODE];
 	showmode |= 3; // take only the separator line from the config
