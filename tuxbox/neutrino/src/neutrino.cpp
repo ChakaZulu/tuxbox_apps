@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.936 2009/03/26 16:07:41 seife Exp $
+	$Id: neutrino.cpp,v 1.937 2009/03/26 16:10:57 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -341,7 +341,12 @@ int CNeutrinoApp::loadSetup()
 	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", false);
 
 	//misc
+#ifdef HAVE_DBOX_HARDWARE
 	g_settings.shutdown_real		= configfile.getBool("shutdown_real"             , true );
+#else
+	/* most dreamboxen and the TD cannot do a real shutdown */
+	g_settings.shutdown_real		= configfile.getBool("shutdown_real"             , false);
+#endif
 	g_settings.shutdown_real_rcdelay	= configfile.getBool("shutdown_real_rcdelay"     , true );
 	strcpy(g_settings.shutdown_count, configfile.getString("shutdown_count","0").c_str());
 	g_settings.volumebar_disp_pos		= configfile.getInt32("volumebar_disp_pos" , 4 );
@@ -363,11 +368,11 @@ int CNeutrinoApp::loadSetup()
 	//audio
 	g_settings.audio_AnalogMode 		= configfile.getInt32( "audio_AnalogMode"        , 0 );
 	g_settings.audio_DolbyDigital		= configfile.getBool("audio_DolbyDigital"        , false);
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	g_settings.audio_avs_Control 		= configfile.getInt32( "audio_avs_Control", CControld::TYPE_AVS );
 	strcpy( g_settings.audio_step,		configfile.getString( "audio_step" , "5" ).c_str() );
 #else
-	// the dreambox 500 has 32 volume steps, so a stepwidth of 3 matches the hardware better
+	// the dreambox 500 (and the TD) has 32 volume steps, so a stepwidth of 3 matches the hardware better
 	strcpy( g_settings.audio_step,		configfile.getString( "audio_step" , "3" ).c_str() );
 	g_settings.audio_avs_Control 		= CControld::TYPE_OST;
 #endif
@@ -582,10 +587,15 @@ int CNeutrinoApp::loadSetup()
 	g_settings.movieplayer_plugin = configfile.getString( "movieplayer_plugin", "Teletext" );
 
 	//rc-key configuration
+#ifdef HAVE_TRIPLEDRAGON
+	g_settings.key_tvradio_mode = (neutrino_msg_t)configfile.getInt32("key_tvradio_mode", CRCInput::RC_tv);
+	g_settings.key_channelList_pageup = (neutrino_msg_t)configfile.getInt32("key_channelList_pageup", CRCInput::RC_page_up);
+	g_settings.key_channelList_pagedown = (neutrino_msg_t)configfile.getInt32("key_channelList_pagedown", CRCInput::RC_page_down);
+#else
 	g_settings.key_tvradio_mode = (neutrino_msg_t)configfile.getInt32("key_tvradio_mode", CRCInput::RC_nokey);
-
 	g_settings.key_channelList_pageup = (neutrino_msg_t)configfile.getInt32("key_channelList_pageup", CRCInput::RC_minus);
 	g_settings.key_channelList_pagedown = (neutrino_msg_t)configfile.getInt32("key_channelList_pagedown", CRCInput::RC_plus);
+#endif
 	g_settings.key_channelList_cancel = (neutrino_msg_t)configfile.getInt32("key_channelList_cancel", CRCInput::RC_home);
 	g_settings.key_channelList_sort = (neutrino_msg_t)configfile.getInt32("key_channelList_sort", CRCInput::RC_blue);
 	g_settings.key_channelList_addrecord = (neutrino_msg_t)configfile.getInt32("key_channelList_addrecord", CRCInput::RC_red);
@@ -601,11 +611,11 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_zaphistory = (neutrino_msg_t)configfile.getInt32("key_zaphistory", CRCInput::RC_home);
 	g_settings.key_lastchannel = (neutrino_msg_t)configfile.getInt32("key_lastchannel", CRCInput::RC_0);
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
 	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
 #else
-	// my dm500s works good with those - seife
+	// my dm500s and tripledragon works good with those - seife
 	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", "300").c_str());
 	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", "100").c_str());
 #endif
