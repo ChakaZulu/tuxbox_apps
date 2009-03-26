@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.25 2009/03/26 15:34:08 seife Exp $
+  $Id: movieplayer2.cpp,v 1.26 2009/03/26 15:36:05 seife Exp $
 
   License: GPL
 
@@ -1111,14 +1111,17 @@ void *
 ReadTSFileThread(void *parm)
 {
 	/* reads a TS file into *ringbuf */
-	char *fn = (char *)parm;
+	CFileList f = CFileList((*(CFileList *)parm));
+	const char *fn = f[0].Name.c_str();
 	int fd = open(fn, O_RDONLY);
 	g_EOF = false;
-	INFO("start, filename = '%s', fd = %d\n", fn, fd);
+	INFO("start, filename = '%s', fd = %d, f.size = %d\n", fn, fd, f.size());
 	ssize_t len;
 	size_t readsize;
 	off_t bytes_per_second = 500000;
-	off_t filesize, filepos;
+	off_t filesize = 0;
+	off_t filepos = 0;
+	off_t offset = 0;
 	unsigned int lastpts = 0, smooth = 0;
 	off_t lastpos = 0, ptspos = 0;
 	time_t last = 0;
@@ -1126,6 +1129,8 @@ ReadTSFileThread(void *parm)
 	int i;
 	char *ts;
 	ringbuffer_data_t vec[2];
+	int numfiles = f.size();
+	int fileno = 0;
 
 	g_percent = 0;
 	hintBox->hide(); // the "connecting to streaming server" hintbox
@@ -1134,7 +1139,10 @@ ReadTSFileThread(void *parm)
 
 	g_input_failed = false;
 
-	filesize = lseek(fd, 0, SEEK_END);
+	for (int i = 0; i < numfiles; i++)
+		filesize += f[i].Size;
+	INFO("Number of files: %d overall size: %lld\n", numfiles, filesize);
+
 	filepos = mp_seekSync(fd, 0);
 	if (filepos < 0)
 		perror("ReadTSFileThread lseek");
@@ -1209,22 +1217,59 @@ ReadTSFileThread(void *parm)
 		switch(g_playstate)
 		{
 		case CMoviePlayerGui::SKIP:
-			INFO("lseek from %ld, seconds %d\n", filepos, skipseconds);
-			filesize = lseek(fd, 0, SEEK_END);
+			INFO("lseek from %lld, seconds %d\n", filepos, skipseconds);
 			if (!(g_startpts == -1 && skipabsolute)) // only jump absolute if startpts is known
 			{
 				int s = skipseconds;
 				if (skipabsolute)
 					s = skipseconds - get_filetime();
 				filepos += (bytes_per_second * s) / 188 * 188;
-				if (filepos >= filesize)
-					filepos -= (filepos - filesize + 30 * bytes_per_second) / 188 * 188;
-				if (filepos < 0)
-					filepos = 0;
 				// smooth = 0;
 				last = 0;
 				bufferingBox->paint();
-				INFO("lseek to %ld, size %ld\n", filepos, filesize);
+ repeat:
+				INFO("lseek to %lld, partsize %lld fileno %d numfiles %d\n", filepos, f[fileno].Size, fileno, numfiles);
+				if (filepos > f[fileno].Size && fileno + 1 < numfiles)
+				{
+					INFO("skipping to next file...\n");
+					close(fd);
+					offset  += f[fileno].Size;
+					filepos -= f[fileno].Size;
+					fileno++;
+					fn = f[fileno].Name.c_str();
+					fd = (open (fn, O_RDONLY));
+					if (fd < 0)
+					{
+						INFO("cannot open %s (%m)\n", fn);
+						g_EOF = true;
+					}
+					else
+						INFO("opened %s, filepos: %lld\n", fn, filepos);
+					goto repeat;
+				}
+				if (filepos < 0 && fileno > 0)
+				{
+					INFO("skipping to previous file...\n");
+					close(fd);
+					fileno--;
+					offset  -= f[fileno].Size;
+					filepos += f[fileno].Size;
+					fn = f[fileno].Name.c_str();
+					fd = (open (fn, O_RDONLY));
+					if (fd < 0)
+					{
+						INFO("cannot open %s (%m)\n", fn);
+						g_EOF = true;
+					}
+					else
+						INFO("opened %s, filepos: %lld\n", fn, filepos);
+					goto repeat;
+				}
+
+				if (filepos >= f[fileno].Size)
+					filepos -= (filepos - f[fileno].Size + 30 * bytes_per_second) / 188 * 188;
+				if (filepos < 0)
+					filepos = 0;
 				if (mp_seekSync(fd, filepos) < 0)
 					perror("ReadTSFileThread lseek");
 			}
@@ -1314,7 +1359,7 @@ ReadTSFileThread(void *parm)
 						if (pts != -1)
 						{
 							g_pts = pts;
-							ptspos = filepos + (ts - vec[0].buf);
+							ptspos = offset + filepos + (ts - vec[0].buf);
 							if (skipabsolute && !g_skiprequest)
 							{
 								time_t timediff = skipseconds - get_filetime();
@@ -1361,14 +1406,27 @@ ReadTSFileThread(void *parm)
 
 			if (len <= 0 && !skipabsolute) // len < 0 => error, len == 0 => EOF
 			{
-				INFO("error or EOF => exiting\n");
 				if (len < 0)
 				{
 					perror("ReadTSFileThread read");
 					g_input_failed = true;
 				}
-				else
-					g_EOF = true; // does not matter if EOF or read error...
+				else if (fileno + 1 < numfiles)
+				{
+					close(fd);
+					offset += f[fileno].Size;
+					fn = f[++fileno].Name.c_str();
+					fd = (open (fn, O_RDONLY));
+					if (fd > -1)
+					{
+						filepos = 0;
+						INFO("opened %s, filepos: %ld\n", fn, filepos);
+						continue;
+					}
+					g_input_failed = true;
+				}
+				INFO("error or EOF => exiting\n");
+				g_EOF = true; // does not matter if EOF or read error...
 				break;
 			}
 			done += len;
@@ -1379,7 +1437,7 @@ ReadTSFileThread(void *parm)
 		}
 
 		if (filesize)
-			g_percent = filepos * 100 / filesize;	// overflow? not with 64 bits...
+			g_percent = (filepos + offset) * 100 / filesize;	// overflow? not with 64 bits...
 	}
 	close(fd);
 	INFO("ends now.\n");
@@ -1393,15 +1451,17 @@ ReadMPEGFileThread(void *parm)
 	   then remultiplexes it as a TS into *ringbuf.
 	   TODO: get rid of the input ringbuffer if possible
 	 */
-	char *fn = (char *)parm;
+	CFileList f = CFileList((*(CFileList *)parm));
+	const char *fn = f[0].Name.c_str();
 	int fd = open(fn, O_RDONLY);
 	g_EOF = false;
-	INFO("start, filename = '%s', fd = %d\n", fn, fd);
+	INFO("start, filename = '%s', fd = %d, f.size = %d\n", fn, fd, f.size());
 	int len, size;
 	size_t rd;
 	off_t bytes_per_second = 500000;
-	off_t filesize;
+	off_t filesize = 0;
 	off_t filepos = 0;
+	off_t offset = 0;
 	g_percent = 0;
 	char *ppes;
 	char ts[188];
@@ -1413,12 +1473,14 @@ ReadMPEGFileThread(void *parm)
 	unsigned int pesPacketLen;
 	int tsPacksCount;
 	unsigned char rest;
+	int numfiles = f.size();
+	int fileno = 0;
 
 	hintBox->hide(); // the "connecting to streaming server" hintbox
 
-	filesize = lseek(fd, 0, SEEK_END);
-	lseek(fd, 0, SEEK_SET);
-
+	for (int i = 0; i < numfiles; i++)
+		filesize += f[i].Size;
+	INFO("Number of files: %d overall size: %lld\n", numfiles, filesize);
 	pidv = 100;
 	pida = 101;
 
@@ -1467,40 +1529,79 @@ ReadMPEGFileThread(void *parm)
 		switch(g_playstate)
 		{
 		case CMoviePlayerGui::SKIP:
-			INFO("lseek from %ld, seconds %d\n", filepos, skipseconds);
-			filesize = lseek(fd, 0, SEEK_END);
+			INFO("lseek from %lld, seconds %d\n", filepos, skipseconds);
 			if (!(g_startpts == -1 && skipabsolute)) // only jump absolute if startpts is known
 			{
 				int s = skipseconds;
 				if (skipabsolute)
 					s = skipseconds - get_filetime();
 				filepos += (bytes_per_second * s);
-				if (filepos >= filesize)
-				{
-					filepos = filesize - 30 * bytes_per_second;
-					skipabsolute = false;
-				}
-				if (filepos < 0)
-					filepos = 0;
 				// smooth = 0; // reset the bitrate smoothing counter after seek?
 				last = 0;
 				bufferingBox->paint();
-				INFO("lseek to %ld, size %ld\n", filepos, filesize);
+ repeat:
+				INFO("lseek to %lld, partsize %lld\n", filepos, f[fileno].Size);
+				if (filepos > f[fileno].Size && fileno + 1 < numfiles)
+				{
+					INFO("skipping to next file...\n");
+					close(fd);
+					offset  += f[fileno].Size;
+					filepos -= f[fileno].Size;
+					fileno++;
+					fn = f[fileno].Name.c_str();
+					fd = (open (fn, O_RDONLY));
+					if (fd < 0)
+					{
+						INFO("cannot open %s (%m)\n", fn);
+						g_EOF = true;
+					}
+					else
+						INFO("opened %s, filepos: %lld\n", fn, filepos);
+					goto repeat;
+				}
+				if (filepos < 0 && fileno > 0)
+				{
+					INFO("skipping to previous file...\n");
+					close(fd);
+					fileno--;
+					offset  -= f[fileno].Size;
+					filepos += f[fileno].Size;
+					fn = f[fileno].Name.c_str();
+					fd = (open (fn, O_RDONLY));
+					if (fd < 0)
+					{
+						INFO("cannot open %s (%m)\n", fn);
+						g_EOF = true;
+					}
+					else
+						INFO("opened %s, filepos: %lld\n", fn, filepos);
+					goto repeat;
+				}
+				/* if this is true, we must be on the last file */
+				if (filepos >= f[fileno].Size)
+				{
+					filepos = f[fileno].Size - 30 * bytes_per_second;
+					skipabsolute = false;
+				}
+				/* if this is true, we must be on the first file... */
+				if (filepos < 0)
+					filepos = 0;
+
 				if (lseek(fd, filepos, SEEK_SET) < 0)
 					perror("ReadMPEGFileThread lseek");
 			}
-			INFO("BUFFERRESET!\n");
+			DBG("BUFFERRESET!\n");
 			while (!bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
 				usleep(100000);
 			bufferfilled = false;
 			ringbuffer_reset(ringbuf);
 			ringbuffer_reset(buf_in);
 			bufferreset = false;
-			INFO("BUFFERRESET done.\n");
+			DBG("BUFFERRESET done.\n");
 			/* OutputThread() sets g_playstate to SOFTRESET */
 			while (g_playstate == CMoviePlayerGui::SKIP)
 				usleep(100000);
-			INFO("skip ends\n");
+			DBG("skip ends\n");
 			break;
 		case CMoviePlayerGui::PLAY:
 			if (last == 0)
@@ -1609,7 +1710,22 @@ ReadMPEGFileThread(void *parm)
 			if (len && input_empty)
 				continue;
 			if (!len)
+			{
+				if (fileno + 1 < numfiles)
+				{
+					close(fd);
+					offset += f[fileno].Size;
+					fn = f[++fileno].Name.c_str();
+					fd = (open (fn, O_RDONLY));
+					if (fd > -1)
+					{
+						filepos = 0;
+						INFO("opened %s, filepos: %ld\n", fn, filepos);
+						continue;
+					}
+				}
 				g_EOF = true;
+			}
 		}
 		input_empty = false;
 #endif
@@ -1782,12 +1898,12 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				break;
 			case 0xb9:
 			case 0xbc:
-				INFO("%s\n", (ppes[3] == 0xb9) ? "program_end_code" : "program_stream_map");
+				DBG("%s\n", (ppes[3] == 0xb9) ? "program_end_code" : "program_stream_map");
 				resync = true;
 				// fallthrough. TODO: implement properly.
 			default:
 				if (! resync)
-					INFO("Unknown stream id: 0x%X.\n", ppes[3]);
+					DBG("Unknown stream id: 0x%X.\n", ppes[3]);
 				ringbuffer_read_advance(buf_in, 1); // remove 1 Byte
 				goto again;
 				break;
@@ -1813,7 +1929,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				{
 					gotpts = time(NULL);
 					g_pts = pts;
-					ptspos = filepos; // not exact: disregards the bytes in the buffer!
+					ptspos = (offset + filepos); // not exact: disregards the bytes in the buffer!
 					if (g_startpts == -1) // only works if we are starting from the start of the file
 					{
 						g_startpts = pts;
@@ -1882,7 +1998,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 		ringbuffer_read_advance(buf_in, pesPacketLen);
 
 		if (filesize)
-			g_percent = filepos * 100 / filesize;	// overflow? not with 64 bits...
+			g_percent = (filepos + offset) * 100 / filesize;	// overflow? not with 64 bits...
 	}
 	close(fd);
 	ringbuffer_free(buf_in);
@@ -1907,9 +2023,9 @@ OutputThread(void *arg)
 	// use global pida and pidv
 	pida = 0, pidv = 0, g_currentac3 = 0;
 	int ret, done;
-	char *fn = (char *)arg;
+	CFileList f = CFileList(*(CFileList *)arg);
+	const char *fn = f[0].Name.c_str();
 	int dmxa = -1 , dmxv = -1, dvr = -1, adec = -1, vdec = -1;
-
 	if (fn[0] == '/')
 		remote = false;	// we are playing a "local" file (hdd or NFS)
 
@@ -1936,7 +2052,7 @@ OutputThread(void *arg)
 	g_input_failed = false; // there is no input thread running now... hopefully.
 	pthread_t rcvt;	// the input / "receive" thread
 	if (remote)
-		ret = pthread_create(&rcvt, NULL, ReceiveStreamThread, arg);
+		ret = pthread_create(&rcvt, NULL, ReceiveStreamThread, (void *)fn);
 	else
 	{
 		std::string tmp = fn;
@@ -2053,15 +2169,15 @@ OutputThread(void *arg)
 #endif
 				break;
 			case CMoviePlayerGui::SKIP:
-				INFO("requesting buffer reset\n");
+				DBG("requesting buffer reset\n");
 				bufferreset = true;
 				while (bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
 				{
-					INFO("WAITING FOR BUFFERRESET\n");
+					DBG("WAITING FOR BUFFERRESET\n");
 					usleep(250000);
 				}
 				g_playstate = CMoviePlayerGui::SOFTRESET;
-				INFO("skipping end\n");
+				DBG("skipping end\n");
 				break;
 			case CMoviePlayerGui::RESYNC:
 				INFO("Resyncing\n");
@@ -2208,7 +2324,7 @@ OutputThread(void *arg)
 
 		if (g_skiprequest)
 		{
-			INFO("g_skiprequest == true!\n");
+			DBG("g_skiprequest == true!\n");
 			g_playstate = CMoviePlayerGui::SKIP;
 			g_skiprequest = false;
 		}
@@ -2375,8 +2491,10 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	int selected = 0;
 	CTimeOSD StreamTime;
 	CFileList filelist;
+	CFileList tmpfilelist;
 	MI_MOVIE_INFO movieinfo;
 	bool movieinfo_valid = false;
+	bool autoplaylist = false; // auto-playlist of foo.001.ts, foo.002.ts,... or 001.vdr, 002.vdr,...
 	int last_apid = -1; // for auto-playlists...
 	hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MOVIEPLAYER_PLEASEWAIT)); // UTF-8
 
@@ -2440,7 +2558,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	{
 		if (g_playstate == CMoviePlayerGui::STOPPED && !cdDvd)
 		{
-			if (selected + 1 < (int)filelist.size() && !aborted)
+			if (selected + 1 < (int)filelist.size() && !aborted && !autoplaylist)
 			{
 				last_apid = g_currentapid;
 				selected++;
@@ -2555,6 +2673,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 						mrl_str = filelist[0].Name;
 					INFO("Generated FILE MRL: %s\n", mrl_str.c_str());
 
+					autoplaylist = false;
 					if (filelist.size() == 1 && !stream)
 					{
 						char *ext;
@@ -2565,6 +2684,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 						     (ext - 4 >= filename &&                      !strcmp(ext, ".vdr"))))
 						{
 							int num = 0;
+							struct stat s;
 							CFile *file = new CFile;
 							sscanf(ext - 3, "%d", &num);
 							do {
@@ -2572,14 +2692,17 @@ CMoviePlayerGui::PlayStream(int streamtype)
 								char nextfile[strlen(filename) + 1];
 								memcpy(nextfile, filename, strlen(filename)-strlen(ext)-3);
 								sprintf(nextfile+strlen(filename)-strlen(ext)-3,"%03d%s", num, ext);
-								if (access(nextfile, R_OK))
+								if (stat(nextfile, &s))
 									break; // file does not exist
 								file->Name = nextfile;
+								file->Size = s.st_size;
 								INFO("auto-adding '%s' to playlist\n", nextfile);
 								filelist.push_back(*file);
 							} while (true);
 							delete file;
 						}
+						if (filelist.size() > 1)
+							autoplaylist = true;
 					}
 					update_info = true;
 					start_play = true;
@@ -2613,6 +2736,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 		if (start_play)
 		{
+			CFileList *outArg;
 			if (g_settings.streaming_show_tv_in_browser == true &&
 			    g_ZapitsetStandbyState == false)
 			{
@@ -2633,8 +2757,15 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			//TODO: Add Dialog (Remove Dialog later)
 			hintBox->paint();
 			buffer_time=0;
-			const char *mrl = mrl_str.c_str(); // todo: is const char * allowed as pthread_create arg?
-			if (pthread_create(&rct, 0, OutputThread, (void *)mrl) != 0)
+			if (autoplaylist)
+				outArg = &filelist;
+			else
+			{
+				tmpfilelist.clear();
+				tmpfilelist.push_back(filelist[selected]);
+				outArg = &tmpfilelist;
+			}
+			if (pthread_create(&rct, 0, OutputThread, (void *)outArg) != 0)
 				break;
 			g_playstate = CMoviePlayerGui::SOFTRESET;
 		}
@@ -2916,31 +3047,34 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		}
 		else if (msg == CRCInput::RC_left || msg == CRCInput::RC_right)
 		{
-			if (msg == CRCInput::RC_left)
-				selected--;
-			else
-				selected++;
-INFO("selected: %d/%d  state: %d\n", selected, (int)filelist.size(), g_playstate);
-			if (selected < 0)
-				selected = 0;
-			else if (selected >= (int)filelist.size())
-				selected = filelist.size() - 1;
-			else if (!filelist.empty() && g_playstate == CMoviePlayerGui::PLAY)
+			if (!autoplaylist)
 			{
-				filename = filelist[selected].Name.c_str();
-				sel_filename = filelist[selected].getFileName();
-				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-				if (stream)
-				{
-					int namepos = filelist[selected].Name.rfind("vlc://");
-					mrl_str = filelist[selected].Name.substr(namepos + 6);
-					mrl_str = url_escape(mrl_str.c_str());
-				}
+				if (msg == CRCInput::RC_left)
+					selected--;
 				else
-					mrl_str = filelist[selected].Name;
-				INFO("Generated FILE MRL: %s\n", mrl_str.c_str());
-				update_info = true;
-				start_play = true;
+					selected++;
+
+				if (selected < 0)
+					selected = 0;
+				else if (selected >= (int)filelist.size())
+					selected = filelist.size() - 1;
+				else if (!filelist.empty() && g_playstate == CMoviePlayerGui::PLAY)
+				{
+					filename = filelist[selected].Name.c_str();
+					sel_filename = filelist[selected].getFileName();
+					//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
+					if (stream)
+					{
+						int namepos = filelist[selected].Name.rfind("vlc://");
+						mrl_str = filelist[selected].Name.substr(namepos + 6);
+						mrl_str = url_escape(mrl_str.c_str());
+					}
+					else
+						mrl_str = filelist[selected].Name;
+					INFO("Generated FILE MRL: %s\n", mrl_str.c_str());
+					update_info = true;
+					start_play = true;
+				}
 			}
 		}
 		else if (msg == NeutrinoMessages::RECORD_START ||
@@ -3044,7 +3178,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.25 $");
+	return imageinfo.getModulVersion("","$Revision: 1.26 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
