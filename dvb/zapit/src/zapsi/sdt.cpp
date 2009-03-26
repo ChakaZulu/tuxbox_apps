@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.48 2005/12/25 19:07:54 racker Exp $
+ * $Id: sdt.cpp,v 1.49 2009/03/26 14:04:47 seife Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,7 +31,13 @@
 #include <zapit/types.h>
 
 
-#define SDT_SIZE 1024
+/* 1023 bytes payload + 3 bytes header.
+   The spec says, the payload should not be larger than 1021, so that
+   the whole packet is not larger than 1024 bytes.
+   But on hotbird 13E, I have seen 1026 byte packets.
+   The length field is 12 bits with the bits 11 and 12 being 00,
+   so 1026 (0x03ff + 3) really should be enough */
+#define SDT_SIZE 1023 + 3
 
 
 uint32_t get_sdt_TsidOnid(void)
