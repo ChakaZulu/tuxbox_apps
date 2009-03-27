@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.21 2007/03/25 15:06:04 Arzka Exp $
+ * $Id: channel.cpp,v 1.22 2009/03/27 16:05:13 houdini Exp $
  *
  * (C) 2002 by Steffen Hehn <mcclean@berlios.de>
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
@@ -90,15 +90,16 @@ void CZapitChannel::resetPids(void)
 {
 	std::vector<CZapitAudioChannel *>::iterator aI;
 
-	for (aI = audioChannels.begin(); aI != audioChannels.end(); aI++)
+	for ( aI = audioChannels.begin(); aI != audioChannels.end(); aI++ )
 		delete *aI;
 
 	audioChannels.clear();
 	currentAudioChannel = 0;
 
 	std::vector<CZapitAbsSub *>::iterator subI;
-	for (subI = channelSubs.begin(); subI != channelSubs.end(); subI++){
-	    delete *subI;
+	for ( subI = channelSubs.begin(); subI != channelSubs.end(); subI++ )
+	{
+		delete *subI;
 	}
 	channelSubs.clear();
 	currentSub = 0;
@@ -112,113 +113,132 @@ void CZapitChannel::resetPids(void)
 	pidsFlag = false;
 }
 
-void CZapitChannel::addTTXSubtitle(const unsigned int pid, const std::string langCode, const unsigned char magazine_number, const unsigned char page_number, const bool impaired)
+void CZapitChannel::addTTXSubtitle ( const unsigned int pid, const std::string langCode, const unsigned char magazine_number, const unsigned char page_number, const bool impaired )
 {
-    CZapitTTXSub* oldSub = 0;
-    CZapitTTXSub* tmpSub = 0;
-    unsigned char mag_nr = magazine_number ? magazine_number : 8;
+	CZapitTTXSub* oldSub = 0;
+	CZapitTTXSub* tmpSub = 0;
+	unsigned char mag_nr = magazine_number ? magazine_number : 8;
 
-    std::vector<CZapitAbsSub*>::iterator subI;
-    // Check if it already exists
-    for (subI=channelSubs.begin(); subI!=channelSubs.end();subI++){
-	if ((*subI)->thisSubType==CZapitAbsSub::TTX){
-	    tmpSub=reinterpret_cast<CZapitTTXSub*>(*subI);
-            if (tmpSub->ISO639_language_code == langCode) {
-	        oldSub = tmpSub;
-                if (tmpSub->pId==pid &&
-		    tmpSub->teletext_magazine_number==mag_nr &&
-		    tmpSub->teletext_page_number==page_number &&
-		    tmpSub->hearingImpaired==impaired) {
-                    // It is already there, do nothing
-		    return;
-                }
-                // No need to iterate more
-                break;
-	    }
+	std::vector<CZapitAbsSub*>::iterator subI;
+	// Check if it already exists
+	for ( subI=channelSubs.begin(); subI!=channelSubs.end();subI++ )
+	{
+		if ( ( *subI )->thisSubType==CZapitAbsSub::TTX )
+		{
+			tmpSub=reinterpret_cast<CZapitTTXSub*> ( *subI );
+			if ( tmpSub->ISO639_language_code == langCode )
+			{
+				oldSub = tmpSub;
+				if ( tmpSub->pId==pid &&
+				        tmpSub->teletext_magazine_number==mag_nr &&
+				        tmpSub->teletext_page_number==page_number &&
+				        tmpSub->hearingImpaired==impaired )
+				{
+					// It is already there, do nothing
+					return;
+				}
+				// No need to iterate more
+				break;
+			}
+		}
 	}
-    }
 
-    DBG("TTXSub: PID=0x%04x, lang=%3.3s, page=%1X%02X", 
-        pid, langCode.c_str(), mag_nr, page_number);
+	DBG ( "TTXSub: PID=0x%04x, lang=%3.3s, page=%1X%02X",
+	      pid, langCode.c_str(), mag_nr, page_number );
 
-    if (oldSub) {
-        tmpSub=oldSub;
-    } else {
-        tmpSub = new CZapitTTXSub();
-        channelSubs.push_back(tmpSub);
-    }
-    tmpSub->pId=pid;
-    tmpSub->ISO639_language_code=langCode;
-    tmpSub->teletext_magazine_number=mag_nr;
-    tmpSub->teletext_page_number=page_number;
-    tmpSub->hearingImpaired=impaired;
-
-    setPidsUpdated();  // To notify clients if pids have changed
-}
-
-void CZapitChannel::addDVBSubtitle(const unsigned int pid, const std::string langCode, const unsigned char subtitling_type, const unsigned short composition_page_id, const unsigned short ancillary_page_id)
-{
-    CZapitDVBSub* oldSub = 0;
-    CZapitDVBSub* tmpSub = 0;
-    std::vector<CZapitAbsSub*>::iterator subI;
-    for (subI=channelSubs.begin(); subI!=channelSubs.end();subI++){
-	if ((*subI)->thisSubType==CZapitAbsSub::DVB){
-	    tmpSub=reinterpret_cast<CZapitDVBSub*>(*subI);
-	    if (tmpSub->ISO639_language_code==langCode) {
-                oldSub = tmpSub;
-                if (tmpSub->pId==pid &&
-		    tmpSub->subtitling_type==subtitling_type &&
-		    tmpSub->composition_page_id==composition_page_id &&
-		    tmpSub->ancillary_page_id==ancillary_page_id) {
-
-                    return;
-                 }
-		 break;
-	    }
+	if ( oldSub )
+	{
+		tmpSub=oldSub;
 	}
-    }
-
-    DBG("DVBSub: PID=0x%04x, lang=%3.3s, cpageid=%04x, apageid=%04x",
-        pid, langCode.c_str(), composition_page_id, ancillary_page_id);
-
-    if (oldSub) {
-        tmpSub = oldSub;
-    } else {
-        tmpSub = new CZapitDVBSub();
-        channelSubs.push_back(tmpSub);
-    }
-
-    tmpSub->pId=pid;
-    tmpSub->ISO639_language_code=langCode;
-    tmpSub->subtitling_type=subtitling_type;
-    tmpSub->composition_page_id=composition_page_id;
-    tmpSub->ancillary_page_id=ancillary_page_id;
-
-    setPidsUpdated();
-}
-
-CZapitAbsSub* CZapitChannel::getChannelSub(int index)
-{
-    CZapitAbsSub* retval = NULL;
-
-    if ((index < 0) && (currentSub < getSubtitleCount())){
-	retval = channelSubs[currentSub];
-    } else { 
-        if ((index >= 0) && (index < (int)getSubtitleCount())) {
-	    retval = channelSubs[index];
+	else
+	{
+		tmpSub = new CZapitTTXSub();
+		channelSubs.push_back ( tmpSub );
 	}
-    }
-    return retval;
+	tmpSub->pId=pid;
+	tmpSub->ISO639_language_code=langCode;
+	tmpSub->teletext_magazine_number=mag_nr;
+	tmpSub->teletext_page_number=page_number;
+	tmpSub->hearingImpaired=impaired;
+
+	setPidsUpdated();  // To notify clients if pids have changed
 }
 
-void CZapitChannel::setChannelSub(int subIdx)
+void CZapitChannel::addDVBSubtitle ( const unsigned int pid, const std::string langCode, const unsigned char subtitling_type, const unsigned short composition_page_id, const unsigned short ancillary_page_id )
 {
-    if (subIdx < (int)channelSubs.size()){
-	currentSub=subIdx;
-    }
+	CZapitDVBSub* oldSub = 0;
+	CZapitDVBSub* tmpSub = 0;
+	std::vector<CZapitAbsSub*>::iterator subI;
+	for ( subI=channelSubs.begin(); subI!=channelSubs.end();subI++ )
+	{
+		if ( ( *subI )->thisSubType==CZapitAbsSub::DVB )
+		{
+			tmpSub=reinterpret_cast<CZapitDVBSub*> ( *subI );
+			if ( tmpSub->ISO639_language_code==langCode )
+			{
+				oldSub = tmpSub;
+				if ( tmpSub->pId==pid &&
+				        tmpSub->subtitling_type==subtitling_type &&
+				        tmpSub->composition_page_id==composition_page_id &&
+				        tmpSub->ancillary_page_id==ancillary_page_id )
+				{
+
+					return;
+				}
+				break;
+			}
+		}
+	}
+
+	DBG ( "DVBSub: PID=0x%04x, lang=%3.3s, cpageid=%04x, apageid=%04x",
+	      pid, langCode.c_str(), composition_page_id, ancillary_page_id );
+
+	if ( oldSub )
+	{
+		tmpSub = oldSub;
+	}
+	else
+	{
+		tmpSub = new CZapitDVBSub();
+		channelSubs.push_back ( tmpSub );
+	}
+
+	tmpSub->pId=pid;
+	tmpSub->ISO639_language_code=langCode;
+	tmpSub->subtitling_type=subtitling_type;
+	tmpSub->composition_page_id=composition_page_id;
+	tmpSub->ancillary_page_id=ancillary_page_id;
+
+	setPidsUpdated();
 }
 
-int CZapitChannel::getChannelSubIndex(void)
+CZapitAbsSub* CZapitChannel::getChannelSub ( int index )
 {
-    return currentSub < getSubtitleCount() ? currentSub : -1;
+	CZapitAbsSub* retval = NULL;
+
+	if ( ( index < 0 ) && ( currentSub < getSubtitleCount() ) )
+	{
+		retval = channelSubs[currentSub];
+	}
+	else
+	{
+		if ( ( index >= 0 ) && ( index < ( int ) getSubtitleCount() ) )
+		{
+			retval = channelSubs[index];
+		}
+	}
+	return retval;
+}
+
+void CZapitChannel::setChannelSub ( int subIdx )
+{
+	if ( subIdx < ( int ) channelSubs.size() )
+	{
+		currentSub=subIdx;
+	}
+}
+
+int CZapitChannel::getChannelSubIndex ( void )
+{
+	return currentSub < getSubtitleCount() ? currentSub : -1;
 }
