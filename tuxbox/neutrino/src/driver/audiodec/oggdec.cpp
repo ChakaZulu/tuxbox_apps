@@ -55,7 +55,7 @@ int ogg_seek(void *data, ogg_int64_t offset, int whence)
   return fseek((FILE*)data, (long)offset, whence);
 }
 
-int ogg_close(void *data)
+int ogg_close(void *)
 {
   return 0;
 }
@@ -224,7 +224,7 @@ void* COggDec::OutputDsp(void * arg)
 	return NULL;
 }
 
-bool COggDec::GetMetaData(FILE *in, const bool nice, CAudioMetaData* m)
+bool COggDec::GetMetaData(FILE *in, const bool /*nice*/, CAudioMetaData* m)
 {
 	OggVorbis_File vf;
 	if (!Open(in, &vf))

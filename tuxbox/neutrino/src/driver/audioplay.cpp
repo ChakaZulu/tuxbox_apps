@@ -81,7 +81,7 @@ CAudioPlayer* CAudioPlayer::getInstance()
 	return AudioPlayer;
 }
 
-void* CAudioPlayer::PlayThread( void* dummy )
+void* CAudioPlayer::PlayThread(void*)
 {
 	int soundfd = ::open("/dev/sound/dsp",O_WRONLY);
 	if (soundfd != -1)

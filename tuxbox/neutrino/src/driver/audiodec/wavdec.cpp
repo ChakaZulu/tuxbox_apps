@@ -165,7 +165,7 @@ CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 	return Status;
 }
 
-bool CWavDec::GetMetaData(FILE *in, const bool nice, CAudioMetaData* m)
+bool CWavDec::GetMetaData(FILE *in, const bool /*nice*/, CAudioMetaData* m)
 {
 	return SetMetaData(in, m);
 }

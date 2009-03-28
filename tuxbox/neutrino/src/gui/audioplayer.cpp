@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.62 2009/03/21 10:25:16 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.63 2009/03/28 14:35:09 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -220,7 +220,7 @@ CAudioPlayerGui::~CAudioPlayerGui()
 }
 
 //------------------------------------------------------------------------
-int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
+int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 {
 	CAudioPlayer::getInstance()->init();
 	m_state = CAudioPlayerGui::STOP;
