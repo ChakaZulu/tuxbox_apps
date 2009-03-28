@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.14 2009/03/28 13:55:21 seife Exp $
+	$Id: movieinfo.cpp,v 1.15 2009/03/28 13:58:48 seife Exp $
 
 	Kommentar:
 
@@ -807,6 +807,8 @@ bool CMovieInfo::parseInfoVDR(char* text, MI_MOVIE_INFO* movie_info)
 	char *nl = NULL;
 	int epgid, start, length, table, ver;
 	std::string tmp;
+	int apidcounter = 0;
+	int ac3counter = 32;
 
 	EPG_AUDIO_PIDS audio_pids;
 
@@ -838,15 +840,44 @@ bool CMovieInfo::parseInfoVDR(char* text, MI_MOVIE_INFO* movie_info)
 				printf("COULD NOT CONVERT VDR LINE: '%s'\n", tmp.c_str());
 			break;
 		case 'X':
+			/* X 1 03 deu Breitwand */
 			if (*(text + 2) == '1')
+			{
 				movie_info->format = *(text + 5) - '1'; // 0 - 4:3, 2 - 16:9, not used anyway ATM.
+				break;
+			}
 			/*
-			   No idea how to find out the audio PIDs, or how to map it to the audio streams...
 			   X 2 03 deu Stereo
 			   X 2 03 deu Stereo
 			   X 2 05 deu Dolby Digital 5.1
-			   X 1 03 deu Breitwand
 			 */
+			if (*(text + 2) == '2')
+			{
+				bool found = true;
+				unsigned int id;
+				id = strtol(text + 4, NULL, 16);
+				audio_pids.epgAudioPidName = convertVDRline(text + 5, nl - (text + 5));
+				switch (id)
+				{
+				case 0x01: // mono
+				case 0x03: // stereo
+				case 0x04: // "audio description" on ARD
+					audio_pids.epgAudioPid = apidcounter;
+					apidcounter++;
+					break;
+				case 0x05:
+					audio_pids.epgAudioPid = ac3counter;
+					ac3counter++;
+					break;
+				// case 0x40: // unknown
+				default:
+					found = false;
+					tmp = convertVDRline(text, nl - text);
+					fprintf(stderr, "%s: invalid VDR line: '%s'\n", __FUNCTION__, tmp.c_str());
+				}
+				if (found)
+					movie_info->audioPids.push_back(audio_pids);
+			}
 			break;
 		default:
 			break;
