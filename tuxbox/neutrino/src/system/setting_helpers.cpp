@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.174 2009/03/11 20:42:20 rhabarber1848 Exp $
+	$Id: setting_helpers.cpp,v 1.175 2009/03/28 14:50:19 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -520,7 +520,7 @@ bool CRecAPIDSettingsNotifier::changeNotify(const neutrino_locale_t, void *)
 	return true;
 }
 
-int CAPIDChangeExec::exec(CMenuTarget* parent, const std::string & actionKey)
+int CAPIDChangeExec::exec(CMenuTarget*, const std::string & actionKey)
 {
 	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
 	unsigned int sel= atoi(actionKey.c_str());
@@ -576,7 +576,7 @@ int CMoviePluginChangeExec::exec(CMenuTarget* parent, const std::string & action
 }
 
 #ifdef HAVE_DBOX_HARDWARE
-int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
+int CUCodeCheckExec::exec(CMenuTarget*, const std::string &)
 {
 	std::stringstream text;
 	char res[60];
@@ -600,7 +600,7 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 }
 #endif
 
-int CDVBInfoExec::exec(CMenuTarget* parent, const std::string & actionKey)
+int CDVBInfoExec::exec(CMenuTarget*, const std::string &)
 {
 	std::stringstream text;
 
@@ -805,7 +805,7 @@ const CMenuOptionChooser::keyval USERMENU_ITEM_OPTIONS[USERMENU_ITEM_OPTION_COUN
 	{SNeutrinoSettings::ITEM_TECHINFO, LOCALE_EPGMENU_STREAMINFO}
 };
 
-int CUserMenuMenu::exec(CMenuTarget* parent, const std::string & actionKey)
+int CUserMenuMenu::exec(CMenuTarget* parent, const std::string &)
 {
 	if(parent != NULL)
 		parent->hide();
