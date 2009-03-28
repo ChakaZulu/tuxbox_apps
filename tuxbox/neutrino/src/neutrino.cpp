@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.937 2009/03/26 16:10:57 seife Exp $
+	$Id: neutrino.cpp,v 1.938 2009/03/28 14:02:44 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2710,7 +2710,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			 * => typecast to avoid destructor call
 			 */
 			if (nextRecordingInfo != NULL)
-				delete (unsigned char *) nextRecordingInfo;
+				delete [](unsigned char *)nextRecordingInfo;
 
 			nextRecordingInfo = (CTimerd::RecordingInfo *) data;
 
@@ -2754,12 +2754,12 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 					 * What a brilliant idea to send classes via the eventserver!
 					 * => typecast to avoid destructor call
 					 */
-				 	delete (unsigned char *) nextRecordingInfo;
+					delete [](unsigned char *)nextRecordingInfo;
 
 					nextRecordingInfo=NULL;
 				}
 			}
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			return messages_return::handled;
 		}
 		else if( msg == NeutrinoMessages::ZAPTO)
@@ -3002,7 +3002,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 				//changeNotify(LOCALE_MAINMENU_RECORDING_START, data);
 			}
 
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			return messages_return::handled;
 		}
 		else if( msg == NeutrinoMessages::REMIND)
@@ -3015,7 +3015,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			}
 			if( mode != mode_scart )
 				ShowMsgUTF(LOCALE_TIMERLIST_TYPE_REMIND, text, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			return messages_return::handled;
 		}
 		else if (msg == NeutrinoMessages::LOCK_RC)
@@ -3091,7 +3091,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 					   CMessageBox::mbrBack,CMessageBox::mbBack,NEUTRINO_ICON_SHELL);
 			}
 
-			delete (unsigned char*) data;
+			delete [] (unsigned char*) data;
 			return messages_return::handled;
 		}
 		else if (msg == NeutrinoMessages::EVT_SERVICES_UPD)
@@ -3113,7 +3113,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		}
 	}
 	if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000))
-		delete (unsigned char*) data;
+		delete [] (unsigned char*) data;
 
 	return messages_return::unhandled;
 }
@@ -3700,7 +3700,7 @@ void CNeutrinoApp::startNextRecording()
 		 * What a brilliant idea to send classes via the eventserver!
 		 * => typecast to avoid destructor call
 		 */
-		delete (unsigned char *) nextRecordingInfo;
+		delete [](unsigned char *)nextRecordingInfo;
 
 		nextRecordingInfo = NULL;
 	}
