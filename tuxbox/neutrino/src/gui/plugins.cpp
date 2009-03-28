@@ -185,6 +185,7 @@ bool CPlugins::parseCfg(plugin *plugin_data)
 	plugin_data->lcd = false;
 	plugin_data->vtxtpid = false;
 	plugin_data->showpig = false;
+	plugin_data->subpid = false;
 	plugin_data->needoffset = false;
 	plugin_data->hide = false;
 	plugin_data->type = CPlugins::P_TYPE_DISABLED;
