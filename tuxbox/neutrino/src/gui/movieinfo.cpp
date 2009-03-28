@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.13 2009/01/23 16:57:50 seife Exp $
+	$Id: movieinfo.cpp,v 1.14 2009/03/28 13:55:21 seife Exp $
 
 	Kommentar:
 
@@ -511,7 +511,7 @@ void CMovieInfo::showMovieInfo(MI_MOVIE_INFO& movie_info)
     	print_buffer += "\n"; 
    		print_buffer += g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_LENGTH);
       	print_buffer += " rec: "; 
- 	 	snprintf(date_char, 12,"%3d",movie_info.rec_length);
+		snprintf(date_char, 12,"%3d:%02d",movie_info.rec_length / 60, movie_info.rec_length % 60);
     	print_buffer += date_char; 
     }
     if(movie_info.audioPids.size() != 0 )
