@@ -23,7 +23,7 @@ int fh_png_id(const char *name)
 }
 
 
-int fh_png_load(const char *name,unsigned char **buffer,int* xp,int* yp)
+int fh_png_load(const char *name,unsigned char **buffer,int* /*xp*/,int* /*yp*/)
 {
 	static const png_color_16 my_background = {0, 0, 0, 0, 0};
 
@@ -108,7 +108,7 @@ int fh_png_load(const char *name,unsigned char **buffer,int* xp,int* yp)
 	fclose(fh);
 	return(FH_ERROR_OK);
 }
-int fh_png_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_height)
+int fh_png_getsize(const char *name,int *x,int *y, int /*wanted_width*/, int /*wanted_height*/)
 {
 	png_structp png_ptr;
 	png_infop info_ptr;

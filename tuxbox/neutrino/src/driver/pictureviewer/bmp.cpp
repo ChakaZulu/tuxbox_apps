@@ -234,7 +234,7 @@ int fh_bmp_load(const char *name,unsigned char **buffer,int* xp,int* yp)
 //	dbout("fh_bmp_load }\n");
 	return(FH_ERROR_OK);
 }
-int fh_bmp_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_height)
+int fh_bmp_getsize(const char *name,int *x,int *y, int /*wanted_width*/, int /*wanted_height*/)
 {
 //	dbout("fh_bmp_getsize {\n");
 	int fd;

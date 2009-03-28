@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.65 2008/12/05 22:06:19 seife Exp $
+	$Id: pictureviewer.cpp,v 1.66 2009/03/28 14:36:20 seife Exp $
 
 	MP3Player by Dirch
 	
@@ -114,7 +114,7 @@ CPictureViewerGui::~CPictureViewerGui()
 }
 
 //------------------------------------------------------------------------
-int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
+int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & /*actionKey*/)
 {
 	struct stat sFileInfo;
 	selected = 0;
@@ -735,7 +735,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.65 $");
+	return imageinfo.getModulVersion("","$Revision: 1.66 $");
 }
 
 void CPictureViewerGui::showHelp()

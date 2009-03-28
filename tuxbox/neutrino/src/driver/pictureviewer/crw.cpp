@@ -159,7 +159,7 @@ void crw_cb_error_exit(j_common_ptr cinfo)
 //	 dbout("crw_cb_error_exit }\n");
 }
 
-int fh_crw_load(const char *filename,unsigned char **buffer,int* xp,int* yp)
+int fh_crw_load(const char *filename,unsigned char **buffer,int* xp,int* /*yp*/)
 {
 //	dbout("fh_crw_load (%d/%d) {\n",x,y);
 	struct jpeg_decompress_struct cinfo;

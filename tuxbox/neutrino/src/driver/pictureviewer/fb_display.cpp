@@ -175,10 +175,10 @@ void blit2FB(void *fbbuff,
 	 }
 }
 
-void clearFB(int bpp, int cpp)
+void clearFB(int /*bpp*/, int cpp)
 {
-   int x,y;
-   getCurrentRes(&x,&y);
+	int x,y;
+	getCurrentRes(&x,&y);
 	unsigned int stride = CFrameBuffer::getInstance()->getStride();
 	
 	switch(cpp){
@@ -231,11 +231,11 @@ inline unsigned short make15color(unsigned char r, unsigned char g, unsigned cha
 	 ((r >> 3) & 31)        );
 }
 
-inline unsigned short make16color(uint32_t r, uint32_t g, uint32_t b, 
-											 uint32_t rl, uint32_t ro, 
-											 uint32_t gl, uint32_t go, 
-											 uint32_t bl, uint32_t bo, 
-											 uint32_t tl, uint32_t to)
+inline unsigned short make16color(uint32_t r, uint32_t g, uint32_t b,
+				  uint32_t rl, uint32_t ro,
+				  uint32_t gl, uint32_t go,
+				  uint32_t bl, uint32_t bo,
+				  uint32_t /*tl*/, uint32_t /*to*/)
 {
     return (
 //		 ((0xFF >> (8 - tl)) << to) |
