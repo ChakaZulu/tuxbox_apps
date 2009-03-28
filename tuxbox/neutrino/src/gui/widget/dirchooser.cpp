@@ -1,5 +1,5 @@
 /*  
-	$Id: dirchooser.cpp,v 1.2 2007/02/24 15:19:00 guenther Exp $
+	$Id: dirchooser.cpp,v 1.3 2009/03/28 14:48:58 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 	
@@ -73,7 +73,7 @@ CDirChooser::CDirChooser(std::string* path, char* allowed_path0,char* allowed_pa
 }
 
 /**********************************************************************/
-int CDirChooser::exec(CMenuTarget* parent, const std::string & actionKey)
+int CDirChooser::exec(CMenuTarget* parent, const std::string &)
 /* start dir chooser */
 /**********************************************************************/
 {
@@ -128,7 +128,7 @@ int CDirChooser::exec(CMenuTarget* parent, const std::string & actionKey)
 
 
 /**********************************************************************/
-CRecDirChooser::CRecDirChooser(const neutrino_locale_t Name, const std::string & Icon, int * chosenNfsIndex, char * chosenLocalDir, const char * const selectedLocalDir, const int mwidth, const int mheight)
+CRecDirChooser::CRecDirChooser(const neutrino_locale_t Name, const std::string & Icon, int * chosenNfsIndex, char * chosenLocalDir, const char * const /*selectedLocalDir*/, const int mwidth, const int mheight)
 	: CMenuWidget(Name, Icon,mwidth,mheight), index(chosenNfsIndex), localDir(chosenLocalDir)
 /**********************************************************************/
 {
@@ -137,7 +137,7 @@ CRecDirChooser::CRecDirChooser(const neutrino_locale_t Name, const std::string &
 }
 
 /**********************************************************************/
-CRecDirChooser::CRecDirChooser(const neutrino_locale_t Name, const std::string & Icon, int * chosenNfsIndex, std::string * chosenLocalDir, const char * const selectedLocalDir, const int mwidth, const int mheight)
+CRecDirChooser::CRecDirChooser(const neutrino_locale_t Name, const std::string & Icon, int * chosenNfsIndex, std::string * chosenLocalDir, const char * const /*selectedLocalDir*/, const int mwidth, const int mheight)
 	: CMenuWidget(Name, Icon,mwidth,mheight), index(chosenNfsIndex), localDirString(chosenLocalDir)
 /**********************************************************************/
 {

@@ -160,7 +160,7 @@ void CBEChannelWidget::hide()
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
-int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
+int CBEChannelWidget::exec(CMenuTarget* parent, const std::string &)
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;

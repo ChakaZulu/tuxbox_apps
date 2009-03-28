@@ -1,5 +1,5 @@
 /*
-	$Id: progresswindow.cpp,v 1.21 2008/11/30 22:47:12 dbt Exp $
+	$Id: progresswindow.cpp,v 1.22 2009/03/28 14:48:58 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -165,7 +165,7 @@ void CProgressWindow::paint()
 	showGlobalStatus(global_progress);
 }
 
-int CProgressWindow::exec(CMenuTarget* parent, const std::string & actionKey)
+int CProgressWindow::exec(CMenuTarget* parent, const std::string & /*actionKey*/)
 {
 	if(parent)
 	{

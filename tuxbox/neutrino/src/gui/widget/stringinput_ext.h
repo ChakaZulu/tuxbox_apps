@@ -93,11 +93,11 @@ class CExtendedInput_Item
 	public:
 
 		virtual void setDataPointer(char* Data){data=Data;};
-		virtual void init(int &x, int &y){};
-		virtual void paint(int x, int y, bool focusGained){};
+		virtual void init(int &/*x*/, int &/*y*/){};
+		virtual void paint(int /*x*/, int /*y*/, bool /*focusGained*/){};
 		virtual bool isSelectable(){return true;};
 
-		virtual void keyPressed( int key ){};
+		virtual void keyPressed(int /*key*/){};
 		virtual ~CExtendedInput_Item(){}
 };
 

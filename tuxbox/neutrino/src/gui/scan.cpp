@@ -70,7 +70,7 @@ CScanTs::CScanTs()
 }
 #define get_set (CNeutrinoApp::getInstance()->getScanSettings())
 #define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
-int CScanTs::exec(CMenuTarget* parent, const std::string &)
+int CScanTs::exec(CMenuTarget* /*parent*/, const std::string &)
 {
 	diseqc_t		diseqcType = NO_DISEQC;
 	neutrino_msg_t		msg;

@@ -1,5 +1,5 @@
 /*
- * $Id: buttons.cpp,v 1.6 2008/05/23 00:46:49 dbt Exp $
+ * $Id: buttons.cpp,v 1.7 2009/03/28 14:48:58 seife Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -77,7 +77,7 @@ void paintButtons(CFrameBuffer * const frameBuffer, Font * const font,
 		max_iconw = max_iconw>iconw ? max_iconw : iconw; 
 	
 		// get width of  buttontext
-		unsigned int fwidth = ((max_iconw+2*space+real_textwidth) > (maxButtonwidth)) ? maxButtonwidth : real_textwidth;
+		fwidth = ((max_iconw+2*space+real_textwidth) > (maxButtonwidth)) ? maxButtonwidth : real_textwidth;
 		
 		// calculate finally buttonwidth
 		bwidth = max_iconw + 2*space + fwidth;	

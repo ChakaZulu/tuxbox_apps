@@ -830,7 +830,7 @@ int ShowMsg2UTF(	const char * const Title,
 			const CMsgBox::result_ Default,
 			const uint ShowButtons,
 			const char * const Icon,
-			const int Width,
+			const int /*Width*/,
 			const int timeout,
 			bool returnDefaultOnTimeout)
 {

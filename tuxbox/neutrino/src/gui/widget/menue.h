@@ -1,5 +1,5 @@
 /*
-	$Id: menue.h,v 1.76 2009/02/18 18:03:03 seife Exp $
+	$Id: menue.h,v 1.77 2009/03/28 14:48:58 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -57,7 +57,7 @@ class CChangeObserver
 {
 	public:
 		virtual ~CChangeObserver(){}
-		virtual bool changeNotify(const neutrino_locale_t OptionName, void *Data)
+		virtual bool changeNotify(const neutrino_locale_t /*OptionName*/, void * /*Data*/)
 		{
 			return false;
 		}
@@ -101,7 +101,7 @@ class CMenuItem
 			return false;
 		}
 
-		virtual int exec(CMenuTarget* parent)
+		virtual int exec(CMenuTarget* /*parent*/)
 		{
 			return 0;
 		}

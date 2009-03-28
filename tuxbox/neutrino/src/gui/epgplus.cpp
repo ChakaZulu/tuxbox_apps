@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.46 2009/03/05 20:47:56 rhabarber1848 Exp $
+	$Id: epgplus.cpp,v 1.47 2009/03/28 14:48:57 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2199,7 +2199,7 @@ void EpgPlus::paint()
 //  -- (2004-03-05 rasc)
 //
 
-int CEPGplusHandler::exec(CMenuTarget* parent, const std::string &actionKey)
+int CEPGplusHandler::exec(CMenuTarget* parent, const std::string &)
 {
 	int           res = menu_return::RETURN_EXIT_ALL;
 	EpgPlus       *e;
@@ -2226,10 +2226,7 @@ EpgPlus::MenuTargetAddReminder::MenuTargetAddReminder
 	this->epgPlus = epgPlus;
 }
 
-int EpgPlus::MenuTargetAddReminder::exec
-  ( CMenuTarget* parent
-  , const std::string& actionKey
-  )
+int EpgPlus::MenuTargetAddReminder::exec(CMenuTarget*, const std::string&)
 {
 	#ifdef DEBUG_
 		std::cout << "add reminder" << std::endl;
@@ -2268,10 +2265,7 @@ EpgPlus::MenuTargetAddRecordTimer::MenuTargetAddRecordTimer
 	this->epgPlus = epgPlus;
 }
 
-int EpgPlus::MenuTargetAddRecordTimer::exec
-  ( CMenuTarget* parent
-  , const std::string& actionKey
-  )
+int EpgPlus::MenuTargetAddRecordTimer::exec(CMenuTarget*, const std::string&)
 {
 	#ifdef DEBUG_
 		std::cout << "add record timer 1" << std::endl;
@@ -2351,18 +2345,15 @@ EpgPlus::MenuTargetRefreshEpg::MenuTargetRefreshEpg
 }
 
 
-int EpgPlus::MenuTargetRefreshEpg::exec
-  ( CMenuTarget* parent
-  , const std::string& actionKey
-  )
+int EpgPlus::MenuTargetRefreshEpg::exec(CMenuTarget*, const std::string&)
 {
-	#ifdef DEBUG_
-		std::cout << "refresh mode" << std::endl;
-	#endif
+#ifdef DEBUG_
+	std::cout << "refresh mode" << std::endl;
+#endif
 
-  this->epgPlus->refreshAll = true;
+	this->epgPlus->refreshAll = true;
 
-  return menu_return::RETURN_EXIT_ALL;
+	return menu_return::RETURN_EXIT_ALL;
 }
 
 struct CMenuOptionChooser::keyval menuOptionChooserSwitchSwapModes[] =

@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.149 2009/02/06 21:33:06 rhabarber1848 Exp $
+	$Id: menue.cpp,v 1.150 2009/03/28 14:48:58 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1067,7 +1067,7 @@ int CLockedMenuForwarder::exec(CMenuTarget* parent)
 }
 
 
-int CMenuSelectorTarget::exec(CMenuTarget* parent, const std::string & actionKey)
+int CMenuSelectorTarget::exec(CMenuTarget* /*parent*/, const std::string & actionKey)
 {
 //	printf("CMenuSelector: %s\n", actionKey.c_str());
 	if (actionKey != "")

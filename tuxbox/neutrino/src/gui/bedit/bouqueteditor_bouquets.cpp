@@ -177,7 +177,7 @@ void CBEBouquetWidget::hide()
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
-int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
+int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string&)
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;

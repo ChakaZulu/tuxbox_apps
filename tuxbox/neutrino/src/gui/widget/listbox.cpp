@@ -119,7 +119,7 @@ int CListBox::getItemHeight()
 	return fheight;
 }
 
-void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
+void CListBox::paintItem(unsigned int /*itemNr*/, int paintNr, bool selected)
 {
 	int ypos = y+ theight + paintNr*getItemHeight();
 
@@ -141,7 +141,7 @@ void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
 	g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x + 10, ypos+ fheight, width-20, "demo", color);
 }
 
-int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
+int CListBox::exec(CMenuTarget* parent, const std::string &)
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;

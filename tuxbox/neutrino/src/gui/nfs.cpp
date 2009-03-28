@@ -65,7 +65,7 @@ public:
 		m_pass = a4;
 		m_type = type;
 	}
-	bool changeNotify(const neutrino_locale_t OptionName, void *)
+	bool changeNotify(const neutrino_locale_t, void *)
 	{
 		if(*m_type == (int)CFSMounter::NFS)
 		{

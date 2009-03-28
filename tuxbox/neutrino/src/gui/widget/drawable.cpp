@@ -115,7 +115,7 @@ void DIcon::init()
 	m_width = 16;
 }
 
-void DIcon::draw(CFBWindow *window, int x, int y, int width)
+void DIcon::draw(CFBWindow *window, int x, int y, int /*width*/)
 {
 	window->paintIcon(m_icon.c_str(), x, y);
 }
@@ -132,7 +132,7 @@ DPagebreak::DPagebreak()
 	m_width = 0;
 }
 
-void DPagebreak::draw(CFBWindow *window, int x, int y, int width)
+void DPagebreak::draw(CFBWindow * /*window*/, int /*x*/, int /*y*/, int /*width*/)
 {
 // 	window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU], 
 // 						 x, y + m_height, width, "<pagebreak>", 

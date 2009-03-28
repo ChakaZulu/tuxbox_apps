@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.120 2009/03/01 14:01:11 rhabarber1848 Exp $
+	$Id: eventlist.cpp,v 1.121 2009/03/28 14:48:57 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -935,7 +935,7 @@ int EventList::findEvents(void)
 //  -- (2004-03-06 rasc)
 //
 
-int CEventListHandler::exec(CMenuTarget* parent, const std::string &actionkey)
+int CEventListHandler::exec(CMenuTarget* parent, const std::string &/*actionkey*/)
 {
 	int           res = menu_return::RETURN_EXIT_ALL;
 	EventList     *e;

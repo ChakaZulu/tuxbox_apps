@@ -68,7 +68,7 @@ class CListBox : public CMenuWidget
 		virtual void onYellowKeyPressed(){};
 		virtual void onBlueKeyPressed(){};
 		virtual void onOkKeyPressed(){};
-		virtual void onOtherKeyPressed( int key ){};
+		virtual void onOtherKeyPressed(int /*key*/){};
 
 		//------gibt die Anzahl der Listenitems---
 		virtual unsigned int getItemCount();

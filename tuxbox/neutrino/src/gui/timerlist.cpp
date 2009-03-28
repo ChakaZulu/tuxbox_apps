@@ -1,5 +1,5 @@
 /*
-	$Id: timerlist.cpp,v 1.99 2009/02/18 17:48:41 seife Exp $
+	$Id: timerlist.cpp,v 1.100 2009/03/28 14:48:57 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -102,7 +102,7 @@ public:
 		iType=Type;
 		stopTime=time;
 	}
-	bool changeNotify(const neutrino_locale_t OptionName, void *)
+	bool changeNotify(const neutrino_locale_t, void *)
 	{
 		CTimerd::CTimerEventTypes type = (CTimerd::CTimerEventTypes) *iType;
 		if(type == CTimerd::TIMER_RECORD)
@@ -163,7 +163,7 @@ public:
 		iRepeat=repeat;
 	}
 
-	bool changeNotify(const neutrino_locale_t OptionName, void *)
+	bool changeNotify(const neutrino_locale_t, void *)
 	{
 		if(*iRepeat >= (int)CTimerd::TIMERREPEAT_WEEKDAYS)
 			m1->setActive (true);

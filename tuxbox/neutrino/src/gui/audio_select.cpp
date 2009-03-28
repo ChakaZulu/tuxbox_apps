@@ -66,7 +66,7 @@ const CMenuOptionChooser::keyval AUDIOMENU_ANALOGOUT_OPTIONS[AUDIOMENU_ANALOGOUT
 
 
 
-int CAudioSelectMenuHandler::exec(CMenuTarget* parent, const std::string &actionkey)
+int CAudioSelectMenuHandler::exec(CMenuTarget* parent, const std::string &)
 {
 	int           res = menu_return::RETURN_EXIT_ALL;
 

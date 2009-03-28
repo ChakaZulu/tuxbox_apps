@@ -102,7 +102,7 @@ CPluginList::~CPluginList()
 	pluginlist.clear();
 }
 
-int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
+int CPluginList::exec(CMenuTarget* parent, const std::string & /*actionKey*/)
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;

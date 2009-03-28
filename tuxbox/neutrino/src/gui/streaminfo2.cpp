@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.38 2009/02/22 18:45:42 seife Exp $
+	$Id: streaminfo2.cpp,v 1.39 2009/03/28 14:48:57 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -419,7 +419,7 @@ const struct button_label StreamInfoButtons[2] =
 	{ NEUTRINO_ICON_BUTTON_HOME , LOCALE_STREAMINFO_CLOSE	}
 };
 
-void CStreamInfo2::paint(int mode)
+void CStreamInfo2::paint(int/*mode*/)
 {
 	const char * head_string;
 	int ypos = y+5;
@@ -778,10 +778,10 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.38 $");
+	return imageinfo.getModulVersion("","$Revision: 1.39 $");
 }
 
-int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
+int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &)
 {
 	int res = menu_return::RETURN_EXIT_ALL;
 	if (parent)

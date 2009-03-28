@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.251 2009/03/26 15:21:46 seife Exp $
+	$Id: infoviewer.cpp,v 1.252 2009/03/28 14:48:57 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1787,7 +1787,7 @@ void CInfoViewer::showEpgInfo()   //message on event change
 //  -- (2004-03-06 rasc)
 // 
 
-int CInfoViewerHandler::exec(CMenuTarget* parent, const std::string &actionkey)
+int CInfoViewerHandler::exec(CMenuTarget* parent, const std::string &)
 {
 	int           res = menu_return::RETURN_EXIT_ALL;
 	CChannelList  *channelList;
