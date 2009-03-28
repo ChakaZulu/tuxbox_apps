@@ -303,7 +303,7 @@ int ConnectToServer(char *hostname, int port)
 int request_file(URL *url)
 {
 	char str[255], *ptr;
-	int slot, rval;
+	int slot;
 	ID3 id3;
 
 	/* get the cache slot for this stream. A negative return value */

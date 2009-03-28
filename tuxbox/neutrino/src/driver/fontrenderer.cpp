@@ -38,7 +38,7 @@
 
 
 FT_Error FBFontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
-        FT_Library  library,
+        FT_Library  /*library*/,
         FT_Pointer  request_data,
         FT_Face*    aface)
 {
