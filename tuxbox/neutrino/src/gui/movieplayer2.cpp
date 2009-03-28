@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.28 2009/03/26 15:39:12 seife Exp $
+  $Id: movieplayer2.cpp,v 1.29 2009/03/28 13:59:15 seife Exp $
 
   License: GPL
 
@@ -2800,7 +2800,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 		if (g_showaudioselectdialog)
 		{
-			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
+			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 400);
 			APIDSelector.addItem(GenericMenuSeparator);
 			g_apidchanged = false;
 			pidt = 0;
@@ -2812,20 +2812,43 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			{
 				if (g_ac3flags[count] != 0) // AC3 or Teletext
 					continue;
+
+				std::string apidtitle = "";
+				bool mi_found = false, selected = false;
 				sprintf(apidnumber, "%d", count+1);
 				sprintf(show_pid_number, "%u", g_apids[count]);
 
-				std::string apidtitle = "Stream ";
-				apidtitle.append(show_pid_number);
-				if (g_apids[count] == g_currentapid)
-					apidtitle.append(" *"); // current stream.
+				if (movieinfo_valid)
+				{
+					for (unsigned int i = 0; i < movieinfo.audioPids.size(); i++)
+					{
+						if (movieinfo.audioPids[i].epgAudioPid == g_apids[count])
+						{
+							apidtitle.append(movieinfo.audioPids[i].epgAudioPidName);
+							mi_found = true;
+							break;
+						}
+					}
+				}
+				if (!mi_found)
+					apidtitle = "Stream ";
 
-				// get_movie_info_apid_name(g_apids[count],p_movie_info,&apidtitle);
+				apidtitle.append(" [");
+				apidtitle.append(show_pid_number);
+				apidtitle.append("]");
+
+				if (g_currentapid == -1 && g_apids[count] == 0)
+					selected = true;
+				if (g_apids[count] == g_currentapid)
+				{
+					selected = true;
+					apidtitle.append(" *"); // current stream.
+				}
 				APIDSelector.addItem(
 					new CMenuForwarderNonLocalized(apidtitle.c_str(), true,
 						NULL, APIDChanger, apidnumber,
 						CRCInput::convertDigitToKey(count+1)),
-					(g_apids[count] == g_currentapid)); // select current stream
+					selected); // select current stream
 			}
 
 			// then show the other audio pids (AC3/teletex)
@@ -2833,30 +2856,50 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			{
 				if (g_ac3flags[count] == 0) // already handled...
 					continue;
+				std::string apidtitle = "";
+				bool mi_found = false, selected = false;
 				sprintf(apidnumber, "%d", count+1);
 				sprintf(show_pid_number, "%u", g_apids[count]);
 
-				std::string apidtitle = "Stream ";
-				apidtitle.append(show_pid_number);
-				if (g_apids[count] == g_currentapid)
-					apidtitle.append(" *"); // current stream.
+				if (movieinfo_valid)
+				{
+					for (unsigned int i = 0; i < movieinfo.audioPids.size(); i++)
+					{
+						if (movieinfo.audioPids[i].epgAudioPid == g_apids[count])
+						{
+							apidtitle.append(movieinfo.audioPids[i].epgAudioPidName);
+							mi_found = true;
+							break;
+						}
+					}
+				}
+				if (!mi_found)
+					apidtitle = "Stream ";
 
+				apidtitle.append(" [");
+				apidtitle.append(show_pid_number);
+				apidtitle.append("]");
+
+				if (g_ac3flags[count] == 1)
+					apidtitle.append(" (AC3)");
 				if (g_ac3flags[count] == 2)
 				{
 					apidtitle.append(" (Teletext)");
 					pidt = g_apids[count];
 				}
-				if (g_ac3flags[count] == 1)
+
+				if (g_currentapid == -1 && g_apids[count] == 0)
+					selected = true;
+				if (g_apids[count] == g_currentapid)
 				{
-					// get_movie_info_apid_name(g_apids[count], p_movie_info, &apidtitle);
-					// if ((int)apidtitle.find("AC3") < 0) //std::nopos)
-					apidtitle.append(" (AC3)");
+					selected = true;
+					apidtitle.append(" *"); // current stream.
 				}
 				APIDSelector.addItem(
 					new CMenuForwarderNonLocalized(apidtitle.c_str(), true,
 						NULL, APIDChanger, apidnumber,
 						CRCInput::convertDigitToKey(count+1)),
-					(g_apids[count] == g_currentapid));
+					selected); // select current stream
 			}
 			APIDSelector.exec(NULL, ""); // otherwise use Dialog
 			delete APIDChanger;
@@ -3179,7 +3222,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.28 $");
+	return imageinfo.getModulVersion("","$Revision: 1.29 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
