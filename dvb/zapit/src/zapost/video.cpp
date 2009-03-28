@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.12 2007/06/04 17:06:43 dbluelle Exp $
+ * $Id: video.cpp,v 1.14 2009/03/28 13:47:13 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -23,16 +23,26 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <zapit/zapit.h>
 #include <zapit/debug.h>
 #include <zapit/settings.h>
 #include <zapit/video.h>
+#include <dbox/avs_core.h>
+#include <dbox/saa7126_core.h>
+
+extern struct Ssettings settings;
 
 CVideo::CVideo(void)
 {
 	if ((fd = open(VIDEO_DEVICE, O_RDWR)) < 0)
 		ERROR(VIDEO_DEVICE);
 
+#ifndef HAVE_DREAMBOX_HARDWARE
+	/* setBlank is not _needed_ on the Dreambox. I don't know about the
+	   dbox, so i ifdef'd it out. Not blanking the fb leaves the bootlogo
+	   on screen until the video starts. --seife */
 	setBlank(true);
+#endif
 }
 
 CVideo::~CVideo(void)
@@ -59,6 +69,8 @@ video_format_t CVideo::getAspectRatio(void)
 
 int CVideo::setCroppingMode(video_displayformat_t format)
 {
+	const char *format_string[] = { "panscan", "letterbox", "center_cutout", "unknown" };
+	DBG("setting cropping mode to %s", format_string[format]);
 	return fop(ioctl, VIDEO_SET_DISPLAY_FORMAT, format);
 }
 
@@ -70,6 +82,141 @@ video_displayformat_t CVideo::getCroppingMode(void)
 	return status.displayFormat;
 #else
 	return status.display_format;
+#endif
+}
+
+/* set the format:
+   0 auto
+   1 16:9
+   2 4:3(LB)
+   3 4:3(PS)
+   format == -1 disables 12V on SCART pin 8 */
+void CVideo::setVideoFormat(int format)
+{
+	video_displayformat_t videoDisplayFormat;
+	int _fd;
+	int avsiosfncFormat;
+	int wss;
+
+	const char *format_string[] = { "auto", "16:9", "4:3(LB)", "4:3(PS)" };
+	/*
+	  16:9 : fnc 1
+	  4:3  : fnc 2
+	*/
+
+	if (format == 0) // automatic switch
+	{
+		DBG("setting VideoFormat to auto");
+		int activeAspectRatio;
+		if (settings.vcr)
+			activeAspectRatio = settings.aspectRatio_vcr;
+		else
+			activeAspectRatio = settings.aspectRatio_dvb;
+
+		switch (activeAspectRatio)
+		{
+		case 0:	// 4:3
+			format= 2;
+			break;
+		case 1:	// 16:9
+		case 2:	// 21,1:1
+			format = 1;
+			break;
+		default:
+			format = 2;
+			// damits nicht ausgeht beim starten :)
+		}
+	}
+
+	printf("[CVideo::%s] output format: ", __FUNCTION__);
+	if (format >= 0 && format <= 3)
+		printf("%s\n", format_string[format]);
+	else
+		printf("unknown (%d)\n", format);
+
+	if ((_fd = open(AVS_DEVICE, O_RDWR)) < 0)
+		perror("[CVideo] " AVS_DEVICE);
+	else
+	{
+		if (format < 0)
+			format = 0;
+
+		avsiosfncFormat = format;
+
+		if (settings.boxtype == CControld::TUXBOX_MAKER_PHILIPS)
+		{
+			switch (format)
+			{
+			case 1:
+				avsiosfncFormat = 2;
+				break;
+			case 2:
+				avsiosfncFormat = 3;
+				break;
+			}
+		}
+
+		if (ioctl(_fd, AVSIOSFNC, &avsiosfncFormat) < 0)
+			perror("[CVideo] AVSIOSFNC");
+
+		close(_fd);
+	}
+
+	switch (format)
+	{
+		//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
+	case AVS_FNCOUT_EXT169:
+		videoDisplayFormat = VIDEO_CENTER_CUT_OUT;
+		wss = SAA_WSS_169F;
+		break;
+	case AVS_FNCOUT_EXT43:
+		videoDisplayFormat = VIDEO_LETTER_BOX;
+		wss = SAA_WSS_43F;
+		break;
+	case AVS_FNCOUT_EXT43_1:
+		videoDisplayFormat = VIDEO_PAN_SCAN;
+		wss = SAA_WSS_43F;
+		break;
+	default:
+		videoDisplayFormat = VIDEO_LETTER_BOX;
+		wss = SAA_WSS_43F;
+		break;
+	}
+	setCroppingMode(videoDisplayFormat);
+
+	if ((_fd = open(SAA7126_DEVICE, O_RDWR)) < 0)
+		perror("[CVideo] " SAA7126_DEVICE);
+	else {
+		if (ioctl(_fd, SAAIOSWSS, &wss) < 0)
+			perror("[CVideo] SAAIOSWSS");
+
+		close(_fd);
+	}
+
+#if 0	/* todo: fix. probably outside of video.cpp. */
+	static int last_videoformat = AVS_FNCOUT_EXT43;
+	if (format != last_videoformat) {
+		switch (format) {
+		case AVS_FNCOUT_EXT169:
+		{
+			execute_start_file(FORMAT_16_9_FILE);
+			CIRSend irs("16:9");
+			irs.Send();
+			last_videoformat = format;
+			break;
+		}
+		case AVS_FNCOUT_EXT43:
+		{
+			execute_start_file(FORMAT_4_3_FILE);
+			CIRSend irs("4:3");
+			irs.Send();
+			last_videoformat = format;
+			break;
+		}
+		default:
+			break;
+		}
+	}
 #endif
 }
 
