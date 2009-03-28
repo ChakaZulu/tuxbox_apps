@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.938 2009/03/28 14:02:44 seife Exp $
+	$Id: neutrino.cpp,v 1.939 2009/03/28 14:51:43 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3958,7 +3958,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 *          changeNotify - features menu recording start / stop                        *
 *                                                                                     *
 **************************************************************************************/
-bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *data)
+bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
 {
 	if ((ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING_START)) || (ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING)))
 	{
