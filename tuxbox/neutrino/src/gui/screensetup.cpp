@@ -194,9 +194,9 @@ void CScreenSetup::hide()
 	frameBuffer->paintBackgroundBox(0,0,720,576);
 }
 
-void CScreenSetup::paintBorder( int selected )
+void CScreenSetup::paintBorder(int sel)
 {
-	if ( selected == 0 )
+	if (sel == 0)
 		paintBorderUL();
 	else
 		paintBorderLR();
@@ -222,25 +222,23 @@ void CScreenSetup::paintBorderLR()
 
 void CScreenSetup::paintCoords()
 {
-	int x=15*19;
-	int y=15*16;
-	frameBuffer->paintBoxRel(x,y, 15*9,15*6, COL_MENUCONTENT_PLUS_0);
+	const int _x = 15*19;
+	const int _y = 15*16;
+	frameBuffer->paintBoxRel(_x, _y, 15*9,15*6, COL_MENUCONTENT_PLUS_0);
 	char xpos[30];
 	char ypos[30];
 	char xepos[30];
-	char yepos[30];	
+	char yepos[30];
 
 	sprintf((char*) &xpos, "SX: %d",x_coord[0] );
 	sprintf((char*) &ypos, "SY: %d", y_coord[0] );
 	sprintf((char*) &xepos, "EX: %d", x_coord[1] );
 	sprintf((char*) &yepos, "EY: %d", y_coord[1] );
-	
-	
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,y+30, 200, xpos, COL_MENUCONTENT); //SX
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,y+50, 200, ypos, COL_MENUCONTENT); //SY
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,y+70, 200, xepos, COL_MENUCONTENT); //EX
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,y+90, 200, yepos, COL_MENUCONTENT); //EY
-	
+
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(_x+10,_y+30, 200, xpos, COL_MENUCONTENT); //SX
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(_x+10,_y+50, 200, ypos, COL_MENUCONTENT); //SY
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(_x+10,_y+70, 200, xepos, COL_MENUCONTENT); //EX
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(_x+10,_y+90, 200, yepos, COL_MENUCONTENT); //EY
 }
 
 void CScreenSetup::paint()
