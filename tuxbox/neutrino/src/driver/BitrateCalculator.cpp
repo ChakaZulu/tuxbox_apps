@@ -203,19 +203,19 @@ unsigned int BitrateCalculator::calc(unsigned int &long_average)
 // -- sync TS stream (if not already done by firmware)
 //
 
-int BitrateCalculator::sync_ts (u_char *buf, int len)
+int BitrateCalculator::sync_ts(u_char *ts, int len)
 {
 	int  i;
 
 	// find TS sync byte...
 	// SYNC ...[188 len] ...SYNC...
-	
-	for (i=0; i < len; i++) {
-		if (buf[i] == TS_SYNC_BYTE) {
-		   if ((i+TS_LEN) < len) {
-		      if (buf[i+TS_LEN] != TS_SYNC_BYTE) continue;
-		   }
-		   break;
+	for (i = 0; i < len; i++) {
+		if (ts[i] == TS_SYNC_BYTE) {
+			if (i + TS_LEN < len) {
+				if (ts[i + TS_LEN] != TS_SYNC_BYTE)
+					continue;
+			}
+			break;
 		}
 	}
 	return i;
@@ -231,18 +231,16 @@ int BitrateCalculator::sync_ts (u_char *buf, int len)
 //  return: error count
 //
 
-int BitrateCalculator::ts_error_count (u_char *buf, int len) 
+int BitrateCalculator::ts_error_count(u_char *ts, int len)
 {
 	int error_count = 0;
 
 	while (len > 0) {
-
 		// check  = getBits(buf, 0, 8, 1);
-		if (*(buf+1) & 0x80) error_count++;
-
+		if (*(ts + 1) & 0x80)
+			error_count++;
 		len -= TS_LEN;
-		buf += TS_LEN;
-
+		ts  += TS_LEN;
 	}
 	return error_count;
 }
