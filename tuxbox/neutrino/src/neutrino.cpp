@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.939 2009/03/28 14:51:43 seife Exp $
+	$Id: neutrino.cpp,v 1.940 2009/03/29 16:57:08 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1261,12 +1261,12 @@ bool CNeutrinoApp::ucodes_available(void)
 *          CNeutrinoApp -  channelsInit, get the Channellist from daemon              *
 *                                                                                     *
 **************************************************************************************/
-void CNeutrinoApp::channelsInit(int init_mode, int mode)
+void CNeutrinoApp::channelsInit(int init_mode, int _mode)
 {
 	dprintf(DEBUG_DEBUG, "doing channelsInit\n");
 
 	if (init_mode == init_mode_switch) {
-		if (mode_radio == mode) {
+		if (mode_radio == _mode) {
 			if (channelListRADIO && bouquetListRADIO) {
 				channelList = channelListRADIO;
 				bouquetList = bouquetListRADIO;
@@ -1275,7 +1275,7 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 				return;
 			} // else load
 		} 
-		else if (mode_tv == mode) {
+		else if (mode_tv == _mode) {
 			if (channelListTV && bouquetListTV) {
 				channelList = channelListTV;
 				bouquetList = bouquetListTV;
@@ -1286,11 +1286,11 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 		}
 	}
 
-	if (mode_unknown == mode) { // stay in current TV/Radio mode
+	if (mode_unknown == _mode) { // stay in current TV/Radio mode
 		if (channelList == channelListTV) {
-			mode = mode_tv;
+			_mode = mode_tv;
 		} else {
-			mode = mode_radio;
+			_mode = mode_radio;
 		}
 	}
 
@@ -1317,14 +1317,14 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 	g_Zapit->getBouquets(zapitBouquets, false, true, CZapitClient::MODE_TV); // UTF-8
 	for(uint i = 0; i < zapitBouquets.size(); i++)
 	{
-		CZapitClient::BouquetChannelList zapitChannels;
+		CZapitClient::BouquetChannelList zC;
 
 		bouquetListTV->addBouquet(zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
-		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_TV, true); // UTF-8
+		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zC, CZapitClient::MODE_TV, true); // UTF-8
 
-		for (uint j = 0; j < zapitChannels.size(); j++)
+		for (uint j = 0; j < zC.size(); j++)
 		{
-			CChannelList::CChannel* channel = new CChannelList::CChannel(zapitChannels[j].nr, zapitChannels[j].nr, zapitChannels[j].name, zapitChannels[j].satellitePosition, zapitChannels[j].channel_id); // UTF-8
+			CChannelList::CChannel* channel = new CChannelList::CChannel(zC[j].nr, zC[j].nr, zC[j].name, zC[j].satellitePosition, zC[j].channel_id); // UTF-8
 	
 			/* observe that "bouquetList->Bouquets[i]" refers to the bouquet we just created using bouquetList->addBouquet */
 			bouquetListTV->Bouquets[i]->channelList->addChannel(channel);
@@ -1334,7 +1334,7 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 
 				for (int k=0; k<channelListTV->getSize(); k++)
 				{
-					if ((*channelListTV)[k]->channel_id == zapitChannels[j].channel_id) {
+					if ((*channelListTV)[k]->channel_id == zC[j].channel_id) {
 						(*channelListTV)[k]->bAlwaysLocked = true;
 					}
 				}
@@ -1365,14 +1365,14 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 	g_Zapit->getBouquets(zapitBouquets, false, true, CZapitClient::MODE_RADIO); // UTF-8
 	for(uint i = 0; i < zapitBouquets.size(); i++)
 	{
-		CZapitClient::BouquetChannelList zapitChannels;
+		CZapitClient::BouquetChannelList zC;
 
 		bouquetListRADIO->addBouquet(zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
-		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_RADIO, true); // UTF-8
+		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zC, CZapitClient::MODE_RADIO, true); // UTF-8
 
-		for (uint j = 0; j < zapitChannels.size(); j++)
+		for (uint j = 0; j < zC.size(); j++)
 		{
-			CChannelList::CChannel* channel = new CChannelList::CChannel(zapitChannels[j].nr, zapitChannels[j].nr, zapitChannels[j].name, zapitChannels[j].satellitePosition, zapitChannels[j].channel_id); // UTF-8
+			CChannelList::CChannel* channel = new CChannelList::CChannel(zC[j].nr, zC[j].nr, zC[j].name, zC[j].satellitePosition, zC[j].channel_id); // UTF-8
 
 			/* observe that "bouquetList->Bouquets[i]" refers to the bouquet we just created using bouquetList->addBouquet */
 			bouquetListRADIO->Bouquets[i]->channelList->addChannel(channel);
@@ -1385,7 +1385,7 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 	}
 
 	dprintf(DEBUG_DEBUG, "\nAll bouquets-channels received\n");
-	if (mode == mode_radio) {
+	if (_mode == mode_radio) {
 		if (channelListRADIO && bouquetListRADIO) {
 			channelList = channelListRADIO;
 			bouquetList = bouquetListRADIO;
@@ -1393,7 +1393,7 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 			channelList->clearTuned();
 		}
 	} 
-	else if (mode == mode_tv) {
+	else if (_mode == mode_tv) {
 		if (channelListTV && bouquetListTV) {
 			channelList = channelListTV;
 			bouquetList = bouquetListTV;
@@ -1436,7 +1436,7 @@ void CNeutrinoApp::channelsInit4Record(void)
 	g_Zapit->getBouquets(zapitBouquets, false, true); // UTF-8
 	for(uint i = 0; i < zapitBouquets.size(); i++)
 	{
-		CZapitClient::BouquetChannelList zapitChannels;
+		zapitChannels.clear();
 
 		bouquetListRecord->addBouquet(zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
 		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_CURRENT, true); // UTF-8
@@ -2087,7 +2087,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD           , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    scanSettingsMenu    (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD              , "streaming.raw"       );
 	
@@ -2114,7 +2114,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 					moviePlayer);
 
 	//service
-	InitServiceSettings(service, scanSettings);
+	InitServiceSettings(service, scanSettingsMenu);
 
 	//language Setup
 	InitLanguageSettings(languageSettings);
@@ -2150,7 +2150,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitParentalLockSettings(parentallockSettings);
 
 	// ScanSettings
-	InitScanSettings(scanSettings);
+	InitScanSettings(scanSettingsMenu);
 
 	dprintf( DEBUG_NORMAL, "registering as event client\n");
 
@@ -2549,8 +2549,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 
 					if ((g_settings.shutdown_real_rcdelay))
 					{
-						neutrino_msg_t      msg;
-						neutrino_msg_data_t data;
+						neutrino_msg_t      tmpmsg;
+						neutrino_msg_data_t tmpdata;
 						struct timeval      endtime;
 						time_t              seconds;
 
@@ -2567,9 +2567,9 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 
 						while(true)
 						{
-							g_RCInput->getMsg_ms(&msg, &data, timeout);
+							g_RCInput->getMsg_ms(&tmpmsg, &tmpdata, timeout);
 							/* if the power key gets released, then get out of here */
-							if (msg == (CRCInput::RC_standby | CRCInput::RC_Release))
+							if (tmpmsg == (CRCInput::RC_standby | CRCInput::RC_Release))
 								break;
 
 							gettimeofday(&endtime, NULL);
