@@ -243,10 +243,10 @@ bool CFlashTool::program( const std::string & filename, int globalProgressEndEra
 
 bool CFlashTool::erase(int globalProgressEnd)
 {
-	int				fd;
-	mtd_info_t		meminfo;
-	erase_info_t	erase;
-	int				globalProgressBegin = 0;
+	int		fd;
+	mtd_info_t	meminfo;
+	erase_info_t	eraseinfo;
+	int		globalProgressBegin = 0;
 
 	if( (fd = open( mtdDevice.c_str(), O_RDWR )) < 0 )
 	{
@@ -266,8 +266,8 @@ bool CFlashTool::erase(int globalProgressEnd)
 		globalProgressBegin = statusViewer->getGlobalStatus();
 	}
 
-	erase.length = meminfo.erasesize;
-	for (erase.start = 0; erase.start < meminfo.size;erase.start += meminfo.erasesize)
+	eraseinfo.length = meminfo.erasesize;
+	for (eraseinfo.start = 0; eraseinfo.start < meminfo.size; eraseinfo.start += meminfo.erasesize)
 	{
 		/*
 		printf( "\rErasing %u Kibyte @ %x -- %2u %% complete.",
@@ -276,7 +276,7 @@ bool CFlashTool::erase(int globalProgressEnd)
 		*/
 		if(statusViewer)
 		{
-			int prog = int(erase.start*100./meminfo.size);
+			int prog = int(eraseinfo.start * 100. / meminfo.size);
 			statusViewer->showLocalStatus(prog);
 			if(globalProgressEnd!=-1)
 			{
@@ -285,7 +285,7 @@ bool CFlashTool::erase(int globalProgressEnd)
 			}
 		}
 
-		if(ioctl( fd, MEMERASE, &erase) != 0)
+		if (ioctl(fd, MEMERASE, &eraseinfo) != 0)
 		{
 			ErrorMessage = g_Locale->getText(LOCALE_FLASHUPDATE_ERASEFAILED);
 			close(fd);
