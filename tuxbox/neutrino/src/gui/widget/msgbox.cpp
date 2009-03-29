@@ -84,15 +84,15 @@
 // Return:		
 // Notes:		
 //////////////////////////////////////////////////////////////////////
-CMsgBox::CMsgBox(	const char * text,
-			Font* fontText,
-			const int mode,
-			const CBox* position,
-			const char * title,
-			Font* fontTitle,
-			const char * icon,
-			int return_button,
-			const result_ default_result)
+CMsgBox::CMsgBox(const char *text,
+		 Font *fontText,
+		 const int _mode,
+		 const CBox *position,
+		 const char *title,
+		 Font *fontTitle,
+		 const char *icon,
+		 int return_button,
+		 const result_ default_result)
 {
 	//TRACE("->CMsgBox::CMsgBox\r\n");
 	initVar();
@@ -101,7 +101,7 @@ CMsgBox::CMsgBox(	const char * text,
 	if(fontTitle != NULL)	m_pcFontTitle 	= fontTitle;
 	if(icon != NULL)	m_cIcon 	= icon;
 	if(position != NULL)	m_cBoxFrame	= *position;
-	m_nMode	= mode;
+	m_nMode = _mode;
 	//TRACE(" CMsgBox::cText: %d ,m_cTitle %d,m_nMode %d\t\r\n",strlen(text),m_cTitle.size(),m_nMode);
 
 	if(m_nMode & BORDER)
@@ -744,11 +744,11 @@ int CMsgBox::exec(int timeout, int returnDefaultOnTimeout, bool helpkey)
 //////////////////////////////////////////////////////////////////////
 bool CMsgBox::setText(const std::string* newText)
 {
-	bool result = false;
+	bool ret = false;
 	// update text in textbox if there is one
 	if(m_pcTextBox != NULL && newText != NULL)
 	{
-		result = m_pcTextBox->setText(newText);
+		ret = m_pcTextBox->setText(newText);
 		if((m_nMode & AUTO_WIDTH) || (m_nMode & AUTO_HIGH))
 		{
 			/* window might changed in size ...*/
@@ -768,7 +768,7 @@ bool CMsgBox::setText(const std::string* newText)
 		}
 	}
 	
-	return(result);
+	return ret;
 };
 
 

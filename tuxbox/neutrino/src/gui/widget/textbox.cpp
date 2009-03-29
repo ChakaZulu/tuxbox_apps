@@ -4,7 +4,7 @@
 
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: textbox.cpp,v 1.4 2009/01/10 18:13:39 seife Exp $
+	$Id: textbox.cpp,v 1.5 2009/03/29 16:23:11 seife Exp $
 
 	Kommentar: 
   
@@ -49,6 +49,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: textbox.cpp,v $
+	Revision 1.5  2009/03/29 16:23:11  seife
+	widgets: fix shadow warnings
+	
 	Revision 1.4  2009/01/10 18:13:39  seife
 	Make the scrollbar of the textbox consistent with the rest of neutrino
 	(width 15 pixels, rounded corners)
@@ -94,11 +97,11 @@ bool UTF8XMLtoUTF8(std::string* text);
 // Return:		
 // Notes:		
 //////////////////////////////////////////////////////////////////////
-CTextBox::CTextBox(const char * text, 
-				   Font* font_text,
-				   const int mode, 
-				   const CBox* position,
-					CFBWindow::color_t textBackgroundColor)
+CTextBox::CTextBox(const char *text,
+		   Font *font_text,
+		   const int _mode,
+		   const CBox *position,
+		   CFBWindow::color_t textBackgroundColor)
 {
 	//TRACE("[CTextBox] new\r\n");
 	initVar();
@@ -114,11 +117,10 @@ CTextBox::CTextBox(const char * text,
 		m_nMaxWidth = m_cFrame.iWidth;
 	}
 
-	m_nMode	= mode;
-
+	m_nMode = _mode;
 
 	/* in case of auto line break, we do no support auto width  yet */
-	if( !(mode & NO_AUTO_LINEBREAK))
+	if (!(_mode & NO_AUTO_LINEBREAK))
 	{
 		m_nMode = m_nMode & ~AUTO_WIDTH; /* delete any AUTO_WIDTH*/
 	}

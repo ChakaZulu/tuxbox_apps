@@ -4,7 +4,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: listframe.cpp,v 1.3 2007/11/07 15:31:10 seife Exp $
+	$Id: listframe.cpp,v 1.4 2009/03/29 16:23:11 seife Exp $
 
 	Kommentar:
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: listframe.cpp,v $
+	Revision 1.4  2009/03/29 16:23:11  seife
+	widgets: fix shadow warnings
+	
 	Revision 1.3  2007/11/07 15:31:10  seife
 	fix fileselector colors in moviebrowser
 	(http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?t=46718)
@@ -100,12 +103,12 @@
 // Return:		
 // Notes:		
 //////////////////////////////////////////////////////////////////////
-CListFrame::CListFrame(	LF_LINES* lines, 
-				   		Font* font_text,
-				   		const int mode, 
-				   		const CBox* position,
-						const char* textTitle,
-						Font* font_title)
+CListFrame::CListFrame(LF_LINES* lines,
+		       Font* font_text,
+		       const int _mode,
+		       const CBox* position,
+		       const char* textTitle,
+		       Font* font_title)
 {
 	//TRACE("[CListFrame] new\r\n");
 	initVar();
@@ -128,7 +131,7 @@ CListFrame::CListFrame(	LF_LINES* lines,
 		m_nMaxWidth = m_cFrame.iWidth;
 	}
 
-	m_nMode	= mode;
+	m_nMode = _mode;
 	
 #if 0
 	TRACE("  Mode: ");
