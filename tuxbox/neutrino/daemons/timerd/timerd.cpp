@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.63 2009/01/15 09:31:41 seife Exp $
+	$Id: timerd.cpp,v 1.64 2009/03/29 16:15:35 seife Exp $
 
 	License: GPL
 
@@ -51,6 +51,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	CTimerEventMap events;
 	CTimerdMsg::commandModifyTimer msgModifyTimer;
 	CTimerdMsg::responseGetSleeptimer rspGetSleeptimer;
+	CTimerd::responseGetTimer resp;
 	CTimerEventMap::iterator pos;
 	switch (rmsg.cmd)
 	{
@@ -82,7 +83,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 		case CTimerdMsg::CMD_GETTIMER:						// timer daten abfragen
 			CTimerdMsg::commandGetTimer msgGetTimer;
-			CTimerd::responseGetTimer resp;
 			CBasicServer::receive_data(connfd,&msgGetTimer, sizeof(msgGetTimer));
 			if(CTimerManager::getInstance()->listEvents(events))
 			{
@@ -146,11 +146,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 			if (CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger)) == true)
 			{
-				for(CTimerEventMap::iterator pos = events.begin();pos != events.end();pos++)
+				for (CTimerEventMap::iterator it = events.begin(); it != events.end(); it++)
 				{
-					CTimerd::responseGetTimer resp;
-
-					CTimerEvent *event = pos->second;
+					CTimerEvent *event = it->second;
 
 					resp.eventID = event->eventID;
 					resp.eventState = event->eventState;

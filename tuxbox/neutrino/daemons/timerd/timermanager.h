@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.47 2009/01/05 14:07:25 seife Exp $
+	$Id: timermanager.h,v 1.48 2009/03/29 16:15:35 seife Exp $
 
 	License: GPL
 
@@ -76,8 +76,8 @@ typedef std::map<int, CTimerEvent*> CTimerEventMap;
 class CTimerEvent_Shutdown : public CTimerEvent
 {
  public:
-	CTimerEvent_Shutdown( time_t announceTime, time_t alarmTime, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE, uint repeatcount = 1) :
-		CTimerEvent(CTimerd::TIMER_SHUTDOWN, announceTime, alarmTime, (time_t) 0, evrepeat, repeatcount ){};
+	CTimerEvent_Shutdown(time_t _announce, time_t _alarm, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE, uint repeatcount = 1) :
+		CTimerEvent(CTimerd::TIMER_SHUTDOWN, _announce, _alarm, (time_t) 0, evrepeat, repeatcount){};
 	CTimerEvent_Shutdown(CConfigFile *config, int iId):
 		CTimerEvent(CTimerd::TIMER_SHUTDOWN, config, iId){};
 	virtual void fireEvent();
@@ -87,8 +87,8 @@ class CTimerEvent_Shutdown : public CTimerEvent
 class CTimerEvent_Sleeptimer : public CTimerEvent
 {
  public:
-	CTimerEvent_Sleeptimer( time_t announceTime, time_t alarmTime, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE, uint repeatcount = 1) :
-		CTimerEvent(CTimerd::TIMER_SLEEPTIMER, announceTime, alarmTime, (time_t) 0,evrepeat,repeatcount ){};
+	CTimerEvent_Sleeptimer(time_t _announce, time_t _alarm, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE, uint repeatcount = 1) :
+		CTimerEvent(CTimerd::TIMER_SLEEPTIMER, _announce, _alarm, (time_t) 0,evrepeat,repeatcount){};
 	CTimerEvent_Sleeptimer(CConfigFile *config, int iId):
 		CTimerEvent(CTimerd::TIMER_SLEEPTIMER, config, iId){};
 	virtual void fireEvent();
@@ -139,13 +139,13 @@ class CTimerEvent_Record : public CTimerEvent
 class CTimerEvent_Zapto : public CTimerEvent_Record
 {
  public:
-	CTimerEvent_Zapto(time_t announceTime, time_t alarmTime, 
+	CTimerEvent_Zapto(time_t _announce, time_t _alarm,
 			  t_channel_id channel_id,
 			  event_id_t epgID = 0,
 			  time_t epg_starttime = 0, 
 			  CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE,
 			  uint repeatcount = 1):
-		CTimerEvent_Record(announceTime, alarmTime, (time_t) 0, channel_id, epgID, epg_starttime, 0, evrepeat,repeatcount)
+		CTimerEvent_Record(_announce, _alarm, (time_t) 0, channel_id, epgID, epg_starttime, 0, evrepeat,repeatcount)
 	{eventType = getEventType();};
 	CTimerEvent_Zapto(CConfigFile *config, int iId):
 		CTimerEvent_Record(config, iId)

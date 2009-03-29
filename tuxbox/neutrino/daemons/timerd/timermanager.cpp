@@ -6,7 +6,7 @@
 
 	Copyright (C) 2009 Stefan Seyfried
 
-   $Id: timermanager.cpp,v 1.89 2009/01/07 12:11:08 seife Exp $
+   $Id: timermanager.cpp,v 1.90 2009/03/29 16:15:35 seife Exp $
 
 	License: GPL
 
@@ -255,17 +255,17 @@ int CTimerManager::addEvent(CTimerEvent* evt, bool save)
 }
 
 //------------------------------------------------------------
-bool CTimerManager::removeEvent(int eventID)
+bool CTimerManager::removeEvent(int ev_ID)
 {
 	bool res = false;
 	pthread_mutex_lock(&tm_eventsMutex);
-	if(events.find(eventID)!=events.end())							 // if i have a event with this id
+	if (events.find(ev_ID) != events.end())		// if i have a event with this id
 	{
-		if( (events[eventID]->eventState == CTimerd::TIMERSTATE_ISRUNNING) && (events[eventID]->stopTime > 0) )
-			events[eventID]->stopEvent();	// if event is running an has stopTime 
+		if (events[ev_ID]->eventState == CTimerd::TIMERSTATE_ISRUNNING && events[ev_ID]->stopTime > 0)
+			events[ev_ID]->stopEvent();	// if event is running an has stopTime
 
-		events[eventID]->eventState = CTimerd::TIMERSTATE_TERMINATED;		// set the state to terminated
-		res = true;															// so timerthread will do the rest for us
+		events[ev_ID]->eventState = CTimerd::TIMERSTATE_TERMINATED;	// set the state to terminated
+		res = true;							// so timerthread will do the rest for us
 	}
 	else
 		res = false;
@@ -273,16 +273,16 @@ bool CTimerManager::removeEvent(int eventID)
 	return res;
 }
 //------------------------------------------------------------
-bool CTimerManager::stopEvent(int eventID)
+bool CTimerManager::stopEvent(int ev_ID)
 {
 	bool res = false;
 	pthread_mutex_lock(&tm_eventsMutex);
-	if(events.find(eventID)!=events.end())							 // if i have a event with this id
+	if (events.find(ev_ID) != events.end())		// if i have a event with this id
 	{
-		if( (events[eventID]->eventState == CTimerd::TIMERSTATE_ISRUNNING) && (events[eventID]->stopTime > 0) )
-			events[eventID]->stopEvent();	// if event is running an has stopTime 
-		events[eventID]->eventState = CTimerd::TIMERSTATE_HASFINISHED;		// set the state to finished
-		res = true;															// so timerthread will do the rest for us
+		if (events[ev_ID]->eventState == CTimerd::TIMERSTATE_ISRUNNING && events[ev_ID]->stopTime > 0)
+			events[ev_ID]->stopEvent();	// if event is running an has stopTime
+		events[ev_ID]->eventState = CTimerd::TIMERSTATE_HASFINISHED;	// set the state to finished
+		res = true;							// so timerthread will do the rest for us
 	}
 	else
 		res = false;
@@ -309,13 +309,13 @@ bool CTimerManager::listEvents(CTimerEventMap &Events)
 }
 //------------------------------------------------------------
 
-CTimerd::CTimerEventTypes* CTimerManager::getEventType(int eventID) 
+CTimerd::CTimerEventTypes* CTimerManager::getEventType(int ev_ID)
 {
 	CTimerd::CTimerEventTypes *res = NULL;
 	pthread_mutex_lock(&tm_eventsMutex);
-	if(events.find(eventID)!=events.end())
+	if (events.find(ev_ID) != events.end())
 	{
-		res = &(events[eventID]->eventType);
+		res = &(events[ev_ID]->eventType);
 	}
 	else
 		res = NULL;
@@ -324,13 +324,13 @@ CTimerd::CTimerEventTypes* CTimerManager::getEventType(int eventID)
 }
 //------------------------------------------------------------
 
-int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, uint repeatCount, CTimerd::CTimerEventRepeat evrepeat, CTimerd::responseGetTimer& data)
+int CTimerManager::modifyEvent(int ev_ID, time_t announceTime, time_t alarmTime, time_t stopTime, uint repeatCount, CTimerd::CTimerEventRepeat evrepeat, CTimerd::responseGetTimer& data)
 {
 	int res = 0;
 	pthread_mutex_lock(&tm_eventsMutex);
-	if(events.find(eventID)!=events.end())
+	if (events.find(ev_ID) != events.end())
 	{
-		CTimerEvent *event = events[eventID];
+		CTimerEvent *event = events[ev_ID];
 		event->announceTime = announceTime;
 		event->alarmTime = alarmTime;
 		event->stopTime = stopTime;
@@ -363,7 +363,7 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 		}
 		
 		m_saveEvents=true;
-		res = eventID;
+		res = ev_ID;
 	}
 	else
 		res = 0;
@@ -371,39 +371,39 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 	return res;
 }
 
-int CTimerManager::modifyEvent(int eventID, unsigned char apids)
+int CTimerManager::modifyEvent(int ev_ID, unsigned char apids)
 {
-	dprintf("Modify Event %d apid 0x%X\n",eventID,apids);
+	dprintf("Modify Event %d apid 0x%X\n", ev_ID, apids);
 	int res = 0;
 	pthread_mutex_lock(&tm_eventsMutex);
-	if(events.find(eventID)!=events.end())
+	if (events.find(ev_ID) != events.end())
 	{
-		CTimerEvent *event = events[eventID];
+		CTimerEvent *event = events[ev_ID];
 		if(event->eventType == CTimerd::TIMER_RECORD)
 		{
 			((CTimerEvent_Record*) (event))->eventInfo.apids = apids;
 			m_saveEvents=true;
-			res = eventID;
+			res = ev_ID;
 		}
 		else if(event->eventType == CTimerd::TIMER_ZAPTO)
 		{
 			((CTimerEvent_Zapto*) (event))->eventInfo.apids = apids;
 			m_saveEvents=true;
-			res = eventID;
+			res = ev_ID;
 		}
 	}
 	pthread_mutex_unlock(&tm_eventsMutex);
 	return res;
 }
 
-int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime)
+int CTimerManager::rescheduleEvent(int ev_ID, time_t announceTime, time_t alarmTime, time_t stopTime)
 {
 	int res = 0;
 	pthread_mutex_lock(&tm_eventsMutex);
 
-	if(events.find(eventID)!=events.end())
+	if (events.find(ev_ID) != events.end())
 	{
-		CTimerEvent *event = events[eventID];
+		CTimerEvent *event = events[ev_ID];
 		if(event->announceTime > 0)
 			event->announceTime += announceTime;
 		if(event->alarmTime > 0)
@@ -412,7 +412,7 @@ int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alar
 			event->stopTime += stopTime;
 		event->eventState = CTimerd::TIMERSTATE_SCHEDULED;
 		m_saveEvents=true;
-		res = eventID;
+		res = ev_ID;
 	}
 	else
 		res = 0;
@@ -1055,14 +1055,15 @@ void CTimerEvent_Sleeptimer::fireEvent()
 //=============================================================
 // Standby Event
 //=============================================================
-CTimerEvent_Standby::CTimerEvent_Standby( time_t announceTime, time_t alarmTime, 
-					  bool sb_on, 
-					  CTimerd::CTimerEventRepeat evrepeat,
-					  uint repeatcount): 
-	CTimerEvent(CTimerd::TIMER_STANDBY, announceTime, alarmTime, (time_t) 0, evrepeat,repeatcount)
+CTimerEvent_Standby::CTimerEvent_Standby(time_t _announce, time_t _alarm,
+					 bool sb_on,
+					 CTimerd::CTimerEventRepeat evrepeat,
+					 uint repeatcount):
+	CTimerEvent(CTimerd::TIMER_STANDBY, _announce, _alarm, (time_t)0, evrepeat, repeatcount)
 {
 	standby_on = sb_on;
 }
+
 CTimerEvent_Standby::CTimerEvent_Standby(CConfigFile *config, int iId):
 CTimerEvent(CTimerd::TIMER_STANDBY, config, iId)
 {
@@ -1094,13 +1095,13 @@ void CTimerEvent_Standby::saveToConfig(CConfigFile *config)
 //=============================================================
 // Record Event
 //=============================================================
-CTimerEvent_Record::CTimerEvent_Record(time_t announceTime, time_t alarmTime, time_t stopTime, 
+CTimerEvent_Record::CTimerEvent_Record(time_t _announce, time_t _alarm, time_t _stop,
 				       t_channel_id channel_id,
 				       event_id_t epgID, 
 				       time_t epg_starttime, unsigned char apids,
 				       CTimerd::CTimerEventRepeat evrepeat,
 				       uint repeatcount, const std::string recDir) :
-	CTimerEvent(getEventType(), announceTime, alarmTime, stopTime, evrepeat, repeatcount)
+	CTimerEvent(getEventType(), _announce, _alarm, _stop, evrepeat, repeatcount)
 {
 	eventInfo.epgID = epgID;
 	eventInfo.epg_starttime = epg_starttime;
@@ -1289,12 +1290,12 @@ void CTimerEvent_Zapto::getEpgId()
 //=============================================================
 // NextProgram Event
 //=============================================================
-CTimerEvent_NextProgram::CTimerEvent_NextProgram(time_t announceTime, time_t alarmTime, time_t stopTime, 
+CTimerEvent_NextProgram::CTimerEvent_NextProgram(time_t _announce, time_t _alarm, time_t _stop,
 						 t_channel_id channel_id,
 						 event_id_t epgID, 
 						 time_t epg_starttime, CTimerd::CTimerEventRepeat evrepeat,
 						 uint repeatcount) :
-	CTimerEvent(CTimerd::TIMER_NEXTPROGRAM, announceTime, alarmTime, stopTime, evrepeat,repeatcount)
+	CTimerEvent(CTimerd::TIMER_NEXTPROGRAM, _announce, _alarm, _stop, evrepeat, repeatcount)
 {
 	eventInfo.epgID = epgID;
 	eventInfo.epg_starttime = epg_starttime;
@@ -1368,12 +1369,12 @@ void CTimerEvent_NextProgram::Reschedule()
 //=============================================================
 // Remind Event
 //=============================================================
-CTimerEvent_Remind::CTimerEvent_Remind(time_t announceTime,
-				       time_t alarmTime, 
+CTimerEvent_Remind::CTimerEvent_Remind(time_t _announce,
+				       time_t _alarm,
 				       const char * const msg,
 				       CTimerd::CTimerEventRepeat evrepeat,
 				       uint repeatcount) :
-	CTimerEvent(CTimerd::TIMER_REMIND, announceTime, alarmTime, (time_t) 0, evrepeat,repeatcount)
+	CTimerEvent(CTimerd::TIMER_REMIND, _announce, _alarm, (time_t)0, evrepeat, repeatcount)
 {
 	memset(message, 0, sizeof(message));
 	strncpy(message, msg, sizeof(message)-1);
@@ -1411,12 +1412,12 @@ void CTimerEvent_Remind::saveToConfig(CConfigFile *config)
 //=============================================================
 // ExecPlugin Event
 //=============================================================
-CTimerEvent_ExecPlugin::CTimerEvent_ExecPlugin(time_t announceTime,
-					       time_t alarmTime, 
+CTimerEvent_ExecPlugin::CTimerEvent_ExecPlugin(time_t _announce,
+					       time_t _alarm,
 					       const char * const plugin,
 					       CTimerd::CTimerEventRepeat evrepeat,
 					       uint repeatcount) :
-	CTimerEvent(CTimerd::TIMER_EXEC_PLUGIN, announceTime, alarmTime, (time_t) 0, evrepeat,repeatcount)
+	CTimerEvent(CTimerd::TIMER_EXEC_PLUGIN, _announce, _alarm, (time_t)0, evrepeat, repeatcount)
 {
 	memset(name, 0, sizeof(name));
 	strncpy(name, plugin, sizeof(name)-1);
