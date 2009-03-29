@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.cpp,v 1.8 2009/01/27 02:24:19 ecosys Exp $ 
+	$Id: themes.cpp,v 1.9 2009/03/29 16:54:02 seife Exp $ 
 
 	Copyright (C) 2007, 2008, 2009 (flasher) Frank Liebelt
 
@@ -110,8 +110,8 @@ void CThemes::readThemes(CMenuWidget &themes)
 		{
 			for(int count=0;count<n;count++)
 			{
-				char * themefile = themelist[count]->d_name;
-				char * pos = strstr(themefile, ".theme");
+				char *file = themelist[count]->d_name;
+				char *pos = strstr(file, ".theme");
 				if(pos != NULL)
 				{
 					if ( p == 0 && hasCVSThemes == false ) {
@@ -123,10 +123,10 @@ void CThemes::readThemes(CMenuWidget &themes)
 					}
 					*pos = '\0';
 					if ( p == 1 ) {
-						userThemeFile = "{U}" + (std::string)themefile;
-						oj = new CMenuForwarderNonLocalized((char*)themefile, true, "", this, userThemeFile.c_str());
+						userThemeFile = "{U}" + (std::string)file;
+						oj = new CMenuForwarderNonLocalized((char*)file, true, "", this, userThemeFile.c_str());
 					} else
-						oj = new CMenuForwarderNonLocalized((char*)themefile, true, "", this, themefile);
+						oj = new CMenuForwarderNonLocalized((char*)file, true, "", this, file);
 					themes.addItem( oj );
 				}
 			}
