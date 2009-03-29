@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.39 2009/03/28 14:48:57 seife Exp $
+	$Id: streaminfo2.cpp,v 1.40 2009/03/29 16:53:14 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -160,21 +160,21 @@ int CStreamInfo2::exec()
 	return res;
 }
 
-void CStreamInfo2::paint_bitrate(unsigned int bitrate) {
+void CStreamInfo2::paint_bitrate(unsigned int br) {
 	char buf[100];
 	int ypos = y - 5;
 	int xpos = x+10;
-	int width  = w_max (710, 5);
-	int ratepos_x = (xpos + width/2)/2+17;
+	int w = w_max (710, 5);
+	int ratepos_x = (xpos + w / 2) / 2 + 17;
 
 	ypos += hheight;
 	ypos += (iheight >>1);
 	ypos += iheight;
 	ypos += iheight;
-	sprintf((char*) buf, "%5u kbit/s", bitrate);
+	sprintf((char*) buf, "%5u kbit/s", br);
 	frameBuffer->paintBoxRel(xpos, ypos-iheight+1, 300, iheight-1, COL_MENUCONTENT_PLUS_0);
-	g_Font[font_info]->RenderString(xpos, ypos, width-10, g_Locale->getText(LOCALE_STREAMINFO_BITRATE), COL_MENUCONTENT, 0, true); // UTF-8
-	g_Font[font_info]->RenderString(ratepos_x, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[font_info]->RenderString(xpos, ypos, w - 10, g_Locale->getText(LOCALE_STREAMINFO_BITRATE), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[font_info]->RenderString(ratepos_x, ypos, w - 10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 int CStreamInfo2::doSignalStrengthLoop ()
@@ -268,57 +268,57 @@ void CStreamInfo2::hide()
 	frameBuffer->paintBackgroundBoxRel(0,0, max_width,max_height);
 }
 
-void CStreamInfo2::paint_pig(int x, int y, int w, int h)
+void CStreamInfo2::paint_pig(int _x, int _y, int w, int h)
 {
 #if HAVE_DVB_API_VERSION < 3
-	frameBuffer->paintBackgroundBoxRel(x, y, w, h);
+	frameBuffer->paintBackgroundBoxRel(_x, _y, w, h);
 #else
-	frameBuffer->paintBoxRel(x,y,w,h, COL_BLACK); //black
+	frameBuffer->paintBoxRel(_x, _y, w, h, COL_BLACK); //black
 #endif
-	pig->show (x,y,w,h);
+	pig->show(_x, _y, w, h);
 }
 
-void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
+void CStreamInfo2::paint_signal_fe_box(int _x, int _y, int w, int h)
 {
 	int y1, y2;
 	int xd = w/4;
 
-	g_Font[font_small]->RenderString(x, y+iheight+15, width-10, g_Locale->getText(LOCALE_STREAMINFO_SIGNAL), COL_MENUCONTENT, 0, true);
+	g_Font[font_small]->RenderString(_x, _y+iheight+15, width-10, g_Locale->getText(LOCALE_STREAMINFO_SIGNAL), COL_MENUCONTENT, 0, true);
 
-	sigBox_x = x;
-	sigBox_y = y+iheight+15;
+	sigBox_x = _x;
+	sigBox_y = _y+iheight+15;
 	sigBox_w = w;
 	sigBox_h = h-iheight*3;
 	frameBuffer->paintBoxRel(sigBox_x,sigBox_y,sigBox_w+2,sigBox_h, COL_BLACK);
 
-	y1 = y + h + iheight + iheight+iheight-8;
-	y2 = y + h - sheight+8;
+	y1 = _y + h + iheight + iheight+iheight-8;
+	y2 = _y + h - sheight+8;
 	
-	frameBuffer->paintBoxRel(x+xd*0,y2- 12,16,2, COL_RED); //red
-	g_Font[font_small]->RenderString(x+20+xd*0, y2, 50, "BER", COL_MENUCONTENT, 0, true);
+	frameBuffer->paintBoxRel(_x+xd*0,y2- 12,16,2, COL_RED); //red
+	g_Font[font_small]->RenderString(_x+20+xd*0, y2, 50, "BER", COL_MENUCONTENT, 0, true);
 
-	frameBuffer->paintBoxRel(x+xd*1,y2- 12,16,2,COL_BLUE); //blue
-	g_Font[font_small]->RenderString(x+20+xd*1, y2, 50, "SNR", COL_MENUCONTENT, 0, true);
+	frameBuffer->paintBoxRel(_x+xd*1,y2- 12,16,2,COL_BLUE); //blue
+	g_Font[font_small]->RenderString(_x+20+xd*1, y2, 50, "SNR", COL_MENUCONTENT, 0, true);
 
-	frameBuffer->paintBoxRel(x+8+xd*2,y2- 12,16,2, COL_GREEN); //green
-	g_Font[font_small]->RenderString(x+28+xd*2, y2, 50, "SIG", COL_MENUCONTENT, 0, true);
+	frameBuffer->paintBoxRel(_x+8+xd*2,y2- 12,16,2, COL_GREEN); //green
+	g_Font[font_small]->RenderString(_x+28+xd*2, y2, 50, "SIG", COL_MENUCONTENT, 0, true);
 	
-	frameBuffer->paintBoxRel(x+xd*3,y2- 12,16,2,COL_OLIVE); // near yellow
-	g_Font[font_small]->RenderString(x+20+xd*3, y2, 50, "Bitrate", COL_MENUCONTENT, 0, true);
+	frameBuffer->paintBoxRel(_x+xd*3,y2- 12,16,2,COL_OLIVE); // near yellow
+	g_Font[font_small]->RenderString(_x+20+xd*3, y2, 50, "Bitrate", COL_MENUCONTENT, 0, true);
 	
 	sig_text_y = y1 - iheight;
-	sig_text_ber_x = x+xd*0;
-	sig_text_snr_x = x+05+xd*1;
-	sig_text_sig_x = x+05+xd*2;
-	sig_text_rate_x = x+10+xd*3;
+	sig_text_ber_x =  _x +      xd * 0;
+	sig_text_snr_x =  _x +  5 + xd * 1;
+	sig_text_sig_x =  _x +  5 + xd * 2;
+	sig_text_rate_x = _x + 10 + xd * 3;
 		
 	int maxmin_x; // x-position of min and max
-	if (paint_mode ==0)	{
+	if (paint_mode == 0) {
 		maxmin_x = sig_text_ber_x-40;
-		}
-		else	{
-		maxmin_x = x+40+xd*3+45;
-		}		
+	}
+	else {
+		maxmin_x = _x + 40 + xd * 3 + 45;
+	}
 	g_Font[font_small]->RenderString(maxmin_x, y1 - sheight - sheight - sheight, 50, "max", COL_MENUCONTENT, 0, true);
 	g_Font[font_small]->RenderString(maxmin_x, y1 - sheight, 50, "min", COL_MENUCONTENT, 0, true);
 
@@ -335,10 +335,10 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	}
 }
 
-void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
+void CStreamInfo2::paint_signal_fe(struct bitrate br, struct feSignal s)
 {
 	int   x_now = sigBox_pos;
-	int   y = sig_text_y;
+	int   yt = sig_text_y;
 	int   yd;
 
 	sigBox_pos = (++sigBox_pos) % sigBox_w;
@@ -346,9 +346,9 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 	frameBuffer->paintVLine(sigBox_x+sigBox_pos, sigBox_y, sigBox_y+sigBox_h, COL_WHITE);
 	frameBuffer->paintVLine(sigBox_x+x_now, sigBox_y, sigBox_y+sigBox_h+1, COL_BLACK);
 
-	SignalRenderStr (rate.short_average,sig_text_rate_x,y - sheight);
-	SignalRenderStr (rate.max_short_average,sig_text_rate_x,y - sheight - sheight);
-	SignalRenderStr (rate.min_short_average,sig_text_rate_x,y);
+	SignalRenderStr(br.short_average,     sig_text_rate_x, yt - sheight);
+	SignalRenderStr(br.max_short_average, sig_text_rate_x, yt - sheight - sheight);
+	SignalRenderStr(br.min_short_average, sig_text_rate_x, yt);
 	if ( g_RemoteControl->current_PIDs.PIDs.vpid > 0 ){
 		yd = y_signal_fe (rate.short_average, 12000, sigBox_h); // Video + Audio
 	} else {
@@ -364,27 +364,27 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 	}
 	
 	if (s.ber != s.old_ber) {
-		SignalRenderStr (s.ber, sig_text_ber_x,y - sheight);
-		SignalRenderStr (s.max_ber, sig_text_ber_x,y - sheight - sheight);
-		SignalRenderStr (s.min_ber, sig_text_ber_x,y);
+		SignalRenderStr(s.ber,     sig_text_ber_x, yt - sheight);
+		SignalRenderStr(s.max_ber, sig_text_ber_x, yt - sheight - sheight);
+		SignalRenderStr(s.min_ber, sig_text_ber_x, yt);
 	}
 	yd = y_signal_fe (s.ber, 4000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_RED); //red
 
 
 	if (s.sig != s.old_sig) {
-		SignalRenderStr (s.sig, sig_text_sig_x,y - sheight);
-		SignalRenderStr (s.max_sig, sig_text_sig_x,y - sheight - sheight);
-		SignalRenderStr (s.min_sig, sig_text_sig_x,y);
+		SignalRenderStr(s.sig,     sig_text_sig_x, yt - sheight);
+		SignalRenderStr(s.max_sig, sig_text_sig_x, yt - sheight - sheight);
+		SignalRenderStr(s.min_sig, sig_text_sig_x, yt);
 	}
 	yd = y_signal_fe (s.sig, 65000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_GREEN); //green
 
 
 	if (s.snr != s.old_snr) {
-		SignalRenderStr (s.snr, sig_text_snr_x,y - sheight);
-		SignalRenderStr (s.max_snr, sig_text_snr_x,y - sheight - sheight);
-		SignalRenderStr (s.min_snr, sig_text_snr_x,y);
+		SignalRenderStr(s.snr,     sig_text_snr_x, yt - sheight);
+		SignalRenderStr(s.max_snr, sig_text_snr_x, yt - sheight - sheight);
+		SignalRenderStr(s.min_snr, sig_text_snr_x, yt);
 	}
 	yd = y_signal_fe (s.snr, 65000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_BLUE); //blue
@@ -404,13 +404,13 @@ int CStreamInfo2::y_signal_fe(unsigned long value, unsigned long max_value, int 
 	return (int) l;
 }
 
-void CStreamInfo2::SignalRenderStr (unsigned int value, int x, int y)
+void CStreamInfo2::SignalRenderStr(unsigned int value, int _x, int _y)
 {
 	char str[30];
 
-	frameBuffer->paintBoxRel(x, y-sheight+5, 60, sheight-1, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(_x, _y - sheight + 5, 60, sheight - 1, COL_MENUCONTENT_PLUS_0);
 	sprintf(str,"%6u",value);
-	g_Font[font_small]->RenderString(x, y+5, 60, str, COL_MENUCONTENT, 0, true);
+	g_Font[font_small]->RenderString(_x, _y + 5, 60, str, COL_MENUCONTENT, 0, true);
 }
 
 const struct button_label StreamInfoButtons[2] =
@@ -778,7 +778,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.39 $");
+	return imageinfo.getModulVersion("","$Revision: 1.40 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &)
