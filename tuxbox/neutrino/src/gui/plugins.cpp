@@ -413,11 +413,11 @@ void CPlugins::startPlugin(int number,int param)
 	}
 	if (plugin_list[number].subpid)
 	{
-		for (unsigned i = 0 ;
-			i < g_RemoteControl->current_PIDs.SubPIDs.size() ; i++) {
-			if (g_RemoteControl->current_PIDs.SubPIDs[i].pid !=
-				g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
-				subpid = g_RemoteControl->current_PIDs.SubPIDs[i].pid;
+		for (unsigned j = 0; j < g_RemoteControl->current_PIDs.SubPIDs.size(); j++) {
+			if (g_RemoteControl->current_PIDs.SubPIDs[j].pid !=
+				g_RemoteControl->current_PIDs.PIDs.vtxtpid)
+			{
+				subpid = g_RemoteControl->current_PIDs.SubPIDs[j].pid;
 			}
 		}
 		startparam = makeParam(P_ID_SUBPID, subpid , startparam);
