@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.133 2009/03/25 14:08:08 seife Exp $
+ * $Id: locals_intern.h,v 1.134 2009/03/29 20:47:14 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -328,6 +328,8 @@ const char * locale_real_names[] =
 	"epgviewer.More_Screenings",
 	"epgviewer.nodetailed",
 	"epgviewer.notfound",
+	"esound.info",
+	"esound.name",
 	"eventfinder.head",
 	"eventfinder.keyword",
 	"eventfinder.search",

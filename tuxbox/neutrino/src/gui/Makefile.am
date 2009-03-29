@@ -23,7 +23,7 @@ libneutrino_gui_a_SOURCES = \
 	rc_lock.cpp bookmarkmanager.cpp \
 	timeosd.cpp epgplus.cpp epg_menu.cpp personalize.cpp \
 	streaminfo2.cpp plugins.cpp imageinfo.cpp \
-	audio_select.cpp movieinfo.cpp
+	audio_select.cpp movieinfo.cpp esound.cpp
 
 if ENABLE_MOVIEPLAYER2
 libneutrino_gui_a_SOURCES += movieplayer2.cpp
@@ -56,6 +56,6 @@ libneutrino_gui_a_SOURCES += \
 endif
 
 if ENABLE_MOVIEPLAYER2
-AM_CPPFLAGS = -DMOVIEPLAYER2
+AM_CPPFLAGS = -DMOVIEPLAYER2 -Wshadow
 endif
 #AM_CPPFLAGS = -DSKIP_CA_STATUS

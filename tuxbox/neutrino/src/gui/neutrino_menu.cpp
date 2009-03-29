@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.50 2009/03/26 20:26:27 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.51 2009/03/29 20:47:14 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -61,6 +61,7 @@
 #include "gui/alphasetup.h"
 #include "gui/audio_select.h"
 #include "gui/audioplayer.h"
+#include "gui/esound.h"
 #include "gui/epgplus.h"
 #include "gui/favorites.h"
 #include "gui/imageinfo.h"
@@ -159,6 +160,20 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		mainMenu.addItem(new CMenuForwarder(LOCALE_INETRADIO_NAME, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut++)));
 	else if (g_settings.personalize_inetradio == 2)
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_INETRADIO_NAME, g_settings.personalize_pincode, true, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut++)));
+
+	bool found_esound = false;
+
+	if (access("/bin/esd", X_OK) == 0)
+		found_esound = true;
+
+	if (access("/var/bin/esd", X_OK) == 0)
+		found_esound = true;
+
+	if (found_esound)
+	{
+		puts("[neutrino] found esound, adding to mainmenue");
+		mainMenu.addItem(new CMenuForwarder(LOCALE_ESOUND_NAME, true, NULL, new CEsoundGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+	}
 
 	if (g_settings.personalize_movieplayer == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut++)));
