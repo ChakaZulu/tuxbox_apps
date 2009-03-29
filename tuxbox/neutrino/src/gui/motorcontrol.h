@@ -57,7 +57,6 @@ class CMotorControl : public CMenuTarget
 		int menue_height;
 		int status_height;
 		int ypos;
-		int ypos_status;
 		int ypos_menue;
 		
 		int8_t stepSize;

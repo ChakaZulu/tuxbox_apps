@@ -1,5 +1,5 @@
 /*
-	$Id: motorcontrol.cpp,v 1.23 2009/01/12 20:35:38 houdini Exp $
+	$Id: motorcontrol.cpp,v 1.24 2009/03/29 16:25:34 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -347,33 +347,33 @@ void CMotorControl::hide()
 	stopSatFind();
 }
 
-void CMotorControl::paintLine(int x, int * y, int width, const char * txt, uint8_t color = COL_MENUCONTENT, uint8_t bgcolor = COL_MENUCONTENT_PLUS_0 )
+void CMotorControl::paintLine(int _x, int *_y, int _w, const char *txt, uint8_t color = COL_MENUCONTENT, uint8_t bgcolor = COL_MENUCONTENT_PLUS_0)
 {
-	*y += mheight;
-	frameBuffer->paintBoxRel(x, *y - mheight, width, mheight, bgcolor);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, *y, width, txt, color);
+	*_y += mheight;
+	frameBuffer->paintBoxRel(_x, *_y - mheight, _w, mheight, bgcolor);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(_x, *_y, _w, txt, color);
 }
 
-void CMotorControl::paintLine(int x, int y, int width, const char * txt, uint8_t color = COL_MENUCONTENT)
+void CMotorControl::paintLine(int _x, int _y, int _w, const char *txt, uint8_t color = COL_MENUCONTENT)
 {
 	//frameBuffer->paintBoxRel(x, y - mheight, width, mheight, COL_MENUCONTENT_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y, width, txt, color);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(_x, _y, _w, txt, color);
 }
 
-void CMotorControl::paintSeparator(int xpos, int * ypos, int width, const char * txt)
+void CMotorControl::paintSeparator(int xpos, int *yp, int w, const char *txt)
 {
 	int stringwidth = 0;
 	int stringstartposX = 0;
 	int offset = 20;
 	
-	*ypos += mheight;
-	frameBuffer->paintHLineRel(xpos, width - offset, *ypos - (mheight >> 1), COL_MENUCONTENT_PLUS_3);
-	frameBuffer->paintHLineRel(xpos, width - offset, *ypos - (mheight >> 1) + 1, COL_MENUCONTENT_PLUS_1);
+	*yp += mheight;
+	frameBuffer->paintHLineRel(xpos, w - offset, *yp - (mheight >> 1), COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintHLineRel(xpos, w - offset, *yp - (mheight >> 1) + 1, COL_MENUCONTENT_PLUS_1);
 	
 	stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(txt);
-	stringstartposX = (xpos + (width >> 1)) - (stringwidth >> 1)- (offset >> 1);
-	frameBuffer->paintBoxRel(stringstartposX - 5, *ypos - mheight, stringwidth + 10, mheight, COL_MENUCONTENT_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, *ypos, stringwidth, txt, COL_MENUCONTENTINACTIVE);
+	stringstartposX = (xpos + (w >> 1)) - (stringwidth >> 1)- (offset >> 1);
+	frameBuffer->paintBoxRel(stringstartposX - 5, *yp - mheight, stringwidth + 10, mheight, COL_MENUCONTENT_PLUS_0);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, *yp, stringwidth, txt, COL_MENUCONTENTINACTIVE);
 }
 
 void CMotorControl::paint()
