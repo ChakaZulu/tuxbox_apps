@@ -256,7 +256,7 @@ void CAlphaSetup::paint()
 	paintSlider(x + 10, y + hheight + mheight, alpha2, LOCALE_GTXALPHA_ALPHA2, ALPHA_SETUP_ICON_DESELECTED     , false);
 }
 
-void CAlphaSetup::paintSlider(const int x, const int y, const unsigned char * const spos, const neutrino_locale_t text, const char * const iconname, const bool /*selected*/) // UTF-8
+void CAlphaSetup::paintSlider(const int _x, const int _y, const unsigned char * const spos, const neutrino_locale_t text, const char * const iconname, const bool /*selected*/) // UTF-8
 {
 	int startx = 170;
 	char wert[5];
@@ -265,14 +265,14 @@ void CAlphaSetup::paintSlider(const int x, const int y, const unsigned char * co
 		return;
 	int sspos = (*spos)*100/8;
 
-	frameBuffer->paintBoxRel(x + startx, y, 120, mheight, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(_x + startx, _y, 120, mheight, COL_MENUCONTENT_PLUS_0);
 
-	frameBuffer->paintIcon("volumebody.raw", x + startx            , y + 2 + mheight / 4);
-	frameBuffer->paintIcon(iconname        , x + startx + 3 + sspos, y     + mheight / 4);
+	frameBuffer->paintIcon("volumebody.raw", _x + startx            , _y + 2 + mheight / 4);
+	frameBuffer->paintIcon(iconname        , _x + startx + 3 + sspos, _y     + mheight / 4);
 
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x,y+mheight, width, g_Locale->getText(text), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(_x, _y + mheight, width, g_Locale->getText(text), COL_MENUCONTENT, 0, true); // UTF-8
 
 	sprintf(wert, "%3d", (*spos)); // UTF-8 encoded
-	frameBuffer->paintBoxRel(x + startx + 120 + 10, y, 50, mheight, COL_MENUCONTENT_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT, 0, true); // UTF-8
+	frameBuffer->paintBoxRel(_x + startx + 120 + 10, _y, 50, mheight, COL_MENUCONTENT_PLUS_0);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(_x + startx + 120 + 10, _y + mheight, width, wert, COL_MENUCONTENT, 0, true); // UTF-8
 }
