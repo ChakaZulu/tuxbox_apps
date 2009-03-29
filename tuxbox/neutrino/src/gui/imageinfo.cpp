@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.25 2009/03/28 14:48:57 seife Exp $
+	$Id: imageinfo.cpp,v 1.26 2009/03/29 16:48:00 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -178,10 +178,8 @@ void CImageInfo::clearContentBox()
 	frameBuffer->paintBoxRel(xpos, iheight*10+6, width-10, endY-(iheight*10+6)-32, COL_MENUCONTENT_PLUS_0 );
 }
 
-void CImageInfo::paint_pig(int x, int y, int w, int h)
+void CImageInfo::paint_pig(int xPig, int yPig, int w, int h)
 {
-	int xPig = x; //picture position
-	int yPig = y; //+ hheight +16;
 #if HAVE_DVB_API_VERSION < 3
 	frameBuffer->paintBackgroundBoxRel(xPig, yPig, w, h);
 #else
@@ -190,9 +188,9 @@ void CImageInfo::paint_pig(int x, int y, int w, int h)
 	pig->show (xPig, yPig, w, h);
 }
 
-void CImageInfo::paintLine(int xpos, int font, const char* text, uint8_t    color = COL_MENUCONTENT )
+void CImageInfo::paintLine(int xp, int font, const char* text, uint8_t color = COL_MENUCONTENT )
 {
-	g_Font[font]->RenderString(xpos, ypos, width-10, text, color, 0, true);
+	g_Font[font]->RenderString(xp, ypos, width-10, text, color, 0, true);
 }
 
 void CImageInfo::paintContent(int fontSize, int xposC, int yposC, const char *text, uint8_t    color = COL_MENUCONTENT)
@@ -314,7 +312,7 @@ void CImageInfo::paintRevisionInfos(int y_startposition)
 	
 	y_startposition += iheight;
 	paintContent(font_info, xpos, y_startposition, "Imageinfo:", COL_MENUCONTENTINACTIVE );
-	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.25 $").c_str());
+	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.26 $").c_str());
 	
 #ifdef MOVIEBROWSER
 	y_startposition += iheight;
@@ -499,11 +497,11 @@ const char* CImageInfo::getImageInfo (int InfoType)
   }
 }
 
-void CImageInfo::paintHead(int x, int y, const char *localetext)
+void CImageInfo::paintHead(int xh, int yh, const char *localetext)
 {
 	int headheight = hheight;
-	frameBuffer->paintBoxRel(x, y, width, headheight + 4, COL_MENUHEAD, RADIUS_MID, CORNER_TOP);
-	g_Font[font_head]->RenderString(x+5, y + headheight + 4, width, localetext, COL_MENUHEAD, 0, true);}
+	frameBuffer->paintBoxRel(xh, yh, width, headheight + 4, COL_MENUHEAD, RADIUS_MID, CORNER_TOP);
+	g_Font[font_head]->RenderString(xh + 5, yh + headheight + 4, width, localetext, COL_MENUHEAD, 0, true);}
 	
 const struct button_label CImageInfoButtons[5] =
 {
@@ -514,12 +512,12 @@ const struct button_label CImageInfoButtons[5] =
 	{ NEUTRINO_ICON_BUTTON_HOME, LOCALE_IMAGEINFO_EXIT }
 };
 
-void CImageInfo::paintFoot(int x, int y)
+void CImageInfo::paintFoot(int xf, int yf)
 {
 	int ButtonHeight = ssheight;
-	frameBuffer->paintBoxRel(x, y, width, ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
-	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 5, y, width/6, 5, CImageInfoButtons, width);
-}	
+	frameBuffer->paintBoxRel(xf, yf, width, ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, xf + 5, yf, width/6, 5, CImageInfoButtons, width);
+}
 
 void CImageInfo::paint()
 {
@@ -592,14 +590,14 @@ void CImageInfo::paint()
 
 /* 	useful stuff for version informations * getModulVersion()
  * 	returns a numeric version string for better version handling from any module without 	
- * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.25 $" becomes "1.146", 
+ * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.26 $" becomes "1.146", 
  * 	argument prefix can be empty or a replacement for "Revision"-string eg. "Version: " or "v." as required,
- * 	argument ID_string must be a CVS-keyword like "$Revision: 1.25 $", used and changed by 
+ * 	argument ID_string must be a CVS-keyword like "$Revision: 1.26 $", used and changed by 
  * 	cvs-committs or a version data string eg: "1.xxx" by yourself
  * 	some examples:
- * 	getModulVersion("Version: ","$Revision: 1.25 $")	 returns "Version: 1.153"	
- * 	getModulVersion("v.","$Revision: 1.25 $")			 returns "v.1.153"
- *  	getModulVersion("","$Revision: 1.25 $")		 		 returns "1.153"
+ * 	getModulVersion("Version: ","$Revision: 1.26 $")	 returns "Version: 1.153"	
+ * 	getModulVersion("v.","$Revision: 1.26 $")			 returns "v.1.153"
+ *  	getModulVersion("","$Revision: 1.26 $")		 		 returns "1.153"
  */
 std::string CImageInfo::getModulVersion(const std::string &/*prefix_string*/, std::string ID_string)
 {
