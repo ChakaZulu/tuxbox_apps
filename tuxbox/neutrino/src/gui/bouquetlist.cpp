@@ -178,10 +178,10 @@ int CBouquetList::show()
 		return res;
 	}
 
-	int maxpos= 1;
+	int digits = 1;
 	int i= Bouquets.size();
 	while ((i= i/10)!=0)
-		maxpos++;
+		digits++;
 
 	paintHead();
 	paint();
@@ -191,7 +191,7 @@ int CBouquetList::show()
 	int zapOnExit = false;
 
 	unsigned int chn= 0;
-	int pos= maxpos;
+	int pos = digits;
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
@@ -253,12 +253,12 @@ int CBouquetList::show()
 		}
 		else if (CRCInput::isNumeric(msg))
 		{
-			if (pos == maxpos)
+			if (pos == digits)
 			{
 				if (msg == CRCInput::RC_0)
 				{
 					chn = firstselected;
-					pos = maxpos;
+					pos = digits;
 				}
 				else
 				{
@@ -275,7 +275,7 @@ int CBouquetList::show()
 			if (chn > Bouquets.size())
 			{
 				chn = firstselected;
-				pos = maxpos;
+				pos = digits;
 			}
 
 			int prevselected=selected;
