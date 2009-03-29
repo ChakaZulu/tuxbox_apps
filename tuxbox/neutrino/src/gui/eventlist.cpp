@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.121 2009/03/28 14:48:57 seife Exp $
+	$Id: eventlist.cpp,v 1.122 2009/03/29 16:20:56 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -725,7 +725,7 @@ void  EventList::showFunctionBar (bool show)
 	int  h_maxoffset = 5, h_minoffset = 2;
 
 	CKeyHelper keyhelper;
-	neutrino_msg_t key = CRCInput::RC_nokey;
+	neutrino_msg_t dummy = CRCInput::RC_nokey;
 	const char * icon = NULL;
 	std::string btncaption;	
 
@@ -752,7 +752,7 @@ void  EventList::showFunctionBar (bool show)
 	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
 		(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
 	{
-		keyhelper.get(&key, &icon, g_settings.key_channelList_addrecord);
+		keyhelper.get(&dummy, &icon, g_settings.key_channelList_addrecord);
 		
 		if(is_timer & EventList::TIMER_RECORD )
 			btncaption = g_Locale->getText(LOCALE_TIMERLIST_DELETE);
@@ -773,7 +773,7 @@ void  EventList::showFunctionBar (bool show)
 	if (1)
 	{
 
-		keyhelper.get(&key, &icon, CRCInput::RC_green);
+		keyhelper.get(&dummy, &icon, CRCInput::RC_green);
 		
 		btncaption = g_Locale->getText(LOCALE_EVENTFINDER_SEARCH);
 		
@@ -791,7 +791,7 @@ void  EventList::showFunctionBar (bool show)
 	// Button: Timer Channelswitch
 	if (g_settings.key_channelList_addremind != CRCInput::RC_nokey)
 	{
-		keyhelper.get(&key, &icon, g_settings.key_channelList_addremind);
+		keyhelper.get(&dummy, &icon, g_settings.key_channelList_addremind);
 
 		if(is_timer & EventList::TIMER_ZAPTO)
 			btncaption =  g_Locale->getText(LOCALE_TIMERLIST_DELETE);
@@ -812,7 +812,7 @@ void  EventList::showFunctionBar (bool show)
 	// Button: Event Re-Sort
 	if (g_settings.key_channelList_sort != CRCInput::RC_nokey)
 	{
-		keyhelper.get(&key, &icon, g_settings.key_channelList_sort);
+		keyhelper.get(&dummy, &icon, g_settings.key_channelList_sort);
 		
 		btncaption =  g_Locale->getText(LOCALE_EVENTLISTBAR_EVENTSORT);
 		
@@ -829,7 +829,7 @@ void  EventList::showFunctionBar (bool show)
 	// Button: Event Reload/Refresh
 	if (g_settings.key_channelList_reload != CRCInput::RC_nokey)
 	{
-		keyhelper.get(&key, &icon, g_settings.key_channelList_reload);
+		keyhelper.get(&dummy, &icon, g_settings.key_channelList_reload);
 
 		// paint 5th button
 		btncaption =  g_Locale->getText(LOCALE_KEYBINDINGMENU_RELOAD);
