@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.146 2009/02/18 17:48:41 seife Exp $
+	$Id: epgview.cpp,v 1.147 2009/03/29 15:56:06 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -219,12 +219,12 @@ void CEpgData::showText( int startPos, int ypos )
 	medlineheight = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getHeight();
 	medlinecount = sb / medlineheight;
 
-	int textCount = epgText.size();
+	int textSize = epgText.size();
 	int y=ypos;
 
 	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT_PLUS_0); // background of the text box
 
-	for(int i=startPos; i<textCount && i<startPos+medlinecount; i++,y+=medlineheight)
+	for(int i = startPos; i < textSize && i < startPos + medlinecount; i++, y += medlineheight)
 	{
 		if ( i< info1_lines )
 			g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->RenderString(sx+10, y+medlineheight, ox- 15- 15, epgText[i], COL_MENUCONTENT, 0, true); // UTF-8
@@ -232,8 +232,8 @@ void CEpgData::showText( int startPos, int ypos )
 			g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->RenderString(sx+10, y+medlineheight, ox- 15- 15, epgText[i], COL_MENUCONTENT, 0, true); // UTF-8
 	}
 
-	int sbc= ((textCount- 1)/ medlinecount)+ 1;
-	int sbs= (startPos+ 1)/ medlinecount;
+	int sbc = ((textSize - 1)/ medlinecount) + 1;
+	int sbs = (startPos + 1)/ medlinecount;
 	frameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT_PLUS_1); // scrollbar bg
 	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ sbs*(sb-4)/sbc , 11, (sb-4)/sbc,  COL_MENUCONTENT_PLUS_3, RADIUS_SMALL); // scrollbar
 }
@@ -931,39 +931,37 @@ int CEpgData::FollowScreenings (const t_channel_id /*channel_id*/, const std::st
 // -- 2002-05-13 rasc
 //
 
-void CEpgData::showTimerEventBar (bool show)
-
+void CEpgData::showTimerEventBar(bool _show)
 {
-  int  x,y,w,h;
-  int  cellwidth;		// 4 cells
-  int  h_offset, pos;
+	int x,y,w,h;
+	int cellwidth; // 4 cells
+	int h_offset, pos;
 
-  w = ox;
-  h = 30;
-  x = sx;
-  y = sy + oy;
-  h_offset = 5;
-  cellwidth = w / 4;
+	w = ox;
+	h = 30;
+	x = sx;
+	y = sy + oy;
+	h_offset = 5;
+	cellwidth = w / 4;
 
-
-    // hide only?
-	if (! show)
+	// hide only?
+	if (! _show)
 	{
 		frameBuffer->paintBackgroundBoxRel(x, y, w, h);
 		return;
 	}
 
-    frameBuffer->paintBoxRel(x, y, w, h, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
+	frameBuffer->paintBoxRel(x, y, w, h, COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
 
-    // Button: Timer Record & Channelswitch
+	// Button: Timer Record & Channelswitch
 	if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)
 	{
 		pos = 0;
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x + 8 + cellwidth * pos, y + h_offset + 2);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 29 + cellwidth * pos, y + h - h_offset + 2, w - 30, g_Locale->getText(LOCALE_TIMERBAR_RECORDEVENT), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 	}
-    // Button: Timer Channelswitch
-    pos = 2;
+	// Button: Timer Channelswitch
+	pos = 2;
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + 8 + cellwidth * pos, y + h_offset + 2);
 	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 29 + cellwidth * pos, y + h - h_offset + 2, w - 30, g_Locale->getText(LOCALE_TIMERBAR_CHANNELSWITCH), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 }
