@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.29 2009/03/28 13:59:15 seife Exp $
+  $Id: movieplayer2.cpp,v 1.30 2009/03/29 16:24:18 seife Exp $
 
   License: GPL
 
@@ -1139,7 +1139,7 @@ ReadTSFileThread(void *parm)
 
 	g_input_failed = false;
 
-	for (int i = 0; i < numfiles; i++)
+	for (i = 0; i < numfiles; i++)
 		filesize += (*f)[i].Size;
 	INFO("Number of files: %d overall size: %lld\n", numfiles, filesize);
 
@@ -1799,18 +1799,18 @@ ReadMPEGFileThread(void *parm)
 			case 0xbd: // AC3
 			{
 				//skip = (ppes[4] << 8 | ppes[5]) + 6;
-				unsigned int offset = ppes[8] + 8 + 1; // ppes[8] is often 0
-				if (offset >= 10) // we did only make sure for 10 bytes
+				unsigned int off = ppes[8] + 8 + 1; // ppes[8] is often 0
+				if (off >= 10) // we did only make sure for 10 bytes
 				{
-					rd = ringbuffer_get_readpointer(buf_in, &ppes, offset);
-					if (rd < offset) // not enough space in ringbuf;
+					rd = ringbuffer_get_readpointer(buf_in, &ppes, off);
+					if (rd < off) // not enough space in ringbuf;
 						continue;
 				}
-				int subid = ppes[offset];
+				int subid = ppes[off];
 				// if (offset == 0x24 && subid == 0x10 ) // TTX?
 				if (subid < 0x80 || subid > 0x87)
 					break;
-				DBG("AC3: ofs 0x%02x subid 0x%02x\n", offset, subid);
+				DBG("AC3: ofs 0x%02x subid 0x%02x\n", off, subid);
 				subid -= 0x60; // normalize to 32...39 (hex 0x20..0x27)
 #if 0
 This is commented out so we never start up with the AC3 audio selected.
@@ -2814,7 +2814,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 					continue;
 
 				std::string apidtitle = "";
-				bool mi_found = false, selected = false;
+				bool mi_found = false, current = false;
 				sprintf(apidnumber, "%d", count+1);
 				sprintf(show_pid_number, "%u", g_apids[count]);
 
@@ -2838,17 +2838,17 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				apidtitle.append("]");
 
 				if (g_currentapid == -1 && g_apids[count] == 0)
-					selected = true;
+					current = true;
 				if (g_apids[count] == g_currentapid)
 				{
-					selected = true;
+					current = true;
 					apidtitle.append(" *"); // current stream.
 				}
 				APIDSelector.addItem(
 					new CMenuForwarderNonLocalized(apidtitle.c_str(), true,
 						NULL, APIDChanger, apidnumber,
 						CRCInput::convertDigitToKey(count+1)),
-					selected); // select current stream
+					current); // select current stream
 			}
 
 			// then show the other audio pids (AC3/teletex)
@@ -2857,7 +2857,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				if (g_ac3flags[count] == 0) // already handled...
 					continue;
 				std::string apidtitle = "";
-				bool mi_found = false, selected = false;
+				bool mi_found = false, current = false;
 				sprintf(apidnumber, "%d", count+1);
 				sprintf(show_pid_number, "%u", g_apids[count]);
 
@@ -2889,17 +2889,17 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				}
 
 				if (g_currentapid == -1 && g_apids[count] == 0)
-					selected = true;
+					current = true;
 				if (g_apids[count] == g_currentapid)
 				{
-					selected = true;
+					current = true;
 					apidtitle.append(" *"); // current stream.
 				}
 				APIDSelector.addItem(
 					new CMenuForwarderNonLocalized(apidtitle.c_str(), true,
 						NULL, APIDChanger, apidnumber,
 						CRCInput::convertDigitToKey(count+1)),
-					selected); // select current stream
+					current); // select current stream
 			}
 			APIDSelector.exec(NULL, ""); // otherwise use Dialog
 			delete APIDChanger;
@@ -3222,7 +3222,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.29 $");
+	return imageinfo.getModulVersion("","$Revision: 1.30 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
