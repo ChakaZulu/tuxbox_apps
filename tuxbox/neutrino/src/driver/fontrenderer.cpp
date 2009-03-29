@@ -99,19 +99,19 @@ FBFontRenderClass::~FBFontRenderClass()
 
 FT_Error FBFontRenderClass::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* aface)
 {
-	fontListEntry *font=(fontListEntry *)face_id;
-	if (!font)
+	fontListEntry *fnt=(fontListEntry *)face_id;
+	if (!fnt)
 		return -1;
-	dprintf(DEBUG_DEBUG, "[FONT] FTC_Face_Requester (%s/%s)\n", font->family, font->style);
+	dprintf(DEBUG_DEBUG, "[FONT] FTC_Face_Requester (%s/%s)\n", fnt->family, fnt->style);
 
 	int error;
-	if ((error=FT_New_Face(library, font->filename, 0, aface)))
+	if ((error=FT_New_Face(library, fnt->filename, 0, aface)))
 	{
-		dprintf(DEBUG_NORMAL, "[FONT] FTC_Face_Requester (%s/%s) failed: %i\n", font->family, font->style, error);
+		dprintf(DEBUG_NORMAL, "[FONT] FTC_Face_Requester (%s/%s) failed: %i\n", fnt->family, fnt->style, error);
 		return error;
 	}
 
-	if (strcmp(font->style, (*aface)->style_name) != 0)
+	if (strcmp(fnt->style, (*aface)->style_name) != 0)
 	{
 		FT_Matrix matrix; // Italics
 
@@ -141,9 +141,9 @@ FTC_FaceID FBFontRenderClass::getFaceID(const char * const family, const char * 
 	return 0;
 }
 
-FT_Error FBFontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit)
+FT_Error FBFontRenderClass::getGlyphBitmap(FTC_Image_Desc *fnt, FT_ULong glyph_index, FTC_SBit *sbit)
 {
-	return FTC_SBit_Cache_Lookup(sbitsCache, font, glyph_index, sbit);
+	return FTC_SBit_Cache_Lookup(sbitsCache, fnt, glyph_index, sbit);
 }
 
 const char *FBFontRenderClass::AddFont(const char * const filename, const bool make_italics)
@@ -487,7 +487,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 				else
 				{
 					int start, end;
-					int color = -1;
+					int col = -1;
 
 					if (ax < w)
 						start = 0;
@@ -500,16 +500,16 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 						end = spread_by + 1;
 
 					for (int i = start; i < end; i++)
-						if (color < *(s - i))
-							color = *(s - i);
+						if (col < *(s - i))
+							col = *(s - i);
 #ifdef FB_USE_PALETTE
 #ifdef PRE_CALC_TRANSLATION_TABLE
-					*td++= colors[color];
+					*td++= colors[col];
 #else
-					*(td++) = bgcolor + (fb_pixel_t)(color * delta / 256);
+					*(td++) = bgcolor + (fb_pixel_t)(col * delta / 256);
 #endif
 #else
-					*td++= colors[color];
+					*td++= colors[col];
 #endif
 					s++;
 				}
