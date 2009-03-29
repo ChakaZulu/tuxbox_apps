@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.252 2009/03/28 14:48:57 seife Exp $
+	$Id: infoviewer.cpp,v 1.253 2009/03/29 16:48:52 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -802,7 +802,6 @@ requests to sectionsd.
 
 void CInfoViewer::showSubchan()
 {
-	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
 	std::string subChannelName; 	// holds the name of the subchannel/audio channel
