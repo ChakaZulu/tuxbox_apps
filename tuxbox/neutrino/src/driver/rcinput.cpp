@@ -847,7 +847,6 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 						{
 							case CSectionsdClient::EVT_TIMESET:
 								{
-									struct timeval tv;
 									gettimeofday( &tv, NULL );
 									long long timeOld = tv.tv_usec + tv.tv_sec * 1000000LL;
 
@@ -1564,13 +1563,13 @@ const char * CRCInput::getSpecialKeyName(const unsigned int key)
 
 std::string CRCInput::getKeyName(const unsigned int key)
 {
-	int unicode_value = getUnicodeValue(key);
-	if (unicode_value == -1)
+	int uc_value = getUnicodeValue(key);
+	if (uc_value == -1)
 		return getSpecialKeyName(key);
 	else
 	{
 		char tmp[2];
-		tmp[0] = unicode_value;
+		tmp[0] = uc_value;
 		tmp[1] = 0;
 		return std::string(tmp);
 	}
