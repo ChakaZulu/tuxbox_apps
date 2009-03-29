@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.132 2009/03/05 20:50:10 rhabarber1848 Exp $
+	$Id: update.cpp,v 1.133 2009/03/29 16:55:42 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -123,9 +123,9 @@ class CNonLocalizedMenuSeparator : public CMenuSeparator
 	const char * the_text;
 
 public:
-	CNonLocalizedMenuSeparator(const char * text, const neutrino_locale_t Text) : CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, Text)
+	CNonLocalizedMenuSeparator(const char *_text, const neutrino_locale_t Text) : CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, Text)
 		{
-			the_text = text;
+			the_text = _text;
 		}
 
 	virtual const char * getString(void)
@@ -530,25 +530,25 @@ CFlashExpert::CFlashExpert()
 	selectedMTD = -1;
 }
 
-void CFlashExpert::readmtd(int readmtd)
+void CFlashExpert::readmtd(int mtd)
 {
 	char tmp[10];
-	sprintf(tmp, "%d", readmtd);
+	sprintf(tmp, "%d", mtd);
 	std::string filename = "/tmp/mtd";
 	filename += tmp;
 	filename += ".img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
-	if (readmtd == -1)
+	if (mtd == -1)
 	{
 		filename = "/tmp/flashimage.img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
-		readmtd = CMTDInfo::getInstance()->findMTDNumberFromDescription(MTD_TEXT_OF_WHOLE_IMAGE); //MTD_OF_WHOLE_IMAGE;
+		mtd = CMTDInfo::getInstance()->findMTDNumberFromDescription(MTD_TEXT_OF_WHOLE_IMAGE); //MTD_OF_WHOLE_IMAGE;
 	}
 	setTitle(LOCALE_FLASHUPDATE_TITLEREADFLASH);
 	paint();
 	showGlobalStatus(0);
-	showStatusMessageUTF((std::string(g_Locale->getText(LOCALE_FLASHUPDATE_ACTIONREADFLASH)) + " (" + CMTDInfo::getInstance()->getMTDName(readmtd) + ')')); // UTF-8
+	showStatusMessageUTF((std::string(g_Locale->getText(LOCALE_FLASHUPDATE_ACTIONREADFLASH)) + " (" + CMTDInfo::getInstance()->getMTDName(mtd) + ')')); // UTF-8
 	CFlashTool ft;
 	ft.setStatusViewer( this );
-	ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(readmtd));
+	ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(mtd));
 	if(!ft.readFromMTD(filename, 100))
 	{
 		showStatusMessageUTF(ft.getErrorMessage()); // UTF-8
@@ -645,11 +645,11 @@ void CFlashExpert::showMTDSelector(const std::string & actionkey)
 	mtdselector->addItem(new CMenuForwarder(LOCALE_MESSAGEBOX_CANCEL));
 	mtdselector->addItem(GenericMenuSeparatorLine);
 	CMTDInfo* mtdInfo =CMTDInfo::getInstance();
-	for(int x=0;x<mtdInfo->getMTDCount();x++)
+	for (int i = 0; i < mtdInfo->getMTDCount(); i++)
 	{
 		char sActionKey[20];
-		sprintf(sActionKey, "%s%d", actionkey.c_str(), x);
-		mtdselector->addItem(new CMenuForwarderNonLocalized(mtdInfo->getMTDName(x).c_str(), true, NULL, this, sActionKey));
+		sprintf(sActionKey, "%s%d", actionkey.c_str(), i);
+		mtdselector->addItem(new CMenuForwarderNonLocalized(mtdInfo->getMTDName(i).c_str(), true, NULL, this, sActionKey));
 	}
 	mtdselector->exec(NULL,"");
 	delete mtdselector;
