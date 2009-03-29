@@ -89,14 +89,14 @@ bool CBEChannelSelectWidget::hasChanged()
 	return modified;
 }
 
-void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
+void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool _selected)
 {
 	int ypos = y+ theight + paintNr*fheight;
 	int c_rad_small;
 
 	uint8_t    color;
 	fb_pixel_t bgcolor;
-	if (selected)
+	if (_selected)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
