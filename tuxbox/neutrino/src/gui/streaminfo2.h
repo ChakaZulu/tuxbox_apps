@@ -73,7 +73,7 @@ class CStreamInfo2
 		int   sig_text_snr_x;
 		int   sig_text_rate_x;
 		int   current_apid;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		int   actmode;
 #endif
 		BitrateCalculator *brc;

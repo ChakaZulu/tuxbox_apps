@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.204 2009/03/26 20:26:27 dbt Exp $
+	$Id: neutrino.h,v 1.205 2009/03/30 09:52:35 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -164,7 +164,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CShutdownCountNotifier	*shutdownCountNotifier;
 
 		CNVODChangeExec         	*NVODChanger;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		CUCodeCheckExec		*UCodeChecker;
 #endif
 		CDVBInfoExec			*DVBInfo;
@@ -187,7 +187,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		bool showUserMenu(int button);
 		bool getNVODMenu(CMenuWidget* menu);
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		bool ucodes_available(void);
 #endif
 		void firstChannel();

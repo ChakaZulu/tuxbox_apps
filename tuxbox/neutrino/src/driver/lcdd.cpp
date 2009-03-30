@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.72 2009/03/26 15:21:46 seife Exp $
+	$Id: lcdd.cpp,v 1.73 2009/03/30 09:52:36 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -921,7 +921,7 @@ int CLCD::getInverse()
 
 void CLCD::setAutoDimm(int autodimm)
 {
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	int fd;
 	g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM] = autodimm;
 

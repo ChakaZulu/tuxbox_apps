@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.940 2009/03/29 16:57:08 seife Exp $
+	$Id: neutrino.cpp,v 1.941 2009/03/30 09:52:35 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1224,7 +1224,7 @@ void CNeutrinoApp::firstChannel()
 	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
 }
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 /**************************************************************************************
 *                                                                                     *
 *          CNeutrinoApp -  ucodes_available, check if ucodes are available            *
@@ -2222,7 +2222,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	InitNetworkSettings(networkSettings);
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if (!ucodes_available())
 	{
 		/* display error message */
@@ -3206,7 +3206,7 @@ void CNeutrinoApp::paintMuteIcon( bool is_visible )
 
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) // lirc
 	{ // bei LIRC wissen wir nicht wikrlich ob jetzt ge oder entmuted wird, deswegen nix zeigen---
 		if( !isEvent )
