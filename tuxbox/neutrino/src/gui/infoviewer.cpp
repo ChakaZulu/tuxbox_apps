@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.253 2009/03/29 16:48:52 seife Exp $
+	$Id: infoviewer.cpp,v 1.254 2009/03/31 17:21:51 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -376,7 +376,7 @@ void CInfoViewer::showMovieTitle(const int playstate, const std::string &title, 
 		break;
 	}
 	frameBuffer->paintIcon(icon,
-			       BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
+			       BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 			       BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 
 	display_Info(title.c_str(), sub_title.c_str(), true, false, (percent * 120) / 100);
@@ -942,7 +942,7 @@ void CInfoViewer::showSubchan()
 void CInfoViewer::showIcon_16_9() const
 {
 	frameBuffer->paintIcon((aspectRatio != 0) ? "16_9.raw" : "16_9_gray.raw",
-				BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
+				BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 }
 
@@ -950,7 +950,7 @@ void CInfoViewer::showIcon_VTXT() const
 {
 	int vtpid=g_RemoteControl->current_PIDs.PIDs.vtxtpid;
 	frameBuffer->paintIcon((vtpid != 0) ? "vtxt.raw" : "vtxt_gray.raw",
-				BoxEndX - (ICON_SMALL_WIDTH + 6),
+				BoxEndX - (ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 #ifndef TUXTXT_CFG_STANDALONE
 	if(g_settings.tuxtxt_cache && !CNeutrinoApp::getInstance ()->recordingstatus)
@@ -979,7 +979,9 @@ void CInfoViewer::showIcon_SubT() const
 		}
 	}
 
-	frameBuffer->paintIcon((subpid != 0) ? "subt.raw" : "subt_gray.raw", BoxEndX - (ICON_SMALL_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6), BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+	frameBuffer->paintIcon((subpid != 0) ? "subt.raw" : "subt_gray.raw",
+				BoxEndX - (ICON_SMALL_WIDTH + 6),
+				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 }
 
 void CInfoViewer::showFailure()
@@ -1517,7 +1519,7 @@ void CInfoViewer::showButton_Audio()
 		dd_icon = "dd_gray.raw";
 
 	frameBuffer->paintIcon(dd_icon,
-			       BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
+			       BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 			       BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 }
 
@@ -1537,7 +1539,7 @@ void CInfoViewer::killTitle()
 void CInfoViewer::showIcon_CA_Status() const
 {
 	frameBuffer->paintIcon((CA_Status) ? "ca.raw" : "fta.raw",
-				BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
+				BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 }
 
