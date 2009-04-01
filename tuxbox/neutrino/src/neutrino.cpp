@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.941 2009/03/30 09:52:35 seife Exp $
+	$Id: neutrino.cpp,v 1.942 2009/04/01 11:44:36 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -483,6 +483,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.personalize_games = configfile.getInt32("personalize_games", 1);
 	g_settings.personalize_audioplayer = configfile.getInt32("personalize_audioplayer", 1);
 	g_settings.personalize_inetradio = configfile.getInt32("personalize_inetradio", 0);
+	g_settings.personalize_esound = configfile.getInt32("personalize_esound", 0);
 	g_settings.personalize_movieplayer = configfile.getInt32("personalize_movieplayer", 1);
 	g_settings.personalize_pictureviewer = configfile.getInt32("personalize_pictureviewer", 1);
 #if ENABLE_UPNP
@@ -1008,6 +1009,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "personalize_games", g_settings.personalize_games );
 	configfile.setInt32 ( "personalize_audioplayer", g_settings.personalize_audioplayer );
 	configfile.setInt32 ( "personalize_inetradio", g_settings.personalize_inetradio );
+	configfile.setInt32 ( "personalize_esound", g_settings.personalize_esound );
 	configfile.setInt32 ( "personalize_movieplayer", g_settings.personalize_movieplayer );
 	configfile.setInt32 ( "personalize_pictureviewer", g_settings.personalize_pictureviewer );
 #if ENABLE_UPNP

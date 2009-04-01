@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.7 2008/05/01 21:53:12 houdini Exp $
+        $Id: personalize.cpp,v 1.8 2009/04/01 11:44:38 rhabarber1848 Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -180,6 +180,7 @@ void CPersonalizeGui::ShowMainMenuOptions()
 	int old_games		= g_settings.personalize_games;
 	int old_audioplayer	= g_settings.personalize_audioplayer;
 	int old_inetradio		= g_settings.personalize_inetradio;
+	int old_esound		= g_settings.personalize_esound;
 	int old_movieplayer	= g_settings.personalize_movieplayer;
 	int old_pictureviewer	= g_settings.personalize_pictureviewer;
 #ifdef ENABLE_UPNP
@@ -207,6 +208,10 @@ void CPersonalizeGui::ShowMainMenuOptions()
 
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_AUDIOPLAYER, (int *)&g_settings.personalize_audioplayer,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_INETRADIO_NAME, (int *)&g_settings.personalize_inetradio,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
+	//check if esound is available	
+	if (access("/bin/esd", X_OK) == 0 || access("/var/bin/esd", X_OK) == 0) {
+		pMMMenu->addItem(new CMenuOptionChooser(LOCALE_ESOUND_NAME, (int *)&g_settings.personalize_esound,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
+	}	
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_MOVIEPLAYER, (int *)&g_settings.personalize_movieplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_PICTUREVIEWER, (int *)&g_settings.personalize_pictureviewer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 #ifdef ENABLE_UPNP
@@ -230,6 +235,7 @@ void CPersonalizeGui::ShowMainMenuOptions()
 		|| old_games != g_settings.personalize_games
 		|| old_audioplayer != g_settings.personalize_audioplayer
 		|| old_inetradio != g_settings.personalize_inetradio
+		|| old_esound != g_settings.personalize_esound
 		|| old_movieplayer != g_settings.personalize_movieplayer
 		|| old_pictureviewer != g_settings.personalize_pictureviewer
 #ifdef ENABLE_UPNP

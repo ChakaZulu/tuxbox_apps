@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.52 2009/03/30 09:52:37 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.53 2009/04/01 11:44:38 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -161,18 +161,13 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	else if (g_settings.personalize_inetradio == 2)
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_INETRADIO_NAME, g_settings.personalize_pincode, true, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut++)));
 
-	bool found_esound = false;
-
-	if (access("/bin/esd", X_OK) == 0)
-		found_esound = true;
-
-	if (access("/var/bin/esd", X_OK) == 0)
-		found_esound = true;
-
-	if (found_esound)
+	if (access("/bin/esd", X_OK) == 0 || access("/var/bin/esd", X_OK) == 0)
 	{
-		puts("[neutrino] found esound, adding to mainmenue");
+		puts("[neutrino] found esound, adding to mainmenue/personalize");
+		if (g_settings.personalize_esound == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_ESOUND_NAME, true, NULL, new CEsoundGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+		else if (g_settings.personalize_esound == 2)
+			mainMenu.addItem(new CLockedMenuForwarder(LOCALE_ESOUND_NAME, g_settings.personalize_pincode, true, true, NULL, new CEsoundGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
 	}
 
 	if (g_settings.personalize_movieplayer == 1)
@@ -215,7 +210,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "",
 										CRCInput::convertDigitToKey(shortcut++)));
 
-	if (g_settings.personalize_audioplayer==0 && g_settings.personalize_inetradio==0 && g_settings.personalize_movieplayer==0 && g_settings.personalize_pictureviewer==0 && g_settings.personalize_upnpbrowser==0)
+	if (g_settings.personalize_audioplayer==0 && g_settings.personalize_inetradio==0 && g_settings.personalize_esound==0 && g_settings.personalize_movieplayer==0 && g_settings.personalize_pictureviewer==0 && g_settings.personalize_upnpbrowser==0)
 		;// Stop seperator from appearing when menu entries have been hidden
 	else
 		mainMenu.addItem(GenericMenuSeparatorLine); 

@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.204 2009/03/25 14:08:08 seife Exp $
+  $Id: settings.h,v 1.205 2009/04/01 11:44:38 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -199,6 +199,7 @@ struct SNeutrinoSettings
 	int personalize_games;
 	int personalize_audioplayer;
 	int personalize_inetradio;
+	int personalize_esound;
 	int personalize_movieplayer;
 	int personalize_pictureviewer;
 	int personalize_upnpbrowser;
