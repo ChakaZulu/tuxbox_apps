@@ -26,7 +26,7 @@ private:
 		const char *func_name;
 		TyFunc pfunc;
 	} TyFuncCall;
-	const static TyFuncCall yFuncCallList[];
+	static const TyFuncCall yFuncCallList[];
 	
 	// func TUXBOX
 	std::string func_mount_get_list(CyhookHandler *hh, std::string para);
@@ -62,7 +62,7 @@ public:
 	virtual std::string 	YWeb_cgi_func(CyhookHandler *hh, std::string ycmd);
 	// virtual functions for HookHandler/Hook
 	virtual std::string 	getHookName(void) {return std::string("mod_NeutrinoYParser");}
-	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.3 $");}
+	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.4 $");}
 	virtual THandleStatus	Hook_SendResponse(CyhookHandler *hh);
 	virtual THandleStatus 	Hook_ReadConfig(CConfigFile *Config, CStringList &ConfigList); 
 };

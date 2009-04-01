@@ -24,7 +24,7 @@ private:
 		TyFunc pfunc;
 		const char *mime_type;
 	} TyCgiCall;
-	const static TyCgiCall yCgiCallList[];
+	static const TyCgiCall yCgiCallList[];
 
 	int rc_send(int ev, unsigned int code, unsigned int value);
 
@@ -108,7 +108,7 @@ public:
 
 	// virtual functions for HookHandler/Hook
 	virtual std::string getHookName(void) {return std::string("mod_ControlAPI");}
-	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.5 $");}
+	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.6 $");}
 	virtual THandleStatus Hook_SendResponse(CyhookHandler *hh);
 	virtual THandleStatus Hook_PrepareResponse(CyhookHandler *hh);
 };

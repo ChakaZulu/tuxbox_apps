@@ -56,7 +56,7 @@ public:
 	static bool SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int channels);
 private:
 	static bool avs_mute(bool mute);
-	unsigned static int mSamplerate;
+	static unsigned int mSamplerate;
 };
 
 

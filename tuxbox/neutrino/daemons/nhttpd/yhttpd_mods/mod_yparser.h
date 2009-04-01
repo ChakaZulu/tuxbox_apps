@@ -53,7 +53,7 @@ private:
 		TyCGIFunc pfunc;
 		const char *mime_type;
 	} TyCgiCall;
-	const static TyCgiCall yCgiCallList[];
+	static const TyCgiCall yCgiCallList[];
 
 	// func dispatcher Array
 	typedef std::string (CyParser::*TyFunc)(CyhookHandler *hh, std::string para);
@@ -62,7 +62,7 @@ private:
 		const char *func_name;
 		TyFunc pfunc;
 	} TyFuncCall;
-	const static TyFuncCall yFuncCallList[];
+	static const TyFuncCall yFuncCallList[];
 
 	// local Session vars
 	CStringList ycgi_vars;	//ycgi session vars
@@ -113,7 +113,7 @@ public:
 	// virtual functions for BaseClass
 	virtual std::string 	YWeb_cgi_func(CyhookHandler *hh, std::string ycmd);
 	// virtual functions for HookHandler/Hook
-	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.3 $");}
+	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.4 $");}
 	virtual std::string 	getHookName(void) {return "mod_yparser";}
 	virtual THandleStatus 	Hook_SendResponse(CyhookHandler *hh); 	
 };
