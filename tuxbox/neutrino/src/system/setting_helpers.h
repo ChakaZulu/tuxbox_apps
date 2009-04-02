@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.91 2009/02/22 22:19:51 rhabarber1848 Exp $
+	$Id: setting_helpers.h,v 1.92 2009/04/02 08:04:47 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -35,11 +35,10 @@
 */
 
 
+#include <config.h>
 #include <gui/widget/menue.h>
 
 #include <string>
-
-#include <config.h>
 
 unsigned long long getcurrenttime();
 
