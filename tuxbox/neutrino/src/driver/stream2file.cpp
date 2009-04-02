@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.31 2009/03/25 14:08:08 seife Exp $
+ * $Id: stream2file.cpp,v 1.32 2009/04/02 07:53:53 seife Exp $
  * 
  * streaming to file/disc
  * 
@@ -195,7 +195,8 @@ void * FileThread(void * v_arg)
 
  retry:
 				sprintf(filename, "%s.%3.3d.%s", myfilename, ++filecount, ((struct filenames_t *)v_arg)->extension);
-				printf("[stream2file] filename: '%s' myfilename: '%s'\n", filename, myfilename);
+				printf("[stream2file] filename: '%s'\n"
+				       "            myfilename: '%s'\n", filename, myfilename);
 				if (fd2 != -1)
 					close(fd2);
 
@@ -502,6 +503,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			printf("[stream2file] INFO: %s already exists, not overwriting\n", buf);
 		else
 		{
+			fprintf(stderr, "[stream2file] trying to create %s, error %d (%m)\n", buf, errno);
 			DEC_BUSY_COUNT;
 			return STREAM2FILE_INVALID_DIRECTORY;
 		}
