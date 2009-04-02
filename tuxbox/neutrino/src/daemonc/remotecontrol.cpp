@@ -159,7 +159,7 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 			}
 	}
 
-    if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
+	if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
 	{
 		const CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
 
@@ -171,19 +171,18 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 			CLCD::getInstance()->setEPGTitle(info_CN->current_name);
 			if ( info_CN->current_uniqueKey != current_EPGid )
 			{
-			    if ( current_EPGid != 0 )
-			    {
-			    	// ist nur ein neues Programm, kein neuer Kanal
+				if ( current_EPGid != 0 )
+				{
+					// ist nur ein neues Programm, kein neuer Kanal
+					// PIDs neu holen
+					g_Zapit->getPIDS( current_PIDs );
 
-			    	// PIDs neu holen
-			    	g_Zapit->getPIDS( current_PIDs );
-
-			    	// APID Bearbeitung neu anstossen
-			    	has_unresolved_ctags = true;
+					// APID Bearbeitung neu anstossen
+					has_unresolved_ctags = true;
 
 					// infobar indicate on epg change 
 					g_InfoViewer->showEpgInfo();                            
-                }
+				}
 
 				current_EPGid= info_CN->current_uniqueKey;
 
@@ -213,7 +212,7 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 					g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN->current_fsk, false );
 			}
 		}
-	    return messages_return::handled;
+		return messages_return::handled;
 	}
 	else if ( msg == NeutrinoMessages::EVT_NEXTEPG )
 	{
