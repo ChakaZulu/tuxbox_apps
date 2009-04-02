@@ -6,7 +6,7 @@
 
 	Copyright (C) 2009 Stefan Seyfried
 
-   $Id: timermanager.cpp,v 1.91 2009/03/30 09:52:34 seife Exp $
+   $Id: timermanager.cpp,v 1.92 2009/04/02 07:41:04 seife Exp $
 
 	License: GPL
 
@@ -144,7 +144,7 @@ void* CTimerManager::timerThread(void *arg)
 					{
 						event->setState(CTimerd::TIMERSTATE_PREANNOUNCE);
 						dprintf("announcing event\n");
-						event->announceEvent();							// event specific announce handler
+						event->announceEvent();		// event specific announce handler
 						timerManager->m_saveEvents = true;
 					}
 
@@ -153,8 +153,8 @@ void* CTimerManager::timerThread(void *arg)
 					{
 						event->setState(CTimerd::TIMERSTATE_ISRUNNING);
 						dprintf("firing event\n");
-						event->fireEvent();										// fire event specific handler
-						if(event->stopTime == 0)					// if event needs no stop event
+						event->fireEvent();		// fire event specific handler
+						if(event->stopTime == 0)	// if event needs no stop event
 							event->setState(CTimerd::TIMERSTATE_HASFINISHED);
 						timerManager->m_saveEvents = true;
 					}
@@ -163,7 +163,7 @@ void* CTimerManager::timerThread(void *arg)
 					if( event->stopTime <= now ) // check if event stoptime has come
 					{
 						dprintf("stopping event\n");
-						event->stopEvent();							//  event specific stop handler
+						event->stopEvent();		//  event specific stop handler
 						event->setState(CTimerd::TIMERSTATE_HASFINISHED); 
 						timerManager->m_saveEvents = true;
 					}
@@ -181,14 +181,14 @@ void* CTimerManager::timerThread(void *arg)
 					timerManager->m_saveEvents = true;
 				}
 				
-				if(event->eventState == CTimerd::TIMERSTATE_TERMINATED)				// event is terminated, so delete it
+				if(event->eventState == CTimerd::TIMERSTATE_TERMINATED)	// event is terminated, so delete it
 				{
 					dprintf("deleting event\n");
 					if (timerd_debug)
 						pos->second->printEvent();
 					dprintf("\n");
-					delete pos->second;										// delete event
-					timerManager->events.erase(pos);				// remove from list
+					delete pos->second;			// delete event
+					timerManager->events.erase(pos);	// remove from list
 					timerManager->m_saveEvents = true;
 				}
 			}
@@ -445,181 +445,181 @@ void CTimerManager::loadEventsFromConfig()
 			switch(type)
 			{
 				case CTimerd::TIMER_SHUTDOWN :
+				{
+					CTimerEvent_Shutdown *event=
+					new CTimerEvent_Shutdown(&config, savedIDs[i]);
+					if((event->alarmTime >= now) || (event->stopTime > now))
 					{
-						CTimerEvent_Shutdown *event=
-						new CTimerEvent_Shutdown(&config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							addEvent(event,false);
-						}
-						else
-						{
-							dprintf("shutdown timer (%d) too old %d/%d\n",
-								i,(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}       
+						addEvent(event,false);
+					}
+					else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+					{
+						// old periodic timers need to be rescheduled
+						event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+						addEvent(event,false);
+					}
+					else
+					{
+						dprintf("shutdown timer (%d) too old %d/%d\n",
+							i,(int)now,(int) event->alarmTime);
+						delete event;
+					}
+					break;
+				}
 				case CTimerd::TIMER_NEXTPROGRAM :
+				{
+					CTimerEvent_NextProgram *event=
+					new CTimerEvent_NextProgram(&config, savedIDs[i]);
+					if((event->alarmTime >= now) || (event->stopTime > now))
 					{
-						CTimerEvent_NextProgram *event=
-						new CTimerEvent_NextProgram(&config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							addEvent(event,false);
-						}
-						else
-						{
-							dprintf("next program timer (%d) too old %d/%d\n",i,
-								(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}       
+						addEvent(event,false);
+					}
+					else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+					{
+						// old periodic timers need to be rescheduled
+						event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+						addEvent(event,false);
+					}
+					else
+					{
+						dprintf("next program timer (%d) too old %d/%d\n",i,
+							(int)now,(int) event->alarmTime);
+						delete event;
+					}
+					break;
+				}
 				case CTimerd::TIMER_ZAPTO :
+				{
+					CTimerEvent_Zapto *event=
+					new CTimerEvent_Zapto(&config, savedIDs[i]);
+					if((event->alarmTime >= now) || (event->stopTime > now))
 					{
-						CTimerEvent_Zapto *event=
-						new CTimerEvent_Zapto(&config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							addEvent(event,false);
-						}
-						else
-						{
-							dprintf("zapto timer (%d) too old %d/%d\n",
-								i,(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}          
+						addEvent(event,false);
+					}
+					else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+					{
+						// old periodic timers need to be rescheduled
+						event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+						addEvent(event,false);
+					}
+					else
+					{
+						dprintf("zapto timer (%d) too old %d/%d\n",
+							i,(int)now,(int) event->alarmTime);
+						delete event;
+					}
+					break;
+				}
 				case CTimerd::TIMER_STANDBY :
+				{
+					CTimerEvent_Standby *event=
+					new CTimerEvent_Standby(&config, savedIDs[i]);
+					if((event->alarmTime >= now) || (event->stopTime > now))
 					{
-						CTimerEvent_Standby *event=
-						new CTimerEvent_Standby(&config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							addEvent(event,false);
-						}
-						else
-						{
-							dprintf("standby timer (%d) too old %d/%d\n",
-								i,(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}           
+						addEvent(event,false);
+					}
+					else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+					{
+						// old periodic timers need to be rescheduled
+						event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+						addEvent(event,false);
+					}
+					else
+					{
+						dprintf("standby timer (%d) too old %d/%d\n",
+							i,(int)now,(int) event->alarmTime);
+						delete event;
+					}
+					break;
+				}
 				case CTimerd::TIMER_RECORD :
+				{
+					CTimerEvent_Record *event=
+					new CTimerEvent_Record(&config, savedIDs[i]);
+					if((event->alarmTime >= now) || (event->stopTime > now))
 					{
-						CTimerEvent_Record *event=
-						new CTimerEvent_Record(&config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							addEvent(event,false);
-						}
-						else
-						{
-							dprintf("record timer (%d) too old %d/%d\n",
-								i,(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}          
+						addEvent(event,false);
+					}
+					else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+					{
+						// old periodic timers need to be rescheduled
+						event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+						addEvent(event,false);
+					}
+					else
+					{
+						dprintf("record timer (%d) too old %d/%d\n",
+							i,(int)now,(int) event->alarmTime);
+						delete event;
+					}
+					break;
+				}
 				case CTimerd::TIMER_SLEEPTIMER :
+				{
+					CTimerEvent_Sleeptimer *event=
+					new CTimerEvent_Sleeptimer(&config, savedIDs[i]);
+					if((event->alarmTime >= now) || (event->stopTime > now))
 					{
-						CTimerEvent_Sleeptimer *event=
-						new CTimerEvent_Sleeptimer(&config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							addEvent(event,false);
-						}
-						else
-						{
-							dprintf("sleep timer (%d) too old %d/%d\n",
-								i,(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
+						addEvent(event,false);
 					}
+					else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+					{
+						// old periodic timers need to be rescheduled
+						event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+						addEvent(event,false);
+					}
+					else
+					{
+						dprintf("sleep timer (%d) too old %d/%d\n",
+							i,(int)now,(int) event->alarmTime);
+						delete event;
+					}
+					break;
+				}
 				case CTimerd::TIMER_REMIND :
+				{
+					CTimerEvent_Remind *event=
+					new CTimerEvent_Remind(&config, savedIDs[i]);
+					if((event->alarmTime >= now) || (event->stopTime > now))
 					{
-						CTimerEvent_Remind *event=
-						new CTimerEvent_Remind(&config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							addEvent(event,false);
-						}
-						else
-						{
-							dprintf("remind timer (%d) too old %d/%d\n",
-								i,(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
+						addEvent(event,false);
 					}
+					else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+					{
+						// old periodic timers need to be rescheduled
+						event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+						addEvent(event,false);
+					}
+					else
+					{
+						dprintf("remind timer (%d) too old %d/%d\n",
+							i,(int)now,(int) event->alarmTime);
+						delete event;
+					}
+					break;
+				}
 				case CTimerd::TIMER_EXEC_PLUGIN :
+				{
+					CTimerEvent_ExecPlugin *event=
+					new CTimerEvent_ExecPlugin(&config, savedIDs[i]);
+					if((event->alarmTime >= now) || (event->stopTime > now))
 					{
-						CTimerEvent_ExecPlugin *event=
-						new CTimerEvent_ExecPlugin(&config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							addEvent(event,false);
-						}
-						else
-						{
-							dprintf("exec plugin timer (%d) too old %d/%d\n",
-								i,(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
+						addEvent(event,false);
 					}
+					else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+					{
+						// old periodic timers need to be rescheduled
+						event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+						addEvent(event,false);
+					}
+					else
+					{
+						dprintf("exec plugin timer (%d) too old %d/%d\n",
+							i,(int)now,(int) event->alarmTime);
+						delete event;
+					}
+					break;
+				}
 				default:
 					printf("Unknown timer on load %d\n",type);
 			}
@@ -705,7 +705,7 @@ bool CTimerManager::shutdown()
 			 event->eventType == CTimerd::TIMER_ZAPTO ) &&
 			event->eventState == CTimerd::TIMERSTATE_SCHEDULED)
 		{
-			// Wir wachen nur für Records und Zaptos wieder auf
+			// Wir wachen nur fuer Records und Zaptos wieder auf
 			if(event->announceTime < nextAnnounceTime || nextAnnounceTime==0)
 			{
 				nextAnnounceTime=event->announceTime;
