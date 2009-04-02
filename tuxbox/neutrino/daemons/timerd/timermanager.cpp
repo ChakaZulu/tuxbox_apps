@@ -6,7 +6,7 @@
 
 	Copyright (C) 2009 Stefan Seyfried
 
-   $Id: timermanager.cpp,v 1.92 2009/04/02 07:41:04 seife Exp $
+   $Id: timermanager.cpp,v 1.93 2009/04/02 07:44:04 seife Exp $
 
 	License: GPL
 
@@ -712,7 +712,6 @@ bool CTimerManager::shutdown()
 			}
 		}
 	}
-	int erg;
 
 	if(nextAnnounceTime!=0)
 	{
@@ -721,16 +720,10 @@ bool CTimerManager::shutdown()
 			minutes=1; //1 minute is minimum
 
 		int fd = open("/dev/dbox/fp0", O_RDWR);
-		if((erg=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes))<0)
+		if (ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes) < 0)
 		{
-			if(erg==-1)	// Wakeup not supported
-			{
-				dprintf("Wakeup not supported (%d min.)\n",minutes);
-			}
-			else
-			{
-				dprintf("Error setting wakeup (%d)\n",erg);
-			}
+			// Wakeup not supported
+			printf("[timerd] Wakeup not supported (%d min.), errno=%d\n",minutes,errno);
 		}
 		else
 		{
