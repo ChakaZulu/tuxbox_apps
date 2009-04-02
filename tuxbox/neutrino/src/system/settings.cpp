@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.50 2009/02/18 17:48:53 seife Exp $
+        $Id: settings.cpp,v 1.51 2009/04/02 07:58:13 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -256,8 +256,8 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 	{
 		char tmp[20];
 		int i;
-		int satCount = configfile.getInt32("satCount", 0);
-		for (i = 0; i < satCount; i++)
+		int s_Count = configfile.getInt32("satCount", 0);
+		for (i = 0; i < s_Count; i++)
 		{
 			sprintf((char*)&tmp, "SatName%d", i);
 			strcpy( satName[i], configfile.getString(tmp, "").c_str());
@@ -295,7 +295,7 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 
 bool CScanSettings::saveSettings(const char * const fileName)
 {
-	int satCount = 0;
+	int s_Count = 0;
 
 	configfile.setInt32( "delivery_system", delivery_system);
 	configfile.setInt32( "diseqcMode", diseqcMode );
@@ -311,11 +311,11 @@ bool CScanSettings::saveSettings(const char * const fileName)
 
 		for (i = 0; i < MAX_SATELLITES; i++)
 			if (satName[i][0] != 0)
-				satCount++;
+				s_Count++;
 
-		configfile.setInt32("satCount", satCount);
+		configfile.setInt32("satCount", s_Count);
 		
-		for (int i = 0; i < satCount; i++)
+		for (i = 0; i < s_Count; i++)
 		{
 			sprintf((char*)&tmp, "SatName%d", i);
 			configfile.setString(tmp, satName[i]);
@@ -346,7 +346,7 @@ bool CScanSettings::saveSettings(const char * const fileName)
 		tmpsatNameList.clear();
 		bool satfound = false;
 		// scan the new available sat configurations and change update TP_SatSelectMenu
-		for (int i = 0; i < satCount; i++)
+		for (int i = 0; i < s_Count; i++)
 		{
 			if (((0 <= satDiseqc[i])   && (diseqcMode != DISEQC_1_2)) ||
 			    ((0 != satMotorPos[i]) && (diseqcMode == DISEQC_1_2)))
