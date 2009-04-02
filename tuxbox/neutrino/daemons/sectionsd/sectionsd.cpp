@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.288 2009/02/28 13:57:50 seife Exp $
+//  $Id: sectionsd.cpp,v 1.289 2009/04/02 07:25:09 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2465,7 +2465,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.288 2009/02/28 13:57:50 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.289 2009/04/02 07:25:09 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6920,12 +6920,14 @@ static void *eitThread(void *)
 				unlockMessaging();
 #endif
 
+				if (timeoutsDMX == -1)
+					dprintf("[eitThread] skipping to next filter(%d) (> DMX_HAS_ALL_SECTIONS_SKIPPING)\n", dmxEIT.filter_index+1 );
+				else if (timeoutsDMX == -2)
+					dprintf("[eitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxEIT.filter_index+1 );
+				else
+					dprintf("[eitThread] skipping to next filter(%d) (timeouts %d)\n", dmxEIT.filter_index+1, timeoutsDMX);
 				if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 				{
-					if (timeoutsDMX == -1)
-					dprintf("[eitThread] skipping to next filter(%d) (> DMX_HAS_ALL_SECTIONS_SKIPPING)\n", dmxEIT.filter_index+1 );
-					if (timeoutsDMX == -2)
-					dprintf("[eitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxEIT.filter_index+1 );
 					timeoutsDMX = 0;
 					dmxEIT.change(dmxEIT.filter_index + 1);
 				}
@@ -6981,9 +6983,9 @@ static void *eitThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning && !channel_is_blacklisted)
 			{
+				dprintf("[eitThread] skipping to next filter(%d) (> DMX_TIMEOUT_SKIPPING %d)\n", dmxEIT.filter_index+1, timeoutsDMX);
 				if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 				{
-					dprintf("[eitThread] skipping to next filter(%d) (> DMX_TIMEOUT_SKIPPING)\n", dmxEIT.filter_index+1 );
 					dmxEIT.change(dmxEIT.filter_index + 1);
 				}
 				else
@@ -7054,9 +7056,9 @@ static void *eitThread(void *)
 			{
 				readLockMessaging();
 
+				dprintf("[eitThread] skipping to next filter(%d) (> TIME_EIT_SKIPPING)\n", dmxEIT.filter_index+1 );
 				if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 				{
-					dprintf("[eitThread] skipping to next filter(%d) (> TIME_EIT_SKIPPING)\n", dmxEIT.filter_index+1 );
 					dmxEIT.change(dmxEIT.filter_index + 1);
 				}
 				else
@@ -8105,7 +8107,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.288 2009/02/28 13:57:50 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.289 2009/04/02 07:25:09 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
