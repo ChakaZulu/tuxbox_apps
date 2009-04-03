@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.289 2009/04/02 07:25:09 seife Exp $
+//  $Id: sectionsd.cpp,v 1.290 2009/04/03 14:59:06 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2465,7 +2465,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.289 2009/04/02 07:25:09 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.290 2009/04/03 14:59:06 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -7209,6 +7209,7 @@ static void *cnThread(void *)
 						eit_waiting_since = zeit;
 						writeLockMessaging();
 						messaging_need_eit_version = true;
+						sendToSleepNow = false; // reset after channel change
 					}
 					unlockMessaging();
 					if (zeit - eit_waiting_since > TIME_EIT_VERSION_WAIT) {
@@ -8107,7 +8108,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.289 2009/04/02 07:25:09 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.290 2009/04/03 14:59:06 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
