@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.205 2009/04/01 11:44:38 rhabarber1848 Exp $
+  $Id: settings.h,v 1.206 2009/04/03 15:41:43 seife Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -50,6 +50,7 @@ struct SNeutrinoSettings
 	unsigned char video_csync;
 
 	//misc
+	int standby_save_power;
 	int shutdown_real;
 	int shutdown_real_rcdelay;
 	char shutdown_count[4];

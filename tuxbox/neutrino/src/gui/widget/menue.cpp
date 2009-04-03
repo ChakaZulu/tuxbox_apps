@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.150 2009/03/28 14:48:58 seife Exp $
+	$Id: menue.cpp,v 1.151 2009/04/03 15:41:42 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -302,7 +302,8 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 	while ( msg!=CRCInput::RC_timeout );
 
 	hide();
-	CLCD::getInstance()->setMode(oldlcdmode);
+	if (CLCD::getInstance()->getMode() != CLCD::MODE_STANDBY)
+		CLCD::getInstance()->setMode(oldlcdmode);
 
 	return retval;
 }

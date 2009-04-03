@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.942 2009/04/01 11:44:36 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.943 2009/04/03 15:41:42 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -214,6 +214,7 @@ CNeutrinoApp::CNeutrinoApp()
 	parentallocked    = false;
 	waitforshutdown   = false;
 	volumeBarIsVisible	= true;
+	standbyAfterRecord = false;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -341,6 +342,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", false);
 
 	//misc
+	g_settings.standby_save_power		= configfile.getBool("standby_save_power"        , false);
 #ifdef HAVE_DBOX_HARDWARE
 	g_settings.shutdown_real		= configfile.getBool("shutdown_real"             , true );
 #else
@@ -877,6 +879,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString("epg_dir"                 ,g_settings.epg_dir);
 
 	//misc
+	configfile.setBool("standby_save_power"        , g_settings.standby_save_power);
 	configfile.setBool("shutdown_real"             , g_settings.shutdown_real);
 	configfile.setBool("shutdown_real_rcdelay"     , g_settings.shutdown_real_rcdelay);
 	configfile.setString("shutdown_count"          , g_settings.shutdown_count);
@@ -2689,6 +2692,9 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 
 			if(old_id == 0)
 				channelList->zapTo(0);
+			/* if we came from standby to recording => back into standby */
+			if (!data &&standbyAfterRecord)
+				standbyMode(true);
 		}
 		else if( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED )			// EVT_BOUQUETSCHANGED: initiated by zapit ; EVT_SERVICESCHANGED: no longer used
 		{
@@ -2703,6 +2709,11 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		}
 		else if (msg == NeutrinoMessages::RECORD_START)
 		{
+			if (mode == mode_standby)
+			{
+				standbyMode(false);
+				standbyAfterRecord = true;
+			}
 			execute_start_file(NEUTRINO_RECORDING_START_SCRIPT);
 			/* set nextRecordingInfo to current event (replace other scheduled recording if available) */
 
@@ -2850,6 +2861,11 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		}
 		else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
 		{
+			if (mode == mode_standby)
+			{
+				standbyMode(false);
+				standbyAfterRecord = true;
+			}
 			execute_start_file(NEUTRINO_RECORDING_TIMER_SCRIPT);
 
 			if( g_settings.recording_server_wakeup )
@@ -2913,6 +2929,12 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		}
 		else if( msg == NeutrinoMessages::STANDBY_ON )
 		{
+			if (recordingstatus != 0)
+			{
+				DisplayErrorMessage("Nach Ende der Aufnahme wird in Standby geschaltet...");
+				standbyAfterRecord = true;
+				return messages_return::handled;
+			}
 			if( mode != mode_standby )
 			{
 				// noch nicht im Standby-Mode...
@@ -3535,9 +3557,12 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
+		if (g_settings.standby_save_power)
+			g_Zapit->setStandby(true);
 
 		execute_start_file(NEUTRINO_ENTER_STANDBY_SCRIPT);
 
+		standbyAfterRecord = false; // reset
 		lastMode = mode;
 		mode = mode_standby;
 
@@ -3550,6 +3575,8 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		// STANDBY AUS
 
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+		if (g_settings.standby_save_power)
+			g_Zapit->setStandby(false);
 		g_Controld->videoPowerDown(false);
 
 		execute_start_file(NEUTRINO_LEAVE_STANDBY_SCRIPT);
@@ -3569,6 +3596,8 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		{
 			tvMode( false );
 		}
+		/* hack. TODO: why is this needed? */
+		g_Sectionsd->setServiceChanged(g_RemoteControl->current_channel_id, false);
 	}
 }
 
