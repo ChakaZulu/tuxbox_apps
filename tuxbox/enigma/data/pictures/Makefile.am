@@ -11,9 +11,14 @@ install_DATA = \
 	icon-info-fs8.png icon-question-fs8.png volumeslider-fs8.png \
 	folder-fs8.png clock-fs8.png clock_rec-fs8.png event_ok-fs8.png \
 	event_failed-fs8.png dreamlogo-fs8.png arrow_down.png \
-	scan.mvi diseqc_0-fs8.png diseqc_1-fs8.png diseqc_2-fs8.png arrow_up.png \
+	diseqc_0-fs8.png diseqc_1-fs8.png diseqc_2-fs8.png arrow_up.png \
 	lcd-speaker.png lcd-clock.png separator-fs8.png marker-fs8.png \
 	marker_small-fs8.png padlock-fs8.png padlock_small-fs8.png check-fs8.png \
-	radio.mvi mp3.mvi newfound-fs8.png newfound_small-fs8.png rass_logo.png \
+	newfound-fs8.png newfound_small-fs8.png rass_logo.png \
 	rass_page1.png rass_page2.png rass_page3.png rass_page4.png nopreview.png
 
+if BOXTYPE_DREAMBOX
+
+install_DATA += radio.mvi mp3.mvi scan.mvi 
+
+endif

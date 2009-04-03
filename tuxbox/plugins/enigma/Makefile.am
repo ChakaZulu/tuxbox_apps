@@ -1,2 +1,7 @@
-SUBDIRS = bitrate demo dreamdata ngrabstart ngrabstop dslconnect dsldisconnect rss script weather dbswitch getset dreamflash movieplayer scummvm
+SUBDIRS = bitrate demo ngrabstart ngrabstop dslconnect dsldisconnect rss script weather dbswitch getset scummvm
 
+if BOXTYPE_DREAMBOX
+
+SUBDIRS += dreamdata dreamflash movieplayer
+
+endif
