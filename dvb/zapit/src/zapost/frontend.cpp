@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.64 2009/03/21 15:06:12 seife Exp $
+ * $Id: frontend.cpp,v 1.66 2009/04/03 15:30:22 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -42,7 +42,7 @@
 #define FE_SET_VOLTAGE SEC_SET_VOLTAGE
 #endif
 
-CFrontend::CFrontend(int _uncommitted_switch_mode)
+CFrontend::CFrontend(int _uncommitted_switch_mode, int _auto_fec)
 {
 	tuned = false;
 	currentToneMode = SEC_TONE_OFF;
@@ -55,8 +55,9 @@ CFrontend::CFrontend(int _uncommitted_switch_mode)
 	secfd = -1;
 
 	uncommitted_switch_mode = _uncommitted_switch_mode;
+	auto_fec = _auto_fec;
 	if ((uncommitted_switch_mode<0) || (uncommitted_switch_mode>2)) uncommitted_switch_mode = 0;
-	printf("[frontend] uncommitted_switch_mode %d\n", uncommitted_switch_mode);
+	printf("[frontend] uncommitted_switch_mode %d auto_fec %d\n", uncommitted_switch_mode, auto_fec);
 
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
 		ERROR(FRONTEND_DEVICE);
@@ -88,11 +89,19 @@ CFrontend::~CFrontend(void)
 	if (diseqcType > MINI_DISEQC)
 		sendDiseqcStandby();
 
-	close(fd);
+	/* tested on dm500, VOLTAGE_OFF switched into passthrough mode,
+	   FE_POWER_OFF does something else to save some power...
+	   It does no harm on dbox2, at least not on philips sat
+	   enigma does exactly the same it its savePower() function
+	 */
+	secSetVoltage(SEC_VOLTAGE_OFF, 1);
+	secSetTone(SEC_TONE_OFF, 1);
 #if HAVE_DVB_API_VERSION < 3
+	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_OFF);
 	if (secfd >= 0)
 		close(secfd);
 #endif
+	close(fd);
 }
 
 void CFrontend::reset(void)
@@ -289,8 +298,7 @@ void CFrontend::setFrontend(const dvb_frontend_parameters *feparams)
 	if (fd == -1)
 		return;
 
-	if (errno != 0)
-		errno = 0;
+	errno = 0;
 
 	while ((errno == 0) || (errno == EOVERFLOW))
 		quiet_fop(ioctl, FE_GET_EVENT, &event);
@@ -301,6 +309,13 @@ void CFrontend::setFrontend(const dvb_frontend_parameters *feparams)
 	if (info.type == FE_QAM) {
 		feparams2.Frequency /= 1000;
 		DBG("cable box: setting frequency to %d khz\n", feparams2.Frequency);
+	}
+	if (auto_fec)
+	{
+		if (info.type == FE_QPSK)
+			feparams2.u.qpsk.FEC_inner = FEC_AUTO;
+		if (info.type == FE_QAM)
+			feparams2.u.qam.FEC_inner = FEC_AUTO;
 	}
 	fop(ioctl, FE_SET_FRONTEND, &feparams2);
 #else
@@ -565,14 +580,11 @@ void CFrontend::sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms)
 	if (fop(ioctl, FE_DISEQC_SEND_BURST, burst) == 0)
 #else
 	secCmdSequence sequence;
-	secCommand *command = NULL;
 	memset(&sequence, 0, sizeof(sequence));
 
 	sequence.miniCommand = burst;
 	sequence.continuousTone = (secToneMode)currentToneMode;
 	sequence.voltage = (secVoltage)currentTransponder.polarization;
-	sequence.commands = command;
-	sequence.numCommands = 0;
 
 	if (fop_sec(ioctl, SEC_SEND_SEQUENCE, &sequence) == 0)
 #endif
@@ -620,7 +632,9 @@ void CFrontend::setDiseqcType(const diseqc_t newDiseqcType)
 		return;
 	}
 
-	if ((diseqcType <= MINI_DISEQC) && (newDiseqcType > MINI_DISEQC)) {
+	// if ((diseqcType <= MINI_DISEQC) && (newDiseqcType > MINI_DISEQC)) {
+	if (newDiseqcType > NO_DISEQC) // or just always send reset?
+	{
 		sendDiseqcPowerOn();
 		sendDiseqcReset();
 	}
@@ -785,6 +799,8 @@ int CFrontend::setParameters(TP_params *TP)
 				break; /* tuned */
 		} while(1);
 
+		if (tuned && tryagain) /* i've never seen this trigger */
+			WARN("==============> TRY AGAIN actually helped <=======================================================");
 #if HAVE_DVB_API_VERSION >= 3
 		if (do_auto_qam && can_not_auto_qam && !tuned)
 		{
@@ -869,6 +885,7 @@ int CFrontend::setParameters(TP_params *TP)
 
 void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_band, const uint32_t frequency)
 {
+	DBG("sat_no: %d pol: %d high: %d freq: %d diseqc_type: %d", sat_no, pol, (int)high_band, frequency, diseqcType);
 	uint8_t repeats = diseqcRepeats;
 
 	fe_sec_voltage_t v = (pol & 1) ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18;
@@ -893,8 +910,8 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 	 * set all SEC / DiSEqC parameters
 	 */
 
-	secSetTone(SEC_TONE_OFF, 15);
-	secSetVoltage(v, 15);
+	secSetTone(SEC_TONE_OFF, 1); // this resets currentToneMode!
+	secSetVoltage(v, 30);
 
 	if ((diseqcType == DISEQC_1_1) && (uncommitted_switch_mode > 0))
 	{
@@ -964,6 +981,7 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 	if (diseqcType == SMATV_REMOTE_TUNING)
 		sendDiseqcSmatvRemoteTuningCommand(frequency);
 
+	currentToneMode = t;
 	if (diseqcType == MINI_DISEQC)
 		sendToneBurst(b, 15);
 
