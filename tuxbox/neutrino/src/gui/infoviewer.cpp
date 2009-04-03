@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.255 2009/04/02 11:56:39 seife Exp $
+	$Id: infoviewer.cpp,v 1.256 2009/04/03 15:03:35 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -539,7 +539,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		showIcon_SubT();
 	}
 
-	info_CurrentNext = getEPG(channel_id);
+	g_Sectionsd->getCurrentNextServiceKey(channel_id, info_CurrentNext);
 	if (!calledFromNumZap)
 		CLCD::getInstance()->setEPGTitle(info_CurrentNext.current_name);
 
@@ -1010,7 +1010,7 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		if ((*(t_channel_id *)data) == channel_id)
 		{
-			info_CurrentNext = getEPG(*(t_channel_id *)data);
+			getEPG(*(t_channel_id *)data, info_CurrentNext);
 			CLCD::getInstance()->setEPGTitle(info_CurrentNext.current_name);
 			if ( is_visible )
 				show_Data( true );
@@ -1168,10 +1168,9 @@ void CInfoViewer::showButton_SubServices()
 	}
 }
 
-CSectionsdClient::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_channel_id)
+void CInfoViewer::getEPG(const t_channel_id for_channel_id, CSectionsdClient::CurrentNextInfo &info)
 {
 	static CSectionsdClient::CurrentNextInfo oldinfo;
-	CSectionsdClient::CurrentNextInfo info;
 
 	g_Sectionsd->getCurrentNextServiceKey(for_channel_id, info );
 
@@ -1194,9 +1193,8 @@ CSectionsdClient::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_cha
 			memcpy(p, &for_channel_id, sizeof(t_channel_id));
 			g_RCInput->postMsg(NeutrinoMessages::EVT_NOEPG_YET, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 		}
-		oldinfo = info;
+		memcpy(&oldinfo, &info, sizeof(CSectionsdClient::CurrentNextInfo));;
 	}
-	return info;
 }
 
 void CInfoViewer::display_Info(const char *current, const char *next,

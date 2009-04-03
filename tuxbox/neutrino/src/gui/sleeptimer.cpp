@@ -77,7 +77,8 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 //	if(shutdown_min == 0)		// no timer set
 //		shutdown_min = 10;		// set to 10 min default
 	sprintf(value,"%03d",shutdown_min);
-	CSectionsdClient::CurrentNextInfo info_CurrentNext=g_InfoViewer->getEPG(g_RemoteControl->current_channel_id);
+	CSectionsdClient::CurrentNextInfo info_CurrentNext;
+	g_InfoViewer->getEPG(g_RemoteControl->current_channel_id, info_CurrentNext);
 	if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 	{
 		time_t jetzt=time(NULL);
