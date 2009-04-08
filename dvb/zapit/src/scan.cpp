@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.164 2009/03/21 14:29:12 seife Exp $
+ * $Id: scan.cpp,v 1.166 2009/04/08 23:09:57 rhabarber1848 Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -681,6 +681,9 @@ void scan_provider(xmlNodePtr search, const char * const providerName, uint8_t d
 void *start_scanthread(void *imsg)
 {
 	CZapitMessages::startScan *msg = (CZapitMessages::startScan*)imsg;
+	/* copy the message contents, since it will get freed in the calling function... */
+	scan_mode = msg->scan_mode;
+	int8_t diseqc = msg->diseqc;
 	FILE * fd;
 	char providerName[32] = "";
 	const char * frontendType;
@@ -703,7 +706,6 @@ void *start_scanthread(void *imsg)
 		stop_scan(false);
 		pthread_exit(0);
 	}
-	scan_mode = msg->scan_mode;
 	fake_tid = fake_nid = 0;
 
 	/* get first child */
@@ -724,7 +726,7 @@ void *start_scanthread(void *imsg)
 				if (frontend->getInfo()->type == FE_QPSK) {
 					diseqc_pos = spI->first;
 //printf("providerName = %s, msg->diseqc = %d, diseqc_pos = %d\n", providerName, msg->diseqc, diseqc_pos);
-					if ((msg->diseqc != -1) && (msg->diseqc != diseqc_pos)) {
+					if (diseqc != -1 && diseqc != diseqc_pos) {
 						// skip if sat not wanted
 						continue;
 					}
@@ -732,7 +734,7 @@ void *start_scanthread(void *imsg)
 				if (diseqc_pos == 255 /* = -1 */)
 					diseqc_pos = 0;
 
-				INFO("scanning providerName = %s, msg->diseqc = %d, diseqc_pos = %d\n", providerName, msg->diseqc, diseqc_pos);
+				INFO("scanning providerName = %s, msg->diseqc = %d, diseqc_pos = %d\n", providerName, diseqc, diseqc_pos);
 				scan_provider(search, providerName, diseqc_pos, frontendType);
 				break;
 			}
@@ -748,7 +750,7 @@ void *start_scanthread(void *imsg)
 		 */
 		if (!(fd = fopen(SERVICES_XML, "w")))
 		{
-			WARN("unable to open %s for writing", SERVICES_XML);
+			WARN("unable to open %s for writing\n", SERVICES_XML);
 			goto abort_scan;
 		}
 		write_xml_header(fd);
