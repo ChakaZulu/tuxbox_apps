@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.290 2009/04/03 14:59:06 seife Exp $
+//  $Id: sectionsd.cpp,v 1.291 2009/04/10 11:53:43 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -1416,7 +1416,7 @@ static bool AddServiceToAutoBouquets(const char *provname, const t_original_netw
 				bouquet2 = findBouquetByName(current_parser, currentBouquet->BouquetName);
 			if ((!bouquetContainsService(bouquet2, onid, tsid, sid)) && (!messaging_zap_detected)) {
 				if (!(dst = fopen(CURRENTBOUQUETS_TMP, "w"))) {
-					dprintf("unable to open %s for writing", CURRENTBOUQUETS_TMP);
+					dprintf("unable to open %s for writing\n", CURRENTBOUQUETS_TMP);
 				}
 				else {
 					write_bouquet_xml_header(dst);
@@ -2465,7 +2465,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.290 2009/04/03 14:59:06 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.291 2009/04/10 11:53:43 rhabarber1848 Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -5188,7 +5188,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const int scanTyp
 					is_needed = true;
 					//create new currentservices
 					if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
-						dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
+						dprintf("unable to open %s for writing\n", CURRENTSERVICES_TMP);
 						return false;
 					}
 					if (!(src = fopen(CURRENTSERVICES_XML, "r"))) {
@@ -5267,7 +5267,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const int scanTyp
 					is_needed = true;
 					//create new currentservices
 					if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
-						dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
+						dprintf("unable to open %s for writing\n", CURRENTSERVICES_TMP);
 						unlockServices();
 						return false;
 					}
@@ -5608,7 +5608,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 	std::string diseqc;
 
 	if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
-		dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
+		dprintf("unable to open %s for writing\n", CURRENTSERVICES_TMP);
 		return;
 	}
 
@@ -5911,7 +5911,7 @@ static void addBouquetToCurrentXML(xmlNodePtr bouquet, t_bouquet_id bouquet_id)
 	xmlNodePtr node;
 
 	if (!(dst = fopen(CURRENTBOUQUETS_TMP, "w"))) {
-		dprintf("unable to open %s for writing", CURRENTBOUQUETS_TMP);
+		dprintf("unable to open %s for writing\n", CURRENTBOUQUETS_TMP);
 		return;
 	}
 
@@ -6049,7 +6049,7 @@ static int getscanType()
 	int ret = 3;
 
 	if (!(scanconf = fopen(NEUTRINO_SCAN_SETTINGS_FILE, "r"))) {
-		printf("unable to open %s for reading", NEUTRINO_SCAN_SETTINGS_FILE);
+		printf("unable to open %s for reading\n", NEUTRINO_SCAN_SETTINGS_FILE);
 	} else {
 		while (!feof(scanconf)) {
 			fgets(buffer, 255, scanconf);
@@ -8108,7 +8108,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.290 2009/04/03 14:59:06 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.291 2009/04/10 11:53:43 rhabarber1848 Exp $\n");
 
 	SIlanguage::loadLanguages();
 
