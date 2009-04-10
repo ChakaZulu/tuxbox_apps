@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.166 2009/04/08 23:09:57 rhabarber1848 Exp $
+ * $Id: scan.cpp,v 1.167 2009/04/10 12:55:14 rhabarber1848 Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -750,7 +750,7 @@ void *start_scanthread(void *imsg)
 		 */
 		if (!(fd = fopen(SERVICES_XML, "w")))
 		{
-			WARN("unable to open %s for writing\n", SERVICES_XML);
+			WARN("unable to open %s for writing", SERVICES_XML);
 			goto abort_scan;
 		}
 		write_xml_header(fd);
