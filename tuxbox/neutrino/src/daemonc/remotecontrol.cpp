@@ -161,35 +161,34 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 
 	if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
 	{
-		const CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
+		if ((*(t_channel_id *)data) != current_channel_id)
+			return messages_return::handled;
 
-//		printf("Current/Next channelID: old(%llx) -> new(%llx)\n", current_channel_id, info_CN->current_uniqueKey >> 16);
-		if ( ((info_CN->current_uniqueKey >> 16) == current_channel_id ) || ((info_CN->current_uniqueKey >> 16) == current_sub_channel_id ) )
+		const CSectionsdClient::CurrentNextInfo info_CN = g_InfoViewer->getCurrentNextInfo();
+		if ((info_CN.current_uniqueKey >> 16) == current_channel_id || (info_CN.current_uniqueKey >> 16) == current_sub_channel_id)
 		{
-			//CURRENT-EPG für den aktuellen Kanal bekommen!;
-//			printf("Current/Next EPGID: old(%llx) -> new(%llx)\n", current_EPGid, info_CN->current_uniqueKey);
-			CLCD::getInstance()->setEPGTitle(info_CN->current_name);
-			if ( info_CN->current_uniqueKey != current_EPGid )
+			//CURRENT-EPG for current channel arrived!;
+			CLCD::getInstance()->setEPGTitle(info_CN.current_name);
+			if (info_CN.current_uniqueKey != current_EPGid)
 			{
 				if ( current_EPGid != 0 )
 				{
 					// ist nur ein neues Programm, kein neuer Kanal
 					// PIDs neu holen
 					g_Zapit->getPIDS( current_PIDs );
-
 					// APID Bearbeitung neu anstossen
 					has_unresolved_ctags = true;
-
 					// infobar indicate on epg change 
 					g_InfoViewer->showEpgInfo();                            
 				}
 
-				current_EPGid= info_CN->current_uniqueKey;
+				current_EPGid = info_CN.current_uniqueKey;
 
 				if ( has_unresolved_ctags )
 					processAPIDnames();
 
-				if ( info_CN->flags & CSectionsdClient::epgflags::current_has_linkagedescriptors ){
+				if (info_CN.flags & CSectionsdClient::epgflags::current_has_linkagedescriptors)
+				{
 					subChannels.clear();
 					getSubChannels();
 				}
@@ -197,49 +196,30 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 				if ( needs_nvods )
 					getNVODs();
 
-#if 0
-				if ( current_programm_timer != 0 )
-					g_RCInput->killTimer( current_programm_timer );
-
-				time_t end_program= info_CN->current_zeit.startzeit+ info_CN->current_zeit.dauer;
-				current_programm_timer = g_RCInput->addTimer( &end_program );
-#endif
-
 				// is_video_started is only false if channel is locked
-				if (((!is_video_started) && (info_CN->current_fsk == 0)) || ((!is_video_started) && (g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED)))
-					g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false );
+				if ((!is_video_started && info_CN.current_fsk == 0) || (!is_video_started && g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED))
+					g_RCInput->postMsg(NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false);
 				else
-					g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN->current_fsk, false );
+					g_RCInput->postMsg(NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN.current_fsk, false);
 			}
 		}
 		return messages_return::handled;
 	}
 	else if ( msg == NeutrinoMessages::EVT_NEXTEPG )
 	{
-		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
+		if ((*(t_channel_id *)data) != current_channel_id)
+			return messages_return::handled;
 
-		if ( ( info_CN->next_uniqueKey >> 16) == current_channel_id )
+		const CSectionsdClient::CurrentNextInfo info_CN = g_InfoViewer->getCurrentNextInfo();
+		if (info_CN.next_uniqueKey >> 16 == current_channel_id)
 		{
-			// next-EPG für den aktuellen Kanal bekommen, current ist leider net da?!;
-			if ( info_CN->next_uniqueKey != next_EPGid )
-			{
-			    next_EPGid= info_CN->next_uniqueKey;
-
-				// timer setzen
-
-#if 0
-	        	if ( current_programm_timer != 0 )
-					g_RCInput->killTimer( current_programm_timer );
-
-				time_t end_program= info_CN->next_zeit.startzeit;
-				current_programm_timer = g_RCInput->addTimer( &end_program );
-#endif
-			}
+			// next-EPG for current channel arrived. no current-EPG?!
+			if (info_CN.next_uniqueKey != next_EPGid)
+				next_EPGid = info_CN.next_uniqueKey;
 		}
 		if ( !is_video_started )
 			g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false );
-
-	    return messages_return::handled;
+		return messages_return::handled;
 	}
 	else if (msg == NeutrinoMessages::EVT_NOEPG_YET)
 	{

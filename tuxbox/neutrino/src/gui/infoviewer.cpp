@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.258 2009/04/10 14:21:53 seife Exp $
+	$Id: infoviewer.cpp,v 1.259 2009/04/10 14:25:49 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1176,24 +1176,20 @@ void CInfoViewer::getEPG(const t_channel_id for_channel_id, CSectionsdClient::Cu
 
 	if (info.current_uniqueKey != oldinfo.current_uniqueKey && info.next_uniqueKey != oldinfo.next_uniqueKey)
 	{
+		char *p = new char[sizeof(t_channel_id)];
+		memcpy(p, &for_channel_id, sizeof(t_channel_id));
+		neutrino_msg_t msg;
 		if (info.flags & (CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_next))
 		{
-			CSectionsdClient::CurrentNextInfo*	_info = new CSectionsdClient::CurrentNextInfo;
-			*_info = info;
-			neutrino_msg_t msg;
 			if (info.flags & CSectionsdClient::epgflags::has_current)
 				msg = NeutrinoMessages::EVT_CURRENTEPG;
 			else
 				msg = NeutrinoMessages::EVT_NEXTEPG;
-			g_RCInput->postMsg(msg, (neutrino_msg_data_t)_info, false );
 		}
 		else
-		{
-			t_channel_id * p = new t_channel_id;
-			*p = for_channel_id;
-			g_RCInput->postMsg(NeutrinoMessages::EVT_NOEPG_YET, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
-		}
-		memcpy(&oldinfo, &info, sizeof(CSectionsdClient::CurrentNextInfo));;
+			msg = NeutrinoMessages::EVT_NOEPG_YET;
+		g_RCInput->postMsg(msg, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
+		memcpy(&oldinfo, &info, sizeof(CSectionsdClient::CurrentNextInfo));
 	}
 }
 
