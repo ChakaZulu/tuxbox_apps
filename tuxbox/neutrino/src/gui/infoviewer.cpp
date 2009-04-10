@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.257 2009/04/08 19:05:07 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.258 2009/04/10 14:21:53 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1012,7 +1012,7 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		{
 			getEPG(*(t_channel_id *)data, info_CurrentNext);
 			CLCD::getInstance()->setEPGTitle(info_CurrentNext.current_name);
-			if ( is_visible )
+			if (is_visible && showButtonBar) // if we are called from numzap, showButtonBar is false
 				show_Data( true );
 			showLcdPercentOver();
 		}
@@ -1531,6 +1531,7 @@ void CInfoViewer::killTitle()
 			bottom += InfoHeightY_Info;
 		frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX+ SHADOW_OFFSET, bottom);
 	}
+	showButtonBar = false;
 }
 
 #ifndef SKIP_CA_STATUS
