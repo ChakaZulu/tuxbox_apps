@@ -64,7 +64,7 @@ int fh_jpeg_load_via_server(const char *filename,unsigned char *buffer,int x,int
 	struct pic_data pd;
 
 	strncpy(path, filename, PICV_CLIENT_SERVER_PATHLEN-1);
-	path[PICV_CLIENT_SERVER_PATHLEN]=0;
+	path[PICV_CLIENT_SERVER_PATHLEN-1]=0;
 	
 	dbout("fh_jpeg_load_via_server (%s/%d/%d) {\n",basename(filename),x,y);
 	if ((s=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==-1)

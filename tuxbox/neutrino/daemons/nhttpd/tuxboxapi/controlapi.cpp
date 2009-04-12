@@ -1950,6 +1950,7 @@ void CControlAPI::doNewTimer(CyhookHandler *hh)
 			CConfigFile *Config = new CConfigFile(',');
 			Config->loadConfig(NEUTRINO_CONFIGFILE);
 			_rec_dir = Config->getString("recording_dir_0", "/mnt/filme");
+			delete Config;
 		}
 		if(changeApids)
 			eventinfo.apids = apids;

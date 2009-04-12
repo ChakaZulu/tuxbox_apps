@@ -970,6 +970,7 @@ std::string  CNeutrinoYParser::func_set_timer_form(CyhookHandler *hh, std::strin
 		CConfigFile *Config = new CConfigFile(',');
 		Config->loadConfig(NEUTRINO_CONFIGFILE);
 		hh->ParamList["timer_recordingDir"] = Config->getString("network_nfs_recordingdir", "/mnt/filme");
+		delete Config;
 	}
 	hh->ParamList["standby"] = (cmd == "new")? "0" : ((timer.standby_on)?"1":"0");
 	hh->ParamList["message"] = (cmd == "new")? "" : timer.message;

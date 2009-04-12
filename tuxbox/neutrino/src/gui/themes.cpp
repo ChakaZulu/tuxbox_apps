@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.cpp,v 1.9 2009/03/29 16:54:02 seife Exp $ 
+	$Id: themes.cpp,v 1.10 2009/04/12 16:46:07 rhabarber1848 Exp $ 
 
 	Copyright (C) 2007, 2008, 2009 (flasher) Frank Liebelt
 
@@ -160,6 +160,7 @@ void CThemes::Show()
 		themes.addItem(GenericMenuSeparatorLine);
 		themes.addItem(m1);
 	} else {
+		delete m1;
 		printf("[neutrino theme] error accessing %s\n", USERDIR);
 	}
 
