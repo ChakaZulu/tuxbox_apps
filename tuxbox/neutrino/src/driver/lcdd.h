@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.h,v 1.41 2009/03/26 15:21:46 seife Exp $
+	$Id: lcdd.h,v 1.42 2009/04/12 21:11:44 rhabarber1848 Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -105,6 +105,7 @@ class CLCD
 		std::string			epg_title;
 		std::string			movie_big;
 		std::string			movie_small;
+		std::string			menutitle;
 		char				volume;
 		unsigned char			percentOver;
 		bool				muted;
@@ -137,11 +138,13 @@ class CLCD
 		          const char * fontfile3=NULL, const char * fontname3=NULL); 
 
 		void setMode(const MODES m, const char * const title = "");
+		MODES getMode() { return mode; };
 
 		void showServicename(const std::string name, const bool perform_wakeup = true); // UTF-8
 		void showMoviename(const std::string name); // UTF-8
 		void setEPGTitle(const std::string title);
 		void setMovieInfo(const std::string big, const std::string small);
+		std::string getMenutitle() { return menutitle; };
 		void showTime();
 		/** blocks for duration seconds */
 		void showRCLock(int duration = 2);
@@ -192,8 +195,6 @@ class CLCD
 		int m_progressGlobal;
 		int m_progressLocal;
 	public:
-		MODES getMode(void){return mode;};
-
 		void showFilelist(int flist_pos = -1,CFileList* flist = NULL,const char * const mainDir=NULL);
 		void showInfoBox(const char * const title = NULL,const char * const text = NULL,int autoNewline = -1,int timer = -1);
 		void showProgressBar(int global = -1,const char * const text = NULL,int show_escape = -1,int timer = -1);

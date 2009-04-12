@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.73 2009/03/30 09:52:36 seife Exp $
+	$Id: lcdd.cpp,v 1.74 2009/04/12 21:11:44 rhabarber1848 Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -759,6 +759,7 @@ void CLCD::showAudioProgress(const char perc, bool isMuted)
 void CLCD::setMode(const MODES m, const char * const title)
 {
 	mode = m;
+	menutitle = title;
 	setlcdparameter();
 
 	switch (m)
