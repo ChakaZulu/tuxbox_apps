@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.943 2009/04/03 15:41:42 seife Exp $
+	$Id: neutrino.cpp,v 1.944 2009/04/12 21:19:14 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -601,6 +601,7 @@ int CNeutrinoApp::loadSetup()
 #endif
 	g_settings.key_channelList_cancel = (neutrino_msg_t)configfile.getInt32("key_channelList_cancel", CRCInput::RC_home);
 	g_settings.key_channelList_sort = (neutrino_msg_t)configfile.getInt32("key_channelList_sort", CRCInput::RC_blue);
+	g_settings.key_channelList_search = (neutrino_msg_t)configfile.getInt32("key_channelList_search", CRCInput::RC_green);
 	g_settings.key_channelList_addrecord = (neutrino_msg_t)configfile.getInt32("key_channelList_addrecord", CRCInput::RC_red);
 	g_settings.key_channelList_addremind = (neutrino_msg_t)configfile.getInt32("key_channelList_addremind", CRCInput::RC_yellow);
 	g_settings.key_channelList_reload = (neutrino_msg_t)configfile.getInt32("key_channelList_reload", CRCInput::RC_setup);
@@ -1116,6 +1117,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "key_channelList_pagedown", (int)g_settings.key_channelList_pagedown );
 	configfile.setInt32( "key_channelList_cancel", (int)g_settings.key_channelList_cancel );
 	configfile.setInt32( "key_channelList_sort", (int)g_settings.key_channelList_sort );
+	configfile.setInt32( "key_channelList_search", (int)g_settings.key_channelList_search );
 	configfile.setInt32( "key_channelList_addrecord", (int)g_settings.key_channelList_addrecord );
 	configfile.setInt32( "key_channelList_addremind", (int)g_settings.key_channelList_addremind );
 	configfile.setInt32( "key_channelList_reload",  (int)g_settings.key_channelList_reload );

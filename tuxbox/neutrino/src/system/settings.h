@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.206 2009/04/03 15:41:43 seife Exp $
+  $Id: settings.h,v 1.207 2009/04/12 21:19:15 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -294,6 +294,7 @@ struct SNeutrinoSettings
 	neutrino_msg_t key_channelList_pagedown;
 	neutrino_msg_t key_channelList_cancel;
 	neutrino_msg_t key_channelList_sort;
+	neutrino_msg_t key_channelList_search;
 	neutrino_msg_t key_channelList_addrecord;
 	neutrino_msg_t key_channelList_addremind;
 	neutrino_msg_t key_channelList_reload;

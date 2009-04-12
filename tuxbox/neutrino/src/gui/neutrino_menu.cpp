@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.53 2009/04/01 11:44:38 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.54 2009/04/12 21:19:15 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1965,6 +1965,7 @@ enum keynames {
 	KEY_PAGE_DOWN,
 	KEY_CANCEL_ACTION,
 	KEY_SORT,
+	KEY_SEARCH,
 	KEY_ADD_RECORD,
 	KEY_ADD_REMIND,
 	KEY_RELOAD,
@@ -1987,6 +1988,7 @@ const neutrino_locale_t keydescription_head[] =
 	LOCALE_KEYBINDINGMENU_PAGEDOWN_HEAD,
 	LOCALE_KEYBINDINGMENU_CANCEL_HEAD,
 	LOCALE_KEYBINDINGMENU_SORT_HEAD,
+	LOCALE_EVENTFINDER_HEAD,
 	LOCALE_KEYBINDINGMENU_ADDRECORD_HEAD,
 	LOCALE_KEYBINDINGMENU_ADDREMIND_HEAD,
 	LOCALE_KEYBINDINGMENU_RELOAD_HEAD,
@@ -2007,6 +2009,7 @@ const neutrino_locale_t keydescription[] =
 	LOCALE_KEYBINDINGMENU_PAGEDOWN,
 	LOCALE_KEYBINDINGMENU_CANCEL,
 	LOCALE_KEYBINDINGMENU_SORT,
+	LOCALE_EVENTFINDER_HEAD,
 	LOCALE_KEYBINDINGMENU_ADDRECORD,
 	LOCALE_KEYBINDINGMENU_ADDREMIND,
 	LOCALE_KEYBINDINGMENU_RELOAD,
@@ -2039,6 +2042,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 			&g_settings.key_channelList_pagedown,
 			&g_settings.key_channelList_cancel,
 			&g_settings.key_channelList_sort,
+			&g_settings.key_channelList_search,
 			&g_settings.key_channelList_addrecord,
 			&g_settings.key_channelList_addremind,
 			&g_settings.key_channelList_reload,
