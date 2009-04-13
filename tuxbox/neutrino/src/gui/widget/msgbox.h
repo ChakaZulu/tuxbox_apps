@@ -85,7 +85,7 @@ class CMsgBox
 			FOOT		= 0x10,
 			BORDER		= 0x20,
 			CENTER		= 0x40,
-			NO_AUTO_LINEBREAK= 0x40
+			NO_AUTO_LINEBREAK= 0x80
 		}mode;
 
 	private:
