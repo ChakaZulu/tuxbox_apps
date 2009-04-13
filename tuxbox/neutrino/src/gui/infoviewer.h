@@ -53,9 +53,7 @@ class CInfoViewer
 	
 	bool           gotTime;
 	bool           recordModeActive;
-#ifndef SKIP_CA_STATUS
 	bool           CA_Status;
-#endif
 	
 	int            InfoHeightY;
 	int            InfoHeightY_Info;
@@ -103,9 +101,7 @@ class CInfoViewer
 	void showButton_SubServices();
 	
 	void showIcon_16_9()      const;
-#ifndef SKIP_CA_STATUS
 	void showIcon_CA_Status() const;
-#endif
 	void showIcon_VTXT()      const;
 	void showIcon_SubT()      const;
 	void showRecordIcon(const bool show);
@@ -135,9 +131,7 @@ class CInfoViewer
 	CSectionsdClient::CurrentNextInfo getCurrentNextInfo() { return info_CurrentNext; }
 	
 	void	showSubchan();
-#ifndef SKIP_CA_STATUS
 	void	Set_CA_Status(int Status);
-#endif
 	
 	int	handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
 	void	clearVirtualZapMode() {virtual_zap_mode = false;}

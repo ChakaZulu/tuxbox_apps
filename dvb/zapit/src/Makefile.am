@@ -1,9 +1,10 @@
-SUBDIRS = zapci zapost zapsi
+SUBDIRS = zapci zapost zapsi irsend
 
 INCLUDES = \
 	-I$(top_srcdir)/include \
 	@CONFIGFILE_CFLAGS@ \
 	@CONNECTION_CFLAGS@ \
+	@LIRCDCLIENT_CFLAGS@ \
 	@XML_CFLAGS@
 
 bin_PROGRAMS = pzapit zapit
@@ -27,6 +28,7 @@ udpstreampes_LDADD = \
 zapit_SOURCES = \
 	bouquets.cpp channel.cpp dvbstring.cpp \
 	getservices.cpp scan.cpp \
+	eventwatchdog.cpp controld.cpp \
 	zapit.cpp
 
 zapit_LDADD = \
@@ -34,13 +36,24 @@ zapit_LDADD = \
 	$(top_builddir)/src/zapci/libzapci.la \
 	$(top_builddir)/src/zapost/libzapost.la \
 	$(top_builddir)/src/zapsi/libzapsi.la \
+	$(top_builddir)/src/irsend/libirsend.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
+	@LIRCDCLIENT_LIBS@ \
 	@XML_LIBS@ \
 	-lpthread
+
+if BOXTYPE_DBOX2
+zapit_LDADD += \
+	-ltuxbox
+endif
 
 installdir = $(CONFIGDIR)/zapit
 
 install_DATA = 
 
-#AM_CPPFLAGS = -DSKIP_CA_STATUS
+if BOXTYPE_DBOX2
+install-data-local:
+	install -d $(CONFIGDIR)
+	install -m 644 $(srcdir)/scart.conf $(CONFIGDIR)
+endif

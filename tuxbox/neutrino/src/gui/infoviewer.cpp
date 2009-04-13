@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.259 2009/04/10 14:25:49 seife Exp $
+	$Id: infoviewer.cpp,v 1.260 2009/04/13 10:47:30 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -70,11 +70,7 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #define ICON_LARGE_WIDTH 26
 #define ICON_SMALL_WIDTH 16
 #define ICON_HEIGHT 16
-#ifndef SKIP_CA_STATUS
 #define ICON_OFFSET (2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6)
-#else
-#define ICON_OFFSET (2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6)
-#endif
 #define BOTTOM_BAR_OFFSET 0
 #define borderwidth 4
 
@@ -112,9 +108,7 @@ CInfoViewer::CInfoViewer()
 	is_visible       = false;
 	showButtonBar    = false;
 	gotTime          = g_Sectionsd->getIsTimeSet();
-#ifndef SKIP_CA_STATUS
 	CA_Status        = false;
-#endif
 	virtual_zap_mode = false;
 }
 
@@ -531,9 +525,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		
 		showButton_Audio();
 		showButton_SubServices();
-#ifndef SKIP_CA_STATUS
 		showIcon_CA_Status();
-#endif
 		showIcon_16_9();
 		showIcon_VTXT();
 		showIcon_SubT();
@@ -1122,7 +1114,6 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		gotTime = true;
 		return messages_return::handled;
 	}
-#ifndef SKIP_CA_STATUS
 	else if ( msg == NeutrinoMessages::EVT_ZAP_CA_CLEAR )
 	{
 		Set_CA_Status(false);
@@ -1138,8 +1129,7 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		Set_CA_Status(false);
 		return messages_return::handled;
 	}
-#endif
-	
+
    return messages_return::unhandled;
 }
 
@@ -1530,7 +1520,6 @@ void CInfoViewer::killTitle()
 	showButtonBar = false;
 }
 
-#ifndef SKIP_CA_STATUS
 void CInfoViewer::showIcon_CA_Status() const
 {
 	frameBuffer->paintIcon((CA_Status) ? "ca.raw" : "fta.raw",
@@ -1544,7 +1533,6 @@ void CInfoViewer::Set_CA_Status(int Status)
 	if ( is_visible && showButtonBar )
 		showIcon_CA_Status();
 }
-#endif
 
 int CInfoViewer::showChannelLogo( const t_channel_id logo_channel_id  )
 /* ****************************************************************************

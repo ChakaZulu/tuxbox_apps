@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.944 2009/04/12 21:19:14 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.945 2009/04/13 10:47:28 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2168,11 +2168,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	g_Sectionsd->RegisterNeutrino();
 
-#ifndef SKIP_CA_STATUS
 #define ZAPIT_EVENT_COUNT 26
-#else
-#define ZAPIT_EVENT_COUNT 23
-#endif
 	const CZapitClient::events zapit_event[ZAPIT_EVENT_COUNT] =
 	{
 			CZapitClient::EVT_ZAP_COMPLETE,
@@ -2181,11 +2177,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 			CZapitClient::EVT_ZAP_SUB_COMPLETE,
 			CZapitClient::EVT_ZAP_SUB_FAILED,
 			CZapitClient::EVT_ZAP_MOTOR,
-#ifndef SKIP_CA_STATUS
 			CZapitClient::EVT_ZAP_CA_CLEAR,
 			CZapitClient::EVT_ZAP_CA_LOCK,
 			CZapitClient::EVT_ZAP_CA_FTA,
-#endif
 			CZapitClient::EVT_RECORDMODE_ACTIVATED,
 			CZapitClient::EVT_RECORDMODE_DEACTIVATED,
 			CZapitClient::EVT_SCAN_COMPLETE,

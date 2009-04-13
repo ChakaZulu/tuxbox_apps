@@ -971,7 +971,6 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 							*msg  = NeutrinoMessages::EVT_BOUQUETSCHANGED;
 							*data = 0;
 							break;
-#ifndef SKIP_CA_STATUS
 						case CZapitClient::EVT_ZAP_CA_CLEAR:
 							*msg  = NeutrinoMessages::EVT_ZAP_CA_CLEAR;
 							break;
@@ -981,7 +980,6 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 						case CZapitClient::EVT_ZAP_CA_FTA:
 							*msg  = NeutrinoMessages::EVT_ZAP_CA_FTA;
 							break;
-#endif
 						case CZapitClient::EVT_SCAN_FAILED:
 							*msg  = NeutrinoMessages::EVT_SCAN_FAILED;
 							*data = 0;

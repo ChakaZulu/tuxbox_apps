@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.424 2009/03/21 15:12:36 seife Exp $
+ * $Id: zapit.cpp,v 1.426 2009/04/13 10:47:28 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -60,9 +60,9 @@
 #include <zapit/audio.h>
 #ifdef HAVE_DBOX_HARDWARE
 #include <zapit/aviaext.h>
+#include "irsend/irsend.h"
 #endif
 #include <zapit/cam.h>
-#include <zapit/client/msgtypes.h>
 #include <zapit/dmx.h>
 #include <zapit/debug.h>
 #include <zapit/frontend.h>
@@ -74,6 +74,12 @@
 #include <zapit/video.h>
 #include <xmltree/xmlinterface.h>
 #include <zapit/zapit.h>
+
+#include <zapit/client/msgtypes.h>
+#include <controldclient/controldMsg.h>
+#include <controldclient/controldclient.h>
+
+#include "controld.h"
 
 /* the conditional access module */
 CCam *cam = NULL;
@@ -745,6 +751,7 @@ CZapitClient::responseGetLastChannel load_settings(void)
 static transponder_id_t tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 static int pmt_update_fd = -1;
 static bool update_pmt = false;
+static bool auto_fec = false;
 
 void
 remember_selected_audio()
@@ -773,12 +780,14 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 		pmt_update_fd = -1;
 	}
 
-#ifndef SKIP_CA_STATUS
 	eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_CLEAR, CEventServer::INITID_ZAPIT);
 //	INFO("Event: CA_CLEAR send");
-#endif
 
-	DBG("tuned_transponder_id: " PRINTF_TRANSPONDER_ID_TYPE, tuned_transponder_id);
+#ifdef HAVE_DREAMBOX_HARDWARE
+	int retry = false;
+ again:
+#endif
+	WARN("tuned_transponder_id: " PRINTF_TRANSPONDER_ID_TYPE, tuned_transponder_id);
 
 	if (transponder_id == TRANSPONDER_ID_NOT_TUNED)	/* usual zap */
 	{
@@ -872,7 +881,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 		case 0:
 			break;
 		default:
-			WARN("tuned frequency does not match requested frequency. difference: %u\n", diff);
+			printf("[zapit] tuned frequency does not match request. difference: %d\n", diff);
 			break;
 		}
 
@@ -923,7 +932,20 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 		/* get program map table pid from program association table */
 		if (thisChannel->getPmtPid() == NONE)
 			if (parse_pat(thisChannel) < 0) {
-				WARN("pat parsing failed");
+				printf("[zapit] pat parsing failed\n");
+#ifdef HAVE_DREAMBOX_HARDWARE
+/* again, a workaround where i don't exactly know why it is needed.
+   sometimes, tuning fails on the first try, and for a second try i
+   need to go through a full tuning cycle again. Happened with DMAX
+   on a dreambox 500S... */
+				if (!retry) {
+					retry = true;
+					printf("[zapit] trying again...\n");
+					// force a full tuning cycle
+					tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
+					goto again;
+				}
+#endif
 				failed = true;
 			}
 
@@ -1171,15 +1193,238 @@ int start_scan(CZapitMessages::startScan msg)
 		scan_runs = 0;
 		return -1;
 	}
+	/* This message is a hack: if the variable "msg" is not used, apparently the
+	   compiler might optimize it out, so that it never reaches the scantread...
+	   At least that's my conclusion from the strange failures I did encounter. */
+	WARN("started scanthread with scan_mode: %d diseqc: %d", msg.scan_mode, msg.diseqc);
 
 	return 0;
 }
-
 
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
 	DBG("cmd %d (version %d) received", rmsg.cmd, rmsg.version);
 
+	if ((int)rmsg.cmd > 128) // hack, old controld commands are > 1024 now
+	{
+		switch (rmsg.cmd)
+		{
+		case CControldMsg::CMD_SAVECONFIG:
+			controldSaveSettings();
+			break;
+		case CControldMsg::CMD_SETVOLUME:
+			CControldMsg::commandVolume msg_commandVolume;
+			CBasicServer::receive_data(connfd, &msg_commandVolume, sizeof(msg_commandVolume));
+			if (msg_commandVolume.type == CControld::TYPE_UNKNOWN)
+				msg_commandVolume.type = settings.volume_type;
+			else
+				settings.volume_type = msg_commandVolume.type;
+
+			if (msg_commandVolume.type != CControld::TYPE_LIRC)
+			{
+				settings.volume = msg_commandVolume.volume;
+				if (settings.volume_type == CControld::TYPE_OST)
+					controldconfig->setInt32("volume", settings.volume);
+				else
+					controldconfig->setInt32("volume_avs", settings.volume);
+				audioDecoder->setVolume(msg_commandVolume.volume);
+			}
+#ifdef HAVE_DBOX_HARDWARE
+/* only the dbox2 has IR send, AFAIK */
+			else if (msg_commandVolume.type == CControld::TYPE_LIRC)
+			{
+				if (msg_commandVolume.volume > 50)
+				{
+					CIRSend irs("volplus");
+					irs.Send();
+				}
+				else if (msg_commandVolume.volume < 50)
+				{
+					CIRSend irs("volminus");
+					irs.Send();
+				}
+			}
+#endif
+			else
+				printf("[controld] msg_commandVolume.type == %d not supported on this box!\n", msg_commandVolume.type);
+			eventServer->sendEvent(CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD);
+			break;
+
+		case CControldMsg::CMD_SETMUTE:
+			CControldMsg::commandMute msg_commandMute;
+			CBasicServer::receive_data(connfd, &msg_commandMute, sizeof(msg_commandMute));
+			//printf("[controld] CControldMsg::CMD_SETMUTE: %d\n", msg_commandMute.mute);
+			if (msg_commandMute.type == CControld::TYPE_UNKNOWN)
+				msg_commandMute.type = settings.volume_type;
+			else
+				settings.volume_type = msg_commandMute.type;			
+
+			if (msg_commandMute.type != CControld::TYPE_LIRC)
+			{
+				settings.mute = msg_commandMute.mute;
+				controldconfig->setBool("mute", settings.mute);
+				if (settings.mute)
+					audioDecoder->mute();
+				else
+					audioDecoder->unmute();
+			}
+#ifdef HAVE_DBOX_HARDWARE
+			else if (msg_commandMute.type == CControld::TYPE_LIRC)
+			{
+				CIRSend irs("mute");
+				irs.Send();
+			}
+#else
+			else
+				printf("[controld] msg_commandMute.type == %d not supported on this box.\n", msg_commandMute.type);
+#endif
+			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &msg_commandMute, sizeof(msg_commandMute));
+			break;
+
+		case CControldMsg::CMD_GETVOLUME:
+			CControldMsg::commandVolume msg_responseVolume;
+			CBasicServer::receive_data(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
+			if (msg_responseVolume.type == CControld::TYPE_UNKNOWN)
+				msg_responseVolume.type = settings.volume_type;
+			if (msg_responseVolume.type != CControld::TYPE_LIRC)
+				msg_responseVolume.volume = (unsigned char)settings.volume;
+#ifdef HAVE_DBOX_HARDWARE
+			else if (msg_responseVolume.type == CControld::TYPE_LIRC)
+				msg_responseVolume.volume = 50; //we donnot really know...
+#else
+			else
+				printf("[controld] msg_responseVolume.type == %d not supported on this box.\n", msg_responseVolume.type);
+#endif
+			CBasicServer::send_data(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
+			break;
+
+		case CControldMsg::CMD_GETMUTESTATUS:
+			CControldMsg::commandMute msg_responseMute;
+			CBasicServer::receive_data(connfd, &msg_responseMute, sizeof(msg_responseMute));
+			if (msg_responseMute.type == CControld::TYPE_UNKNOWN)
+				msg_responseMute.type = settings.volume_type;
+			if (msg_responseMute.type != CControld::TYPE_LIRC)
+				msg_responseMute.mute = settings.mute;
+#ifdef HAVE_DBOX_HARDWARE
+			else if (msg_responseMute.type == CControld::TYPE_LIRC)
+				msg_responseMute.mute = false; //we donnot really know...
+#else
+			else
+				printf("[controld msg_responseMute.type == %d not supported on this box.\n", msg_responseMute.type);
+#endif
+			CBasicServer::send_data(connfd, &msg_responseMute, sizeof(msg_responseMute));
+			break;
+
+		case CControldMsg::CMD_SETVIDEOFORMAT:
+			//printf("[controld] set videoformat\n");
+			CControldMsg::commandVideoFormat msg2;
+			CBasicServer::receive_data(connfd, &msg2, sizeof(msg2));
+			settings.videoformat = msg2.format;
+			videoDecoder->setVideoFormat(msg2.format);
+			break;
+		case CControldMsg::CMD_SETVIDEOOUTPUT:
+			//printf("[controld] set videooutput\n");
+			CControldMsg::commandVideoOutput msg3;
+			CBasicServer::receive_data(connfd, &msg3, sizeof(msg3));
+			setvideooutput((CControld::video_format)msg3.output);
+			break;
+		case CControldMsg::CMD_SETBOXTYPE:
+			//printf("[controld] set boxtype\n");    //-------------------dummy!!!!!!!!!!
+			CControldMsg::commandBoxType msg4;
+			CBasicServer::receive_data(connfd, &msg4, sizeof(msg4));
+			setBoxType();
+			break;
+		case CControldMsg::CMD_SETSCARTMODE:
+			//printf("[controld] set scartmode\n");
+			CControldMsg::commandScartMode msg5;
+			CBasicServer::receive_data(connfd, &msg5, sizeof(msg5));
+			setScartMode(msg5.mode);
+			break;
+		case CControldMsg::CMD_GETSCARTMODE:
+			//printf("[controld] get scartmode\n");
+			CControldMsg::responseScartMode msg51;
+			msg51.mode = settings.vcr;
+			CBasicServer::send_data(connfd, &msg51, sizeof(CControldMsg::responseScartMode));
+			break;
+		case CControldMsg::CMD_SETVIDEOPOWERDOWN:
+			//printf("[controld] set scartmode\n");
+			CControldMsg::commandVideoPowerSave msg10;
+			CBasicServer::receive_data(connfd, &msg10, sizeof(msg10));
+			disableVideoOutput(msg10.powerdown);
+			break;
+
+		case CControldMsg::CMD_GETVIDEOPOWERDOWN:
+			//printf("[controld] CMD_GETVIDEOPOWERDOWN\n");
+			CControldMsg::responseVideoPowerSave msg101;
+			msg101.videoPowerSave = settings.videoOutputDisabled;
+			CBasicServer::send_data(connfd, &msg101, sizeof(msg101));
+			break;
+
+		case CControldMsg::CMD_GETVIDEOFORMAT:
+			//printf("[controld] get videoformat (fnc)\n");
+			CControldMsg::responseVideoFormat msg8;
+			msg8.format = settings.videoformat;
+			CBasicServer::send_data(connfd,&msg8,sizeof(msg8));
+			break;
+		case CControldMsg::CMD_GETASPECTRATIO:
+			//printf("[controld] get videoformat (fnc)\n");
+			CControldMsg::responseAspectRatio msga;
+			if (settings.vcr)
+				msga.aspectRatio = settings.aspectRatio_vcr;
+			else
+				msga.aspectRatio = settings.aspectRatio_dvb;
+			CBasicServer::send_data(connfd,&msga,sizeof(msga));
+			break;
+		case CControldMsg::CMD_GETVIDEOOUTPUT:
+			//printf("[controld] get videooutput (fblk)\n");
+			CControldMsg::responseVideoOutput msg9;
+			msg9.output = settings.videooutput;
+			CBasicServer::send_data(connfd,&msg9,sizeof(msg9));
+			break;
+		case CControldMsg::CMD_GETBOXTYPE:
+			//printf("[controld] get boxtype\n");
+			CControldMsg::responseBoxType msg0;
+			msg0.boxtype = settings.boxtype;
+			CBasicServer::send_data(connfd,&msg0,sizeof(msg0));
+			break;
+
+		case CControldMsg::CMD_SETCSYNC:
+			CControldMsg::commandCsync msg11;
+			CBasicServer::receive_data(connfd, &msg11, sizeof(msg11));
+			setRGBCsync(msg11.csync);
+			break;
+		case CControldMsg::CMD_GETCSYNC:
+			CControldMsg::commandCsync msg12;
+			msg12.csync = getRGBCsync();
+			CBasicServer::send_data(connfd, &msg12, sizeof(msg12));
+			break;
+
+		case CControldMsg::CMD_REGISTEREVENT:
+			eventServer->registerEvent(connfd);
+			break;
+		case CControldMsg::CMD_UNREGISTEREVENT:
+			eventServer->unRegisterEvent(connfd);
+			break;
+
+		case CControldMsg::CMD_SETVCROUTPUT:
+			//printf("[controld] set vcroutput\n");
+			CControldMsg::commandVCROutput msg13;
+			CBasicServer::receive_data(connfd, &msg13, sizeof(msg13));
+			setvcroutput((CControld::video_format)msg13.vcr_output);
+			break;
+		case CControldMsg::CMD_GETVCROUTPUT:
+			//printf("[controld] get vcroutput\n");
+			CControldMsg::responseVCROutput msg14;
+			msg14.vcr_output = settings.vcroutput;
+			CBasicServer::send_data(connfd,&msg14,sizeof(msg14));
+			break;
+
+		default:
+			printf("[controld] unknown command %d\n", (int)rmsg.cmd);
+		}
+		return true;
+	}
+	// no more controld, only zapit here...
 	if ((standby) && 
 			((rmsg.cmd != CZapitMessages::CMD_SET_STANDBY) &&
 			(rmsg.cmd != CZapitMessages::CMD_SHUTDOWN) &&
@@ -1194,7 +1439,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			(rmsg.cmd != CZapitMessages::CMD_SET_VOLUME) &&
 			(rmsg.cmd != CZapitMessages::CMD_MUTE) &&
 /* without SET_DISPLAY_FORMAT, controld cannot correct the aspect ratio in movieplayer */
-			(rmsg.cmd != CZapitMessages::CMD_SET_DISPLAY_FORMAT) &&
+//			(rmsg.cmd != CZapitMessages::CMD_SET_DISPLAY_FORMAT) &&
 			(rmsg.cmd != CZapitMessages::CMD_SB_GET_PLAYBACK_ACTIVE) &&
 #endif
 			(rmsg.cmd != CZapitMessages::CMD_GETPIDS))) {
@@ -1242,8 +1487,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_ZAPTO_SERVICEID_NOWAIT:
 	case CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT:
 	{
-		// will be deprecated once everything is in place
-		//ERROR("CMD_ZAPTO_SERVICEID_NOWAIT and CMD_ZAPTO_SUBSERVICEID_NOWAIT are deprecated!");
+		ERROR("CMD_ZAPTO_SERVICEID_NOWAIT and CMD_ZAPTO_SUBSERVICEID_NOWAIT are deprecated!");
 		CZapitMessages::commandZaptoServiceID msgZaptoServiceID;
 		CBasicServer::receive_data(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
 		zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
@@ -1803,16 +2047,12 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	}
 
 	case CZapitMessages::CMD_SET_PAL:
-	{
-		setVideoSystem_t(0);
+		videoDecoder->setVideoSystem(PAL);
 		break;
-	}
-	
+
 	case CZapitMessages::CMD_SET_NTSC:
-	{
-		setVideoSystem_t(1);
+		videoDecoder->setVideoSystem(NTSC);
 		break;
-	}
 
 	case CZapitMessages::CMD_SB_START_PLAYBACK:
 		playbackStopForced = false;
@@ -1825,6 +2065,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		playbackStopForced = true;
 		break;
 
+#if 0
 	case CZapitMessages::CMD_SET_DISPLAY_FORMAT:
 	{
 		CZapitMessages::commandInt msg;
@@ -1832,6 +2073,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		videoDecoder->setCroppingMode((video_displayformat_t) msg.val);
 		break;
 	}
+#endif
 
 	case CZapitMessages::CMD_SET_AUDIO_MODE:
 	{
@@ -1950,7 +2192,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::commandVolume msgVolume;
 		CBasicServer::receive_data(connfd, &msgVolume, sizeof(msgVolume));
-		audioDecoder->setVolume(msgVolume.left, msgVolume.right);
+		audioDecoder->setVolume(msgVolume.left);
 		break;
 	}
 
@@ -2325,12 +2567,12 @@ int startPlayBack(CZapitChannel *thisChannel)
 	}
 
 	/* set demux filters */
-	if (have_pcr) {
-		if (!pcrDemux)
-			pcrDemux = new CDemux();
-		if (pcrDemux->pesFilter(thisChannel->getPcrPid(), DMX_OUT_DECODER, DMX_PES_PCR) < 0)
+	if (have_video) {
+		if (!videoDemux)
+			videoDemux = new CDemux();
+		if (videoDemux->pesFilter(thisChannel->getVideoPid(), DMX_OUT_DECODER, DMX_PES_VIDEO) < 0)
 			return -1;
-		if (pcrDemux->start() < 0)
+		if (videoDemux->start() < 0)
 			return -1;
 	}
 	if (have_audio) {
@@ -2341,12 +2583,12 @@ int startPlayBack(CZapitChannel *thisChannel)
 		if (audioDemux->start() < 0)
 			return -1;
 	}
-	if (have_video) {
-		if (!videoDemux)
-			videoDemux = new CDemux();
-		if (videoDemux->pesFilter(thisChannel->getVideoPid(), DMX_OUT_DECODER, DMX_PES_VIDEO) < 0)
+	if (have_pcr) {
+		if (!pcrDemux)
+			pcrDemux = new CDemux();
+		if (pcrDemux->pesFilter(thisChannel->getPcrPid(), DMX_OUT_DECODER, DMX_PES_PCR) < 0)
 			return -1;
-		if (videoDemux->start() < 0)
+		if (pcrDemux->start() < 0)
 			return -1;
 	}
 #ifdef HAVE_DBOX_HARDWARE
@@ -2361,12 +2603,6 @@ int startPlayBack(CZapitChannel *thisChannel)
 	}
 #endif
 
-	/* start video */
-	if (have_video) {
-		videoDecoder->setSource(VIDEO_SOURCE_DEMUX);
-		videoDecoder->start();
-	}
-
 	/* select audio output and start audio */
 	if (have_audio) {
 		if (thisChannel->getAudioChannel()->isAc3)
@@ -2376,6 +2612,12 @@ int startPlayBack(CZapitChannel *thisChannel)
 
 		audioDecoder->setSource(AUDIO_SOURCE_DEMUX);
 		audioDecoder->start();
+	}
+
+	/* start video */
+	if (have_video) {
+		videoDecoder->setSource(VIDEO_SOURCE_DEMUX);
+		videoDecoder->start();
 	}
 
 	return 0;
@@ -2394,20 +2636,12 @@ int stopPlayBack(void)
 		audioDemux->stop();
 	if (pcrDemux)
 		pcrDemux->stop();
-	if (audioDecoder)
-		audioDecoder->stop();
 	if (videoDecoder)
 		videoDecoder->stop();
+	if (audioDecoder)
+		audioDecoder->stop();
 
 	return 0;
-}
-
-void setVideoSystem_t(int video_system)
-{
-	if (video_system == 0) 
-		videoDecoder->setVideoSystem(PAL);
-	else
-		videoDecoder->setVideoSystem(NTSC);
 }
 
 #ifdef HAVE_DBOX_HARDWARE
@@ -2485,10 +2719,12 @@ void enterStandby(void)
 		videoDemux = NULL;
 	}
 #ifndef HAVE_DREAMBOX_HARDWARE
-	// we need the audiodecoder in standby, to be able to set volume...
+	/* on the dreambox (dm500 tested) we need the audio device for setting
+	   the volume and it can be opened multiple times. Other drivers (dbox)
+	   do not allow multiple open() of the audio device */
 	if (audioDecoder) {
-		delete audioDecoder;
-		audioDecoder = NULL;
+		/* audioDecoder is used to set volume also in standby mode */
+		audioDecoder->closeDevice();
 	}
 #endif
 	if (cam) {
@@ -2499,8 +2735,8 @@ void enterStandby(void)
 		delete frontend;
 		frontend = NULL;
 	}
-#ifndef HAVE_DREAMBOX_HARDWARE
-	// needed in standby to correct aspect ration in movieplayer...
+#ifdef HAVE_DBOX_HARDWARE
+	// needed in standby to correct aspect ration in movieplayer, but not on dbox...
 	if (videoDecoder) {
 		delete videoDecoder;
 		videoDecoder = NULL;
@@ -2512,24 +2748,26 @@ void enterStandby(void)
 
 void leaveStandby(void)
 {
-	if (!audioDecoder) {
-		audioDecoder = new CAudio();
-		audioDecoder->unmute();
-	}
 	if (!cam) {
 		cam = new CCam();
 	}
 	if (!frontend) {
-		frontend = new CFrontend(config.getInt32("uncommitted_switch_mode", 0));
-	}
-	if (!videoDecoder) {
-		videoDecoder = new CVideo();
+		frontend = new CFrontend(config.getInt32("uncommitted_switch_mode", 0), (int)auto_fec);
 	}
 #ifdef HAVE_DBOX_HARDWARE
 	if (!aviaExtDriver) {
 		aviaExtDriver = new CAViAext();
 	}
 #endif
+	if (!audioDecoder)
+		audioDecoder = new CAudio();
+	else	// reopen the device...
+		audioDecoder->openDevice();
+
+	audioDecoder->unmute();
+
+	if (!videoDecoder)
+		videoDecoder = new CVideo();
 
 	frontend->setCurrentSatellitePosition(config.getInt32("lastSatellitePosition", 192));
 	frontend->setDiseqcRepeats(config.getInt32("diseqcRepeats", 0));
@@ -2624,12 +2862,12 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.424 2009/03/21 15:12:36 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.426 2009/04/13 10:47:28 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "dqunl")) > 0) {
+	while ((opt = getopt(argc, argv, "dqaunl")) > 0) {
 		switch (opt) {
 		case 'd':
 			debug = true;
@@ -2643,6 +2881,9 @@ int main(int argc, char **argv)
 			close(STDERR_FILENO);
 			if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
 				close(fd);
+			break;
+		case 'a':
+			auto_fec = true;
 			break;
 		case 'u':
 			update_pmt = true;
@@ -2708,7 +2949,7 @@ int main(int argc, char **argv)
 		setTVMode();
 
 	if (!frontend)
-		frontend = new CFrontend(config.getInt32("uncommitted_switch_mode", 0));
+		frontend = new CFrontend(config.getInt32("uncommitted_switch_mode", 0), (int)auto_fec);
 
 	diseqcType = (diseqc_t)config.getInt32("diseqcType", NO_DISEQC);
 	if (prepare_channels(frontend->getInfo()->type, diseqcType) < 0)
@@ -2759,9 +3000,26 @@ int main(int argc, char **argv)
 	// create eventServer
 	eventServer = new CEventServer;
 
-	leaveStandby();
-	//zap to lastchannel with zapit TEST
+	controld_main();
 
+	leaveStandby();
+
+	/* this was done by controld before, but now needs to come after leaveStandby() */
+#ifndef HAVE_DREAMBOX_HARDWARE
+	/* make sure that both volume settings are initialized */
+	audioDecoder->setVolume(settings.volume, (int)CControld::TYPE_OST);
+	if (settings.volume_type == CControld::TYPE_AVS)
+		settings.volume = settings.volume_avs;
+#endif
+	audioDecoder->setVolume(settings.volume);
+
+	if (settings.mute)
+		audioDecoder->mute();
+	else
+		audioDecoder->unmute();
+	videoDecoder->setVideoFormat(settings.videoformat);
+
+	//zap to lastchannel with zapit TEST
 #if 0
 	CZapitClient::responseGetLastChannel lastchannel;
 	lastchannel=load_settings();
@@ -2801,7 +3059,9 @@ int main(int argc, char **argv)
 	else {
 		zapit_server.run(parse_command, CZapitMessages::ACTVERSION);
 	}
-	
+
+	controld_end();
+
 	enterStandby();
 
 	if (scanInputParser)

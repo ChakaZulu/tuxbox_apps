@@ -85,11 +85,9 @@ struct NeutrinoMessages {
 		EVT_TIMER                                = CRCInput::RC_Events + 20,
 		EVT_PROGRAMLOCKSTATUS                    = CRCInput::RC_Events + 22,
 		EVT_RECORDMODE                           = CRCInput::RC_Events + 24,
-#ifndef SKIP_CA_STATUS
 		EVT_ZAP_CA_CLEAR                         = CRCInput::RC_Events + 26,
 		EVT_ZAP_CA_LOCK                          = CRCInput::RC_Events + 27,
 		EVT_ZAP_CA_FTA                           = CRCInput::RC_Events + 28,
-#endif
 		EVT_SCAN_FAILED                          = CRCInput::RC_Events + 29,
 		EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS = CRCInput::RC_Events + 30,
  		EVT_SCAN_REPORT_FREQUENCY                = CRCInput::RC_Events + 31,

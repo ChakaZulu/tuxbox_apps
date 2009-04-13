@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.55 2009/03/11 20:42:10 rhabarber1848 Exp $
+ * $Id: pmt.cpp,v 1.56 2009/04/13 10:47:28 rhabarber1848 Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -32,11 +32,9 @@
 
 #define PMT_SIZE 1024
 
-#ifndef SKIP_CA_STATUS
 #include <eventserver.h>
 #include <zapit/client/zapitclient.h>
 extern CEventServer *eventServer;
-#endif
 
 /*
  * Stream types
@@ -68,9 +66,7 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 	bool descramble = false;
 	std::string description = "";
 	unsigned char componentTag = 0xFF;
-#ifndef SKIP_CA_STATUS					
 	bool CaStatusSent = false;
-#endif
 	/* elementary stream info for ca pmt */
 	CEsInfo *esInfo = new CEsInfo();
 
@@ -103,12 +99,10 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 
 			case 0x09:
 				esInfo->addCaDescriptor(buffer + pos);
-#ifndef SKIP_CA_STATUS					
 				if (!CaStatusSent)
 					eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_LOCK, CEventServer::INITID_ZAPIT);
 				CaStatusSent = true;
 //				INFO("Event_ESINFO: CA_LOCK send");
-#endif
 				break;
 
 			case 0x0A: /* ISO_639_language_descriptor */
@@ -348,6 +342,7 @@ int parse_pmt(CZapitChannel * const channel)
 
 	unsigned char filter[DMX_FILTER_SIZE];
 	unsigned char mask[DMX_FILTER_SIZE];
+	bool CaStatusSent = false;
 
 	if (channel->getPmtPid() == 0)
 		return -1;
@@ -388,10 +383,10 @@ int parse_pmt(CZapitChannel * const channel)
 			switch (buffer[i]) {
 			case 0x09:
 				caPmt->addCaDescriptor(buffer + i);
-#ifndef SKIP_CA_STATUS
-				eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_LOCK, CEventServer::INITID_ZAPIT);
+				if (!CaStatusSent)
+					eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_LOCK, CEventServer::INITID_ZAPIT);
+				CaStatusSent = true;
 //				INFO("Event_PMT: CA_LOCK send");
-#endif
 				break;
 			default:
 				DBG("decriptor_tag: %02x", buffer[i]);
