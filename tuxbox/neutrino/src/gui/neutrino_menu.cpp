@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.54 2009/04/12 21:19:15 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.55 2009/04/14 20:21:40 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1960,23 +1960,23 @@ const CMenuOptionChooser::keyval KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS[KEYBINDI
 };
 
 enum keynames {
-	KEY_TV_RADIO_MODE,
-	KEY_PAGE_UP,
-	KEY_PAGE_DOWN,
-	KEY_CANCEL_ACTION,
-	KEY_SORT,
-	KEY_SEARCH,
-	KEY_ADD_RECORD,
-	KEY_ADD_REMIND,
-	KEY_RELOAD,
-	KEY_CHANNEL_UP,
-	KEY_CHANNEL_DOWN,
-	KEY_BOUQUET_UP,
-	KEY_BOUQUET_DOWN,
-	KEY_SUBCHANNEL_UP,
-	KEY_SUBCHANNEL_DOWN,
-	KEY_ZAP_HISTORY,
-	KEY_LASTCHANNEL,
+	VIRTUALKEY_TV_RADIO_MODE,
+	VIRTUALKEY_PAGE_UP,
+	VIRTUALKEY_PAGE_DOWN,
+	VIRTUALKEY_CANCEL_ACTION,
+	VIRTUALKEY_SORT,
+	VIRTUALKEY_SEARCH,
+	VIRTUALKEY_ADD_RECORD,
+	VIRTUALKEY_ADD_REMIND,
+	VIRTUALKEY_RELOAD,
+	VIRTUALKEY_CHANNEL_UP,
+	VIRTUALKEY_CHANNEL_DOWN,
+	VIRTUALKEY_BOUQUET_UP,
+	VIRTUALKEY_BOUQUET_DOWN,
+	VIRTUALKEY_SUBCHANNEL_UP,
+	VIRTUALKEY_SUBCHANNEL_DOWN,
+	VIRTUALKEY_ZAP_HISTORY,
+	VIRTUALKEY_LASTCHANNEL,
 
 	MAX_NUM_KEYNAMES
 };
@@ -2062,24 +2062,24 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 		keychooser[i] = new CKeyChooser(keyvalue_p[i], keydescription_head[i], NEUTRINO_ICON_SETTINGS);
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_MODECHANGE));
-	keySettings.addItem(new CMenuForwarder(keydescription[KEY_TV_RADIO_MODE], true, NULL, keychooser[KEY_TV_RADIO_MODE]));
+	keySettings.addItem(new CMenuForwarder(keydescription[VIRTUALKEY_TV_RADIO_MODE], true, NULL, keychooser[VIRTUALKEY_TV_RADIO_MODE]));
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_CHANNELLIST));
 
 	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_KEYBINDINGMENU_BOUQUETHANDLING, &g_settings.bouquetlist_mode, KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS, KEYBINDINGMENU_BOUQUETHANDLING_OPTION_COUNT, true );
 	keySettings.addItem(oj);
 
-	for (int i = KEY_PAGE_UP; i <= KEY_RELOAD; i++)
+	for (int i = VIRTUALKEY_PAGE_UP; i <= VIRTUALKEY_RELOAD; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_QUICKZAP));
 
-	for (int i = KEY_CHANNEL_UP; i <= KEY_SUBCHANNEL_DOWN; i++)
+	for (int i = VIRTUALKEY_CHANNEL_UP; i <= VIRTUALKEY_SUBCHANNEL_DOWN; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 
-	keySettings.addItem(new CMenuForwarder(keydescription[KEY_ZAP_HISTORY], true, NULL, keychooser[KEY_ZAP_HISTORY]));
+	keySettings.addItem(new CMenuForwarder(keydescription[VIRTUALKEY_ZAP_HISTORY], true, NULL, keychooser[VIRTUALKEY_ZAP_HISTORY]));
 
-	keySettings.addItem(new CMenuForwarder(keydescription[KEY_LASTCHANNEL], true, NULL, keychooser[KEY_LASTCHANNEL]));
+	keySettings.addItem(new CMenuForwarder(keydescription[VIRTUALKEY_LASTCHANNEL], true, NULL, keychooser[VIRTUALKEY_LASTCHANNEL]));
 }
 
 #define MAINMENU_RECORDING_OPTION_COUNT 2
