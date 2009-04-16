@@ -4,7 +4,7 @@
 
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: textbox.cpp,v 1.5 2009/03/29 16:23:11 seife Exp $
+	$Id: textbox.cpp,v 1.6 2009/04/16 18:40:11 rhabarber1848 Exp $
 
 	Kommentar: 
   
@@ -49,6 +49,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: textbox.cpp,v $
+	Revision 1.6  2009/04/16 18:40:11  rhabarber1848
+	fix movieinfo display, patch by Gaucho316: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=366884#p366884
+	
 	Revision 1.5  2009/03/29 16:23:11  seife
 	widgets: fix shadow warnings
 	
@@ -127,10 +130,10 @@ CTextBox::CTextBox(const char *text,
 
 #if 0
 	TRACE("  Mode: ");
-	if(mode & SCROLL) TRACE("SCROLL ");
-	if(mode & NO_AUTO_LINEBREAK) TRACE("NO_AUTO_LINEBREAK ");
-	if(mode & AUTO_WIDTH) TRACE("AUTO_WIDTH ");
-	if(mode & AUTO_HIGH) TRACE("AUTO_HIGH");
+	if(_mode & SCROLL) TRACE("SCROLL ");
+	if(_mode & NO_AUTO_LINEBREAK) TRACE("NO_AUTO_LINEBREAK ");
+	if(_mode & AUTO_WIDTH) TRACE("AUTO_WIDTH ");
+	if(_mode & AUTO_HIGH) TRACE("AUTO_HIGH");
 	TRACE("\r\n");
 
 #endif

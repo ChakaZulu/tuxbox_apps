@@ -110,10 +110,10 @@ CMsgBox::CMsgBox(const char *text,
 		m_nWindowFrameBorderWidth = 0;
 
 	//TRACE("  Mode: ");
-	//if(mode & BORDER) TRACE("BORDER ");
-	//if(mode & TITLE) TRACE("TITLE ");
-	//if(mode & FOOT) TRACE("FOOT ");
-	//if(mode & CENTER) TRACE("CENTER");
+	//if(_mode & BORDER) TRACE("BORDER ");
+	//if(_mode & TITLE) TRACE("TITLE ");
+	//if(_mode & FOOT) TRACE("FOOT ");
+	//if(_mode & CENTER) TRACE("CENTER");
 	//TRACE("\r\n");
 
 	//TRACE_1(" m_nWindowFrameBorderWidth: \t%d\r\n",m_nWindowFrameBorderWidth);
@@ -124,10 +124,10 @@ CMsgBox::CMsgBox(const char *text,
 
 	m_pcTextBox = new CTextBox(	text,
 					fontText,
-					mode,
+					_mode,
 					&m_cBoxFrameText);
 
-	if((mode & AUTO_WIDTH) || (mode & AUTO_HIGH))
+	if((_mode & AUTO_WIDTH) || (_mode & AUTO_HIGH))
 	{
 		/* window might changed in size ...*/
 		m_cBoxFrameText		= m_pcTextBox->getWindowsPos();
@@ -138,7 +138,7 @@ CMsgBox::CMsgBox(const char *text,
 		initFramesRel();
 	}
 
-	if(mode & CENTER)
+	if(_mode & CENTER)
 	{
 		m_cBoxFrame.iX	= g_settings.screen_StartX + ((g_settings.screen_EndX - g_settings.screen_StartX - m_cBoxFrame.iWidth) >>1);
 		m_cBoxFrame.iY	= g_settings.screen_StartY + ((g_settings.screen_EndY - g_settings.screen_StartY - m_cBoxFrame.iHeight) >>2);
