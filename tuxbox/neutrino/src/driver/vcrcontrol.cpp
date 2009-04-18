@@ -434,7 +434,7 @@ std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const t_channe
 	if (tmpstring.empty())
 		movieInfo.epgChannel = "unknown";
 	else
-		movieInfo.epgChannel = ZapitTools::UTF8_to_UTF8XML(tmpstring.c_str());
+		movieInfo.epgChannel = tmpstring;
 
 	tmpstring = "not available";
 	if (epgid != 0)
@@ -471,10 +471,10 @@ std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const t_channe
 		}
 #endif
 	}
-	movieInfo.epgTitle = 	ZapitTools::UTF8_to_UTF8XML(tmpstring.c_str());
+	movieInfo.epgTitle = 	tmpstring;
 	movieInfo.epgId = 		channel_id;
-	movieInfo.epgInfo1 = 	ZapitTools::UTF8_to_UTF8XML(info1.c_str());
-	movieInfo.epgInfo2 = 	ZapitTools::UTF8_to_UTF8XML(info2.c_str());
+	movieInfo.epgInfo1 = 	info1;
+	movieInfo.epgInfo2 = 	info2;
 	movieInfo.epgEpgId =  	epgid ;
 	movieInfo.epgMode = 	g_Zapit->getMode();
 	movieInfo.epgVideoPid = si.vpid;
@@ -487,7 +487,7 @@ std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const t_channe
 	for(unsigned int i= 0; i< pids.APIDs.size(); i++)
 	{
 		audio_pids.epgAudioPid = pids.APIDs[i].pid;
-		audio_pids.epgAudioPidName = ZapitTools::UTF8_to_UTF8XML(g_RemoteControl->current_PIDs.APIDs[i].desc);
+		audio_pids.epgAudioPidName = g_RemoteControl->current_PIDs.APIDs[i].desc;
 		movieInfo.audioPids.push_back(audio_pids);
 	}
 	movieInfo.epgVTXPID = si.vtxtpid;

@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.16 2009/03/28 14:48:57 seife Exp $
+	$Id: movieinfo.cpp,v 1.17 2009/04/18 22:24:40 rhabarber1848 Exp $
 
 	Kommentar:
 
@@ -49,6 +49,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <system/helper.h>
 #include <gui/widget/msgbox.h>
 #include <gui/movieinfo.h>
 #include <zapit/client/zapittools.h> /* ZapitTools::Latin1_to_UTF8 */
@@ -123,7 +124,7 @@ bool CMovieInfo::convertTs2XmlName(std::string* filename)
 ************************************************************************/
 #define XML_ADD_TAG_STRING(_xml_text_,_tag_name_,_tag_content_){ \
 	_xml_text_ += "\t\t<"_tag_name_">"; \
-	_xml_text_ += _tag_content_; \
+	_xml_text_ += ZapitTools::UTF8_to_UTF8XML(_tag_content_.c_str()); \
 	_xml_text_ += "</"_tag_name_">\n";}
 
 #define XML_ADD_TAG_UNSIGNED(_xml_text_,_tag_name_,_tag_content_){\
@@ -181,7 +182,7 @@ bool CMovieInfo::encodeMovieInfoXml(std::string* extMessage,MI_MOVIE_INFO &movie
 			sprintf(tmp, "%u", movie_info.audioPids[i].epgAudioPid); //pids.APIDs[i].pid);
 			*extMessage += tmp;
 			*extMessage += "\" "MI_XML_TAG_NAME"=\"";
-			*extMessage += movie_info.audioPids[i].epgAudioPidName; // ZapitTools::UTF8_to_UTF8XML(g_RemoteControl->current_PIDs.APIDs[i].desc);
+			*extMessage += ZapitTools::UTF8_to_UTF8XML(movie_info.audioPids[i].epgAudioPidName.c_str());
 			*extMessage += "\"/>\n";
 		}
 		*extMessage += "\t\t</"MI_XML_TAG_AUDIOPIDS">\n";
@@ -215,7 +216,7 @@ bool CMovieInfo::encodeMovieInfoXml(std::string* extMessage,MI_MOVIE_INFO &movie
 			sprintf(tmp, "%d", movie_info.bookmarks.user[i].length); //pids.APIDs[i].pid);
 			*extMessage += tmp;
 			*extMessage += "\" "MI_XML_TAG_BOOKMARK_USER_NAME"=\"";
-			*extMessage += movie_info.bookmarks.user[i].name;
+			*extMessage += ZapitTools::UTF8_to_UTF8XML(movie_info.bookmarks.user[i].name.c_str());
 			*extMessage += "\"/>\n";
 		}
 	}
@@ -630,6 +631,16 @@ int find_next_char(char to_find,char* text,int start_pos, int end_pos)
 	return(-1);
 }
 
+std::string decodeXmlSpecialChars(std::string s)
+{
+	StrSearchReplace(s,"&lt;","<");
+	StrSearchReplace(s,"&gt;",">");
+	StrSearchReplace(s,"&amp;","&");
+	StrSearchReplace(s,"&quot;","\"");
+	StrSearchReplace(s,"&apos;","\'");
+	return s;
+}
+
 #define GET_XML_DATA_STRING(_text_,_pos_,_tag_,_dest_)\
 	if(strncmp(&_text_[_pos_],_tag_,sizeof(_tag_)-1) == 0)\
 	{\
@@ -638,6 +649,7 @@ int find_next_char(char to_find,char* text,int start_pos, int end_pos)
 		while(_pos_ < bytes && _text_[_pos_] != '<' ) _pos_++;\
 		_dest_ = "";\
 		_dest_.append(&_text_[pos_prev],_pos_ - pos_prev );\
+		_dest_ = decodeXmlSpecialChars(_dest_);\
 		_pos_ += sizeof(_tag_);\
 		continue;\
 	}
@@ -729,7 +741,11 @@ bool CMovieInfo::parseXmlQuickFix(char* text, MI_MOVIE_INFO* movie_info)
 				{
 					int pos3=pos2+1;
 					while(text[pos+pos3] != '\"' && text[pos+pos3] != 0 && text[pos+pos3] != '/')pos3++;
-					if(text[pos+pos3] == '\"') audio_pids.epgAudioPidName.append(&text[pos+pos2+1],pos3-pos2-1);
+					if(text[pos+pos3] == '\"')
+					{
+						audio_pids.epgAudioPidName.append(&text[pos+pos2+1],pos3-pos2-1);
+						audio_pids.epgAudioPidName = decodeXmlSpecialChars(audio_pids.epgAudioPidName);
+					}
 				}
 			}
 			movie_info->audioPids.push_back(audio_pids); 
@@ -775,7 +791,11 @@ bool CMovieInfo::parseXmlQuickFix(char* text, MI_MOVIE_INFO* movie_info)
 									{
 										int pos3=pos2+1;
 										while(text[pos+pos3] != '\"' && text[pos+pos3] != 0 && text[pos+pos3] != '/')pos3++;
-										if(text[pos+pos3] == '\"') movie_info->bookmarks.user[bookmark_nr].name.append(&text[pos+pos2+1],pos3-pos2-1);
+										if(text[pos+pos3] == '\"')
+										{
+											movie_info->bookmarks.user[bookmark_nr].name.append(&text[pos+pos2+1],pos3-pos2-1);
+											movie_info->bookmarks.user[bookmark_nr].name = decodeXmlSpecialChars(movie_info->bookmarks.user[bookmark_nr].name);
+										}
 									}
 								}
 							}
