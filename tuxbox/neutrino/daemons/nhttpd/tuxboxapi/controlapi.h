@@ -57,6 +57,7 @@ private:
 	void ExecCGI(CyhookHandler *hh);
 	void SystemCGI(CyhookHandler *hh);
 	void StandbyCGI(CyhookHandler *hh);
+	void EsoundCGI(CyhookHandler *hh);
 	void RCCGI(CyhookHandler *hh);
 	void GetDateCGI(CyhookHandler *hh);
 	void GetTimeCGI(CyhookHandler *hh);
@@ -108,7 +109,7 @@ public:
 
 	// virtual functions for HookHandler/Hook
 	virtual std::string getHookName(void) {return std::string("mod_ControlAPI");}
-	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.6 $");}
+	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.7 $");}
 	virtual THandleStatus Hook_SendResponse(CyhookHandler *hh);
 	virtual THandleStatus Hook_PrepareResponse(CyhookHandler *hh);
 };

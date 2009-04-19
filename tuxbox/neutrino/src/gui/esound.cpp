@@ -1,5 +1,5 @@
 /*
-  $Id: esound.cpp,v 1.1 2009/03/29 20:47:14 rhabarber1848 Exp $
+  $Id: esound.cpp,v 1.2 2009/04/19 11:06:58 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   based on
@@ -87,6 +87,8 @@
 #define ESOUND_START_SCRIPT2 "/var/etc/init.d/start_esound"
 #define ESOUND_END_SCRIPT "killall esd"
 
+bool esound_active = false;
+
 CEsoundGui::CEsoundGui()
 {
 	m_frameBuffer = CFrameBuffer::getInstance();
@@ -94,13 +96,22 @@ CEsoundGui::CEsoundGui()
 
 CEsoundGui::~CEsoundGui()
 {
-	g_Zapit->setStandby (false);
-	g_Sectionsd->setPauseScanning (false);
+	if(!esound_active)
+	{
+		g_Zapit->setStandby (false);
+		g_Sectionsd->setPauseScanning (false);
+	}
 }
 
 //------------------------------------------------------------------------
 int CEsoundGui::exec(CMenuTarget* parent, const std::string &)
 {
+	if(esound_active)
+	{
+		puts("[esound.cpp] esound already active..."); 
+		return menu_return::RETURN_EXIT_ALL;
+	}
+	esound_active = true;
 	if(parent)
 	{
 		parent->hide();
@@ -162,6 +173,7 @@ int CEsoundGui::exec(CMenuTarget* parent, const std::string &)
 	else
 		puts("[esound.cpp] " ESOUND_START_SCRIPT1 " or " ESOUND_START_SCRIPT2 " not found, returning..." );
 
+	esound_active = false;
 	puts("[esound.cpp] executing " ESOUND_END_SCRIPT "."); 
 	if (system(ESOUND_END_SCRIPT) != 0) 
 		perror("Datei " ESOUND_END_SCRIPT " fehlt. Bitte erstellen, wenn gebraucht.\nFile " ESOUND_END_SCRIPT " not found. Please create if needed.\n");
@@ -214,9 +226,6 @@ int CEsoundGui::show()
 	CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
 
 	bool loop = true;
-	bool update = true;
-	bool clear_before_update = false;
-
 
 	ShowHintUTF( LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ESOUND_INFO) );
 	while(loop)
@@ -227,22 +236,13 @@ int CEsoundGui::show()
 			loop = false;
 		}
 
-		if (update)
-		{
-			if(clear_before_update)
-			{
-				hide();
-				clear_before_update = false;
-			}
-			update = false;
-		}
-		g_RCInput->getMsg(&msg, &data, 10); // 1 sec timeout to update play/stop state display
+		g_RCInput->getMsg(&msg, &data, 1);
 
 		if( msg == CRCInput::RC_timeout)
 		{
 			// nothing
 		}
-		else if( msg == CRCInput::RC_home)
+		else if( msg == CRCInput::RC_home || msg == NeutrinoMessages::ESOUND_OFF)
 		{ 
 			loop=false;
 		}

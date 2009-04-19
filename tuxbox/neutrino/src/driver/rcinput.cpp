@@ -823,6 +823,14 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 									*msg = NeutrinoMessages::STANDBY_OFF;
 									*data = 0;
 								break;
+							case NeutrinoMessages::ESOUND_ON :
+									*msg = NeutrinoMessages::ESOUND_ON;
+									*data = 0;
+								break;
+							case NeutrinoMessages::ESOUND_OFF :
+									*msg = NeutrinoMessages::ESOUND_OFF;
+									*data = 0;
+								break;
 							case NeutrinoMessages::EVT_START_PLUGIN :
 									*msg = NeutrinoMessages::EVT_START_PLUGIN;
 									*data = (neutrino_msg_data_t)p;

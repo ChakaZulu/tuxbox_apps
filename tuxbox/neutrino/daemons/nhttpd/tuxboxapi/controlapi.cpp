@@ -144,6 +144,7 @@ const CControlAPI::TyCgiCall CControlAPI::yCgiCallList[]=
 	{"standby", 		&CControlAPI::StandbyCGI,	"text/plain"},
 	{"shutdown", 		&CControlAPI::ShutdownCGI,	"text/plain"},
 	{"reboot", 		&CControlAPI::RebootCGI,	"text/plain"},
+	{"esound", 		&CControlAPI::EsoundCGI,	"text/plain"},
 	{"getdate", 		&CControlAPI::GetDateCGI,	"text/plain"},
 	{"gettime", 		&CControlAPI::GetTimeCGI,	"text/plain"},
 	{"settings", 		&CControlAPI::SettingsCGI,	"text/plain"},
@@ -446,6 +447,25 @@ void CControlAPI::RCCGI(CyhookHandler *hh)
 			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::LOCK_RC, CEventServer::INITID_HTTPD);
 		else if (hh->ParamList["1"] == "unlock")// unlock remote control
 			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::UNLOCK_RC, CEventServer::INITID_HTTPD);
+		else
+			hh->SendError();
+	}
+	hh->SendOk();
+}
+
+//-----------------------------------------------------------------------------
+void CControlAPI::EsoundCGI(CyhookHandler *hh)
+{
+	if (!(hh->ParamList.empty()))
+	{
+		if (hh->ParamList["1"] == "on") // esound on
+		{
+			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::ESOUND_ON, CEventServer::INITID_HTTPD);
+		}
+		else if (hh->ParamList["1"] == "off") // esound off
+		{
+			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::ESOUND_OFF, CEventServer::INITID_HTTPD);
+		}
 		else
 			hh->SendError();
 	}

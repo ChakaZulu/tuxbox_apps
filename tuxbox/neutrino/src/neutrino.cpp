@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.945 2009/04/13 10:47:28 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.946 2009/04/19 11:06:56 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -86,6 +86,7 @@
 #include "gui/movieplayer.h"
 #include "gui/nfs.h"
 #include "gui/screensetup.h"
+#include "gui/esound.h"
 
 #include <system/setting_helpers.h>
 #include <system/settings.h>
@@ -2965,6 +2966,13 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			{
 				skipShutdownTimer=false;
 			}
+			return messages_return::handled;
+		}
+		else if( msg == NeutrinoMessages::ESOUND_ON )
+		{
+			CEsoundGui::CEsoundGui tmpEsoundGui;
+			tmpEsoundGui.exec(NULL, "");
+			g_RCInput->clearRCMsg();
 			return messages_return::handled;
 		}
 		else if (msg == NeutrinoMessages::EVT_POPUP)
