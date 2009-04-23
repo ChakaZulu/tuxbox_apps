@@ -86,22 +86,19 @@ if test "$enable_http_update" = "no"; then
 AC_DEFINE(DISABLE_INTERNET_UPDATE,1,[deactivate http update])
 fi
 
-if test "$BOXTYPE" = "dm500" ; then
+if test "$BOXMODEL" = "dm500" ; then
 	CPPFLAGS="$CPPFLAGS -DHAVE_DREAMBOX_DM500"
 fi
 
-CPPFLAGS="$CPPFLAGS -Wextra"
+CPPFLAGS="$CPPFLAGS -Wextra -Wshadow"
 
 AC_OUTPUT([
 Makefile
 lib/Makefile
-lib/controldclient/Makefile
 lib/sectionsdclient/Makefile
 lib/timerdclient/Makefile
 lib/irsend/Makefile
 daemons/Makefile
-daemons/controld/Makefile
-daemons/controld/driver/Makefile
 daemons/nhttpd/Makefile
 daemons/nhttpd/web/Makefile
 daemons/nhttpd/web/images/Makefile
