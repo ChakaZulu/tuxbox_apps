@@ -384,10 +384,10 @@ AC_ARG_WITH(boxtype,
 	esac], [BOXTYPE="dbox2"])
 
 AC_ARG_WITH(boxmodel,
-	[  --with-boxmodel         valid for dreambox: dm500, dm500plus, dm600pvr, dm56x0, dm7020, dm7025)
+	[  --with-boxmodel         valid for dreambox: dm500, dm500plus, dm600pvr, dm56x0, dm7000, dm7020, dm7025)
                           valid for ipbox: ip200, ip250, ip350],
 	[case "${withval}" in
-		dm500|dm500plus|dm600pvr|dm56x0|dm7020|dm7025)
+		dm500|dm500plus|dm600pvr|dm56x0|dm7000|dm7020|dm7025)
 			if test "$BOXTYPE" = "dreambox"; then
 				BOXMODEL="$withval"
 			else
@@ -422,8 +422,7 @@ AM_CONDITIONAL(BOXMODEL_DM500,test "$BOXMODEL" = "dm500")
 AM_CONDITIONAL(BOXMODEL_DM500PLUS,test "$BOXMODEL" = "dm500plus")
 AM_CONDITIONAL(BOXMODEL_DM600PVR,test "$BOXMODEL" = "dm600pvr")
 AM_CONDITIONAL(BOXMODEL_DM56x0,test "$BOXMODEL" = "dm56x0")
-AM_CONDITIONAL(BOXMODEL_DM7000,test "$BOXMODEL" = "dm7020")
-AM_CONDITIONAL(BOXMODEL_DM7000,test "$BOXMODEL" = "dm7025")
+AM_CONDITIONAL(BOXMODEL_DM7000,test "$BOXMODEL" = "dm7000" -o "$BOXMODEL" = "dm7020" -o "$BOXMODEL" = "dm7025")
 
 AM_CONDITIONAL(BOXMODEL_IP200,test "$BOXMODEL" = "ip200")
 AM_CONDITIONAL(BOXMODEL_IP250,test "$BOXMODEL" = "ip250")
@@ -442,7 +441,6 @@ elif test "$BOXTYPE" = "generic"; then
 fi
 
 ])
-
 
 dnl backward compatiblity
 AC_DEFUN([AC_GNU_SOURCE],
