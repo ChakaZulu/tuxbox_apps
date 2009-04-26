@@ -63,6 +63,7 @@ neutrino_LDADD = \
 	-lresolv \
 	-ljpeg \
 	-lpthread \
+	-ldl \
 	@XML_LIBS@
 
 if ENABLE_UPNP
