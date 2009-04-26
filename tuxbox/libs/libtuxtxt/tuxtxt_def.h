@@ -4,7 +4,7 @@
 #ifndef TUXTXT_DEF_H
 
 #define TUXTXT_DEF_H
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
  #define TUXTXT_COMPRESS 1 // compress page data: 0 no compression, 1 with zlib, 2 with own algorithm
 #else
  #define TUXTXT_COMPRESS 2

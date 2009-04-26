@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include "tuxtxt_def.h"
-#ifndef HAVE_DREAMBOX_HARDWARE
+#if !defined HAVE_DREAMBOX_HARDWARE && !defined HAVE_IPBOX_HARDWARE
 #include <tuxbox.h>
 #endif
 #if TUXTXT_COMPRESS == 1
@@ -4323,7 +4323,7 @@ void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 	tuxtxt_cache.pageupdate = 1;
 
 	/* clear back buffer */
-#ifndef HAVE_DREAMBOX_HARDWARE
+#if !defined HAVE_DREAMBOX_HARDWARE && !defined HAVE_IPBOX_HARDWARE
 	renderinfo->clearbbcolor = tuxtxt_color_black;
 #else
 	renderinfo->clearbbcolor = renderinfo->screenmode?tuxtxt_color_transp:tuxtxt_cache.FullScrColor;
@@ -4719,7 +4719,7 @@ void tuxtxt_setcolors(tstRenderInfo* renderinfo,unsigned short *pcolormap, int o
 
 	unsigned short t = renderinfo->tr0[tuxtxt_color_transp2];
 	renderinfo->tr0[tuxtxt_color_transp2] = (renderinfo->trans_mode+7)<<11 | 0x7FF;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#if !defined HAVE_DREAMBOX_HARDWARE && !defined HAVE_IPBOX_HARDWARE
 	/* "correct" semi-transparent for Nokia (GTX only allows 2(?) levels of transparency) */
 	if (tuxbox_get_vendor() == TUXBOX_VENDOR_NOKIA)
 		renderinfo->tr0[tuxtxt_color_transp2] = 0xFFFF;
@@ -4906,7 +4906,7 @@ void tuxtxt_DoRender(tstRenderInfo* renderinfo, int startrow, int national_subse
 		if (renderinfo->transpmode || (renderinfo->boxed && !renderinfo->screenmode))
 		{
 			tuxtxt_FillBorder(renderinfo,tuxtxt_color_transp);//ClearBB(transp);
-#ifndef HAVE_DREAMBOX_HARDWARE
+#if !defined HAVE_DREAMBOX_HARDWARE && !defined HAVE_IPBOX_HARDWARE
 			renderinfo->clearbbcolor = tuxtxt_color_black;
 #else
 			renderinfo->clearbbcolor = tuxtxt_color_transp;

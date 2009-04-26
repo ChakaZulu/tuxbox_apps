@@ -423,7 +423,7 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings)
 	case CControld::FORMAT_SVIDEO:
 		arg = SAA_MODE_SVIDEO;
 		break;
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	case CControld::FORMAT_YUV_VBS:
 	case CControld::FORMAT_YUV_CVBS:
 		fprintf(stderr, "[controld] FORMAT_YUV_VBS/FORMAT_YUV_CVBS not supported on dreambox\n");
@@ -449,7 +449,7 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings)
 		close(fd);
 	}
 	
-#ifdef HAVE_DBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	if(format == CControld::FORMAT_RGB || format == CControld::FORMAT_YUV_VBS || format == CControld::FORMAT_YUV_VBS)
 		setRGBCsync(settings.csync);
 #endif
@@ -650,7 +650,7 @@ void disableVideoOutput(bool disable)
 	{
 		//zapit.setStandby(false);
 		audioDecoder->unmute();
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		startPlayBack(cc);
 #endif
 		setvideooutput(settings.videooutput, false);
@@ -662,7 +662,7 @@ void disableVideoOutput(bool disable)
 		videoDecoder->setVideoFormat(-1);
 		//zapit.setStandby(true);
 		audioDecoder->mute();
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		stopPlayBack();
 #endif
 	}

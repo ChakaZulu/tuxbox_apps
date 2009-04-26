@@ -4,10 +4,10 @@ INCLUDES = \
 
 noinst_LTLIBRARIES = libzapost.la
 
-if BOXTYPE_DREAMBOX
 libzapost_la_SOURCES = audio.cpp dmx.cpp frontend.cpp video.cpp
-else
-libzapost_la_SOURCES = audio.cpp aviaext.cpp dmx.cpp frontend.cpp video.cpp
+
+if BOXTYPE_DBOX2
+libzapost_la_SOURCES += aviaext.cpp
 endif
 
-AM_CPPFLAGS = -DDEBUG_SEC_TIMING
+# AM_CPPFLAGS = -DDEBUG_SEC_TIMING

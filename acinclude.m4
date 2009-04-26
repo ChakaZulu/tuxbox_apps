@@ -384,7 +384,7 @@ AC_ARG_WITH(boxtype,
 	esac], [BOXTYPE="dbox2"])
 
 AC_ARG_WITH(boxmodel,
-	[  --with-boxmodel         valid for dreambox: dm500, dm500plus, dm600pvr, dm56x0, dm7000, dm7020, dm7025)
+	[  --with-boxmodel         valid for dreambox: dm500, dm500plus, dm600pvr, dm56x0, dm7000, dm7020, dm7025
                           valid for ipbox: ip200, ip250, ip350],
 	[case "${withval}" in
 		dm500|dm500plus|dm600pvr|dm56x0|dm7000|dm7020|dm7025)
