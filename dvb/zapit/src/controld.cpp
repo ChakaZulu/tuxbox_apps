@@ -695,7 +695,7 @@ void setBoxType()
 	if (settings.boxtype==CControld::TUXBOX_MAKER_UNKNOWN)
 	{
 #endif
-		char * maker_str[] = {
+		const char * maker_str[] = {
 			"unknown",
 			"Nokia",
 			"Philips",

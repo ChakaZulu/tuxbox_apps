@@ -158,7 +158,7 @@ void CEventWatchDog::vcrModeChanged( int nNewVCRMode )
 #if HAVE_DVB_API_VERSION >= 3
 void *CEventWatchDog::watchdogThread(void *arg)
 {
-	char *verb_aratio[] = { "4:3", "16:9", "2.21:1" };
+	const char *verb_aratio[] = { "4:3", "16:9", "2.21:1" };
 
 	CEventWatchDog *WatchDog = (CEventWatchDog *)arg;
 	int fd_ev, fd_video;

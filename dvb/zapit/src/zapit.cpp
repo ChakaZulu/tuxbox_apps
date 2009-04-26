@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.426 2009/04/13 10:47:28 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.427 2009/04/26 19:58:22 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -309,10 +309,9 @@ void copy_transponder(FILE * tmp, xmlNodePtr transponder, const bool is_sat)
 		name = xmlGetAttribute(node, "name");
 		fprintf(tmp,
 			"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
-			xmlGetNumericAttribute(node, "service_id", 16),
+			(unsigned int)xmlGetNumericAttribute(node, "service_id", 16),
 			convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
-			xmlGetNumericAttribute(node, "service_type", 16));
-			
+			(unsigned int)xmlGetNumericAttribute(node, "service_type", 16));
 		node = node->xmlNextNode;
 	}
 }
@@ -403,7 +402,7 @@ void merge_transponder(FILE * tmp, xmlNodePtr transponder, xmlNodePtr current_tr
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 					csid,
 					convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
-					xmlGetNumericAttribute(current_node, "service_type", 16));
+					(unsigned int)xmlGetNumericAttribute(current_node, "service_type", 16));
 				current_node = getNextNode(current_transponder->xmlChildrenNode, csid);
 			} else {
 				name = xmlGetAttribute(node, "name");
@@ -412,7 +411,7 @@ void merge_transponder(FILE * tmp, xmlNodePtr transponder, xmlNodePtr current_tr
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 					sid,
 					convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
-					xmlGetNumericAttribute(node, "service_type", 16));
+					(unsigned int)xmlGetNumericAttribute(node, "service_type", 16));
 				node = getNextNode(transponder->xmlChildrenNode, sid);
 			}
 		}
@@ -561,11 +560,11 @@ static void write_bouquet_xml(FILE *fd, xmlNodePtr bouquet)
 //			name.c_str());
 //	} else {
 		fprintf(fd, "\t<Bouquet type=\"%01x\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"%01x\" locked=\"%01x\">\n",
-			xmlGetNumericAttribute(bouquet, "type", 16),
-			xmlGetNumericAttribute(bouquet, "bouquet_id", 16),
+			(unsigned int)xmlGetNumericAttribute(bouquet, "type", 16),
+			(unsigned int)xmlGetNumericAttribute(bouquet, "bouquet_id", 16),
 			convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
-			xmlGetNumericAttribute(bouquet, "hidden", 16),
-			xmlGetNumericAttribute(bouquet, "locked", 16));
+			(unsigned int)xmlGetNumericAttribute(bouquet, "hidden", 16),
+			(unsigned int)xmlGetNumericAttribute(bouquet, "locked", 16));
 //	}
 	
 	xmlNodePtr channel = bouquet->xmlChildrenNode;
@@ -576,19 +575,18 @@ static void write_bouquet_xml(FILE *fd, xmlNodePtr bouquet)
 			name = "";
 		if (xmlGetAttribute(channel, "sat") != NULL) {
 			fprintf(fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat=\"%03x\"/>\n",
-				xmlGetNumericAttribute(channel, "serviceID", 16),
+				(unsigned int)xmlGetNumericAttribute(channel, "serviceID", 16),
 				convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
-				xmlGetNumericAttribute(channel, "tsid", 16),
-				xmlGetNumericAttribute(channel, "onid", 16),
-				xmlGetSignedNumericAttribute(channel, "sat", 16));	
+				(unsigned int)xmlGetNumericAttribute(channel, "tsid", 16),
+				(unsigned int)xmlGetNumericAttribute(channel, "onid", 16),
+				(unsigned int)xmlGetSignedNumericAttribute(channel, "sat", 16));	
 		}
 		else
 			fprintf(fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\"/>\n",
-				xmlGetNumericAttribute(channel, "serviceID", 16),
+				(unsigned int)xmlGetNumericAttribute(channel, "serviceID", 16),
 				convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
-				xmlGetNumericAttribute(channel, "tsid", 16),
-				xmlGetNumericAttribute(channel, "onid", 16));
-				
+				(unsigned int)xmlGetNumericAttribute(channel, "tsid", 16),
+				(unsigned int)xmlGetNumericAttribute(channel, "onid", 16));
 		channel = channel->xmlNextNode;
 	}
 	fprintf(fd, "\t</Bouquet>\n");
@@ -2862,7 +2860,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.426 2009/04/13 10:47:28 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.427 2009/04/26 19:58:22 seife Exp $\n");
 
 	bool check_lock = true;
 	int opt;
