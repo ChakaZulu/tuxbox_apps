@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.134 2009/03/29 20:47:14 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.135 2009/04/27 08:37:54 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -664,6 +664,7 @@ const char * locale_real_names[] =
 	"miscsettings.shutdown_count_hint2",
 	"miscsettings.shutdown_real",
 	"miscsettings.shutdown_real_rcdelay",
+	"miscsettings.standby_save_power",
 	"miscsettings.tuxtxt_cache",
 	"miscsettings.virtual_zap_mode",
 	"miscsettings.volumebar_disp_pos",
