@@ -9,14 +9,14 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "draw.h"
+#include "rcinput.h"
+
 #ifdef HAVE_DREAMBOX_HARDWARE
 	static int fd_is_ext = 0;
 	static int keyboard = 0;
 	static int drop = 0;
 #endif
-
-#include "draw.h"
-#include "rcinput.h"
 
 #define Debug	if (debug) printf
 
