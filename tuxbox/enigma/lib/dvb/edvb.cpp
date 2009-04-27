@@ -9,9 +9,6 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#if HAVE_DVB_API_VERSION < 3
-#include <dbox/info.h>
-#endif
 #include <algorithm>
 #include <string.h>
 

@@ -1,6 +1,7 @@
 #ifndef RC_INPUT_H
 #define RC_INPUT_H
 
+#include <config.h>
 #ifndef HAVE_DREAMBOX_HARDWARE
 	#include "input_fake.h"
 	#define RC_0			KEY_0

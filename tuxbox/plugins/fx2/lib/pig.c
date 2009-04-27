@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <config.h>
 
 #ifndef i386
 #ifdef HAVE_DREAMBOX_HARDWARE
