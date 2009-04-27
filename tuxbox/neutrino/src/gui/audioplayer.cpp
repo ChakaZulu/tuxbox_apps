@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.65 2009/04/01 15:58:07 dbt Exp $
+  $Id: audioplayer.cpp,v 1.66 2009/04/27 08:06:32 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -283,6 +283,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 	// set zapit in standby mode
 	g_Zapit->setStandby(true);
 
+#ifdef HAVE_DBOX_HARDWARE
 	// If Audiomode is OST then save setting and switch to AVS-Mode
 	if(g_settings.audio_avs_Control == CControld::TYPE_OST)
 	{
@@ -290,6 +291,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 		g_settings.audio_avs_Control = CControld::TYPE_AVS;
 	}
 	else
+#endif
 		m_vol_ost = false;
 
 	// tell neutrino we're in audio mode
@@ -327,11 +329,13 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
 	//g_Zapit->zapTo_serviceID(channel_id);
 	g_Zapit->setStandby(false);
+#ifdef HAVE_DBOX_HARDWARE
 	if(m_vol_ost)
 	{
 		g_Controld->setVolume(100, CControld::TYPE_AVS);
 		g_settings.audio_avs_Control = CControld::TYPE_OST;
 	}
+#endif
 
 	//Send ir
 	CIRSend irs2("audioplayeroff");
