@@ -379,6 +379,10 @@ AC_ARG_WITH(boxtype,
 		dbox2|dreambox|ipbox|tripledragon|generic)
 			BOXTYPE="$withval"
 			;;
+		dm*)
+			BOXTYPE="dreambox"
+			BOXMODEL="$withval"
+			;;
 		*)
 			AC_MSG_ERROR([bad value $withval for --with-boxtype]) ;;
 	esac], [BOXTYPE="dbox2"])
@@ -405,7 +409,7 @@ AC_ARG_WITH(boxmodel,
 			AC_MSG_ERROR([unsupported value $withval for --with-boxmodel])
 			;;
 	esac],
-	[if test "$BOXTYPE" = "dreambox" -o "$BOXTYPE" = "ipbox"; then
+	[if test "$BOXTYPE" = "dreambox" -o "$BOXTYPE" = "ipbox" && test -z "$BOXMODEL"; then
 		AC_MSG_ERROR([Dreambox/IPBox needs --with-boxmodel])
 	fi])
 
