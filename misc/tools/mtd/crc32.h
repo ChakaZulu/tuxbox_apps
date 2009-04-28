@@ -1,9 +1,9 @@
 #ifndef CRC32_H
 #define CRC32_H
 
-/* $Id: crc32.h,v 1.1 2003/10/16 19:48:08 obi Exp $ */
+/* $Id: crc32.h,v 1.2 2009/04/28 13:26:17 seife Exp $ */
 
-#include <linux/types.h>
+#include <stdint.h>
 
 extern const uint32_t crc32_table[256];
 
