@@ -15,7 +15,7 @@ mouse1, mouse2, mouse3,
 pan, action
 */                                                                
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 static int keys_sent_map[N_SCANCODE];
 
 static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
@@ -152,7 +152,7 @@ hbtn_dbox = {
 void
 init_keyboard(void)
 {
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		fbvnc_keymap = fbvnc_keymap_dbox;
 #endif
 		hbtn = hbtn_dbox;
@@ -266,7 +266,7 @@ key_press(int hwkey) {
 		schedule_add(sched, kbdDelay, FBVNC_EVENT_KEYREPEAT);
 	}
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	keys_sent_map[hwkey] = key;
 #endif
 	dprintf("key_press: hwkey=%d, keysym=%d\n", hwkey, key);

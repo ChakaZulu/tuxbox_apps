@@ -320,7 +320,7 @@ void		RcGetActCode( void )
 	case RC_HOME:
 		doexit=3;
 		break;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	case KEY_1:
 		actcode = 1;
 		break;

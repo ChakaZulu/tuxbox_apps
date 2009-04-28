@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.28 2009/02/28 17:14:58 dbluelle Exp $
+ * $Id: setup_harddisk.cpp,v 1.29 2009/04/28 06:43:06 rhabarber1848 Exp $
  */
 
 #include <setup_harddisk.h>
@@ -377,7 +377,7 @@ void eHarddiskMenu::s_format()
 #endif
 		fclose(f);
 /*Set up Swapspace*/
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		system(eString().sprintf("/sbin/mkswap /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str());
 #endif
 

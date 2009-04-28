@@ -30,7 +30,7 @@ static	int		l_height = 0;
 
 void	Fx2SetPig( int x, int y, int width, int height )
 {
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	int overlay;
 #endif
 
@@ -71,7 +71,7 @@ void	Fx2SetPig( int x, int y, int width, int height )
 
 void	Fx2ShowPig( int x, int y, int width, int height )
 {
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	int overlay;
 #endif
 	if ( fd != -1 )
@@ -122,7 +122,7 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 
 void	Fx2StopPig( void )
 {
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	int overlay;
 #endif
 	if ( fd == -1 )

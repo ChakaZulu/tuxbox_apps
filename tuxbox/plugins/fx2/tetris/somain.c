@@ -49,7 +49,7 @@ static	char			*hscore=0;
 static	char			isalloc=0;
 static	int				localuser=-1;
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
     #ifndef TRUE
 	#define TRUE (!0)
     #endif
@@ -538,7 +538,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	}
 #endif
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	Fx2ShowPig( 480, 400, 176, 144 );
 #endif
 
@@ -621,7 +621,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	Fx2StopPig();
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 /* fx2 */
 /* buffer leeren, damit neutrino nicht rumspinnt */
 	realcode = RC_0;

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.82 2009/03/05 07:30:46 coronas Exp $
+ * $Id: setup_extra.cpp,v 1.83 2009/04/28 06:43:06 rhabarber1848 Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -219,7 +219,7 @@ void eExpertSetup::init_eExpertSetup()
 		eConfig::getInstance()->setKey("/ezap/extra/autoplay", autoplay);
 	new eListBoxEntryCheck(&list, _("Enable Filemode Autoplay"), "/ezap/extra/autoplay", _("continue playing last selected movie when entering Filemode"));
 #endif
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 //Boot-info
 	int bootInfo = 0;

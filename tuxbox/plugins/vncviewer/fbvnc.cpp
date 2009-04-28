@@ -10,7 +10,7 @@
 #ifdef HAVE_CONFIG_H
 	#include <config.h>
 #endif
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 #include <configfile.h>
 #endif
 #include <plugin.h>
@@ -20,7 +20,7 @@
 #include <dbox/fp.h>
 #include <linux/fb.h>
 #include "input_fake.h"
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 #include <dbox/fb.h>
 #endif
 
@@ -78,7 +78,7 @@ cleanup_and_exit(char *msg, int ret) {
 	list_destroy(global_framebuffer.overlays);
 	list_destroy(sched);
 	// enable keyboard-conversion again
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	unlink(KBLCKFILE);
 #endif
 	terminate=1;
@@ -196,7 +196,7 @@ fbvnc_init() {
 	{
 		cleanup_and_exit("Get fixed screen settings failed", EXIT_ERROR);
 	}
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if (ioctl(global_framebuffer.framebuf_fds,AVIA_GT_GV_GET_BLEV, &blev) == -1)
 	{
 		printf("Error get blev\n");
@@ -256,7 +256,7 @@ fbvnc_close() {
 	}
 	else
 		printf("Set 8\n");
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if (ioctl(global_framebuffer.framebuf_fds,AVIA_GT_GV_SET_BLEV, blev) == -1)
 	{
 		printf("Error set blev\n");
@@ -791,7 +791,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             {
                if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
                // ignore curser events older than 350 ms
                struct timeval now;
                gettimeofday(&now,NULL);
@@ -1585,7 +1585,7 @@ extern "C" {
 		}
 
 		// lock keyboard-conversions, this is done by the plugin itself
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		fclose(fopen(KBLCKFILE,"w"));
 #endif
 		fbvnc_init();

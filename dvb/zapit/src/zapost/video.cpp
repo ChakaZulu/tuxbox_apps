@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.14 2009/03/28 13:47:13 seife Exp $
+ * $Id: video.cpp,v 1.15 2009/04/28 06:43:05 rhabarber1848 Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -37,7 +37,7 @@ CVideo::CVideo(void)
 	if ((fd = open(VIDEO_DEVICE, O_RDWR)) < 0)
 		ERROR(VIDEO_DEVICE);
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	/* setBlank is not _needed_ on the Dreambox. I don't know about the
 	   dbox, so i ifdef'd it out. Not blanking the fb leaves the bootlogo
 	   on screen until the video starts. --seife */

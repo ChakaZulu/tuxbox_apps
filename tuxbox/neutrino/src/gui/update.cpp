@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.133 2009/03/29 16:55:42 seife Exp $
+	$Id: update.cpp,v 1.134 2009/04/28 06:43:08 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -255,7 +255,7 @@ bool CFlashUpdate::checkVersion4Update()
 	neutrino_locale_t msg_body;
 
 #ifndef DISABLE_INTERNET_UPDATE
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
 		if(!selectHttpImage())
@@ -441,7 +441,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 
 	// Is the file size that of a full image? Then flash as such.
 	unsigned int mtd_of_whole_image = CMTDInfo::getInstance()->findMTDNumberFromDescription(MTD_TEXT_OF_WHOLE_IMAGE);
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	unsigned int mtd_of_update_image = CMTDInfo::getInstance()->findMTDNumber(MTD_DEVICE_OF_UPDATE_PART);
 #else
 	unsigned int mtd_of_update_image = mtd_of_whole_image;
@@ -458,7 +458,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	{
 		ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(mtd_of_whole_image));
 		printf("full image %d %d\n", filesize,mtd_of_whole_image);
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	} else 
 	// Is filesize <= root partition? Then flash as update.
 	if (filesize <= CMTDInfo::getInstance()->getMTDSize(mtd_of_update_image)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: fp_reg.c,v 1.3 2008/03/09 14:12:59 seife Exp $
+ * $Id: fp_reg.c,v 1.4 2009/04/28 06:43:40 rhabarber1848 Exp $
  *
  * (C) 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	else {
 		val = strtoul(argv[2], NULL, 0) & 0xff;
 

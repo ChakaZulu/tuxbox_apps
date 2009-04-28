@@ -1,11 +1,12 @@
 AUTOMAKE_OPTIONS = gnu
 
+SUBDIRS = \
+	include tuxmail tuxtxt tuxcom tuxcal fx2 vncviewer enigma
+
 if BOXTYPE_DREAMBOX
-SUBDIRS = \
-	include tuxmail tuxtxt tuxcom tuxcal fx2 vncviewer enigma pip mosaic
+SUBDIRS += pip mosaic
 else
-SUBDIRS = \
-	include tuxmail tuxtxt tuxcom tuxcal fx2 vncviewer enigma pluginx
+SUBDIRS += pluginx
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig

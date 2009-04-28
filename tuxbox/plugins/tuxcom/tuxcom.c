@@ -27,7 +27,7 @@
  * GetRCCode  (Code from Tuxmail)
  ******************************************************************************/
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 
 int GetRCCode(int mode)
 {
@@ -123,7 +123,9 @@ int GetRCCode(int mode)
 		return 0;
 }
 
-#else
+#endif
+
+#ifdef HAVE_DREAMBOX_HARDWARE
 
 int GetRCCode(int mode)
 {
@@ -2443,7 +2445,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 
 	do{
 		while (GetRCCode(RC_EDIT) == 0);
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		if ((rccode >=0x20) && (rccode < 0x0100))
 		{
 		  kbcode=rccode;

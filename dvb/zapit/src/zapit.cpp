@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.427 2009/04/26 19:58:22 seife Exp $
+ * $Id: zapit.cpp,v 1.428 2009/04/28 06:43:03 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2860,7 +2860,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.427 2009/04/26 19:58:22 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.428 2009/04/28 06:43:03 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;
@@ -3003,7 +3003,7 @@ int main(int argc, char **argv)
 	leaveStandby();
 
 	/* this was done by controld before, but now needs to come after leaveStandby() */
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	/* make sure that both volume settings are initialized */
 	audioDecoder->setVolume(settings.volume, (int)CControld::TYPE_OST);
 	if (settings.volume_type == CControld::TYPE_AVS)

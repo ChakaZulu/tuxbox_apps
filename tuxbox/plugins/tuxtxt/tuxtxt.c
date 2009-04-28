@@ -139,7 +139,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.108 $";
+	char cvs_revision[] = "$Revision: 1.109 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -236,7 +236,7 @@ void plugin_exec(PluginParam *par)
 				case RC_HELP: /* switch to scart input and back */
 				{
 					int i, n;
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 					int vendor = tuxbox_get_vendor() - 1;
 #else
 					int vendor = 3; /* values unknown, rely on requested values */
@@ -575,7 +575,7 @@ void CleanUp()
 
 	if (restoreaudio)
 	{
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 		int vendor = tuxbox_get_vendor() - 1;
 #else
 		int vendor = 3; /* values unknown, rely on requested values */
@@ -2442,7 +2442,7 @@ void RenderMessage(int Message)
 	renderinfo.zoommode = 0;
 
 	/* set colors */
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	if (renderinfo.screenmode)
 	{
 		fbcolor   = tuxtxt_color_black;

@@ -53,7 +53,7 @@
 #include FT_CACHE_SMALL_BITMAPS_H
 
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 #include <linux/input.h>
 #endif
 
@@ -307,7 +307,7 @@ struct fb_cmap colormap = {1, 14, rd, gn, bl, tr};
 int trans_map     [] = {BLUE1,BLUE_TRANSP,TRANSP};
 int trans_map_mark[] = {GRAY2,GRAY_TRANSP,GRAY_TRANSP};
 
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 struct input_event ev;
 #endif
 

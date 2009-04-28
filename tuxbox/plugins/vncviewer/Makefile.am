@@ -1,11 +1,11 @@
 SUBDIRS = rfb
 
-if BOXTYPE_DREAMBOX
-AM_CPPFLAGS = @FREETYPE_CFLAGS@ -I./rfb  -I$(top_srcdir)/include
-vnc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @FREETYPE_LIBS@
-else
+if BOXTYPE_DBOX2
 AM_CPPFLAGS = -I./rfb @FREETYPE_CFLAGS@ @CONFIGFILE_CFLAGS@ -I$(top_srcdir)/include
 vnc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @FREETYPE_LIBS@ @CONFIGFILE_LIBS@
+else
+AM_CPPFLAGS = @FREETYPE_CFLAGS@ -I./rfb  -I$(top_srcdir)/include
+vnc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @FREETYPE_LIBS@
 endif
 noinst_LTLIBRARIES = vnc.la
 

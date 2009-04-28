@@ -1,15 +1,6 @@
 SUBDIRS = font 
 
-if BOXTYPE_DREAMBOX
-AM_CPPFLAGS = \
-	@FREETYPE_CFLAGS@ \
-	-I$(top_srcdir)/include \
-	-I$(includedir)/tuxbox/tuxtxt 
-
-tuxtxt_la_LIBADD = \
-	@FREETYPE_LIBS@ \
-	@TUXTXT_LIBS@
-else
+if BOXTYPE_DBOX2
 AM_CPPFLAGS = \
 	@TUXBOX_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
@@ -20,6 +11,15 @@ tuxtxt_la_LIBADD = \
 	@TUXBOX_LIBS@  \
 	@FREETYPE_LIBS@ \
 	@TUXTXT_LIBS@ 
+else
+AM_CPPFLAGS = \
+	@FREETYPE_CFLAGS@ \
+	-I$(top_srcdir)/include \
+	-I$(includedir)/tuxbox/tuxtxt 
+
+tuxtxt_la_LIBADD = \
+	@FREETYPE_LIBS@ \
+	@TUXTXT_LIBS@
 endif
 
 noinst_LTLIBRARIES = tuxtxt.la
