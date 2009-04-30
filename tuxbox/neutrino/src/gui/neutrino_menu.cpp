@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.57 2009/04/28 06:43:07 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.58 2009/04/30 19:44:34 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1103,19 +1103,13 @@ void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
 		else
 			g_settings.misc_option[i] = 0;
 		
-			if ((driver_setting_files[i].filename == "/var/etc/.philips_rc_patch") && (boxtype ==1)) // usefully for Philips RC and sometimes for Sagem RC
-			{
-				item_enabled[i] = false;
-			}
-			else if  ((driver_setting_files[i].filename == "/var/etc/.no_enxwatchdog") && (boxtype ==1)) // not for Nokia
-			{
-				item_enabled[i] = false;
-			}
-			else
-			{
-				item_enabled[i] = true;
-			}
-				
+		if (!strcmp(driver_setting_files[i].filename, "/var/etc/.philips_rc_patch") && (boxtype == 1)) // usefully for Philips RC and sometimes for Sagem RC
+			item_enabled[i] = false;
+		else if (!strcmp(driver_setting_files[i].filename, "/var/etc/.no_enxwatchdog") && (boxtype == 1)) // not for Nokia
+			item_enabled[i] = false;
+		else
+			item_enabled[i] = true;
+
 		driverSettings.addItem(new CMenuOptionChooser(driver_setting_files[i].name, &(g_settings.misc_option[i]), driver_setting_files[i].options, 2, item_enabled[i], new CTouchFileNotifier(driver_setting_files[i].filename)));
 	}
 
