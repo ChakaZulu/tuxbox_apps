@@ -412,7 +412,7 @@ AC_ARG_WITH(boxmodel,
 				AC_MSG_ERROR([unknown model $withval for boxtype $BOXTYPE])
 			fi
 			;;
-		ip200|ip250|ip300)
+		ip200|ip250|ip350|ip400)
 			if test "$BOXTYPE" = "ipbox"; then
 				BOXMODEL="$withval"
 			else
@@ -445,6 +445,7 @@ AM_CONDITIONAL(BOXMODEL_DM7000,test "$BOXMODEL" = "dm7000" -o "$BOXMODEL" = "dm7
 AM_CONDITIONAL(BOXMODEL_IP200,test "$BOXMODEL" = "ip200")
 AM_CONDITIONAL(BOXMODEL_IP250,test "$BOXMODEL" = "ip250")
 AM_CONDITIONAL(BOXMODEL_IP350,test "$BOXMODEL" = "ip350")
+AM_CONDITIONAL(BOXMODEL_IP400,test "$BOXMODEL" = "ip400")
 
 if test "$BOXTYPE" = "dbox2"; then
 	AC_DEFINE(HAVE_DBOX_HARDWARE, 1, [building for a dbox2])
