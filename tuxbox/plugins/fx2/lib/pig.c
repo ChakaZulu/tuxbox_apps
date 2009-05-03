@@ -37,17 +37,7 @@ void	Fx2SetPig( int x, int y, int width, int height )
 	if ( fd==-1 )
 		return;
 
-#ifdef HAVE_DREAMBOX_HARDWARE
-	avia_pig_hide(fd);
-	avia_pig_set_pos(fd,x,y);
-	avia_pig_set_size(fd,width,height);
-	FBFillRect( x, y, width, height, 0 ); // Fill transp.. for dreambox
-	avia_pig_show(fd);
-	l_x=x;
-	l_y=y;
-	l_width=width;
-	l_height=height;
-#else
+#ifdef HAVE_DBOX_HARDWARE
 	if (( x == format.fmt.win.w.left ) && ( y == format.fmt.win.w.top ) &&
 		( width == format.fmt.win.w.width ) && ( height == format.fmt.win.w.height ))
 			return;
@@ -66,6 +56,16 @@ void	Fx2SetPig( int x, int y, int width, int height )
 	overlay = 1;
 	
 	ioctl(fd, VIDIOC_OVERLAY, &overlay);
+#else
+	avia_pig_hide(fd);
+	avia_pig_set_pos(fd,x,y);
+	avia_pig_set_size(fd,width,height);
+	FBFillRect( x, y, width, height, 0 ); // Fill transp.. for dreambox
+	avia_pig_show(fd);
+	l_x=x;
+	l_y=y;
+	l_width=width;
+	l_height=height;
 #endif
 }
 
@@ -92,17 +92,7 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 	if ( fd == -1 )
 		return;
 
-#ifdef HAVE_DREAMBOX_HARDWARE
-	FBFillRect( x, y, width, height, 0 ); // fill transp for dreambox
-	l_x=x;
-	l_y=y;
-	l_width=width;
-	l_height=height;
-	avia_pig_set_pos(fd,x,y);
-	avia_pig_set_size(fd,width,height);
-	avia_pig_set_stack(fd,2);
-	avia_pig_show(fd);
-#else
+#ifdef HAVE_DBOX_HARDWARE
 	ioctl(fd, VIDIOC_G_FMT, &format);
 	format.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
 	format.fmt.win.w.left=x;
@@ -117,6 +107,16 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 	overlay = 1;
 	
 	ioctl(fd, VIDIOC_OVERLAY, &overlay);
+#else
+	FBFillRect( x, y, width, height, 0 ); // fill transp for dreambox
+	l_x=x;
+	l_y=y;
+	l_width=width;
+	l_height=height;
+	avia_pig_set_pos(fd,x,y);
+	avia_pig_set_size(fd,width,height);
+	avia_pig_set_stack(fd,2);
+	avia_pig_show(fd);
 #endif
 }
 
@@ -128,11 +128,11 @@ void	Fx2StopPig( void )
 	if ( fd == -1 )
 		return;
 
-#ifdef HAVE_DREAMBOX_HARDWARE
-	avia_pig_hide(fd);
-#else
+#ifdef HAVE_DBOX_HARDWARE
 	overlay = 0;
 	ioctl(fd, VIDIOC_OVERLAY, &overlay);
+#else
+	avia_pig_hide(fd);
 #endif
 
 	close(fd);

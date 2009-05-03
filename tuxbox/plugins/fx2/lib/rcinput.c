@@ -8,6 +8,7 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
+#include <linux/input.h>
 
 #include "draw.h"
 #include "rcinput.h"

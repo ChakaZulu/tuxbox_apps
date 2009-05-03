@@ -1480,10 +1480,20 @@ extern "C" {
 		sprintf(szServerScale ,"server_scale%s",szServerNr);
 		sprintf(szPasswd      ,"passwd%s",szServerNr);
 		sprintf(szMouse       ,"mouse%s",szServerNr);
-		
-		
-#ifdef HAVE_DREAMBOX_HARDWARE
 
+#ifdef HAVE_DBOX_HARDWARE
+		CConfigFile config('\t');
+		config.loadConfig(CONFIGDIR "/vnc.conf");
+		strncpy(hostname, config.getString(szServer,"vnc").c_str(), 254);
+		port=config.getInt32(szPort,5900);
+		gScale=config.getInt32(szScale,1);
+		serverScaleFactor = config.getInt32(szServerScale,1);
+		rcCycleDuration = config.getInt32("rc_cycle_duration",225)*1000;
+		rcTest = config.getInt32("rc_test",0);
+		strcpy(passwdString,config.getString(szPasswd,"").substr(0,8).c_str());
+		debug = config.getInt32("debug",0);
+		screenmode = config.getInt32("screenmode",0);
+#else
 		strcpy(hostname,"vnc");
 		gScale=1;
 		serverScaleFactor = 1;
@@ -1522,18 +1532,6 @@ extern "C" {
 			}
 			fclose(fp);
 		}
-#else
-		CConfigFile config('\t');
-		config.loadConfig(CONFIGDIR "/vnc.conf");
-		strncpy(hostname, config.getString(szServer,"vnc").c_str(), 254);
-		port=config.getInt32(szPort,5900);
-		gScale=config.getInt32(szScale,1);
-		serverScaleFactor = config.getInt32(szServerScale,1);
-		rcCycleDuration = config.getInt32("rc_cycle_duration",225)*1000;
-		rcTest = config.getInt32("rc_test",0);
-		strcpy(passwdString,config.getString(szPasswd,"").substr(0,8).c_str());
-		debug = config.getInt32("debug",0);
-		screenmode = config.getInt32("screenmode",0);
 #endif
 		if(gScale > 4 || gScale < 1)
 			gScale=1;

@@ -279,12 +279,12 @@ key_release(int hwkey)
 	int key;
 
 	if (fn_action) return;
-#ifdef HAVE_DREAMBOX_HARDWARE
-	key = hwkey;
-#else
+#ifdef HAVE_DBOX_HARDWARE
 	if (hwkey < 0 || hwkey >= N_SCANCODE) return;
 
 	key = keys_sent_map[hwkey];
+#else
+	key = hwkey;
 #endif
 	dprintf("key_release: hwkey=%d, keysym=%d\n", hwkey, key);
 	SendKeyEvent(key, 0);
