@@ -403,7 +403,7 @@ AC_ARG_WITH(boxtype,
 
 AC_ARG_WITH(boxmodel,
 	[  --with-boxmodel         valid for dreambox: dm500, dm500plus, dm600pvr, dm56x0, dm7000, dm7020, dm7025)
-                          valid for ipbox: ip200, ip250, ip350],
+                          valid for ipbox: ip200, ip250, ip350, ip400],
 	[case "${withval}" in
 		dm500|dm500plus|dm600pvr|dm56x0|dm7000|dm7020|dm7025)
 			if test "$BOXTYPE" = "dreambox"; then
