@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.946 2009/04/19 11:06:56 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.947 2009/05/04 18:47:24 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2706,7 +2706,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		}
 		else if (msg == NeutrinoMessages::RECORD_START)
 		{
-			if (mode == mode_standby)
+			if (g_settings.standby_save_power && mode == mode_standby)
 			{
 				standbyMode(false);
 				standbyAfterRecord = true;
@@ -2858,7 +2858,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		}
 		else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
 		{
-			if (mode == mode_standby)
+			if (g_settings.standby_save_power && mode == mode_standby)
 			{
 				standbyMode(false);
 				standbyAfterRecord = true;
@@ -2926,7 +2926,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		}
 		else if( msg == NeutrinoMessages::STANDBY_ON )
 		{
-			if (recordingstatus != 0)
+			if (g_settings.standby_save_power && recordingstatus != 0)
 			{
 				DisplayErrorMessage("Nach Ende der Aufnahme wird in Standby geschaltet...");
 				standbyAfterRecord = true;
