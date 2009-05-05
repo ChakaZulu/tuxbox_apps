@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.291 2009/04/10 11:53:43 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.292 2009/05/05 18:57:39 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2465,7 +2465,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.291 2009/04/10 11:53:43 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.292 2009/05/05 18:57:39 rhabarber1848 Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -7330,6 +7330,9 @@ static void *cnThread(void *)
 #ifdef PAUSE_EQUALS_STOP
 					dmxCN.real_unpause();
 #endif
+#if HAVE_IPBOX_HARDWARE
+					dmxCN.change(0);
+#endif
 				}
 				else
 				{
@@ -8108,7 +8111,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.291 2009/04/10 11:53:43 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.292 2009/05/05 18:57:39 rhabarber1848 Exp $\n");
 
 	SIlanguage::loadLanguages();
 
