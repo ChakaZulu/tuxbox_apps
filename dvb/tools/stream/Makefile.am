@@ -1,16 +1,17 @@
+if BOXTYPE_DBOX2
+# mpegtools are only used on DVB_API > 1 => dbox2
 INCLUDES = @MPEGTOOLS_CFLAGS@
-if BOXTYPE_DREAMBOX
-sbin_PROGRAMS = streampes streamts streamsec udpstreamts udpstreampes
-udpstreampes_LDADD = -lpthread
-udpstreampes_SOURCES = udpstreampes.cpp
-else
 sbin_PROGRAMS = streampes streamts streamsec udpstreamts streamfile fserver
+streamts_LDADD = @MPEGTOOLS_LIBS@
 streamfile_LDADD = @MPEGTOOLS_LIBS@ -lpthread
 streamfile_SOURCES = streamfile.c ringbuffer.c
 fserver_SOURCES = fserver.c
+else
+sbin_PROGRAMS = streampes streamts streamsec udpstreamts udpstreampes
+udpstreampes_LDADD = -lpthread
+udpstreampes_SOURCES = udpstreampes.cpp
 endif
 streampes_SOURCES = streampes.c
-streamts_LDADD = @MPEGTOOLS_LIBS@
 streamts_SOURCES = streamts.c
 streamsec_SOURCES = streamsec.c
 udpstreamts_SOURCES = udpstreamts.c
