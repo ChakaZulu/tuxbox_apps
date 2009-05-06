@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.12 2009/03/11 20:42:18 rhabarber1848 Exp $
+	$Id: movieviewer.cpp,v 1.13 2009/05/06 19:50:21 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -554,10 +554,10 @@ void CMovieViewer::paintTime( bool show_dot, bool firstPaint )
 /************************************************************************
  
 ************************************************************************/
-void CMovieViewer::showRecordIcon(const bool show)
+void CMovieViewer::showRecordIcon(const bool _show)
 {
 	int ChanNameX = BoxStartX + ChanWidth + 20;
-	if(show)
+	if(_show)
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, ChanNameX, BoxStartY+10 );
 	}

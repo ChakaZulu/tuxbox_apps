@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.23 2009/02/18 17:48:41 seife Exp $
+	$Id: moviebrowser.cpp,v 1.24 2009/05/06 19:48:20 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.24  2009/05/06 19:48:20  houdini
+	fixed some warnings about shadowed variables
+	
 	Revision 1.23  2009/02/18 17:48:41  seife
 	Add missing includes for newer compilers
 	
@@ -468,7 +471,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.23 2009/02/18 17:48:41 seife Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.24 2009/05/06 19:48:20 houdini Exp $\r\n");
 	init();
 }
 
@@ -1427,7 +1430,7 @@ void CMovieBrowser::refreshFilterList(void)
 		std::string tmp = g_Locale->getText(LOCALE_MENU_BACK);
 		m_FilterLines.lineArray[0].push_back(tmp);
 		
-		 if(m_settings.filter.item == MB_INFO_FILEPATH)
+		if(m_settings.filter.item == MB_INFO_FILEPATH)
 		{
 			for(unsigned int i =0 ; i < m_dirNames.size() ;i++)
 			{
@@ -1450,23 +1453,23 @@ void CMovieBrowser::refreshFilterList(void)
 		}
 		else if(m_settings.filter.item == MB_INFO_INFO2)
 		{
-			std::string tmp = "->Eingabe";
-			m_FilterLines.lineArray[0].push_back(tmp);
+			std::string tmp2 = "->Eingabe";
+			m_FilterLines.lineArray[0].push_back(tmp2);
 		}
 		else if(m_settings.filter.item == MB_INFO_MAJOR_GENRE)
 		{
 			for(int i = 0; i < GENRE_ALL_COUNT; i++)
 			{
-				std::string tmp = g_Locale->getText(GENRE_ALL[i].value);
-				m_FilterLines.lineArray[0].push_back(tmp);
+				std::string tmp2 = g_Locale->getText(GENRE_ALL[i].value);
+				m_FilterLines.lineArray[0].push_back(tmp2);
 			}
 		}
 		else if(m_settings.filter.item == MB_INFO_SERIE)
 		{
 			updateSerienames();
-            for(unsigned int i = 0; i < m_vHandleSerienames.size(); i++)
+			for(unsigned int i = 0; i < m_vHandleSerienames.size(); i++)
 			{
-                m_FilterLines.lineArray[0].push_back(m_vHandleSerienames[i]->serieName);
+				m_FilterLines.lineArray[0].push_back(m_vHandleSerienames[i]->serieName);
 			}
 		}
 	}
@@ -1748,18 +1751,18 @@ void CMovieBrowser::refreshFoot(void)
 	// draw 
 	if(1)
 	{
-		std::string ok_text;
+		std::string ok_text2;
 		if(m_settings.gui == MB_GUI_FILTER && m_windowFocus == MB_FOCUS_FILTER)
 		{
-			ok_text = "select";
+			ok_text2 = "select";
 		}
 		else
 		{
-			ok_text = g_Locale->getText(LOCALE_MOVIEBROWSER_FOOT_PLAY);
+			ok_text2 = g_Locale->getText(LOCALE_MOVIEBROWSER_FOOT_PLAY);
 		}
 		m_pcWindow->paintBoxRel(xpos4, m_cBoxFrameFootRel.iY, width4, footheight, (CFBWindow::color_t)bgcolor, c_rad_mid, CORNER_BOTTOM_RIGHT);
 		m_pcWindow->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, xpos4, ypos_icon-4);
-		m_pcWindow->RenderString(m_pcFontFoot, xpos4 + 30, ypos_buttontext , width4-30, ok_text.c_str(), (CFBWindow::color_t)color, 0, true); // UTF-8
+		m_pcWindow->RenderString(m_pcFontFoot, xpos4 + 30, ypos_buttontext , width4-30, ok_text2.c_str(), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}	
 }
 
@@ -2954,9 +2957,7 @@ void CMovieBrowser::showHelp(void)
 ************************************************************************/
 void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
 {
-    unsigned int i = 0;
-
-     /********************************************************************/
+    /********************************************************************/
     /**  MovieInfo menu ******************************************************/
 
     /********************************************************************/
@@ -3008,7 +3009,7 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
 
     /********************************************************************/
     /**  update movie info  ******************************************************/
-        for(i=0; i<MB_INFO_MAX_NUMBER; i++)
+        for(int i=0; i<MB_INFO_MAX_NUMBER; i++)
             movieInfoUpdateAll[i]=0;
         movieInfoUpdateAllIfDestEmptyOnly=true;
 
@@ -3473,10 +3474,10 @@ bool CMovieBrowser::getMovieInfoItem(MI_MOVIE_INFO& movie_info, MB_INFO_ITEM ite
 		case MB_INFO_AUDIO: 				// 		= 17,
 #if 1  // MB_INFO_AUDIO test
 			// we just return the number of audiopids
-			char text[10];
-			snprintf(text, 8,"%d",movie_info.audioPids.size());
-			text[9] = 0; // just to make sure string is terminated
-			*item_string = text;
+			char text2[10];
+			snprintf(text2, 8,"%d",movie_info.audioPids.size());
+			text2[9] = 0; // just to make sure string is terminated
+			*item_string = text2;
 #else // MB_INFO_AUDIO test
 			for(i=0; i < movie_info.audioPids.size() && i < 10; i++)
 			{
@@ -3897,7 +3898,7 @@ std::string CMovieBrowser::getMovieBrowserVersion(void)
 /************************************************************************/
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.23 $");
+	return imageinfo.getModulVersion("","$Revision: 1.24 $");
 }
 
 /************************************************************************/

@@ -104,7 +104,7 @@ class CMovieViewer
 	void showIcon_Audio();
 	void showIcon_16_9()      const;
 	void showIcon_VTXT()      const;
-	void showRecordIcon(const bool show);
+	void showRecordIcon(const bool _show);
 	void showData();
 	void showButtonBar();
 	void showButtonBarExtended();
