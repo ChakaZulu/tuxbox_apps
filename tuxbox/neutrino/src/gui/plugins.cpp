@@ -360,7 +360,7 @@ void CPlugins::startPlugin(int number,int param)
 	int           vtpid      =  0;
 	int           subpid     =  0;
 	PluginParam * startparam =  0;
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	int rcfd = -1;
 #endif
 	if (plugin_list[number].fb)
@@ -369,7 +369,7 @@ void CPlugins::startPlugin(int number,int param)
 	}
 	if (plugin_list[number].rc)
 	{
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		// use /dev/dbox/rc0 to keep compatibility with plugins
 		rcfd = open ("/dev/dbox/rc0",O_RDONLY);
 		__u16 ev;
@@ -537,7 +537,7 @@ void CPlugins::startPlugin(int number,int param)
 		else
 			break;
 	}
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	if (rcfd > 0)
 	{
 		__u16 ev;

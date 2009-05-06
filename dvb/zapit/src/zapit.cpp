@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.428 2009/04/28 06:43:03 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.429 2009/05/06 17:57:51 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -44,7 +44,7 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 #include <sys/ioctl.h>
 #endif
 
@@ -165,7 +165,7 @@ extern std::map<string, t_satellite_position> satellitePositions;
 
 bool standby = true;
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 /* on dreambox: use FASTZAP ioctl? */
 int fastzap = 1;
 #else
@@ -781,7 +781,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_CLEAR, CEventServer::INITID_ZAPIT);
 //	INFO("Event: CA_CLEAR send");
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 	int retry = false;
  again:
 #endif
@@ -931,7 +931,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 		if (thisChannel->getPmtPid() == NONE)
 			if (parse_pat(thisChannel) < 0) {
 				printf("[zapit] pat parsing failed\n");
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 /* again, a workaround where i don't exactly know why it is needed.
    sometimes, tuning fails on the first try, and for a second try i
    need to go through a full tuning cycle again. Happened with DMAX
@@ -1432,7 +1432,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			(rmsg.cmd != CZapitMessages::CMD_GET_AE_IEC_STATE) &&
 			(rmsg.cmd != CZapitMessages::CMD_GET_AE_PLAYBACK_STATE) &&
 #endif
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 /* on the dreambox, we need zapit to set the volume also in movie- or audioplayer mode */
 			(rmsg.cmd != CZapitMessages::CMD_SET_VOLUME) &&
 			(rmsg.cmd != CZapitMessages::CMD_MUTE) &&
@@ -2298,7 +2298,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 #endif
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 	case CZapitMessages::CMD_SET_FASTZAP:
 	{
 		CZapitMessages::commandBoolean msgBoolean;
@@ -2669,7 +2669,7 @@ void setDemuxMode(int demux_mode)
 }
 #endif
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 void setFastZap(int mode)
 {
 #define VIDEO_SET_FASTZAP       _IOW('o', 4, int)
@@ -2860,7 +2860,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.428 2009/04/28 06:43:03 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.429 2009/05/06 17:57:51 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;
@@ -2901,7 +2901,7 @@ int main(int argc, char **argv)
 				"-q : quiet mode\n"
 				"-u : enable update on PMT change\n"
 				"-l : disable checking for lost lock\n"
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 				"-n : disable FASTZAP\n"
 #endif
 				"\n"
@@ -3023,7 +3023,7 @@ int main(int argc, char **argv)
 	lastchannel=load_settings();
 	zapTo(lastchannel.channelNumber);
 #endif
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if HAVE_DVB_API_VERSION < 3
 	setFastZap(fastzap);
 #endif
 

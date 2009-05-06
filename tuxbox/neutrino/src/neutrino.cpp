@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.948 2009/05/06 14:14:31 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.949 2009/05/06 17:57:52 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2355,7 +2355,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					channelList->exec();
 				}
 			}
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 			// support for additional buttons on Dreambox Remote
 			else if( msg == CRCInput::RC_tv )
 			{

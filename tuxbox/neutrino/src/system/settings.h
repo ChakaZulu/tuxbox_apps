@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.208 2009/05/06 14:14:33 rhabarber1848 Exp $
+  $Id: settings.h,v 1.209 2009/05/06 17:57:54 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -390,7 +390,7 @@ struct SNeutrinoSettings
 #define UTF8_TO_FILESYSTEM_ENCODING(a) (g_settings.filesystem_is_utf8 ? (a) : ZapitTools::UTF8_to_Latin1(a).c_str())
 #define FILESYSTEM_ENCODING_TO_UTF8_STRING(a) (g_settings.filesystem_is_utf8 ? (a) : Latin1_to_UTF8(a))
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #define DRIVER_SETTING_FILES_COUNT 2
 #else
 #if HAVE_DVB_API_VERSION == 1
@@ -519,7 +519,7 @@ const int PARENTALLOCK_PROMPT_ONSTART        = 1;
 const int PARENTALLOCK_PROMPT_CHANGETOLOCKED = 2;
 const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #define MAX_SATELLITES 100
 #else
 #define MAX_SATELLITES 64

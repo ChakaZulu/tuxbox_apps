@@ -32,7 +32,7 @@
 #ifndef __MOD_rcinput__
 #define __MOD_rcinput__
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #define OLD_RC_API
 #endif
 
@@ -175,7 +175,7 @@ class CRCInput
 			RC_top_right    = KEY_TOPRIGHT,     /* /include/linux/input.h: #define KEY_TOPRIGHT     0x1a3        */ /* in patched input.h */
 			RC_bottom_left  = KEY_BOTTOMLEFT,   /* /include/linux/input.h: #define KEY_BOTTOMLEFT   0x1a4        */ /* in patched input.h */
 			RC_bottom_right = KEY_BOTTOMRIGHT,  /* /include/linux/input.h: #define KEY_BOTTOMRIGHT  0x1a5        */ /* in patched input.h */
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 			// definitions for additional buttons on Dreambox remote
 			RC_tv           = KEY_TV,           /* /include/linux/input.h: #define KEY_TV		0x179 */
 			RC_radio        = KEY_RADIO,        /* /include/linux/input.h: #define KEY_RADIO	0x181 */

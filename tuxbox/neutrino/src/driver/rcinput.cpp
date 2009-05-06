@@ -63,7 +63,7 @@
 #include <global.h>
 #include <neutrino.h>
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/rawir2"};
 #define RC_standby_release (KEY_MAX + 1)
 typedef struct { __u16 code; } t_input_event;
@@ -1135,7 +1135,7 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 				if (read(fd_rc[i], &ev, sizeof(t_input_event)) == sizeof(t_input_event))
 				{
 					uint trkey = translate(ev.code);
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 					if (ev.code == 0xff)
 					{
 						if (rc_last_key != 0)
@@ -1146,7 +1146,7 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 							return;
 						}
 					}
-#endif /* HAVE_DREAMBOX_HARDWARE */
+#endif /* HAVE_DREAMBOX_HARDWARE || HAVE_IPBOX_HARDWARE */
 					if (trkey != RC_nokey)
 					{
 #ifdef OLD_RC_API
@@ -1587,7 +1587,7 @@ std::string CRCInput::getKeyName(const unsigned int key)
 **************************************************************************/
 int CRCInput::translate(int code)
 {
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	switch (code&0xFF)
 	{
 		case 0x00: return RC_0;
