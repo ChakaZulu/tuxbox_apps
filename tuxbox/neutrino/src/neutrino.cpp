@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.947 2009/05/04 18:47:24 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.948 2009/05/06 14:14:31 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -351,6 +351,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real		= configfile.getBool("shutdown_real"             , false);
 #endif
 	g_settings.shutdown_real_rcdelay	= configfile.getBool("shutdown_real_rcdelay"     , true );
+	g_settings.standby_off_with		= configfile.getInt32("standby_off_with" , 0 );
 	strcpy(g_settings.shutdown_count, configfile.getString("shutdown_count","0").c_str());
 	g_settings.volumebar_disp_pos		= configfile.getInt32("volumebar_disp_pos" , 4 );
 	g_settings.infobar_sat_display		= configfile.getBool("infobar_sat_display"       , true );
@@ -884,6 +885,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool("standby_save_power"        , g_settings.standby_save_power);
 	configfile.setBool("shutdown_real"             , g_settings.shutdown_real);
 	configfile.setBool("shutdown_real_rcdelay"     , g_settings.shutdown_real_rcdelay);
+	configfile.setInt32("standby_off_with"         , g_settings.standby_off_with);
 	configfile.setString("shutdown_count"          , g_settings.shutdown_count);
 	configfile.setInt32("volumebar_disp_pos" , g_settings.volumebar_disp_pos);
 	configfile.setBool("infobar_sat_display"       , g_settings.infobar_sat_display);
@@ -2485,6 +2487,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					// Scart-Mode verlassen
 					scartMode( false );
 				}
+				else
+					handleMsg(msg, data);
 			}
 			else
 			{
@@ -2531,7 +2535,13 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 	}
 
 	if (!waitforshutdown) {
-		if (msg == CRCInput::RC_standby)
+		if (msg == CRCInput::RC_ok && g_settings.standby_off_with == 1 && mode == mode_standby && data == 0)
+			g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
+		else if (msg == CRCInput::RC_home && g_settings.standby_off_with == 2 && mode == mode_standby && data == 0)
+			g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
+		else if ((msg == CRCInput::RC_home || msg == CRCInput::RC_ok) && g_settings.standby_off_with == 3 && mode == mode_standby && data == 0)
+			g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
+		else if (msg == CRCInput::RC_standby)
 		{
 			if (data == 0)
 			{

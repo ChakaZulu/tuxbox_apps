@@ -628,6 +628,11 @@ miscsettings.infobar Infobar
 miscsettings.infobar_sat_display Satellitenanzeige
 miscsettings.infobar_show Info bei EPG Änderung
 miscsettings.osd_specials OSD-Extras
+miscsettings.rc_standby_off_with Standby aus mit
+miscsettings.rc_standby_off_with_power Power
+miscsettings.rc_standby_off_with_power_home Power, Home
+miscsettings.rc_standby_off_with_power_home_ok Power, Home, OK
+miscsettings.rc_standby_off_with_power_ok Power, OK
 miscsettings.show_mute_icon Mute-Icon bei Lautstärke 0
 miscsettings.show_mute_icon_no nein
 miscsettings.show_mute_icon_not_in_ac3mode nicht bei AC3

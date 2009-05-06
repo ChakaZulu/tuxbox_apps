@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.93 2009/04/27 08:37:54 rhabarber1848 Exp $
+	$Id: setting_helpers.h,v 1.94 2009/05/06 14:14:33 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -129,9 +129,9 @@ class CRecordingNotifier2 : public CChangeObserver
 class CMiscNotifier : public CChangeObserver
 {
 	private:
-		CMenuItem* toDisable[3];
+		CMenuItem* toDisable[4];
 	public:
-		CMiscNotifier( CMenuItem*, CMenuItem*, CMenuItem* );
+		CMiscNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem* );
 		bool changeNotify(const neutrino_locale_t, void *);
 };
 

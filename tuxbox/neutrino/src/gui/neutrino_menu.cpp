@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.59 2009/04/30 19:50:57 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.60 2009/05/06 14:14:32 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -924,6 +924,15 @@ const CMenuOptionChooser::keyval  INFOBAR_CHANNELLOGO_BACKGROUND_SHOW_OPTIONS[IN
    { 2 , LOCALE_INFOVIEWER_CHANNELLOGO_BACKGROUND_SHADED }
 };
 
+#define REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS_COUNT 4
+const CMenuOptionChooser::keyval  REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS[REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS_COUNT]=
+{
+   { 0 , LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH_POWER },
+   { 1 , LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH_POWER_OK },
+   { 2 , LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH_POWER_HOME },
+   { 3 , LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH_POWER_HOME_OK }
+};
+
 /* misc settings menu */
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 															CMenuWidget &miscSettingsGeneral,
@@ -963,11 +972,12 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsGeneral.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_GENERAL));
 	addMenueIntroItems(miscSettingsGeneral);
 	CMenuOptionChooser *m1 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL_RCDELAY, &g_settings.shutdown_real_rcdelay, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, !g_settings.shutdown_real);
+	CMenuOptionChooser *m5 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH, &g_settings.standby_off_with, REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS, REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS_COUNT, !g_settings.shutdown_real);
 	CShutdownCountNotifier *shutDownCountNotifier = new CShutdownCountNotifier;
 	CStringInput * miscSettings_shutdown_count = new CStringInput(LOCALE_MISCSETTINGS_SHUTDOWN_COUNT, g_settings.shutdown_count, 3, LOCALE_MISCSETTINGS_SHUTDOWN_COUNT_HINT1, LOCALE_MISCSETTINGS_SHUTDOWN_COUNT_HINT2, "0123456789 ", shutDownCountNotifier);
 	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_MISCSETTINGS_SHUTDOWN_COUNT, true, g_settings.shutdown_count, miscSettings_shutdown_count);
 	CMenuOptionChooser *m3 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_STANDBY_SAVE_POWER, &g_settings.standby_save_power, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, !g_settings.shutdown_real);
-	CMiscNotifier* miscNotifier = new CMiscNotifier(m1, m3, m4);
+	CMiscNotifier* miscNotifier = new CMiscNotifier(m1, m3, m4, m5);
 	CMenuOptionChooser *m2 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL, &g_settings.shutdown_real, OPTIONS_OFF1_ON0_OPTIONS, OPTIONS_OFF1_ON0_OPTION_COUNT, true, miscNotifier);
 	miscSettingsGeneral.addItem(m2);
 	miscSettingsGeneral.addItem(m3);
@@ -1028,7 +1038,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsRemoteControl.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCK, true, g_settings.repeat_blocker, keySettings_repeatBlocker));
 	miscSettingsRemoteControl.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, true, g_settings.repeat_genericblocker, keySettings_repeat_genericblocker));
 	miscSettingsRemoteControl.addItem(m1);
-	
+	miscSettingsRemoteControl.addItem(m5);
+		
 	// filebrowser
 	miscSettingsFilebrowser.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
 	addMenueIntroItems(miscSettingsFilebrowser);

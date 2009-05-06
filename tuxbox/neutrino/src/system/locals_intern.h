@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.135 2009/04/27 08:37:54 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.136 2009/05/06 14:14:33 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -655,6 +655,11 @@ const char * locale_real_names[] =
 	"miscsettings.infobar_sat_display",
 	"miscsettings.infobar_show",
 	"miscsettings.osd_specials",
+	"miscsettings.rc_standby_off_with",
+	"miscsettings.rc_standby_off_with_power",
+	"miscsettings.rc_standby_off_with_power_home",
+	"miscsettings.rc_standby_off_with_power_home_ok",
+	"miscsettings.rc_standby_off_with_power_ok",
 	"miscsettings.show_mute_icon",
 	"miscsettings.show_mute_icon_no",
 	"miscsettings.show_mute_icon_not_in_ac3mode",

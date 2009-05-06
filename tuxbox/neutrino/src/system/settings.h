@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.207 2009/04/12 21:19:15 rhabarber1848 Exp $
+  $Id: settings.h,v 1.208 2009/05/06 14:14:33 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -53,6 +53,7 @@ struct SNeutrinoSettings
 	int standby_save_power;
 	int shutdown_real;
 	int shutdown_real_rcdelay;
+	int standby_off_with;
 	char shutdown_count[4];
 	int volumebar_disp_pos;
 	char record_safety_time_before[3];
