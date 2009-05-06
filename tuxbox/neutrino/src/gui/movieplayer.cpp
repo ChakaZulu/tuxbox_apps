@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.170 2009/03/27 12:59:39 trompete88 Exp $
+  $Id: movieplayer.cpp,v 1.171 2009/05/06 19:49:33 houdini Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -2701,7 +2701,7 @@ static void mp_tcpClose(int fd)
 //=====================
 void *mp_playFileMain(void *filename)
 {
-    std::string fname;
+	std::string fname;
 	bool          failed = true;
 	struct pollfd pHandle;
 	int           rd, rSize;
@@ -2722,32 +2722,32 @@ void *mp_playFileMain(void *filename)
 		//------------------------------
 		if(filename != NULL) //Only one file selected
 		{
-            fname = (const char *)filename;
-            if (fname.length()) {
-    			//-- check for file type --
-    			//-------------------------
-    			if( mp_probe(fname.c_str(), ctx) )
-    				failed = false;
+			fname = (const char *)filename;
+			if (fname.length()) {
+	    			//-- check for file type --
+    				//-------------------------
+    				if( mp_probe(fname.c_str(), ctx) )
+    					failed = false;
+	    			else
+    					fprintf(stderr,"[mp] couldn't open (%s) for probing\n", fname.c_str());
+    			}
     			else
-    				fprintf(stderr,"[mp] couldn't open (%s) for probing\n", fname.c_str());
-    		}
-    		else
-    			fprintf(stderr,"[mp] invalid filename (null)\n");
-        }
-        else {
-            ctx->isStream  = false;
-	        ctx->itChanged = false;
-	        ctx->lst_cnt   = 0;
-         	ctx->it        = 0;
-         	for (unsigned int i = 0; (i < PF_LST_ITEMS) && (i < filelist.size()); i++) {
-             	ctx->lst[ctx->lst_cnt].pname = filelist[ctx->lst_cnt].Name.c_str();
-             	ctx->lst_cnt++;
-            }
-            if(ctx->lst_cnt) {
-                fprintf(stderr, "[mp] playlist with (%d) entries generated\n", ctx->lst_cnt);
-            }
-            failed = false;
-       }
+    				fprintf(stderr,"[mp] invalid filename (null)\n");
+        	}
+        	else {
+			ctx->isStream  = false;
+			ctx->itChanged = false;
+			ctx->lst_cnt   = 0;
+			ctx->it        = 0;
+			for (unsigned int i = 0; (i < PF_LST_ITEMS) && (i < filelist.size()); i++) {
+				ctx->lst[ctx->lst_cnt].pname = filelist[ctx->lst_cnt].Name.c_str();
+				ctx->lst_cnt++;
+			}
+			if(ctx->lst_cnt) {
+				fprintf(stderr, "[mp] playlist with (%d) entries generated\n", ctx->lst_cnt);
+			}
+			failed = false;
+		}
 	}
 	else
 		fprintf(stderr,"[mp] error opening some DVB devices\n");
@@ -2770,13 +2770,13 @@ void *mp_playFileMain(void *filename)
 		//-- force buffer refilling including immidiate freezeAV() --
 		//-- should also initiate late "stop/start" of devices ... --  
 		//-----------------------------------------------------------
-if(g_settings.streaming_use_buffer)
-{
-		mp_bufferReset(ctx);
+		if(g_settings.streaming_use_buffer)
+		{
+			mp_bufferReset(ctx);
 
-		//-- set default count of buffer segments for Ptr-Queue --
-		ctx->nSegsMax = N_SEGS_QUEUE;
-}
+			//-- set default count of buffer segments for Ptr-Queue --
+			ctx->nSegsMax = N_SEGS_QUEUE;
+		}
 	
 		//-- (live) stream or ... --
 		//--------------------------
@@ -2835,10 +2835,10 @@ if(g_settings.streaming_use_buffer)
 				ctx->pidv     = lstIt->vpid;
 				ctx->pida     = lstIt->apid;
 				ctx->ac3      = 0;
-if(!g_settings.streaming_use_buffer)
-{
-				ctx->readSize = PF_BUF_SIZE/2;
-}
+				if(!g_settings.streaming_use_buffer)
+				{
+					ctx->readSize = PF_BUF_SIZE/2;
+				}
 			}
 			else
 			{
@@ -2862,36 +2862,36 @@ if(!g_settings.streaming_use_buffer)
 			//-- file playback can pause, set --
 			//-- actaul pos to req. start pos --
 			ctx->canPause = true;
-if(g_settings.streaming_use_buffer)
-{
-			ctx->pos = g_startposition;
-			g_startposition = 0;
+			if(g_settings.streaming_use_buffer)
+			{
+				ctx->pos = g_startposition;
+				g_startposition = 0;
 
-			//-- analyze TS file (set apid/vpid/ac3, filesize, nSegsMax, ... in --
-			//-- ctx) on leave, read position of file will be set to start pos.  -- 
-			mp_analyze(ctx);
-			//-- audio track may be selected --
-			mp_selectAudio(ctx);
-}
-else
-{
-			//-- set (short) readsize --
-			ctx->readSize = PF_BUF_SIZE/4;
+				//-- analyze TS file (set apid/vpid/ac3, filesize, nSegsMax, ... in --
+				//-- ctx) on leave, read position of file will be set to start pos.  -- 
+				mp_analyze(ctx);
+				//-- audio track may be selected --
+				mp_selectAudio(ctx);
+			}
+			else
+			{
+				//-- set (short) readsize --
+				ctx->readSize = PF_BUF_SIZE/4;
 
-			//-- analyze TS file (set apid/vpid/ac3 in ctx) --
-			mp_analyze(ctx);
-			//-- audio track may be selected --
-			mp_selectAudio(ctx);
+				//-- analyze TS file (set apid/vpid/ac3 in ctx) --
+				mp_analyze(ctx);
+				//-- audio track may be selected --
+				mp_selectAudio(ctx);
 
-			//-- get file size --
-			ctx->fileSize = lseek (ctx->inFd, 0L, SEEK_END);
+				//-- get file size --
+				ctx->fileSize = lseek (ctx->inFd, 0L, SEEK_END);
 
-			//-- set bookmark position --
-			ctx->pos = g_startposition;
-			ctx->pos = mp_seekSync(ctx->inFd, ctx->pos);
+				//-- set bookmark position --
+				ctx->pos = g_startposition;
+				ctx->pos = mp_seekSync(ctx->inFd, ctx->pos);
 
-			g_startposition = 0;
-}
+				g_startposition = 0;
+			}
 		}
 
 		fprintf
@@ -2902,10 +2902,10 @@ else
 			ctx->pidv, ctx->pida, ctx->ac3
 		);
 		
-if(!g_settings.streaming_use_buffer)
-{
-	mp_bufferReset(ctx);
-}
+		if(!g_settings.streaming_use_buffer)
+		{
+			mp_bufferReset(ctx);
+		}
 
 		//-- aspect ratio init --
 		checkAspectRatio(ctx->vdec, true);
@@ -2938,7 +2938,7 @@ if(g_settings.streaming_use_buffer)
 				{
 					//-- detect/process events --
 					mp_checkEvent(ctx);
-        
+
 					if ( ctx->fileSize > 0 )
 					{
 				  		cPercent = (ctx->pos*100)/ctx->fileSize;
@@ -2956,20 +2956,20 @@ if(g_settings.streaming_use_buffer)
 					}
 					//-- write queue-segment to dvr-device --
 					if (!q->writerRun()) break;
-        
+
 					//-- update file position --
 					g_fileposition = ctx->pos;
-        
+
 				} 
 				//== end of player loop (II) == 
-      
+
 				//-- terminate reader thread --
 				q->terminateReader();
-      
+
 				fprintf(stderr,"[mp] leaving player loop ...\n");
 				fprintf(stderr,"[mp] ... checking for another playlist item\n");      
 			}
-    
+
 			delete q;  /// cleanup resources !
 		}
 }
@@ -3044,18 +3044,18 @@ else
 			ctx->inFd = -1;
 		}
 
-if(g_settings.streaming_use_buffer)
-{
-		ctx->pos = 0LL;
-}
-else
-{
+		if(g_settings.streaming_use_buffer)
+		{
+			ctx->pos = 0LL;
+		}
+		else
+		{
 
-		//-- Note: on any content change AV should be freezed first,   --
-		//-- to get a consitant state. restart of all DVB-devices will --
-		//-- be initiated by a SoftReset in the next turn/starts.      --
-		mp_freezeAV(ctx); //needed???????????
-}
+			//-- Note: on any content change AV should be freezed first,   --
+			//-- to get a consitant state. restart of all DVB-devices will --
+			//-- be initiated by a SoftReset in the next turn/starts.      --
+			mp_freezeAV(ctx); //needed???????????
+		}
 
 		//-- check for another item to play --
 		//------------------------------------
@@ -3230,11 +3230,11 @@ void CMoviePlayerGui::PlayFile (int parental)
 			{
 				int play_sec = g_fileposition / SECONDOFFSET;  // get current seconds from moviestart 
 				
-                g_filepos_per_sec = g_fileposition - g_fileposition_old;
-                g_fileposition_old = g_fileposition;
-                //static int seconds = 0;
-                //TRACE(" %6ds=%9lld (delta %9lld) / %5d\r\n",seconds++,g_fileposition,g_filepos_per_sec,play_sec);
-                g_fileposition_old = g_fileposition;
+				g_filepos_per_sec = g_fileposition - g_fileposition_old;
+				g_fileposition_old = g_fileposition;
+				//static int seconds = 0;
+				//TRACE(" %6ds=%9lld (delta %9lld) / %5d\r\n",seconds++,g_fileposition,g_filepos_per_sec,play_sec);
+				g_fileposition_old = g_fileposition;
 
 				if(play_sec + 10 < jump_not_until || play_sec  > jump_not_until +10) jump_not_until = 0; // check if !jump is stale (e.g. if user jumped forward or backward)
 				
@@ -3310,14 +3310,14 @@ void CMoviePlayerGui::PlayFile (int parental)
 										// if the jump back time is to less, it does sometimes cause problems (it does probably jump only 5 sec which will cause the next jump, and so on)
 										if(g_jumpseconds > -15 )
 											g_jumpseconds = -15;
-                                        g_playstate   = CMoviePlayerGui::JPOS;  // bookmark  is of type loop, jump backward
+										g_playstate   = CMoviePlayerGui::JPOS;  // bookmark  is of type loop, jump backward
 									}
 									else if(p_movie_info->bookmarks.user[book_nr].length > 0)
 									{
 										// jump at least 15 seconds
 										if(g_jumpseconds < 15 )
 											g_jumpseconds = 15;
-                                        g_playstate   = CMoviePlayerGui::JPOS;  // bookmark  is of type commercial, jump forward 
+										g_playstate   = CMoviePlayerGui::JPOS;  // bookmark  is of type commercial, jump forward 
 									}
 	
 									TRACE("[mp]  do jump %d sec\r\n",g_jumpseconds);
@@ -3407,12 +3407,12 @@ void CMoviePlayerGui::PlayFile (int parental)
 				{
 					Path_local = filebrowser->getCurrentDir();
 					if (g_settings.streaming_allow_multiselect) {
-                        filelist = filebrowser->getSelectedFiles();
-                    } else {
-                        CFile *file = filebrowser->getSelectedFile();
-                        filelist.clear();
-                        filelist.push_back(*file);
-                    }
+						filelist = filebrowser->getSelectedFiles();
+					} else {
+						CFile *file = filebrowser->getSelectedFile();
+						filelist.clear();
+						filelist.push_back(*file);
+					}
 
 					if(!filelist.empty())
 					{
@@ -3424,11 +3424,11 @@ void CMoviePlayerGui::PlayFile (int parental)
 						}
 
 						filename     = filelist[0].Name.c_str();
-		   				sel_filename = filelist[0].getFileName();
+						sel_filename = filelist[0].getFileName();
 	
 						update_lcd   = true;
 						start_play   = true;
-                        p_movie_info = NULL; // ew might get the movie info here some time
+						p_movie_info = NULL; // ew might get the movie info here some time
 
 						if(FileTime.IsVisible()) // update time if visible
 							FileTime.show(0);
@@ -3472,11 +3472,11 @@ void CMoviePlayerGui::PlayFile (int parental)
 			g_playstate = CMoviePlayerGui::PLAY;  // !!!
 			int retval;
 			if (filelist.size() == 1 || isBookmark || isMovieBrowser) {
-                isBookmark = false;
-                retval = pthread_create(&rct, 0, mp_playFileThread, (void *)filename);
-            } else {
-                retval = pthread_create(&rct, 0, mp_playFileThread, NULL);
-            }
+				isBookmark = false;
+				retval = pthread_create(&rct, 0, mp_playFileThread, (void *)filename);
+			} else {
+				retval = pthread_create(&rct, 0, mp_playFileThread, NULL);
+			}
 			if(retval != 0)
 			{
 				fprintf(stderr, "[mp] couldn't create player thread\n");
@@ -3504,7 +3504,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			pidt=0;
 			CAPIDSelectExec *APIDChanger = new CAPIDSelectExec;
 
-                // show the normal audio pids first
+			// show the normal audio pids first
 			for( unsigned int count=0; count<g_numpida; count++ )
 			{
 				char apidnumber[3],show_pid_number[4];
@@ -3514,43 +3514,41 @@ void CMoviePlayerGui::PlayFile (int parental)
 				std::string apidtitle = "Stream ";
 				apidtitle.append(show_pid_number);
 
-                if(g_ac3flags[count] == 0)
-                {
-                    get_movie_info_apid_name(g_apids[count],p_movie_info,&apidtitle);
-                    APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)),
-                                         (count == 0));
-                }
-            }
-                
-            // then show the other audio pids (AC3/teletex)
-            for( unsigned int count=0; count<g_numpida; count++ )
-            {
-                char apidnumber[3],show_pid_number[4];
-                sprintf(apidnumber, "%d", count+1);
-                sprintf(show_pid_number, "%u", g_apids[count]);
+				if(g_ac3flags[count] == 0)
+				{
+					get_movie_info_apid_name(g_apids[count],p_movie_info,&apidtitle);
+					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)), (count == 0));
+				}
+			}
 
-                std::string apidtitle = "Stream ";
-                apidtitle.append(show_pid_number);
+			// then show the other audio pids (AC3/teletex)
+			for( unsigned int count=0; count<g_numpida; count++ )
+			{
+				char apidnumber[3],show_pid_number[4];
+				sprintf(apidnumber, "%d", count+1);
+				sprintf(show_pid_number, "%u", g_apids[count]);
 
-    			if(g_ac3flags[count] == 2)
-    			{
-    				apidtitle.append(" (Teletext)");
-    				pidt=g_apids[count];
-                    APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), false, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)),
-                                             (count == 0));
-    			}
-    
-    			if(g_ac3flags[count] == 1)
-    			{
-                    get_movie_info_apid_name(g_apids[count],p_movie_info,&apidtitle);
-     				if((int)apidtitle.find("AC3") < 0) //std::nopos)
-                        apidtitle.append(" (AC3)");
-                    APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)),
+				std::string apidtitle = "Stream ";
+				apidtitle.append(show_pid_number);
+
+    				if(g_ac3flags[count] == 2)
+	    			{
+    					apidtitle.append(" (Teletext)");
+    					pidt=g_apids[count];
+					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), false, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)), (count == 0));
+	    			}
+
+    				if(g_ac3flags[count] == 1)
+	    			{
+					get_movie_info_apid_name(g_apids[count],p_movie_info,&apidtitle);
+					if((int)apidtitle.find("AC3") < 0) //std::nopos)
+						apidtitle.append(" (AC3)");
+					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)),
                                                (count == 0));
-    			}
-            }
-            APIDSelector.exec(NULL, ""); // otherwise use Dialog
-            delete APIDChanger;
+    				}
+			}
+			APIDSelector.exec(NULL, ""); // otherwise use Dialog
+			delete APIDChanger;
 			g_showaudioselectdialog = false;
 
 			if(g_show_movieviewer)
@@ -3865,19 +3863,19 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 						g_jumpseconds = jumpsecs ;
 						if(t[0]=='=')
-                        {
-                            g_playstate = CMoviePlayerGui::JPOS;
-                        }
+						{
+							g_playstate = CMoviePlayerGui::JPOS;
+						}
 						else if(t[0]=='-')
 						{
 							g_jumpseconds *= -1;
-                            g_playstate = CMoviePlayerGui::JB;
+							g_playstate = CMoviePlayerGui::JB;
 						}
 						else
-                        {
+						{
 							g_playstate = CMoviePlayerGui::JB;
-                        }
-                        printf("Jump %d\n",g_jumpseconds);
+						}
+						printf("Jump %d\n",g_jumpseconds);
 						FileTime.hide();
 					}
 				}
@@ -3917,38 +3915,38 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- select previous item (in playlist) --
 			case CRCInput::RC_up:
-                if(isMovieBrowser == true)
-                {
-                    int new_pos_sec = get_next_movie_info_bookmark_pos_sec(p_movie_info, g_fileposition / SECONDOFFSET, true);
-                    if(new_pos_sec >= 0)
-                    {
-                        g_jumpseconds = new_pos_sec;
-                        g_playstate   = CMoviePlayerGui::JPOS;
-                    }
-                }
-                else
-                {
+				if(isMovieBrowser == true)
+				{
+					int new_pos_sec = get_next_movie_info_bookmark_pos_sec(p_movie_info, g_fileposition / SECONDOFFSET, true);
+					if(new_pos_sec >= 0)
+					{
+						g_jumpseconds = new_pos_sec;
+						g_playstate   = CMoviePlayerGui::JPOS;
+					}
+				}
+				else
+				{
 				    g_playstate = CMoviePlayerGui::ITEMSELECT;
 				    g_itno      = -2;
-                }
+				}
 				break;
 
 				//-- select next item (in playlist) --
 			case CRCInput::RC_down:
-                if(isMovieBrowser == true)
-                {
-                    int new_pos_sec = get_next_movie_info_bookmark_pos_sec(p_movie_info,g_fileposition /SECONDOFFSET , false);
-                    if(new_pos_sec >= 0)
-                    {
-                        g_jumpseconds = new_pos_sec ;
-                        g_playstate   = CMoviePlayerGui::JPOS;
-                    }
-                }
-                else
-                {
+				if(isMovieBrowser == true)
+				{
+					int new_pos_sec = get_next_movie_info_bookmark_pos_sec(p_movie_info,g_fileposition /SECONDOFFSET , false);
+					if(new_pos_sec >= 0)
+					{
+						g_jumpseconds = new_pos_sec ;
+						g_playstate   = CMoviePlayerGui::JPOS;
+					}
+				}
+				else
+				{
 				    g_playstate = CMoviePlayerGui::ITEMSELECT;
 				    g_itno      = -1;
-                }
+				}
 				break;
 
 				//-- stop navigation action in progress (not used) --
@@ -4013,12 +4011,16 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	neutrino_msg_data_t data;
 
 	std::string sel_filename;
-	bool update_info = true, start_play = false, exit =
-	false, open_filebrowser = true, cdDvd = false, aborted = false;
+	bool update_info = true;
+	bool start_play = false;
+	bool exit = false; 
+	bool open_filebrowser = true;
+	bool cdDvd = false;
+	bool aborted = false;
 	char mrl[200];
-    unsigned int selected = 0;
+	unsigned int selected = 0;
 	CTimeOSD StreamTime;
-	CFileList filelist;
+	CFileList _filelist;
 
 	if(streamtype == STREAMTYPE_DVD)
 	{
@@ -4057,24 +4059,24 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	do
 	{
 		if (g_playstate == CMoviePlayerGui::STOPPED && !cdDvd) {
-            if(selected + 1 < filelist.size() && !aborted) {
-                selected++;
-				filename = filelist[selected].Name.c_str();
-				sel_filename = filelist[selected].getFileName();
-				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-				int namepos = filelist[selected].Name.rfind("vlc://");
-				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
-                char *tmp = curl_escape (mrl_str.c_str (), 0);
-                strncpy (mrl, tmp, sizeof (mrl) - 1);
-                curl_free (tmp);
-				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
+		if(selected + 1 < _filelist.size() && !aborted) {
+			selected++;
+			filename = _filelist[selected].Name.c_str();
+			sel_filename = _filelist[selected].getFileName();
+			//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
+			int namepos = _filelist[selected].Name.rfind("vlc://");
+			std::string mrl_str = _filelist[selected].Name.substr(namepos + 6);
+                	char *tmp = curl_escape (mrl_str.c_str (), 0);
+                	strncpy (mrl, tmp, sizeof (mrl) - 1);
+                	curl_free (tmp);
+			printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 
 				update_info = true;
 				start_play = true;
 			} else {
-                open_filebrowser = true;
-                aborted = false;
-            }
+				open_filebrowser = true;
+				aborted = false;
+			}
 
 
 		}
@@ -4122,23 +4124,23 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			{
 				Path_vlc = filebrowser->getCurrentDir ();
 				if (g_settings.streaming_allow_multiselect) {
-                    filelist = filebrowser->getSelectedFiles();
-                } else {
-                    CFile *file = filebrowser->getSelectedFile();
-                    filelist.clear();
-                    filelist.push_back(*file);
-                }
+					_filelist = filebrowser->getSelectedFiles();
+				} else {
+					CFile *file = filebrowser->getSelectedFile();
+					_filelist.clear();
+					_filelist.push_back(*file);
+				}
 
-				if(!filelist.empty())
+				if(!_filelist.empty())
 				{
-					filename = filelist[0].Name.c_str();
-					sel_filename = filelist[0].getFileName();
+					filename = _filelist[0].Name.c_str();
+					sel_filename = _filelist[0].getFileName();
 					//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-					int namepos = filelist[0].Name.rfind("vlc://");
-					std::string mrl_str = filelist[0].Name.substr(namepos + 6);
-                    char *tmp = curl_escape (mrl_str.c_str (), 0);
-                    strncpy (mrl, tmp, sizeof (mrl) - 1);
-                    curl_free (tmp);
+					int namepos = _filelist[0].Name.rfind("vlc://");
+					std::string mrl_str = _filelist[0].Name.substr(namepos + 6);
+					char *tmp = curl_escape (mrl_str.c_str (), 0);
+					strncpy (mrl, tmp, sizeof (mrl) - 1);
+					curl_free (tmp);
 					printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 
 					update_info = true;
@@ -4336,16 +4338,16 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		}
 		else if(msg == CRCInput::RC_left)
 		{
-			if(!filelist.empty() && selected > 0 && g_playstate == CMoviePlayerGui::PLAY) {
-                selected--;
-				filename = filelist[selected].Name.c_str();
-				sel_filename = filelist[selected].getFileName();
+			if(!_filelist.empty() && selected > 0 && g_playstate == CMoviePlayerGui::PLAY) {
+				selected--;
+				filename = _filelist[selected].Name.c_str();
+				sel_filename = _filelist[selected].getFileName();
 				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-				int namepos = filelist[selected].Name.rfind("vlc://");
-				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
-                char *tmp = curl_escape (mrl_str.c_str (), 0);
-                strncpy (mrl, tmp, sizeof (mrl) - 1);
-                curl_free (tmp);
+				int namepos = _filelist[selected].Name.rfind("vlc://");
+				std::string mrl_str = _filelist[selected].Name.substr(namepos + 6);
+				char *tmp = curl_escape (mrl_str.c_str (), 0);
+				strncpy (mrl, tmp, sizeof (mrl) - 1);
+				curl_free (tmp);
 				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 
 				update_info = true;
@@ -4354,24 +4356,23 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		}
 		else if(msg == CRCInput::RC_right)
 		{
-			if(!filelist.empty() && selected + 1 < filelist.size() && g_playstate == CMoviePlayerGui::PLAY) {
-                selected++;
-				filename = filelist[selected].Name.c_str();
-				sel_filename = filelist[selected].getFileName();
+			if(!_filelist.empty() && selected + 1 < _filelist.size() && g_playstate == CMoviePlayerGui::PLAY) {
+				selected++;
+				filename = _filelist[selected].Name.c_str();
+				sel_filename = _filelist[selected].getFileName();
 				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-				int namepos = filelist[selected].Name.rfind("vlc://");
-				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
-                char *tmp = curl_escape (mrl_str.c_str (), 0);
-                strncpy (mrl, tmp, sizeof (mrl) - 1);
-                curl_free (tmp);
+				int namepos = _filelist[selected].Name.rfind("vlc://");
+				std::string mrl_str = _filelist[selected].Name.substr(namepos + 6);
+				char *tmp = curl_escape (mrl_str.c_str (), 0);
+				strncpy (mrl, tmp, sizeof (mrl) - 1);
+				curl_free (tmp);
 				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 
 				update_info = true;
 				start_play = true;
 			}
 		}
-		else
-			if(msg == NeutrinoMessages::RECORD_START
+		else if(msg == NeutrinoMessages::RECORD_START
 				|| msg == NeutrinoMessages::ZAPTO
 				|| msg == NeutrinoMessages::STANDBY_ON
 				|| msg == NeutrinoMessages::SHUTDOWN
@@ -4457,7 +4458,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.170 $");
+	return imageinfo.getModulVersion("","$Revision: 1.171 $");
 }
 
 void CMoviePlayerGui::showHelpTS()
@@ -4520,7 +4521,7 @@ void CMoviePlayerGui::showHelpVLC()
 }
 
 void CMoviePlayerGui::showFileInfoVLC() {
-    Helpbox helpbox;
+	Helpbox helpbox;
 	std::string url = "http://";
 	url += g_settings.streaming_server_ip;
 	url += ':';
@@ -4530,36 +4531,36 @@ void CMoviePlayerGui::showFileInfoVLC() {
 	CURLcode httpres = sendGetRequest(url, response);
 	
 	if(httpres == 0 && response.length() > 0) {
-        xmlDocPtr answer_parser = parseXml(response.c_str());
-        if (answer_parser != NULL) {
-            xmlNodePtr element = xmlDocGetRootElement(answer_parser);
-            element = element->xmlChildrenNode;
-            while (element) {
-                  if (strcmp(xmlGetName(element), "information") == 0) {
-                     element = element->xmlChildrenNode;
-                     break;
-                  }
-                  element = element->xmlNextNode;
-            }
-            while (element) {
-                helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, xmlGetAttribute(element, "name") );
-                xmlNodePtr element1 = element->xmlChildrenNode;
-                while (element1) {
-                      char tmp[50] = "-- ";
-                      strcat(tmp, xmlGetAttribute(element1, "name"));
-                      strcat(tmp, " : ");
-                      char* data = xmlGetData(element1);
-                      if (data != NULL) {
-                          strcat(tmp, data);
-                      }
-                      helpbox.addLine(tmp);
-                      element1 = element1->xmlNextNode;
-                }
-                element = element->xmlNextNode;
-            }
-            xmlFreeDoc(answer_parser);
-            hide();
-            helpbox.show(LOCALE_MESSAGEBOX_INFO);
-        }
+		xmlDocPtr answer_parser = parseXml(response.c_str());
+		if (answer_parser != NULL) {
+			xmlNodePtr element = xmlDocGetRootElement(answer_parser);
+			element = element->xmlChildrenNode;
+			while (element) {
+				if (strcmp(xmlGetName(element), "information") == 0) {
+					element = element->xmlChildrenNode;
+					break;
+				}
+				element = element->xmlNextNode;
+			}
+			while (element) {
+				helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, xmlGetAttribute(element, "name") );
+				xmlNodePtr element1 = element->xmlChildrenNode;
+				while (element1) {
+					char tmp[50] = "-- ";
+					strcat(tmp, xmlGetAttribute(element1, "name"));
+					strcat(tmp, " : ");
+					char* data = xmlGetData(element1);
+					if (data != NULL) {
+						strcat(tmp, data);
+					}
+					helpbox.addLine(tmp);
+					element1 = element1->xmlNextNode;
+				}
+				element = element->xmlNextNode;
+			}
+			xmlFreeDoc(answer_parser);
+			hide();
+			helpbox.show(LOCALE_MESSAGEBOX_INFO);
+		}
 	}
 }
