@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.171 2009/05/06 19:49:33 houdini Exp $
+  $Id: movieplayer.cpp,v 1.172 2009/05/13 13:27:13 trompete88 Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -658,7 +658,7 @@ bool VlcRequestStream(char* mrl, int  transcodeVideo, int transcodeAudio)
 		souturl += "}:";
 	}
 	souturl += "std{access=http,mux=ts,dst=";
-	souturl += g_settings.streaming_server_ip;
+//	souturl += g_settings.streaming_server_ip;
 	souturl += ':';
 	souturl += g_settings.streaming_server_port;
 	souturl += "/dboxstream}";
@@ -4458,7 +4458,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.171 $");
+	return imageinfo.getModulVersion("","$Revision: 1.172 $");
 }
 
 void CMoviePlayerGui::showHelpTS()
