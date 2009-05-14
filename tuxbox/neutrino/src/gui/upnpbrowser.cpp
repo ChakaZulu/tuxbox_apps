@@ -49,7 +49,6 @@
 #include <driver/audioplay.h>
 #include <driver/audiofile.h>
 #include <driver/audiometadata.h>
-#define DBOX 1
 
 #include <daemonc/remotecontrol.h>
 
@@ -113,6 +112,7 @@ int CUpnpBrowserGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// set zapit in standby mode
         g_Zapit->setStandby(true);
 
+#ifdef HAVE_DBOX_HARDWARE
 	// If Audiomode is OST then save setting and switch to AVS-Mode
 	if(g_settings.audio_avs_Control == CControld::TYPE_OST)
 	{
@@ -120,6 +120,7 @@ int CUpnpBrowserGui::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_settings.audio_avs_Control = CControld::TYPE_AVS;
 	}
 	else
+#endif
 		m_vol_ost = false;
 
 	// tell neutrino we're in audio mode
@@ -150,7 +151,7 @@ int CUpnpBrowserGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true);
 
-#ifdef DBOX
+#ifdef HAVE_DBOX_HARDWARE
 	// disable iec aka digi out
 	g_Zapit->IecOff();
 #endif
@@ -164,16 +165,18 @@ int CUpnpBrowserGui::exec(CMenuTarget* parent, const std::string & actionKey)
 		CAudioPlayer::getInstance()->stop();
 
 	g_Zapit->setStandby(false);
+#ifdef HAVE_DBOX_HARDWARE
 	if(m_vol_ost)
 	{
 		g_Controld->setVolume(100, CControld::TYPE_AVS);
 		g_settings.audio_avs_Control = CControld::TYPE_OST;
 	}
+#endif
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
 
-#ifdef DBOX
+#ifdef HAVE_DBOX_HARDWARE
 	// enable iec aka digi out
 	g_Zapit->IecOn();
 #endif
