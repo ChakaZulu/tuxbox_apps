@@ -303,6 +303,7 @@ epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
 epgviewer.notfound keine Programminformationen (EPG) gefunden
 esound.info Drücke Home um den Esound Soundserver zu beenden
 esound.name Esound Soundserver
+esound.port Esound Port
 eventfinder.head Stichwortsuche im EPG
 eventfinder.keyword Suchbegriff
 eventfinder.search Suche

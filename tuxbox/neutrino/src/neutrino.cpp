@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.950 2009/05/16 00:22:50 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.951 2009/05/16 00:32:35 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -685,6 +685,9 @@ int CNeutrinoApp::loadSetup()
 	g_settings.audioplayer_show_playlist = configfile.getInt32("audioplayer_show_playlist",1);
 	g_settings.audioplayer_enable_sc_metadata = configfile.getInt32("audioplayer_enable_sc_metadata",1);
 
+	//Esound
+	strcpy(g_settings.esound_port, configfile.getString("esound_port", "").c_str());
+
 	//Filebrowser
 	g_settings.filebrowser_showrights =  configfile.getInt32("filebrowser_showrights", 1);
 	g_settings.filebrowser_sortmethod = configfile.getInt32("filebrowser_sortmethod", 0);
@@ -1190,6 +1193,9 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "audioplayer_repeat_on", g_settings.audioplayer_repeat_on );
 	configfile.setInt32( "audioplayer_show_playlist", g_settings.audioplayer_show_playlist );
 	configfile.setInt32( "audioplayer_enable_sc_metadata", g_settings.audioplayer_enable_sc_metadata );
+
+	//Esound
+	configfile.setString( "esound_port", g_settings.esound_port);
 
 	//Filebrowser
 	configfile.setInt32("filebrowser_showrights", g_settings.filebrowser_showrights);

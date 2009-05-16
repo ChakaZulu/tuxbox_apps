@@ -1,5 +1,5 @@
 /*
-  $Id: esound.cpp,v 1.4 2009/05/16 00:22:51 rhabarber1848 Exp $
+  $Id: esound.cpp,v 1.5 2009/05/16 00:32:36 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   based on
@@ -83,10 +83,6 @@
 #define DVR	ADAP "/dvr0"
 #endif
 
-#define ESOUND_START_SCRIPT1 "/etc/init.d/start_esound"
-#define ESOUND_START_SCRIPT2 "/var/etc/init.d/start_esound"
-#define ESOUND_END_SCRIPT "killall esd"
-
 bool esound_active = false;
 
 CEsoundGui::CEsoundGui()
@@ -111,6 +107,39 @@ int CEsoundGui::exec(CMenuTarget* parent, const std::string &)
 		puts("[esound.cpp] esound already active..."); 
 		return menu_return::RETURN_EXIT_ALL;
 	}
+
+	std::string tmp;
+	std::string esound_start_script ("start_esound");
+	std::string esound_start_path1 ("/etc/init.d/");
+	std::string esound_start_path2 ("/var/etc/init.d/");
+	std::string esound_start_command;
+
+	// check for Esound start script in /etc
+	tmp = (esound_start_path1+esound_start_script).c_str();
+	if (access(tmp.c_str(), X_OK) == 0)
+	{
+		esound_start_script = tmp;
+	}
+	else
+	{
+		// check for Esound start script in /var/etc
+		tmp = (esound_start_path2+esound_start_script).c_str();
+		if (access(tmp.c_str(), X_OK) == 0)
+		{
+			esound_start_script = tmp;
+		}
+	}
+
+	if (tmp == "")
+	{
+		printf("[esound.cpp] %s in %s or %s not found, returning...", esound_start_script.c_str(), esound_start_path1.c_str(), esound_start_path2.c_str());
+		return menu_return::RETURN_EXIT_ALL;
+	}
+	else
+	{
+		esound_start_command = (esound_start_script+' '+g_settings.esound_port);
+	}
+
 	esound_active = true;
 	if(parent)
 	{
@@ -158,27 +187,14 @@ int CEsoundGui::exec(CMenuTarget* parent, const std::string &)
 	g_Zapit->IecOff();
 #endif
 
-	if (access(ESOUND_START_SCRIPT1, X_OK) == 0)
-	{
-		puts("[esound.cpp] executing " ESOUND_START_SCRIPT1 "."); 
-		if (system(ESOUND_START_SCRIPT1) != 0) 
-			perror("Datei " ESOUND_START_SCRIPT1 " fehlt.Bitte erstellen, wenn gebraucht.\nFile " ESOUND_START_SCRIPT1 " not found. Please create if needed.\n");
+	printf("[esound.cpp] executing %s.\n", esound_start_command.c_str());
+	if (system(esound_start_command.c_str()) == 0)
 		show();
-	}
-	else if (access(ESOUND_START_SCRIPT2, X_OK) == 0)
-	{
-		puts("[esound.cpp] executing " ESOUND_START_SCRIPT2 "."); 
-		if (system(ESOUND_START_SCRIPT2) != 0) 
-			perror("Datei " ESOUND_START_SCRIPT2 " fehlt.Bitte erstellen, wenn gebraucht.\nFile " ESOUND_START_SCRIPT2 " not found. Please create if needed.\n");
-		show();
-	}
-	else
-		puts("[esound.cpp] " ESOUND_START_SCRIPT1 " or " ESOUND_START_SCRIPT2 " not found, returning..." );
 
 	esound_active = false;
-	puts("[esound.cpp] executing " ESOUND_END_SCRIPT "."); 
-	if (system(ESOUND_END_SCRIPT) != 0) 
-		perror("Datei " ESOUND_END_SCRIPT " fehlt. Bitte erstellen, wenn gebraucht.\nFile " ESOUND_END_SCRIPT " not found. Please create if needed.\n");
+	puts("[esound.cpp] stopping Esound...");
+	if (system("killall esd") != 0) 
+		perror("[esound.cpp] stopping Esound failed...");
 
 	// wait for esound to end
 	sleep(2);

@@ -303,6 +303,7 @@ epgviewer.nodetailed No detailed informations available
 epgviewer.notfound no epg found
 esound.info press Home to end to Esound soundserver
 esound.name Esound Soundserver
+esound.port Esound Port
 eventfinder.head Search in EPG
 eventfinder.keyword Keyword
 eventfinder.search Search

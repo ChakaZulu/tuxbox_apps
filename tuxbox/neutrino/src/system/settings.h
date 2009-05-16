@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.210 2009/05/16 00:22:52 rhabarber1848 Exp $
+  $Id: settings.h,v 1.211 2009/05/16 00:32:36 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -421,6 +421,9 @@ struct SNeutrinoSettings
 	int   audioplayer_repeat_on;
 	int   audioplayer_show_playlist;
 	int   audioplayer_enable_sc_metadata;
+
+	//Esound
+	char  esound_port[6];
 
 	//Filebrowser
 	int filebrowser_showrights;
