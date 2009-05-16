@@ -111,8 +111,8 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 	if (!frameBuffer->getActive())
 		return menu_return::RETURN_EXIT_ALL;
 
-	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
-		g_Controld->setVideoFormat(CControldClient::VIDEOFORMAT_4_3);
+	if(g_settings.video_Format != g_settings.video_backgroundFormat)
+		g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
 
 	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
 	frameBuffer->loadPicture2FrameBuffer("scan.raw");
@@ -183,7 +183,7 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 	g_Sectionsd->setPauseScanning(false);
 
 
-	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
+	if(g_settings.video_Format != g_settings.video_backgroundFormat)
 		g_Controld->setVideoFormat(g_settings.video_Format);
 
 	return menu_return::RETURN_REPAINT;

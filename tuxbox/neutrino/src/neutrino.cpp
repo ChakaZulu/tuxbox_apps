@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.949 2009/05/06 17:57:52 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.950 2009/05/16 00:22:50 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -324,6 +324,8 @@ int CNeutrinoApp::loadSetup()
 
 	//video
 	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
+	g_settings.video_backgroundFormat = configfile.getInt32("video_backgroundFormat", CControldClient::VIDEOFORMAT_4_3);
+
 	g_settings.video_csync = configfile.getInt32( "video_csync", 0 );
 
 	//fb-alphavalues for gtx
@@ -868,6 +870,8 @@ void CNeutrinoApp::saveSetup()
 
 	//video
 	configfile.setInt32( "video_Format", g_settings.video_Format );
+	configfile.setInt32( "video_backgroundFormat", g_settings.video_backgroundFormat );
+
 	configfile.setInt32( "video_csync", g_settings.video_csync );
 
 	//fb-alphavalues for gtx
@@ -1639,10 +1643,10 @@ const CMenuOptionChooser::keyval VIDEOMENU_VCRSIGNAL_OPTIONS[VIDEOMENU_VCRSIGNAL
 #define VIDEOMENU_VIDEOFORMAT_OPTION_COUNT 4
 const CMenuOptionChooser::keyval VIDEOMENU_VIDEOFORMAT_OPTIONS[VIDEOMENU_VIDEOFORMAT_OPTION_COUNT] =
 {
-	{ 2, LOCALE_VIDEOMENU_VIDEOFORMAT_43         },
-	{ 3, LOCALE_VIDEOMENU_VIDEOFORMAT_431        },
-	{ 1, LOCALE_VIDEOMENU_VIDEOFORMAT_169        },
-	{ 0, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT }
+	{ CControldClient::VIDEOFORMAT_4_3, LOCALE_VIDEOMENU_VIDEOFORMAT_43         },
+	{ CControldClient::VIDEOFORMAT_4_3_PS, LOCALE_VIDEOMENU_VIDEOFORMAT_431        },
+	{ CControldClient::VIDEOFORMAT_16_9, LOCALE_VIDEOMENU_VIDEOFORMAT_169        },
+	{ CControldClient::VIDEOFORMAT_AUTO, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT }
 };
 
 class CVideoSettings : public CMenuWidget, CChangeObserver
@@ -1663,14 +1667,16 @@ public:
 
 			addItem(new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &video_out_signal, VIDEOMENU_VIDEOSIGNAL_OPTIONS, VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT, true, this));
 
-			CMenuOptionChooser * oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT, true, this);
+			CMenuOptionChooser * oj1 = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT, true, this);
+			CMenuOptionChooser * oj2 = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT_BG, &g_settings.video_backgroundFormat, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT-1, true, this);
 
 			if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
 			{
 				changeNotify(LOCALE_VIDEOMENU_VIDEOFORMAT, NULL);
 			}
-
-			addItem(oj);
+			
+			addItem(oj1);
+			addItem(oj2);
 
 			SyncControlerForwarder = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, false, NULL, &RGBCSyncControler);
 			addItem(SyncControlerForwarder);
@@ -1692,6 +1698,8 @@ public:
 
 	virtual bool changeNotify(const neutrino_locale_t OptionName, void *)
 		{
+			CNeutrinoApp * neutrino = CNeutrinoApp::getInstance();
+
 			if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOSIGNAL))
 			{
 				while ((vcr_video_out_signal) == CControldClient::VIDEOOUTPUT_SVIDEO && (video_out_signal != CControldClient::VIDEOOUTPUT_SVIDEO) && (video_out_signal != CControldClient::VIDEOOUTPUT_COMPOSITE) )
@@ -1705,9 +1713,13 @@ public:
 			{
 				g_Controld->setVCROutput(vcr_video_out_signal);
 			}
-			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT))
+			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT) && (neutrino->getMode() != NeutrinoMessages::mode_radio))
 			{
 				g_Controld->setVideoFormat(g_settings.video_Format);
+			}
+			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT_BG) && (neutrino->getMode() == NeutrinoMessages::mode_radio))
+			{
+				g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
 			}
 
 			return true;
@@ -1722,7 +1734,7 @@ public:
 				VcrVideoOutSignalOptionChooser->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_COMPOSITE) || (video_out_signal == CControldClient::VIDEOOUTPUT_SVIDEO));
 			SyncControlerForwarder->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal ==  CControldClient::VIDEOOUTPUT_YUV_CVBS));
 
-			g_settings.video_Format = g_Controld->getVideoFormat();
+			//g_settings.video_Format = g_Controld->getVideoFormat();
 
 			CMenuWidget::paint();
 		};
@@ -3490,7 +3502,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 
 	mode = mode_tv;
 
-	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
+	if(g_settings.video_Format != g_settings.video_backgroundFormat)
 		g_Controld->setVideoFormat(g_settings.video_Format);
 
 	//printf( "tv-mode\n" );
@@ -3645,8 +3657,8 @@ void CNeutrinoApp::radioMode( bool rezap)
 
 	mode = mode_radio;
 
-	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
-		g_Controld->setVideoFormat(CControldClient::VIDEOFORMAT_4_3);
+	if(g_settings.video_Format != g_settings.video_backgroundFormat)
+		g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
 
 	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
 	frameBuffer->useBackground(frameBuffer->loadBackground("radiomode.raw"));// set useBackground true or false

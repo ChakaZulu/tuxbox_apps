@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.209 2009/05/06 17:57:54 rhabarber1848 Exp $
+  $Id: settings.h,v 1.210 2009/05/16 00:22:52 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -47,6 +47,7 @@ struct SNeutrinoSettings
 {
 	//video
 	int video_Format;
+	int video_backgroundFormat;
 	unsigned char video_csync;
 
 	//misc

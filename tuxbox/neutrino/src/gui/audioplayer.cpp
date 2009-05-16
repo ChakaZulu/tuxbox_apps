@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.66 2009/04/27 08:06:32 seife Exp $
+  $Id: audioplayer.cpp,v 1.67 2009/05/16 00:22:51 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -270,8 +270,8 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 		parent->hide();
 	}
 
-	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
-		g_Controld->setVideoFormat(CControldClient::VIDEOFORMAT_4_3);
+	if(g_settings.video_Format != g_settings.video_backgroundFormat)
+		g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
 
 	bool usedBackground = m_frameBuffer->getuseBackground();
 	if (usedBackground)

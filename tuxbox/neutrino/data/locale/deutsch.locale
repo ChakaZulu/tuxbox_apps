@@ -1311,6 +1311,7 @@ videomenu.videoformat_169 16:9
 videomenu.videoformat_43 4:3 (LB)
 videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_autodetect automatisch
+videomenu.videoformat_bg Hintergrundbildformat
 videomenu.videosignal Video Signalart
 videomenu.videosignal_composite CVBS
 videomenu.videosignal_rgb RGB + CVBS
