@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.49 2009/03/26 13:43:10 seife Exp $
+	$Id: framebuffer.h,v 1.50 2009/05/19 17:58:10 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -121,7 +121,7 @@ class CFrameBuffer
 		unsigned int getStride() const;             // size of a single line in the framebuffer (in bytes)
 		bool getActive() const;                     // is framebuffer active?
 
-#if HAVE_DVB_API_VERSION >= 3
+#ifdef HAVE_DBOX_HARDWARE
 		void setTransparency( int tr = 0 );
 		void setBlendLevel(int blev1, int blev2);
 #endif
