@@ -4,7 +4,7 @@
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 	Copyright (C) 2005 SnowHead
 
-	$Id: lcdapi.cpp,v 1.2 2007/11/26 20:48:41 yjogol Exp $
+	$Id: lcdapi.cpp,v 1.3 2009/05/19 18:00:27 seife Exp $
 
 	License: GPL
 
@@ -36,7 +36,6 @@
 
 #include <lcddisplay/lcddisplay.h>
 
-#include <dbox/fp.h>
 #include <fcntl.h>
 #include <unistd.h>
 
