@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.66 2009/03/28 14:36:20 seife Exp $
+	$Id: pictureviewer.cpp,v 1.67 2009/05/19 20:29:21 seife Exp $
 
 	MP3Player by Dirch
 	
@@ -698,7 +698,7 @@ void CPictureViewerGui::view(unsigned int index, bool unscaled)
 	if(m_state == MENU)
 	{
 		frameBuffer->setMode(720, 576, 16);
-#if HAVE_DVB_API_VERSION >= 3
+#ifdef HAVE_DBOX_HARDWARE
 		frameBuffer->setTransparency(0);
 #endif
 	}
@@ -723,7 +723,7 @@ void CPictureViewerGui::endView()
 	if(m_state != MENU)
 	{
 		frameBuffer->setMode(720, 576, 8 * sizeof(fb_pixel_t));
-#if HAVE_DVB_API_VERSION >= 3
+#ifdef HAVE_DBOX_HARDWARE
 		frameBuffer->setBlendLevel(g_settings.gtx_alpha1, g_settings.gtx_alpha2);
 #endif
 		frameBuffer->ClearFrameBuffer();
@@ -735,7 +735,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.66 $");
+	return imageinfo.getModulVersion("","$Revision: 1.67 $");
 }
 
 void CPictureViewerGui::showHelp()
