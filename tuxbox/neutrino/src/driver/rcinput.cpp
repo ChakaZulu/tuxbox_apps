@@ -37,7 +37,6 @@
 #include <driver/rcinput.h>
 #include <driver/stream2file.h>
 
-#include <dbox/fp.h>
 #include <stdio.h>
 #include <asm/types.h>
 #include <sys/ioctl.h>
