@@ -5,6 +5,7 @@
 // C
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
 #include <strings.h>
 
 // yhttpd
