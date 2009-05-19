@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.74 2009/04/12 21:11:44 rhabarber1848 Exp $
+	$Id: lcdd.cpp,v 1.75 2009/05/19 18:03:07 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -40,7 +40,9 @@
 #include <lcddisplay/lcddisplay.h>
 #include <gui/widget/icons.h>
 
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #include <dbox/fp.h>
+#endif
 #include <fcntl.h>
 #include <time.h>
 #include <unistd.h>
@@ -220,6 +222,7 @@ void CLCD::displayUpdate()
 
 void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const int inverse, const int bias)
 {
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	if (!display.isAvailable())
 		return;
 
@@ -271,6 +274,7 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 		}
 		close(fd);
 	}
+#endif
 }
 
 void CLCD::setlcdparameter(void)
