@@ -1,8 +1,11 @@
 AUTOMAKE_OPTIONS = gnu
 
 SUBDIRS = \
-	libavs \
 	liblcddisplay \
 	liblircdclient \
 	libtuxtxt
-	
+
+if !BOXTYPE_GENERIC
+SUBDIRS += \
+	libavs
+endif	
