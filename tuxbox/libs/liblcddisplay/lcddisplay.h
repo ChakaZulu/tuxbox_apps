@@ -26,7 +26,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef HAVE_GENERIC_HARDWARE
+// dummy
+#define LCD_ROWS	8
+#define LCD_COLS	120
+#define LCD_PIXEL_OFF	0
+#define LCD_PIXEL_ON	1
+#define LCD_PIXEL_INV	2
+
+#else
 #include <dbox/lcd-ks0713.h>
+#endif
 
 #include <string>
 

@@ -43,6 +43,7 @@ CLCDDisplay::CLCDDisplay()
 {
 	paused=0;
 	available = false;
+#ifndef HAVE_GENERIC_HARDWARE
 	//open device
 	if((fd = open("/dev/dbox/lcd0",O_RDWR)) < 0)
 	{
@@ -65,8 +66,9 @@ CLCDDisplay::CLCDDisplay()
 		return;
 	}
 
-	iconBasePath = "";
 	available = true;
+#endif
+	iconBasePath = "";
 }
 
 bool CLCDDisplay::isAvailable()
@@ -86,6 +88,7 @@ void CLCDDisplay::pause()
 
 void CLCDDisplay::resume()
 {
+#ifndef HAVE_GENERIC_HARDWARE
 	//clear the display
 	if ( ioctl(fd,LCD_IOCTL_CLEAR) < 0)
 	{
@@ -100,12 +103,13 @@ void CLCDDisplay::resume()
 		perror("graphic mode failed");
 		return;
 	}
-
+#endif
 	paused = 0;
 }
 
 void CLCDDisplay::convert_data ()
 {
+#ifndef HAVE_GENERIC_HARDWARE
 	unsigned int x, y, z;
 	char tmp;
 
@@ -122,10 +126,12 @@ void CLCDDisplay::convert_data ()
 			lcd[y][x] = tmp;
 		}
 	}
+#endif
 }
 
 void CLCDDisplay::update()
 {
+#ifndef HAVE_GENERIC_HARDWARE
 	convert_data();
 	if(paused || !available)
 		return;
@@ -133,6 +139,7 @@ void CLCDDisplay::update()
 		if ( write(fd, lcd, LCD_BUFFER_SIZE) < 0) {
 			perror("lcdd: CLCDDisplay::update(): write()");
 		}
+#endif
 }
 
 void CLCDDisplay::draw_point(const int x, const int y, const int state)
