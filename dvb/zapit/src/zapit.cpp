@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.429 2009/05/06 17:57:51 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.430 2009/05/19 18:21:46 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -683,10 +683,12 @@ void saveSettings(bool write)
 		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithChannelID(cc->getChannelID());
 
 		if (c >= 0)
+		{
 			if ((currentMode & RADIO_MODE))
 				lastChannelRadio = c;
 			else
 				lastChannelTV = c;
+		}
 	}
 
 	if (write) {
@@ -2860,7 +2862,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.429 2009/05/06 17:57:51 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.430 2009/05/19 18:21:46 seife Exp $\n");
 
 	bool check_lock = true;
 	int opt;

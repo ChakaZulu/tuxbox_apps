@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.167 2009/04/10 12:55:14 rhabarber1848 Exp $
+ * $Id: scan.cpp,v 1.168 2009/05/19 18:24:37 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -332,8 +332,8 @@ int get_sdts(const t_satellite_position satellite_position, const char * const f
 				{
 					TsidOnid = get_sdt_TsidOnid();
 
-					if ((TsidOnid != 0) &&
-					    ((tI->second.transport_stream_id != (TsidOnid >> 16)&0xFFFF) || (tI->second.original_network_id != TsidOnid &0xFFFF)))
+					if (TsidOnid != 0 &&
+					    (tI->second.transport_stream_id != ((TsidOnid >> 16) & 0xFFFF) || tI->second.original_network_id != (TsidOnid & 0xFFFF)))
 					{
 						tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
 						tI->second.original_network_id = TsidOnid &0xFFFF;
@@ -465,7 +465,7 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 			}
 
 			if ( service_wr )
-			
+			{
 				if (cI->second.getName().empty())
 					fprintf(fd,
 						"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
@@ -478,6 +478,7 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 						cI->second.getServiceId(),
 						convert_UTF8_To_UTF8_XML(cI->second.getName().c_str()).c_str(),
 						cI->second.getServiceType());
+			}
 		}
 	}
 
