@@ -6,7 +6,7 @@
 
 	Copyright (C) 2009 Stefan Seyfried
 
-   $Id: timermanager.cpp,v 1.93 2009/04/02 07:44:04 seife Exp $
+   $Id: timermanager.cpp,v 1.94 2009/05/19 17:52:14 seife Exp $
 
 	License: GPL
 
@@ -31,9 +31,13 @@
 
 #include <sstream>
 
-#include <dbox/fp.h>
-
+// also includes config.h - for HAVE_xxx_HARDWARE etc...
 #include <timermanager.h>
+
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+#include <dbox/fp.h>
+#endif
+
 #include <timerdclient/timerdclient.h>
 #include <timerdclient/timerdmsg.h>
 #include <debug.h>
@@ -55,6 +59,7 @@ CTimerManager::CTimerManager()
 	loadRecordingSafety();
 
 	timer_wakeup = false; // fallback
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	char wakeup;
 	int fd = open("/dev/dbox/fp0", O_RDWR);
 	int ret = ioctl(fd, FP_IOCTL_IS_WAKEUP, &wakeup);
@@ -69,8 +74,9 @@ CTimerManager::CTimerManager()
 		if (ioctl(fd, FP_IOCTL_CLEAR_WAKEUP_TIMER) < 0)
 			perror("[timerd] FP_IOCTL_CLEAR_WAKEUP_TIMER");
 #endif
+		close(fd);
 	}
-
+#endif
 	//thread starten
 	if(pthread_create (&thrTimer, NULL, timerThread, (void *) this) != 0 )
 	{
@@ -719,6 +725,7 @@ bool CTimerManager::shutdown()
 		if(minutes<1)
 			minutes=1; //1 minute is minimum
 
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		int fd = open("/dev/dbox/fp0", O_RDWR);
 		if (ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes) < 0)
 		{
@@ -730,6 +737,7 @@ bool CTimerManager::shutdown()
 			dprintf("wakeup in %d min. programmed\n",minutes);
 			status=true;
 		}
+#endif
 	}
 	pthread_mutex_unlock(&tm_eventsMutex);
 	return status;
