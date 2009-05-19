@@ -41,10 +41,11 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #include <dbox/avs_core.h>
 #include <dbox/fp.h>
 #include <dbox/saa7126_core.h>
-
+#endif
 #include <zapit/audio.h>
 #include <zapit/channel.h>
 
@@ -128,7 +129,9 @@ avs_vendor_settings current_avs_settings;
 // bool vcr;
 // bool videoOutputDisabled;
 
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 void routeVideo();
+#endif
 
 void sig_catch(int);
 
@@ -383,6 +386,7 @@ char getRGBCsync()
 #endif
 }
 
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 void setvcroutput(CControld::video_format format) {
   if ((format != CControld::FORMAT_CVBS) && (format != CControld::FORMAT_SVIDEO)) {
     printf("[controld] illegal format (=%d) specified for VCR output (using CVBS)!", format);
@@ -454,6 +458,15 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings)
 		setRGBCsync(settings.csync);
 #endif
 }
+#else
+void setvcroutput(CControld::video_format)
+{
+}
+
+void setvideooutput(CControld::video_format, bool)
+{
+}
+#endif
 
 void execute_start_file(const char *filename)
 {
@@ -466,6 +479,7 @@ void execute_start_file(const char *filename)
 	}
 }
 
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 void routeVideo(int v1, int a1,
 		int v2, int a2,
 		int v3, int a3, int fblk)
@@ -608,6 +622,11 @@ void setScartMode(bool onoff)
 	}
 	switch_vcr( onoff );
 }
+#else
+void setScartMode(bool)
+{
+}
+#endif
 
 void disableVideoOutput(bool disable)
 {

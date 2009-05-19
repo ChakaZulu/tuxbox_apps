@@ -1,5 +1,5 @@
 /*
- * $Id: audio.h,v 1.14 2007/06/04 17:06:42 dbluelle Exp $
+ * $Id: audio.h,v 1.16 2009/05/19 18:27:53 seife Exp $
  *
  * (C) 2002-2003 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -23,6 +23,11 @@
 #ifndef __zapit_audio_h__
 #define __zapit_audio_h__
 
+#ifndef HAVE_TRIPLEDRAGON
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+#include <dbox/avs_core.h>
+#define AVS_DEVICE "/dev/dbox/avs0"
+#endif
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/audio.h>
 #define audio_stream_source_t	audioStreamSource_t
@@ -35,6 +40,7 @@
 #else
 #include <linux/dvb/audio.h>
 #endif
+#endif /* HAVE_TRIPLEDRAGON */
 
 class CAudio
 {
@@ -59,8 +65,12 @@ class CAudio
 		int enableBypass(void);
 		int disableBypass(void);
 
-		/* volume, min = 0, max = 255 */
-		int setVolume(unsigned int left, unsigned int right);
+		/* volume, min = 0, max = 100, forcetype should be CControld::volume_type */
+		int setVolume(unsigned char vol, int forcetype = 3);
+
+		/* claim and release the device */
+		int openDevice(void);
+		void closeDevice(void);
 
 		/* start and stop audio */
 		int start(void);

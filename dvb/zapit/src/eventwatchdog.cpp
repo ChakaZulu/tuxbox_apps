@@ -24,7 +24,9 @@
 #include <config.h>
 #endif
 
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #include <dbox/event.h>
+#endif
 #if HAVE_DVB_API_VERSION < 3
 #include <zapit/client/zapitclient.h>
 #include <ost/video.h>
@@ -121,6 +123,7 @@ int CEventWatchDog::getVideoMode()
 int CEventWatchDog::getVCRMode()
 {
 	int val = 0;
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	int fp = open("/dev/dbox/fp0",O_RDWR);
 
 	if (fp >= 0) {
@@ -129,6 +132,7 @@ int CEventWatchDog::getVCRMode()
 		//printf("getVCRMode= %d\n", val);
 	}
 
+#endif
 	return val;
 }
 
@@ -161,10 +165,13 @@ void *CEventWatchDog::watchdogThread(void *arg)
 	const char *verb_aratio[] = { "4:3", "16:9", "2.21:1" };
 
 	CEventWatchDog *WatchDog = (CEventWatchDog *)arg;
-	int fd_ev, fd_video;
+	int fd_ev = -1, fd_video;
 
 	while (true)
 	{
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+#define _DEVNUM 2
+		struct pollfd pfd[2];
 		fd_ev = open(EVENT_DEVICE, O_RDWR|O_NONBLOCK);
 		if (fd_ev < 0)
 		{
@@ -177,23 +184,27 @@ void *CEventWatchDog::watchdogThread(void *arg)
 			close(fd_ev);
 			pthread_exit(NULL);
 		}
-
+		pfd[1].fd = fd_ev;
+		pfd[1].events = POLLIN;
+#else
+#define _DEVNUM 1
+		struct pollfd pfd[1];
+#endif
 		fd_video = open(VIDEO_DEVICE, O_RDONLY|O_NONBLOCK);
 		if (fd_video < 0)
 		{
 			perror("[controld] " VIDEO_DEVICE);
-			close(fd_ev);
+			if (fd_ev >= 0)
+				close(fd_ev);
 			pthread_exit(NULL);
 		}
 
-		struct pollfd pfd[2];
-		pfd[0].fd = fd_ev;
-		pfd[0].events = POLLIN;
-		pfd[1].fd = fd_video;
-		pfd[1].events = POLLPRI;
+		pfd[0].fd = fd_video;
+		pfd[0].events = POLLPRI;
 
-		while (poll(pfd, 2, -1) > 0) {
-			if (pfd[0].revents & POLLIN) {
+		while (poll(pfd, _DEVNUM, -1) > 0) {
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+			if (pfd[1].revents & POLLIN) {
 				struct event_t event;
 				while (read(fd_ev, &event, sizeof(event)) == sizeof(event)) {
 					if (event.event == EVENT_VCR_CHANGED) {
@@ -216,8 +227,8 @@ void *CEventWatchDog::watchdogThread(void *arg)
 					}
 				}
 			}
-
-			if (pfd[1].revents & POLLPRI) {
+#endif
+			if (pfd[0].revents & POLLPRI) {
 				struct video_event event;
 
 				if (ioctl(fd_video, VIDEO_GET_EVENT, &event) == -1) {
@@ -243,7 +254,8 @@ void *CEventWatchDog::watchdogThread(void *arg)
 		perror("[CONTROLD] eventwatchdog poll()");
 
 		close(fd_video);
-		close(fd_ev);
+		if (fd_ev >= 0)
+			close(fd_ev);
 		sleep(1);
 	}
 	pthread_exit(NULL);
