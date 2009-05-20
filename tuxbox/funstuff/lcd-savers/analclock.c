@@ -101,7 +101,7 @@ void circle(int mx, int my, int r, char col, screen_t s) {
 	}
 }
 
-#define MX 88
+#define MX 60
 #define MY 32
 #define RAD 27
 
