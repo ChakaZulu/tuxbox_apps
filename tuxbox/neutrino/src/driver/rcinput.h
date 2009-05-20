@@ -34,6 +34,7 @@
 
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #define OLD_RC_API
+#include <dbox/fp.h>
 #endif
 
 #include <linux/input.h>
