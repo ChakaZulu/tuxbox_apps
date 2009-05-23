@@ -4348,7 +4348,7 @@ void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 			tx = TV43STARTX;
 			ty = TV43STARTY;
 			th = TV43HEIGHT;
-#ifdef HAVE_DREAMBOX_DM500
+#ifdef BOXMODEL_DM500
 			tw = renderinfo->var_screeninfo.xres/4; // DM500 seems to only like PIG sizes with same ratio
 			th = renderinfo->var_screeninfo.yres/4;
 #endif
@@ -4362,7 +4362,7 @@ void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 			tw = TV169FULLWIDTH;
 			th = TV169FULLHEIGHT;
 			renderinfo->displaywidth= (TV169FULLSTARTX-renderinfo->sx);
-#ifdef HAVE_DREAMBOX_DM500
+#ifdef BOXMODEL_DM500
 			tw = renderinfo->var_screeninfo.xres/2; // DM500 seems to only like PIG sizes with same ratio
 			th = renderinfo->var_screeninfo.yres/2;
 #endif

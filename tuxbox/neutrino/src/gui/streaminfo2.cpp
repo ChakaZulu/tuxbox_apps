@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.40 2009/03/29 16:53:14 seife Exp $
+	$Id: streaminfo2.cpp,v 1.41 2009/05/23 18:32:48 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -443,11 +443,11 @@ void CStreamInfo2::paint(int/*mode*/)
 		ypos = y+hheight+8;
 
 		// paint PIG
-#ifndef HAVE_DREAMBOX_DM500
-		paint_pig( pigboxes_x,  ypos , 240, 190);
-#else
+#ifdef BOXMODEL_DM500
 		// the dm500 seems to like only half / quarter resolution...
 		paint_pig(pigboxes_x + 60,  ypos, 180, 144);
+#else
+		paint_pig( pigboxes_x,  ypos , 240, 190);
 #endif
 
 		// Info Output
@@ -778,7 +778,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.40 $");
+	return imageinfo.getModulVersion("","$Revision: 1.41 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &)

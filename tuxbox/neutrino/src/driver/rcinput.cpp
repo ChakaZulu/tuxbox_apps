@@ -1619,7 +1619,7 @@ int CRCInput::translate(int code)
 		case 0x43: return RC_blue;
 		case 0x45: return RC_text;
 		case 0x53: return RC_radio;
-#ifdef HAVE_DREAMBOX_DM500
+#ifdef BOXMODEL_DM500
 		case 0x0c: return RC_spkr;	// MUTE key
 		case 0x44: return RC_tv;	// TV   key
 		case 0x50: return RC_plus;	// ">"	key
