@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.47 2009/05/23 16:38:11 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.48 2009/05/23 16:39:42 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -602,9 +602,12 @@ const char *dmx_filter_types [] = {
 			"actual transport stream, scheduled",
 			"other transport stream, now/next",
 			"actual transport stream, scheduled2",
-//			"other transport stream, scheduled"
+#ifdef HAVE_DBOX_HARDWARE
 			"other transport stream, scheduled 1/2",
 			"other transport stream, scheduled 2/2"
+#else
+			"other transport stream, scheduled"
+#endif
 };
 
 int DMX::change(const int new_filter_index)

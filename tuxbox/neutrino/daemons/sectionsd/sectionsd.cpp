@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.293 2009/05/23 16:38:11 seife Exp $
+//  $Id: sectionsd.cpp,v 1.294 2009/05/23 16:39:42 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2462,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.293 2009/05/23 16:38:11 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.294 2009/05/23 16:39:42 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6809,9 +6809,12 @@ static void *eitThread(void *)
 	dmxEIT.addfilter(0x50, 0xff); //1  actual TS, scheduled
 	dmxEIT.addfilter(0x4f, 0xff); //2  other TS, current/next
 	dmxEIT.addfilter(0x50, 0xf0); //3  actual TS, scheduled later
-//	dmxEIT.addfilter(0x60, 0xf0); //4  other TS, scheduled
+#ifdef HAVE_DBOX_HARDWARE
 	dmxEIT.addfilter(0x60, 0xf1); //4a other TS, scheduled, even
 	dmxEIT.addfilter(0x61, 0xf1); //4b other TS, scheduled, odd
+#else
+	dmxEIT.addfilter(0x60, 0xf0); //4  other TS, scheduled
+#endif
 
 	if (debug) {
 		int policy;
@@ -8082,7 +8085,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.293 2009/05/23 16:38:11 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.294 2009/05/23 16:39:42 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
