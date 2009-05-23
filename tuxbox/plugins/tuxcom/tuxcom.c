@@ -125,7 +125,7 @@ int GetRCCode(int mode)
 
 #endif
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 
 int GetRCCode(int mode)
 {
@@ -565,7 +565,7 @@ void plugin_exec(PluginParam *par)
 		else if	(!strcmp(par->id, P_ID_OFF_Y))   sy = atoi(par->val);
 		else if	(!strcmp(par->id, P_ID_END_Y))   ey = atoi(par->val);
 	}
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	kb=open("/dev/vc/0", O_RDONLY);
 #endif
 
@@ -738,7 +738,7 @@ void plugin_exec(PluginParam *par)
 	// lock keyboard-conversions, this is done by the plugin itself
 	fclose(fopen(KBLCKFILE,"w"));
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
  	fcntl(rc, F_SETFL, O_NONBLOCK);
 #else
 	fcntl(rc, F_SETFL, fcntl(rc, F_GETFL) &~ O_NONBLOCK);
@@ -774,7 +774,7 @@ void plugin_exec(PluginParam *par)
 		}
 		firstentry = 0;
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		if (kbcode != 0)
 		{
 			if (kbcode == 0x09) // tab
@@ -1395,7 +1395,7 @@ void plugin_exec(PluginParam *par)
 	ClearMarker    (RIGHTFRAME);
 	ClearZipEntries(LEFTFRAME );
 	ClearZipEntries(RIGHTFRAME);
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	if (kb != -1) close(kb);
 #endif
 	return;

@@ -80,7 +80,7 @@
 #define MSG_VERSION    "Tuxbox Commander Version 1.16"
 #define MSG_COPYRIGHT  "© dbluelle 2004-2007"
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 
 //rc codes
 #define KEY_0		0x5C00
