@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.297 2009/05/23 16:50:12 seife Exp $
+//  $Id: sectionsd.cpp,v 1.298 2009/05/23 21:10:08 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2462,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.297 2009/05/23 16:50:12 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.298 2009/05/23 21:10:08 rhabarber1848 Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -7292,8 +7292,9 @@ static void *cnThread(void *)
 				if (rs == 0)
 				{
 					dprintf("dmxCN: waking up again - requested from .change()\n");
+// fix EPG problems on IPBox
+// http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=367937#p367937
 #if HAVE_IPBOX_HARDWARE
-/* WTF?????? */
 					dmxCN.change(0);
 #endif
 				}
@@ -8068,7 +8069,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.297 2009/05/23 16:50:12 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.298 2009/05/23 21:10:08 rhabarber1848 Exp $\n");
 
 	SIlanguage::loadLanguages();
 
