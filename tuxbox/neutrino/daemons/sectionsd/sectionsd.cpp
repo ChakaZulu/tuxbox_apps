@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.295 2009/05/23 16:43:55 seife Exp $
+//  $Id: sectionsd.cpp,v 1.296 2009/05/23 16:44:52 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2462,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.295 2009/05/23 16:43:55 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.296 2009/05/23 16:44:52 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -7283,7 +7283,7 @@ static void *cnThread(void *)
 				sendToSleepNow = false;
 
 				dmxCN.real_pause();
-				printdate_ms(stderr);fprintf(stderr,"dmxCN: going to sleep...\n");
+				dprintf("dmxCN: going to sleep...\n");
 
 				writeLockMessaging();
 				messaging_eit_is_busy = false;
@@ -7306,7 +7306,7 @@ static void *cnThread(void *)
 
 				if (rs == 0)
 				{
-					printdate_ms(stderr); fprintf(stderr,"dmxCN: waking up again - requested from .change()\n");
+					dprintf("dmxCN: waking up again - requested from .change()\n");
 					dmxCN.real_unpause();
 #if HAVE_IPBOX_HARDWARE
 					dmxCN.change(0);
@@ -8085,7 +8085,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.295 2009/05/23 16:43:55 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.296 2009/05/23 16:44:52 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
