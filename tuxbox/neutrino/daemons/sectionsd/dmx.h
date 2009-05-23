@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.16 2009/02/28 13:57:50 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.17 2009/05/23 16:50:12 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -84,7 +84,7 @@ class DMX
 	int request_pause(void);
 	int request_unpause(void);
 
-	int change(const int new_filter_index); // locks while changing
+	int change(const int new_filter_index, const int new_current_service = -1); // locks while changing
 
 	void lock(void);
 	void unlock(void);

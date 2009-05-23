@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.296 2009/05/23 16:44:52 seife Exp $
+//  $Id: sectionsd.cpp,v 1.297 2009/05/23 16:50:12 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2462,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.296 2009/05/23 16:44:52 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.297 2009/05/23 16:50:12 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2895,12 +2895,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		}
 		messaging_need_eit_version = false;
 		unlockMessaging();
-		dmxCN.real_unpause();
 		dmxCN.setCurrentService(messaging_current_servicekey & 0xffff);
-		dmxCN.change(0);
-		dmxEIT.real_unpause();
 		dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
-		dmxEIT.change( 0 );
 	}
 	else
 		dprintf("[sectionsd] commandserviceChanged: no change...\n");
@@ -6125,7 +6121,6 @@ static void *nitThread(void *)
 					 if (messaging_nit_nid[0] != 0)
 						updateNetwork();
 					pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
-					dmxSDT.real_unpause();
 					dmxSDT.change( 0 );
 				}
 
@@ -6138,13 +6133,11 @@ static void *nitThread(void *)
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxNIT: waking up again - looking for new transponders :)\n");
-					dmxNIT.real_unpause();
 					dmxNIT.change( 0 ); // -> restart
 				}
 				else if (rs == 0)
 				{
 					dprintf("dmxNIT: waking up again - requested from .change()\n");
-					dmxNIT.real_unpause();
 				}
 				else
 				{
@@ -6359,13 +6352,11 @@ static void *sdtThread(void *)
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxSDT: waking up again - looking for new services :)\n");
-					dmxSDT.real_unpause();
 					dmxSDT.change( 0 ); // -> restart
 				}
 				else if (rs == 0)
 				{
 					dprintf("dmxSDT: waking up again - requested from .change()\n");
-					dmxSDT.real_unpause();
 				}
 				else
 				{
@@ -6991,7 +6982,6 @@ static void *eitThread(void *)
 
 				if (auto_scanning) {
 					pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
-					dmxNIT.real_unpause();
 					dmxNIT.change( 0 );
 				}
 
@@ -7012,17 +7002,12 @@ static void *eitThread(void *)
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxEIT: waking up again - timed out\n");
-					dmxEIT.real_unpause();
-// must call dmxEIT.change after! unpause otherwise dev is not open,
-// dmxEIT.lastChanged will not be set, and filter is advanced the next iteration
-// maybe .change should imply .real_unpause()? -- seife
 					dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxEIT.filters.size() );
 					dmxEIT.change(1); // -> restart
 				}
 				else if (rs == 0)
 				{
 					dprintf("dmxEIT: waking up again - requested from .change()\n");
-					dmxEIT.real_unpause();
 				}
 				else
 				{
@@ -7307,8 +7292,8 @@ static void *cnThread(void *)
 				if (rs == 0)
 				{
 					dprintf("dmxCN: waking up again - requested from .change()\n");
-					dmxCN.real_unpause();
 #if HAVE_IPBOX_HARDWARE
+/* WTF?????? */
 					dmxCN.change(0);
 #endif
 				}
@@ -7525,14 +7510,12 @@ static void *pptThread(void *)
 					dprintf("dmxPPT: waking up again - looking for new events :)\n");
 					if (0 != privatePid)
 					{
-						dmxPPT.real_unpause();
 						dmxPPT.change( 0 ); // -> restart
 					}
 				}
 				else if (rs == 0)
 				{
 					dprintf("dmxPPT: waking up again - requested from .change()\n");
-					dmxPPT.real_unpause();
 				}
 				else
 				{
@@ -8085,7 +8068,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.296 2009/05/23 16:44:52 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.297 2009/05/23 16:50:12 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8274,7 +8257,6 @@ int main(int argc, char **argv)
 						messaging_last_requested = time(NULL);
 						unlockMessaging();
 						sched_yield();
-						dmxCN.real_unpause();
 						dmxCN.change(0);
 						sched_yield();
 					}

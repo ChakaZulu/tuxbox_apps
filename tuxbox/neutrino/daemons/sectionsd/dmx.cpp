@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.49 2009/05/23 16:43:55 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.50 2009/05/23 16:50:12 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -457,7 +457,10 @@ int DMX::getSection(char *buf, const unsigned timeoutInMSeconds, int &timeouts)
 int DMX::immediate_start(void)
 {
 	if (isOpen())
-		return 1;
+	{
+xprintf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>DMX::imediate_start: isOpen()<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+		closefd();
+	}
 
 	if (real_pauseCounter != 0) {
 		dprintf("DMX::immediate_start: realPausecounter !=0 (%d)!\n", real_pauseCounter);
@@ -525,7 +528,6 @@ int DMX::real_pause(void)
 
 int DMX::real_unpause(void)
 {
-
 	lock();
 
 	if (real_pauseCounter == 0)
@@ -609,7 +611,7 @@ const char *dmx_filter_types [] = {
 #endif
 };
 
-int DMX::change(const int new_filter_index)
+int DMX::change(const int new_filter_index, const int new_current_service)
 {
 	if (debug)
 		showProfiling("changeDMX: before pthread_mutex_lock(&start_stop_mutex)");
@@ -633,6 +635,8 @@ int DMX::change(const int new_filter_index)
 		return 1;
 	}
 #endif
+	if (new_current_service != -1)
+		current_service = new_current_service;
 
 	if (real_pauseCounter > 0)
 	{
@@ -775,40 +779,7 @@ int DMX::setPid(const unsigned short new_pid)
 
 int DMX::setCurrentService(int new_current_service)
 {
-	lock();
-
-	/* there might be occurences of setCurrentService with the devcice stopped */
-	current_service = new_current_service;
-
-	if (!isOpen())
-	{
-		pthread_cond_signal(&change_cond);
-		dprintf("DMX::setCurrentService(0x%x) not open!\n",new_current_service);
-		unlock();
-		return 1;
-	}
-
-	if (real_pauseCounter > 0)
-	{
-		/*d*/printf("DMX::setCurrentService(0x%x) ignored because of real_pauseCounter > 0 (%d)\n", new_current_service, real_pauseCounter);
-		unlock();
-		return 0;	// not running (e.g. streaming)
-	}
-	closefd();
-
-	int rc = immediate_start();
-
-	if (rc != 0)
-	{
-		unlock();
-		return rc;
-	}
-
-        pthread_cond_signal(&change_cond);
-
-	unlock();
-
-	return 0;
+	return change(0, new_current_service);
 }
 
 int DMX::dropCachedSectionIDs()
