@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.46 2009/02/28 13:57:50 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.47 2009/05/23 16:38:11 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -38,9 +38,6 @@
 #include <cstring>
 #include <map>
 
-/**/
-#define PAUSE_EQUALS_STOP 1
-/**/
 /*
 #define DEBUG_MUTEX 1
 #define DEBUG_CACHED_SECTIONS 1
@@ -516,17 +513,7 @@ int DMX::real_pause(void)
 
 	if (real_pauseCounter == 0)
 	{
-#ifdef PAUSE_EQUALS_STOP
 		immediate_stop();
-#else
-		if (ioctl(fd, DMX_STOP, 0) == -1)
-		{
-			closefd();
-			perror("[sectionsd] DMX: DMX_STOP");
-			unlock();
-			return 2;
-		}
-#endif
 	}
 	//else
 	//	dprintf("real_pause: counter %d\n", real_pauseCounter);
@@ -538,26 +525,12 @@ int DMX::real_pause(void)
 
 int DMX::real_unpause(void)
 {
-#ifndef PAUSE_EQUALS_STOP
-	if (!isOpen())
-		return 1;
-#endif
 
 	lock();
 
 	if (real_pauseCounter == 0)
 	{
-#ifdef PAUSE_EQUALS_STOP
 		immediate_start();
-#else
-		if (ioctl(fd, DMX_START, 0) == -1)
-		{
-			closefd();
-			perror("[sectionsd] DMX: DMX_START");
-			unlock();
-			return 2;
-		}
-#endif
 		//dprintf("real_unpause DONE: %d\n", real_pauseCounter);
 	}
 	//else
@@ -601,11 +574,6 @@ int DMX::request_unpause(void)
 to be removed....
 int DMX::pause(void)
 {
-#ifndef PAUSE_EQUALS_STOP
-	if (!isOpen())
-		return 1;
-#endif
-
 	pthread_mutex_lock(&pauselock);
 
 	//dprintf("lock from pc: %d\n", pauseCounter);
@@ -618,11 +586,6 @@ int DMX::pause(void)
 
 int DMX::unpause(void)
 {
-#ifndef PAUSE_EQUALS_STOP
-	if (!isOpen())
-		return 1;
-#endif
-
 	pthread_mutex_lock(&pauselock);
 
 	//dprintf("unlock from pc: %d\n", pauseCounter);
@@ -662,9 +625,7 @@ int DMX::change(const int new_filter_index)
  */
 	if (!isOpen())
 	{
-#ifdef PAUSE_EQUALS_STOP
 		pthread_cond_signal(&change_cond);
-#endif
 		unlock();
 		dprintf("DMX::change(%d): not open!\n",new_filter_index);
 		return 1;
@@ -740,7 +701,6 @@ ssize_t DMX::readNbytes(int _fd, char *buf, const size_t n, unsigned timeoutInMS
 		perror ("[sectionsd] DMX::readNbytes poll");
 		return -1;
 	}
-#ifdef PAUSE_EQUALS_STOP
 	if ((ufds.revents & POLLERR) != 0) /* POLLERR means buffer error, i.e. buffer overflow */
 	{
 		printdate_ms(stderr);
@@ -749,7 +709,6 @@ ssize_t DMX::readNbytes(int _fd, char *buf, const size_t n, unsigned timeoutInMS
 		       filters[filter_index].filter, filters[filter_index].mask);
 		return -1;
 	}
-#endif
 	if (!(ufds.revents&POLLIN))
 	{
 		xprintf("%s: not ufds.revents&POLLIN, please report!\n", __FUNCTION__);
@@ -780,9 +739,7 @@ int DMX::setPid(const unsigned short new_pid)
 
 	if (!isOpen())
 	{
-#ifdef PAUSE_EQUALS_STOP
 		pthread_cond_signal(&change_cond);
-#endif
 		unlock();
 		return 1;
 	}
@@ -823,9 +780,7 @@ int DMX::setCurrentService(int new_current_service)
 
 	if (!isOpen())
 	{
-#ifdef PAUSE_EQUALS_STOP
 		pthread_cond_signal(&change_cond);
-#endif
 		dprintf("DMX::setCurrentService(0x%x) not open!\n",new_current_service);
 		unlock();
 		return 1;
@@ -865,9 +820,7 @@ int DMX::dropCachedSectionIDs()
 #if 0
 	if (!isOpen())
 	{
-#ifdef PAUSE_EQUALS_STOP
 		pthread_cond_signal(&change_cond);
-#endif
 		unlock();
 		return 1;
 	}

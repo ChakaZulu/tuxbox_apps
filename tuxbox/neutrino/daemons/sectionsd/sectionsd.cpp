@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.292 2009/05/05 18:57:39 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.293 2009/05/23 16:38:11 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -82,9 +82,6 @@
 #include "SInetworks.hpp"
 #include "SIsections.hpp"
 #include "SIlanguage.hpp"
-
-/* please use the same define status as in dmx.cpp! */
-#define PAUSE_EQUALS_STOP 1
 
 //#include "timerdclient.h"
 //#include "../timermanager.h"
@@ -2465,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.292 2009/05/05 18:57:39 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.293 2009/05/23 16:38:11 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2898,14 +2895,10 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		}
 		messaging_need_eit_version = false;
 		unlockMessaging();
-#ifdef PAUSE_EQUALS_STOP
 		dmxCN.real_unpause();
-#endif
 		dmxCN.setCurrentService(messaging_current_servicekey & 0xffff);
 		dmxCN.change(0);
-#ifdef PAUSE_EQUALS_STOP
 		dmxEIT.real_unpause();
-#endif
 		dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
 		dmxEIT.change( 0 );
 	}
@@ -6132,9 +6125,7 @@ static void *nitThread(void *)
 					 if (messaging_nit_nid[0] != 0)
 						updateNetwork();
 					pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
-#ifdef PAUSE_EQUALS_STOP
 					dmxSDT.real_unpause();
-#endif
 					dmxSDT.change( 0 );
 				}
 
@@ -6147,17 +6138,13 @@ static void *nitThread(void *)
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxNIT: waking up again - looking for new transponders :)\n");
-#ifdef PAUSE_EQUALS_STOP
 					dmxNIT.real_unpause();
-#endif
 					dmxNIT.change( 0 ); // -> restart
 				}
 				else if (rs == 0)
 				{
 					dprintf("dmxNIT: waking up again - requested from .change()\n");
-#ifdef PAUSE_EQUALS_STOP
 					dmxNIT.real_unpause();
-#endif
 				}
 				else
 				{
@@ -6372,17 +6359,13 @@ static void *sdtThread(void *)
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxSDT: waking up again - looking for new services :)\n");
-#ifdef PAUSE_EQUALS_STOP
 					dmxSDT.real_unpause();
-#endif
 					dmxSDT.change( 0 ); // -> restart
 				}
 				else if (rs == 0)
 				{
 					dprintf("dmxSDT: waking up again - requested from .change()\n");
-#ifdef PAUSE_EQUALS_STOP
 					dmxSDT.real_unpause();
-#endif
 				}
 				else
 				{
@@ -7005,9 +6988,7 @@ static void *eitThread(void *)
 
 				if (auto_scanning) {
 					pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
-#ifdef PAUSE_EQUALS_STOP
 					dmxNIT.real_unpause();
-#endif
 					dmxNIT.change( 0 );
 				}
 
@@ -7028,9 +7009,7 @@ static void *eitThread(void *)
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxEIT: waking up again - timed out\n");
-#ifdef PAUSE_EQUALS_STOP
 					dmxEIT.real_unpause();
-#endif
 // must call dmxEIT.change after! unpause otherwise dev is not open,
 // dmxEIT.lastChanged will not be set, and filter is advanced the next iteration
 // maybe .change should imply .real_unpause()? -- seife
@@ -7040,9 +7019,7 @@ static void *eitThread(void *)
 				else if (rs == 0)
 				{
 					dprintf("dmxEIT: waking up again - requested from .change()\n");
-#ifdef PAUSE_EQUALS_STOP
 					dmxEIT.real_unpause();
-#endif
 				}
 				else
 				{
@@ -7327,9 +7304,7 @@ static void *cnThread(void *)
 				if (rs == 0)
 				{
 					printdate_ms(stderr); fprintf(stderr,"dmxCN: waking up again - requested from .change()\n");
-#ifdef PAUSE_EQUALS_STOP
 					dmxCN.real_unpause();
-#endif
 #if HAVE_IPBOX_HARDWARE
 					dmxCN.change(0);
 #endif
@@ -7547,18 +7522,14 @@ static void *pptThread(void *)
 					dprintf("dmxPPT: waking up again - looking for new events :)\n");
 					if (0 != privatePid)
 					{
-#ifdef PAUSE_EQUALS_STOP
 						dmxPPT.real_unpause();
-#endif
 						dmxPPT.change( 0 ); // -> restart
 					}
 				}
 				else if (rs == 0)
 				{
 					dprintf("dmxPPT: waking up again - requested from .change()\n");
-#ifdef PAUSE_EQUALS_STOP
 					dmxPPT.real_unpause();
-#endif
 				}
 				else
 				{
@@ -8111,7 +8082,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.292 2009/05/05 18:57:39 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.293 2009/05/23 16:38:11 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8300,9 +8271,7 @@ int main(int argc, char **argv)
 						messaging_last_requested = time(NULL);
 						unlockMessaging();
 						sched_yield();
-#ifdef PAUSE_EQUALS_STOP
 						dmxCN.real_unpause();
-#endif
 						dmxCN.change(0);
 						sched_yield();
 					}
