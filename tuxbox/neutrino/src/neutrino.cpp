@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.952 2009/05/23 18:32:27 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.953 2009/05/24 16:21:08 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3508,7 +3508,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 
 	mode = mode_tv;
 
-	if(g_settings.video_Format != g_settings.video_backgroundFormat)
+	if (g_Controld->getVideoFormat() != g_settings.video_Format)
 		g_Controld->setVideoFormat(g_settings.video_Format);
 
 	//printf( "tv-mode\n" );
@@ -3663,7 +3663,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 
 	mode = mode_radio;
 
-	if(g_settings.video_Format != g_settings.video_backgroundFormat)
+	if (g_Controld->getVideoFormat() != g_settings.video_backgroundFormat)
 		g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
 
 	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
