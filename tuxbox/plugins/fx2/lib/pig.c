@@ -9,7 +9,7 @@
 #include <config.h>
 
 #ifndef i386
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	#include <dbox/avia_gt_pig.h>
 	#define PIGDEV "/dev/dbox/pig0"
 	extern FBFillRect( int x, int y, int dx, int dy, unsigned char col );
@@ -77,7 +77,7 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 	if ( fd != -1 )
 	{
 		Fx2SetPig(x,y,width,height);
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		l_x=x;
 		l_y=y;
 		l_width=width;
@@ -141,7 +141,7 @@ void	Fx2StopPig( void )
 
 void	Fx2PigPause( void )
 {
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	if ( fd != -1 )
 		avia_pig_hide(fd);
 #else
@@ -156,7 +156,7 @@ void	Fx2PigPause( void )
 
 void	Fx2PigResume( void )
 {
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	if ( fd != -1 )
 		avia_pig_show(fd);
 #else

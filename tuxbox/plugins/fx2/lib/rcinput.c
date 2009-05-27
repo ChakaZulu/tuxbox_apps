@@ -13,7 +13,7 @@
 #include "draw.h"
 #include "rcinput.h"
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	static int fd_is_ext = 0;
 	static int keyboard = 0;
 	static int drop = 0;
@@ -155,7 +155,7 @@ void	KbClose( void )
 
 int	RcInitialize( int extfd )
 {
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	char	buf[32];
 	if ( extfd == -1 )
 	{
@@ -185,7 +185,7 @@ int	RcInitialize( int extfd )
 	return 0;
 }
 
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 static unsigned short translate( unsigned short code )
 {
 	if ((code&0xFF00)==0x5C00)
@@ -220,7 +220,7 @@ static unsigned short translate( unsigned short code )
 		case 0x17: return RC_MINUS;
 		case 0x28: return RC_SPKR;
 		case 0x82: return RC_HELP;
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		case 0xFE: keyboard=0;return 0xee;
 		case 0xFF: keyboard=1;return 0xee;
 #endif
@@ -240,7 +240,7 @@ void		RcGetActCode( void )
 	int				x=0;
 	unsigned short	code = 0;
 	static  unsigned short cw=0;
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	char buf[32];
 	if ( fd != -1 )
 		x = read( fd, buf, 32 );
@@ -374,7 +374,7 @@ void	RcClose( void )
 	KbClose();
 	if ( fd == -1 )
 		return;
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	if ( !fd_is_ext )
 #endif
 	close(fd);
