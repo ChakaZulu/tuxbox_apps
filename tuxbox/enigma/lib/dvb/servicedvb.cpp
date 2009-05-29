@@ -579,6 +579,8 @@ void eDVRPlayerThread::updatePosition()
 {
 	int filelength=0;
 
+	if (timestampParser)
+		timestampParser->RefreshEndTime();
 	if (playingPermanentTimeshift)
 		filelength = permanentTimeshift.getCurrentLength (-1)/1880;
 	else

@@ -12,11 +12,10 @@ class eTimeStampParserTS
 	typedef unsigned long long Timestamp;
 	unsigned char pkt[188];
 	int pktptr;
-	int processPacket(const unsigned char *pkt);
+	int processPacket(const unsigned char *pkt, int type);
 	inline int wantPacket(const unsigned char *hdr) const;
 	int pid;
 	int needNextPacket;
-	int skip;
 	tm movie_begin;
 	tm movie_end;	
 	tm movie_current;
@@ -27,13 +26,14 @@ class eTimeStampParserTS
 	off64_t filelength;
 	int sec_duration;
 	int sec_currentpos;
-	int type;
-	void init_eTimeStampParserTS(eString _filename);
+	eString basefilename;
+	void init_eTimeStampParserTS(const char* filename);
 public:
-	eTimeStampParserTS(eString _filename);
-	void parseData(const void *data, unsigned int len);
+	eTimeStampParserTS(const char* filename);
+	void parseData(const void *data, unsigned int len, int type = 0);
 	int getSecondsDuration() { return sec_duration;}
 	int getSecondsCurrent() { return sec_currentpos; }
 	int getAverageBitrate() { return (sec_duration > 0 && filelength > 0 ? filelength*8/sec_duration : -1 ); }
+	void RefreshEndTime();
 };
 #endif

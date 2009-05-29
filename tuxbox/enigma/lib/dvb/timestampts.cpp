@@ -1,5 +1,5 @@
 /*
- * $Id: timestampts.cpp,v 1.6 2009/02/21 15:27:54 dbluelle Exp $
+ * $Id: timestampts.cpp,v 1.7 2009/05/29 17:53:26 dbluelle Exp $
  *
  * (C) 2008 by Dr. Best  <dr.best@dreambox-tools.info>
  *
@@ -30,15 +30,16 @@
 #error no byte order defined!
 #endif
 
-eTimeStampParserTS::eTimeStampParserTS(eString _filename): pktptr(0), pid(-1), needNextPacket(0), skip(0), MovieCurrentTime(0),
-	MovieBeginTime(0), MovieEndTime(0),MovieDuration(0),filelength(-1),sec_duration(-1),sec_currentpos(-1), type(0)
+eTimeStampParserTS::eTimeStampParserTS(const char* filename): pktptr(0), pid(-1), needNextPacket(0), MovieCurrentTime(0),
+	MovieBeginTime(0), MovieEndTime(0),MovieDuration(0),filelength(-1),sec_duration(-1),sec_currentpos(-1)
 {
-	init_eTimeStampParserTS(_filename);
+	init_eTimeStampParserTS(filename);
 }
-void eTimeStampParserTS::init_eTimeStampParserTS(eString _filename)
+void eTimeStampParserTS::init_eTimeStampParserTS(const char* filename)
 {
+	basefilename = filename;
 	// VPID ermitteln
-	int fd=open(_filename.c_str(), O_RDONLY|O_LARGEFILE);
+	int fd=open(basefilename.c_str(), O_RDONLY|O_LARGEFILE);
 	if (fd >= 0)
 	{
 		__u8 packet[188];
@@ -73,60 +74,65 @@ void eTimeStampParserTS::init_eTimeStampParserTS(eString _filename)
 		close(fd);
 	}	
 
-	int fd_begin=::open(_filename.c_str(), O_RDONLY|O_LARGEFILE);
+	int fd_begin=::open(basefilename.c_str(), O_RDONLY|O_LARGEFILE);
 	if (fd_begin >= 0)
 	{
 
-		type = 1; // Anfangszeit setzen!
+		// Anfangszeit setzen!
 		char tmp[65424];
 		int i=0;
 
+		pktptr= 0;
+		needNextPacket = 0;
 		while ( i < 10 && !MovieBeginTime)
 		{
 			int rd = ::read(fd_begin, tmp, 65424);
-			parseData(tmp,rd);
+			parseData(tmp,rd,1);
 			i++;
 		}
 		close(fd_begin);
 		if (MovieBeginTime)
 		{
-			struct stat64 s;
-			int slice = 0;
-			eString tfilename;
-			filelength = 0;
-			while (!stat64((_filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
-			{
-				filelength += s.st_size;
-				tfilename = _filename + (slice ? eString().sprintf(".%03d", slice) : eString(""));
-				slice++;
-			}
-			int fd_end=::open(tfilename.c_str(), O_RDONLY|O_LARGEFILE);
-			if (fd_end>= 0)
-			{
-				type = 2; // Endzeit setzen!
-				pktptr= 0;
-				needNextPacket = 0;
-				skip= 0;
-				off64_t posbegin=::lseek64(fd_end,0, SEEK_END);
-				::lseek64(fd_end, posbegin - (off64_t)654240, SEEK_SET);
-				char p[65424];
-				int rd =1;
-				while ( rd > 0 )
-				{
-					rd = ::read(fd_end, p, 65424);
-					parseData(p,rd);
-				}
-				close(fd_end);
-			}
+			RefreshEndTime();
 		}
 	}
 	pktptr= 0;
 	needNextPacket = 0;
-	skip= 0;
-	type = 0;
 }
-
-int eTimeStampParserTS::processPacket(const unsigned char *pkt)
+void eTimeStampParserTS::RefreshEndTime()
+{
+	struct stat64 s;
+	int slice = 0;
+	eString tfilename;
+	filelength = 0;
+	while (!stat64((basefilename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+	{
+		filelength += s.st_size;
+		tfilename = basefilename + (slice ? eString().sprintf(".%03d", slice) : eString(""));
+		slice++;
+	}
+eDebug("RefreshEndTime:%s,%s",basefilename.c_str(), tfilename.c_str());
+	int fd_end=::open(tfilename.c_str(), O_RDONLY|O_LARGEFILE);
+	if (fd_end>= 0)
+	{
+		// Endzeit setzen!
+		pktptr= 0;
+		needNextPacket = 0;
+		off64_t posbegin=::lseek64(fd_end,0, SEEK_END);
+		::lseek64(fd_end, posbegin - (off64_t)654240, SEEK_SET);
+		char p[65424];
+		int rd =1;
+		while ( rd > 0 )
+		{
+			rd = ::read(fd_end, p, 65424);
+			parseData(p,rd,2);
+		}
+		close(fd_end);
+	}
+	pktptr= 0;
+	needNextPacket = 0;
+}
+int eTimeStampParserTS::processPacket(const unsigned char *pkt, int type)
 {
 	if (!wantPacket(pkt))
 		printf("ne irgendwas ist da falsch\n");
@@ -241,8 +247,13 @@ inline int eTimeStampParserTS::wantPacket(const unsigned char *hdr) const
 	return 0;
 }
 
-void eTimeStampParserTS::parseData(const void *data, unsigned int len)
+void eTimeStampParserTS::parseData(const void *data, unsigned int len, int type)
 {
+	if (!type)
+	{
+		pktptr= 0;
+		needNextPacket = 0;
+	}
 	const unsigned char *packet = (const unsigned char*)data;
 	while (len)
 	{
@@ -300,7 +311,7 @@ void eTimeStampParserTS::parseData(const void *data, unsigned int len)
 			
 			if (pktptr == 188)
 			{
-				needNextPacket = processPacket(pkt);
+				needNextPacket = processPacket(pkt,type);
 				pktptr = 0;
 			}
 		} else if (len >= 4)
@@ -309,7 +320,7 @@ void eTimeStampParserTS::parseData(const void *data, unsigned int len)
 			{
 				if (len >= 188)
 				{
-					needNextPacket = processPacket(packet);
+					needNextPacket = processPacket(packet,type);
 				} else
 				{
 					memcpy(pkt, packet, len);
