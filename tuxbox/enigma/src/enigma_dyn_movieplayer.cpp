@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_movieplayer.cpp,v 1.19 2005/12/23 17:00:08 digi_casi Exp $
+ * $Id: enigma_dyn_movieplayer.cpp,v 1.20 2009/05/29 17:54:31 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -57,6 +57,8 @@
 #include <lib/system/info.h>
 #include <lib/system/http_dyn.h>
 #include <lib/system/econfig.h>
+#include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <enigma_dyn.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_movieplayer.h>
@@ -66,7 +68,7 @@
 
 using namespace std;
 
-eMoviePlayer moviePlayer;
+eAutoInitP0<eMoviePlayer> init_movieplayer(eAutoInitNumbers::actions, "HTTP Movieplayer");
 
 eString streamingServerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -283,14 +285,14 @@ eString movieplayerm3u(eString request, eString dirpath, eString opts, eHTTPConn
 	eString result;
 	
 	eDebug("[MOVIEPLAYERPLS] command = %s, mrl = %s", command.c_str(), mrl.c_str());
-	moviePlayer.control(command.c_str(), mrl.c_str());
+	eMoviePlayer::getInstance()->control(command.c_str(), mrl.c_str());
 	
 	if (command == "start")
 	{
 		content->local_header["Content-Type"] = "video/mpegfile";
 		content->local_header["Cache-Control"] = "no-cache";
 		result = "#EXTM3U\n";
-		result += "#EXTVLCOPT:sout=" + moviePlayer.sout(mrl) + "\n";
+		result += "#EXTVLCOPT:sout=" + eMoviePlayer::getInstance()->sout(mrl) + "\n";
 		result += mrl;
 	}
 	else
