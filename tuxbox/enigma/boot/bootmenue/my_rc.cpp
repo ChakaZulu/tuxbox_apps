@@ -13,8 +13,7 @@ RcInput::RcInput()
 	}
 	fcntl(fd_rc, F_SETFL, O_NONBLOCK );
 	read( fd_rc, buf, 32 );
-
-	pthread_join(thrRc,NULL);
+	
 	if (pthread_create (&thrRc, NULL, ThreadRc, (void *) fd_rc) != 0 )
 		perror("[RcInput] pthread_created error");
 
@@ -25,7 +24,6 @@ RcInput::RcInput()
 		perror(BUTTON_DEVICE);
 		exit(-1);
 	}
-	pthread_join(thrBu,NULL);
 	if (pthread_create (&thrBu, NULL, ThreadBu, (void *) fd_bu) != 0 )
 		perror("[ButtonInput] pthread_created error");
 }

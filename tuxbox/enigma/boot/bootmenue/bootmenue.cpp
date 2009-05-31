@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.27 2005/11/26 16:04:53 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.28 2009/05/31 11:18:37 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on dreamflash by mechatron
@@ -29,7 +29,7 @@ extern int fh_png_getsize(const char *, int *, int *, int, int);
 extern int fh_png_load(const char *, unsigned char *, int, int);
 extern int fh_png_id(const char *);
 
-stmenu *stmenu::instance;
+stmenu *stmenu::instance = 0;
 bool doexit = false;
 
 stmenu::stmenu()
