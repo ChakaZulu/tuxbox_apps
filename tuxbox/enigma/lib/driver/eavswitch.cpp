@@ -22,6 +22,7 @@
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
 #include <lib/dvb/decoder.h>
+#include <lib/driver/streamwd.h>
 
 /* sucks */
 
@@ -329,7 +330,13 @@ void eAVSwitch::muteAvsAudio(bool m)
 		return;
 	}
 }
-
+int eAVSwitch::setTVPin8CheckVCR(int vol)
+{
+	int isVCRActive = eStreamWatchdog::getInstance()->getVCRActivity();
+	if (active && input && isVCRActive)
+		return 1;
+	return setTVPin8(vol);
+}
 int eAVSwitch::setTVPin8(int vol)
 {
 /* results from philips:	fnc=0 -> 0V
@@ -443,7 +450,7 @@ int eAVSwitch::setAspectRatio(eAVAspectRatio as)
 	if ( ioctl(saafd,SAAIOSWSS,&saa) < 0 )
 		eDebug("SAAIOSWSS failed (%m)");
 
-	return setTVPin8((active && (!input))?((aspect==r169)?6:12):0);
+	return setTVPin8CheckVCR((active && (!input))?((aspect==r169)?6:12):0);
 }
 
 void eAVSwitch::setVSystem(eVSystem _system)
@@ -477,7 +484,7 @@ void eAVSwitch::setVSystem(eVSystem _system)
 int eAVSwitch::setActive(int a)
 {
 	active=a;
-	return setTVPin8((active && (!input))?((aspect==r169)?6:12):0);
+	return setTVPin8CheckVCR((active && (!input))?((aspect==r169)?6:12):0);
 }
 
 bool eAVSwitch::loadScartConfig()

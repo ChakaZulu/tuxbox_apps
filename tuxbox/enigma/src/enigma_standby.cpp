@@ -102,7 +102,12 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		eDBoxLCD::getInstance()->switchLCD(0);
 #endif
 		eAVSwitch::getInstance()->setInput(1);
-		eAVSwitch::getInstance()->setTVPin8(0);
+		unsigned int autoVCRswitching = 0;
+		eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", autoVCRswitching );
+		if(autoVCRswitching)
+			eAVSwitch::getInstance()->setTVPin8CheckVCR(0);
+		else
+			eAVSwitch::getInstance()->setTVPin8(0);
 		renewSleep();
 		if( !eSystemInfo::getInstance()->hasLCD() ) //  in standby
 		{

@@ -66,6 +66,7 @@ public:
 	 */
 	void changeVolume(int abs, int vol);
 
+	int setTVPin8CheckVCR(int vol);
 	int setTVPin8(int vol);
 	int setColorFormat(eAVColorFormat cf);
 	int setAspectRatio(eAVAspectRatio as);

@@ -15,8 +15,8 @@ class eStreamWatchdog: public Object
 	void init_eStreamWatchdog();
 private:
 	void check(int);
-	int getVCRActivity();
 public:
+	int getVCRActivity();
 	void reloadSettings(int aspect=-1);
 	eStreamWatchdog();
 	~eStreamWatchdog();
