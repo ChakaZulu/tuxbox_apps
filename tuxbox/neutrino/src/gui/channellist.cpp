@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.211 2009/04/28 06:41:16 rhabarber1848 Exp $
+	$Id: channellist.cpp,v 1.212 2009/06/06 20:22:45 houdini Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -329,9 +329,9 @@ int CChannelList::show()
 			step = (msg_repeatok == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
 			selected += step;
 
-			if(selected >= chanlist.size())
-				selected = ((step==listmaxshow)&&(selected<(((chanlist.size()/listmaxshow)+1)*listmaxshow)))?(chanlist.size()-1):0;
-
+			if(selected >= chanlist.size()) {
+				selected = ((step == listmaxshow) && (selected < (((chanlist.size()/listmaxshow)+1)*listmaxshow))) ? (chanlist.size()-1) : 0;
+			}
 			paintItem(prev_selected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -1271,8 +1271,8 @@ void CChannelList::paintHead()
 {
 	int timestr_len = 0;
 	int provstr_len = 0;
-	char *timestr = new char[10];
-	char *provstr = new char[20];
+	char timestr[10];
+	char provstr[20];
 	time_t now = time(NULL);
 	struct tm *tm = localtime(&now);
 
@@ -1286,18 +1286,21 @@ void CChannelList::paintHead()
 	if (g_info.delivery_system == 1)
 	{
 		for (CZapitClient::SatelliteList::const_iterator satList_it = satList.begin(); satList_it != satList.end(); satList_it++)
+		{
 			if (satList_it->satPosition == getActiveSatellitePosition())
 			{
-				sprintf(provstr,"%s", satList_it->satName);
-			break;
+				snprintf(provstr, 19, "%s", satList_it->satName);
+				provstr[19] = '\0';
+				provstr_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(satList_it->satName, true); // UTF-8
+				break;
 			}
-		provstr_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(provstr, true); // UTF-8
+		}
 	}
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width-10-timestr_len-10, name, COL_MENUHEAD, 0, true); // UTF-8
 	
-	if (g_info.delivery_system == 1)
+	if ((g_info.delivery_system == 1) && (provstr_len > 0))
 	{
 		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+width-10-timestr_len-10-provstr_len-10,y+fheight+5, provstr_len+1, provstr, COL_MENUHEAD, 0, true); // UTF-8
 	}
@@ -1306,8 +1309,6 @@ void CChannelList::paintHead()
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+width-10-timestr_len, y+theight+0, timestr_len+1, timestr, COL_MENUHEAD, 0, true); // UTF-8
 	}
 
-	delete[] timestr;
-	delete[] provstr;
 	paintFoot();
 }
 
