@@ -12,6 +12,7 @@ sub trim {
 	for (@_ ? @_ : $_) {
 		if (defined $_) {
 			s/\xC2\xA0//;
+			s/\x96/-/g;
 			s/^[“\s]+//;
 			s/[-”\s]+$//;
 			s/^\((.*)\)$/$1/;
@@ -45,7 +46,7 @@ sub parse_table {
 sub update {
 	my $t = parse_table(@_);
 	open(OUT, ">src/strings/identifiers/" . $_[0] . ".h");
-	binmode(OUT, ":utf8");
+	binmode(OUT, ":encoding(utf8)");
 	foreach my $row ($t->rows) {
 		my ($id, @fields) = trim @$row;
 		$id =~ s/\s//g;
