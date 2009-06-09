@@ -427,18 +427,18 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings)
 	case CControld::FORMAT_SVIDEO:
 		arg = SAA_MODE_SVIDEO;
 		break;
-#if HAVE_DVB_API_VERSION < 3
-	case CControld::FORMAT_YUV_VBS:
-	case CControld::FORMAT_YUV_CVBS:
-		fprintf(stderr, "[controld] FORMAT_YUV_VBS/FORMAT_YUV_CVBS not supported on dreambox\n");
-		return;
-		break;
-#else
+#ifdef HAVE_DBOX_HARDWARE
 	case CControld::FORMAT_YUV_VBS:
 		arg = SAA_MODE_YUV_V;
 		break;
 	case CControld::FORMAT_YUV_CVBS:
 		arg = SAA_MODE_YUV_C;
+		break;
+#else
+	case CControld::FORMAT_YUV_VBS:
+	case CControld::FORMAT_YUV_CVBS:
+		fprintf(stderr, "[controld] FORMAT_YUV_VBS/FORMAT_YUV_CVBS not supported\n");
+		return;
 		break;
 #endif
 	}
@@ -453,7 +453,7 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings)
 		close(fd);
 	}
 
-#if HAVE_DVB_API_VERSION < 3
+#ifdef HAVE_DBOX_HARDWARE
 	if(format == CControld::FORMAT_RGB || format == CControld::FORMAT_YUV_VBS || format == CControld::FORMAT_YUV_VBS)
 		setRGBCsync(settings.csync);
 #endif
