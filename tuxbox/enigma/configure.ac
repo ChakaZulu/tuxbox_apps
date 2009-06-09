@@ -11,6 +11,11 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
 
+AC_ARG_ENABLE(uclibc,
+	AS_HELP_STRING(--enable-uclibc,	enable rules for creating uclibc linked targets),
+	,[enable_uclibc=no])
+AM_CONDITIONAL(TARGETRULESET_UCLIBC,test "$enable_uclibc" = "yes")
+
 AC_ARG_WITH(webif,
 	[  --with-webif=NAME webif type [[standard,expert,...]]],
 	[WEBIF="$withval"],[WEBIF="expert"])
@@ -130,6 +135,10 @@ fi
 
 if test "$SQLITE" = "yes" ; then
 	CPPFLAGS="$CPPFLAGS -DENABLE_SQLITE"
+fi
+
+if test "$enable_uclibc" = "yes" ; then
+	CPPFLAGS="$CPPFLAGS -DUSE_UCLIBC"
 fi
 
 if test "$BOXMODEL" = "dm56x0" ; then
