@@ -107,11 +107,15 @@ void eZapTimeZoneSetup::okPressed()
 void eZapTimeZoneSetup::setTimeZone()
 {
 	char *ctimeZone=cmdTimeZones();
+#ifdef USE_UCLIBC
+	   setenv("TZ",ctimeZone,1);
+#else
 	if ( system(
 		eString().sprintf(
 			"cp " ZONEINFODIR "/%s /var/etc/localtime",
 			ctimeZone).c_str() ) >> 8)
-		eDebug("couldn't set timezone");
+		eDebug("couldn't set timezone:%s",ctimeZone);
+#endif
 	free(ctimeZone);
 }
 
@@ -217,7 +221,11 @@ char *eZapTimeZoneSetup::cmdTimeZones()
 		if (!strcmp(node->GetType(), "zone"))
 		{
 			const char *name=node->GetAttributeValue("name"),
+#ifdef USE_UCLIBC
+					*zone=node->GetAttributeValue("tz");
+#else
 					*zone=node->GetAttributeValue("zone");
+#endif
 //					*dst=node->GetAttributeValue("dst");
 			if (!zone)
 			{
