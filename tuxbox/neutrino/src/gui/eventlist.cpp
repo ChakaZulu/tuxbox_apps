@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.123 2009/04/12 21:19:15 rhabarber1848 Exp $
+	$Id: eventlist.cpp,v 1.124 2009/06/10 18:25:01 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -557,6 +557,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 					}
 
 					paintHead();
+					UpdateTimerList();
 					paint();
 					showFunctionBar(true);
 				}
