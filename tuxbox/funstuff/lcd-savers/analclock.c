@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include <sys/timeb.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
@@ -248,11 +247,11 @@ void render_line( int xa, int ya, int xb, int yb, int farbe, int width, screen_t
 }
 
 void render_clock(screen_t back, screen_t s) {
-        struct timeb tb;
+        struct timeval tb;
         struct tm *t;
-	int bla, x, y, si, co;
-        time(&tb);
-	t = localtime(&tb.time);
+	int x, y;
+        gettimeofday(&tb, NULL);
+	t = localtime(&tb.tv_sec);
 
 	memcpy(s, back, LCD_BUFFER_SIZE);
 
