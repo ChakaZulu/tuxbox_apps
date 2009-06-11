@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <pthread.h>
+#include <config.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
