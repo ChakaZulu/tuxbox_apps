@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.67 2009/05/16 00:22:51 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.68 2009/06/11 21:13:56 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -280,19 +280,23 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 	m_frameBuffer->useBackground(m_frameBuffer->loadBackground("radiomode.raw"));// set useBackground true or false
 	m_frameBuffer->paintBackground();
 
-	// set zapit in standby mode
-	g_Zapit->setStandby(true);
-
 #ifdef HAVE_DBOX_HARDWARE
 	// If Audiomode is OST then save setting and switch to AVS-Mode
 	if(g_settings.audio_avs_Control == CControld::TYPE_OST)
 	{
+		char tmpvol;
+		tmpvol = g_Controld->getVolume(CControld::TYPE_OST);
+		g_Controld->setVolume(100, CControld::TYPE_OST);
 		m_vol_ost = true;
 		g_settings.audio_avs_Control = CControld::TYPE_AVS;
+		g_Controld->setVolume(tmpvol, CControld::TYPE_AVS);
 	}
 	else
 #endif
 		m_vol_ost = false;
+
+	// set zapit in standby mode
+	g_Zapit->setStandby(true);
 
 	// tell neutrino we're in audio mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_audio );
@@ -332,8 +336,11 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 #ifdef HAVE_DBOX_HARDWARE
 	if(m_vol_ost)
 	{
+		char tmpvol;
+		tmpvol = g_Controld->getVolume(CControld::TYPE_AVS);
 		g_Controld->setVolume(100, CControld::TYPE_AVS);
 		g_settings.audio_avs_Control = CControld::TYPE_OST;
+		g_Controld->setVolume(tmpvol, CControld::TYPE_OST);
 	}
 #endif
 
