@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.152 2009/04/12 21:11:44 rhabarber1848 Exp $
+	$Id: menue.cpp,v 1.153 2009/06/12 19:27:29 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -243,6 +243,8 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 				case (CRCInput::RC_ok):
 					{
 						//exec this item...
+						if ( hasItem() )
+						{
 						CMenuItem* item = items[selected];
 						int rv = item->exec( this );
 						switch ( rv )
@@ -256,6 +258,12 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 							case menu_return::RETURN_REPAINT:
 								paint();
 								break;
+						}
+					}
+						else
+						{
+							msg = CRCInput::RC_timeout;
+							break;
 						}
 					}
 					break;
