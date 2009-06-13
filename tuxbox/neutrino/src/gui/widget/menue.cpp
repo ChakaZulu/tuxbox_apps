@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.153 2009/06/12 19:27:29 rhabarber1848 Exp $
+	$Id: menue.cpp,v 1.154 2009/06/13 12:49:00 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -158,19 +158,15 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 
-	do
-	{
+	do {
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 
-
-		if ( msg <= CRCInput::RC_MaxRC )
-		{
+		if (msg <= CRCInput::RC_MaxRC)
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
-		}
 
-		int handled= false;
+		bool handled = false;
 
-		for (unsigned int i= 0; i< items.size(); i++)
+		for (unsigned int i = 0; i < items.size(); i++)
 		{
 			CMenuItem* titem = items[i];
 			if ((titem->directKey != CRCInput::RC_nokey) &&
@@ -178,15 +174,13 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 			{
 				if (titem->isSelectable())
 				{
-					items[selected]->paint( false );
-					selected= i;
-					msg= CRCInput::RC_ok;
+					items[selected]->paint(false);
+					selected = i;
+					msg = CRCInput::RC_ok;
 				}
 				else
-				{
 					// swallow-key...
-					handled= true;
-				}
+					handled = true;
 				break;
 			}
 		}
@@ -196,62 +190,58 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 			switch (msg)
 			{
 
-				case (CRCInput::RC_up) :
-				case (CRCInput::RC_up|CRCInput::RC_Repeat) :
-				case (CRCInput::RC_down) :
-				case (CRCInput::RC_down|CRCInput::RC_Repeat) :
+				case CRCInput::RC_up:
+				case CRCInput::RC_up|CRCInput::RC_Repeat:
+				case CRCInput::RC_down:
+				case CRCInput::RC_down|CRCInput::RC_Repeat:
+				{
+					//search next / prev selectable item
+					for (unsigned int count = 1; count < items.size(); count++)
 					{
-						//search next / prev selectable item
-						for (unsigned int count=1; count< items.size(); count++)
+						if ((msg & ~CRCInput::RC_Repeat) == CRCInput::RC_up)
 						{
+							pos = selected - count;
+							if (pos < 0)
+								pos += items.size();
+						}
+						else
+							pos = (selected + count) % items.size();
 
-							if ((msg & ~CRCInput::RC_Repeat) == CRCInput::RC_up)
-							{
-								pos = selected- count;
-								if ( pos<0 )
-									pos += items.size();
+						CMenuItem* item = items[pos];
+
+						if (item->isSelectable())
+						{
+							if ((pos < (int)page_start[current_page + 1]) &&
+							    (pos >= (int)page_start[current_page]))
+							{ // Item is currently on screen
+								//clear prev. selected
+								items[selected]->paint(false);
+								//select new
+								item->paint(true);
+								selected = pos;
+								break;
 							}
 							else
 							{
-								pos = (selected+ count)%items.size();
-							}
-
-							CMenuItem* item = items[pos];
-
-							if ( item->isSelectable() )
-							{
-								if ((pos < (int)page_start[current_page + 1]) &&
-								    (pos >= (int)page_start[current_page]))
-								{ // Item is currently on screen
-									//clear prev. selected
-									items[selected]->paint( false );
-									//select new
-									item->paint( true );
-									selected = pos;
-									break;
-								}
-								else
-								{
-									selected=pos;
-									paintItems();
-									break;
-								}
+								selected = pos;
+								paintItems();
+								break;
 							}
 						}
 					}
 					break;
-				case (CRCInput::RC_ok):
+				}
+				case CRCInput::RC_ok:
+					//exec this item...
+					if (hasItem())
 					{
-						//exec this item...
-						if ( hasItem() )
-						{
 						CMenuItem* item = items[selected];
-						int rv = item->exec( this );
-						switch ( rv )
+						int rv = item->exec(this);
+						switch (rv)
 						{
 							case menu_return::RETURN_EXIT_ALL:
 								retval = menu_return::RETURN_EXIT_ALL;
-
+								// TODO: is this fallthrough intentional? --seife
 							case menu_return::RETURN_EXIT:
 								msg = CRCInput::RC_timeout;
 								break;
@@ -260,46 +250,39 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 								break;
 						}
 					}
-						else
-						{
-							msg = CRCInput::RC_timeout;
-							break;
-						}
-					}
+					else
+						msg = CRCInput::RC_timeout;
 					break;
 
-				case (CRCInput::RC_home):
+				case CRCInput::RC_home:
 					msg = CRCInput::RC_timeout;
 					break;
 
-				case (CRCInput::RC_right):
+				case CRCInput::RC_right:
 					break;
 
-				case (CRCInput::RC_left):
+				case CRCInput::RC_left:
 					msg = CRCInput::RC_timeout;
 					break;
 
-				case (CRCInput::RC_timeout):
+				case CRCInput::RC_timeout:
 					break;
 
 				//close any menue on dbox-key
-				case (CRCInput::RC_setup):
-					{
-						msg = CRCInput::RC_timeout;
-						retval = menu_return::RETURN_EXIT_ALL;
-					}
+				case CRCInput::RC_setup:
+					msg = CRCInput::RC_timeout;
+					retval = menu_return::RETURN_EXIT_ALL;
 					break;
 
 				default:
-					if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
+					if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 					{
 						retval = menu_return::RETURN_EXIT_ALL;
 						msg = CRCInput::RC_timeout;
 					}
 			}
 
-
-			if ( msg <= CRCInput::RC_MaxRC )
+			if (msg <= CRCInput::RC_MaxRC)
 			{
 				// recalculate timeout for RC-keys
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
@@ -307,11 +290,11 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 		}
 
 	}
-	while ( msg!=CRCInput::RC_timeout );
+	while (msg != CRCInput::RC_timeout);
 
 	hide();
 	if (CLCD::getInstance()->getMode() != CLCD::MODE_STANDBY)
-		CLCD::getInstance()->setMode(oldLcdMode,oldLcdMenutitle.c_str());
+		CLCD::getInstance()->setMode(oldLcdMode, oldLcdMenutitle.c_str());
 
 	return retval;
 }
