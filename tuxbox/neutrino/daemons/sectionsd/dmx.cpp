@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.50 2009/05/23 16:50:12 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.51 2009/06/14 21:46:03 rhabarber1848 Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -787,7 +787,7 @@ int DMX::dropCachedSectionIDs()
         lock();
 
 /* i think that those checks are wrong for dropCachedSectionIDs(), since
-   this is called from the houskeeping thread while sectionsd might be
+   this is called from the housekeeping thread while sectionsd might be
    idle waiting for the EIT update filter to trigger -- seife
  */
 #if 0
