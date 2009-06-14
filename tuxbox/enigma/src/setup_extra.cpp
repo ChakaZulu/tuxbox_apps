@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.83 2009/04/28 06:43:06 rhabarber1848 Exp $
+ * $Id: setup_extra.cpp,v 1.84 2009/06/14 16:03:12 rhabarber1848 Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -260,15 +260,6 @@ void eExpertSetup::init_eExpertSetup()
 		OSyncDisable = 1;
 	eConfig::getInstance()->setKey("/extras/O_SYNC_disable", OSyncDisable);
 	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Disable O_SYNC"), "/extras/O_SYNC_disable", _("The file/recording is not opened for synchronous I/O")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_o_sync");
-//Alternative Frontenddriver for Philips
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips )
-	{
-		int tda80xx = 0;
-		if (access("/var/etc/.tda80xx", R_OK) == 0)
-			tda80xx = 1;
-		eConfig::getInstance()->setKey("/extras/tda80xx", tda80xx);
-		CONNECT_2_1((new eListBoxEntryCheck(&list, _("New Philips driver"), "/extras/tda80xx", _("use tda80xx driver for Philips boxes")))->selected, eExpertSetup::fileToggle,"/var/etc/.tda80xx");
-	}
 #endif
 	setHelpID(92);
 }
