@@ -14,7 +14,7 @@
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-// Copyright 2006 Bengt Martensson, "Barf"
+// Copyright 2006, 2009 Bengt Martensson, "Barf"
 // http://www.bengt-martensson.de/dbox2
 
 /*
@@ -32,12 +32,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <controldclient.h>
 
-#define CHECKARG if (arg == NO_ARG) {\
-  fprintf(stderr, "%s: This command takes an argument\n");\
- exit(1);\
-  } 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <controldclient/controldclient.h>
+
+#define CHECKARG(cmdname) if (arg == NO_ARG) {			\
+    fprintf(stderr, "%s: This command takes an argument\n", cmdname);	\
+    exit(1);								\
+} 
 
 #define GETCOMMAND_VOLUME(cmdname, cmd) if (!strcasecmp(argv[1], cmdname)) {\
   result = the_controld.cmd(vt); \
@@ -48,12 +53,12 @@
 } else
 
 #define SETCOMMAND(cmdname, cmd) if (!strcasecmp(argv[1], cmdname)) {\
-  CHECKARG; \
+    CHECKARG(cmdname);						     \
   the_controld.cmd(arg); \
 } else
 
 #define SETCOMMAND_VOLUME(cmdname, cmd) if (!strcasecmp(argv[1], cmdname)) {\
-  CHECKARG; \
+    CHECKARG(cmdname);							\
   the_controld.cmd(arg, vt); \
 } else
 
@@ -78,7 +83,7 @@ void usage(char *);
 int
 main(int argc, char *argv[]) {
   CControldClient the_controld;
-  CControld::volume_type vt;
+  CControld::volume_type vt = CControld::TYPE_UNKNOWN;
   char *myname = argv[0];
   char arg = NO_ARG;
   char result = NO_RESULT;
@@ -147,7 +152,11 @@ main(int argc, char *argv[]) {
 void usage(char *myname) {
   fprintf(stderr, 
 	  "Usage: %s [-VOLTYPE] COMMAND [ARGUMENT]\n"
-	  "where VOLTYPE = -a (avs), -o (ost), or -l (lirc),\n"
+	  "where VOLTYPE = "
+#ifdef HAVE_DBOX_HARDWARE
+	  " -a (avs),"
+#endif
+	  " -o (ost), or -l (lirc),\n"
 	  "and COMMAND is one of\n"
 	  "getVolume\n"
 	  "setVolume  VOLUME\n"
@@ -171,8 +180,6 @@ void usage(char *myname) {
 	  "setRGBCsync [0,...,31]\n"
 	  "getRGBCsync\n"
 	  "shutdown\n"
-	  "saveSettings\n"
-	  "registerEvent\n"
-	  "unRegisterEvent.\n",
+	  "saveSettings.\n",
 	  myname);
 }

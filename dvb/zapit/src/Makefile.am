@@ -7,7 +7,7 @@ INCLUDES = \
 	@LIRCDCLIENT_CFLAGS@ \
 	@XML_CFLAGS@
 
-bin_PROGRAMS = pzapit zapit
+bin_PROGRAMS = pzapit zapit controldc
 sbin_PROGRAMS = udpstreampes
 
 pzapit_SOURCES = \
@@ -47,6 +47,8 @@ if BOXTYPE_DBOX2
 zapit_LDADD += \
 	-ltuxbox
 endif
+
+controldc_LDADD = $(top_builddir)/lib/libcontroldclient.la @CONNECTION_LIBS@
 
 installdir = $(CONFIGDIR)/zapit
 
