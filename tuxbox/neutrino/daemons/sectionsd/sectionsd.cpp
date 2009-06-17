@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.299 2009/06/14 21:46:04 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.300 2009/06/17 20:54:35 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2462,7 +2462,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.299 2009/06/14 21:46:04 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.300 2009/06/17 20:54:35 rhabarber1848 Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -4909,7 +4909,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				}
 			}
 			else
-				dputs("Unknow format or version of request!");
+				dputs("Unknown format or version of request!");
 		}
 	} // try
 	catch (std::exception& e)
@@ -8069,7 +8069,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.299 2009/06/14 21:46:04 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.300 2009/06/17 20:54:35 rhabarber1848 Exp $\n");
 
 	SIlanguage::loadLanguages();
 
