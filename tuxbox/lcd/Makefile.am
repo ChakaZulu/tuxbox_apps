@@ -1,4 +1,3 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = lcdip lcdmenu
-
+SUBDIRS = lcdip lcdmenu lcdcmd

@@ -16,6 +16,6 @@ TUXBOX_APPS_LIB_PKGCONFIG(LCDDISPLAY,tuxbox-lcddisplay)
 AC_OUTPUT([
 Makefile
 lcdip/Makefile
+lcdcmd/Makefile
 lcdmenu/Makefile
 ])
-
