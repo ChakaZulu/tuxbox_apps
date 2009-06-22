@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.300 2009/06/17 20:54:35 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.301 2009/06/22 10:22:29 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -166,13 +166,14 @@ static long secondsExtendedTextCache;
 static long oldEventsAre;
 static int scanning = 1;
 
-#define EPG_FILTER_PATH "/var/tuxbox/config/zapit/epgfilter.xml"
-
-std::string epg_filter_dir = EPG_FILTER_PATH;
+std::string epg_filter_dir = "/var/tuxbox/config/zapit/epgfilter.xml";
 static bool epg_filter_is_whitelist = false;
 static bool epg_filter_except_current_next = false;
 static bool bouquet_filter_is_whitelist = false;
 static bool messaging_zap_detected = false;
+
+std::string dvbtime_filter_dir = "/var/tuxbox/config/zapit/dvbtimefilter.xml";
+static bool dvb_time_update = false;
 
 //NTP- Config
 #define CONF_FILE "/var/tuxbox/config/neutrino.conf"
@@ -458,8 +459,16 @@ struct ChannelBlacklist
 	ChannelBlacklist *next;
 };
 
+struct ChannelNoDVBTimelist
+{
+	t_channel_id chan;
+	t_channel_id mask;
+	ChannelNoDVBTimelist *next;
+};
+
 EPGFilter *CurrentEPGFilter = NULL;
 ChannelBlacklist *CurrentBlacklist = NULL;
+ChannelNoDVBTimelist *CurrentNoDVBTime = NULL;
 
 static bool checkEPGFilter(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
 {
@@ -478,6 +487,18 @@ static bool checkEPGFilter(t_original_network_id onid, t_transport_stream_id tsi
 static bool checkBlacklist(t_channel_id channel_id)
 {
 	ChannelBlacklist *blptr = CurrentBlacklist;
+	while (blptr)
+	{
+		if (blptr->chan == (channel_id & blptr->mask))
+			return true;
+		blptr = blptr->next;
+	}
+	return false;
+}
+
+static bool checkNoDVBTimelist(t_channel_id channel_id)
+{
+	ChannelNoDVBTimelist *blptr = CurrentNoDVBTime;
 	while (blptr)
 	{
 		if (blptr->chan == (channel_id & blptr->mask))
@@ -517,6 +538,25 @@ static void addBlacklist(t_original_network_id onid, t_transport_stream_id tsid,
 		node->mask = mask;
 		node->next = CurrentBlacklist;
 		CurrentBlacklist = node;
+	}
+}
+
+static void addNoDVBTimelist(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
+{
+	t_channel_id channel_id =
+		CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(sid, onid, tsid);
+	t_channel_id mask =
+		CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(
+			(sid ? 0xFFFF : 0), (onid ? 0xFFFF : 0), (tsid ? 0xFFFF : 0)
+		);
+	if (!checkNoDVBTimelist(channel_id))
+	{
+		xprintf("Add channel 0x%012llx, mask 0x%012llx to NoDVBTimelist\n", channel_id, mask);
+		ChannelNoDVBTimelist *node = new ChannelNoDVBTimelist;
+		node->chan = channel_id;
+		node->mask = mask;
+		node->next = CurrentNoDVBTime;
+		CurrentNoDVBTime = node;
 	}
 }
 
@@ -2462,7 +2502,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.300 2009/06/17 20:54:35 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.301 2009/06/22 10:22:29 rhabarber1848 Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2865,6 +2905,21 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 			dmxSDT.request_unpause();
 			dmxPPT.request_unpause();
 			xprintf("[sectionsd] commandserviceChanged: service is no longer filtered!\n");
+		}
+	}
+
+	if(checkNoDVBTimelist(*uniqueServiceKey))
+	{
+		if (dvb_time_update) {
+			dvb_time_update = false;
+		}
+		xprintf("[sectionsd] commandserviceChanged: DVB time update is blocked!\n");
+	}
+	else
+	{
+		if (!dvb_time_update) {
+			dvb_time_update = true;
+			xprintf("[sectionsd] commandserviceChanged: DVB time update is allowed!\n");
 		}
 	}
 
@@ -6607,6 +6662,7 @@ static void *timeThread(void *)
 				pthread_mutex_unlock(&timeIsSetMutex );
 				eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &actTime, sizeof(actTime) );
 			} else {
+				if (dvb_time_update) {
 				if (getUTC(&UTC, true)) // always use TDT, a lot of transponders don't provide a TOT
 				{
 					tim = changeUTCtoCtime((const unsigned char *) &UTC);
@@ -6627,7 +6683,7 @@ static void *timeThread(void *)
 					struct tm *tmTime;
 					actTime=time(NULL);
 					tmTime = localtime(&actTime);
-					printf("[%sThread] - %02d.%02d.%04d %02d:%02d:%02d, tim: %s", "time", tmTime->tm_mday, tmTime->tm_mon+1, tmTime->tm_year+1900, tmTime->tm_hour, tmTime->tm_min, tmTime->tm_sec, ctime(&tim));
+					xprintf("[%sThread] - %02d.%02d.%04d %02d:%02d:%02d, tim: %s", "time", tmTime->tm_mday, tmTime->tm_mon+1, tmTime->tm_year+1900, tmTime->tm_hour, tmTime->tm_min, tmTime->tm_sec, ctime(&tim));
 					first_time = false;
 					pthread_mutex_lock(&timeIsSetMutex);
 					timeset = true;
@@ -6636,24 +6692,34 @@ static void *timeThread(void *)
 					pthread_mutex_unlock(&timeIsSetMutex );
 					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim));
 				}
+				}
 			}
 
-			if (timeset) {
+			if (timeset && dvb_time_update) {
 				first_time = false;
 				seconds = ntprefresh * 60;
 
 				if(time_ntp){
-					printf("[%sThread] Time set via NTP, going to sleep for %d seconds.\n", "time", seconds);
+					xprintf("[%sThread] Time set via NTP, going to sleep for %d seconds.\n", "time", seconds);
 				}
 				else {
-					printf("[%sThread] Time set via DVB, going to sleep for %d seconds.\n", "time", seconds);
+					xprintf("[%sThread] Time set via DVB, going to sleep for %d seconds.\n", "time", seconds);
 				}
 			}
-			else if (!scanning){
-				seconds = 60;
-			}
 			else {
-				seconds = 1;
+				if (!first_time){
+					/* time was already set, no need to do it again soon when DVB time-blocked channel is tuned */
+					seconds = ntprefresh * 60;
+				}
+				else if (!scanning){
+					seconds = 60;
+				}
+				else {
+					seconds = 1;
+				}
+				if (!dvb_time_update && !first_time) {
+					xprintf("[%sThread] Time NOT set via DVB due to blocked channel, going to sleep for %d seconds.\n", "time", seconds);
+				}
 			}
 
 			gettimeofday(&now, NULL);
@@ -7924,6 +7990,38 @@ static void readEPGFilter(void)
 	xmlFreeDoc(filter_parser);
 }
 
+static void readDVBTimeFilter(void)
+{
+	xmlDocPtr filter_parser = parseXmlFile(dvbtime_filter_dir.c_str());
+
+	t_original_network_id onid = 0;
+	t_transport_stream_id tsid = 0;
+	t_service_id sid = 0;
+
+	if (filter_parser != NULL)
+	{
+		dprintf("Reading DVBTimeFilters\n");
+		
+		xmlNodePtr filter = xmlDocGetRootElement(filter_parser);
+		filter = filter->xmlChildrenNode;
+
+		while (filter) {
+
+			onid = xmlGetNumericAttribute(filter, "onid", 16);
+			tsid = xmlGetNumericAttribute(filter, "tsid", 16);
+			sid  = xmlGetNumericAttribute(filter, "serviceID", 16);
+			addNoDVBTimelist(onid, tsid, sid);
+
+			filter = filter->xmlNextNode;
+		}
+	}
+	else
+	{
+		dvb_time_update = true;
+	}
+	xmlFreeDoc(filter_parser);
+}
+
 static void readBouquetFilter(void)
 {
 	xmlDocPtr filter_parser = parseXmlFile("/var/tuxbox/config/mybouquets.xml");
@@ -8069,7 +8167,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.300 2009/06/17 20:54:35 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.301 2009/06/22 10:22:29 rhabarber1848 Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8152,6 +8250,7 @@ int main(int argc, char **argv)
 		printf("[sectionsd] Events are old %ldmin after their end time\n", oldEventsAre / 60);
 
 		readEPGFilter();
+		readDVBTimeFilter();
 		readBouquetFilter();
 
 		if (!debug) {
