@@ -48,6 +48,9 @@ zapit_LDADD += \
 	-ltuxbox
 endif
 
+controldc_SOURCES = \
+	controldc.cpp
+
 controldc_LDADD = $(top_builddir)/lib/libcontroldclient.la @CONNECTION_LIBS@
 
 installdir = $(CONFIGDIR)/zapit
