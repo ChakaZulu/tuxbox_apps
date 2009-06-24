@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.68 2009/06/11 21:13:56 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.69 2009/06/24 20:33:05 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -437,16 +437,16 @@ int CAudioPlayerGui::show()
 		{
 			// nothing
 		}
-		else if( msg == CRCInput::RC_home)
+		else if (msg == CRCInput::RC_home)
 		{ 
 			if (m_state != CAudioPlayerGui::STOP)
 				stop();
 			else
 				loop=false;
 		}
-		else if( msg == CRCInput::RC_left)
+		else if (msg == CRCInput::RC_left)
 		{
-			if(m_key_level == 1)
+			if (m_key_level == 1)
 			{
 				playPrev();
 			}
@@ -459,21 +459,23 @@ int CAudioPlayerGui::show()
 						m_current = m_playlist.size()-1;
 					update = true;
 				}
-				else if(m_selected > 0 )
+				else if (!m_playlist.empty())
 				{
-					if (int(m_selected) > int(m_listmaxshow))
+					if (m_selected < m_listmaxshow)
+					{
 						m_selected = m_playlist.size()-1;
+					}					
 					else
 						m_selected -= m_listmaxshow;
-					m_liststart = (m_selected/m_listmaxshow)*m_listmaxshow;
+					m_liststart = (m_selected / m_listmaxshow) * m_listmaxshow;
 					update = true;
 				}
 			}
 
 		}
-		else if( msg == CRCInput::RC_right)
+		else if (msg == CRCInput::RC_right)
 		{
-			if(m_key_level == 1)
+			if (m_key_level == 1)
 			{
 				playNext();
 			}
@@ -486,11 +488,14 @@ int CAudioPlayerGui::show()
 						m_current = 0;
 					update = true;
 				}
-				else if(m_selected != m_playlist.size()-1 && !m_playlist.empty())
+				else if (!m_playlist.empty())
 				{
 					m_selected += m_listmaxshow;
 					if (m_selected >= m_playlist.size())
-						m_selected = 0;
+						if (((m_playlist.size() / m_listmaxshow) + 1) * m_listmaxshow == m_playlist.size() + m_listmaxshow)
+							m_selected = 0;
+						else
+							m_selected = m_selected < (((m_playlist.size() / m_listmaxshow) + 1) * m_listmaxshow) ? (m_playlist.size()-1) : 0;
 					m_liststart = (m_selected / m_listmaxshow) * m_listmaxshow;
 					update = true;
 				}
