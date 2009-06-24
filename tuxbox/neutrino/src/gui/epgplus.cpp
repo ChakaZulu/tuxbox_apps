@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.47 2009/03/28 14:48:57 seife Exp $
+	$Id: epgplus.cpp,v 1.48 2009/06/24 21:40:29 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1408,7 +1408,7 @@ int EpgPlus::exec
 			if ( msg <= CRCInput::RC_MaxRC )
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-			if (msg == g_settings.key_channelList_pagedown || msg == CRCInput::RC_yellow)
+			if (msg == CRCInput::RC_yellow)
 			{
 				if (this->channelList->getSize() > 0 )
 					{
@@ -1462,7 +1462,7 @@ int EpgPlus::exec
 						}
 					}
 			}
-			else if (msg == g_settings.key_channelList_pageup || msg == CRCInput::RC_green)
+			else if (msg == CRCInput::RC_green)
 			{
 				if (this->channelList->getSize() > 0 )
 				{
