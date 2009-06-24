@@ -2102,11 +2102,17 @@ int eScheduleMhw::sectionRead(__u8 *data)
 			
 			if ( titles.find( title_id ) == titles.end() )
 			{
+				tnew_title_read = time(0)+eDVB::getInstance()->time_difference;
 				titles[ title_id ] = *title;
 				if ( (title->summary_available) && (program_ids.find(program_id) == program_ids.end()) )
 					// program_ids will be used to gather summaries.
 					program_ids[ program_id ] = title_id;
 				return 0;	// Continue reading of the current table.
+			}
+			else
+			{
+				/* keep reading titles, if we got a new title less than 4 seconds ago */
+				if (time(0) + eDVB::getInstance()->time_difference - tnew_title_read <= 4) return 0;
 			}
 		}
 	}

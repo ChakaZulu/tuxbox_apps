@@ -177,6 +177,7 @@ class eScheduleMhw: public eSection
 	std::map<__u32, mhw_title_t> titles;
 	std::map<__u32, __u32> program_ids;
 	time_t tnew_summary_read;
+	time_t tnew_title_read;
 	
 	void cleanup();
 	__u8 *delimitName( __u8 *in, __u8 *out, int len_in );
