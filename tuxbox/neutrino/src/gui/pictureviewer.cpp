@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.67 2009/05/19 20:29:21 seife Exp $
+	$Id: pictureviewer.cpp,v 1.68 2009/06/24 20:38:29 rhabarber1848 Exp $
 
 	MP3Player by Dirch
 	
@@ -201,48 +201,48 @@ int CPictureViewerGui::show()
 	int res = -1;
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(LOCALE_PICTUREVIEWER_HEAD));
-	m_state=MENU;
+	m_state = MENU;
 
 	int timeout;
 
-	bool loop=true;
-	bool update=true;
+	bool loop = true;
+	bool update = true;
 	
-	while(loop)
+	while (loop)
 	{
-		if(update)
+		if (update)
 		{
 			hide();
-			update=false;
+			update = false;
 			paint();
 		}
 		
-		if(m_state!=SLIDESHOW)
-			timeout=50; // egal
+		if (m_state != SLIDESHOW)
+			timeout = 50; // egal
 		else
 		{
-			timeout=(m_time+atoi(g_settings.picviewer_slide_time)-(long)time(NULL))*10;
-			if(timeout <0 )
-				timeout=1;
+			timeout = (m_time + atoi(g_settings.picviewer_slide_time) - (long)time(NULL))*10;
+			if (timeout < 0)
+				timeout = 1;
 		}
-		g_RCInput->getMsg( &msg, &data, timeout );
+		g_RCInput->getMsg(&msg, &data, timeout);
 		neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
-		if( msg == CRCInput::RC_home)
+		if (msg == CRCInput::RC_home)
 		{ //Exit after cancel key
-			if(m_state!=MENU)
+			if (m_state != MENU)
 			{
 				endView();
-				update=true;
+				update = true;
 			}
 			else
-				loop=false;
+				loop = false;
 		}
 		else if (msg == CRCInput::RC_timeout)
 		{
-			if(m_state == SLIDESHOW)
+			if (m_state == SLIDESHOW)
 			{
-				m_time=(long)time(NULL);
+				m_time = (long)time(NULL);
 				unsigned int next = selected + 1;
 				if (next >= playlist.size())
 					next = 0;
@@ -251,55 +251,64 @@ int CPictureViewerGui::show()
 		}
 		else if (msg == CRCInput::RC_left)
 		{
-			if (m_state == MENU)
+			if (!playlist.empty())
 			{
-				if ((int(selected)-int(listmaxshow))<0)
-					selected=playlist.size()-1;
+				if (m_state == MENU)
+				{
+					if (selected < listmaxshow)
+						selected = playlist.size()-1;
+					else
+						selected -= listmaxshow;
+					liststart = (selected / listmaxshow) * listmaxshow;
+					paint();
+				}
 				else
-					selected -= listmaxshow;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				paint();
-			}
-			else
-			{
-				view((selected == 0) ? (playlist.size() - 1) : (selected - 1));
+				{
+					view((selected == 0) ? (playlist.size() - 1) : (selected - 1));
+				}
 			}
 		}
 		else if (msg == CRCInput::RC_right)
 		{
-			if (m_state == MENU)
+			if (!playlist.empty())
 			{
-				selected += listmaxshow;
-				if (selected >= playlist.size())
-					selected=0;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				paint();
-			}
-			else
-			{
-				unsigned int next = selected + 1;
-				if (next >= playlist.size())
-					next = 0;
-				view(next);
+				if (m_state == MENU)
+				{
+					selected += listmaxshow;
+					if (selected >= playlist.size())
+						if (((playlist.size() / listmaxshow) + 1) * listmaxshow == playlist.size() + listmaxshow)
+							selected = 0;
+						else
+							selected = selected < (((playlist.size() / listmaxshow) + 1) * listmaxshow) ? (playlist.size() - 1) : 0;
+					liststart = (selected / listmaxshow) * listmaxshow;
+					paint();
+				}
+				else
+				{
+					unsigned int next = selected + 1;
+					if (next >= playlist.size())
+						next = 0;
+					view(next);
+				}
 			}
 		}
 		else if (msg_repeatok == CRCInput::RC_up)
 		{
 			if ((m_state == MENU) && (!playlist.empty()))
 			{
-				int prevselected=selected;
-				if(selected==0)
+				int prevselected = selected;
+				if (selected == 0)
 				{
-					selected = playlist.size()-1;
+					selected = playlist.size() - 1;
 				}
 				else
 					selected--;
 				paintItem(prevselected - liststart);
 				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				if(oldliststart!=liststart)
+				liststart = (selected / listmaxshow) * listmaxshow;
+				if (oldliststart != liststart)
 				{
-					update=true;
+					update = true;
 				}
 				else
 				{
@@ -311,14 +320,14 @@ int CPictureViewerGui::show()
 		{
 			if ((m_state == MENU) && (!playlist.empty()))
 			{
-				int prevselected=selected;
-				selected = (selected+1)%playlist.size();
+				int prevselected = selected;
+				selected = (selected + 1) %playlist.size();
 				paintItem(prevselected - liststart);
 				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				if(oldliststart!=liststart)
+				liststart = (selected / listmaxshow) * listmaxshow;
+				if(oldliststart != liststart)
 				{
-					update=true;
+					update = true;
 				}
 				else
 					{
@@ -337,19 +346,19 @@ int CPictureViewerGui::show()
 			{
 				if (!playlist.empty())
 				{
-					CViewList::iterator p = playlist.begin()+selected;
+					CViewList::iterator p = playlist.begin() + selected;
 					playlist.erase(p);
 					if (selected >= playlist.size())
 						selected = playlist.size()-1;
 					update = true;
 				}
 			}
-			else if(m_state == SLIDESHOW)
+			else if (m_state == SLIDESHOW)
 			{
 				m_state = VIEW;
 			}
 		}
-		else if(msg==CRCInput::RC_green)
+		else if (msg == CRCInput::RC_green)
 		{
 			if (m_state == MENU)
 			{
@@ -364,6 +373,7 @@ int CPictureViewerGui::show()
 				if (filebrowser.exec(Path.c_str()))
 				{
 					Path = filebrowser.getCurrentDir();
+					
 					CFileList::const_iterator files = filebrowser.getSelectedFiles().begin();
 					for(; files != filebrowser.getSelectedFiles().end();files++)
 					{
@@ -388,28 +398,28 @@ int CPictureViewerGui::show()
 					else if (m_sort == DATE)
 						std::sort(playlist.begin(), playlist.end(), comparePictureByDate);
 				}
-				update=true;
+				update = true;
 			}
 		}
-		else if(msg==CRCInput::RC_yellow)
+		else if (msg == CRCInput::RC_yellow)
 		{
-			if(m_state==MENU)
+			if (m_state == MENU && !playlist.empty())
 			{
 				playlist.clear();
-				selected=0;
-				update=true;
+				selected = 0;
+				update = true;
 			}
 		}
-		else if(msg==CRCInput::RC_blue)
+		else if (msg == CRCInput::RC_blue)
 		{
 			if ((m_state == MENU || m_state == VIEW) && (!playlist.empty()))
 			{
-				m_time=(long)time(NULL);
+				m_time = (long)time(NULL);
 				view(selected);
 				m_state=SLIDESHOW;
 			}
 		}
-		else if(msg==CRCInput::RC_help)
+		else if (msg == CRCInput::RC_help)
 		{
 			if (m_state == MENU)
 			{
@@ -417,105 +427,78 @@ int CPictureViewerGui::show()
 				paint();
 			}
 		}
-		else if( msg == CRCInput::RC_1 )
+		else if (msg == CRCInput::RC_1)
 		{ 
-			if(m_state==MENU)
-			{
-			}
-			else
-			{
+			if (m_state != MENU)
 				m_viewer->Zoom(200/3);
-			}
 
 		}
-		else if( msg == CRCInput::RC_2 )
+		else if (msg == CRCInput::RC_2)
 		{ 
-			if(m_state==MENU)
-			{
-			}
-			else
-			{
+			if (m_state != MENU)
 				m_viewer->Move(0,-50);
-			}
 		}
-		else if( msg == CRCInput::RC_3 )
+		else if (msg == CRCInput::RC_3)
 		{ 
-			if(m_state==MENU)
-			{
-			}
-			else
-			{
+			if (m_state != MENU)
 				m_viewer->Zoom(150);
-			}
-
 		}
-		else if( msg == CRCInput::RC_4 )
+		else if (msg == CRCInput::RC_4)
 		{ 
-			if(m_state==MENU)
-			{
-			}
-			else
-			{
+			if (m_state != MENU)
 				m_viewer->Move(-50,0);
-			}
 		}
-		else if ( msg == CRCInput::RC_5 )
+		else if (msg == CRCInput::RC_5)
 		{
-			if(m_sort==FILENAME)
+			if (!playlist.empty())
 			{
-				m_sort=DATE;
-				std::sort(playlist.begin(),playlist.end(),comparePictureByDate);
-			}
-			else if(m_sort==DATE)
-			{
-				m_sort=FILENAME;
-				std::sort(playlist.begin(),playlist.end(),comparePictureByFilename);
-			}
-			update=true;
+				if (m_sort == FILENAME)
+				{
+					m_sort=DATE;
+					std::sort(playlist.begin(),playlist.end(),comparePictureByDate);
+				}
+				else if (m_sort==DATE)
+				{
+					m_sort=FILENAME;
+					std::sort(playlist.begin(),playlist.end(),comparePictureByFilename);
+				}
+				update = true;
+			 }
 		}
-		else if( msg == CRCInput::RC_6 )
+		else if (msg == CRCInput::RC_6)
 		{ 
-			if(m_state==MENU)
-			{
-			}
-			else
-			{
+			if (m_state != MENU)
 				m_viewer->Move(50,0);
-			}
 		}
-		else if( msg == CRCInput::RC_8 )
+		else if (msg == CRCInput::RC_8)
 		{ 
-			if(m_state==MENU)
-			{
-			}
-			else
-			{
+			if (m_state != MENU)
 				m_viewer->Move(0,50);
-			}
 		}
-		else if(msg==CRCInput::RC_0)
+		else if (msg == CRCInput::RC_0)
 		{
-			view(selected, true);
+			if (!playlist.empty())
+				view(selected, true);
 		}
-		else if(msg==CRCInput::RC_setup)
+		else if (msg == CRCInput::RC_setup)
 		{
-			if(m_state==MENU)
+			if (m_state == MENU)
 			{
 				CNFSSmallMenu nfsMenu;
 				nfsMenu.exec(this, "");
-				update=true;
+				update = true;
 				CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(LOCALE_PICTUREVIEWER_HEAD));
 			}
 		}
-		else if(msg == NeutrinoMessages::CHANGEMODE)
+		else if (msg == NeutrinoMessages::CHANGEMODE)
 		{
-			if((data & NeutrinoMessages::mode_mask) !=NeutrinoMessages::mode_pic)
+			if ((data & NeutrinoMessages::mode_mask) != NeutrinoMessages::mode_pic)
 			{
 				loop = false;
-				m_LastMode=data;
+				m_LastMode = data;
 			}
 		}
-		else if(msg == NeutrinoMessages::RECORD_START ||
+		else if (msg == NeutrinoMessages::RECORD_START ||
 				  msg == NeutrinoMessages::ZAPTO ||
 				  msg == NeutrinoMessages::STANDBY_ON ||
 				  msg == NeutrinoMessages::SHUTDOWN ||
@@ -529,7 +512,7 @@ int CPictureViewerGui::show()
 		}
 		else
 		{
-			if( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
+			if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 			{
 				loop = false;
 			}
@@ -537,7 +520,7 @@ int CPictureViewerGui::show()
 	}
 	hide();
 
-	return(res);
+	return (res);
 }
 
 //------------------------------------------------------------------------
@@ -735,7 +718,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.67 $");
+	return imageinfo.getModulVersion("","$Revision: 1.68 $");
 }
 
 void CPictureViewerGui::showHelp()
@@ -746,13 +729,13 @@ void CPictureViewerGui::showHelp()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP2));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_5, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP3));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP4));
-	helpbox.addPagebreak();
+	helpbox.addLine("");
 	helpbox.addLine(g_Locale->getText(LOCALE_PICTUREVIEWER_HELP5));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP6));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_RIGHT, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP7));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_5, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP8));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP9));
-	helpbox.addPagebreak();
+	helpbox.addLine("");
 	helpbox.addLine(g_Locale->getText(LOCALE_PICTUREVIEWER_HELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP11));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP12));
@@ -766,7 +749,7 @@ void CPictureViewerGui::showHelp()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_5, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP20));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP22));
-
+	helpbox.addLine("");
 	helpbox.addLine(version);
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
