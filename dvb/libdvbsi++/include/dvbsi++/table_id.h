@@ -1,5 +1,5 @@
 /*
- * $Id: table_id.h,v 1.5 2005/11/30 16:43:25 mws Exp $
+ * $Id: table_id.h,v 1.6 2009/06/25 16:29:01 obi Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,7 +37,7 @@ enum TableId {
 	TID_DSMCC_DL_DATA	= 0x3C,	/* DSM-CC Download Data */
 	TID_DSMCC_DL_EVENT	= 0x3D,	/* DSM-CC Download Event */
 
-	/* 0x40 - 0x7F: ETSI EN 300 468 V1.5.1 (2003-01) */
+	/* 0x40 - 0x7F: ETSI EN 300 468 V1.9.1 (2009-03) */
 	TID_NIT_ACTUAL		= 0x40,	/* network_information_section - actual_network */
 	TID_NIT_OTHER		= 0x41,	/* network_information_section - other_network */
 	TID_SDT_ACTUAL		= 0x42,	/* service_description_section - actual_transport_stream */
@@ -81,10 +81,12 @@ enum TableId {
 	TID_RST			= 0x71,	/* running_status_section */
 	TID_ST			= 0x72,	/* stuffing_section */
 	TID_TOT			= 0x73,	/* time_offset_section */
-	TID_AIT			= 0x74, /* application_information_section */
-	TID_CIT			= 0x77, /* content_identifier_section */
-	TID_MPE_FEC		= 0x78, /* mpe_fec_section EN 301 192 V1.4.1 */
-	/* 0x79 - 0x7D: ETSI EN 300 468 V1-6-1| ISO/IEC 13818-1 reserved*/
+	TID_AIT			= 0x74, /* application_information_section (TS 102 812) */
+	TID_CT			= 0x75, /* container_section (TS 102 323) */
+	TID_RCT			= 0x76, /* related_content_section (TS 102 323) */
+	TID_CIT			= 0x77, /* content_identifier_section (TS 102 323) */
+	TID_MPE_FEC		= 0x78, /* mpe_fec_section (EN 301 192) */
+	TID_RNT			= 0x79, /* resolution_notification_section (TS 102 323) */
 	TID_DIT			= 0x7E,	/* discontinuity_information_section */
 	TID_SIT			= 0x7F,	/* selection_information_section */
 
