@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.cpp,v 1.12 2008/06/03 15:02:23 obi Exp $
+ * $Id: descriptor_container.cpp,v 1.13 2009/06/25 17:26:07 obi Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -147,208 +147,176 @@ Descriptor *DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool
 	switch (buffer[0]) {
 	case VIDEO_STREAM_DESCRIPTOR:
 		return new VideoStreamDescriptor(buffer);
-
 	case AUDIO_STREAM_DESCRIPTOR:
 		return new AudioStreamDescriptor(buffer);
-
 	case REGISTRATION_DESCRIPTOR:
 		return new RegistrationDescriptor(buffer);
-
+#if 0
+	case DATA_STREAM_ALIGNMENT_DESCRIPTOR:
+		return new DataStreamAlignmentDescriptor(buffer);
+#endif
 	case TARGET_BACKGROUND_GRID_DESCRIPTOR:
 		return new TargetBackgroundGridDescriptor(buffer);
-
 	case VIDEO_WINDOW_DESCRIPTOR:
 		return new VideoWindowDescriptor(buffer);
-
 	case CA_DESCRIPTOR:
 		return new CaDescriptor(buffer);
-
 	case ISO_639_LANGUAGE_DESCRIPTOR:
 		return new Iso639LanguageDescriptor(buffer);
-
+#if 0
+	case SYSTEM_CLOCK_DESCRIPTOR:
+		return new SystemClockDescriptor(buffer);
+	case MULTIPLEX_BUFFER_UTILIZATION_DESCRIPTOR:
+		return new MultiplexBufferUtilizationDescriptor(buffer);
+	case COPYRIGHT_DESCRIPTOR:
+		return new CopyrightDescriptor(buffer);
+	case MAXIMUM_BITRATE_DESCRIPTOR:
+		return new MaximumBitrateDescriptor(buffer);
+	case PRIVATE_DATA_INDICATOR_DESCRIPTOR:
+		return new PrivateDataIndicatorDescriptor(buffer);
+	case SMOOTHING_BUFFER_DESCRIPTOR:
+		return new SmoothingBufferDescriptor(buffer);
+	case STD_DESCRIPTOR:
+		return new StdDescriptor(buffer);
+	case IBP_DESCRIPTOR:
+		return new IbpDescriptor(buffer);
+#endif
 	case CAROUSEL_IDENTIFIER_DESCRIPTOR:
 		return new CarouselIdentifierDescriptor(buffer);
-
 	case NETWORK_NAME_DESCRIPTOR:
 		return new NetworkNameDescriptor(buffer);
-
 	case SERVICE_LIST_DESCRIPTOR:
 		return new ServiceListDescriptor(buffer);
-
 	case STUFFING_DESCRIPTOR:
 		return new StuffingDescriptor(buffer);
-
 	case SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
 		return new SatelliteDeliverySystemDescriptor(buffer);
-
 	case CABLE_DELIVERY_SYSTEM_DESCRIPTOR:
 		return new CableDeliverySystemDescriptor(buffer);
-
 	case VBI_DATA_DESCRIPTOR:
 		return new VbiDataDescriptor(buffer);
-
 	case VBI_TELETEXT_DESCRIPTOR:
 		return new VbiTeletextDescriptor(buffer);
-
 	case BOUQUET_NAME_DESCRIPTOR:
 		return new BouquetNameDescriptor(buffer);
-
 	case SERVICE_DESCRIPTOR:
 		return new ServiceDescriptor(buffer);
-
 	case COUNTRY_AVAILABILITY_DESCRIPTOR:
 		return new CountryAvailabilityDescriptor(buffer);
-
 	case LINKAGE_DESCRIPTOR:
 		return new LinkageDescriptor(buffer);
-
 	case NVOD_REFERENCE_DESCRIPTOR:
 		return new NvodReferenceDescriptor(buffer);
-
 	case TIME_SHIFTED_SERVICE_DESCRIPTOR:
 		return new TimeShiftedServiceDescriptor(buffer);
-
 	case SHORT_EVENT_DESCRIPTOR:
 		return new ShortEventDescriptor(buffer);
-
 	case EXTENDED_EVENT_DESCRIPTOR:
 		return new ExtendedEventDescriptor(buffer);
-
+#if 0
+	case TIME_SHIFTED_EVENT_DESCRIPTOR:
+		return new TimeShiftedEventDescriptor(buffer);
+#endif
 	case COMPONENT_DESCRIPTOR:
 		return new ComponentDescriptor(buffer);
-
 	case MOSAIC_DESCRIPTOR:
 		return new MosaicDescriptor(buffer);
-
 	case STREAM_IDENTIFIER_DESCRIPTOR:
 		return new StreamIdentifierDescriptor(buffer);
-
 	case CA_IDENTIFIER_DESCRIPTOR:
 		return new CaIdentifierDescriptor(buffer);
-
 	case CONTENT_DESCRIPTOR:
 		return new ContentDescriptor(buffer);
-
 	case PARENTAL_RATING_DESCRIPTOR:
 		return new ParentalRatingDescriptor(buffer);
-
 	case TELETEXT_DESCRIPTOR:
 		return new TeletextDescriptor(buffer);
-
 	case TELEPHONE_DESCRIPTOR:
 		return new TelephoneDescriptor(buffer);
-
 	case LOCAL_TIME_OFFSET_DESCRIPTOR:
 		return new LocalTimeOffsetDescriptor(buffer);
-
 	case SUBTITLING_DESCRIPTOR:
 		return new SubtitlingDescriptor(buffer);
-
 	case TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR:
 		return new TerrestrialDeliverySystemDescriptor(buffer);
-
 	case MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
 		return new MultilingualNetworkNameDescriptor(buffer);
-
 	case MULTILINGUAL_BOUQUET_NAME_DESCRIPTOR:
 		return new MultilingualBouquetNameDescriptor(buffer);
-
 	case MULTILINGUAL_SERVICE_NAME_DESCRIPTOR:
 		return new MultilingualServiceNameDescriptor(buffer);
-
 	case MULTILINGUAL_COMPONENT_DESCRIPTOR:
 		return new MultilingualComponentDescriptor(buffer);
-
 	case PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
 		return new PrivateDataSpecifierDescriptor(buffer);
-
 	case SERVICE_MOVE_DESCRIPTOR:
 		return new ServiceMoveDescriptor(buffer);
-
-	case FREQUENCY_LIST_DESCRIPTOR:
-		return new FrequencyListDescriptor(buffer);
-
-	case DATA_BROADCAST_DESCRIPTOR:
-		return new DataBroadcastDescriptor(buffer);
-
-	case SCRAMBLING_DESCRIPTOR:
-		return new ScramblingDescriptor(buffer);
-
-	case DATA_BROADCAST_ID_DESCRIPTOR:
-		return new DataBroadcastIdDescriptor(buffer);
-
-	case PDC_DESCRIPTOR:
-		return new PdcDescriptor(buffer);
-
-	case AC3_DESCRIPTOR:
-		return new Ac3Descriptor(buffer);
-
-	case ANCILLARY_DATA_DESCRIPTOR:
-		return new AncillaryDataDescriptor(buffer);
-
-	case CELL_LIST_DESCRIPTOR:
-		return new CellListDescriptor(buffer);
-
-	case CELL_FREQUENCY_LINK_DESCRIPTOR:
-		return new CellFrequencyLinkDescriptor(buffer);
-
-	case ANNOUNCEMENT_SUPPORT_DESCRIPTOR:
-		return new AnnouncementSupportDescriptor(buffer);
-
-	case APPLICATION_SIGNALLING_DESCRIPTOR:
-		return new ApplicationSignallingDescriptor(buffer);
-
-	case ADAPTATION_FIELD_DATA_DESCRIPTOR:
-		return new AdaptationFieldDataDescriptor(buffer);
-
-	case SERVICE_IDENTIFIER_DESCRIPTOR:
-		return new ServiceIdentifierDescriptor(buffer);
-
-	case DEFAULT_AUTHORITY_DESCRIPTOR:
-		return new DefaultAuthorityDescriptor(buffer);
-
-	case RELATED_CONTENT_DESCRIPTOR:
-		return new RelatedContentDescriptor(buffer);
-
-	case TVA_ID_DESCRIPTOR:
-		return new TVAIdDescriptor(buffer);
-
-	case CONTENT_IDENTIFIER_DESCRIPTOR:
-		return new ContentIdentifierDescriptor(buffer);
-
-	case TIME_SLICE_FEC_IDENTIFIER_DESCRIPTOR:
-		return new TimeSliceFecIdentifierDescriptor(buffer);
-
-	case ECM_REPETITION_RATE_DESCRIPTOR:
-		return new ECMRepetitionRateDescriptor(buffer);
-
-	case S2_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
-		return new S2SatelliteDeliverySystemDescriptor(buffer);
-
-	case ENHANCED_AC3_DESCRIPTOR:
-		return new EnhancedAC3Descriptor(buffer);
-
-	case DTS_DESCRIPTOR:
-		return new DTSDescriptor(buffer);
-
-	case AAC_DESCRIPTOR:
-		return new AACDescriptor(buffer);
-
-	case EXTENSION_DESCRIPTOR:
-		return new ExtensionDescriptor(buffer);
-
-	case TRANSPORT_STREAM_DESCRIPTOR:
-		return new TransportStreamDescriptor(buffer);
-
-	case DSNG_DESCRIPTOR:
-		return new DSNGDescriptor(buffer);
-
-	case SERVICE_AVAILABILITY_DESCRIPTOR:
-		return new ServiceAvailabilityDescriptor(buffer);
-
 	case SHORT_SMOOTHING_BUFFER_DESCRIPTOR:
 		return new ShortSmoothingBufferDescriptor(buffer);
-
+	case FREQUENCY_LIST_DESCRIPTOR:
+		return new FrequencyListDescriptor(buffer);
+#if 0
+	case PARTIAL_TRANSPORT_STREAM_DESCRIPTOR:
+		return new PartialTransportStreamDescriptor(buffer);
+#endif
+	case DATA_BROADCAST_DESCRIPTOR:
+		return new DataBroadcastDescriptor(buffer);
+	case SCRAMBLING_DESCRIPTOR:
+		return new ScramblingDescriptor(buffer);
+	case DATA_BROADCAST_ID_DESCRIPTOR:
+		return new DataBroadcastIdDescriptor(buffer);
+	case TRANSPORT_STREAM_DESCRIPTOR:
+		return new TransportStreamDescriptor(buffer);
+	case DSNG_DESCRIPTOR:
+		return new DSNGDescriptor(buffer);
+	case PDC_DESCRIPTOR:
+		return new PdcDescriptor(buffer);
+	case AC3_DESCRIPTOR:
+		return new Ac3Descriptor(buffer);
+	case ANCILLARY_DATA_DESCRIPTOR:
+		return new AncillaryDataDescriptor(buffer);
+	case CELL_LIST_DESCRIPTOR:
+		return new CellListDescriptor(buffer);
+	case CELL_FREQUENCY_LINK_DESCRIPTOR:
+		return new CellFrequencyLinkDescriptor(buffer);
+	case ANNOUNCEMENT_SUPPORT_DESCRIPTOR:
+		return new AnnouncementSupportDescriptor(buffer);
+	case APPLICATION_SIGNALLING_DESCRIPTOR:
+		return new ApplicationSignallingDescriptor(buffer);
+	case ADAPTATION_FIELD_DATA_DESCRIPTOR:
+		return new AdaptationFieldDataDescriptor(buffer);
+	case SERVICE_IDENTIFIER_DESCRIPTOR:
+		return new ServiceIdentifierDescriptor(buffer);
+	case SERVICE_AVAILABILITY_DESCRIPTOR:
+		return new ServiceAvailabilityDescriptor(buffer);
+	case DEFAULT_AUTHORITY_DESCRIPTOR:
+		return new DefaultAuthorityDescriptor(buffer);
+	case RELATED_CONTENT_DESCRIPTOR:
+		return new RelatedContentDescriptor(buffer);
+	case TVA_ID_DESCRIPTOR:
+		return new TVAIdDescriptor(buffer);
+	case CONTENT_IDENTIFIER_DESCRIPTOR:
+		return new ContentIdentifierDescriptor(buffer);
+	case TIME_SLICE_FEC_IDENTIFIER_DESCRIPTOR:
+		return new TimeSliceFecIdentifierDescriptor(buffer);
+	case ECM_REPETITION_RATE_DESCRIPTOR:
+		return new ECMRepetitionRateDescriptor(buffer);
+	case S2_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
+		return new S2SatelliteDeliverySystemDescriptor(buffer);
+	case ENHANCED_AC3_DESCRIPTOR:
+		return new EnhancedAC3Descriptor(buffer);
+	case DTS_DESCRIPTOR:
+		return new DTSDescriptor(buffer);
+	case AAC_DESCRIPTOR:
+		return new AACDescriptor(buffer);
+#if 0
+	case XAIT_LOCATION_DESCRIPTOR:
+		return new XaitDescriptor(buffer);
+	case FTA_CONTENT_MANAGEMENT_DESCRIPTOR:
+		return new FtaContentManagementDescriptor(buffer);
+#endif
+	case EXTENSION_DESCRIPTOR:
+		return new ExtensionDescriptor(buffer);
 	default:
 		return new Descriptor(buffer);
 	}
