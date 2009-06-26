@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.75 2009/05/19 18:03:07 seife Exp $
+	$Id: lcdd.cpp,v 1.76 2009/06/26 13:07:04 rhabarber1848 Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -511,7 +511,7 @@ void CLCD::showTime()
 		{
 			display.draw_fill_rect(-1, -1, 120, 64, CLCDDisplay::PIXEL_OFF); // clear lcd
 
-			ShowNewClock(&display, t->tm_hour, t->tm_min, t->tm_wday, t->tm_mday, t->tm_mon);
+			ShowNewClock(&display, t->tm_hour, t->tm_min, t->tm_sec, t->tm_wday, t->tm_mday, t->tm_mon);
 		}
 		else
 		{
