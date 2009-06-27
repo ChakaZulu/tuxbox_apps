@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.301 2009/06/22 10:22:29 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.302 2009/06/27 19:47:19 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2502,7 +2502,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.301 2009/06/22 10:22:29 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.302 2009/06/27 19:47:19 rhabarber1848 Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -3385,7 +3385,7 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 	SIevent evt;
 	SItime zeit(0, 0);
 
-	dprintf("[commandActualEPGchannelID] Request of actual EPG for " PRINTF_CHANNEL_ID_TYPE "\n", * uniqueServiceKey);
+	dprintf("[commandActualEPGchannelID] Request of current EPG for " PRINTF_CHANNEL_ID_TYPE "\n", * uniqueServiceKey);
 
 	readLockEvents();
 	if (*uniqueServiceKey == messaging_current_servicekey) {
@@ -3889,7 +3889,7 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 
 	time_t* startzeit = (time_t *)(data + 8);
 
-	dprintf("Request of actual EPG for 0x%llx 0x%lx\n", *epgID, *startzeit);
+	dprintf("Request of current EPG for 0x%llx 0x%lx\n", *epgID, *startzeit);
 
 	readLockEvents();
 
@@ -3933,7 +3933,7 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 
 	event_id_t * epgID = (event_id_t *)data;
 
-	dprintf("Request of actual EPG for 0x%llx\n", *epgID);
+	dprintf("Request of current EPG for 0x%llx\n", *epgID);
 
 	readLockEvents();
 
@@ -6863,7 +6863,7 @@ static void *eitThread(void *)
 	 */
 	// -- set EIT filter  0x4e-0x6F
 	dmxEIT.addfilter(0x00, 0x00); //0 dummy filter
-	dmxEIT.addfilter(0x50, 0xf0); //1  actual TS, scheduled
+	dmxEIT.addfilter(0x50, 0xf0); //1  current TS, scheduled
 	dmxEIT.addfilter(0x4f, 0xff); //2  other TS, current/next
 #ifdef HAVE_DBOX_HARDWARE
 	dmxEIT.addfilter(0x60, 0xf1); //3a other TS, scheduled, even
@@ -7194,7 +7194,7 @@ static void *cnThread(void *)
 	bool sendToSleepNow = false;
 
 	// -- set EIT filter  0x4e
-	dmxCN.addfilter(0x4e, 0xff); //0  actual TS, current/next
+	dmxCN.addfilter(0x4e, 0xff); //0  current TS, current/next
 
 	try
 	{
@@ -7589,7 +7589,7 @@ static void *pptThread(void *)
 					dprintf("dmxPPT: waking up again - unknown reason?!\n");
 					dmxPPT.real_unpause();
 				}
-				// after sleeping get actual time
+				// after sleeping get current time
 				zeit = time(NULL);
 				start_section = 0; // fetch new? events
 				lastData = zeit; // restart timer
@@ -8167,7 +8167,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.301 2009/06/22 10:22:29 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.302 2009/06/27 19:47:19 rhabarber1848 Exp $\n");
 
 	SIlanguage::loadLanguages();
 
