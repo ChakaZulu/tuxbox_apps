@@ -110,10 +110,10 @@ public:
 	struct FontSetting
 	{
 		FontSettingID     settingID;
-		char*             settingName;
-		neutrino_locale_t locale;            
-		char*             name;
-		char*             style;
+		const char*       settingName;
+		neutrino_locale_t locale;
+		const char*       name;
+		const char*       style;
 		int               size;
 		bool              isConfigurable;
 	};
@@ -121,18 +121,18 @@ public:
 	struct ColorSetting
 	{
 		ColorSettingID    settingID;
-		char*             settingName;
-		neutrino_locale_t locale;            
-		int               color;           
+		const char*       settingName;
+		neutrino_locale_t locale;
+		int               color;
 		bool              isConfigurable;
 	};
 
 	struct SizeSetting
 	{
 		SizeSettingID     settingID;
-		char*             settingName;
-		neutrino_locale_t locale;            
-		int               size;           
+		const char*       settingName;
+		neutrino_locale_t locale;
+		int               size;
 		bool              isConfigurable;
 	};
 
