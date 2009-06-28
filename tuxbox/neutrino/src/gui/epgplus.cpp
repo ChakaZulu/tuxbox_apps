@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.49 2009/06/28 20:44:31 seife Exp $
+	$Id: epgplus.cpp,v 1.50 2009/06/28 20:47:42 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1339,31 +1339,24 @@ void EpgPlus::free()
   }
 }
 
-int EpgPlus::exec
-  ( CChannelList* channelList
-  , int selectedChannelIndex
-  , CBouquetList* bouquetList
-  )
+int EpgPlus::exec(CChannelList* channelList, int selectedChannelIndex, CBouquetList* bouquetList)
 {
 	this->channelList = channelList;
 	this->channelListStartIndex = int(selectedChannelIndex/maxNumberOfDisplayableEntries)*maxNumberOfDisplayableEntries;
-  this->bouquetList = bouquetList;
+	this->bouquetList = bouquetList;
 
 	int res = menu_return::RETURN_REPAINT;
 
 	do
 	{
-    this->refreshAll = false;
-    this->refreshFooterButtons = false;
-    this->is_visible = true;
-	
-    time_t currentTime = time(NULL);
+		this->refreshAll = false;
+		this->refreshFooterButtons = false;
+		this->is_visible = true;
+
+		time_t currentTime = time(NULL);
 		tm tmStartTime = *localtime(&currentTime);
-
-
 		tmStartTime.tm_sec = 0;
 		tmStartTime.tm_min = int(tmStartTime.tm_min/15) * 15;
-
 
 		this->startTime = mktime(&tmStartTime);
 		this->selectedTime = this->startTime;
@@ -1373,29 +1366,24 @@ int EpgPlus::exec
 		{
 			selectedChannelIndex = this->selectedChannelEntry->index;
 		}
-
-		#ifdef DEBUG_
-			std::cout << "exec " << selectedChannelIndex << " " << (*this->channelList)[selectedChannelIndex]->channel_id << " " << (*this->channelList)[selectedChannelIndex]->getName() << std::endl;
-		#endif
-
+#ifdef DEBUG_
+		std::cout << "exec " << selectedChannelIndex << " " << (*this->channelList)[selectedChannelIndex]->channel_id << " " << (*this->channelList)[selectedChannelIndex]->getName() << std::endl;
+#endif
 		neutrino_msg_t      msg;
 		neutrino_msg_data_t data;
 
 		this->createChannelEntries(selectedChannelIndex);
-
-		#ifdef DEBUG_
-			std::cout << "paint" << std::endl;
-		#endif
+#ifdef DEBUG_
+		std::cout << "paint" << std::endl;
+#endif
 		this->header->paint();
-		#ifdef DEBUG_
-			std::cout << "paintButtons1" << std::endl;
-		#endif
-
+#ifdef DEBUG_
+		std::cout << "paintButtons1" << std::endl;
+#endif
 		this->footer->paintButtons(buttonLabels, sizeof(buttonLabels)/sizeof(button_label));
-		#ifdef DEBUG_
-			std::cout << "paintButtons2" << std::endl;
-		#endif
-
+#ifdef DEBUG_
+		std::cout << "paintButtons2" << std::endl;
+#endif
 		this->paint();
 
 		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
@@ -1405,62 +1393,58 @@ int EpgPlus::exec
 			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 			neutrino_msg_t msg_repeatok = msg & ~CRCInput::RC_Repeat;
 
-			if ( msg <= CRCInput::RC_MaxRC )
+			if (msg <= CRCInput::RC_MaxRC)
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
 			if (msg == g_settings.key_channelList_pagedown || msg == CRCInput::RC_yellow)
 			{
-				if (this->channelList->getSize() > 0 )
+				if (this->channelList->getSize() > 0)
+				{
+					switch (this->currentSwapMode)
 					{
-						switch (this->currentSwapMode)
+						case SwapMode_ByPage:
 						{
-							case SwapMode_ByPage:
-							{
-								int selectedChannelEntryIndex = this->selectedChannelEntry->index;
-								selectedChannelEntryIndex    += this->maxNumberOfDisplayableEntries;
+							int selectedChannelEntryIndex = this->selectedChannelEntry->index;
+							selectedChannelEntryIndex    += this->maxNumberOfDisplayableEntries;
 
-								if (selectedChannelEntryIndex > this->channelList->getSize() - 1)
-									selectedChannelEntryIndex = 0;
+							if (selectedChannelEntryIndex > this->channelList->getSize() - 1)
+								selectedChannelEntryIndex = 0;
 
-								this->createChannelEntries(selectedChannelEntryIndex);
-								this->paint();
-							}
+							this->createChannelEntries(selectedChannelEntryIndex);
+							this->paint();
 							break;
+						}
 
-							case SwapMode_ByBouquet:
+						case SwapMode_ByBouquet:
+						{
+							unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
+#ifdef DEBUG_
+							std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
+#endif
+							++currentBouquetNumber;
+
+							if (currentBouquetNumber == bouquetList->Bouquets.size())
+								currentBouquetNumber = 0;
+
+							CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
+#ifdef DEBUG_
+							std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
+#endif
+							if (bouquet->channelList->getSize() > 0)
 							{
-								unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
+								// select first channel of bouquet
 #ifdef DEBUG_
-								std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
+								std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
 #endif
-
-								++currentBouquetNumber;
-
-								if (currentBouquetNumber == bouquetList->Bouquets.size())
-									currentBouquetNumber = 0;
-
-								CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
-#ifdef DEBUG_
-								std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
-#endif
-
-								if (bouquet->channelList->getSize() > 0)
-								{
-									// select first channel of bouquet
-#ifdef DEBUG_
-									std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
-#endif
-
-									bouquetList->activateBouquet(currentBouquetNumber);
-
-									this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
-									this->createChannelEntries(this->channelListStartIndex);
-									this->paint();
-								}
+								bouquetList->activateBouquet(currentBouquetNumber);
+								this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
+								this->createChannelEntries(this->channelListStartIndex);
+								this->paint();
 							}
 							break;
 						}
 					}
+				}
 			}
 			else if (msg == g_settings.key_channelList_pageup || msg == CRCInput::RC_green)
 			{
@@ -1474,12 +1458,12 @@ int EpgPlus::exec
 							selectedChannelEntryIndex    -= this->maxNumberOfDisplayableEntries;
 
 							if (selectedChannelEntryIndex < 0)
-							selectedChannelEntryIndex = this->channelList->getSize() - 1;
+								selectedChannelEntryIndex = this->channelList->getSize() - 1;
 
 							this->createChannelEntries(selectedChannelEntryIndex);
 							this->paint();
+							break;
 						}
-						break;
 
 						case SwapMode_ByBouquet:
 						{
@@ -1487,7 +1471,6 @@ int EpgPlus::exec
 #ifdef DEBUG_
 							std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
 #endif
-
 							--currentBouquetNumber;
 
 							if (currentBouquetNumber == unsigned(-1))
@@ -1497,23 +1480,20 @@ int EpgPlus::exec
 #ifdef DEBUG_
 							std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
 #endif
-
 							if (bouquet->channelList->getSize() > 0)
 							{
 								// select first channel of bouquet
 #ifdef DEBUG_
 								std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
 #endif
-
 								bouquetList->activateBouquet(currentBouquetNumber);
-
 								this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
 								this->createChannelEntries(this->channelListStartIndex);
 								this->paint();
 							}
-            			}
-            			break;
-        			}
+							break;
+						}
+					}
 				}
 			}
 			else if (msg_repeatok == g_settings.key_channelList_pageup ||
@@ -1531,13 +1511,9 @@ int EpgPlus::exec
 			else if (msg == (neutrino_msg_t) CRCInput::RC_red)
 			{
 				fb_pixel_t savedScreen[this->usableScreenWidth * this->usableScreenHeight * sizeof(fb_pixel_t)];
-				this->frameBuffer->SaveScreen
-					( this->usableScreenX
-					, this->usableScreenY
-					, this->usableScreenWidth
-					, this->usableScreenHeight
-					, savedScreen
-					);
+				this->frameBuffer->SaveScreen(this->usableScreenX, this->usableScreenY,
+							      this->usableScreenWidth, this->usableScreenHeight,
+							      savedScreen);
 
 				CMenuWidget menuWidgetActions(LOCALE_EPGPLUS_ACTIONS, "features.raw", 400);
 				menuWidgetActions.addItem(new CMenuForwarder(LOCALE_EPGPLUS_RECORD     , true, NULL, new MenuTargetAddRecordTimer(this), NULL, CRCInput::RC_red   , NEUTRINO_ICON_BUTTON_RED   ), false);
@@ -1546,145 +1522,109 @@ int EpgPlus::exec
 
 				menuWidgetActions.exec(NULL, "");
 
-				this->frameBuffer->RestoreScreen
-					( this->usableScreenX
-					, this->usableScreenY
-					, this->usableScreenWidth
-					, this->usableScreenHeight
-					, savedScreen
-					);
+				this->frameBuffer->RestoreScreen(this->usableScreenX, this->usableScreenY,
+								 this->usableScreenWidth, this->usableScreenHeight,
+								 savedScreen);
 			}
-			else if ( msg == (neutrino_msg_t) CRCInput::RC_blue)
+			else if (msg == (neutrino_msg_t) CRCInput::RC_blue)
 			{
 				fb_pixel_t savedScreen[this->usableScreenWidth * this->usableScreenHeight * sizeof(fb_pixel_t)];
-				this->frameBuffer->SaveScreen
-					( this->usableScreenX
-					, this->usableScreenY
-					, this->usableScreenWidth
-					, this->usableScreenHeight
-					, savedScreen
-					);
+				this->frameBuffer->SaveScreen(this->usableScreenX, this->usableScreenY,
+							      this->usableScreenWidth, this->usableScreenHeight,
+							      savedScreen);
 
-        CMenuWidget menuWidgetOptions(LOCALE_EPGPLUS_OPTIONS, "features.raw", 500);
-/*        menuWidgetOptions.addItem
-          ( new CMenuForwarder
-            ( LOCALE_EPGPLUS_SETTINGS
-            , true
-            , NULL
-            , new MenuTargetSettings(this)
-            , NULL
-            , CRCInput::RC_red
-            , NEUTRINO_ICON_BUTTON_RED
-            )
-          , false
-          );
-*/
-        menuWidgetOptions.addItem(new MenuOptionChooserSwitchSwapMode(this));
-        menuWidgetOptions.addItem(new MenuOptionChooserSwitchViewMode(this));
+				CMenuWidget menuWidgetOptions(LOCALE_EPGPLUS_OPTIONS, "features.raw", 500);
+				menuWidgetOptions.addItem(new MenuOptionChooserSwitchSwapMode(this));
+				menuWidgetOptions.addItem(new MenuOptionChooserSwitchViewMode(this));
 
-        int result = menuWidgetOptions.exec(NULL, "");
-        if (result == menu_return::RETURN_REPAINT)
-        {
-  			  this->frameBuffer->RestoreScreen
-					  ( this->usableScreenX
-					  , this->usableScreenY
-					  , this->usableScreenWidth
-					  , this->usableScreenHeight
-					  , savedScreen
-					  );
-        }
-        else if (result == menu_return::RETURN_EXIT_ALL)
-        {
-          this->refreshAll = true;
-        }
+				int result = menuWidgetOptions.exec(NULL, "");
+				if (result == menu_return::RETURN_REPAINT)
+				{
+					this->frameBuffer->RestoreScreen(this->usableScreenX, this->usableScreenY,
+									 this->usableScreenWidth, this->usableScreenHeight,
+									 savedScreen);
+				}
+				else if (result == menu_return::RETURN_EXIT_ALL)
+				{
+					this->refreshAll = true;
+				}
 			}
 			else if (CRCInput::isNumeric(msg))
 			{ //numeric zap
 				this->hide();
-				this->channelList->numericZap( msg );
+				this->channelList->numericZap(msg);
 
 				int selectedChannelEntryIndex = this->channelList->getSelectedChannelIndex();
 				if (selectedChannelEntryIndex < this->channelList->getSize())
 				{
 					this->hide();
 					this->createChannelEntries(selectedChannelEntryIndex);
-
 					this->header->paint();
 					this->footer->paintButtons(buttonLabels, sizeof(buttonLabels)/sizeof(button_label));
 					this->paint();
 				}
-
 			}
 			else if (msg_repeatok == CRCInput::RC_up)
 			{
-				if (this->channelList->getSize() > 0 ) {
-				#ifdef DEBUG_
+				if (this->channelList->getSize() > 0) {
+#ifdef DEBUG_
 					std::cout << "RC_up" << std::endl;
-				#endif
+#endif
+					int selectedChannelEntryIndex     = this->selectedChannelEntry->index;
+					int prevSelectedChannelEntryIndex = selectedChannelEntryIndex;
 
-				int selectedChannelEntryIndex     = this->selectedChannelEntry->index;
-				int prevSelectedChannelEntryIndex = selectedChannelEntryIndex;
-
-				--selectedChannelEntryIndex;
-				if (selectedChannelEntryIndex < 0)
-				{
-					#ifdef DEBUG_
+					--selectedChannelEntryIndex;
+					if (selectedChannelEntryIndex < 0)
+					{
+#ifdef DEBUG_
 						std::cout << "this->selectedChannelEntry->index < 0" << std::endl;
-					#endif
-					selectedChannelEntryIndex = this->channelList->getSize() - 1;
-				}
+#endif
+						selectedChannelEntryIndex = this->channelList->getSize() - 1;
+					}
 
+					int oldChannelListStartIndex = this->channelListStartIndex;
+					this->channelListStartIndex = (selectedChannelEntryIndex / this->maxNumberOfDisplayableEntries) * this->maxNumberOfDisplayableEntries;
 
-				int oldChannelListStartIndex = this->channelListStartIndex;
-
-				this->channelListStartIndex = (selectedChannelEntryIndex / this->maxNumberOfDisplayableEntries) * this->maxNumberOfDisplayableEntries;
-
-				if (oldChannelListStartIndex != this->channelListStartIndex)
-				{
-					#ifdef DEBUG_
+					if (oldChannelListStartIndex != this->channelListStartIndex)
+					{
+#ifdef DEBUG_
 						std::cout << "oldChannelListStartIndex != this->channelListStartIndex" << std::endl;
-					#endif
-
-					this->createChannelEntries(selectedChannelEntryIndex);
-
-					this->paint();
-					g_RCInput->clearRCMsg();
-				}
-				else
-				{
-					this->selectedChannelEntry = this->displayedChannelEntries[selectedChannelEntryIndex - this->channelListStartIndex];
-
-					this->paintChannelEntry(prevSelectedChannelEntryIndex - this->channelListStartIndex);
-					this->paintChannelEntry(selectedChannelEntryIndex     - this->channelListStartIndex);
-				}
+#endif
+						this->createChannelEntries(selectedChannelEntryIndex);
+						this->paint();
+						g_RCInput->clearRCMsg();
+					}
+					else
+					{
+						this->selectedChannelEntry = this->displayedChannelEntries[selectedChannelEntryIndex - this->channelListStartIndex];
+						this->paintChannelEntry(prevSelectedChannelEntryIndex - this->channelListStartIndex);
+						this->paintChannelEntry(selectedChannelEntryIndex     - this->channelListStartIndex);
+					}
 				}
 			}
 			else if (msg_repeatok == CRCInput::RC_down)
 			{
 				if (this->channelList->getSize() > 0 ) {
-				int selectedChannelEntryIndex     = this->selectedChannelEntry->index;
-				int prevSelectedChannelEntryIndex = this->selectedChannelEntry->index;
+					int selectedChannelEntryIndex     = this->selectedChannelEntry->index;
+					int prevSelectedChannelEntryIndex = this->selectedChannelEntry->index;
 
-				selectedChannelEntryIndex = (selectedChannelEntryIndex + 1) % this->channelList->getSize();
+					selectedChannelEntryIndex = (selectedChannelEntryIndex + 1) % this->channelList->getSize();
 
+					int oldChannelListStartIndex = this->channelListStartIndex;
+					this->channelListStartIndex = (selectedChannelEntryIndex / this->maxNumberOfDisplayableEntries) * this->maxNumberOfDisplayableEntries;
 
-				int oldChannelListStartIndex = this->channelListStartIndex;
-				this->channelListStartIndex = (selectedChannelEntryIndex / this->maxNumberOfDisplayableEntries) * this->maxNumberOfDisplayableEntries;
-
-				if (oldChannelListStartIndex != this->channelListStartIndex)
-				{
-					this->createChannelEntries(selectedChannelEntryIndex);
-
-					this->paint();
-					g_RCInput->clearRCMsg();
-				}
-				else
-				{
-					this->selectedChannelEntry = this->displayedChannelEntries[selectedChannelEntryIndex - this->channelListStartIndex];
-
-					this->paintChannelEntry(prevSelectedChannelEntryIndex - this->channelListStartIndex);
-					this->paintChannelEntry(this->selectedChannelEntry->index - this->channelListStartIndex);
-				}
+					if (oldChannelListStartIndex != this->channelListStartIndex)
+					{
+						this->createChannelEntries(selectedChannelEntryIndex);
+						this->paint();
+						g_RCInput->clearRCMsg();
+					}
+					else
+					{
+						this->selectedChannelEntry = this->displayedChannelEntries[selectedChannelEntryIndex - this->channelListStartIndex];
+						this->paintChannelEntry(prevSelectedChannelEntryIndex - this->channelListStartIndex);
+						this->paintChannelEntry(this->selectedChannelEntry->index - this->channelListStartIndex);
+					}
 				}
 			}
 			else if (msg == CRCInput::RC_timeout || msg == g_settings.key_channelList_cancel)
@@ -1694,173 +1634,155 @@ int EpgPlus::exec
 
 			else if (msg_repeatok == CRCInput::RC_left)
 			{
-        switch (this->currentViewMode)
-        {
-          case ViewMode_Stretch:
-				    {
-					    if (this->duration - 30*60 > 30*60)
-					    {
-						    this->duration -= 30*60;
-						    this->hide();
-                this->refreshAll = true;
-              }
-				    }
-            break;
-          case ViewMode_Scroll:
-				    {
-					    #ifdef DEBUG_
-						    std::cout << "RC_left " << std::endl;
-					    #endif
-					    TCChannelEventEntries::const_iterator It = this->getSelectedEvent();
+				switch (this->currentViewMode)
+				{
+					case ViewMode_Stretch:
+						if (this->duration - 30*60 > 30*60)
+						{
+							this->duration -= 30*60;
+							this->hide();
+							this->refreshAll = true;
+						}
+						break;
+					case ViewMode_Scroll:
+					{
+#ifdef DEBUG_
+						std::cout << "RC_left " << std::endl;
+#endif
+						TCChannelEventEntries::const_iterator It = this->getSelectedEvent();
 
-					    if ( (It != this->selectedChannelEntry->channelEventEntries.begin())
-					       &&(It != this->selectedChannelEntry->channelEventEntries.end())
-					       )
-					    {
-						    #ifdef DEBUG_
-							    std::cout << "--It" << std::endl;
-						    #endif
+						if ((It != this->selectedChannelEntry->channelEventEntries.begin()) &&
+						    (It != this->selectedChannelEntry->channelEventEntries.end()))
+						{
+#ifdef DEBUG_
+							std::cout << "--It" << std::endl;
+#endif
+							--It;
+							this->selectedTime = (*It)->channelEvent.startTime + (*It)->channelEvent.duration/2;
+							if (this->selectedTime < this->startTime)
+								this->selectedTime = this->startTime;
+#ifdef DEBUG_
+							std::cout << "repaint channel entry" << std::endl;
+#endif
+							this->selectedChannelEntry->paint(true, this->selectedTime);
+						}
+						else
+						{
+							if (this->startTime != this->firstStartTime)
+							{
+#ifdef DEBUG_
+								std::cout << "this->startTime != this->firstStartTime" << std::endl;
+#endif
+								if (this->startTime - this->duration > this->firstStartTime)
+								{
+#ifdef DEBUG_
+									std::cout << "this->startTime - this->duration > this->firstStartTime" << std::endl;
+#endif
+									this->startTime -= this->duration;
+								}
+								else
+								{
+									this->startTime = this->firstStartTime;
+								}
 
-						    --It;
-						    this->selectedTime = (*It)->channelEvent.startTime + (*It)->channelEvent.duration/2;
-						    if (this->selectedTime < this->startTime)
-							    this->selectedTime = this->startTime;
+								this->selectedTime = this->startTime + this->duration - 1; // select last event
+								this->createChannelEntries(this->selectedChannelEntry->index);
 
-						    #ifdef DEBUG_
-							    std::cout << "repaint channel entry" << std::endl;
-						    #endif
-						    this->selectedChannelEntry->paint(true, this->selectedTime);
-					    }
-					    else
-					    {
-						    if (this->startTime != this->firstStartTime)
-						    {
-							    #ifdef DEBUG_
-								    std::cout << "this->startTime != this->firstStartTime" << std::endl;
-							    #endif
-
-							    if (this->startTime - this->duration > this->firstStartTime)
-							    {
-								    #ifdef DEBUG_
-									    std::cout << "this->startTime - this->duration > this->firstStartTime" << std::endl;
-								    #endif
-								    this->startTime -= this->duration;
-							    }
-							    else
-							    {
-								    this->startTime = this->firstStartTime;
-							    }
-
-							    this->selectedTime = this->startTime + this->duration - 1; // select last event
-							    this->createChannelEntries(this->selectedChannelEntry->index);
-
-							    this->paint();
-							g_RCInput->clearRCMsg();
-							
-						    }
-              }
-            }
-            break;
+								this->paint();
+								g_RCInput->clearRCMsg();
+							}
+						}
+					}
+					break;
 				}
 			}
 			else if (msg_repeatok == CRCInput::RC_right)
 			{
-        switch (this->currentViewMode)
-        {
-          case ViewMode_Stretch:
-				    {
-					    if (this->duration + 30*60 < 4*60*60)
-					    {
-						    this->duration += 60*60;
-						    this->hide();
-                this->refreshAll = true;
-					    }
-				    }
-            break;
+				switch (this->currentViewMode)
+				{
+					case ViewMode_Stretch:
+						if (this->duration + 30*60 < 4*60*60)
+						{
+							this->duration += 60*60;
+							this->hide();
+							this->refreshAll = true;
+						}
+						break;
+					case ViewMode_Scroll:
+					{
+#ifdef DEBUG_
+						std::cout << "RC_right " << std::endl;
+#endif
+						TCChannelEventEntries::const_iterator It = this->getSelectedEvent();
 
-          case ViewMode_Scroll:
-				    {
-					    #ifdef DEBUG_
-						    std::cout << "RC_right " << std::endl;
-					    #endif
-					    TCChannelEventEntries::const_iterator It = this->getSelectedEvent();
+						if ((It != this->selectedChannelEntry->channelEventEntries.end() - 1) &&
+						    (It != this->selectedChannelEntry->channelEventEntries.end()))
+						{
+#ifdef DEBUG_
+							std::cout << "++It" << std::endl;
+#endif
+							++It;
 
-					    if ( (It != this->selectedChannelEntry->channelEventEntries.end() - 1)
-					    &&(It != this->selectedChannelEntry->channelEventEntries.end())
-					    )
-					    {
-						    #ifdef DEBUG_
-							    std::cout << "++It" << std::endl;
-						    #endif
+							this->selectedTime = (*It)->channelEvent.startTime + (*It)->channelEvent.duration/2;
 
-						    ++It;
+							if (this->selectedTime > this->startTime + time_t(this->duration))
+								this->selectedTime = this->startTime + this->duration;
+#ifdef DEBUG_
+							std::cout << "repaint channel entry" << std::endl;
+#endif
+							this->selectedChannelEntry->paint(true, this->selectedTime);
+						}
+						else
+						{
+#ifdef DEBUG_
+							std::cout << "this->startTime += this->duration" << std::endl;
+#endif
+							this->startTime += this->duration;
+							this->createChannelEntries(this->selectedChannelEntry->index);
 
-						    this->selectedTime = (*It)->channelEvent.startTime + (*It)->channelEvent.duration/2;
+							this->selectedTime = this->startTime;
+							this->createChannelEntries(this->selectedChannelEntry->index);
 
-						    if (this->selectedTime > this->startTime + time_t(this->duration))
-							    this->selectedTime = this->startTime + this->duration;
-
-						    #ifdef DEBUG_
-							    std::cout << "repaint channel entry" << std::endl;
-						    #endif
-						    this->selectedChannelEntry->paint(true, this->selectedTime);
-					    }
-					    else
-					    {
-						    #ifdef DEBUG_
-							    std::cout << "this->startTime += this->duration" << std::endl;
-						    #endif
-						    this->startTime += this->duration;
-						    this->createChannelEntries(this->selectedChannelEntry->index);
-
-						    this->selectedTime = this->startTime;
-						    this->createChannelEntries(this->selectedChannelEntry->index);
-
-						    this->paint();
-						g_RCInput->clearRCMsg();
-					    }
-				    }
-            break;
-        }
+							this->paint();
+							g_RCInput->clearRCMsg();
+						}
+					}
+					break;
+				}
 			}
-			else if ( msg==CRCInput::RC_ok )
+			else if (msg==CRCInput::RC_ok)
 			{
-				#ifdef DEBUG_
-					std::cout << "zapTo " << this->selectedChannelEntry->index << std::endl;
-				#endif
+#ifdef DEBUG_
+				std::cout << "zapTo " << this->selectedChannelEntry->index << std::endl;
+#endif
 				this->channelList->zapTo(this->selectedChannelEntry->index);
 			}
-			else if (msg==CRCInput::RC_help )
+			else if (msg==CRCInput::RC_help)
 			{
 				TCChannelEventEntries::const_iterator It = this->getSelectedEvent();
 
 				if (It != this->selectedChannelEntry->channelEventEntries.end())
 				{
-
-					if ( (*It)->channelEvent.eventID != 0 )
+					if ((*It)->channelEvent.eventID != 0)
 					{
 						this->hide();
 
 						time_t startTime = (*It)->channelEvent.startTime;
-						res = g_EpgData->show
-							( this->selectedChannelEntry->channel->channel_id
-							, (*It)->channelEvent.eventID
-							, &startTime
-							);
+						res = g_EpgData->show(this->selectedChannelEntry->channel->channel_id,
+								      (*It)->channelEvent.eventID, &startTime);
 
-						if ( res == menu_return::RETURN_EXIT_ALL )
+						if (res == menu_return::RETURN_EXIT_ALL)
 						{
 							loop = false;
 						}
 						else
 						{
-							g_RCInput->getMsg( &msg, &data, 0 );
+							g_RCInput->getMsg(&msg, &data, 0);
 
-							if ( ( msg != CRCInput::RC_red ) &&
-							( msg != CRCInput::RC_timeout ) )
+							if (msg != CRCInput::RC_red && msg != CRCInput::RC_timeout)
 							{
 								// RC_red schlucken
-								g_RCInput->postMsg( msg, data );
+								g_RCInput->postMsg(msg, data);
 							}
 
 							this->header->paint();
@@ -1879,20 +1801,20 @@ int EpgPlus::exec
 						if(is_visible)
 						{
 							std::string EPG_Plus;
-							
+
 							EPG_Plus = g_Locale->getText(LOCALE_EPGPLUS_SHOW);
-							EPG_Plus.insert(0, " ");  
-							
+							EPG_Plus.insert(0, " ");
+						
 							int epgplus_len = this->header->font->getRenderWidth(EPG_Plus, true); // UTF-8
 							int theight     = this->header->font->getHeight();
 							int dbox_icon_width = frameBuffer->getIconWidth(NEUTRINO_ICON_BUTTON_DBOX);
-							
+
 							is_visible = false;
 							this->hide();
-							
+
 							frameBuffer->paintBoxRel(this->usableScreenX+ this->usableScreenWidth- epgplus_len- dbox_icon_width- 2- 2, this->usableScreenY, epgplus_len+ dbox_icon_width+ 2+ 2, theight+0, COL_MENUHEAD_PLUS_0, RADIUS_SMALL);
 							frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, this->usableScreenX+ this->usableScreenWidth- epgplus_len- dbox_icon_width- 2, this->usableScreenY);
-							this->header->font->RenderString(this->usableScreenX+ this->usableScreenWidth- epgplus_len, this->usableScreenY+ theight+0, epgplus_len, EPG_Plus, this->header->color, 0, true); // UTF-8							
+							this->header->font->RenderString(this->usableScreenX+ this->usableScreenWidth- epgplus_len, this->usableScreenY+ theight+0, epgplus_len, EPG_Plus, this->header->color, 0, true); // UTF-8
 						}
 						else
 						{
@@ -1900,7 +1822,6 @@ int EpgPlus::exec
 							this->header->paint();
 							this->footer->paintButtons(buttonLabels, sizeof(buttonLabels)/sizeof(button_label));
 							this->paint();
-							
 							break;
 						}
 					}
@@ -1914,31 +1835,26 @@ int EpgPlus::exec
 			}
 			else
 			{
-				if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) &
-				messages_return::cancel_all )
+				if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;
 				}
 			}
 
-      if (this->refreshAll)
-        loop = false;
-      else if (this->refreshFooterButtons)
-        this->footer->paintButtons(buttonLabels, sizeof(buttonLabels)/sizeof(button_label));
-
+			if (this->refreshAll)
+				loop = false;
+			else if (this->refreshFooterButtons)
+				this->footer->paintButtons(buttonLabels, sizeof(buttonLabels)/sizeof(button_label));
 		}
 
 		this->hide();
 
-		for ( TChannelEntries::iterator It = this->displayedChannelEntries.begin()
-		; It != this->displayedChannelEntries.begin()
-		; ++It
-		)
-		delete *It;
+		for (TChannelEntries::iterator It = this->displayedChannelEntries.begin();
+		     It != this->displayedChannelEntries.begin(); ++It)
+			delete *It;
 	}
 	while (this->refreshAll);
-
 
 	return res;
 }
