@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.430 2009/05/19 18:21:46 seife Exp $
+ * $Id: zapit.cpp,v 1.431 2009/06/28 21:56:14 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2764,7 +2764,10 @@ void leaveStandby(void)
 	else	// reopen the device...
 		audioDecoder->openDevice();
 
-	audioDecoder->unmute();
+	if (settings.mute)
+		audioDecoder->mute();
+	else
+		audioDecoder->unmute();
 
 	if (!videoDecoder)
 		videoDecoder = new CVideo();
@@ -2862,7 +2865,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.430 2009/05/19 18:21:46 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.431 2009/06/28 21:56:14 seife Exp $\n");
 
 	bool check_lock = true;
 	int opt;

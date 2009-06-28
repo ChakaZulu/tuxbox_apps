@@ -668,7 +668,8 @@ void disableVideoOutput(bool disable)
 	if (!disable)
 	{
 		//zapit.setStandby(false);
-		audioDecoder->unmute();
+		if (!settings.mute)
+			audioDecoder->unmute();
 #if HAVE_DVB_API_VERSION < 3
 		startPlayBack(cc);
 #endif
