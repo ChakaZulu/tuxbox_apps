@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.48 2009/06/24 21:40:29 rhabarber1848 Exp $
+	$Id: epgplus.cpp,v 1.49 2009/06/28 20:44:31 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1408,7 +1408,7 @@ int EpgPlus::exec
 			if ( msg <= CRCInput::RC_MaxRC )
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-			if (msg == CRCInput::RC_yellow)
+			if (msg == g_settings.key_channelList_pagedown || msg == CRCInput::RC_yellow)
 			{
 				if (this->channelList->getSize() > 0 )
 					{
@@ -1462,7 +1462,7 @@ int EpgPlus::exec
 						}
 					}
 			}
-			else if (msg == CRCInput::RC_green)
+			else if (msg == g_settings.key_channelList_pageup || msg == CRCInput::RC_green)
 			{
 				if (this->channelList->getSize() > 0 )
 				{
@@ -1515,6 +1515,18 @@ int EpgPlus::exec
             			break;
         			}
 				}
+			}
+			else if (msg_repeatok == g_settings.key_channelList_pageup ||
+				 msg_repeatok == g_settings.key_channelList_pagedown ||
+				 msg_repeatok == CRCInput::RC_green ||
+				 msg_repeatok == CRCInput::RC_yellow)
+			{
+				/* ignore pageup/down if repeated.
+				   on many machines, pageup/down is mapped to volume up/down keys and when we do not
+				   ignore the repeate event here, it the repeat events will invoke volume setting
+				   which is not wanted in this case.
+				   Instead of ignoring, we could also allow repeated pgup/pgdown, but since page
+				   flipping is rather slow, we probably don't want to do that. */
 			}
 			else if (msg == (neutrino_msg_t) CRCInput::RC_red)
 			{
