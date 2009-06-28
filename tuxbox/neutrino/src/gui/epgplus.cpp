@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.50 2009/06/28 20:47:42 seife Exp $
+	$Id: epgplus.cpp,v 1.51 2009/06/28 20:48:14 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -177,18 +177,12 @@ EpgPlus::Settings::Settings
 Font* EpgPlus::Header::font      = NULL;
 int   EpgPlus::Header::color = 0;
 
-EpgPlus::Header::Header
-  ( CFrameBuffer* frameBuffer
-  , int x
-  , int y
-  , int width
-  )
+EpgPlus::Header::Header(CFrameBuffer* _frameBuffer, int _x, int _y, int _width)
 {
-	this->frameBuffer = frameBuffer;
-	this->x       = x;
-	this->y       = y;
-	this->width   = width;
-
+	frameBuffer = _frameBuffer;
+	x     = _x;
+	y     = _y;
+	width = _width;
 }
 
 EpgPlus::Header::~Header()
@@ -240,22 +234,14 @@ int   EpgPlus::TimeLine::markColor     = 0;
 int   EpgPlus::TimeLine::backMarkColor = 0;
 int   EpgPlus::TimeLine::gridColor     = 0;
 
-EpgPlus::TimeLine::TimeLine
-  ( CFrameBuffer* frameBuffer
-  , int x
-  , int y
-  , int width
-  , int startX
-  , int durationX
-  )
+EpgPlus::TimeLine::TimeLine(CFrameBuffer* _frameBuffer, int _x, int _y, int _width, int _startX, int _durationX)
 {
-	this->frameBuffer = frameBuffer;
-	this->x          = x;
-	this->y          = y;
-	this->width      = width;
-	this->startX     = startX;
-	this->durationX  = durationX;
-
+	frameBuffer= _frameBuffer;
+	x          = _x;
+	y          = _y;
+	width      = _width;
+	startX     = _startX;
+	durationX  = _durationX;
 }
 
 void EpgPlus::TimeLine::init()
@@ -274,90 +260,45 @@ EpgPlus::TimeLine::~TimeLine()
 {
 }
 
-void EpgPlus::TimeLine::paint
-  ( time_t startTime
-  , int    duration
-  )
+void EpgPlus::TimeLine::paint(time_t startTime, int _duration)
 {
-	#ifdef DEBUG_
-		std::cout << "EpgPlus::TimeLine::paint" << std::endl;
-	#endif
+#ifdef DEBUG_
+	std::cout << "EpgPlus::TimeLine::paint" << std::endl;
+#endif
 
-	this->clearMark();
+	clearMark();
+	int xPos = startX;
 
-	int xPos = this->startX;
-
-	this->currentDuration = duration;
-	int numberOfTicks = this->currentDuration/(60*60) * 2;
-	int tickDist = (this->durationX)/numberOfTicks;
+	currentDuration = _duration;
+	int numberOfTicks = currentDuration / (60 * 60) * 2;
+	int tickDist = durationX / numberOfTicks;
 	time_t tickTime = startTime;
 	bool toggleColor = false;
 
 	// display date of begin
-	this->frameBuffer->paintBoxRel
-		( this->x
-		, this->y
-		, this->width
-    , this->fontTime->getHeight()
-		, toggleColor?this->color2:this->color1
-		);
+	frameBuffer->paintBoxRel(x, y, width, fontTime->getHeight(), color1);
 
-  this->fontDate->RenderString
-		( this->x + 4
-		, this->y + this->fontDate->getHeight()
-		, this->width
-		, EpgPlus::getTimeString(startTime, "%d-%b")
-		, this->color1
-		, 0
-		, true
-		); // UTF-8
+	fontDate->RenderString(x + 4, y + fontDate->getHeight(), width,
+			       EpgPlus::getTimeString(startTime, "%d-%b"), color1, 0, true); // UTF-8
 
 	// paint ticks
-	for ( int i = 0
-	    ; i < numberOfTicks
-	    ;   ++i
-	      , xPos += tickDist
-	      , tickTime += duration/numberOfTicks
-	    )
+	for (int i = 0; i < numberOfTicks; ++i, xPos += tickDist, tickTime += _duration / numberOfTicks)
 	{
 		int xWidth = tickDist;
-		if (xPos + xWidth > this->x + width)
-			xWidth = this->x + width - xPos;
+		if (xPos + xWidth > x + width)
+			xWidth = x + width - xPos;
 
-
-		this->frameBuffer->paintBoxRel
-			( xPos
-			, this->y
-			, xWidth
-      , this->fontTime->getHeight()
-			, toggleColor?this->color1:this->color2
-			);
-
+		frameBuffer->paintBoxRel(xPos, y, xWidth, fontTime->getHeight(), toggleColor ? color1 : color2);
 		std::string timeStr = EpgPlus::getTimeString(tickTime, "%H");
+		int textWidth = fontTime->getRenderWidth(timeStr, true);
 
-		int textWidth = this->fontTime->getRenderWidth(timeStr, true);
-
-    this->fontTime->RenderString
-			( xPos - textWidth - 4
-			, this->y + this->fontTime->getHeight()
-			, textWidth
-			, timeStr
-			, toggleColor?this->color2:this->color1
-			, 0
-			, true
-			); // UTF-8
+		fontTime->RenderString(xPos - textWidth - 4, y + fontTime->getHeight(), textWidth, timeStr,
+				       toggleColor ? color2 : color1, 0, true); // UTF-8
 
 		timeStr = EpgPlus::getTimeString(tickTime, "%M");
-		textWidth = this->fontTime->getRenderWidth(timeStr, true);
-		this->fontTime->RenderString
-			( xPos + 4
-			, this->y + this->fontTime->getHeight()
-			, textWidth
-			, timeStr
-			, toggleColor?this->color1:this->color2
-			, 0
-			, true
-			); // UTF-8
+		textWidth = fontTime->getRenderWidth(timeStr, true);
+		fontTime->RenderString(xPos + 4, y + fontTime->getHeight(), textWidth, timeStr,
+				       toggleColor ? color1 : color2, 0, true); // UTF-8
 
 		toggleColor = !toggleColor;
 	}
@@ -389,72 +330,32 @@ void EpgPlus::TimeLine::paintGrid()
 	}
 }
 
-void EpgPlus::TimeLine::paintMark
-  ( time_t startTime
-  , int    duration
-  , int    x
-  , int    width
-  )
+void EpgPlus::TimeLine::paintMark(time_t startTime, int _duration, int _x, int _width)
 {
-	#ifdef DEBUG_
-		std::cout << "EpgPlus::TimeLine::paintMark" << std::endl;
-	#endif
+#ifdef DEBUG_
+	std::cout << "EpgPlus::TimeLine::paintMark" << std::endl;
+#endif
 
 	// clear old mark
-	this->clearMark();
+	clearMark();
 
 	// paint new mark
-	this->frameBuffer->paintBoxRel
-		( x
-    , this->y + this->fontTime->getHeight()
-		, width
-		, this->fontTime->getHeight()
-		, this->markColor
-		);
-
-
+	frameBuffer->paintBoxRel(_x, y + fontTime->getHeight(), _width, fontTime->getHeight(), markColor);
 	// display start time before mark
 	std::string timeStr = EpgPlus::getTimeString(startTime, "%H:%M");
-	int textWidth = this->fontTime->getRenderWidth(timeStr, true);
+	int textWidth = fontTime->getRenderWidth(timeStr, true);
+	int textHeight = fontTime->getHeight();
 
-  this->fontTime->RenderString
-		( x - textWidth
-		, this->y + this->fontTime->getHeight() + this->fontTime->getHeight()
-		, textWidth
-		, timeStr
-		, this->backMarkColor
-		, 0
-		, true
-		); // UTF-8
+	fontTime->RenderString(_x - textWidth, y + 2 * textHeight, textWidth, timeStr, backMarkColor, 0, true); // UTF-8
 
 	// display end time after mark
-	timeStr = EpgPlus::getTimeString(startTime + duration, "%H:%M");
+	timeStr = EpgPlus::getTimeString(startTime + _duration, "%H:%M");
 	textWidth = fontTime->getRenderWidth(timeStr, true);
 
-	if (x + width + textWidth < this->x + this->width)
-	{
-		this->fontTime->RenderString
-			( x + width
-			, this->y + this->fontTime->getHeight() + this->fontTime->getHeight()
-			, textWidth
-			, timeStr
-			, this->backMarkColor
-			, 0
-			, true
-			); // UTF-8
-	}
-	else if (textWidth < width - 10)
-	{
-    this->fontTime->RenderString
-			( x + width - textWidth
-			, this->y + this->fontTime->getHeight() + this->fontTime->getHeight()
-			, textWidth
-			, timeStr
-			, this->markColor
-			, 0
-			, true
-			); // UTF-8
-	}
+	if (_x + _width + textWidth < x + width)
+		fontTime->RenderString(_x + _width, y + 2 * textHeight, textWidth, timeStr, backMarkColor, 0, true); // UTF-8
+	else if (textWidth < _width - 10)
+		fontTime->RenderString(_x + _width - textWidth, y + 2 * textHeight, textWidth, timeStr, markColor, 0, true); // UTF-8
 }
 
 void EpgPlus::TimeLine::clearMark()
@@ -483,27 +384,19 @@ int   EpgPlus::ChannelEventEntry::normalColor2         = 0;
 int   EpgPlus::ChannelEventEntry::selectionColor       = 0;
 int   EpgPlus::ChannelEventEntry::dummyEventColor      = 0;
 
-EpgPlus::ChannelEventEntry::ChannelEventEntry
-  ( const CChannelEvent* channelEvent
-  , CFrameBuffer* frameBuffer
-  , TimeLine* timeLine
-  , Footer* footer
-  ,	int x
-  , int y
-  , int width
-  )
+EpgPlus::ChannelEventEntry::ChannelEventEntry(const CChannelEvent* _channelEvent, CFrameBuffer* _frameBuffer,
+					      TimeLine* _timeLine, Footer* _footer, int _x, int _y, int _width)
 {
 	// copy neccessary?
-	if (channelEvent != NULL)
-		this->channelEvent = *channelEvent;
+	if (_channelEvent != NULL)
+		channelEvent = *_channelEvent;
 
-	this->frameBuffer = frameBuffer;
-	this->timeLine = timeLine;
-	this->footer = footer;
-	this->x      = x;
-	this->y      = y;
-	this->width  = width;
-
+	frameBuffer = _frameBuffer;
+	timeLine = _timeLine;
+	footer = _footer;
+	x      = _x;
+	y      = _y;
+	width  = _width;
 }
 
 void EpgPlus::ChannelEventEntry::init()
@@ -535,76 +428,45 @@ bool EpgPlus::ChannelEventEntry::isSelected
 }
 
 
-void EpgPlus::ChannelEventEntry::paint
-  ( bool isSelected
-  , bool toggleColor
-  )
+void EpgPlus::ChannelEventEntry::paint(bool _isSelected, bool toggleColor)
 {
-	#ifdef DEBUG_
-		std::cout << "EpgPlus::ChannelEventEntry::paint " << this->x << " " << this->y << " " << this->width << " " << " " << this->channelEvent.description << std::endl;
-	#endif
+#ifdef DEBUG_
+	std::cout << "EpgPlus::ChannelEventEntry::paint " << this->x << " " << this->y << " " << this->width << " " << " " << this->channelEvent.description << std::endl;
+#endif
 
+	frameBuffer->paintBoxRel(x, y, width, font->getHeight(),
+				 channelEvent.description.empty() ?
+					dummyEventColor :
+					(_isSelected ? selectionColor : (toggleColor ? normalColor1 : normalColor2)));
 
-	this->frameBuffer->paintBoxRel
-		( this->x
-		, this->y
-		, this->width
-		, this->font->getHeight()
-		, this->channelEvent.description.empty()?this->dummyEventColor:(isSelected?this->selectionColor:(toggleColor?this->normalColor1:this->normalColor2))
-		);
+	font->RenderString(x + 2, y + font->getHeight(), width - 4 > 0 ? width - 4 : 0, channelEvent.description,
+			   _isSelected ? selectionColor : (toggleColor ? normalColor1 : normalColor2), false);
 
+	// paint the separation line
+	if (separationLineHeight > 0)
+		frameBuffer->paintBoxRel(x, y + font->getHeight(), width, separationLineHeight, separationLineColor);
 
-	this->font->RenderString
-		( this->x + 2
-		, this->y + this->font->getHeight()
-		, this->width - 4 > 0?this->width - 4:0
-		, this->channelEvent.description
-		, isSelected?this->selectionColor:(toggleColor?this->normalColor1:this->normalColor2)
-		, false
-		);
-
-  // paint the separation line
-  if (separationLineHeight > 0)
-  {
-	  this->frameBuffer->paintBoxRel
-		  ( this->x
-		  , this->y + this->font->getHeight()
-		  , this->width
-		  , this->separationLineHeight
-		  , this->separationLineColor
-		  );
-  }
-
-	if (isSelected)
+	if (_isSelected)
 	{
-		if (this->channelEvent.description.empty())
+		if (channelEvent.description.empty())
 		{// dummy channel event
-			this->timeLine->clearMark();
+			timeLine->clearMark();
 		}
 		else
 		{
-			this->timeLine->paintMark
-				( this->channelEvent.startTime
-				, this->channelEvent.duration
-				, this->x
-				, this->width
-				);
+			timeLine->paintMark(channelEvent.startTime, channelEvent.duration, x, width);
 		}
-
-		#ifdef DEBUG_
-			std::cout << "paintEventDetails1" << std::endl;
-		#endif
+#ifdef DEBUG_
+		std::cout << "paintEventDetails1" << std::endl;
+#endif
 		CShortEPGData shortEpgData;
 
-		this->footer->paintEventDetails
-			( this->channelEvent.description
-			, g_Sectionsd->getEPGidShort(this->channelEvent.eventID, &shortEpgData)?shortEpgData.info1:""
-			);
-		#ifdef DEBUG_
-			std::cout << "paintEventDetails2" << std::endl;
-		#endif
-
-		this->timeLine->paintGrid();
+		footer->paintEventDetails(channelEvent.description,
+					  g_Sectionsd->getEPGidShort(channelEvent.eventID, &shortEpgData) ? shortEpgData.info1 : "");
+#ifdef DEBUG_
+		std::cout << "paintEventDetails2" << std::endl;
+#endif
+		timeLine->paintGrid();
 	}
 }
 
@@ -620,40 +482,26 @@ int   EpgPlus::ChannelEntry::separationLineColor  = 0;
 int   EpgPlus::ChannelEntry::selectionColor       = 0;
 int   EpgPlus::ChannelEntry::normalColor          = 0;
 
-EpgPlus::ChannelEntry::ChannelEntry
-  ( const CChannelList::CChannel* channel
-  , int index
-  ,	CFrameBuffer* frameBuffer
-  ,	Footer* footer
-  , CBouquetList* bouquetList
-  , int x
-  , int y
-  , int width
-  )
+EpgPlus::ChannelEntry::ChannelEntry(const CChannelList::CChannel* _channel, int _index,
+				    CFrameBuffer* _frameBuffer, Footer* _footer, CBouquetList* _bouquetList,
+				    int _x, int _y, int _width)
 {
-	this->channel = channel;
+	channel = _channel;
 
-  if (channel != NULL)
-  {
-    std::stringstream displayName;
-	  displayName
-		  << index + 1
-		  << " "
-		  << channel->getName();
+	if (channel != NULL)
+	{
+		std::stringstream tmpName;
+		tmpName << _index + 1 << " " << channel->getName();
+		displayName  = ZapitTools::UTF8_to_Latin1(tmpName.str().c_str());
+	}
 
-    this->displayName  = ZapitTools::UTF8_to_Latin1(displayName.str().c_str());
-  }
-
-  this->index = index;
-
-	this->frameBuffer = frameBuffer;
-	this->footer      = footer;
-  this->bouquetList = bouquetList;
-
-	this->x      = x;
-	this->y      = y;
-	this->width  = width;
-
+	index = _index;
+	frameBuffer = _frameBuffer;
+	footer      = _footer;
+	bouquetList = _bouquetList;
+	x     = _x;
+	y     = _y;
+	width = _width;
 }
 
 void EpgPlus::ChannelEntry::init()
@@ -773,18 +621,12 @@ Font* EpgPlus::Footer::fontEventShortDescription = NULL;
 Font* EpgPlus::Footer::fontButtons = NULL;
 int   EpgPlus::Footer::color   = 0;
 
-EpgPlus::Footer::Footer
-  ( CFrameBuffer* frameBuffer
-  , int x
-  , int y
-  , int width
-  )
+EpgPlus::Footer::Footer(CFrameBuffer* _frameBuffer, int _x, int _y, int _width)
 {
-	this->frameBuffer = frameBuffer;
-	this->x       = x;
-	this->y       = y;
-	this->width   = width;
-
+	frameBuffer = _frameBuffer;
+	x     = _x;
+	y     = _y;
+	width = _width;
 }
 
 EpgPlus::Footer::~Footer()
@@ -909,19 +751,13 @@ struct button_label buttonLabels[] =
 	{ NEUTRINO_ICON_BUTTON_DBOX	  , LOCALE_EPGPLUS_HIDE}
 };
 
-void EpgPlus::Footer::paintButtons
-  ( button_label* buttonLabels
-  , int numberOfButtons
-  )
+void EpgPlus::Footer::paintButtons(button_label* _buttonLabels, int numberOfButtons)
 {
-  int yPos = this->y + this->getUsedHeight() - this->fontButtons->getHeight();
+	int yPos = y + getUsedHeight() - fontButtons->getHeight();
+	int buttonWidth =  40;
 
-  int buttonWidth =  40;
-
-  this->frameBuffer->paintBoxRel(this->x, yPos, this->width, this->fontButtons->getHeight(), COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
-
-  ::paintButtons(this->frameBuffer, this->fontButtons, g_Locale, this->x +5, yPos , buttonWidth, numberOfButtons, buttonLabels,  this->width-25);
-
+	frameBuffer->paintBoxRel(x, yPos, width, fontButtons->getHeight(), COL_INFOBAR_SHADOW_PLUS_1, RADIUS_MID, CORNER_BOTTOM);
+	::paintButtons(frameBuffer, fontButtons, g_Locale, x + 5, yPos , buttonWidth, numberOfButtons, _buttonLabels, width - 25);
 }
 
 EpgPlus::EpgPlus()
@@ -1339,11 +1175,11 @@ void EpgPlus::free()
   }
 }
 
-int EpgPlus::exec(CChannelList* channelList, int selectedChannelIndex, CBouquetList* bouquetList)
+int EpgPlus::exec(CChannelList* _channelList, int selectedChannelIndex, CBouquetList* _bouquetList)
 {
-	this->channelList = channelList;
+	this->channelList = _channelList;
 	this->channelListStartIndex = int(selectedChannelIndex/maxNumberOfDisplayableEntries)*maxNumberOfDisplayableEntries;
-	this->bouquetList = bouquetList;
+	this->bouquetList = _bouquetList;
 
 	int res = menu_return::RETURN_REPAINT;
 
@@ -1767,9 +1603,9 @@ int EpgPlus::exec(CChannelList* channelList, int selectedChannelIndex, CBouquetL
 					{
 						this->hide();
 
-						time_t startTime = (*It)->channelEvent.startTime;
+						time_t _startTime = (*It)->channelEvent.startTime;
 						res = g_EpgData->show(this->selectedChannelEntry->channel->channel_id,
-								      (*It)->channelEvent.eventID, &startTime);
+								      (*It)->channelEvent.eventID, &_startTime);
 
 						if (res == menu_return::RETURN_EXIT_ALL)
 						{
@@ -2147,11 +1983,9 @@ int CEPGplusHandler::exec(CMenuTarget* parent, const std::string &)
 	return res;
 }
 
-EpgPlus::MenuTargetAddReminder::MenuTargetAddReminder
-  ( EpgPlus* epgPlus
-  )
+EpgPlus::MenuTargetAddReminder::MenuTargetAddReminder(EpgPlus* _epgPlus)
 {
-	this->epgPlus = epgPlus;
+	epgPlus = _epgPlus;
 }
 
 int EpgPlus::MenuTargetAddReminder::exec(CMenuTarget*, const std::string&)
@@ -2186,11 +2020,9 @@ int EpgPlus::MenuTargetAddReminder::exec(CMenuTarget*, const std::string&)
 	return menu_return::RETURN_EXIT_ALL;
 }
 
-EpgPlus::MenuTargetAddRecordTimer::MenuTargetAddRecordTimer
-  ( EpgPlus* epgPlus
-  )
+EpgPlus::MenuTargetAddRecordTimer::MenuTargetAddRecordTimer(EpgPlus* _epgPlus)
 {
-	this->epgPlus = epgPlus;
+	epgPlus = _epgPlus;
 }
 
 int EpgPlus::MenuTargetAddRecordTimer::exec(CMenuTarget*, const std::string&)
@@ -2265,11 +2097,9 @@ int EpgPlus::MenuTargetAddRecordTimer::exec(CMenuTarget*, const std::string&)
 	return menu_return::RETURN_EXIT_ALL;
 }
 
-EpgPlus::MenuTargetRefreshEpg::MenuTargetRefreshEpg
-  ( EpgPlus* epgPlus
-  )
+EpgPlus::MenuTargetRefreshEpg::MenuTargetRefreshEpg(EpgPlus* _epgPlus)
 {
-	this->epgPlus = epgPlus;
+	epgPlus = _epgPlus;
 }
 
 
@@ -2290,23 +2120,15 @@ struct CMenuOptionChooser::keyval menuOptionChooserSwitchSwapModes[] =
   {EpgPlus::SwapMode_ByBouquet, LOCALE_EPGPLUS_BYBOUQUET_MODE}
 };
 
-EpgPlus::MenuOptionChooserSwitchSwapMode::MenuOptionChooserSwitchSwapMode
-  ( EpgPlus* epgPlus
-  )
-  : CMenuOptionChooser
-      ( LOCALE_EPGPLUS_SWAP_MODE
-      , (int*)&epgPlus->currentSwapMode
-      , menuOptionChooserSwitchSwapModes
-      , sizeof(menuOptionChooserSwitchSwapModes)/sizeof(CMenuOptionChooser::keyval)
-      , true
-      , NULL
-      , CRCInput::RC_yellow
-      , NEUTRINO_ICON_BUTTON_YELLOW
-      )
+EpgPlus::MenuOptionChooserSwitchSwapMode::MenuOptionChooserSwitchSwapMode(EpgPlus* _epgPlus)
+	: CMenuOptionChooser(LOCALE_EPGPLUS_SWAP_MODE, (int*)&_epgPlus->currentSwapMode,
+			     menuOptionChooserSwitchSwapModes,
+			     sizeof(menuOptionChooserSwitchSwapModes)/sizeof(CMenuOptionChooser::keyval),
+			     true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW)
 {
-  this->epgPlus = epgPlus;
-  this->oldSwapMode = epgPlus->currentSwapMode;
-  this->oldTimingMenuSettings = g_settings.timing[SNeutrinoSettings::TIMING_MENU];
+	epgPlus = _epgPlus;
+	oldSwapMode = _epgPlus->currentSwapMode;
+	oldTimingMenuSettings = g_settings.timing[SNeutrinoSettings::TIMING_MENU];
 }
 
 EpgPlus::MenuOptionChooserSwitchSwapMode::~MenuOptionChooserSwitchSwapMode()
