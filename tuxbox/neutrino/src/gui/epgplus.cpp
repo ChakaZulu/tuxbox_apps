@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.51 2009/06/28 20:48:14 seife Exp $
+	$Id: epgplus.cpp,v 1.52 2009/06/28 20:48:53 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2121,7 +2121,7 @@ struct CMenuOptionChooser::keyval menuOptionChooserSwitchSwapModes[] =
 };
 
 EpgPlus::MenuOptionChooserSwitchSwapMode::MenuOptionChooserSwitchSwapMode(EpgPlus* _epgPlus)
-	: CMenuOptionChooser(LOCALE_EPGPLUS_SWAP_MODE, (int*)&_epgPlus->currentSwapMode,
+	: CMenuOptionChooser(LOCALE_EPGPLUS_SWAP_MODE, (int*)(int)&_epgPlus->currentSwapMode,
 			     menuOptionChooserSwitchSwapModes,
 			     sizeof(menuOptionChooserSwitchSwapModes)/sizeof(CMenuOptionChooser::keyval),
 			     true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW)
@@ -2172,21 +2172,13 @@ struct CMenuOptionChooser::keyval menuOptionChooserSwitchViewModes[] =
   {EpgPlus::ViewMode_Stretch, LOCALE_EPGPLUS_SCROLL_MODE}
 };
 
-EpgPlus::MenuOptionChooserSwitchViewMode::MenuOptionChooserSwitchViewMode
-  ( EpgPlus* epgPlus
-  )
-  : CMenuOptionChooser
-      ( LOCALE_EPGPLUS_VIEW_MODE
-      , (int*)&epgPlus->currentViewMode
-      , menuOptionChooserSwitchViewModes
-      , sizeof(menuOptionChooserSwitchViewModes)/sizeof(CMenuOptionChooser::keyval)
-      , true
-      , NULL
-      , CRCInput::RC_blue
-      , NEUTRINO_ICON_BUTTON_BLUE
-      )
+EpgPlus::MenuOptionChooserSwitchViewMode::MenuOptionChooserSwitchViewMode(EpgPlus* epgPlus)
+	: CMenuOptionChooser(LOCALE_EPGPLUS_VIEW_MODE, (int*)(int)&epgPlus->currentViewMode,
+			     menuOptionChooserSwitchViewModes,
+			     sizeof(menuOptionChooserSwitchViewModes)/sizeof(CMenuOptionChooser::keyval),
+			     true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE)
 {
-  this->oldTimingMenuSettings = g_settings.timing[SNeutrinoSettings::TIMING_MENU];
+	oldTimingMenuSettings = g_settings.timing[SNeutrinoSettings::TIMING_MENU];
 }
 
 EpgPlus::MenuOptionChooserSwitchViewMode::~MenuOptionChooserSwitchViewMode()
