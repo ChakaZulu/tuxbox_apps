@@ -18,14 +18,14 @@ libdvbsi___la_SOURCES = \
 	audio_stream_descriptor.cpp \
 	bouquet_association_section.cpp \
 	bouquet_name_descriptor.cpp \
-	cable_delivery_system_descriptor.cpp \
-	caching_priority_descriptor.cpp \
 	ca_descriptor.cpp \
 	ca_identifier_descriptor.cpp \
 	ca_message_section.cpp \
 	ca_program_map_section.cpp \
-	carousel_identifier_descriptor.cpp \
 	ca_section.cpp \
+	cable_delivery_system_descriptor.cpp \
+	caching_priority_descriptor.cpp \
+	carousel_identifier_descriptor.cpp \
 	cell_frequency_link_descriptor.cpp \
 	cell_list_descriptor.cpp \
 	component_descriptor.cpp \
@@ -40,8 +40,8 @@ libdvbsi___la_SOURCES = \
 	data_broadcast_id_descriptor.cpp \
 	default_authority_descriptor.cpp \
 	delegated_application_descriptor.cpp \
-	descriptor_container.cpp \
 	descriptor.cpp \
+	descriptor_container.cpp \
 	dii_location_descriptor.cpp \
 	dsng_descriptor.cpp \
 	dts_descriptor.cpp \
@@ -58,6 +58,7 @@ libdvbsi___la_SOURCES = \
 	extension_descriptor.cpp \
 	external_application_authorisation_descriptor.cpp \
 	frequency_list_descriptor.cpp \
+	fta_content_management_descriptor.cpp \
 	group_link_descriptor.cpp \
 	info_descriptor.cpp \
 	ip_signaling_descriptor.cpp \

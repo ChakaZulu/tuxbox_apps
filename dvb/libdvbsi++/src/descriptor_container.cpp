@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.cpp,v 1.13 2009/06/25 17:26:07 obi Exp $
+ * $Id: descriptor_container.cpp,v 1.14 2009/06/29 16:18:28 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -57,6 +57,7 @@
 #include <dvbsi++/extension_descriptor.h>
 #include <dvbsi++/external_application_authorisation_descriptor.h>
 #include <dvbsi++/frequency_list_descriptor.h>
+#include <dvbsi++/fta_content_management_descriptor.h>
 #include <dvbsi++/group_link_descriptor.h>
 #include <dvbsi++/info_descriptor.h>
 #include <dvbsi++/ip_signaling_descriptor.h>
@@ -312,9 +313,9 @@ Descriptor *DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool
 #if 0
 	case XAIT_LOCATION_DESCRIPTOR:
 		return new XaitDescriptor(buffer);
+#endif
 	case FTA_CONTENT_MANAGEMENT_DESCRIPTOR:
 		return new FtaContentManagementDescriptor(buffer);
-#endif
 	case EXTENSION_DESCRIPTOR:
 		return new ExtensionDescriptor(buffer);
 	default:

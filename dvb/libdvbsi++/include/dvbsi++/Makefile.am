@@ -17,14 +17,14 @@ pkginclude_HEADERS = \
 	bouquet_association_section.h \
 	bouquet_name_descriptor.h \
 	byte_stream.h \
-	cable_delivery_system_descriptor.h \
-	caching_priority_descriptor.h \
 	ca_descriptor.h \
 	ca_identifier_descriptor.h \
 	ca_message_section.h \
 	ca_program_map_section.h \
-	carousel_identifier_descriptor.h \
 	ca_section.h \
+	cable_delivery_system_descriptor.h \
+	caching_priority_descriptor.h \
+	carousel_identifier_descriptor.h \
 	cell_frequency_link_descriptor.h \
 	cell_list_descriptor.h \
 	compat.h \
@@ -40,8 +40,8 @@ pkginclude_HEADERS = \
 	data_broadcast_id_descriptor.h \
 	default_authority_descriptor.h \
 	delegated_application_descriptor.h \
-	descriptor_container.h \
 	descriptor.h \
+	descriptor_container.h \
 	descriptor_tag.h \
 	dii_location_descriptor.h \
 	dsng_descriptor.h \
@@ -59,6 +59,7 @@ pkginclude_HEADERS = \
 	extension_descriptor.h \
 	external_application_authorisation_descriptor.h \
 	frequency_list_descriptor.h \
+	fta_content_management_descriptor.h \
 	group_link_descriptor.h \
 	info_descriptor.h \
 	ip_signaling_descriptor.h \
