@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.213 2009/06/30 11:32:36 rhabarber1848 Exp $
+	$Id: channellist.cpp,v 1.214 2009/06/30 19:21:54 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -323,7 +323,7 @@ int CChannelList::show()
 		}
 		else if (msg_repeatok == CRCInput::RC_down || msg_repeatok == g_settings.key_channelList_pagedown)
 		{
-			int step = 0;
+			unsigned int step = 0;
 			int prev_selected = selected;
 
 			step = (msg_repeatok == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
