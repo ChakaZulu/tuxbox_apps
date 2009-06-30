@@ -355,7 +355,7 @@ void CBouquetList::paintItem(int pos)
 	if(liststart+pos<Bouquets.size())
 	{
 		CBouquet* bouq = Bouquets[liststart+pos];
-		//number - zum direkten hinh�pfen
+		//number - for direct jump
 		char tmp[10];
 		sprintf((char*) tmp, "%d", liststart+pos+ 1);
 
