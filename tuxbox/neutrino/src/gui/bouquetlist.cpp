@@ -236,7 +236,10 @@ int CBouquetList::show()
 			selected += step;
 
 			if(selected >= Bouquets.size())
-				selected = 0;
+				if (((Bouquets.size() / listmaxshow) + 1) * listmaxshow == Bouquets.size() + listmaxshow) // last page has full entries
+					selected = 0;
+				else
+					selected = ((step == listmaxshow) && (selected < (((Bouquets.size() / listmaxshow) + 1) * listmaxshow))) ? (Bouquets.size() - 1) : 0;
 
 			paintItem(prev_selected - liststart);
 			unsigned int oldliststart = liststart;
