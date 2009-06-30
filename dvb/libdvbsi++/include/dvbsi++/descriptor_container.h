@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.h,v 1.6 2006/03/28 17:21:59 ghostrider Exp $
+ * $Id: descriptor_container.h,v 1.7 2009/06/30 12:03:02 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -25,6 +25,7 @@ class DescriptorContainer
 {
 	private:
 		Descriptor *descriptorSi(const uint8_t * const buffer, bool back = true);
+		Descriptor *descriptorSiExtended(const uint8_t * const buffer, bool back = true);
 		Descriptor *descriptorCarousel(const uint8_t * const buffer, bool back = true);
 		Descriptor *descriptorMhp(const uint8_t * const buffer, bool back = true);
 

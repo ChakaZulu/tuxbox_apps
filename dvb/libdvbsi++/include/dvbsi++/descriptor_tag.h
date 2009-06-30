@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_tag.h,v 1.8 2009/06/25 16:35:47 obi Exp $
+ * $Id: descriptor_tag.h,v 1.9 2009/06/30 12:03:02 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -95,7 +95,7 @@ enum SiDescriptorTag {
 	ENHANCED_AC3_DESCRIPTOR				= 0x7A,
 	DTS_DESCRIPTOR					= 0x7B,
 	AAC_DESCRIPTOR					= 0x7C,
-	XAIT_LOCATION_DESCRIPTOR			= 0x7D,
+	XAIT_LOCATION_DESCRIPTOR			= 0x7D,	/* TS 102 590 aka A107.MHP 1.2 Spec */
 	FTA_CONTENT_MANAGEMENT_DESCRIPTOR		= 0x7E,
 	EXTENSION_DESCRIPTOR				= 0x7F,
 	/* 0x80 - 0xFE: User defined */

@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.cpp,v 1.15 2009/06/30 07:28:30 mws Exp $
+ * $Id: descriptor_container.cpp,v 1.16 2009/06/30 12:03:03 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -36,6 +36,9 @@
 #include <dvbsi++/content_identifier_descriptor.h>
 #include <dvbsi++/content_type_descriptor.h>
 #include <dvbsi++/country_availability_descriptor.h>
+#include <dvbsi++/cp_descriptor.h>
+#include <dvbsi++/cp_identifier_descriptor.h>
+#include <dvbsi++/cpcm_delivery_signalling_descriptor.h>
 #include <dvbsi++/data_broadcast_descriptor.h>
 #include <dvbsi++/data_broadcast_id_descriptor.h>
 #include <dvbsi++/default_authority_descriptor.h>
@@ -59,6 +62,7 @@
 #include <dvbsi++/frequency_list_descriptor.h>
 #include <dvbsi++/fta_content_management_descriptor.h>
 #include <dvbsi++/group_link_descriptor.h>
+#include <dvbsi++/image_icon_descriptor.h>
 #include <dvbsi++/info_descriptor.h>
 #include <dvbsi++/ip_signaling_descriptor.h>
 #include <dvbsi++/iso639_language_descriptor.h>
@@ -316,11 +320,28 @@ Descriptor *DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool
 	case FTA_CONTENT_MANAGEMENT_DESCRIPTOR:
 		return new FtaContentManagementDescriptor(buffer);
 	case EXTENSION_DESCRIPTOR:
-		return new ExtensionDescriptor(buffer);
+		return descriptorSiExtended(buffer);
 	default:
 		return new Descriptor(buffer);
 	}
 }
+
+Descriptor *DescriptorContainer::descriptorSiExtended(const uint8_t * const buffer, bool back)
+{
+	switch (buffer[2]) {
+	case IMAGE_ICON_DESCRIPTOR:
+		return new ImageIconDescriptor(buffer);
+	case CPCM_DELIVERY_SIGNALLING_DESCRIPTOR:
+		return new CpcmDeliverySignallingDescriptor(buffer);
+	case CP_DESCRIPTOR:
+		return new CpDescriptor(buffer);
+	case CP_IDENTIFIER_DESCRIPTOR:
+		return new CpIdentifierDescriptor(buffer);
+	default:
+		return new ExtensionDescriptor(buffer);
+	}
+}
+
 
 Descriptor *DescriptorContainer::descriptorCarousel(const uint8_t * const buffer, bool back)
 {

@@ -35,6 +35,9 @@ pkginclude_HEADERS = \
 	content_identifier_section.h \
 	content_type_descriptor.h \
 	country_availability_descriptor.h \
+	cp_descriptor.h \
+	cp_identifier_descriptor.h \
+	cpcm_delivery_signalling_descriptor.h \
 	crc32_descriptor.h \
 	data_broadcast_descriptor.h \
 	data_broadcast_id_descriptor.h \
@@ -61,6 +64,7 @@ pkginclude_HEADERS = \
 	frequency_list_descriptor.h \
 	fta_content_management_descriptor.h \
 	group_link_descriptor.h \
+	image_icon_descriptor.h \
 	info_descriptor.h \
 	ip_signaling_descriptor.h \
 	iso639_language_descriptor.h \

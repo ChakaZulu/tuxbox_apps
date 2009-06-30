@@ -35,6 +35,9 @@ libdvbsi___la_SOURCES = \
 	content_identifier_section.cpp \
 	content_type_descriptor.cpp \
 	country_availability_descriptor.cpp \
+	cp_descriptor.cpp \
+	cp_identifier_descriptor.cpp \
+	cpcm_delivery_signalling_descriptor.cpp \
 	crc32_descriptor.cpp \
 	data_broadcast_descriptor.cpp \
 	data_broadcast_id_descriptor.cpp \
@@ -60,6 +63,7 @@ libdvbsi___la_SOURCES = \
 	frequency_list_descriptor.cpp \
 	fta_content_management_descriptor.cpp \
 	group_link_descriptor.cpp \
+	image_icon_descriptor.cpp \
 	info_descriptor.cpp \
 	ip_signaling_descriptor.cpp \
 	iso639_language_descriptor.cpp \
