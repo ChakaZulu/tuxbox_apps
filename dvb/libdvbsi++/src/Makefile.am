@@ -123,4 +123,5 @@ libdvbsi___la_SOURCES = \
 	vbi_data_descriptor.cpp \
 	vbi_teletext_descriptor.cpp \
 	video_stream_descriptor.cpp \
-	video_window_descriptor.cpp
+	video_window_descriptor.cpp \
+	xait_location_descriptor.cpp

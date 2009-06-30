@@ -128,4 +128,5 @@ pkginclude_HEADERS = \
 	vbi_data_descriptor.h \
 	vbi_teletext_descriptor.h \
 	video_stream_descriptor.h \
-	video_window_descriptor.h
+	video_window_descriptor.h \
+	xait_location_descriptor.h
