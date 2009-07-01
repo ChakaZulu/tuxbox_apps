@@ -285,7 +285,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string&)
 		}
 		else if (msg_repeatok == CRCInput::RC_down || msg_repeatok == g_settings.key_channelList_pagedown)
 		{
-			int step = 0;
+			unsigned int step = 0;
 			int prev_selected = selected;
 
 			step = (msg_repeatok == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
@@ -293,7 +293,10 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string&)
 
 			if(selected >= Bouquets.size())
 			{
-				selected = 0;
+				if (((Bouquets.size() / listmaxshow) + 1) * listmaxshow == Bouquets.size() + listmaxshow) // last page has full entries
+					selected = 0;
+				else
+					selected = ((step == listmaxshow) && (selected < (((Bouquets.size() / listmaxshow) + 1) * listmaxshow))) ? (Bouquets.size() - 1) : 0;
 			}
 
 

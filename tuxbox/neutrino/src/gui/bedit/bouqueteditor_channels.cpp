@@ -243,7 +243,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string &)
 		}
 		else if (msg_repeatok == CRCInput::RC_down || msg_repeatok == g_settings.key_channelList_pagedown)
 		{
-			int step = 0;
+			unsigned int step = 0;
 			int prev_selected = selected;
 
 			step = (msg_repeatok == g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
@@ -251,7 +251,10 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string &)
 
 			if(selected >= Channels.size())
 			{
-				selected = 0;
+				if (((Channels.size() / listmaxshow) + 1) * listmaxshow == Channels.size() + listmaxshow) // last page has full entries
+					selected = 0;
+				else
+					selected = ((step == listmaxshow) && (selected < (((Channels.size() / listmaxshow) + 1) * listmaxshow))) ? (Channels.size() - 1) : 0;
 			}
 
 			if (state == beDefault)
