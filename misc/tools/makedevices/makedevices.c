@@ -40,6 +40,9 @@ struct deventry devices[] = {
 	{ "tty1",	C, 4, 1 },
 	{ "tty2",	C, 4, 2 },
 	{ "tty3",	C, 4, 3 },
+	{ "tty4",	C, 4, 4 },
+	{ "tty5",	C, 4, 5 },
+	{ "tty6",	C, 4, 6 },
 	/* different major / minor number than on 2.4... */
 	{ "tts/0",	C, 204, 46 },
 	{ "tts/1",	C, 204, 47 },
