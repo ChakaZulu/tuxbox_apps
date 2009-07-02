@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.955 2009/06/11 11:32:52 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.956 2009/07/02 15:52:47 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -202,6 +202,7 @@ CNeutrinoApp::CNeutrinoApp()
 	SetupFrameBuffer();
 
 	mode = mode_unknown;
+	mode_beforeScart = mode_unknown;
 	channelList       = NULL;
 	bouquetList       = NULL;
 	channelListTV     = NULL;
@@ -3537,6 +3538,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 
 		g_Controld->setScartMode( 1 );
 		CLCD::getInstance()->setMode(CLCD::MODE_SCART);
+		mode_beforeScart = mode;
 		lastMode = mode;
 		mode = mode_scart;
 	}
@@ -3546,6 +3548,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 		g_Controld->setScartMode( 0 );
 
 		mode = mode_unknown;
+		mode_beforeScart = mode_unknown;
 
 		//re-set mode
 		if( lastMode == mode_radio )
@@ -3628,14 +3631,17 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		mode = mode_unknown;
 
 		//re-set mode
-		if( lastMode == mode_radio )
-		{
-			radioMode( false );
-		}
-		else
-		{
-			tvMode( false );
-		}
+		if (lastMode == mode_radio || mode_beforeScart == mode_radio)
+				radioMode(false);
+			else
+				tvMode(false);
+
+		mode_beforeScart = mode_unknown;
+		
+		//show mute icon ONLY if muted or current volume value is 0
+		if (current_muted || doShowMuteIcon())
+			paintMuteIcon();
+
 		/* hack. TODO: why is this needed? */
 		g_Sectionsd->setServiceChanged(g_RemoteControl->current_channel_id, false);
 	}
