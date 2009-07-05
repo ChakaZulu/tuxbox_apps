@@ -386,7 +386,8 @@ char getRGBCsync()
 #endif
 }
 
-#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+#if defined HAVE_DBOX_HARDWARE
+/* AFAIK only the dbox can put different signals on VCR and TV SCART */
 void setvcroutput(CControld::video_format format) {
   if ((format != CControld::FORMAT_CVBS) && (format != CControld::FORMAT_SVIDEO)) {
     printf("[controld] illegal format (=%d) specified for VCR output (using CVBS)!", format);
@@ -396,7 +397,13 @@ void setvcroutput(CControld::video_format format) {
   controldconfig->setInt32("vcroutput", settings.vcroutput);
   routeVideo();
 }
+#else
+void setvcroutput(CControld::video_format)
+{
+}
+#endif
 
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 void setvideooutput(CControld::video_format format, bool bSaveSettings)
 {
 	int fd;
@@ -427,19 +434,17 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings)
 	case CControld::FORMAT_SVIDEO:
 		arg = SAA_MODE_SVIDEO;
 		break;
-#ifdef HAVE_DBOX_HARDWARE
 	case CControld::FORMAT_YUV_VBS:
 		arg = SAA_MODE_YUV_V;
 		break;
+#ifdef HAVE_DBOX_HARDWARE
 	case CControld::FORMAT_YUV_CVBS:
 		arg = SAA_MODE_YUV_C;
 		break;
 #else
-	case CControld::FORMAT_YUV_VBS:
 	case CControld::FORMAT_YUV_CVBS:
-		fprintf(stderr, "[controld] FORMAT_YUV_VBS/FORMAT_YUV_CVBS not supported\n");
+		fprintf(stderr, "[controld] FORMAT_YUV_CVBS not supported\n");
 		return;
-		break;
 #endif
 	}
 
@@ -458,11 +463,10 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings)
 		setRGBCsync(settings.csync);
 #endif
 }
-#else
-void setvcroutput(CControld::video_format)
-{
-}
+#endif
 
+#ifdef HAVE_GENERIC_HARDWARE
+/* not implemented yet */
 void setvideooutput(CControld::video_format, bool)
 {
 }
@@ -479,7 +483,7 @@ void execute_start_file(const char *filename)
 	}
 }
 
-#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 void routeVideo(int v1, int a1,
 		int v2, int a2,
 		int v3, int a3, int fblk)
@@ -571,7 +575,58 @@ void routeVideo() {
 
   routeVideo(v1, f.a1, v2, f.a2, v3, f.a3, fblk);
 }
+#endif
 
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+void routeVideo()
+{
+	/* i deduced the fblk and scart setting from the enigma code */
+	int scart[6];
+	if (settings.vcr)
+	{
+		scart[0] = 3;
+		scart[1] = 2;
+		scart[2] = 1;
+		scart[3] = 0;
+		scart[4] = 1;
+		scart[5] = 1;
+	}
+	else
+	{
+		scart[0] = 5;
+		scart[1] = 1;
+		scart[2] = 1;
+		scart[3] = 1;
+		scart[4] = 1;
+		scart[5] = 1;
+	}
+
+	switchvalue fblk = 0;
+	if (!settings.videoOutputDisabled &&
+	    !settings.vcr &&
+	    (settings.videooutput == CControld::FORMAT_RGB ||
+	     settings.videooutput == CControld::FORMAT_YUV_VBS))
+		fblk = 1;
+
+	int fd = open(AVS_DEVICE, O_RDWR);
+	if (fd < 0)
+		perror("[controld] " AVS_DEVICE);
+	else
+        {
+		if (ioctl(fd, AVSIOSFBLK, &fblk) < 0)
+			perror("[controld] AVSIOSFBLK");
+		ioctl(fd, AVSIOSVSW1, scart[0]);
+		ioctl(fd, AVSIOSASW1, scart[1]);
+		ioctl(fd, AVSIOSVSW2, scart[2]);
+		ioctl(fd, AVSIOSASW2, scart[3]);
+		ioctl(fd, AVSIOSVSW3, scart[4]);
+		ioctl(fd, AVSIOSASW3, scart[5]);
+	}
+}
+#endif
+
+#ifndef HAVE_GENERIC_HARDWARE
+/* if dbox || dreambox || ipbox || tripled */
 void switch_vcr( bool vcr_on)
 {
 	int activeAspectRatio;
