@@ -62,6 +62,12 @@ AC_ARG_ENABLE(movieplayer2,
 	,[enable_movieplayer2=no])
 AM_CONDITIONAL(ENABLE_MOVIEPLAYER2,test "$enable_movieplayer2" = "yes")
 
+# neutrino UK FreeSat EPG (experimental) #########################
+AC_ARG_ENABLE(freesatepg,
+	AS_HELP_STRING(--enable-freesatepg,enable experimental UK FreeSat Neutrino EPG),
+	,[enable_freesatepg=no])
+AM_CONDITIONAL(ENABLE_FREESATEPG,test "$enable_freesatepg" = "yes")
+
 AC_ARG_ENABLE(use-libxml2,
    [  --enable-use-libxml2    use libxml2 instead of libxmltree],
       [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
@@ -84,6 +90,10 @@ fi
 
 if test "$enable_http_update" = "no"; then
 AC_DEFINE(DISABLE_INTERNET_UPDATE,1,[deactivate http update])
+fi
+
+if test "$enable_freesatepg" = "yes"; then
+AC_DEFINE(ENABLE_FREESATEPG,1,[enable UK FreeSat EPG])
 fi
 
 CPPFLAGS="$CPPFLAGS -Wextra -Wshadow"

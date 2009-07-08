@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.302 2009/06/27 19:47:19 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.303 2009/07/08 20:32:17 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -92,6 +92,11 @@
 // #define TIME_EIT_SCHEDULED_PAUSE 5* 60
 // Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
 #define TIME_EIT_SKIPPING 90
+
+#ifdef ENABLE_FREESATEPG
+// a little more time for freesat epg
+#define TIME_FSEIT_SKIPPING 240
+#endif
 
 //#define MAX_EVENTS 6000
 static unsigned int max_events;
@@ -218,6 +223,9 @@ static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 /* no matter how big the buffer, we will receive spurious POLLERR's in table 0x60,
    but those are not a big deal, so let's save some memory */
 static DMX dmxEIT(0x12, 320);
+#ifdef ENABLE_FREESATEPG
+static DMX dmxFSEIT(3842, 320);
+#endif
 static DMX dmxCN(0x12, 32, false);
 static DMX dmxSDT(0x11, 128);
 static DMX dmxNIT(0x10, 128);
@@ -311,6 +319,9 @@ inline int EITThreadsPause(void)
 {
 	return(	dmxEIT.pause() ||
 		dmxCN.pause() ||
+#ifdef ENABLE_FREESATEPG
+		dmxFSEIT.pause() ||
+#endif
 		dmxPPT.pause());
 }
 
@@ -318,6 +329,9 @@ inline int EITThreadsUnPause(void)
 {
 	return(	dmxCN.unpause() ||
 		dmxEIT.unpause() ||
+#ifdef ENABLE_FREESATEPG
+		dmxFSEIT.unpause() ||
+#endif
 		dmxPPT.unpause());
 } 
 #endif
@@ -2115,6 +2129,9 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 	{
 		dmxCN.request_pause();
 		dmxEIT.request_pause();
+#ifdef ENABLE_FREESATEPG
+		dmxFSEIT.request_pause();
+#endif
 		dmxNIT.request_pause();
 		dmxSDT.request_pause();
 		dmxPPT.request_pause();
@@ -2126,10 +2143,16 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 		dmxNIT.request_unpause();
 		dmxSDT.request_unpause();
 		dmxEIT.request_unpause();
+#ifdef ENABLE_FREESATEPG
+		dmxFSEIT.request_unpause();
+#endif
 		dmxPPT.request_unpause();
 		scanning = 1;
 		dmxCN.change(0);
 		dmxEIT.change(0);
+#ifdef ENABLE_FREESATEPG
+		dmxFSEIT.change(0);
+#endif
 	}
 
 	struct sectionsd::msgResponseHeader msgResponse;
@@ -2502,7 +2525,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.302 2009/06/27 19:47:19 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.303 2009/07/08 20:32:17 rhabarber1848 Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2952,6 +2975,9 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		unlockMessaging();
 		dmxCN.setCurrentService(messaging_current_servicekey & 0xffff);
 		dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
+#ifdef ENABLE_FREESATEPG
+		dmxFSEIT.change( 0 );
+#endif
 	}
 	else
 		dprintf("[sectionsd] commandserviceChanged: no change...\n");
@@ -6840,6 +6866,280 @@ int eit_stop_update_filter(int *fd)
 	return 0;
 }
 
+
+#ifdef ENABLE_FREESATEPG
+//---------------------------------------------------------------------
+//			Freesat EIT-thread
+// reads Freesat EPG-data
+//---------------------------------------------------------------------
+static void *fseitThread(void *)
+{
+
+	struct SI_section_header *header;
+	/* we are holding the start_stop lock during this timeout, so don't
+	   make it too long... */
+	unsigned timeoutInMSeconds = EIT_READ_TIMEOUT;
+	bool sendToSleepNow = false;
+
+	dmxFSEIT.addfilter(0x60, 0xff); //other TS, scheduled, freesat epg is only broadcast using table_ids 0x60 (scheduled) and 0x61 (scheduled later)
+	
+	if (debug) {
+		int policy;
+		struct sched_param parm;
+		int rc = pthread_getschedparam(pthread_self(), &policy, &parm);
+		dprintf("freesatEitThread getschedparam: %d pol %d, prio %d\n", rc, policy, parm.sched_priority);
+	}
+
+	try
+	{
+		dprintf("[%sThread] pid %d (%lu) start\n", "fseit", getpid(), pthread_self());
+		int timeoutsDMX = 0;
+		char *static_buf = new char[MAX_SECTION_LENGTH];
+		int rc;
+
+		if (static_buf == NULL)
+			throw std::bad_alloc();
+
+		dmxFSEIT.start(); // -> unlock
+		if (!scanning)
+			dmxFSEIT.request_pause();
+
+		waitForTimeset();
+		dmxFSEIT.lastChanged = time(NULL);
+
+		for (;;)
+		{
+			while (!scanning)
+				sleep(1);
+			time_t zeit = time(NULL);
+
+			rc = dmxSDT.getSection(static_buf, timeoutInMSeconds, timeoutsDMX);
+
+			if (rc < 0)
+				continue;
+
+			if (timeoutsDMX < 0)
+			{
+				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
+				{
+					if (timeoutsDMX == -1)
+					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_HAS_ALL_SECTIONS_SKIPPING)\n", dmxFSEIT.filter_index+1 );
+					if (timeoutsDMX == -2)
+					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxFSEIT.filter_index+1 );
+					timeoutsDMX = 0;
+					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
+				}
+				else {
+					sendToSleepNow = true;
+					timeoutsDMX = 0;
+				}
+			}
+
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
+			{
+				readLockServices();
+				readLockMessaging();
+
+				MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
+				//dprintf("timeoutsDMX %x\n",currentServiceKey);
+
+				if ( messaging_current_servicekey )
+					si = mySIservicesOrderUniqueKey.find( messaging_current_servicekey );
+
+				if (si != mySIservicesOrderUniqueKey.end())
+				{
+					// 1 and 3 == scheduled
+					// 2 == current/next
+					if ((dmxFSEIT.filter_index == 2 && !si->second->eitPresentFollowingFlag()) ||
+					   ((dmxFSEIT.filter_index == 1 || dmxFSEIT.filter_index == 3) && !si->second->eitScheduleFlag()))
+					{
+						timeoutsDMX = 0;
+						dprintf("[freesatEitThread] timeoutsDMX for 0x"
+							PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+							" reset to 0 (not broadcast)\n", messaging_current_servicekey );
+
+						dprintf("New Filterindex: %d (ges. %d)\n", dmxFSEIT.filter_index + 1, (signed) dmxFSEIT.filters.size() );
+						dmxFSEIT.change( dmxFSEIT.filter_index + 1 );
+					}
+					else
+						if (dmxFSEIT.filter_index >= 1)
+						{
+							if (dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
+							{
+								dprintf("New Filterindex: %d (ges. %d)\n", dmxFSEIT.filter_index + 1, (signed) dmxFSEIT.filters.size() );
+								dmxFSEIT.change(dmxFSEIT.filter_index + 1);
+								//dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n" );
+								timeoutsDMX = 0;
+							}
+							else
+							{
+								sendToSleepNow = true;
+								dputs("sendToSleepNow = true");
+							}
+						}
+				}
+				unlockMessaging();
+				unlockServices();
+			}
+
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
+			{
+				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
+				{
+					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_TIMEOUT_SKIPPING)\n", dmxEIT.filter_index+1 );
+					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
+				}
+				else
+					sendToSleepNow = true;
+
+				timeoutsDMX = 0;
+			}
+
+			if (sendToSleepNow)
+			{
+				sendToSleepNow = false;
+
+				dmxFSEIT.real_pause();
+				pthread_mutex_lock( &dmxFSEIT.start_stop_mutex );
+				writeLockMessaging();
+				messaging_zap_detected = false;
+				unlockMessaging();
+
+				if (auto_scanning) {
+					pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
+					dmxNIT.change( 0 );
+				}
+
+				struct timespec abs_wait;
+				struct timeval now;
+				gettimeofday(&now, NULL);
+				TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+				abs_wait.tv_sec += TIME_EIT_SCHEDULED_PAUSE;
+				dprintf("dmxFSEIT: going to sleep for %d seconds...\n", TIME_EIT_SCHEDULED_PAUSE);
+
+				int rs = pthread_cond_timedwait( &dmxFSEIT.change_cond, &dmxFSEIT.start_stop_mutex, &abs_wait );
+
+				pthread_mutex_unlock( &dmxFSEIT.start_stop_mutex );
+
+				if (rs == ETIMEDOUT)
+				{
+					dprintf("dmxFSEIT: waking up again - timed out\n");
+// must call dmxFSEIT.change after! unpause otherwise dev is not open,
+// dmxFSEIT.lastChanged will not be set, and filter is advanced the next iteration
+// maybe .change should imply .real_unpause()? -- seife
+					dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxFSEIT.filters.size() );
+					dmxFSEIT.change(1); // -> restart
+				}
+				else if (rs == 0)
+				{
+					dprintf("dmxFSEIT: waking up again - requested from .change()\n");
+				}
+				else
+				{
+					dprintf("dmxFSEIT:  waking up again - unknown reason %d\n",rs);
+				}
+				// update zeit after sleep
+				zeit = time(NULL);
+			}
+			else if (zeit > dmxFSEIT.lastChanged + TIME_FSEIT_SKIPPING )
+			{
+				readLockMessaging();
+
+				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
+				{
+					dprintf("[freesatEitThread] skipping to next filter(%d) (> TIME_FSEIT_SKIPPING)\n", dmxFSEIT.filter_index+1 );
+					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
+				}
+				else
+					sendToSleepNow = true;
+
+				unlockMessaging();
+			}
+
+			if (rc <= (int)sizeof(struct SI_section_header))
+			{
+				xprintf("%s rc < sizeof(SI_Section_header) (%d < %d)\n", __FUNCTION__, rc, sizeof(struct SI_section_header));
+				continue;
+			}
+
+			header = (SI_section_header*)static_buf;
+			unsigned short section_length = header->section_length_hi << 8 | header->section_length_lo;
+			
+
+
+			if ((header->current_next_indicator) && (!dmxFSEIT.real_pauseCounter ))
+			{
+				// Wir wollen nur aktuelle sections
+
+// Houdini: added new constructor where the buffer is given as a parameter and must be allocated outside
+// -> no allocation and copy of data into a 2nd buffer
+//				SIsectionEIT eit(SIsection(section_length + 3, buf));
+				SIsectionEIT eit(section_length + 3, static_buf);
+// Houdini: if section is not parsed (too short) -> no need to check events
+				if (eit.is_parsed() && eit.header())
+				{
+					// == 0 -> kein event
+
+					//dprintf("[eitThread] adding %d events [table 0x%x] (begin)\n", eit.events().size(), header.table_id);
+					zeit = time(NULL);
+					// Nicht alle Events speichern
+					for (SIevents::iterator e = eit.events().begin(); e != eit.events().end(); e++)
+					{
+						if (!(e->times.empty()))
+						{
+							if ( ( e->times.begin()->startzeit < zeit + secondsToCache ) &&
+							        ( ( e->times.begin()->startzeit + (long)e->times.begin()->dauer ) > zeit - oldEventsAre ) )
+							{
+								//fprintf(stderr, "%02x ", header.table_id);
+								addEvent(*e, header->table_id, zeit);
+							}
+						}
+						else
+						{
+							// pruefen ob nvod event
+							readLockServices();
+							MySIservicesNVODorderUniqueKey::iterator si = mySIservicesNVODorderUniqueKey.find(e->get_channel_id());
+
+							if (si != mySIservicesNVODorderUniqueKey.end())
+							{
+								// Ist ein nvod-event
+								writeLockEvents();
+
+								for (SInvodReferences::iterator i = si->second->nvods.begin(); i != si->second->nvods.end(); i++)
+									mySIeventUniqueKeysMetaOrderServiceUniqueKey.insert(std::make_pair(i->uniqueKey(), e->uniqueKey()));
+
+								unlockEvents();
+								addNVODevent(*e);
+							}
+							unlockServices();
+						}
+					} // for
+					//dprintf("[eitThread] added %d events (end)\n",  eit.events().size());
+				} // if
+			} // if
+			else
+			{
+				delete[] static_buf;
+
+				//dprintf("[eitThread] skipped sections for table 0x%x\n", header.table_id);
+			}
+		} // for
+	} // try
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "[freesatEitThread] Caught std-exception %s!\n", e.what());
+	}
+	catch (...)
+	{
+		fprintf(stderr, "[freesatEitThread] Caught exception!\n");
+	}
+
+	dputs("[freesatEitThread] end");
+
+	pthread_exit(NULL);
+}
+#endif
+
 //---------------------------------------------------------------------
 //			EIT-thread
 // reads EPG-datas
@@ -8163,11 +8463,14 @@ static void signalHandler(int signum)
 int main(int argc, char **argv)
 {
 	pthread_t threadTOT, threadEIT, threadCN, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
+#ifdef ENABLE_FREESATEPG
+	pthread_t threadFSEIT;
+#endif
 	int rc;
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.302 2009/06/27 19:47:19 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.303 2009/07/08 20:32:17 rhabarber1848 Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8300,6 +8603,16 @@ int main(int argc, char **argv)
 			fprintf(stderr, "[sectionsd] failed to create eit-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
+
+#ifdef ENABLE_FREESATEPG
+		// EIT-Thread3 starten
+		rc = pthread_create(&threadFSEIT, 0, fseitThread, 0);
+
+		if (rc) {
+			fprintf(stderr, "[sectionsd] failed to create fseit-thread (rc=%d)\n", rc);
+			return EXIT_FAILURE;
+		}
+#endif
 
 		// premiere private epg -Thread starten
 		rc = pthread_create(&threadPPT, 0, pptThread, 0);
