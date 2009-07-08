@@ -18,6 +18,20 @@
 #include <lib/dvb/service.h>
 #include <lib/dvb/dvbservice.h>
 
+#ifdef ENABLE_FREESAT_EPG
+struct fsattab {
+    unsigned int value;
+    short bits;
+    char next;
+};
+
+#define START   '\0'
+#define STOP    '\0'
+#define ESCAPE  '\1'
+
+#include <lib/dvb/freesat_tables.h>
+#endif
+
 int eventData::CacheSize=0;
 
 eEPGCache *eEPGCache::instance;
@@ -72,8 +86,19 @@ void eventData::init_eventData(const eit_event_struct* e, int size, int type)
 					if ( it == descriptors.end() )
 					{
 						CacheSize+=descr_len;
+#ifdef ENABLE_FREESAT_EPG
+						__u8 *d = NULL;
+						if (type == eEPGCache::SCHEDULE_FREESAT)
+							d  = DecodeFreesat(descr,descr_len);
+						else
+						{
+							d = new __u8[descr_len];
+							memcpy(d, descr, descr_len);
+						}
+#else
 						__u8 *d = new __u8[descr_len];
 						memcpy(d, descr, descr_len);
+#endif
 						descriptors[crc] = descriptorPair(1, d);
 					}
 					else
@@ -125,6 +150,149 @@ const eit_event_struct* eventData::get() const
 	data[11] = descriptors_length & 0xFF;
 	return (eit_event_struct*)data;
 }
+#ifdef ENABLE_FREESAT_EPG
+__u8* eventData::DecodeFreesat(__u8* descr,int descr_len)
+{
+	if (descr[0] == DESCR_SHORT_EVENT)
+	{
+		__u8 *data=(__u8*)descr;
+		int ptr=5;
+		int len=data[ptr++];
+		int name_len=0,text_len=0;
+		eString event_name;
+		eString event_text;
+		if (*((unsigned char*)data+ptr) < 0x06 && *((unsigned char*)data+ptr+1) == 0x1f)
+			event_name = freesat_huffman_to_string((const char*)data+ptr+1, len);
+		else if (*((unsigned char*)data+ptr) == 0x1f)
+			event_name = freesat_huffman_to_string((const char*)data+ptr, len);
+		else
+			event_name = eString((const char*)data+ptr, len);
+		ptr+=len;
+		len=data[ptr++];
+		if (*((unsigned char*)data+ptr) < 0x06 && *((unsigned char*)data+ptr+1) == 0x1f)
+			event_text = freesat_huffman_to_string((const char*)data+ptr+1, len);
+		else if (*((unsigned char*)data+ptr) == 0x1f)
+			event_text  = freesat_huffman_to_string((const char*)data+ptr, len);
+		else
+			event_text = eString((const char*)data+ptr, len);
+		name_len = event_name.size();
+		text_len = event_text.size();
+//eDebug("[EPGC] Data decoded:%s",event_name.c_str());
+		__u8 *d = new __u8[5+1+name_len+1+text_len];
+		memcpy(d, descr,5);
+		d[1] = 5+1+name_len+1+text_len;
+		d[5] = name_len;
+		memcpy(((__u8 *)d+5+1), event_name.c_str(), name_len);
+		d[5+1+event_name.size()] = event_text.size();
+		memcpy(((__u8 *)d+5+1+name_len+1), event_text.c_str(), text_len);
+		return d;
+	}
+	__u8 *d = new __u8[descr_len];
+	memcpy(d, descr, descr_len);
+	return d;
+}
+// This is taken from http://svn.mythtv.org/trac/browser/trunk/mythtv/libs/libmythtv/mpeg/freesat_huffman.cpp
+const char* eventData::freesat_huffman_to_string(const char *src, uint size)
+{
+	struct fsattab *fsat_table;
+	unsigned int *fsat_index;
+
+	if (src[1] == 1 || src[1] == 2)
+	{
+		if (src[1] == 1)
+		{
+			fsat_table = fsat_table_1;
+			fsat_index = fsat_index_1;
+		} else {
+			fsat_table = fsat_table_2;
+			fsat_index = fsat_index_2;
+		}
+		std::string uncompressed(size * 3, '\0');
+		int p = 0;
+		unsigned value = 0, byte = 2, bit = 0;
+		while (byte < 6 && byte < size)
+		{
+			value |= src[byte] << ((5-byte) * 8);
+			byte++;
+		}
+		char lastch = START;
+
+		do
+		{
+			bool found = false;
+			unsigned bitShift = 0;
+			char nextCh = STOP;
+			if (lastch == ESCAPE)
+			{
+				found = true;
+				// Encoded in the next 8 bits.
+				// Terminated by the first ASCII character.
+				nextCh = (value >> 24) & 0xff;
+				bitShift = 8;
+				if ((nextCh & 0x80) == 0)
+				{
+					if (nextCh < ' ')
+						nextCh = STOP;
+					lastch = nextCh;
+				}
+			}
+			else
+			{
+				unsigned indx = (unsigned)lastch;
+				for (unsigned j = fsat_index[indx]; j < fsat_index[indx+1]; j++)
+				{
+					unsigned mask = 0, maskbit = 0x80000000;
+					for (short kk = 0; kk < fsat_table[j].bits; kk++)
+					{
+						mask |= maskbit;
+						maskbit >>= 1;
+					}
+					if ((value & mask) == fsat_table[j].value)
+					{
+						nextCh = fsat_table[j].next;
+						bitShift = fsat_table[j].bits;
+						found = true;
+						lastch = nextCh;
+						break;
+					}
+				}
+			}
+			if (found)
+			{
+				if (nextCh != STOP && nextCh != ESCAPE)
+				{
+					if (p >= (int)uncompressed.length())
+						uncompressed.resize(p+10);
+					uncompressed[p++] = nextCh;
+				}
+				// Shift up by the number of bits.
+				for (unsigned b = 0; b < bitShift; b++)
+				{
+					value = (value << 1) & 0xfffffffe;
+					if (byte < size)
+						value |= (src[byte] >> (7-bit)) & 1;
+					if (bit == 7)
+					{
+						bit = 0;
+						byte++;
+					}
+					else bit++;
+				}
+			}
+			else
+			{
+				// Entry missing in table.
+				uncompressed.resize(p);
+				uncompressed.append("...");
+				return uncompressed.c_str();
+			}
+		} while (lastch != STOP && byte < size+4);
+		uncompressed.resize(p);
+		return uncompressed.c_str();
+	}
+	else return src;
+}
+#endif //ENABLE_FREESAT_EPG
 
 bool eventData::search(int tsidonid, const eString &search, int intExactMatch, int intCaseSensitive, int genre, int Range)
 {
@@ -279,6 +447,9 @@ void eEPGCache::init_eEPGCache()
 	scheduleOtherReader.setContext(this);
 #ifdef ENABLE_MHW_EPG
 	scheduleMhwReader.setContext(this);
+#endif
+#ifdef ENABLE_FREESAT_EPG
+	scheduleFreesatReader.setContext(this);
 #endif
 	nownextReader.setContext(this);
 #ifdef ENABLE_PRIVATE_EPG
@@ -625,9 +796,13 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 
 	eit_t *eit = (eit_t*) data;
 	bool seen=false;
+#if ENABLE_FREESAT_EPG
+	tidMap &seenSections = this->seenSections[source==SCHEDULE_FREESAT ? 1:source/2]; // source is 1,2,4 .. so index is 0,1,2
+	tidMap &calcedSections = this->calcedSections[source==SCHEDULE_FREESAT ? 1:source/2];
+#else
 	tidMap &seenSections = this->seenSections[source/2]; // source is 1,2,4 .. so index is 0,1,2
 	tidMap &calcedSections = this->calcedSections[source/2];
-
+#endif
 #ifdef ENABLE_MHW_EPG
 	if ( source != SCHEDULE_MHW )
 	// In case of SCHEDULE_MHW the procedure that is feeding the data will send each section once.
@@ -682,11 +857,11 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 		time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5);
 		time_t now = time(0)+eDVB::getInstance()->time_difference;
 
-		if ( TM != 3599 && TM > -1 && source < 8)
+		if ( TM != 3599 && TM > -1 && (source < 8 || source == SCHEDULE_FREESAT))
 			haveData |= source;
 
 #ifdef ENABLE_MHW_EPG
-		if ( haveData & (SCHEDULE|SCHEDULE_OTHER) && isRunning & SCHEDULE_MHW )
+		if ( haveData & (SCHEDULE|SCHEDULE_OTHER|SCHEDULE_FREESAT) && isRunning & SCHEDULE_MHW )
 		{
 			eDebug("[EPGC] si schedule data avail.. abort mhw reader");
 			isRunning &= ~SCHEDULE_MHW;
@@ -1370,6 +1545,11 @@ void eEPGCache::startEPG()
 			isRunning |= SCHEDULE_MHW;
 		}
 #endif
+#ifdef ENABLE_FREESAT_EPG
+		eDebug("[EPGC] Start freesat scheduler");
+		scheduleFreesatReader.start();
+		isRunning |= SCHEDULE_FREESAT;
+#endif
 		abortTimer.start(7000,true);
 	}
 	else
@@ -1408,6 +1588,19 @@ void eEPGCache::abortNonAvail()
 			isRunning &= ~SCHEDULE_MHW;
 			scheduleMhwReader.abort();
 		}
+#endif
+#ifdef ENABLE_FREESAT_EPG
+		if ( !(haveData&SCHEDULE_FREESAT) && (isRunning&SCHEDULE_FREESAT) )
+		{
+			eDebug("[EPGC] abort non avail freesat schedule reading");
+			isRunning &= ~SCHEDULE_FREESAT;
+			scheduleFreesatReader.abort();
+		}
+#endif
+#ifdef ENABLE_FREESAT_EPG
+		if ( (haveData&SCHEDULE_FREESAT) && (isRunning&SCHEDULE_FREESAT) )
+			abortTimer.start(240000, true);
+		else
 #endif
 		if ( isRunning )
 			abortTimer.start(90000, true);
@@ -1538,6 +1731,13 @@ void eEPGCache::abortEPG()
 		{
 			isRunning &= ~SCHEDULE_MHW;
 			scheduleMhwReader.abort();
+		}
+#endif
+#ifdef ENABLE_FREESAT_EPG
+		if (isRunning & SCHEDULE_FREESAT)
+		{
+			isRunning &= ~SCHEDULE_FREESAT;
+			scheduleFreesatReader.abort();
 		}
 #endif
 		eDebug("[EPGC] abort caching events !!");

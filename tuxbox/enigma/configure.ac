@@ -68,6 +68,12 @@ AC_SUBST(ENIGMA_DEBUG)
 AM_CONDITIONAL(ENIGMA_DEBUG_NO,test "$ENIGMA_DEBUG" != "yes")
 AM_CONDITIONAL(ENIGMA_DEBUG_YES,test "$ENIGMA_DEBUG" = "yes")
 
+AC_ARG_ENABLE(freesatepg,
+	AS_HELP_STRING(--enable-freesatepg,enable UK FreeSat EPG),
+	,[enable_freesatepg=no])
+AM_CONDITIONAL(ENABLE_FREESATEPG,test "$enable_freesatepg" = "yes")
+
+
 AC_ARG_ENABLE(sqlite,
 	[  --enable-sqlite          enable sql storage (default off)],
 	[SQLITE="$enableval"],[SQLITE="no"])
@@ -115,6 +121,10 @@ fi
 
 if test "$MHW_EPG" = "yes" ; then
 	CPPFLAGS="$CPPFLAGS -DENABLE_MHW_EPG"
+fi
+
+if test "$enable_freesatepg" = "yes" ; then
+	CPPFLAGS="$CPPFLAGS -DENABLE_FREESAT_EPG"
 fi
 
 if test "$FLASHTOOL" = "expert" ; then

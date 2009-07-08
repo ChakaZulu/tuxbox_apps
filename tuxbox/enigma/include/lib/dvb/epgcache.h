@@ -113,6 +113,10 @@ private:
 	static descriptorMap descriptors;
 	static __u8 data[4108];
 	void init_eventData(const eit_event_struct* e, int size, int type);
+#ifdef ENABLE_FREESAT_EPG
+	__u8* DecodeFreesat(__u8* descr,int descr_len);
+	const char* freesat_huffman_to_string(const char *src, uint size);
+#endif
 public:
 	__u8 type;
 	static int CacheSize;
@@ -196,6 +200,21 @@ class eScheduleMhw: public eSection
 };
 #endif
 
+#ifdef ENABLE_FREESAT_EPG
+class eScheduleFreesat: public eSection
+{
+	friend class eEPGCache;
+	inline int sectionRead(__u8 *data);
+	inline void sectionFinish(int);
+	eScheduleFreesat()
+	{}
+	int start()
+	{// 0x60 , 0x61
+		return setFilter( 3842, 0x60, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFE );
+	}
+};
+#endif
+
 class eNowNext: public eSection
 {
 	friend class eEPGCache;
@@ -250,6 +269,9 @@ public:
 #ifdef ENABLE_MHW_EPG
 	friend class eScheduleMhw;
 #endif
+#ifdef ENABLE_FREESAT_EPG
+	friend class eScheduleFreesat;
+#endif
 #ifdef ENABLE_PRIVATE_EPG
 	friend class ePrivateContent;
 #endif
@@ -262,6 +284,9 @@ public:
 		SCHEDULE_OTHER=4
 #ifdef ENABLE_MHW_EPG
 		,SCHEDULE_MHW=8
+#endif
+#ifdef ENABLE_FREESAT_EPG
+		,SCHEDULE_FREESAT=16
 #endif
 	};
 	friend class eSchedule;
@@ -332,6 +357,9 @@ private:
 	eScheduleOther scheduleOtherReader;
 #ifdef ENABLE_MHW_EPG
 	eScheduleMhw scheduleMhwReader;
+#endif
+#ifdef ENABLE_FREESAT_EPG
+	eScheduleFreesat scheduleFreesatReader;
 #endif
 	eNowNext nownextReader;
 #ifdef ENABLE_PRIVATE_EPG
@@ -425,6 +453,13 @@ inline int eScheduleOther::sectionRead(__u8 *data)
 	return eEPGCache::getInstance()->sectionRead(data, eEPGCache::SCHEDULE_OTHER);
 }
 
+#ifdef ENABLE_FREESAT_EPG
+inline int eScheduleFreesat::sectionRead(__u8 *data)
+{
+	return eEPGCache::getInstance()->sectionRead(data, eEPGCache::SCHEDULE_FREESAT);
+}
+#endif
+
 inline void eSchedule::sectionFinish(int err)
 {
 	eEPGCache *e = eEPGCache::getInstance();
@@ -448,6 +483,20 @@ inline void eScheduleOther::sectionFinish(int err)
 			e->finishEPG();
 	}
 }
+
+#ifdef ENABLE_FREESAT_EPG
+inline void eScheduleFreesat::sectionFinish(int err)
+{
+	eEPGCache *e = eEPGCache::getInstance();
+	if ( (e->isRunning & eEPGCache::SCHEDULE_FREESAT) && (err == -ETIMEDOUT || err == -ECANCELED ) )
+	{
+		eDebug("[EPGC] stop schedule freesat");
+		e->isRunning &= ~eEPGCache::SCHEDULE_FREESAT;
+		if (e->haveData)
+			e->finishEPG();
+	}
+}
+#endif
 
 inline void eNowNext::sectionFinish(int err)
 {
