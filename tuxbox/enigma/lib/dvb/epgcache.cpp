@@ -857,10 +857,10 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 		time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5);
 		time_t now = time(0)+eDVB::getInstance()->time_difference;
 
-#ifdef ENABLE_FREESAT_EPG
+//#ifdef ENABLE_FREESAT_EPG
 		if ( TM != 3599 && TM > -1 && (source < 8 || source == SCHEDULE_FREESAT))
 			haveData |= source;
-#endif
+//#endif
 
 #ifdef ENABLE_MHW_EPG
 		if ( haveData & (SCHEDULE|SCHEDULE_OTHER|SCHEDULE_FREESAT) && isRunning & SCHEDULE_MHW )
