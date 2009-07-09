@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.956 2009/07/02 15:52:47 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.957 2009/07/09 20:54:45 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3868,6 +3868,9 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_Zapit->setDiseqcType(CNeutrinoApp::getInstance()->getScanSettings().diseqcMode);
 		/* send diseqc repeat to zapit */
 		g_Zapit->setDiseqcRepeat(CNeutrinoApp::getInstance()->getScanSettings().diseqcRepeat);
+		/* setDiseqcType sends a DiSEqC reset, so we need to retune afterwards
+		   this should actually be handled by zapit itself, but that's not yet implemented */
+		g_Zapit->ReZap();
 
 		hintBox->hide();
 		delete hintBox;

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.431 2009/06/28 21:56:14 seife Exp $
+ * $Id: zapit.cpp,v 1.432 2009/07/09 20:54:44 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1694,7 +1694,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::responseZapComplete msgResponseZapComplete;
 		if (cc)
+		{
+			/* force a full tuning cycle */
+			tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 			msgResponseZapComplete.zapStatus = zapTo_ChannelID(cc->getChannelID(), false);
+		}
 		else
 			msgResponseZapComplete.zapStatus = 0;
 
@@ -2865,7 +2869,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.431 2009/06/28 21:56:14 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.432 2009/07/09 20:54:44 seife Exp $\n");
 
 	bool check_lock = true;
 	int opt;
