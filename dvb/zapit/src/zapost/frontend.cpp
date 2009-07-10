@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.67 2009/05/06 17:57:52 rhabarber1848 Exp $
+ * $Id: frontend.cpp,v 1.68 2009/07/10 09:37:16 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -632,11 +632,12 @@ void CFrontend::setDiseqcType(const diseqc_t newDiseqcType)
 		return;
 	}
 
-	// if ((diseqcType <= MINI_DISEQC) && (newDiseqcType > MINI_DISEQC)) {
-	if (newDiseqcType > NO_DISEQC) // or just always send reset?
+	if (diseqcType != newDiseqcType)
 	{
-		sendDiseqcPowerOn();
+		/* make sure that the switch gets reset, so that he will
+		   accept the new mode */
 		sendDiseqcReset();
+		sendDiseqcPowerOn();
 	}
 
 	diseqcType = newDiseqcType;
