@@ -4,6 +4,14 @@ AM_INIT_AUTOMAKE([dist-bzip2 no-define])
 AC_PROG_CC
 AC_PROG_RANLIB
 
+AC_ARG_WITH(dvbincludes,
+	[  --with-dvbincludes=PATH  path for dvb includes [[NONE]]],
+	[DVBINCLUDES="$withval"],[DVBINCLUDES=""])
+
+if test "$DVBINCLUDES"; then
+	CPPFLAGS="$CPPFLAGS -I$DVBINCLUDES"
+fi
+
 AC_CHECK_HEADER([linux/dvb/dmx.h])
 AC_CHECK_HEADER([ost/dmx.h])
 
