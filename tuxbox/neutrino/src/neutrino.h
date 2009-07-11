@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.207 2009/07/02 15:52:47 rhabarber1848 Exp $
+	$Id: neutrino.h,v 1.208 2009/07/11 18:29:03 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -143,7 +143,8 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 
 		int					mode;
 		int					lastMode;
-		int					mode_beforeScart;
+		int					tunerMode;
+		bool					wakeupfromScart;
 		bool					standbyAfterRecord;
 		bool					softupdate;
 		bool					fromflash;

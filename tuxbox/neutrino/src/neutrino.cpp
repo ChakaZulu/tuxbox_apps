@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.958 2009/07/10 09:36:17 seife Exp $
+	$Id: neutrino.cpp,v 1.959 2009/07/11 18:29:03 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -202,7 +202,6 @@ CNeutrinoApp::CNeutrinoApp()
 	SetupFrameBuffer();
 
 	mode = mode_unknown;
-	mode_beforeScart = mode_unknown;
 	channelList       = NULL;
 	bouquetList       = NULL;
 	channelListTV     = NULL;
@@ -216,6 +215,7 @@ CNeutrinoApp::CNeutrinoApp()
 	parentallocked    = false;
 	waitforshutdown   = false;
 	volumeBarIsVisible	= true;
+	wakeupfromScart    = false;
 	standbyAfterRecord = false;
 }
 
@@ -2504,6 +2504,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 						}
 					}
 					// Scart-Mode verlassen
+					wakeupfromScart = false;
 					scartMode( false );
 				}
 				else
@@ -3124,6 +3125,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			if( mode != mode_scart )
 			{
 				// noch nicht im Scart-Mode...
+				if (mode == mode_standby)				
+					wakeupfromScart = true;
 				scartMode( true );
 			}
 			else // sonst nur lcd akt.
@@ -3506,8 +3509,9 @@ void CNeutrinoApp::tvMode( bool rezap )
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 	}
-
+	
 	mode = mode_tv;
+	tunerMode = mode_tv;
 
 	if (g_Controld->getVideoFormat() != g_settings.video_Format)
 		g_Controld->setVideoFormat(g_settings.video_Format);
@@ -3538,7 +3542,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 
 		g_Controld->setScartMode( 1 );
 		CLCD::getInstance()->setMode(CLCD::MODE_SCART);
-		mode_beforeScart = mode;
+
 		lastMode = mode;
 		mode = mode_scart;
 	}
@@ -3548,21 +3552,17 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 		g_Controld->setScartMode( 0 );
 
 		mode = mode_unknown;
-		mode_beforeScart = mode_unknown;
 
 		//re-set mode
-		if( lastMode == mode_radio )
+		if (wakeupfromScart)
 		{
-			radioMode( false );
+			standbyMode(true);
+			wakeupfromScart = false;
 		}
-		else if( lastMode == mode_tv )
-		{
-			tvMode( false );
-		}
-		else if( lastMode == mode_standby )
-		{
-			standbyMode( true );
-		}
+		else if (tunerMode == mode_radio)
+			radioMode(false);
+		else
+			tvMode(false);
 	}
 }
 
@@ -3603,6 +3603,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		}
 
 		standbyAfterRecord = false; // reset
+		wakeupfromScart = false; //reset
 		lastMode = mode;
 		mode = mode_standby;
 
@@ -3631,12 +3632,10 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		mode = mode_unknown;
 
 		//re-set mode
-		if (lastMode == mode_radio || mode_beforeScart == mode_radio)
-				radioMode(false);
-			else
-				tvMode(false);
-
-		mode_beforeScart = mode_unknown;
+		if (tunerMode == mode_radio)
+			radioMode(false);
+		else
+			tvMode(false);
 		
 		//show mute icon ONLY if muted or current volume value is 0
 		if (current_muted || doShowMuteIcon())
@@ -3674,8 +3673,9 @@ void CNeutrinoApp::radioMode( bool rezap)
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 	}
-
+	
 	mode = mode_radio;
+	tunerMode = mode_radio;
 
 	if (g_Controld->getVideoFormat() != g_settings.video_backgroundFormat)
 		g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
