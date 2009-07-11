@@ -208,9 +208,13 @@ class eScheduleFreesat: public eSection
 	inline void sectionFinish(int);
 	eScheduleFreesat()
 	{}
-	int start()
-	{// 0x60 , 0x61
-		return setFilter( 3842, 0x60, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFE );
+	inline void start1()
+	{// PID 3842 used for most Transponders
+		setFilter( 3842, 0x60, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFE );
+	}
+	inline void start2()
+	{// PID 3003 used on Brit Shorts/ITV-HD Transponder is much faster
+		setFilter( 3003, 0x60, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFE );
 	}
 };
 #endif
@@ -359,7 +363,8 @@ private:
 	eScheduleMhw scheduleMhwReader;
 #endif
 #ifdef ENABLE_FREESAT_EPG
-	eScheduleFreesat scheduleFreesatReader;
+	eScheduleFreesat scheduleFreesatReader1;
+	eScheduleFreesat scheduleFreesatReader2;
 #endif
 	eNowNext nownextReader;
 #ifdef ENABLE_PRIVATE_EPG

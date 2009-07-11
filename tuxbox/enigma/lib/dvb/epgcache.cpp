@@ -449,7 +449,8 @@ void eEPGCache::init_eEPGCache()
 	scheduleMhwReader.setContext(this);
 #endif
 #ifdef ENABLE_FREESAT_EPG
-	scheduleFreesatReader.setContext(this);
+	scheduleFreesatReader1.setContext(this);
+	scheduleFreesatReader2.setContext(this);
 #endif
 	nownextReader.setContext(this);
 #ifdef ENABLE_PRIVATE_EPG
@@ -1556,7 +1557,8 @@ void eEPGCache::startEPG()
 #endif
 #ifdef ENABLE_FREESAT_EPG
 		eDebug("[EPGC] Start freesat scheduler");
-		scheduleFreesatReader.start();
+		scheduleFreesatReader1.start1();
+		scheduleFreesatReader2.start2();
 		isRunning |= SCHEDULE_FREESAT;
 #endif
 		abortTimer.start(7000,true);
@@ -1603,7 +1605,8 @@ void eEPGCache::abortNonAvail()
 		{
 			eDebug("[EPGC] abort non avail freesat schedule reading");
 			isRunning &= ~SCHEDULE_FREESAT;
-			scheduleFreesatReader.abort();
+			scheduleFreesatReader1.abort();
+			scheduleFreesatReader2.abort();
 		}
 #endif
 #ifdef ENABLE_FREESAT_EPG
@@ -1746,7 +1749,8 @@ void eEPGCache::abortEPG()
 		if (isRunning & SCHEDULE_FREESAT)
 		{
 			isRunning &= ~SCHEDULE_FREESAT;
-			scheduleFreesatReader.abort();
+			scheduleFreesatReader1.abort();
+			scheduleFreesatReader2.abort();
 		}
 #endif
 		eDebug("[EPGC] abort caching events !!");
