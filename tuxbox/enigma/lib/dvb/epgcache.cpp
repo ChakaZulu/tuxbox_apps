@@ -183,7 +183,7 @@ __u8* eventData::DecodeFreesat(__u8* descr,int descr_len)
 		d[1] = 5+1+name_len+1+text_len;
 		d[5] = name_len;
 		memcpy(((__u8 *)d+5+1), event_name.c_str(), name_len);
-		d[5+1+event_name.size()] = event_text.size();
+		d[5+1+name_len] = text_len;
 		memcpy(((__u8 *)d+5+1+name_len+1), event_text.c_str(), text_len);
 		return d;
 	}
@@ -290,7 +290,8 @@ const char* eventData::freesat_huffman_to_string(const char *src, uint size)
 		uncompressed.resize(p);
 		return uncompressed.c_str();
 	}
-	else return src;
+	else
+		return eString(src, size).c_str();
 }
 #endif //ENABLE_FREESAT_EPG
 
