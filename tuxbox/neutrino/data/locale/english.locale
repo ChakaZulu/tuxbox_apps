@@ -395,7 +395,7 @@ flashupdate.squashfs.noversion SquashFS version checks are currently only suppor
 flashupdate.titlereadflash Reading Flash
 flashupdate.titlewriteflash Writing Flash
 flashupdate.updatemode Updatemode
-flashupdate.updatemode_internet internet
+flashupdate.updatemode_internet online (internet)
 flashupdate.updatemode_manual manual (ftp)
 flashupdate.url_file config file
 flashupdate.versioncheck checking version
