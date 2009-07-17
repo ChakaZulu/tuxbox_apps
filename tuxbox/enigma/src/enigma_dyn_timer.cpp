@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_timer.cpp,v 1.23 2008/09/24 19:20:16 dbluelle Exp $
+ * $Id: enigma_dyn_timer.cpp,v 1.24 2009/07/17 19:36:54 dbluelle Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -181,7 +181,8 @@ struct getEntryString
 		time_t time_end = se->time_begin + se->duration;
 		tm endTime = *localtime(&time_end);
 
-		eString description = htmlChars(se->service.descr);
+		eString description = se->service.descr;
+
 		eString channel = getLeft(description, '/');
 		if (!channel)
 		{
@@ -249,7 +250,10 @@ struct getEntryString
 		tmp.strReplace("#DATE#", eString().sprintf("%02d.%02d.%04d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_year + 1900));
 		tmp.strReplace("#TIME#", eString().sprintf("%02d:%02d", startTime.tm_hour, startTime.tm_min));
 		tmp.strReplace("#CHANNEL#", XMLify(channel,format));
-		tmp.strReplace("#DESCRIPTION#", XMLify(description,format));
+		tmp.strReplace("#DESCRIPTION#", XMLify(htmlChars(description),format));
+		description.strReplace("\'", "\\\'");
+		description.strReplace("\"", "\\\"");
+		tmp.strReplace("#DESCRIPTIONJS#", XMLify(htmlChars(description),format));
 		if (se->type & ePlaylistEntry::SwitchTimerEntry)
 			tmp.strReplace("#ACTION#", "ZAP");
 		else

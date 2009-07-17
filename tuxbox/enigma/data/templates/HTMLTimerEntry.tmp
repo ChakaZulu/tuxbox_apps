@@ -5,7 +5,7 @@
 		</a>
 	</td>
 	<td rowspan="2" align="center">
-		<a href="javascript:editTimerEvent('ref=#REFERENCE#&start=#START#&duration=#DURATION#&channel=#CHANNEL#&descr=#DESCRIPTION#&type=#TIMERTYPE#')">
+		<a href="javascript:editTimerEvent('ref=#REFERENCE#&start=#START#&duration=#DURATION#&channel=#CHANNEL#&descr=#DESCRIPTIONJS#&type=#TIMERTYPE#')">
 			<img src="edit.gif" border="0" height="20">
 		</a>
 	</td>
