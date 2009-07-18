@@ -28,7 +28,8 @@
 //#include <driver/rcinput.h>
 
 
-#define BUTTONMAX 16
+#define BUTTONMAX 10
+
 static const neutrino_msg_t key_helper_msg_def[BUTTONMAX]=
 {
 	CRCInput::RC_red,
@@ -37,16 +38,10 @@ static const neutrino_msg_t key_helper_msg_def[BUTTONMAX]=
 	CRCInput::RC_blue,
 	CRCInput::RC_setup,
 	CRCInput::RC_help,
-	CRCInput::RC_home,
-	CRCInput::RC_spkr,
-	CRCInput::RC_ok,
-	CRCInput::RC_up,
-	CRCInput::RC_down,
 	CRCInput::RC_plus,
 	CRCInput::RC_minus,
-	CRCInput::RC_right,
 	CRCInput::RC_left,
-	CRCInput::RC_help
+	CRCInput::RC_right
 };
 
 static const char * key_helper_icon_def[BUTTONMAX]=
@@ -57,16 +52,10 @@ static const char * key_helper_icon_def[BUTTONMAX]=
 	NEUTRINO_ICON_BUTTON_BLUE,
 	NEUTRINO_ICON_BUTTON_DBOX,
 	NEUTRINO_ICON_BUTTON_HELP,
-	NEUTRINO_ICON_BUTTON_HOME,
-	NEUTRINO_ICON_BUTTON_MUTE_SMALL,
-	NEUTRINO_ICON_BUTTON_OKAY_SMALL,
-	NEUTRINO_ICON_BUTTON_TOP,
-	NEUTRINO_ICON_BUTTON_DOWN,
 	NEUTRINO_ICON_BUTTON_PLUS,
 	NEUTRINO_ICON_BUTTON_MINUS,
-	NEUTRINO_ICON_BUTTON_RIGHT,
-	NEUTRINO_ICON_BUTTON_LEFT,	
-	NEUTRINO_ICON_BUTTON_HELP_SMALL
+	NEUTRINO_ICON_BUTTON_LEFT,
+	NEUTRINO_ICON_BUTTON_RIGHT	
 };
 
 // USERMENU
@@ -107,26 +96,14 @@ class CKeyHelper
 				button = 4;
 			if(prefered_key == CRCInput::RC_help)
 				button = 5;
-			if(prefered_key == CRCInput::RC_home)
-				button = 6;
-			if(prefered_key == CRCInput::RC_spkr)
-				button = 7;
-			if(prefered_key == CRCInput::RC_ok)
-				button = 8;
-			if(prefered_key == CRCInput::RC_up)
-				button = 9;
-			if(prefered_key == CRCInput::RC_down)
-				button = 10;
 			if(prefered_key == CRCInput::RC_plus)
-				button = 11;
+				button = 6;
 			if(prefered_key == CRCInput::RC_minus)
-				button = 12;	
-			if(prefered_key == CRCInput::RC_right)
-				button = 13;
+				button = 7;	
 			if(prefered_key == CRCInput::RC_left)
-				button = 14;
-			if(prefered_key == CRCInput::RC_help)
-				button = 15;			
+				button = 8;
+			if(prefered_key == CRCInput::RC_right)
+				button = 9;
 		
 			if((button >= 0) && (button < BUTTONMAX) && (color_key_used[button] == true)) {
 				button = -1;
