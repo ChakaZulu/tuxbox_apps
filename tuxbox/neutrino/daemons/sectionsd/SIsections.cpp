@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.58 2009/07/08 20:32:17 rhabarber1848 Exp $
+// $Id: SIsections.cpp,v 1.59 2009/07/18 21:42:42 rhabarber1848 Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -621,33 +621,6 @@ void SIsectionPPT::parsePrivateContentTransmissionDescriptor(const char *buf, SI
 	if (sizeof(struct descr_generic_header)+3 <= maxlen) e.original_network_id = ((*(p+2))<<8) | (*(p+3));
 	if (sizeof(struct descr_generic_header)+5 <= maxlen) e.service_id = ((*(p+4))<<8) | (*(p+5));
 
-	// 1.10.2007 Premiere is still sending wrong epg data
-	if (e.original_network_id == 0x0085) {
-		if ((e.transport_stream_id == 0x0003) && (e.service_id == 0x00f0)) {
-			e.transport_stream_id = 0x0002;
-			e.service_id = 0x00e0;
-		}
-		if ((e.transport_stream_id == 0x0003) && (e.service_id == 0x00f1)) {
-			e.transport_stream_id = 0x0002;
-			e.service_id = 0x00e1;
-		}
-		if ((e.transport_stream_id == 0x0003) && (e.service_id == 0x00f5)) {
-			e.transport_stream_id = 0x0003;
-			e.service_id = 0x00dc;
-		}
-		if ((e.transport_stream_id == 0x0004) && (e.service_id == 0x00d2)) {
-			e.transport_stream_id = 0x0011;
-			e.service_id = 0x00e2;
-		}
-		if ((e.transport_stream_id == 0x0011) && (e.service_id == 0x00d3)) {
-			e.transport_stream_id = 0x0011;
-			e.service_id = 0x00e3;
-		}
-		if ((e.transport_stream_id == 0x0001) && (e.service_id == 0x00d4)) {
-			e.transport_stream_id = 0x0004;
-			e.service_id = 0x00e4;
-		}
-	}
 	p += 6;
 	while(p+6 <= buf + evt->descriptor_length + sizeof(struct descr_generic_header)) {// at least one startdate/looplength/time entry
 		tm_buf[0] = *(p);
