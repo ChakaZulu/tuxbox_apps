@@ -1,5 +1,5 @@
 /*
- * $Id: aformat.cpp,v 1.1 2009/07/19 14:02:27 rhabarber1848 Exp $
+ * $Id: aformat.cpp,v 1.2 2009/07/19 16:27:01 rhabarber1848 Exp $
  *
  * aformat - d-box2 linux project
  *
@@ -90,6 +90,7 @@ in_plugin_config.mnu_einfuegen --> den Inhalt in /var/tuxbox/config/flexinc/plug
 #include <sys/socket.h>
 #include <time.h>
 #include <unistd.h>
+#include <linux/version.h>
 
 #include <dbox/saa7126_core.h>
 
@@ -108,7 +109,11 @@ in_plugin_config.mnu_einfuegen --> den Inhalt in /var/tuxbox/config/flexinc/plug
 #define P_VERSION "1.2"		// ??? - Barf
 
 #if HAVE_DVB_API_VERSION >= 3
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0)
 #include <linux/dvb/avia/avia_gt_capture.h>
+#else
+#include <../dvb/drivers/media/dvb/avia/avia_gt_capture.h>
+#endif
 #else
 #include <dbox/avia_gt_capture.h>
 #endif
@@ -322,7 +327,7 @@ int main(int argc, char **argv)
 	unsigned long towait=3000000L;
 	int opt;
 
-	fprintf(stdout, "Automatisches Bildschirmformat $Id: aformat.cpp,v 1.1 2009/07/19 14:02:27 rhabarber1848 Exp $\n");
+	fprintf(stdout, "Automatisches Bildschirmformat $Id: aformat.cpp,v 1.2 2009/07/19 16:27:01 rhabarber1848 Exp $\n");
 
 	while ((opt = getopt(argc, argv, "dlq")) > 0) {
 		switch (opt) {
