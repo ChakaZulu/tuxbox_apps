@@ -7784,6 +7784,33 @@ void eZapMain::gotRDSText(eString text)
 	lcdmain.lcdMain->gotRDSText(text);
 #endif
 }
+void eZapMain::getAllBouquetServices(std::list<ePlaylistEntry> &servicelist)
+{
+	servicelist.clear();
+	for ( std::list<ePlaylistEntry>::const_iterator it(userTVBouquets->getConstList().begin()); it != userTVBouquets->getConstList().end(); ++it)
+	{
+		ePlaylist *p = (ePlaylist*) eServiceInterface::getInstance()->addRef( it->service );
+		if ( p )
+		{
+			for ( std::list<ePlaylistEntry>::const_iterator itp ( p->getConstList().begin() );
+				itp != p->getConstList().end(); ++itp)
+				servicelist.push_back(*itp);
+			eServiceInterface::getInstance()->removeRef( it->service );
+		}
+	}
+	for (std::list<ePlaylistEntry>::const_iterator it(userRadioBouquets->getConstList().begin()); it != userRadioBouquets->getConstList().end(); it++ )
+	{
+		ePlaylist *p = (ePlaylist*) eServiceInterface::getInstance()->addRef( it->service );
+		if ( p )
+		{
+			for ( std::list<ePlaylistEntry>::const_iterator itp ( p->getConstList().begin() );
+				itp != p->getConstList().end(); ++itp)
+				servicelist.push_back(*itp);
+			eServiceInterface::getInstance()->removeRef( it->service );
+		}
+	}
+//eDebug("getAllBouquetServices:%d",servicelist.size());
+}
 
 eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *lcdTitle, eWidget *lcdElement)
 : eListBoxWindow<eListBoxEntryText>(_("Service Menu"), 12, 400, true), ref(ref)

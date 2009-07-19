@@ -17,6 +17,7 @@
 #endif
 #include <lib/dvb/service.h>
 #include <lib/dvb/dvbservice.h>
+#include <src/enigma_main.h>
 
 #ifdef ENABLE_FREESAT_EPG
 struct fsattab {
@@ -851,6 +852,11 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			--ptr;
 
 		uniqueEPGKey service( HILO(eit->service_id), HILO(eit->original_network_id), HILO(eit->transport_stream_id) );
+		if (!eEPGCache::getInstance()->CheckBouquets(service))
+		{
+			Unlock();
+			return 0;
+		}
 
 		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 		int eit_event_size;
@@ -1532,6 +1538,26 @@ void eEPGCache::startEPG()
 		}
 		Lock();
 		temp.clear();
+
+		int cachebouquets = 1;
+		eConfig::getInstance()->getKey("/extras/cachebouquets", cachebouquets );
+		if (cachebouquets)
+		{
+			std::list<ePlaylistEntry> servicelist;
+			eZapMain::getInstance()->getAllBouquetServices(servicelist);
+			for ( std::list<ePlaylistEntry>::const_iterator it ( servicelist.begin() );
+				it != servicelist.end(); ++it)
+			{
+				if ( it->service.type == eServiceReference::idDVB )
+				{
+					uniqueEPGKey key((eServiceReferenceDVB&)(it->service));
+					bouquetservicelist.push_back(key);
+				}
+			}
+			//eDebug("[cachebouquets] fillbouquetlist:%d",bouquetservicelist.size());
+
+		}
+
 		for (int i=0; i < 3; ++i)
 		{
 			seenSections[i].clear();
@@ -1569,6 +1595,22 @@ void eEPGCache::startEPG()
 		eDebug("[EPGC] wait for clock update");
 		zapTimer.start(1000, 1); // restart Timer
 	}
+}
+
+bool eEPGCache::CheckBouquets(uniqueEPGKey& key)
+{
+	int cachebouquets = 1;
+	eConfig::getInstance()->getKey("/extras/cachebouquets", cachebouquets );
+	if (!cachebouquets)
+		return true;
+
+	for ( std::list<uniqueEPGKey>::const_iterator it ( bouquetservicelist.begin() );
+		it != bouquetservicelist.end(); ++it)
+	{
+		if (*it == key)
+			return true;
+	}
+	return false;
 }
 
 void eEPGCache::abortNonAvail()
@@ -1630,6 +1672,16 @@ void eEPGCache::abortNonAvail()
 
 void eEPGCache::enterService(const eServiceReferenceDVB& ref, int err)
 {
+	int cachebouquets = 1;
+	eConfig::getInstance()->getKey("/extras/cachebouquets", cachebouquets );
+	if (cachebouquets)
+	{
+		bouquetservicelist.clear();
+		uniqueEPGKey key(ref);
+		bouquetservicelist.push_back(key);
+		eDebug("[cachebouquets]entering service:%d,%d,%d",key.sid,key.onid,key.tsid);
+	}
+
 	if ( ref.path )
 		err = 2222;
 	else if ( ref.getServiceType() == 7 )

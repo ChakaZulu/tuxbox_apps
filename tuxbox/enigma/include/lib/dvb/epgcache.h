@@ -343,6 +343,7 @@ private:
 
 	static pthread_mutex_t cache_lock;
 	uniqueEPGKey current_service;
+	std::list<uniqueEPGKey> bouquetservicelist; // List of all services in bouquets
 	int paused;
 	int isLoading;
 
@@ -411,6 +412,9 @@ public:
 
 	EITEvent *lookupEvent(const eServiceReferenceDVB &service, int event_id, bool plain=false );
 	EITEvent *lookupEvent(const eServiceReferenceDVB &service, time_t=0, bool plain=false );
+	
+	bool CheckBouquets(uniqueEPGKey &key);
+	inline void ClearCache() { flushEPG(); }
 
 	Signal1<void, bool> EPGAvail;
 	Signal0<void> EPGUpdated;
