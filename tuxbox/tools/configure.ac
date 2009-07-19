@@ -14,8 +14,14 @@ TUXBOX_BOXTYPE
 # TUXBOX_APPS_LIB_PKGCONFIG(PLUGINS,tuxbox-plugins)
 TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 
+# needed by aformat
+TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
+TUXBOX_APPS_LIB_PKGCONFIG(CONNECTION,tuxbox-connection)
+TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
+
 AC_OUTPUT([
 Makefile
+aformat/Makefile
 camd/Makefile
 misc/Makefile
 satfind/Makefile
