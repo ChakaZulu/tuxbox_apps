@@ -127,6 +127,7 @@
 ./src/setup_rc.cpp
 ./src/setup_rfmod.cpp
 ./src/setup_timezone.cpp
+./src/setup_epg.cpp
 ./src/setup_window.cpp
 ./src/setupengrab.cpp
 ./src/setupnetwork.cpp

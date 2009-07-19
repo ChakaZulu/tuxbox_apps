@@ -27,6 +27,7 @@ class eExpertSetup: public eSetupWindow
 	void swapmanager();
 #endif
 #endif
+	void setup_epgcache();
 
 #ifndef TUXTXT_CFG_STANDALONE
 	void tuxtxtCachingChanged(bool);

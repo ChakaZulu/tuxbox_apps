@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.84 2009/06/14 16:03:12 rhabarber1848 Exp $
+ * $Id: setup_extra.cpp,v 1.85 2009/07/19 13:14:46 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -26,6 +26,7 @@
 #include <software_update.h>
 #include <setup_rc.h>
 #include <swapmanager.h>
+#include <setup_epg.h>
 #include <lib/dvb/decoder.h>
 #include <lib/gui/emessage.h>
 #include <lib/system/info.h>
@@ -83,6 +84,7 @@ void eExpertSetup::init_eExpertSetup()
 #endif
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 		CONNECT((new eListBoxEntryMenu(&list, _("Factory reset"), eString().sprintf("(%d) %s", ++entry, _("all settings will set to factory defaults")) ))->selected, eExpertSetup::factory_reset);
+	CONNECT((new eListBoxEntryMenu(&list, _("EPG settings"), eString().sprintf("(%d) %s", ++entry, _("open EPG settings")) ))->selected, eExpertSetup::setup_epgcache);
 	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
 #ifndef DISABLE_FILE
@@ -174,7 +176,6 @@ void eExpertSetup::init_eExpertSetup()
 		CONNECT((new eListBoxEntryCheck(&list,_("Enable fast zapping"),"/elitedvb/extra/fastzapping",_("enables faster zapping.. but with visible sync")))->selected, eExpertSetup::fastZappingChanged );
 	CONNECT((new eListBoxEntryCheck(&list, _("Use http authentification"), "/ezap/webif/lockWebIf", _("enables the http (user/password) authentification")))->selected, eExpertSetup::reinitializeHTTPServer );
 	CONNECT((new eListBoxEntryCheck(&list, _("Don't open serial port"), "/ezap/extra/disableSerialOutput", _("don't write debug messages to /dev/tts/0")))->selected, eExpertSetup::reinitializeHTTPServer );
-	new eListBoxEntryCheck(&list, _("Use EPG cache for Infobar"), "/ezap/osd/useEPGCache", _("use the EPG cache for the infobar if the EIT is unavailable"));
 	new eListBoxEntryCheck(&list, _("Auto bouquet change"), "/elitedvb/extra/autobouquetchange", _("change into next bouquet when end of current bouquet is reached"));
 	new eListBoxEntryCheck(&list, _("Auto reconnect cahandler"), "/elitedvb/extra/cahandlerReconnect", _("try to reconnect when an external cahandler connection was lost"));
 #ifndef DISABLE_NETWORK
@@ -406,6 +407,19 @@ void eExpertSetup::swapmanager()
 }
 #endif
 #endif
+
+void eExpertSetup::setup_epgcache()
+{
+	hide();
+	eEPGSetup setup;
+#ifndef DISABLE_LCD
+	setup.setLCD(LCDTitle, LCDElement);
+#endif
+	setup.show();
+	setup.exec();
+	setup.hide();
+	show();
+}
 
 //implemented in upgrade.cpp
 extern bool erase(char mtd[30], const char *titleText);
