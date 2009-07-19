@@ -830,7 +830,7 @@ void eDVB::configureNetwork()
 			delete udhcpc;
 			system("killall -9 udhcpc");
 			FILE *file=fopen("/etc/hostname","r");
-			eString cmd("/bin/udhcpc -f");
+			eString cmd("udhcpc -f");
 			if (!file)
 				eDebug("couldn't get hostname.. /etc/hostname not exist");
 			else
@@ -841,9 +841,9 @@ void eDVB::configureNetwork()
 
 				struct stat s;
 				if ( !stat("/var/share/udhcpc/default.script", &s) )
-					cmd.sprintf("/bin/udhcpc --hostname=%s --foreground --script=/var/share/udhcpc/default.script", buf);
+					cmd.sprintf("udhcpc --hostname=%s --foreground --script=/var/share/udhcpc/default.script", buf);
 				else
-					cmd.sprintf("/bin/udhcpc --hostname=%s --foreground", buf);
+					cmd.sprintf("udhcpc --hostname=%s --foreground", buf);
 			}
 			udhcpc = new eConsoleAppContainer(cmd.c_str());
 			CONNECT(udhcpc->dataAvail, eDVB::UDHCPC_DataAvail);
