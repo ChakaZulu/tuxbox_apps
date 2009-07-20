@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.959 2009/07/11 18:29:03 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.960 2009/07/20 08:36:01 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -63,6 +63,7 @@
 
 #include "global.h"
 #include "neutrino.h"
+#include <dbox/fp.h>
 
 #include <daemonc/remotecontrol.h>
 
@@ -2314,6 +2315,23 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	neutrino_msg_data_t data;
 
 	dprintf(DEBUG_NORMAL, "initialized everything\n");
+
+	if (g_settings.vcr_AutoSwitch)
+	{
+		int val = 0;
+		int fp = open("/dev/dbox/fp0",O_RDWR);
+		if (fp >= 0)
+		{
+			ioctl(fp, FP_IOCTL_GET_VCR, &val);
+			close(fp);
+			if (val > 0)
+			{
+				dprintf(DEBUG_NORMAL, "Switching to scart mode...\n");
+				lastMode = mode;
+				handleMsg(NeutrinoMessages::EVT_VCRCHANGED, VCR_STATUS_ON);
+			}
+		}
+	}
 
 	while( true )
 	{
