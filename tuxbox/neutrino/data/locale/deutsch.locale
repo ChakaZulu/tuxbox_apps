@@ -645,6 +645,7 @@ miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.standby_save_power Standby Stromsparmodus (exp.)
 miscsettings.startmode Startmodus
+miscsettings.startmode_restore Letzter Modus
 miscsettings.tuxtxt_cache Videotext zwischenspeichern
 miscsettings.virtual_zap_mode Virtual Zap
 miscsettings.volumebar_disp_pos Lautstärkeanzeige

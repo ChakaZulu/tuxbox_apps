@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.961 2009/07/21 07:27:18 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.962 2009/07/21 19:40:06 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2334,7 +2334,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		}
 	}
 
-	if(g_settings.startmode == STARTMODE_RADIO)
+	if(g_settings.startmode == STARTMODE_TV)
+	{
+		tvMode();
+	}
+	else if(g_settings.startmode == STARTMODE_RADIO)
 	{
 		radioMode();
 	}
