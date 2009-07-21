@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.61 2009/05/16 00:32:36 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.62 2009/07/21 07:27:21 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -937,6 +937,24 @@ const CMenuOptionChooser::keyval  REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS[REMOTE
    { 3 , LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH_POWER_HOME_OK }
 };
 
+#ifdef ENABLE_ESD
+#define MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT 7
+#else
+#define MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT 6
+#endif
+const CMenuOptionChooser::keyval  MISCSETTINGS_STARTMODE_WITH_OPTIONS[MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT]=
+{
+   { 0 , LOCALE_MAINMENU_TVMODE },
+   { 1 , LOCALE_MAINMENU_RADIOMODE },
+   { 2 , LOCALE_MAINMENU_SCARTMODE },
+   { 3 , LOCALE_MAINMENU_AUDIOPLAYER },
+   { 4 , LOCALE_INETRADIO_NAME },
+#ifdef ENABLE_ESD
+   { 5 , LOCALE_ESOUND_NAME },
+#endif
+   { 6 , LOCALE_TIMERLIST_TYPE_STANDBY },
+};
+
 /* misc settings menu */
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 															CMenuWidget &miscSettingsGeneral,
@@ -975,6 +993,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	// general
 	miscSettingsGeneral.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_GENERAL));
 	addMenueIntroItems(miscSettingsGeneral);
+	CMenuOptionChooser *m6 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_STARTMODE, &g_settings.startmode, MISCSETTINGS_STARTMODE_WITH_OPTIONS, MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT, true);
 	CMenuOptionChooser *m1 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL_RCDELAY, &g_settings.shutdown_real_rcdelay, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, !g_settings.shutdown_real);
 	CMenuOptionChooser *m5 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH, &g_settings.standby_off_with, REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS, REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS_COUNT, !g_settings.shutdown_real);
 	CShutdownCountNotifier *shutDownCountNotifier = new CShutdownCountNotifier;
@@ -983,6 +1002,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	CMenuOptionChooser *m3 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_STANDBY_SAVE_POWER, &g_settings.standby_save_power, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, !g_settings.shutdown_real);
 	CMiscNotifier* miscNotifier = new CMiscNotifier(m1, m3, m4, m5);
 	CMenuOptionChooser *m2 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL, &g_settings.shutdown_real, OPTIONS_OFF1_ON0_OPTIONS, OPTIONS_OFF1_ON0_OPTION_COUNT, true, miscNotifier);
+	miscSettingsGeneral.addItem(m6);
 	miscSettingsGeneral.addItem(m2);
 	miscSettingsGeneral.addItem(m3);
 	miscSettingsGeneral.addItem(m4);

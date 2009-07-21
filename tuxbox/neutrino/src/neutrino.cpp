@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.960 2009/07/20 08:36:01 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.961 2009/07/21 07:27:18 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -372,6 +372,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.infobar_channel_logodir, configfile.getString( "infobar_channel_logodir", "/var/share/tuxbox/neutrino/icons/").c_str()); 
 	g_settings.infobar_show_channellogo	= configfile.getInt32("infobar_show_channellogo"		,0);
 	g_settings.infobar_channellogo_background		= configfile.getInt32("infobar_channellogo_background"		,0);
+	g_settings.startmode			= configfile.getInt32("startmode" , 0 );
 
 	//audio
 	g_settings.audio_AnalogMode 		= configfile.getInt32( "audio_AnalogMode"        , 0 );
@@ -911,7 +912,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32("infobar_show_channellogo"			, g_settings.infobar_show_channellogo);
 	configfile.setString("infobar_channel_logodir"	, g_settings.infobar_channel_logodir);
 	configfile.setInt32( "infobar_channellogo_background"	, g_settings.infobar_channellogo_background);
-	
+	configfile.setInt32("startmode"                , g_settings.startmode);
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode" , g_settings.audio_AnalogMode);
@@ -2331,6 +2332,37 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				handleMsg(NeutrinoMessages::EVT_VCRCHANGED, VCR_STATUS_ON);
 			}
 		}
+	}
+
+	if(g_settings.startmode == STARTMODE_RADIO)
+	{
+		radioMode();
+	}
+	else if(g_settings.startmode == STARTMODE_SCART)
+	{
+		lastMode = mode;
+		handleMsg(NeutrinoMessages::EVT_VCRCHANGED, VCR_STATUS_ON);
+	}
+	else if(g_settings.startmode == STARTMODE_AUDIOPLAYER)
+	{
+		CAudioPlayerGui::CAudioPlayerGui tmpAudioPlayerGui;
+		tmpAudioPlayerGui.exec(NULL, "");
+	}
+	else if(g_settings.startmode == STARTMODE_INETRADIO)
+	{
+		CAudioPlayerGui::CAudioPlayerGui tmpAudioPlayerGui(true);
+		tmpAudioPlayerGui.exec(NULL, "");
+	}
+#ifdef ENABLE_ESD
+	else if(g_settings.startmode == STARTMODE_ESOUND)
+	{
+		CEsoundGui::CEsoundGui tmpEsoundGui;
+		tmpEsoundGui.exec(NULL, "");
+	}
+#endif
+	else if(g_settings.startmode == STARTMODE_STANDBY)
+	{
+		handleMsg(NeutrinoMessages::STANDBY_ON, 0);
 	}
 
 	while( true )

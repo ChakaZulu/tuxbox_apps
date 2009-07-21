@@ -644,6 +644,7 @@ miscsettings.shutdown_count_hint2 to deep standby (0 = off).
 miscsettings.shutdown_real Standby
 miscsettings.shutdown_real_rcdelay Delayed Shutdown
 miscsettings.standby_save_power Standby power save mode (exp.)
+miscsettings.startmode Startmode
 miscsettings.tuxtxt_cache TuxText Cache
 miscsettings.virtual_zap_mode Virtual Zap
 miscsettings.volumebar_disp_pos Volumebar

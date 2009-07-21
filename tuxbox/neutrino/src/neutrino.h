@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.208 2009/07/11 18:29:03 rhabarber1848 Exp $
+	$Id: neutrino.h,v 1.209 2009/07/21 07:27:18 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -132,6 +132,18 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 			init_mode_init 		= 1,
 			init_mode_record 	= 2,
 			init_mode_switch 	= 3,
+		};
+
+	enum
+		{
+			STARTMODE_UNKNOWN	= -1,
+			STARTMODE_TV	 	= 0,
+			STARTMODE_RADIO	 	= 1,
+			STARTMODE_SCART	 	= 2,
+			STARTMODE_AUDIOPLAYER 	= 3,
+			STARTMODE_INETRADIO 	= 4,
+			STARTMODE_ESOUND 	= 5,
+			STARTMODE_STANDBY 	= 6,
 		};
 
 		CConfigFile				configfile;
