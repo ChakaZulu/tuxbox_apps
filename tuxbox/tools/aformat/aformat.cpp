@@ -1,5 +1,5 @@
 /*
- * $Id: aformat.cpp,v 1.2 2009/07/19 16:27:01 rhabarber1848 Exp $
+ * $Id: aformat.cpp,v 1.3 2009/07/21 21:53:09 dbt Exp $
  *
  * aformat - d-box2 linux project
  *
@@ -20,6 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
+ * $log$
  */
 
 /*
@@ -36,47 +37,6 @@
   SIGUSR2:         Reread configuration file
 */
 
-/**
-####################################################################################
-#### aformat 1.1
-#### Automatische Formatanpassung bei Schummelsendern
-####################################################################################
-
-Viele Sender (z.B. "Discovery-Channel" oder "Discovery Geschichte") machen es sich aus
-Kostengründen zur Angewohnheit, auch Sendungen, welche ursprünglich im 16:9- oder sogar
-Kino-Format aufgenommen wurden, einfach auf 4:3 runterzuskalieren und dann so zu senden.
-Das Ergebnis besteht dann bei 16:9-Fernsehern in schwarzen Streifen nicht nur links und
-rechts sondern zusätzlich oben und unten. Da ist dann auf dem nutzbaren Bereich eines
-Fernsehers nicht mehr viel zu sehen. Auch mögen Plasmafernseher solche Balken im Hinblick
-auf den Einbrenneffekt überhaupt nicht.
-Deshalb habe ich mal eine Testversion einer entsprechenden Umschaltung gebaut. Sie wertet
-die Größe der schwarzen Balken am oberen Bildrand aus und zoomt das Bild entsrechend der
-gemachten Einstellungen auf. Das funktioniert allerdings nur bei Fernsehern, welche das WSS-
-Signal (wide screen signaling) auswerten können. Das sollten die meisten können.
-Für die Basisfunktion ist das Plugin "aformat" mit den Rechten 755 nach /var/plugins/ und
-"aformat.conf" nach /var/tuxbox/config/ zu kopieren. Gestartet wird entweder automatisch
-oder über das Flexmenü.
-Wichtig: Um das Plugin beim Boxenstart automatisch zu starten, ist noch die Zeile
-"[ -e /var/etc/.aformat ] && ( sleep 20; aformat ) &" in die start_neutrino vor dem eigent-
-lichen Start von Neutrino einzufügen.
-
-Start und Konfiguration über das Flexmenü:
-
-Installation des Flexmenüstarts:
---------------------------------
-plrun_aformat.mnu --> nach /var/tuxbox/config/flexinc/
-in_plugin_run.mnu_einfuegen --> den Inhalt in /var/tuxbox/config/flexinc/plugin_run.mnu einfügen
-
-Gesteuert wird das Plugin nun übers Menü unter:
-Automatikformat starten / beenden
-
-Installation der Menükonfiguration:
------------------------------------
-afops --> nach /var/plugins/ + Dateirechte 755
-plconfig_aformat.mnu --> nach /var/tuxbox/config/flexinc
-in_plugin_config.mnu_einfuegen --> den Inhalt in /var/tuxbox/config/flexinc/plugin_config.mnu einfügen
-
-*/
 
 /* system headers */
 #include <fcntl.h>
@@ -327,7 +287,7 @@ int main(int argc, char **argv)
 	unsigned long towait=3000000L;
 	int opt;
 
-	fprintf(stdout, "Automatisches Bildschirmformat $Id: aformat.cpp,v 1.2 2009/07/19 16:27:01 rhabarber1848 Exp $\n");
+	fprintf(stdout, "Automatisches Bildschirmformat $Id: aformat.cpp,v 1.3 2009/07/21 21:53:09 dbt Exp $\n");
 
 	while ((opt = getopt(argc, argv, "dlq")) > 0) {
 		switch (opt) {

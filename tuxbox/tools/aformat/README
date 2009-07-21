@@ -1,0 +1,55 @@
+$log$
+####################################################################################
+#### aformat
+#### Automatische Formatanpassung bei Schummelsendern
+####################################################################################
+
+Viele Sender (z.B. "Discovery-Channel" oder "Discovery Geschichte") machen es sich aus
+Kostengründen zur Angewohnheit, auch Sendungen, welche ursprünglich im 16:9- oder sogar
+Kino-Format aufgenommen wurden, einfach auf 4:3 runterzuskalieren und dann so zu senden.
+
+Das Ergebnis besteht dann bei modernen 16:9-Fernsehern in schwarzen Streifen nicht nur
+links und rechts, sondern zusätzlich oben und unten. Auf dem nutzbaren Bereich eines
+Fernsehers ist dann nicht mehr viel zu sehen. Auch mögen Plasmafernseher solche Balken
+im Hinblick auf den Einbrenneffekt überhaupt nicht.
+
+"aformat" wertet die Größe der schwarzen Balken am oberen Bildrand aus und zoomt das Bild
+entsrechend der gemachten Einstellungen auf. Das funktioniert allerdings nur bei Fernsehern,
+welche das WSS-Signal (wide screen signaling) auswerten können. Das sollten die meisten können.
+
+Für die Basisfunktion ist das Plugin "aformat" mit den Rechten 755 nach /var/plugins/ und
+"aformat.conf" nach /var/tuxbox/config/ zu kopieren. Gestartet wird entweder automatisch
+oder über das Flexmenü.
+Zum komplilieren werden stehen die Targets make aformat und make flash-aformat zur Verfügung.
+
+Wichtig: Um das Plugin beim Boxenstart automatisch zu starten, ist noch die Zeile
+"[ -e /var/etc/.aformat ] && ( sleep 20; aformat ) &" in die start_neutrino vor dem eigent-
+lichen Start von Neutrino einzufügen.
+
+Start und Konfiguration über das Flexmenü:
+
+Installation des Flexmenüstarts:
+--------------------------------
+plrun_aformat.mnu --> nach /var/tuxbox/config/flexinc/
+in_plugin_run.mnu_einfuegen --> den Inhalt in /var/tuxbox/config/flexinc/plugin_run.mnu einfügen
+
+Gesteuert wird das Plugin nun übers Menü unter:
+Automatikformat starten / beenden
+
+Installation der Menükonfiguration:
+-----------------------------------
+afops --> nach /var/plugins/ + Dateirechte 755
+plconfig_aformat.mnu --> nach /var/tuxbox/config/flexinc
+in_plugin_config.mnu_einfuegen --> den Inhalt in /var/tuxbox/config/flexinc/plugin_config.mnu einfügen
+
+Options:
+ -d	Debugmode: Don't fork, additionally generate debugging messages
+
+ -l	Run also in the abscense of /var/etc/.aformat
+
+ -q     Be quiet.
+
+ Signal handling:
+
+  SIGUSR1:         Toggles debug mode
+  SIGUSR2:         Reread configuration file
