@@ -1,4 +1,7 @@
-$log$
+$Log: README,v $
+Revision 1.2  2009/07/21 22:05:56  dbt
+config file pattern added
+
 ####################################################################################
 #### aformat
 #### Automatische Formatanpassung bei Schummelsendern
@@ -53,3 +56,53 @@ Options:
 
   SIGUSR1:         Toggles debug mode
   SIGUSR2:         Reread configuration file
+
+
+Config-File:
+------------
+
+####################################################################################
+####             Konfigurationsdatei fuer aformat
+####          Automatische Formatanpassung bei Schummelsendern
+####################################################################################
+
+# Aller wieviel Sekunden soll getestet werden?
+LOOP=3
+
+# Wie oft soll der Test vor dem Umschalten wiederholt werden?
+REPEAT=1
+
+# WelcheS Format soll nicht veraendert werden?
+NOSWITCH=7
+
+# Ab wieviel schwarzen Zeilen am oberen Bildrand soll auf 14:9 umgeschaltet werden?
+MAXBLACK14=16
+
+# Ab wieviel schwarzen Zeilen am oberen Bildrand soll auf 16:9 umgeschaltet werden?
+MAXBLACK16=48
+
+# Auf welches Format soll bei 14:9 umgeschaltet werden?
+WIDE14=1
+
+# Auf welches Format soll bei 16:9 umgeschaltet werden?
+WIDE16=3
+
+# Auf welches Format soll bei erkanntem Vollbild umgeschaltet werden?
+NORMAL=0
+
+# Soll der experimentelle Modus verwendet werden?
+EXPERIMENTAL=1
+
+# moegliche Formate (siehe Kommando "saa")
+# 0 4:3 full format
+# 1 14:9 center letterbox
+# 2 14:9 top letterbox
+# 3 16:9 center letterbox
+# 4 16:9 top letterbox
+# 5 >16:9 center letterbox
+# 6 4:3 with 14:9 center letterbox
+# 7 16:9 full format (anamorphic)
+# 8 turned off
+
+# Auf welchen Kanaelen soll keine Formatumschaltung erfolgen?
+BLACKLIST=
