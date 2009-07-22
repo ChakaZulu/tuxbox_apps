@@ -15,7 +15,7 @@ class eEPGSetup: public eWindow
 	eButton *bt_clear, *bt_seldir, *bt_store;
 	eStatusBar *statusbar;
 	eCheckbox *cb_cachebouquets, *cb_infobarcache;
-	eTextInputField* tb_path;
+	eTextInputField *tb_path, *tb_file;
 
 	void selectDir();
 	void clearCache();

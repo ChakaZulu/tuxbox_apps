@@ -13,11 +13,17 @@ void eEPGSetup::init_eEPGSetup()
 	char* p = 0;
 	eConfig::getInstance()->getKey("/extras/epgcachepath", p);
 	if (p) path = eString(p);
-
-
 	tb_path=new eTextInputField(this);tb_path->setName("path");
 	tb_path->setText(path);
+
 	bt_seldir=new eButton(this); bt_seldir->setName("seldir");
+
+	eString file = eString("epg.dat");
+	p = 0;
+	eConfig::getInstance()->getKey("/extras/epgfile", p);
+	if (p) file = eString(p);
+	tb_file=new eTextInputField(this);tb_file->setName("file");
+	tb_file->setText(file);
 
 	int cachebouquets = 1;
 	eConfig::getInstance()->getKey("/extras/cachebouquets", cachebouquets );
@@ -76,6 +82,9 @@ void eEPGSetup::storePressed()
 	if (startPath.empty() || startPath[startPath.length() -1] != '/')
 		startPath+= "/";
 	eConfig::getInstance()->setKey("/extras/epgcachepath", startPath.c_str() );
+
+	eString file = tb_file->getText();
+	eConfig::getInstance()->setKey("/extras/epgfile", file.c_str() );
 
 	close(0);
 }

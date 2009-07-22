@@ -1871,13 +1871,17 @@ void eEPGCache::thread()
 
 void eEPGCache::load()
 {
+	char *epgfile;
+	if ( eConfig::getInstance()->getKey("/extras/epgfile", epgfile ) )
+		epgfile=strdup("epg.dat");
 	char *cachepath;
 	if (eConfig::getInstance()->getKey("/extras/epgcachepath", cachepath))
 		cachepath = strdup("/hdd");
 	eString cachefilename, cachefilenamemd5;
-	cachefilename.sprintf("%s/epg.dat",cachepath);
-	cachefilenamemd5.sprintf("%s/epg.dat.md5",cachepath);
+	cachefilename.sprintf("%s/%s",cachepath,epgfile);
+	cachefilenamemd5.sprintf("%s/%s.md5",cachepath,epgfile);
 	free(cachepath);
+	free(epgfile);
 	FILE *f = fopen(cachefilename.c_str(), "r");
 	if (f)
 	{
@@ -1990,12 +1994,15 @@ void eEPGCache::load()
 
 void eEPGCache::save()
 {
+	char *epgfile;
+	if ( eConfig::getInstance()->getKey("/extras/epgfile", epgfile ) )
+		epgfile=strdup("epg.dat");
 	char *cachepath;
 	if (eConfig::getInstance()->getKey("/extras/epgcachepath", cachepath))
 		cachepath = strdup("/hdd");
 	eString cachefilename, cachefilenamemd5;
-	cachefilename.sprintf("%s/epg.dat",cachepath);
-	cachefilenamemd5.sprintf("%s/epg.dat.md5",cachepath);
+	cachefilename.sprintf("%s/%s",cachepath,epgfile);
+	cachefilenamemd5.sprintf("%s/%s.md5",cachepath,epgfile);
 	struct statfs s;
 	off64_t tmp;
 	if (statfs(cachepath, &s)<0)
@@ -2006,6 +2013,7 @@ void eEPGCache::save()
 		tmp*=s.f_bsize;
 	}
 	free(cachepath);
+	free(epgfile);
 
 	// prevent writes to builtin flash
 	if ( tmp < 1024*1024*50 ) // storage size < 50MB
