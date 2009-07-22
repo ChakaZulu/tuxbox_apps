@@ -83,6 +83,11 @@ Specifies the path where the epg cache will be saved when shutting down the box<
 		<input style="color:#000000" name="epgcachepath" type="text" size="90" maxlength="256" value="#EPGCACHEPATH#">
 	</td>	
 </tr>
+<tr>
+	<td>
+		<input style="color:#000000" name="epgfilename" type="text" size="90" maxlength="256" value="#EPGFILENAME#">
+	</td>
+</tr>
 </table>
 <br><br>
 <input style="color: #000000; width: 100px" type="submit" size="100px" value="Save">
