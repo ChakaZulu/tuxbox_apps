@@ -1,5 +1,5 @@
 /*
- * $Id: aformat.cpp,v 1.3 2009/07/21 21:53:09 dbt Exp $
+ * $Id: aformat.cpp,v 1.4 2009/07/22 20:47:00 barf Exp $
  *
  * aformat - d-box2 linux project
  *
@@ -84,6 +84,7 @@ CConfigFile config(',', false);
 static int stride;
 static char msg[]="[aformat] ";
 static const char CFG_FILE[] = "/var/tuxbox/config/aformat.conf";
+static const char PID_FILE[] = "/var/run/aformat.pid";
 int debug = 0;			// declared in zapit/debug.h
 
 // Variables in configuration file
@@ -275,8 +276,9 @@ void signal_handler(int signum)
 		load_config();
 		break;
 	default:
-	  printf("Received signal %d, quitting\n", signum);
-	  exit(2);
+	        printf("[aformat] Received signal %d, quitting\n", signum);
+		unlink(PID_FILE);
+		exit(2);
 		break;
 	}
 }
@@ -287,7 +289,7 @@ int main(int argc, char **argv)
 	unsigned long towait=3000000L;
 	int opt;
 
-	fprintf(stdout, "Automatisches Bildschirmformat $Id: aformat.cpp,v 1.3 2009/07/21 21:53:09 dbt Exp $\n");
+	fprintf(stdout, "Automatisches Bildschirmformat $Id: aformat.cpp,v 1.4 2009/07/22 20:47:00 barf Exp $\n");
 
 	while ((opt = getopt(argc, argv, "dlq")) > 0) {
 		switch (opt) {
@@ -331,14 +333,15 @@ int main(int argc, char **argv)
 		}
 	}
 
-	//signal(SIGHUP, signal_handler);
-	//signal(SIGTERM, signal_handler);
-	//signal(SIGINT, signal_handler);
+	signal(SIGHUP, signal_handler);
+	signal(SIGTERM, signal_handler);
+	signal(SIGINT, signal_handler);
 	signal(SIGUSR1, signal_handler);
 	signal(SIGUSR2, signal_handler);
 
 	if (!debug) {
-		switch (fork()) {
+		pid_t pid = fork();
+		switch (pid) {
 		case -1: /* can't fork */
 			ERROR("fork");
 			return -1;
@@ -349,6 +352,9 @@ int main(int argc, char **argv)
 			}
 			break;
 		default: /* parent returns to calling process */
+			FILE *f = fopen(PID_FILE, "w");
+			fprintf(f, "%d\n", pid);
+			fclose(f);
 			return 0;
 		}
 	}
@@ -444,5 +450,6 @@ int main(int argc, char **argv)
 		usleep(towait);
 	}
 	printf("%sProgrammende\n", msg);
+	unlink(PID_FILE);
 	exit(0);
 }

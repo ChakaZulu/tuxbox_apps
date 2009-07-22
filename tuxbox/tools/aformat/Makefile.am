@@ -15,4 +15,8 @@ aformat_LDADD = \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@
 
+installdir = $(CONFIGDIR)
+
+install_DATA = aformat.conf
+
 endif
