@@ -1,5 +1,5 @@
 /*
- * $Id: aformat.cpp,v 1.4 2009/07/22 20:47:00 barf Exp $
+ * $Id: aformat.cpp,v 1.5 2009/07/23 19:46:58 barf Exp $
  *
  * aformat - d-box2 linux project
  *
@@ -289,7 +289,7 @@ int main(int argc, char **argv)
 	unsigned long towait=3000000L;
 	int opt;
 
-	fprintf(stdout, "Automatisches Bildschirmformat $Id: aformat.cpp,v 1.4 2009/07/22 20:47:00 barf Exp $\n");
+	fprintf(stdout, "Automatisches Bildschirmformat $Id: aformat.cpp,v 1.5 2009/07/23 19:46:58 barf Exp $\n");
 
 	while ((opt = getopt(argc, argv, "dlq")) > 0) {
 		switch (opt) {
@@ -339,6 +339,17 @@ int main(int argc, char **argv)
 	signal(SIGUSR1, signal_handler);
 	signal(SIGUSR2, signal_handler);
 
+	// Normally, this fails leaving f == NULL.
+	// Otherwise, refuse to run.
+	FILE *f = fopen(PID_FILE, "r");
+	int existing_pid;
+	if (f != 0) {
+		fscanf(f, "%d", &existing_pid);
+		fprintf(stderr,
+			"Es scheint schon ein aformat-Instanz mit PID %d zu laufen.\n"
+			"Falls nicht, loesche %s.\n", existing_pid,  PID_FILE);
+		exit(EXIT_FAILURE);
+	}
 	if (!debug) {
 		pid_t pid = fork();
 		switch (pid) {
