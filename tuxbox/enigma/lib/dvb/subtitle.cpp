@@ -222,23 +222,18 @@ int subtitle_process_pixel_data(struct subtitle_ctx *sub, struct subtitle_page *
 		bitstream_init(&bit, data, 4);
 		for ( int i=0; i < 4; ++i )
 			map_2_to_4_bit_table[i] = bitstream_get(&bit);
-		break;
+		return bit.consumed + 1;
 	case 0x21:  // ignore 2 -> 8bit map table
 		bitstream_init(&bit, data, 8);
 		for ( int i=0; i < 4; ++i )
 			bitstream_get(&bit);
-		break;
+		return bit.consumed + 1;
 	case 0x22:  // ignore 4 -> 8bit map table
 		bitstream_init(&bit, data, 8);
 		for ( int i=0; i < 16; ++i )
 			bitstream_get(&bit);
-		break;
+		return bit.consumed + 1;
 	case 0xF0:
-		// recreate default map
-		map_2_to_4_bit_table[0] = 0;
-		map_2_to_4_bit_table[1] = 8;
-		map_2_to_4_bit_table[2] = 7;
-		map_2_to_4_bit_table[3] = 15;
 		subtitle_process_line(sub, page, object_id, *linenr, line, *linep);
 /*		{
 			int i;
@@ -275,6 +270,13 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 //	//eDebug("have %d bytes of segment data", segment_length);
 	
 //	//eDebug("page_id %d, segtype %02x", page_id, segment_type);
+
+	sub->isdrawn = 0;
+	// recreate default map
+	map_2_to_4_bit_table[0] = 0;
+	map_2_to_4_bit_table[1] = 8;
+	map_2_to_4_bit_table[2] = 7;
+	map_2_to_4_bit_table[3] = 15;
 	
 	struct subtitle_page *page, **ppage;
 		
@@ -711,6 +713,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 //		eDebug("end of display set segment");
 		if (sub->screen_enabled)
 			subtitle_redraw_all(sub);
+		sub->isdrawn = 1;
 		break;
 	}
 	case 0xFF: // stuffing

@@ -121,6 +121,9 @@ void eSubtitleWidget::processPESPacket(unsigned char *pkt, int len)
 		return;
 	}
 	subtitle_process_pes(subtitle, pesbuffer, peslen);
+	if (!subtitle->isdrawn && subtitle->screen_enabled)
+		subtitle_redraw_all(subtitle);
+
 }
 
 void eSubtitleWidget::displaying_timeout()
@@ -166,6 +169,8 @@ void eSubtitleWidget::processNext()
 
 		delete [] pes.pkt;
 	}
+	if (!subtitle->isdrawn && subtitle->screen_enabled)
+		subtitle_redraw_all(subtitle);
 
 	unsigned long long current = 0;
 	
