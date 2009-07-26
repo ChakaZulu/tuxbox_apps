@@ -62,7 +62,6 @@ radiobox_LDADD = \
 	@ID3TAG_LIBS@ \
 	@MAD_LIBS@ \
 	@FREETYPE_LIBS@ \
-	@CRAMFS_LIBS@ \
 	@PNG_LIBS@
 
 

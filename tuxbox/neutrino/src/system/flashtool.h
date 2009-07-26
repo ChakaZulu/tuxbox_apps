@@ -65,7 +65,6 @@ class CFlashTool
 		bool program( const std::string & filename, int globalProgressEndErase=-1, int globalProgressEndFlash=-1 );
 		bool readFromMTD( const std::string & filename, int globalProgressEnd=-1 );
 
-		bool check_cramfs( const std::string & filename );
 		bool is_squashfs( const std::string & filename );
 		bool MD5Check(const std::string squashfsimage, const std::string checkmd5);
 		bool GetVersionInfo(CFlashVersionInfo& versionInfo, const std::string filename);

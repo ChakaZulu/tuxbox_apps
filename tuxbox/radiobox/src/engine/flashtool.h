@@ -59,8 +59,6 @@ class CFlashTool
 		bool program( const std::string & filename, int globalProgressEndErase=-1, int globalProgressEndFlash=-1 );
 		bool readFromMTD( const std::string & filename, int globalProgressEnd=-1 );
 
-		bool check_cramfs( const std::string & filename );
-
 		void reboot();
 };
 

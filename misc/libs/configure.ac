@@ -19,8 +19,6 @@ libconfigfile/Makefile
 libconfigfile/tuxbox-configfile.pc
 libconnection/Makefile
 libconnection/tuxbox-connection.pc
-libcramfs/Makefile
-libcramfs/tuxbox-cramfs.pc
 libeventserver/Makefile
 libeventserver/tuxbox-eventserver.pc
 libmd5sum/Makefile

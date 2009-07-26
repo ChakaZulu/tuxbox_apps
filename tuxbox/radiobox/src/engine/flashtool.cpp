@@ -38,7 +38,6 @@
 #include <linux/compiler.h>
 #endif
 #include <mtd/mtd-user.h>
-#include <libcramfs.h>
 
 //encoding implements only one function
 //Latin1_to_UTF8 which was copied here
@@ -311,13 +310,6 @@ bool CFlashTool::erase(int globalProgressEnd)
 
 	close(fd);
 	return true;
-}
-
-bool CFlashTool::check_cramfs( const std::string & filename )
-{
-	int retVal = cramfs_crc( (char*) filename.c_str() );
-	printf("flashcheck returned: %d\n", retVal);
-	return retVal==1; 
 }
 
 void CFlashTool::reboot()

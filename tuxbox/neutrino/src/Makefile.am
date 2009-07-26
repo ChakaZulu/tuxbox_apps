@@ -43,7 +43,6 @@ neutrino_LDADD = \
 	$(top_builddir)/lib/irsend/libirsend.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
-	@CRAMFS_LIBS@ \
 	@CURL_LIBS@ \
 	@FREETYPE_LIBS@ \
 	@LIRCDCLIENT_LIBS@ \

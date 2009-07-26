@@ -38,7 +38,6 @@
 #include <linux/compiler.h>
 #endif
 #include <mtd/mtd-user.h>
-#include <libcramfs.h>
 #include <libmd5sum.h>
 
 #include <driver/encoding.h>
@@ -318,13 +317,6 @@ bool CFlashTool::MD5Check(const std::string squashfsimage, const std::string che
 
 	printf("[CFlashTool] md5 check successfull\n");
 	return true;
-}
-
-bool CFlashTool::check_cramfs( const std::string & filename )
-{
-	int retVal = cramfs_crc( (char*) filename.c_str() );
-	printf("flashcheck returned: %d\n", retVal);
-	return retVal==1; 
 }
 
 void CFlashTool::reboot()

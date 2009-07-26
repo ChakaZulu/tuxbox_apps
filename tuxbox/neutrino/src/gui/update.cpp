@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.134 2009/04/28 06:43:08 rhabarber1848 Exp $
+	$Id: update.cpp,v 1.135 2009/07/26 14:39:15 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -387,7 +387,6 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	paint();
 	showGlobalStatus(20);
 
-	bool looks_like_cramfs = filename.find(".cramfs") != unsigned(-1);
 #ifndef DISABLE_INTERNET_UPDATE
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
@@ -420,20 +419,6 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 		}
 	}
 #endif
-
-	// If the file name contains the string ".cramfs", check that it
-	// is a valid cramfs image
-	if (looks_like_cramfs)
-	{
-		printf("[update] Checking it for cramfs correctness\n");
-		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_MD5CHECK)); // UTF-8
-		if(!ft.check_cramfs(filename))
-		{
-			hide();
-			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_MD5SUMERROR)); // UTF-8
-			return menu_return::RETURN_REPAINT;
-		}
-	}
 
 	struct stat buf;
 	stat(filename.c_str(), &buf);
@@ -675,7 +660,6 @@ void CFlashExpert::showFileSelector(const std::string & actionkey)
 			std::string filen = namelist[count]->d_name;
 			if((int(filen.find(".img")) != -1) 
 			   || (int(filen.find(".squashfs")) != -1)
-			   || (int(filen.find(".cramfs")) != -1)
 			   || (int(filen.find(".jffs2")) != -1)
 			   || (int(filen.find(".flfs")) != -1)
 			   )
