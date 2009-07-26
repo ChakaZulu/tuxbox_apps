@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.303 2009/07/08 20:32:17 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.304 2009/07/26 17:02:46 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -230,9 +230,11 @@ static DMX dmxCN(0x12, 32, false);
 static DMX dmxSDT(0x11, 128);
 static DMX dmxNIT(0x10, 128);
 
+#ifdef ENABLE_PPT
 // Houdini: added for Premiere Private EPG section for Sport/Direkt Portal
 static DMX dmxPPT(0x00, 256);
 unsigned int privatePid=0;
+#endif
 
 inline void readLockServices(void)
 {
@@ -2134,7 +2136,9 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 #endif
 		dmxNIT.request_pause();
 		dmxSDT.request_pause();
+#ifdef ENABLE_PPT
 		dmxPPT.request_pause();
+#endif
 		scanning = 0;
 	}
 	else if (!pause && !scanning)
@@ -2146,7 +2150,9 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 #ifdef ENABLE_FREESATEPG
 		dmxFSEIT.request_unpause();
 #endif
+#ifdef ENABLE_PPT
 		dmxPPT.request_unpause();
+#endif
 		scanning = 1;
 		dmxCN.change(0);
 		dmxEIT.change(0);
@@ -2525,7 +2531,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.303 2009/07/08 20:32:17 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.304 2009/07/26 17:02:46 rhabarber1848 Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2914,7 +2920,9 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 			dmxEIT.request_pause();
 			dmxNIT.request_pause();
 			dmxSDT.request_pause();
+#ifdef ENABLE_PPT
 			dmxPPT.request_pause();
+#endif
 		}
 		xprintf("[sectionsd] commandserviceChanged: service is filtered!\n");
 	}
@@ -2926,7 +2934,9 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 			dmxEIT.request_unpause();
 			dmxNIT.request_unpause();
 			dmxSDT.request_unpause();
+#ifdef ENABLE_PPT
 			dmxPPT.request_unpause();
+#endif
 			xprintf("[sectionsd] commandserviceChanged: service is no longer filtered!\n");
 		}
 	}
@@ -4116,6 +4126,7 @@ static void commandUnRegisterEventClient(int /*connfd*/, char *data, const unsig
 }
 
 
+#ifdef ENABLE_PPT
 static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLength)
 {
 	unsigned short pid;
@@ -4139,6 +4150,7 @@ static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLeng
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 	return ;
 }
+#endif
 
 static void commandSetSectionsdScanMode(int connfd, char *data, const unsigned dataLength)
 {
@@ -4921,7 +4933,9 @@ static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
 {	commandDummy2,                          "commandPauseSorting"			},
 {	commandRegisterEventClient,             "commandRegisterEventClient"		},
 {	commandUnRegisterEventClient,           "commandUnRegisterEventClient"		},
+#ifdef ENABLE_PPT
 {	commandSetPrivatePid,                   "commandSetPrivatePid"			},
+#endif
 {	commandSetSectionsdScanMode,            "commandSetSectionsdScanMode"		},
 {	commandFreeMemory,			"commandFreeMemory"			},
 {	commandReadSIfromXML,			"commandReadSIfromXML"			},
@@ -7754,6 +7768,7 @@ printdate_ms(stderr); fprintf(stderr, "NVOD-EVENT in CN-THREAD!!!!!!!!!!!!!!!!!!
 	pthread_exit(NULL);
 }
 
+#ifdef ENABLE_PPT
 
 //---------------------------------------------------------------------
 // Premiere Private EPG Thread
@@ -8059,6 +8074,8 @@ static void *pptThread(void *)
 
 	pthread_exit(NULL);
 }
+
+#endif
 
 /* helper function for the housekeeping-thread */
 static void print_meminfo(void)
@@ -8462,15 +8479,18 @@ static void signalHandler(int signum)
 
 int main(int argc, char **argv)
 {
-	pthread_t threadTOT, threadEIT, threadCN, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
+	pthread_t threadTOT, threadEIT, threadCN, threadSDT, threadHouseKeeping, threadNIT;
 #ifdef ENABLE_FREESATEPG
 	pthread_t threadFSEIT;
+#endif
+#ifdef ENABLE_PPT
+	pthread_t threadPPT;
 #endif
 	int rc;
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.303 2009/07/08 20:32:17 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.304 2009/07/26 17:02:46 rhabarber1848 Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -8614,6 +8634,7 @@ int main(int argc, char **argv)
 		}
 #endif
 
+#ifdef ENABLE_PPT
 		// premiere private epg -Thread starten
 		rc = pthread_create(&threadPPT, 0, pptThread, 0);
 
@@ -8621,6 +8642,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "[sectionsd] failed to create ppt-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
+#endif
 
 		// NIT-Thread starten
 		rc = pthread_create(&threadNIT, 0, nitThread, 0);

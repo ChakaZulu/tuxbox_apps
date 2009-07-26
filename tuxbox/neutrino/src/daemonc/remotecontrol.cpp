@@ -237,7 +237,9 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 		{
 			CLCD::getInstance()->showServicename(current_channel_name); // UTF-8
 			g_Zapit->getPIDS( current_PIDs );
+#ifdef ENABLE_PPT
 			g_Sectionsd->setPrivatePid( current_PIDs.PIDs.privatepid );
+#endif
 
 			char *p = new char[sizeof(t_channel_id)];
 			memcpy(p, &current_channel_id, sizeof(t_channel_id));

@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.59 2009/07/18 21:42:42 rhabarber1848 Exp $
+// $Id: SIsections.cpp,v 1.60 2009/07/26 17:02:46 rhabarber1848 Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -456,6 +456,7 @@ void SIsectionEIT::parse(void)
 // sollte hier alles ueberprueft werden.
 // Leider ist das noch nicht bei allen Descriptoren so.
 //-----------------------------------------------------------------------
+#ifdef ENABLE_PPT
 void SIsectionPPT::parseLinkageDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   if(maxlen>=sizeof(struct descr_linkage_header))
@@ -718,6 +719,8 @@ void SIsectionPPT::parse(void)
 
 	parsed = 1;
 }
+#endif
+
 /********************/
 void SIsectionSDT::parseNVODreferenceDescriptor(const char *buf, SIservice &s)
 {

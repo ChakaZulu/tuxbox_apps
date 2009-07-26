@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.27 2009/07/08 20:32:17 rhabarber1848 Exp $
+//    $Id: SIsections.hpp,v 1.28 2009/07/26 17:02:46 rhabarber1848 Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -202,6 +202,7 @@ struct SI_section_header {
 	unsigned last_section_number		: 8;
 } __attribute__ ((packed)) ; // 8 bytes
 
+#ifdef ENABLE_PPT
 struct SI_section_PPT_header { // Premiere Private Table
 	unsigned table_id			: 8;
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -242,6 +243,7 @@ struct SI_section_PPT_header { // Premiere Private Table
 	unsigned descriptor_section_length_lo	: 8;
 	
 } __attribute__ ((packed)) ; // 8 bytes
+#endif
 
 class SIsection
 {
@@ -542,6 +544,7 @@ protected:
 #endif
 };
 
+#ifdef ENABLE_PPT
 class SIsectionPPT : public SIsection
 {
 public:
@@ -640,6 +643,7 @@ protected:
 	void parsePrivateContentTransmissionDescriptor(const char *buf, SIevent &e, unsigned maxlen);
 
 };
+#endif
 
 #ifndef DO_NOT_INCLUDE_STUFF_NOT_NEEDED_FOR_SECTIONSD
 // Fuer for_each
@@ -648,11 +652,13 @@ struct printSIsectionEIT : public std::unary_function<SIsectionEIT, void>
 	void operator() (const SIsectionEIT &s) { s.dump();}
 };
 
+#ifdef ENABLE_PPT
 // Fuer for_each
 struct printSIsectionPPT : public std::unary_function<SIsectionPPT, void>
 {
 	void operator() (const SIsectionPPT &s) { s.dump();}
 };
+#endif
 
 /*
 // Fuer for_each
@@ -677,6 +683,7 @@ public:
 	}
 };
 
+#ifdef ENABLE_PPT
 // Menge aller present/following PPTs (actual TS)
 class SIsectionsPPT : public std::set <SIsectionPPT, std::less<SIsectionPPT> >
 {
@@ -692,6 +699,7 @@ public:
 		return rc;
 	}
 };
+#endif
 
 // Menge aller schedule EITs (actual TS)
 class SIsectionsEITschedule : public std::set <SIsectionEIT, std::less<SIsectionEIT> >

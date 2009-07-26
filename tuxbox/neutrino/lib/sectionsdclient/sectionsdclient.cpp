@@ -1,7 +1,7 @@
 /*
   Client-Interface fuer sectionsd  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.64 2009/03/29 16:27:02 seife Exp $
+  $Id: sectionsdclient.cpp,v 1.65 2009/07/26 17:02:49 rhabarber1848 Exp $
 
   License: GPL
 
@@ -741,6 +741,7 @@ bool CSectionsdClient::getEPGidShort(const event_id_t eventid, CShortEPGData * e
 	return false;
 }
 
+#ifdef ENABLE_PPT
 void CSectionsdClient::setPrivatePid(const unsigned short pid)
 {
 	send(sectionsd::setPrivatePid, (char*)&pid, sizeof(pid));
@@ -748,6 +749,7 @@ void CSectionsdClient::setPrivatePid(const unsigned short pid)
 	readResponse();
 	close_connection();
 }
+#endif
 
 #if 0
 void CSectionsdClient::setSectionsdScanMode(const int scanMode)
