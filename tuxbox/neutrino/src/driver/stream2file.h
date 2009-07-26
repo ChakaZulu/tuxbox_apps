@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.h,v 1.12 2008/10/06 07:15:32 seife Exp $
+ * $Id: stream2file.h,v 1.13 2009/07/26 17:00:23 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -53,6 +53,7 @@ struct stream2file_status2_t
 
 stream2file_error_msg_t start_recording(const char * const filename,
 					const char * const info,
+					int mode,
 					const bool with_o_sync,
 					const bool with_fdatasync,
 					const unsigned long long splitsize,

@@ -844,6 +844,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	{
 		error_msg = ::start_recording(filename,
 					      getMovieInfoString(channel_id, epgid, epg_time).c_str(),
+					      mode,
 					      Use_O_Sync,
 					      Use_Fdatasync,
 					      ((unsigned long long)SplitSize) * 1048576ULL,

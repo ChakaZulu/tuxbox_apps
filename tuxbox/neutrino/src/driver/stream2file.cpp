@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.32 2009/04/02 07:53:53 seife Exp $
+ * $Id: stream2file.cpp,v 1.33 2009/07/26 17:00:23 rhabarber1848 Exp $
  * 
  * streaming to file/disc
  * 
@@ -121,6 +121,7 @@ static time_t record_start_time = 0;
 static time_t record_end_time = 0;
 
 static char myfilename[512];
+static int mymode;
 
 typedef struct filenames_t
 {
@@ -175,6 +176,7 @@ void * FileThread(void * v_arg)
 	ringbuffer_data_t vec[2];
 	size_t readsize;
 	unsigned int filecount = 0;
+	char radio_extension[5];
 	const unsigned long long splitsize = (limit / TS_SIZE) * TS_SIZE;
 	unsigned long long remfile=0;
 	int fd2 = -1;
@@ -194,7 +196,12 @@ void * FileThread(void * v_arg)
 					flags |= O_SYNC;
 
  retry:
-				sprintf(filename, "%s.%3.3d.%s", myfilename, ++filecount, ((struct filenames_t *)v_arg)->extension);
+				if (mymode == 2)
+					// without extension .mp2 the Neutrino Audioplayer can not access the recording
+					sprintf(radio_extension, "%s", ".mp2");
+				else
+					sprintf(radio_extension, "%s", "");
+				sprintf(filename, "%s.%3.3d.%s%s", myfilename, ++filecount, ((struct filenames_t *)v_arg)->extension, radio_extension);
 				printf("[stream2file] filename: '%s'\n"
 				       "            myfilename: '%s'\n", filename, myfilename);
 				if (fd2 != -1)
@@ -460,6 +467,7 @@ void * DMXThread(void * v_arg)
 
 stream2file_error_msg_t start_recording(const char * const filename,
 					const char * const info,
+					int mode,
 					const bool with_o_sync,
 					const bool with_fdatasync,
 					const unsigned long long splitsize,
@@ -487,6 +495,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 
 	INC_BUSY_COUNT;
 	strcpy(myfilename, filename);
+	mymode = mode;
 
 	// printf("start_recording: myfilename '%s' filename '%s'\n",myfilename,filename);
 	// write stream information (should wakeup the disk from standby, too)
