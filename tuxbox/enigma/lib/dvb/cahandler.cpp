@@ -192,9 +192,22 @@ void CAService::connectionLost()
 
 void CAService::buildCAPMT( PMT *pmt )
 {
+	eTransponder *tp = eTransponderList::getInstance()->searchTS(me.getDVBNamespace(), me.getTransportStreamID(), me.getOriginalNetworkID());
 	if ( !capmt )
 		capmt = new unsigned char[1024];
-
+	unsigned int dvbnamespace = (unsigned int)me.getDVBNamespace().get();
+	if (tp && tp->satellite.isValid())
+	{
+		int orb_pos_part = dvbnamespace >> 16;
+/* convert to enigma2 compatible dvbnamespace
+   e2 uses 3600 - x degrees for west positions
+   e1 use a signed 16bit integer.. so convert here */
+		if (orb_pos_part > 0xF8F8)
+		{
+			orb_pos_part = 3600 - (0x10000 - orb_pos_part);
+			dvbnamespace = (orb_pos_part << 16) | (dvbnamespace & 0xFFFF);
+		}
+	}
 	memcpy(capmt,"\x9f\x80\x32\x82\x00\x00", 6);
 
 	capmt[6]=lastPMTVersion==-1 ? LIST_ONLY : LIST_UPDATE;
