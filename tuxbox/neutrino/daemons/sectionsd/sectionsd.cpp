@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.304 2009/07/26 17:02:46 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.305 2009/07/30 12:41:39 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2531,7 +2531,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.304 2009/07/26 17:02:46 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.305 2009/07/30 12:41:39 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -4935,6 +4935,8 @@ static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
 {	commandUnRegisterEventClient,           "commandUnRegisterEventClient"		},
 #ifdef ENABLE_PPT
 {	commandSetPrivatePid,                   "commandSetPrivatePid"			},
+#else
+{	commandDummy2,                          "commandSetPrivatePid"			},
 #endif
 {	commandSetSectionsdScanMode,            "commandSetSectionsdScanMode"		},
 {	commandFreeMemory,			"commandFreeMemory"			},
@@ -8490,7 +8492,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.304 2009/07/26 17:02:46 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.305 2009/07/30 12:41:39 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
