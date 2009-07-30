@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.21 2009/07/26 17:02:49 rhabarber1848 Exp $
+//  $Id: sectionsdMsg.h,v 1.22 2009/07/30 12:26:47 seife Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -88,6 +88,8 @@ struct sectionsd
 		CMD_unregisterEvents,		// commandUnRegisterEventClient
 #ifdef ENABLE_PPT
 		setPrivatePid,			// commandSetPrivatePid
+#else
+		dummy11_setPrivatePid,
 #endif
 		setSectionsdScanMode,		// commandSetSectionsdScanMode
 		freeMemory,			// commandFreeMemory
