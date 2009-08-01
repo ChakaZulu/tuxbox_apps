@@ -8,6 +8,9 @@
 #include <lib/dvb/subtitle.h>
 #include <lib/base/eerror.h>
 #include <lib/gdi/fb.h>
+#include <lib/gdi/font.h>
+#include <lib/gdi/gfbdc.h>
+#include <lib/gui/eskin.h>
 
 void bitstream_init(struct bitstream *bit, void *buffer, int size)
 {
@@ -58,6 +61,60 @@ void subtitle_process_line(struct subtitle_ctx *sub, struct subtitle_page *page,
 				}
 //				//eDebug("inserting %d bytes (into region %d)", len, region->region_id);
 				memcpy(region->region_buffer + region->region_width * y + x, data, len);
+			}
+			object = object->next;
+		}
+		region = region->next;
+	}
+}
+
+void subtitle_process_string(struct subtitle_ctx *sub, struct subtitle_page *page, int object_id, __u8 *data, int len)
+{
+	struct subtitle_region *region = page->regions;
+	gFont font=eSkin::getActive()->queryFont("global.normal");
+
+	while (region)
+	{
+		struct subtitle_region_object *object = region->region_objects;
+		while (object)
+		{
+			if (object->object_id == object_id)
+			{
+				eString s = convertDVBUTF8(data,len);
+
+				gPixmap pixmap;
+				pixmap.x=region->region_width;
+				pixmap.y=region->region_height;
+				pixmap.bpp=8;
+				pixmap.bypp=1;
+				pixmap.stride=region->region_width;
+				pixmap.data=region->region_buffer;
+				pixmap.clut.colors=gFBDC::getInstance()->getPixmap().clut.colors;
+				pixmap.clut.data=gFBDC::getInstance()->getPixmap().clut.data;
+
+				eRect pos( object->object_horizontal_position, object->object_vertical_position, region->region_width - object->object_horizontal_position, region->region_height - object->object_vertical_position);
+				gPixmapDC* outputDC = new gPixmapDC(&pixmap);
+				gPainter* p = new gPainter(*outputDC);
+				p->setBackgroundColor(gColor(object->background_pixel_value| 0xF0));
+				p->setForegroundColor(gColor(object->foreground_pixel_value| 0xF0));
+				eTextPara *para = new eTextPara( pos );
+				para->setFont( font );
+				para->renderString( s );
+				eRect bbox(para->getBoundBox());
+				bbox.moveBy(-2, -2);
+				bbox.setWidth(bbox.width()+4);
+				bbox.setHeight(bbox.height()+4);
+
+				p->clip(bbox);
+				p->clear();
+				p->renderPara( *para );
+				para->destroy();
+				p->clippop();
+				p->flush();
+				delete p;	
+				delete outputDC;
+				pixmap.clut.data=0;
+//eDebug("process_string:%s,%d,%d,%d,%d",s.c_str(),len,object->background_pixel_value,object->foreground_pixel_value,region->clut_id);
 			}
 			object = object->next;
 		}
@@ -602,11 +659,6 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			
 			CLUT_entry_id = *segment++;
 			entry_CLUT_flag = *segment >> 5;
-			if (!(entry_CLUT_flag & 6)) // if no 4 or 16 color entry, skip it
-			{
-				eDebug("skipped 8bit CLUT entry");
-				continue;
-			}
 			full_range = *segment++ & 1;
 			processed_length += 2;
 			
@@ -626,12 +678,18 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 				v_T   = (*segment++ & 3) << 6;
 				processed_length += 2;
 			}
+			if (!(entry_CLUT_flag & 6)) // if no 4 or 16 color entry, skip it
+			{
+				eDebug("skipped 8bit CLUT entry");
+				continue;
+			}
 			
 			clut->entries[CLUT_entry_id].Y = v_Y; 
 			clut->entries[CLUT_entry_id].Cr = v_Cr; 
 			clut->entries[CLUT_entry_id].Cb = v_Cb; 
 			clut->entries[CLUT_entry_id].T = v_T; 
-			clut->size++;
+			if (clut->size <= CLUT_entry_id)
+				clut->size = CLUT_entry_id+1;
 			//eDebug("  %04x %02x %02x %02x %02x", CLUT_entry_id, v_Y, v_Cb, v_Cr, v_T);
 		}
 		break;
@@ -704,8 +762,13 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			}
 		} 
 		else if (object_coding_method == 1)
-			eDebug("---- object_coding_method 1 unsupported!");
-
+		{
+			int len = *segment++;
+			processed_length++;
+			subtitle_process_string(sub, page, object_id, segment, len*2);
+			segment += len;
+			processed_length += len;
+		}
 		break;
 	}
 	case 0x80: // end of display set segment
