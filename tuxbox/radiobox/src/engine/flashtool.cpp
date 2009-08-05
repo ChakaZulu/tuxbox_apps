@@ -34,7 +34,7 @@
 #include <sys/reboot.h>
 
 #include <linux/version.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,7)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,7)) && (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18))
 #include <linux/compiler.h>
 #endif
 #include <mtd/mtd-user.h>
