@@ -49,13 +49,11 @@ static	char			*hscore=0;
 static	char			isalloc=0;
 static	int				localuser=-1;
 
-#ifdef HAVE_DBOX_HARDWARE
-    #ifndef TRUE
-	#define TRUE (!0)
-    #endif
-    #ifndef FALSE
-	#define FALSE (0)
-    #endif
+#ifndef TRUE
+#define TRUE (!0)
+#endif
+#ifndef FALSE
+#define FALSE (0)
 #endif
 
 typedef struct _HScore
