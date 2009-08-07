@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.212 2009/07/21 07:27:22 rhabarber1848 Exp $
+  $Id: settings.h,v 1.213 2009/08/07 07:22:53 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -74,6 +74,7 @@ struct SNeutrinoSettings
 	int infobar_show_channellogo;
 	int infobar_channellogo_background;
 	int startmode;
+	int radiotext_enable;
 
 	// EPG
 	std::string epg_cache;

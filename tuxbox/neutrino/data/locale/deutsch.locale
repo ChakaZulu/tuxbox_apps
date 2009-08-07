@@ -629,6 +629,7 @@ miscsettings.infobar Infobar
 miscsettings.infobar_sat_display Satellitenanzeige
 miscsettings.infobar_show Info bei EPG Änderung
 miscsettings.osd_specials OSD-Extras
+miscsettings.radiotext Radiotext
 miscsettings.rc_standby_off_with Standby aus mit
 miscsettings.rc_standby_off_with_power Power
 miscsettings.rc_standby_off_with_power_home Power, Home

@@ -42,6 +42,9 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 #include "driver/lcdd.h"
+#ifdef ENABLE_RADIOTEXT
+#include "driver/radiotext.h"
+#endif
 
 #include "system/localize.h"
 #include "system/settings.h"
@@ -73,6 +76,9 @@ NEUTRINO_CPP  CRCInput		*g_RCInput;
 NEUTRINO_CPP  CEpgData		*g_EpgData;
 NEUTRINO_CPP  CInfoViewer	*g_InfoViewer;
 NEUTRINO_CPP  EventList		*g_EventList;
+#ifdef ENABLE_RADIOTEXT
+NEUTRINO_CPP  CRadioText	*g_Radiotext;
+#endif
 
 NEUTRINO_CPP  CLocaleManager	*g_Locale;
 NEUTRINO_CPP  CPlugins		*g_PluginList;

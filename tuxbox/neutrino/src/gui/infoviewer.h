@@ -111,6 +111,11 @@ class CInfoViewer
    	void showLcdPercentOver();
 	int showChannelLogo(  const t_channel_id logo_channel_id );
 	void showInfoFile();
+#ifdef ENABLE_RADIOTEXT
+	void showIcon_RadioText(bool rt_available, bool rt_enabled) const;
+	void showRadiotext();
+	void killRadiotext();
+#endif
 	
 	std::string eventname;
 

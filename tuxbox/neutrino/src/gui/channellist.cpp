@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.214 2009/06/30 19:21:54 dbt Exp $
+	$Id: channellist.cpp,v 1.215 2009/08/07 07:22:46 rhabarber1848 Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -618,6 +618,15 @@ void CChannelList::zapTo(int pos, bool forceStoreToLastChannels)
 			tuxtxt_stop();
 		}
 #endif
+
+#ifdef ENABLE_RADIOTEXT
+		if ((g_settings.radiotext_enable) && ((CNeutrinoApp::getInstance()->getMode()) == NeutrinoMessages::mode_radio) && (g_Radiotext))
+		{
+			// stop radiotext PES decoding before zapping
+			g_Radiotext->radiotext_stop();
+		}
+#endif
+
 		tuned = pos;
 		if (g_settings.lcd_setting[SNeutrinoSettings::LCD_EPGMODE] & 0x02)
 		{	/* microoptimization: only poll sectionsd if epg title display is configured

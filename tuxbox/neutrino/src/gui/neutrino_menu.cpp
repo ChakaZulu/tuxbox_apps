@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.64 2009/08/07 07:16:14 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.65 2009/08/07 07:22:50 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1031,6 +1031,10 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VIRTUAL_ZAP_MODE, &g_settings.virtual_zap_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SHOW, &g_settings.infobar_show, INFOBAR_EPG_SHOW_OPTIONS, INFOBAR_EPG_SHOW_OPTIONS_COUNT, true));
 
+#ifdef ENABLE_RADIOTEXT
+	CRadiotextNotifier *radiotextNotifier = new CRadiotextNotifier;
+	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_RADIOTEXT, &g_settings.radiotext_enable, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, radiotextNotifier));
+#endif
 	miscSettingsInfobar.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_CHANNELLOGO));
 	
 	miscSettingsInfobar.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_CHANNELLOGO_SHOW, &g_settings.infobar_show_channellogo, INFOBAR_CHANNELLOGO_SHOW_OPTIONS, INFOBAR_CHANNELLOGO_SHOW_OPTIONS_COUNT, true));

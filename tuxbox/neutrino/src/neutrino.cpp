@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.963 2009/08/07 07:16:04 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.964 2009/08/07 07:22:30 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -146,6 +146,9 @@ static void initGlobals(void)
 	g_InfoViewer    = NULL;
 	g_EventList     = NULL;
 
+#ifdef ENABLE_RADIOTEXT
+	g_Radiotext     = NULL;
+#endif
 	g_Locale        = new CLocaleManager;
 	g_PluginList    = NULL;
 }
@@ -374,6 +377,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_channellogo_background		= configfile.getInt32("infobar_channellogo_background"		,0);
 	g_settings.startmode			= configfile.getInt32("startmode" , 0 );
 
+	g_settings.radiotext_enable		= configfile.getBool("radiotext_enable"          , false);
 	//audio
 	g_settings.audio_AnalogMode 		= configfile.getInt32( "audio_AnalogMode"        , 0 );
 	g_settings.audio_DolbyDigital		= configfile.getBool("audio_DolbyDigital"        , false);
@@ -913,6 +917,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString("infobar_channel_logodir"	, g_settings.infobar_channel_logodir);
 	configfile.setInt32( "infobar_channellogo_background"	, g_settings.infobar_channellogo_background);
 	configfile.setInt32("startmode"                , g_settings.startmode);
+	configfile.setBool("radiotext_enable"          , g_settings.radiotext_enable);
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode" , g_settings.audio_AnalogMode);
@@ -3584,6 +3589,12 @@ void CNeutrinoApp::tvMode( bool rezap )
 		channelsInit(init_mode_switch, mode_tv);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
+#ifdef ENABLE_RADIOTEXT
+	if (g_settings.radiotext_enable) 
+	{
+		g_Radiotext = new CRadioText;
+	}
+#endif
 }
 
 void CNeutrinoApp::scartMode( bool bOnOff )

@@ -20,3 +20,7 @@ install_DATA = \
 	ok_small.raw up_small.raw down_small.raw plus.raw minus.raw \
 	subt.raw subt_gray.raw
 
+if ENABLE_RADIOTEXT
+install_DATA += \
+	radiotextget.raw radiotextoff.raw radiotextwait.raw
+endif

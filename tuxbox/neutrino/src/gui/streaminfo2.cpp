@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.42 2009/06/02 18:55:05 rhabarber1848 Exp $
+	$Id: streaminfo2.cpp,v 1.43 2009/08/07 07:22:50 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -99,6 +99,17 @@ CStreamInfo2::CStreamInfo2()
 	brc = 0;
 	int mode = g_Zapit->getMode();
 
+#ifdef ENABLE_RADIOTEXT
+   /* stop Radiotext if in Radiomode */
+  if (mode == 2) {
+      if (g_settings.radiotext_enable && g_Radiotext) {
+         delete g_Radiotext;
+         g_Radiotext = NULL;
+		 std::cout<<"[streaminfo] disable radiotext during streaminfo executing"<<std::endl;
+      }
+   }
+#endif
+ 
 	if (!g_Zapit->isRecordModeActive())
 		if (mode == 1) { 
 			current_apid = -1;		
@@ -147,6 +158,18 @@ CStreamInfo2::~CStreamInfo2()
 
 	delete pig;
 	if (brc) delete brc;
+		
+#ifdef ENABLE_RADIOTEXT
+	/* restart Radiotext if in Radiomode and enabled */
+	int mode = g_Zapit->getMode();
+	if (mode == 2) {
+     	 if (g_settings.radiotext_enable) {
+  				std::cout<<"[streaminfo] enable radiotext again"<<std::endl;       
+				g_Radiotext = new CRadioText;
+        		g_Radiotext->setPid(g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
+     	 	}			
+   	}	
+#endif
 }
 
 int CStreamInfo2::exec()
@@ -778,7 +801,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.42 $");
+	return imageinfo.getModulVersion("","$Revision: 1.43 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &)

@@ -35,4 +35,10 @@ libneutrino_driver_a_SOURCES = \
 	shutdown_count.cpp \
 	BitrateCalculator.cpp
 
+if ENABLE_RADIOTEXT
+libneutrino_driver_a_SOURCES += \
+	radiotext.cpp \
+	radiotools.cpp
+endif
+
 libneutrino_driver_netfile_a_SOURCES = netfile.cpp

@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.94 2009/05/06 14:14:33 rhabarber1848 Exp $
+	$Id: setting_helpers.h,v 1.95 2009/08/07 07:22:53 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -154,6 +154,14 @@ class CPauseSectionsdNotifier : public CChangeObserver
 	public:
 		bool changeNotify(const neutrino_locale_t, void * Data);
 };
+
+#ifdef ENABLE_RADIOTEXT
+class CRadiotextNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const neutrino_locale_t, void * Data);
+};
+#endif
 
 #ifdef HAVE_DBOX_HARDWARE
 class CSPTSNotifier : public CChangeObserver

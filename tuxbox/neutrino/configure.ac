@@ -72,6 +72,11 @@ AC_ARG_ENABLE(esd,
 	,[enable_esd=no])
 AM_CONDITIONAL(ENABLE_ESD,test "$enable_esd" = "yes")
 
+AC_ARG_ENABLE(radiotext,
+	AS_HELP_STRING(--enable-radiotext,include Radiotext support),
+	,[enable_radiotext=no])
+AM_CONDITIONAL(ENABLE_RADIOTEXT,test "$enable_radiotext" = "yes")
+
 AC_ARG_ENABLE(use-libxml2,
    [  --enable-use-libxml2    use libxml2 instead of libxmltree],
       [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
@@ -102,6 +107,10 @@ fi
 
 if test "$enable_esd" = "yes"; then
 AC_DEFINE(ENABLE_ESD,1,[include esd sound daemon])
+fi
+
+if test "$enable_radiotext" = "yes"; then
+AC_DEFINE(ENABLE_RADIOTEXT,1,[include Radiotext support])
 fi
 
 CPPFLAGS="$CPPFLAGS -Wextra -Wshadow"

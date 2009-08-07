@@ -629,6 +629,7 @@ miscsettings.infobar Infobar
 miscsettings.infobar_sat_display Satellite display
 miscsettings.infobar_show EPG Info
 miscsettings.osd_specials OSD-Specials
+miscsettings.radiotext Radiotext
 miscsettings.rc_standby_off_with Standby off with
 miscsettings.rc_standby_off_with_power Power
 miscsettings.rc_standby_off_with_power_home Power, Home

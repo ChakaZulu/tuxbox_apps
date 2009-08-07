@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.177 2009/05/06 14:14:33 rhabarber1848 Exp $
+	$Id: setting_helpers.cpp,v 1.178 2009/08/07 07:22:53 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -351,6 +351,29 @@ bool CSectionsdConfigNotifier::changeNotify(const neutrino_locale_t, void *)
 	CNeutrinoApp::getInstance()->SendSectionsdConfig();
 	return true;
 }
+
+#ifdef ENABLE_RADIOTEXT
+bool CRadiotextNotifier::changeNotify(const neutrino_locale_t, void *)
+{
+	if (g_settings.radiotext_enable)
+	{
+		if (g_Radiotext == NULL)
+			g_Radiotext = new CRadioText;
+		if (g_Radiotext && ((CNeutrinoApp::getInstance()->getMode()) == NeutrinoMessages::mode_radio))
+			g_Radiotext->setPid(g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
+	}
+	else
+	{
+		// stop radiotext PES decoding
+		if (g_Radiotext)
+			g_Radiotext->radiotext_stop();
+		delete g_Radiotext;
+		g_Radiotext = NULL;
+	}
+
+	return true;
+}
+#endif
 
 bool CTouchFileNotifier::changeNotify(const neutrino_locale_t, void * data)
 {
