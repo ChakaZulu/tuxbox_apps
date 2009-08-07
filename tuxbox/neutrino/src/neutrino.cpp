@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.962 2009/07/21 19:40:06 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.963 2009/08/07 07:16:04 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3052,6 +3052,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			}
 			return messages_return::handled;
 		}
+#ifdef ENABLE_ESD
 		else if( msg == NeutrinoMessages::ESOUND_ON )
 		{
 			CEsoundGui::CEsoundGui tmpEsoundGui;
@@ -3059,6 +3060,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			g_RCInput->clearRCMsg();
 			return messages_return::handled;
 		}
+#endif
 		else if (msg == NeutrinoMessages::EVT_POPUP)
 		{
 			if (mode != mode_scart)

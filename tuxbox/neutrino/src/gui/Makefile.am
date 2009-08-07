@@ -23,7 +23,11 @@ libneutrino_gui_a_SOURCES = \
 	rc_lock.cpp bookmarkmanager.cpp \
 	timeosd.cpp epgplus.cpp epg_menu.cpp personalize.cpp \
 	streaminfo2.cpp plugins.cpp imageinfo.cpp \
-	audio_select.cpp movieinfo.cpp esound.cpp
+	audio_select.cpp movieinfo.cpp
+
+if ENABLE_ESD
+libneutrino_gui_a_SOURCES += esound.cpp
+endif
 
 if ENABLE_MOVIEPLAYER2
 libneutrino_gui_a_SOURCES += movieplayer2.cpp

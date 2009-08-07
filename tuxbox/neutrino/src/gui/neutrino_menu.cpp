@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.63 2009/07/21 19:40:07 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.64 2009/08/07 07:16:14 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -161,6 +161,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	else if (g_settings.personalize_inetradio == 2)
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_INETRADIO_NAME, g_settings.personalize_pincode, true, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut++)));
 
+#ifdef ENABLE_ESD
 	if (access("/bin/esd", X_OK) == 0 || access("/var/bin/esd", X_OK) == 0)
 	{
 		puts("[neutrino] found esound, adding to mainmenue/personalize");
@@ -169,6 +170,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		else if (g_settings.personalize_esound == 2)
 			mainMenu.addItem(new CLockedMenuForwarder(LOCALE_ESOUND_NAME, g_settings.personalize_pincode, true, true, NULL, new CEsoundGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
 	}
+#endif
 
 	if (g_settings.personalize_movieplayer == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut++)));
@@ -837,9 +839,11 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYER_DEFDIR, true, g_settings.network_nfs_audioplayerdir, this, "audioplayerdir"));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_ENABLE_SC_METADATA, &g_settings.audioplayer_enable_sc_metadata, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true ));
 
+#ifdef ENABLE_ESD
 	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_ESOUND_NAME));
 	CStringInput * audioplPicSettings_EsoundPort= new CStringInput(LOCALE_ESOUND_PORT, g_settings.esound_port, 5, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_ESOUND_PORT, true, g_settings.esound_port, audioplPicSettings_EsoundPort));
+#endif
 
 }
 
