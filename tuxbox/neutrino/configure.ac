@@ -113,6 +113,10 @@ if test "$enable_radiotext" = "yes"; then
 AC_DEFINE(ENABLE_RADIOTEXT,1,[include Radiotext support])
 fi
 
+if test "$enable_movieplayer2" != "yes"; then
+AC_DEFINE(ENABLE_MOVIEBROWSER,1,[include Moviebrowser support])
+fi
+
 CPPFLAGS="$CPPFLAGS -Wextra -Wshadow"
 
 AC_OUTPUT([

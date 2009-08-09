@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.172 2009/05/13 13:27:13 trompete88 Exp $
+  $Id: movieplayer.cpp,v 1.173 2009/08/09 17:36:03 rhabarber1848 Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -92,9 +92,9 @@
 
 #include <poll.h>
 
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 #define MOVIE_HINT_BOX_TIMER 5 // time to show bookmark hints in seconds
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 #if HAVE_DVB_API_VERSION < 3
 #define ADAP	"/dev/dvb/card0"
@@ -138,10 +138,10 @@ bool g_ZapitsetStandbyState = false;
 
 static bool isTS, isPES, isBookmark;
 
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 static bool isMovieBrowser = false;
 static bool movieBrowserDelOnExit = false;
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 int g_speed = 1;
 #ifndef __USE_FILE_OFFSET64
@@ -319,9 +319,9 @@ CMoviePlayerGui::CMoviePlayerGui()
 
 	filebrowser->Dirs_Selectable = false;
 
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 	moviebrowser = NULL;
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 	tsfilefilter.addFilter ("ts");
 	vlcfilefilter.addFilter ("mpg");
@@ -341,12 +341,12 @@ CMoviePlayerGui::CMoviePlayerGui()
 CMoviePlayerGui::~CMoviePlayerGui ()
 {
 	delete filebrowser;
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 	if(moviebrowser != NULL)
 	{	
 		delete moviebrowser;
 	}
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 	if(bookmarkmanager)
 		delete bookmarkmanager;
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
@@ -445,9 +445,9 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	isTS=false;
 	isPES=false;
 
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 	isMovieBrowser = false;
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 	if(actionKey=="fileplayback")
 	{
@@ -466,7 +466,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		isTS=true;
 		PlayFile();
 	}
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 	else if(actionKey=="tsmoviebrowser")
 	{
 		if(moviebrowser == NULL)
@@ -485,7 +485,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 			TRACE("[mp] error: cannot create MovieBrowser");
 		}
 	}
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 	else if(actionKey=="tsplayback_pc")
 	{
 		//isPES=true;
@@ -3153,7 +3153,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 	std::string sel_filename;
 	std::string hlpstr;
 
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 	timeval current_time;
 	CMovieInfo cMovieInfo;				// funktions to save and load movie info
 	MI_MOVIE_INFO* p_movie_info = NULL;	// movie info handle which comes from the MovieBrowser, if not NULL MoviePlayer is able to save new bookmarks
@@ -3186,7 +3186,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_BOOK_TYPE_BACKWARD, 	true,NULL,&cSelectedMenuBookStart[3]));
 	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_BOOK_MOVIESTART, 		true,NULL,&cSelectedMenuBookStart[4]));
 	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_BOOK_MOVIEEND, 		true,NULL,&cSelectedMenuBookStart[5]));
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 	CTimeOSD    FileTime;
 	bool        update_lcd       = true;
@@ -3222,7 +3222,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			start_play       = true;
 		}
 
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 		if(isMovieBrowser == true) 
 		{
 			// do all moviebrowser stuff here ( like commercial jump ect.)
@@ -3349,7 +3349,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				}
 			}
 		} // isMovieBrowser == true
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 		//-- file browser --
 		//------------------
@@ -3363,7 +3363,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_Zapit->setStandby (false);
 				g_ZapitsetStandbyState = false;
 			}
-#ifdef MOVIEBROWSER  			
+#ifdef ENABLE_MOVIEBROWSER
 			if(isMovieBrowser == true)
 			{
 				// start the moviebrowser instead of the filebrowser
@@ -3399,7 +3399,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				}
 			}
 			else
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 			{ // MOVIEBROWSER added
 				filebrowser->Filter = &tsfilefilter;
 				//-- play selected file or ... --
@@ -3575,7 +3575,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- stop playback + start filebrowser --
 			case CRCInput::RC_home:
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 				if(isMovieBrowser == true && p_movie_info != NULL)
 				{ 
 					// if we have a movie information, try to save the stop position
@@ -3587,7 +3587,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 					cMovieInfo.saveMovieInfo(*p_movie_info);
 					//p_movie_info->fileInfoStale(); //TODO: we might to tell the Moviebrowser that the movie info has changed, but this could cause long reload times  when reentering the Moviebrowser
 				} 
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 				g_playstate = CMoviePlayerGui::STOPPED;
 				pthread_join(rct, NULL);
 				open_filebrowser = true;
@@ -3612,7 +3612,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- invoke bookmark manager --
 			case CRCInput::RC_blue:
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 					// is there already a bookmark activity?
 				if(isMovieBrowser != true)
 				{
@@ -3753,7 +3753,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 					fprintf(stderr, "too many bookmarks\n");
 					DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
 				}
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 				break;
 
@@ -3797,7 +3797,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- Resync A/V --
 			case CRCInput::RC_0:
 
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 				if(isMovieBrowser == true)
 				{
 					if(new_bookmark.pos != 0)
@@ -3809,7 +3809,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 					}
 					jump_not_until = (g_fileposition / SECONDOFFSET) + 10;  // avoid bookmark jumping for the next 10 seconds, , TODO:  might be moved to another key
 				}	
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 				if(g_playstate != CMoviePlayerGui::PAUSE)
 					//g_playstate = CMoviePlayerGui::RESYNC;
 					g_playstate = CMoviePlayerGui::SOFTRESET;
@@ -3985,9 +3985,9 @@ void CMoviePlayerGui::PlayFile (int parental)
 	}
 	while(requestStop==false);
 
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 	isMovieBrowser = false;
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 	//-- request stop only on a running player --
 	if(g_playstate >= CMoviePlayerGui::PLAY)
@@ -4458,7 +4458,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.172 $");
+	return imageinfo.getModulVersion("","$Revision: 1.173 $");
 }
 
 void CMoviePlayerGui::showHelpTS()

@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.30 2009/06/02 18:55:05 rhabarber1848 Exp $
+	$Id: imageinfo.cpp,v 1.31 2009/08/09 17:36:03 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -27,12 +27,9 @@
 
 #include <gui/imageinfo.h>
 
-#ifndef MOVIEPLAYER2
-#define MOVIEBROWSER
-#endif
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 #include <gui/moviebrowser.h>
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 #include <gui/pictureviewer.h>
 #include <gui/streaminfo2.h>
 
@@ -312,14 +309,14 @@ void CImageInfo::paintRevisionInfos(int y_startposition)
 	
 	y_startposition += iheight;
 	paintContent(font_info, xpos, y_startposition, "Imageinfo:", COL_MENUCONTENTINACTIVE );
-	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.30 $").c_str());
+	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.31 $").c_str());
 	
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 	y_startposition += iheight;
 	static CMovieBrowser mb;
 	paintContent(font_info, xpos, y_startposition, "Moviebrowser:", COL_MENUCONTENTINACTIVE );
 	paintContent(font_info, xpos+x_offset_large, y_startposition, mb.getMovieBrowserVersion().c_str());
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 	y_startposition += iheight;
 	static CPictureViewerGui pv;
@@ -592,14 +589,14 @@ void CImageInfo::paint()
 
 /* 	useful stuff for version informations * getModulVersion()
  * 	returns a numeric version string for better version handling from any module without 	
- * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.30 $" becomes "1.146", 
+ * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.31 $" becomes "1.146", 
  * 	argument prefix can be empty or a replacement for "Revision"-string eg. "Version: " or "v." as required,
- * 	argument ID_string must be a CVS-keyword like "$Revision: 1.30 $", used and changed by 
+ * 	argument ID_string must be a CVS-keyword like "$Revision: 1.31 $", used and changed by 
  * 	cvs-committs or a version data string eg: "1.xxx" by yourself
  * 	some examples:
- * 	getModulVersion("Version: ","$Revision: 1.30 $")	 returns "Version: 1.153"	
- * 	getModulVersion("v.","$Revision: 1.30 $")			 returns "v.1.153"
- *  	getModulVersion("","$Revision: 1.30 $")		 		 returns "1.153"
+ * 	getModulVersion("Version: ","$Revision: 1.31 $")	 returns "Version: 1.153"	
+ * 	getModulVersion("v.","$Revision: 1.31 $")			 returns "v.1.153"
+ *  	getModulVersion("","$Revision: 1.31 $")		 		 returns "1.153"
  */
 std::string CImageInfo::getModulVersion(const std::string &/*prefix_string*/, std::string ID_string)
 {

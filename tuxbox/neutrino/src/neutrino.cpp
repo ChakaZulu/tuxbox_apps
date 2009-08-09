@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.964 2009/08/07 07:22:30 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.965 2009/08/09 17:36:02 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -47,6 +47,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <dlfcn.h>
 #include <signal.h>
 #include <sys/wait.h>

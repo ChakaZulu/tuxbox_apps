@@ -39,13 +39,10 @@
 #include "gui/bookmarkmanager.h"
 #include "gui/widget/menue.h"
 
-#ifndef MOVIEPLAYER2
-#define MOVIEBROWSER
-#endif
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
 #include "gui/moviebrowser.h"
 #include "gui/movieinfo.h"
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
 extern "C" {
                #include <driver/ringbuffer.h>
@@ -90,9 +87,9 @@ class CMoviePlayerGui : public CMenuTarget
     std::string Path_vlc_settings;
 
     CFileBrowser * filebrowser;
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
     CMovieBrowser* moviebrowser;
-#endif /* MOVIEBROWSER */
+#endif /* ENABLE_MOVIEBROWSER */
 
     CBookmarkManager * bookmarkmanager;
 
@@ -111,7 +108,7 @@ class CMoviePlayerGui : public CMenuTarget
     CMoviePlayerGui();
     ~CMoviePlayerGui();
     int exec(CMenuTarget* parent, const std::string & actionKey);
-#ifdef MOVIEBROWSER
+#ifdef ENABLE_MOVIEBROWSER
     void fileInfoStale(){if(moviebrowser != NULL)moviebrowser->fileInfoStale();};
 #endif
     std::string getMoviePlayerVersion(void);
