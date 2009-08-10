@@ -501,24 +501,24 @@ int request_file(URL *url)
 /* local syserror numbers              */
 
 #define getHeaderVal(a,b) { \
-  char *ptr; \
-  ptr = strstr(header, a); \
-  if(ptr) \
+  char *_ptr; \
+  _ptr = strstr(header, a); \
+  if(_ptr) \
   { \
-    ptr = strchr(ptr, ':'); \
-    for(;!isalnum(*ptr);ptr++); \
-    b = atoi(ptr); \
+    _ptr = strchr(_ptr, ':'); \
+    for(; !isalnum(*_ptr); _ptr++); \
+    b = atoi(_ptr); \
   } else b = -1; }
 
 #define getHeaderStr(a,b) { \
-  char *ptr; \
-  ptr = strstr(header, a); \
-  if(ptr) \
+  char *_ptr; \
+  _ptr = strstr(header, a); \
+  if(_ptr) \
   { \
     unsigned int i; \
-    ptr = strchr(ptr, ':'); \
-    for(ptr++;isspace(*ptr);ptr++); \
-    for (i=0; (ptr[i]!='\n') && (ptr[i]!='\r') && (ptr[i]!='\0') && (i<sizeof(b)); i++) b[i] = ptr[i]; \
+    _ptr = strchr(_ptr, ':'); \
+    for(_ptr++; isspace(*_ptr); _ptr++); \
+    for (i=0; (_ptr[i]!='\n') && (_ptr[i]!='\r') && (_ptr[i]!='\0') && (i<sizeof(b)); i++) b[i] = _ptr[i]; \
     b[i] = 0; \
   } }
 
@@ -531,7 +531,7 @@ void readln(int fd, char *buf)
 
 int parse_response(URL *url, void *opt, CSTATE *state)
 {
-	char header[2049], str[255];
+	char header[2049], /*str[255]*/ str[2048]; // combined with 2nd local str from id3 part
 	char *ptr, chr=0, lastchr=0;
 	int hlen = 0, response;
 	int meta_interval = 0, rval;
@@ -653,7 +653,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 		int cnt = 0, fcnt = 0;
 		ID3_frame id3frame;
 		uint32_t sz;
-		char *ptr, station[2048], desc[2048], str[2048];
+		char station[2048], desc[2048];
 
 		memmove(id3->magic, "ID3", 3);
 		id3->version[0] = 3;
@@ -731,7 +731,7 @@ FILE *f_open(const char *filename, const char *acctype)
 {
 	URL url;
 	FILE *fd;
-	int i, compatibility_mode = 0;
+	int /*i,*/ compatibility_mode = 0;
 	char *ptr = NULL, buf[4096], type[10];
 
 	if(acctype)
@@ -855,6 +855,7 @@ FILE *f_open(const char *filename, const char *acctype)
 						/* and return a valid stream descriptor */
 						if(!compatibility_mode)
 						{
+ 							int i;
 							/* look for a free cache slot */
 							for(i=0; ((i<CACHEENTMAX) && (cache[i].cache != NULL)); i++){};
 
@@ -936,8 +937,8 @@ FILE *f_open(const char *filename, const char *acctype)
 			strtol(url.host, &endptr, 10);
 			if((endptr-url.host) < (int)strlen(url.host))
 			{
-				char buf[32768], *ptr;
-				FILE *fd;
+				char buf2[32768];
+				FILE *_fd;
 
 				/* convert into shoutcast query format */
 				for(ptr=url.host; *ptr; ptr++)
@@ -947,31 +948,31 @@ FILE *f_open(const char *filename, const char *acctype)
 
 				/* create either a shoutcast or an icecast query */
 				if(url.access_mode == MODE_SCAST)
-					sprintf(buf, "http://classic.shoutcast.com/directory/?orderby=listeners&s=%s", url.host);
+					sprintf(buf2, "http://classic.shoutcast.com/directory/?orderby=listeners&s=%s", url.host);
 				else
-					sprintf(buf, "http://www.icecast.org/streamlist.php?search=%s", url.host);
+					sprintf(buf2, "http://www.icecast.org/streamlist.php?search=%s", url.host);
 
 				//findme
 				// ICECAST: it ain't that simple. Icecast doesn't work yet */
 
-				fd = f_open(buf, "rc");
+				_fd = f_open(buf2, "rc");
 
-				if(!fd)
+				if(!_fd)
 				{
 					sprintf(err_txt, "%s database query failed\nfailed action: %s",
-						((url.access_mode == MODE_SCAST) ? "shoutcast" : "icecast"), buf);
+						((url.access_mode == MODE_SCAST) ? "shoutcast" : "icecast"), buf2);
 					return NULL;
 				}
 
-				fread(buf, 1, 32768, fd);
-				f_close(fd);
+				fread(buf2, 1, 32768, _fd);
+				f_close(_fd);
 
-				ptr = strstr(buf, "rn=");
+				ptr = strstr(buf2, "rn=");
 
 				if(!ptr)
 				{
 					sprintf(err_txt, "failed to find station number");
-					dprintf(stderr, "%s\n", buf);
+					dprintf(stderr, "%s\n", buf2);
 					return NULL;
 				}
 
@@ -983,8 +984,9 @@ FILE *f_open(const char *filename, const char *acctype)
 			sprintf(url.url, "http://classic.shoutcast.com/sbin/shoutcast-playlist.pls?rn=%s&file=filename.pls", url.host);
 
 		case MODE_PLS:	{
-			char *ptr=NULL, *ptr2, buf[4096], servers[25][1024];
-			int rval, i, retries = retry_num;
+			char *ptr2, /*buf[4096], use local buf from function */ servers[25][1024];
+			int rval, retries = retry_num;
+			ptr = NULL;
 
 			/* fetch the playlist from the shoutcast directory with our own */
 			/* url-capable f_open() call. We need the compatibility mode for */
@@ -1018,7 +1020,7 @@ FILE *f_open(const char *filename, const char *acctype)
 				return NULL;
 			}
 
-			for( i=0; ((ptr != NULL) && (i<25)); ptr = strstr(ptr, "http://") )
+			for(int i=0; ((ptr != NULL) && (i<25)); ptr = strstr(ptr, "http://") )
 			{
 				strncpy(servers[i], ptr, 1023);
 				ptr2 = strchr(servers[i], '\n');
@@ -1033,13 +1035,16 @@ FILE *f_open(const char *filename, const char *acctype)
 
 			/* try to connect to all servers until we find one that */
 			/* is willing to serve us */
-			for(i=0, fd = NULL; ((fd == NULL) && (i<25)); i++)
 			{
-				const char* const chptr = strstr(servers[i], "://");
-				if(chptr)
+				int i;			
+				for(i=0, fd = NULL; ((fd == NULL) && (i<25)); i++)
 				{
-					sprintf(url.url, "icy%s", chptr);
-					fd = f_open(url.url, "r");
+					const char* const chptr = strstr(servers[i], "://");
+					if(chptr)
+					{
+						sprintf(url.url, "icy%s", chptr);
+						fd = f_open(url.url, "r");
+					}
 				}
 			}
 		}
@@ -1553,13 +1558,13 @@ int pop(FILE *fd, char *buf, long len)
 void CacheFillThread(void *c)
 {
 	char *buf;
-	STREAM_CACHE *cache = (STREAM_CACHE*)c;
+	STREAM_CACHE *scache = (STREAM_CACHE*)c;
 	int rval, datalen;
 
-	if(cache->closed)
+	if(scache->closed)
 		return;
 
-	dprintf(stderr, "CacheFillThread: thread started, using stream %8x\n", cache->fd);
+	dprintf(stderr, "CacheFillThread: thread started, using stream %8x\n", scache->fd);
 
 	buf = (char*)malloc(CACHEBTRANS);
 
@@ -1576,36 +1581,36 @@ void CacheFillThread(void *c)
 		/* has a f_close() call in an other thread already closed the cache ? */
 		datalen = CACHEBTRANS;
 
-		rval = fread(buf, 1, datalen, cache->fd);
+		rval = fread(buf, 1, datalen, scache->fd);
 
-		if ((rval == 0) && feof(cache->fd)) 
+		if ((rval == 0) && feof(scache->fd)) 
 			break; /* exit cache fill thread if eof and nothing to push */
 
 		/* if there is a filter function set up for this stream, then */
 		/* we need to call it with the propper arguments */
-		if(cache->filter)
+		if(scache->filter)
 		{
-			cache->filter_arg->buf = buf;
-			cache->filter_arg->len = &rval;
-			cache->filter(cache->filter_arg);
+			scache->filter_arg->buf = buf;
+			scache->filter_arg->len = &rval;
+			scache->filter(scache->filter_arg);
 			datalen = rval;
 		}
 
-		if( push(cache->fd, buf, rval) < 0)
+		if( push(scache->fd, buf, rval) < 0)
 			break;
 
-	} while( (rval == datalen) && (!cache->closed) );
+	} while( (rval == datalen) && (!scache->closed) );
 
 	/* close the cache if the stream disrupted */
-	cache->closed = 1;
+	scache->closed = 1;
 	// uclibc doen't like unlocking a non locked mutex, so to be safe use trylock before
-	pthread_mutex_trylock( &cache->writeable );
-	pthread_mutex_unlock( &cache->writeable );
-	pthread_mutex_trylock( &cache->readable );
-	pthread_mutex_unlock( &cache->readable );
+	pthread_mutex_trylock( &scache->writeable );
+	pthread_mutex_unlock( &scache->writeable );
+	pthread_mutex_trylock( &scache->readable );
+	pthread_mutex_unlock( &scache->readable );
 
 	/* ... and exit this thread. */
-	dprintf(stderr, "CacheFillThread: thread exited, stream %8x  \n", cache->fd);
+	dprintf(stderr, "CacheFillThread: thread exited, stream %8x  \n", scache->fd);
 
 	free(buf);
 	pthread_exit(0);
