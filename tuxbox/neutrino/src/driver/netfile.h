@@ -199,12 +199,12 @@ typedef  struct
 
 #define CRLFCut(a) \
 { \
-  char *ptr; \
-  ptr = strchr(a, '\r'); \
-  if(ptr) *ptr = 0; \
+  char *_ptr; \
+  _ptr = strchr(a, '\r'); \
+  if(_ptr) *_ptr = 0; \
   else { \
-  ptr = strchr(a, '\n'); \
-  if(ptr) *ptr = 0; } \
+  _ptr = strchr(a, '\n'); \
+  if(_ptr) *_ptr = 0; } \
 }
 
 #ifdef __cplusplus
