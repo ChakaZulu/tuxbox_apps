@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.126 2009/07/18 21:42:42 rhabarber1848 Exp $
+	$Id: eventlist.cpp,v 1.127 2009/08/11 20:40:38 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -341,7 +341,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				if (((evtlist.size() / listmaxshow) + 1) * listmaxshow == evtlist.size() + listmaxshow) // last page has full entries
 					selected = 0;
 				else
-					selected = ((step == listmaxshow) && (selected < (((evtlist.size() / listmaxshow) + 1) * listmaxshow))) ? (evtlist.size() - 1) : 0;
+					selected = ((step == (int)listmaxshow) && (selected < (((evtlist.size() / listmaxshow) + 1) * listmaxshow))) ? (evtlist.size() - 1) : 0;
 
 			paintItem(prev_selected - liststart);
 			unsigned int oldliststart = liststart;
