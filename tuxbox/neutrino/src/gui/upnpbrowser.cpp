@@ -805,6 +805,7 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 					}
 					m_playing_entry = (*entries)[selected - index];
 #if 0
+// #ifdef ENABLE_PICTUREVIEWER
 					else if ((mime == "image/gif") || (mime == "image/jpeg"))
 					{
 						CPictureViewer *viewer = new CPictureViewer();
@@ -838,6 +839,7 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 						m_frameBuffer->ClearFrameBuffer();
 						delete viewer;
 					}
+// #endif
 #endif
 				}
 

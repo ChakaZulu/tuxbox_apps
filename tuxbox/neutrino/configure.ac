@@ -14,7 +14,6 @@ TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
-TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 TUXBOX_APPS_LIB_PKGCONFIG(CONNECTION,tuxbox-connection)
 TUXBOX_APPS_LIB_PKGCONFIG(EVENTSERVER,tuxbox-eventserver)
@@ -80,6 +79,11 @@ AC_ARG_ENABLE(audioplayer,
 AM_CONDITIONAL(ENABLE_AUDIOPLAYER,test "$enable_audioplayer" = "yes")
 AM_CONDITIONAL(ENABLE_INTERNETRADIO,test "$enable_audioplayer" = "yes")
 
+AC_ARG_ENABLE(pictureviewer,
+	AS_HELP_STRING(--disable-pictureviewer,include Neutrino pictureviewer),
+	,[enable_pictureviewer=yes])
+AM_CONDITIONAL(ENABLE_PICTUREVIEWER,test "$enable_pictureviewer" = "yes")
+
 AC_ARG_ENABLE(use-libxml2,
    [  --enable-use-libxml2    use libxml2 instead of libxmltree],
       [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
@@ -126,6 +130,11 @@ AC_DEFINE(ENABLE_INTERNETRADIO,1,[include Neutrino internetradio])
 TUXBOX_APPS_LIB_PKGCONFIG(ID3TAG,id3tag)
 TUXBOX_APPS_LIB_PKGCONFIG(MAD,mad)
 TUXBOX_APPS_LIB_PKGCONFIG(VORBISIDEC,vorbisidec)
+fi
+
+if test "$enable_pictureviewer" = "yes"; then
+AC_DEFINE(ENABLE_PICTUREVIEWER,1,[include Neutrino pictureviewer])
+TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 fi
 
 CPPFLAGS="$CPPFLAGS -Wextra -Wshadow"

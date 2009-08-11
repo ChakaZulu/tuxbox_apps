@@ -25,7 +25,6 @@ neutrino_LDADD = \
 	gui/bedit/libneutrino_gui_bedit.a \
 	gui/widget/libneutrino_gui_widget.a \
 	gui/widget/libneutrino_gui_widget2.a \
-	driver/pictureviewer/libneutrino_pictureviewer.a \
 	driver/libneutrino_driver.a \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \
@@ -41,13 +40,11 @@ neutrino_LDADD = \
 	@UCODES_LIBS@ \
 	@ZAPIT_LIBS@ \
 	@LCDDISPLAY_LIBS@ \
-	@PNG_LIBS@ \
 	@MPEGTOOLS_LIBS@ \
 	@TUXTXT_LIBS@ \
 	@XMLTREE_LIBS@ \
 	@UPNPCLIENT_LIBS@ \
 	-lresolv \
-	-ljpeg \
 	-lpthread \
 	-ldl \
 	@XML_LIBS@
@@ -73,6 +70,13 @@ neutrino_LDADD += \
 	driver/libneutrino_driver_netfile.a
 endif
 
+endif
+
+if ENABLE_PICTUREVIEWER
+neutrino_LDADD += \
+	driver/pictureviewer/libneutrino_pictureviewer.a \
+	@PNG_LIBS@ \
+	-ljpeg
 endif
 
 if ENABLE_UPNP

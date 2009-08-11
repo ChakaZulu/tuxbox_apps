@@ -1,4 +1,8 @@
-SUBDIRS = pictureviewer
+SUBDIRS =
+
+if ENABLE_PICTUREVIEWER
+SUBDIRS += pictureviewer
+endif
 
 if ENABLE_AUDIOPLAYER
 SUBDIRS += audiodec

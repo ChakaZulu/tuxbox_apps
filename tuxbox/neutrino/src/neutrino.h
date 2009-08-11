@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.210 2009/07/21 19:40:06 rhabarber1848 Exp $
+	$Id: neutrino.h,v 1.211 2009/08/11 09:59:59 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -269,7 +269,9 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 				  CMenuWidget &miscSettings,
 				  CMenuWidget &driverSettings,
 				  CMenuWidget &service,
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 				  CMenuWidget &audiopl_picSettings,
+#endif
 				  CMenuWidget &streamingSettings,
 				  CMenuWidget &moviePlayer);
 		void addMenueIntroItems(CMenuWidget &item);

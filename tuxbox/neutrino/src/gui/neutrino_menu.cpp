@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.67 2009/08/11 09:56:54 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.68 2009/08/11 10:00:00 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -111,7 +111,9 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &miscSettings,
 								CMenuWidget &driverSettings,
 								CMenuWidget &service,
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 								CMenuWidget &audiopl_picSettings,
+#endif
 								CMenuWidget &streamingSettings,
 								CMenuWidget &moviePlayer)
 {
@@ -198,10 +200,12 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &streamingSettings, NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_MOUNT, true, NULL, new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
 
+#ifdef ENABLE_PICTUREVIEWER
 	if (g_settings.personalize_pictureviewer == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
 	else if (g_settings.personalize_pictureviewer == 2)
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, g_settings.personalize_pincode, true, true, NULL, new CPictureViewerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+#endif
 
 #if ENABLE_UPNP
 	if (g_settings.personalize_upnpbrowser == 1)
@@ -314,10 +318,12 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 			shortcut2++;
 	}
 	
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 	if (g_settings.personalize_audpic == 1)
 		mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	else if (g_settings.personalize_audpic == 2)
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, g_settings.personalize_pincode, true, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+#endif
 
 	if (g_settings.personalize_driver == 1)
 		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_DRIVER, true, NULL, &driverSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
@@ -796,6 +802,7 @@ const CMenuOptionChooser::keyval MESSAGEBOX_NO_YES_OPTIONS[MESSAGEBOX_NO_YES_OPT
 	{ 1, LOCALE_MESSAGEBOX_YES }
 };
 
+#ifdef ENABLE_PICTUREVIEWER
 #define PICTUREVIEWER_SCALING_OPTION_COUNT 3
 const CMenuOptionChooser::keyval PICTUREVIEWER_SCALING_OPTIONS[PICTUREVIEWER_SCALING_OPTION_COUNT] =
 {
@@ -803,6 +810,7 @@ const CMenuOptionChooser::keyval PICTUREVIEWER_SCALING_OPTIONS[PICTUREVIEWER_SCA
 	{ CPictureViewer::COLOR , LOCALE_PICTUREVIEWER_RESIZE_COLOR_AVERAGE },
 	{ CPictureViewer::NONE  , LOCALE_PICTUREVIEWER_RESIZE_NONE          }
 };
+#endif
 
 #ifdef ENABLE_AUDIOPLAYER
 #define AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT 2
@@ -819,6 +827,7 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 	audioplPicSettings.addItem(GenericMenuSeparator);
 	audioplPicSettings.addItem(GenericMenuBack);
 
+#ifdef ENABLE_PICTUREVIEWER
 	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PICTUREVIEWER_HEAD));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_PICTUREVIEWER_SCALING  , &g_settings.picviewer_scaling     , PICTUREVIEWER_SCALING_OPTIONS  , PICTUREVIEWER_SCALING_OPTION_COUNT  , true ));
 	CStringInput * pic_timeout= new CStringInput(LOCALE_PICTUREVIEWER_SLIDE_TIME, g_settings.picviewer_slide_time, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
@@ -828,6 +837,7 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DECODE_SERVER_IP, true, g_settings.picviewer_decode_server_ip, audioplPicSettings_DecServerIP));
 	CStringInput * audioplPicSettings_DecServerPort= new CStringInput(LOCALE_PICTUREVIEWER_DECODE_SERVER_PORT, g_settings.picviewer_decode_server_port, 5, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DECODE_SERVER_PORT, true, g_settings.picviewer_decode_server_port, audioplPicSettings_DecServerPort));
+#endif
 
 #ifdef ENABLE_AUDIOPLAYER
 	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_AUDIOPLAYER_NAME));

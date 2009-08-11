@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.9 2009/08/11 09:56:54 rhabarber1848 Exp $
+        $Id: personalize.cpp,v 1.10 2009/08/11 10:00:00 rhabarber1848 Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -219,7 +219,9 @@ void CPersonalizeGui::ShowMainMenuOptions()
 	}
 #endif
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_MOVIEPLAYER, (int *)&g_settings.personalize_movieplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
+#ifdef ENABLE_PICTUREVIEWER
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_PICTUREVIEWER, (int *)&g_settings.personalize_pictureviewer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
+#endif
 #ifdef ENABLE_UPNP
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_UPNPBROWSER, (int *)&g_settings.personalize_upnpbrowser, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 #endif
@@ -299,7 +301,9 @@ void CPersonalizeGui::ShowSettingsOptions()
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_COLORS, (int *)&g_settings.personalize_colors, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_8));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_LCD, (int *)&g_settings.personalize_lcd, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_9));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_KEYBINDING, (int *)&g_settings.personalize_keybinding, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_0));
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, (int *)&g_settings.personalize_audpic, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+#endif
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_DRIVER, (int *)&g_settings.personalize_driver, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_MISC, (int *)&g_settings.personalize_misc, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 
