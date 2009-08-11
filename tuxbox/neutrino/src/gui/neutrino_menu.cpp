@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.66 2009/08/09 17:36:03 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.67 2009/08/11 09:56:54 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -60,7 +60,9 @@
 
 #include "gui/alphasetup.h"
 #include "gui/audio_select.h"
+#ifdef ENABLE_AUDIOPLAYER
 #include "gui/audioplayer.h"
+#endif
 #include "gui/esound.h"
 #include "gui/epgplus.h"
 #include "gui/favorites.h"
@@ -147,15 +149,19 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	else
 		mainMenu.addItem(GenericMenuSeparatorLine); 
 
+#ifdef ENABLE_AUDIOPLAYER
 	if (g_settings.personalize_audioplayer == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
 	else if (g_settings.personalize_audioplayer == 2)
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, g_settings.personalize_pincode, true, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
 
+#ifdef ENABLE_INTERNETRADIO
 	if (g_settings.personalize_inetradio == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_INETRADIO_NAME, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut++)));
 	else if (g_settings.personalize_inetradio == 2)
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_INETRADIO_NAME, g_settings.personalize_pincode, true, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut++)));
+#endif
+#endif
 
 #ifdef ENABLE_ESD
 	if (access("/bin/esd", X_OK) == 0 || access("/var/bin/esd", X_OK) == 0)
@@ -798,12 +804,14 @@ const CMenuOptionChooser::keyval PICTUREVIEWER_SCALING_OPTIONS[PICTUREVIEWER_SCA
 	{ CPictureViewer::NONE  , LOCALE_PICTUREVIEWER_RESIZE_NONE          }
 };
 
+#ifdef ENABLE_AUDIOPLAYER
 #define AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT 2
 const CMenuOptionChooser::keyval AUDIOPLAYER_DISPLAY_ORDER_OPTIONS[AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT] =
 {
 	{ CAudioPlayerGui::ARTIST_TITLE, LOCALE_AUDIOPLAYER_ARTIST_TITLE },
 	{ CAudioPlayerGui::TITLE_ARTIST, LOCALE_AUDIOPLAYER_TITLE_ARTIST }
 };
+#endif
 
 /* audioplayer/pictureviewer settings menu*/
 void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
@@ -821,6 +829,7 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 	CStringInput * audioplPicSettings_DecServerPort= new CStringInput(LOCALE_PICTUREVIEWER_DECODE_SERVER_PORT, g_settings.picviewer_decode_server_port, 5, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DECODE_SERVER_PORT, true, g_settings.picviewer_decode_server_port, audioplPicSettings_DecServerPort));
 
+#ifdef ENABLE_AUDIOPLAYER
 	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_AUDIOPLAYER_NAME));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_DISPLAY_ORDER, &g_settings.audioplayer_display     , AUDIOPLAYER_DISPLAY_ORDER_OPTIONS, AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT, true ));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_FOLLOW       , &g_settings.audioplayer_follow      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
@@ -834,6 +843,7 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_HIGHPRIO     , &g_settings.audioplayer_highprio    , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYER_DEFDIR, true, g_settings.network_nfs_audioplayerdir, this, "audioplayerdir"));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_ENABLE_SC_METADATA, &g_settings.audioplayer_enable_sc_metadata, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true ));
+#endif
 
 #ifdef ENABLE_ESD
 	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_ESOUND_NAME));
@@ -937,10 +947,18 @@ const CMenuOptionChooser::keyval  REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS[REMOTE
    { 3 , LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH_POWER_HOME_OK }
 };
 
-#ifdef ENABLE_ESD
-#define MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT 8
+#if !defined(ENABLE_AUDIOPLAYER) && !defined(ENABLE_ESD)
+#define MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT 5
 #else
+#if !defined(ENABLE_AUDIOPLAYER) && defined(ENABLE_ESD)
+#define MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT 6
+#else
+#if defined(ENABLE_AUDIOPLAYER) && !defined(ENABLE_ESD)
 #define MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT 7
+#else
+#define MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT 8
+#endif
+#endif
 #endif
 const CMenuOptionChooser::keyval  MISCSETTINGS_STARTMODE_WITH_OPTIONS[MISCSETTINGS_STARTMODE_WITH_OPTIONS_COUNT]=
 {
@@ -948,8 +966,10 @@ const CMenuOptionChooser::keyval  MISCSETTINGS_STARTMODE_WITH_OPTIONS[MISCSETTIN
    { 1 , LOCALE_MAINMENU_TVMODE },
    { 2 , LOCALE_MAINMENU_RADIOMODE },
    { 3 , LOCALE_MAINMENU_SCARTMODE },
+#ifdef ENABLE_AUDIOPLAYER
    { 4 , LOCALE_MAINMENU_AUDIOPLAYER },
    { 5 , LOCALE_INETRADIO_NAME },
+#endif
 #ifdef ENABLE_ESD
    { 6 , LOCALE_ESOUND_NAME },
 #endif

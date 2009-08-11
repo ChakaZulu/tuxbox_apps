@@ -19,7 +19,7 @@ libneutrino_gui_a_SOURCES = \
 	bouquetlist.cpp channellist.cpp eventlist.cpp pluginlist.cpp \
 	color.cpp favorites.cpp sleeptimer.cpp screensetup.cpp \
 	epgview.cpp infoviewer.cpp scan.cpp update.cpp \
-	filebrowser.cpp audioplayer.cpp nfs.cpp pictureviewer.cpp \
+	filebrowser.cpp nfs.cpp pictureviewer.cpp \
 	rc_lock.cpp bookmarkmanager.cpp \
 	timeosd.cpp epgplus.cpp epg_menu.cpp personalize.cpp \
 	streaminfo2.cpp plugins.cpp imageinfo.cpp \
@@ -27,6 +27,11 @@ libneutrino_gui_a_SOURCES = \
 
 if ENABLE_ESD
 libneutrino_gui_a_SOURCES += esound.cpp
+endif
+
+if ENABLE_AUDIOPLAYER
+libneutrino_gui_a_SOURCES += \
+	audioplayer.cpp
 endif
 
 if ENABLE_MOVIEPLAYER2

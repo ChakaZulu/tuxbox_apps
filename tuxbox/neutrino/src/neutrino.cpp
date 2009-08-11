@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.965 2009/08/09 17:36:02 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.966 2009/08/11 09:56:52 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -83,7 +83,9 @@
 #include "gui/widget/rgbcsynccontroler.h"
 #include "gui/widget/messagebox.h"
 
+#ifdef ENABLE_AUDIOPLAYER
 #include "gui/audioplayer.h"
+#endif
 #include "gui/bouquetlist.h"
 #include "gui/movieplayer.h"
 #include "gui/nfs.h"
@@ -684,7 +686,11 @@ int CNeutrinoApp::loadSetup()
 	strcpy(g_settings.picviewer_decode_server_port, configfile.getString("picviewer_decode_server_port", "").c_str());
 
 	//Audio-Player
+#ifdef ENABLE_AUDIOPLAYER
 	g_settings.audioplayer_display = configfile.getInt32("audioplayer_display",(int)CAudioPlayerGui::ARTIST_TITLE);
+#else
+	g_settings.audioplayer_display = configfile.getInt32("audioplayer_display",0);
+#endif
 	g_settings.audioplayer_follow  = configfile.getInt32("audioplayer_follow",0);
 	strcpy( g_settings.audioplayer_screensaver, configfile.getString( "audioplayer_screensaver", "0" ).c_str() );
 	g_settings.audioplayer_highprio  = configfile.getInt32("audioplayer_highprio",0);
@@ -2353,16 +2359,20 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		lastMode = mode;
 		handleMsg(NeutrinoMessages::EVT_VCRCHANGED, VCR_STATUS_ON);
 	}
+#ifdef ENABLE_AUDIOPLAYER
 	else if(g_settings.startmode == STARTMODE_AUDIOPLAYER)
 	{
 		CAudioPlayerGui::CAudioPlayerGui tmpAudioPlayerGui;
 		tmpAudioPlayerGui.exec(NULL, "");
 	}
+#ifdef ENABLE_INTERNETRADIO
 	else if(g_settings.startmode == STARTMODE_INETRADIO)
 	{
 		CAudioPlayerGui::CAudioPlayerGui tmpAudioPlayerGui(true);
 		tmpAudioPlayerGui.exec(NULL, "");
 	}
+#endif
+#endif
 #ifdef ENABLE_ESD
 	else if(g_settings.startmode == STARTMODE_ESOUND)
 	{

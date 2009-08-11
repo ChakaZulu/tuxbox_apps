@@ -18,13 +18,6 @@ neutrino_SOURCES = neutrino.cpp
 
 AM_CPPFLAGS =
 
-if ENABLE_FLAC
-FLAClib = -lFLAC
-AM_CPPFLAGS += -DENABLE_FLAC
-else
-FLAClib =
-endif
-
 neutrino_LDADD = \
 	daemonc/libneutrino_daemonc.a \
 	gui/libtimerlist.a \
@@ -34,8 +27,6 @@ neutrino_LDADD = \
 	gui/widget/libneutrino_gui_widget2.a \
 	driver/pictureviewer/libneutrino_pictureviewer.a \
 	driver/libneutrino_driver.a \
-	driver/audiodec/libneutrino_driver_audiodec.a \
-	driver/libneutrino_driver_netfile.a \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
@@ -51,19 +42,38 @@ neutrino_LDADD = \
 	@ZAPIT_LIBS@ \
 	@LCDDISPLAY_LIBS@ \
 	@PNG_LIBS@ \
-	@MAD_LIBS@ \
-	@ID3TAG_LIBS@ \
 	@MPEGTOOLS_LIBS@ \
-	@VORBISIDEC_LIBS@ \
 	@TUXTXT_LIBS@ \
 	@XMLTREE_LIBS@ \
 	@UPNPCLIENT_LIBS@ \
-	$(FLAClib) \
 	-lresolv \
 	-ljpeg \
 	-lpthread \
 	-ldl \
 	@XML_LIBS@
+
+if ENABLE_AUDIOPLAYER
+
+if ENABLE_FLAC
+FLAClib = -lFLAC
+AM_CPPFLAGS += -DENABLE_FLAC
+else
+FLAClib =
+endif
+
+neutrino_LDADD += \
+	driver/audiodec/libneutrino_driver_audiodec.a \
+	@MAD_LIBS@ \
+	@ID3TAG_LIBS@ \
+	@VORBISIDEC_LIBS@ \
+	$(FLAClib)
+
+if ENABLE_INTERNETRADIO
+neutrino_LDADD += \
+	driver/libneutrino_driver_netfile.a
+endif
+
+endif
 
 if ENABLE_UPNP
 INCLUDES += @UPNPCLIENT_CFLAGS@

@@ -1,4 +1,8 @@
-SUBDIRS = pictureviewer audiodec
+SUBDIRS = pictureviewer
+
+if ENABLE_AUDIOPLAYER
+SUBDIRS += audiodec
+endif
 
 INCLUDES = \
 	-I$(top_srcdir)/daemons \
@@ -10,7 +14,11 @@ INCLUDES = \
 	@MPEGTOOLS_CFLAGS@ \
 	-I$(top_srcdir)/lib
 
-noinst_LIBRARIES = libneutrino_driver.a libneutrino_driver_netfile.a
+noinst_LIBRARIES = libneutrino_driver.a
+
+if ENABLE_INTERNETRADIO
+noinst_LIBRARIES += libneutrino_driver_netfile.a
+endif
 
 libneutrino_driver_a_SOURCES = \
 	ringbuffer.c \
@@ -20,7 +28,6 @@ libneutrino_driver_a_SOURCES = \
 	fb_window.cpp \
 	rcinput.cpp \
 	vcrcontrol.cpp \
-	audioplay.cpp \
 	lcdd.cpp \
 	bigclock.cpp \
 	newclock.cpp \
@@ -30,8 +37,6 @@ libneutrino_driver_a_SOURCES = \
 	screen_max.cpp \
 	slotbuffer.c \
 	file.cpp \
-	audiometadata.cpp \
-	audiofile.cpp \
 	shutdown_count.cpp \
 	BitrateCalculator.cpp
 
@@ -41,4 +46,13 @@ libneutrino_driver_a_SOURCES += \
 	radiotools.cpp
 endif
 
+if ENABLE_AUDIOPLAYER
+libneutrino_driver_a_SOURCES += \
+	audioplay.cpp \
+	audiometadata.cpp \
+	audiofile.cpp
+endif
+
+if ENABLE_INTERNETRADIO
 libneutrino_driver_netfile_a_SOURCES = netfile.cpp
+endif

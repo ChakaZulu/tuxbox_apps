@@ -483,10 +483,13 @@ bool CFileBrowser::readDir(const std::string & dirname, CFileList* flist)
 {
 	bool ret;
 
+#ifdef ENABLE_INTERNETRADIO
 	if (m_Mode == ModeSC) {
 		ret = readDir_sc(dirname, flist);
 	}
-	else if (strncmp(dirname.c_str(), VLC_URI, strlen(VLC_URI)) == 0)
+	else
+#endif
+	if (strncmp(dirname.c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 	{
 		ret = readDir_vlc(dirname, flist);
 	}
@@ -588,6 +591,7 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 	return false;
 }
 
+#ifdef ENABLE_INTERNETRADIO
 bool CFileBrowser::readDir_sc(const std::string & dirname, CFileList* flist)
 {
 #define GET_SHOUTCAST_TIMEOUT	60
@@ -752,6 +756,7 @@ and add to neutrino playlist
 
 	return false;
 }
+#endif
 
 bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 {
@@ -801,9 +806,12 @@ bool CFileBrowser::exec(const char * const dirname)
 
 	bool res = false;
 
+#ifdef ENABLE_INTERNETRADIO
 	if (m_Mode == ModeSC) {
 		m_baseurl = base;
-	} else {
+	} else
+#endif
+	{
 		m_baseurl = "http://" + g_settings.streaming_server_ip + ':'
 			  + g_settings.streaming_server_port + "/requests/browse.xml?dir=";
 	}
@@ -913,9 +921,12 @@ bool CFileBrowser::exec(const char * const dirname)
 			{
 				if (S_ISDIR(filelist[selected].Mode))
 				{
+#ifdef ENABLE_INTERNETRADIO
 					if (m_Mode == ModeSC) {
 						ChangeDir(filelist[selected].Url);
-					} else {
+					} else 
+#endif
+					{
 	 					if (filelist[selected].getFileName() != "..") {
 							selections.push_back(selected);
 							ChangeDir(filelist[selected].Name);
@@ -926,6 +937,7 @@ bool CFileBrowser::exec(const char * const dirname)
 		}
 		else if ( msg == CRCInput::RC_left )
 		{
+#ifdef ENABLE_INTERNETRADIO
 			if (m_Mode == ModeSC)
 			{
 				for(unsigned int i = 0; i < filelist.size();i++) {
@@ -935,7 +947,9 @@ bool CFileBrowser::exec(const char * const dirname)
 					}
 				}
 			}
-			else if (selections.size() > 0)
+			else
+#endif
+			if (selections.size() > 0)
 			{
 				ChangeDir("..",selections.back());
 				selections.pop_back();
@@ -989,9 +1003,12 @@ bool CFileBrowser::exec(const char * const dirname)
 			{
 				if (filelist[selected].getFileName() == "..")
 				{
+#ifdef ENABLE_INTERNETRADIO
 					if (m_Mode == ModeSC)
 						ChangeDir(filelist[selected].Url);
-					else {
+					else
+#endif
+					{
 						if (selections.size() > 0)
 						{
 							ChangeDir("..",selections.back());
@@ -1017,9 +1034,11 @@ bool CFileBrowser::exec(const char * const dirname)
 					{
 						if((!Multi_Select) && S_ISDIR(filelist[selected].Mode) && !Dir_Mode)
 						{
+#ifdef ENABLE_INTERNETRADIO
 							if (m_Mode == ModeSC)
 								ChangeDir(filelist[selected].Url);
 							else
+#endif
 								ChangeDir(filelist[selected].Name);
 						}
 						else
@@ -1069,9 +1088,11 @@ bool CFileBrowser::exec(const char * const dirname)
 			if(filelist[i].Marked)
 			{
 				if(S_ISDIR(filelist[i].Mode)) {
+#ifdef ENABLE_INTERNETRADIO
 					if (m_Mode == ModeSC)
 						addRecursiveDir(&selected_filelist,filelist[i].Url, true, progress);
 					else
+#endif
 						addRecursiveDir(&selected_filelist,filelist[i].Name, true, progress);
 				} else
 					selected_filelist.push_back(filelist[i]);
@@ -1313,9 +1334,11 @@ void CFileBrowser::paintHead()
 {
 	char l_name[100];
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0, RADIUS_MID, CORNER_TOP);
+#ifdef ENABLE_INTERNETRADIO
 	if(m_Mode == ModeSC)
 		snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_AUDIOPLAYER_ADD_SC), FILESYSTEM_ENCODING_TO_UTF8_STRING(name).c_str()); // UTF-8
 	else
+#endif
 		snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_FILEBROWSER_HEAD), FILESYSTEM_ENCODING_TO_UTF8_STRING(name).c_str()); // UTF-8
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8

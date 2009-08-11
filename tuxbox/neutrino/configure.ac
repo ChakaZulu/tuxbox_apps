@@ -14,9 +14,6 @@ TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
-TUXBOX_APPS_LIB_PKGCONFIG(ID3TAG,id3tag)
-TUXBOX_APPS_LIB_PKGCONFIG(MAD,mad)
-TUXBOX_APPS_LIB_PKGCONFIG(VORBISIDEC,vorbisidec)
 TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 TUXBOX_APPS_LIB_PKGCONFIG(CONNECTION,tuxbox-connection)
@@ -77,6 +74,12 @@ AC_ARG_ENABLE(radiotext,
 	,[enable_radiotext=no])
 AM_CONDITIONAL(ENABLE_RADIOTEXT,test "$enable_radiotext" = "yes")
 
+AC_ARG_ENABLE(audioplayer,
+	AS_HELP_STRING(--disable-audioplayer,include Neutrino audioplayer/internetradio),
+	,[enable_audioplayer=yes])
+AM_CONDITIONAL(ENABLE_AUDIOPLAYER,test "$enable_audioplayer" = "yes")
+AM_CONDITIONAL(ENABLE_INTERNETRADIO,test "$enable_audioplayer" = "yes")
+
 AC_ARG_ENABLE(use-libxml2,
    [  --enable-use-libxml2    use libxml2 instead of libxmltree],
       [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
@@ -115,6 +118,14 @@ fi
 
 if test "$enable_movieplayer2" != "yes"; then
 AC_DEFINE(ENABLE_MOVIEBROWSER,1,[include Moviebrowser support])
+fi
+
+if test "$enable_audioplayer" = "yes"; then
+AC_DEFINE(ENABLE_AUDIOPLAYER,1,[include Neutrino audioplayer/internetradio])
+AC_DEFINE(ENABLE_INTERNETRADIO,1,[include Neutrino internetradio])
+TUXBOX_APPS_LIB_PKGCONFIG(ID3TAG,id3tag)
+TUXBOX_APPS_LIB_PKGCONFIG(MAD,mad)
+TUXBOX_APPS_LIB_PKGCONFIG(VORBISIDEC,vorbisidec)
 fi
 
 CPPFLAGS="$CPPFLAGS -Wextra -Wshadow"
