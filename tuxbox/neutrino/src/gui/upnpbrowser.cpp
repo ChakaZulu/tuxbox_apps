@@ -285,7 +285,6 @@ std::vector<UPnPEntry> *CUpnpBrowserGui::decodeResult(std::string result)
 			isdir=false;
 			for (snode=node->GetChild(); snode; snode=snode->GetNext())
 			{
-				char *type, *p;
 				std::string duration, url, size;
 				unsigned int i;
 				type=snode->GetType();
@@ -516,7 +515,7 @@ void CUpnpBrowserGui::playnext(void)
 		std::list<UPnPAttribute>results;
 		std::list<UPnPAttribute>::iterator i;
 		std::stringstream sindex;
-		std::vector<UPnPEntry> *entries;
+		std::vector<UPnPEntry> *entries = NULL;
 		bool rfound = false;
 		bool nfound = false;
 		bool tfound = false;
@@ -561,7 +560,7 @@ void CUpnpBrowserGui::playnext(void)
 			}
 		}
 		m_playid++;
-		if (!(*entries)[0].isdir)
+		if ((entries != NULL) && (!(*entries)[0].isdir))
 		{
 			int preferred=(*entries)[0].preferred;
 			if (preferred != -1)
