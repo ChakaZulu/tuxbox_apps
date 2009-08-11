@@ -884,7 +884,6 @@ std::string  CNeutrinoYParser::func_set_timer_form(CyhookHandler *hh, std::strin
 	else
 		hh->ParamList["stop_mday"] = "0";
 	// event type
-	std::string sel;
 	for(int i=1; i<=8;i++)
 	{
 		if(i!=(int)CTimerd::TIMER_NEXTPROGRAM)
@@ -901,6 +900,7 @@ std::string  CNeutrinoYParser::func_set_timer_form(CyhookHandler *hh, std::strin
 	}
 	// Repeat types
 	std::string zRep;
+	std::string sel;
 	sel = "";
 	for(int i=0; i<=6;i++)
 	{
@@ -934,14 +934,14 @@ std::string  CNeutrinoYParser::func_set_timer_form(CyhookHandler *hh, std::strin
 	hh->ParamList["timer_repeatCount"]  = itoa(timer.repeatCount);
 
 	// program row
-	CZapitClient::BouquetChannelList channellist;     
+	CZapitClient::BouquetChannelList channellist;
 	channellist.clear();
 	NeutrinoAPI->Zapit->getChannels(channellist,CZapitClient::MODE_TV);
 	t_channel_id current_channel = (cmd == "new") ? NeutrinoAPI->Zapit->getCurrentServiceID() : timer.channel_id;
 	CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
 	for(; channel != channellist.end();channel++)
 	{
-		std::string sel = (channel->channel_id == current_channel) ? "selected=\"selected\"" : "";
+		sel = (channel->channel_id == current_channel) ? "selected=\"selected\"" : "";
 		hh->ParamList["program_row"] +=
 			string_printf("<option value=\""
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -952,7 +952,7 @@ std::string  CNeutrinoYParser::func_set_timer_form(CyhookHandler *hh, std::strin
 	NeutrinoAPI->Zapit->getChannels(channellist,CZapitClient::MODE_RADIO);
 	for (channel = channellist.begin(); channel != channellist.end(); channel++)
 	{
-		std::string sel = (channel->channel_id == current_channel) ? "selected=\"selected\"" : "";
+		sel = (channel->channel_id == current_channel) ? "selected=\"selected\"" : "";
 		hh->ParamList["program_row"] +=
 			string_printf("<option value=\""
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS

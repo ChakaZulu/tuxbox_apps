@@ -6,7 +6,7 @@
 
 	Copyright (C) 2009 Stefan Seyfried
 
-   $Id: timermanager.cpp,v 1.94 2009/05/19 17:52:14 seife Exp $
+   $Id: timermanager.cpp,v 1.95 2009/08/11 20:36:57 houdini Exp $
 
 	License: GPL
 
@@ -900,10 +900,10 @@ void CTimerEvent::Reschedule()
 							weekday_arr[4]=((weekdays & 0x8) > 0); //Do
 							weekday_arr[5]=((weekdays & 0x10) > 0); //Fr
 							weekday_arr[6]=((weekdays & 0x20) > 0); //Sa
-							struct tm *t= localtime(&alarmTime);
+							struct tm *t2= localtime(&alarmTime);
 							int day;
-							for(day=1 ; !weekday_arr[(t->tm_wday+day)%7] ; day++){}
-							t->tm_mday+=day;
+							for(day=1 ; !weekday_arr[(t2->tm_wday+day)%7] ; day++){}
+							t2->tm_mday+=day;
 						}
 					}
 					else
