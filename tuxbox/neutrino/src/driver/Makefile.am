@@ -39,10 +39,11 @@ libneutrino_driver_a_SOURCES = \
 	genpsi.c \
 	stream2file.cpp \
 	screen_max.cpp \
-	slotbuffer.c \
 	file.cpp \
 	shutdown_count.cpp \
 	BitrateCalculator.cpp
+
+#	slotbuffer.c 
 
 if ENABLE_RADIOTEXT
 libneutrino_driver_a_SOURCES += \
