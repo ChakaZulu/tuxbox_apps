@@ -8,6 +8,9 @@ libtuxtxt_la_SOURCES = libtuxtxt.c
 AM_CPPFLAGS = \
 	@FREETYPE_CFLAGS@
 
+libtuxtxt_la_LIBADD = \
+	@FREETYPE_LIBS@
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = tuxbox-tuxtxt.pc
 
