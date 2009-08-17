@@ -106,6 +106,8 @@ class CInfoViewer
 	void showIcon_SubT()      const;
 	void showRecordIcon(const bool show);
 
+	void showInfoIcons();
+
 	void showFailure();
 	void showMotorMoving(int duration);
    	void showLcdPercentOver();
@@ -126,7 +128,7 @@ class CInfoViewer
 	CInfoViewer();
 
 	void	start();
-	void showEpgInfo();
+	void 	showEpgInfo();
 	void	showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false, int epgpos = 0); // Channel must be UTF-8 encoded
 	void	showMovieTitle(const int playstate, const std::string &title, const std::string &sub_title,
 			       const int percent, const int ac3state, const int num_apids);

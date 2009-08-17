@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.261 2009/08/07 07:22:50 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.262 2009/08/17 06:28:50 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -530,12 +530,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 					txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 		}
 		
-		showButton_Audio();
-		showButton_SubServices();
-		showIcon_CA_Status();
-		showIcon_16_9();
-		showIcon_VTXT();
-		showIcon_SubT();
+		showInfoIcons();
 	}
 
 	g_Sectionsd->getCurrentNextServiceKey(channel_id, info_CurrentNext);
@@ -960,25 +955,31 @@ void CInfoViewer::showIcon_RadioText(bool rt_available, bool rt_enabled) const
 	std::string rt_icon;
 	if ((!virtual_zap_mode) && (mode == 2))
 	{
-		if (g_settings.radiotext_enable) 
-			{
+		if (g_settings.radiotext_enable){
 				rt_icon = rt_available ? "radiotextget.raw" : "radiotextwait.raw";
 			}
-		else if (rt_enabled==false)
-			{
+		else if (rt_enabled==false){
 				rt_icon = "radiotextoff.raw";
 			}
 		else rt_icon = "radiotextoff.raw";
 	}
-	frameBuffer->paintIcon(rt_icon,	BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 6),				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+	frameBuffer->paintIcon(rt_icon, BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 }
 #endif
 
 void CInfoViewer::showIcon_16_9() const
 {
+#ifdef ENABLE_RADIOTEXT
+	if (g_Zapit->getMode() !=2) {
+		frameBuffer->paintIcon((aspectRatio != 0) ? "16_9.raw" : "16_9_gray.raw",
+					BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
+					BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+	}
+#else
 	frameBuffer->paintIcon((aspectRatio != 0) ? "16_9.raw" : "16_9_gray.raw",
 				BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+#endif
 }
 
 void CInfoViewer::showIcon_VTXT() const
@@ -1019,6 +1020,16 @@ void CInfoViewer::showIcon_SubT() const
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 }
 
+void CInfoViewer::showInfoIcons()
+{
+	showButton_SubServices();
+	showIcon_16_9();
+	showIcon_VTXT();
+	showIcon_SubT();
+	showButton_Audio();
+	showIcon_CA_Status();
+}
+
 void CInfoViewer::showFailure()
 {
 	ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_INFOVIEWER_NOTAVAILABLE), 430); // UTF-8
@@ -1055,9 +1066,6 @@ void CInfoViewer::showRadiotext()
 	bool RTisIsUTF = false;
 
 	if (g_Radiotext == NULL) return;
-
-	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
-	//	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
 	if (1 && g_Radiotext->S_RtOsd) {
 		int dx =  BoxEndX - BoxStartX; //width radiotext window
