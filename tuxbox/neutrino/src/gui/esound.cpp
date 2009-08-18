@@ -1,5 +1,5 @@
 /*
-  $Id: esound.cpp,v 1.7 2009/06/11 21:13:56 rhabarber1848 Exp $
+  $Id: esound.cpp,v 1.8 2009/08/18 18:06:16 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   based on
@@ -64,7 +64,9 @@
 
 #include <system/settings.h>
 
+#ifdef ENABLE_LIRC
 #include <irsend/irsend.h>
+#endif
 
 #include <algorithm>
 #include <sys/time.h>
@@ -185,9 +187,11 @@ int CEsoundGui::exec(CMenuTarget* parent, const std::string &)
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true);
 
+#ifdef ENABLE_LIRC
 	//Send ir
 	CIRSend irs("esoundon");
 	irs.Send();
+#endif
 
 	puts("[esound.cpp] executing " ESOUNDSERVER_START_SCRIPT "."); 
 	if (system(ESOUNDSERVER_START_SCRIPT) != 0) 
@@ -229,9 +233,11 @@ int CEsoundGui::exec(CMenuTarget* parent, const std::string &)
 	}
 #endif
 
+#ifdef ENABLE_LIRC
 	//Send ir
 	CIRSend irs2("esoundoff");
 	irs2.Send();
+#endif
 
 	puts("[esound.cpp] executing " ESOUNDSERVER_END_SCRIPT "."); 
 	if (system(ESOUNDSERVER_END_SCRIPT) != 0) 

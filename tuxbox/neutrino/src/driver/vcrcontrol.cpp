@@ -44,7 +44,9 @@
 
 #include <gui/widget/messagebox.h>
 
+#ifdef ENABLE_LIRC
 #include <irsend/irsend.h>
+#endif
 
 #include <global.h>
 #include <neutrino.h>
@@ -247,8 +249,12 @@ bool CVCRControl::CVCRDevice::Stop()
 		g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
 		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
 	}
+#ifdef ENABLE_LIRC
 	CIRSend irs("stop");
 	return irs.Send();
+#else
+	return true;
+#endif
 }
 
 //-------------------------------------------------------------------------
@@ -304,23 +310,35 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, co
 	}
 
 	deviceState = CMD_VCR_RECORD;
+#ifdef ENABLE_LIRC
 	// Send IR
 	CIRSend irs("record");
 	return irs.Send();
+#else
+	return true;
+#endif
 }
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Pause()
 {
+#ifdef ENABLE_LIRC
 	CIRSend irs("pause");
 	return irs.Send();
+#else
+	return true;
+#endif
 }
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Resume()
 {
+#ifdef ENABLE_LIRC
 	CIRSend irs("resume");
 	return irs.Send();
+#else
+	return true;
+#endif
 }
 
 //-------------------------------------------------------------------------

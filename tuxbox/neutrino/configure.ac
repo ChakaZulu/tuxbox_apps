@@ -17,7 +17,6 @@ TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 TUXBOX_APPS_LIB_PKGCONFIG(CONNECTION,tuxbox-connection)
 TUXBOX_APPS_LIB_PKGCONFIG(EVENTSERVER,tuxbox-eventserver)
 TUXBOX_APPS_LIB_PKGCONFIG(LCDDISPLAY,tuxbox-lcddisplay)
-TUXBOX_APPS_LIB_PKGCONFIG(LIRCDCLIENT,tuxbox-lircdclient)
 TUXBOX_APPS_LIB_PKGCONFIG(NET,tuxbox-net)
 TUXBOX_APPS_LIB_PKGCONFIG(PLUGINS,tuxbox-plugins)
 TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
@@ -44,6 +43,11 @@ AC_ARG_ENABLE(upnp,
 	AS_HELP_STRING(--enable-upnp,include upnp support),
 	,[enable_upnp=no])
 AM_CONDITIONAL(ENABLE_UPNP,test "$enable_upnp" = "yes")
+
+AC_ARG_ENABLE(lirc,
+	AS_HELP_STRING(--enable-lirc,include lirc support),
+	,[enable_lirc=no])
+AM_CONDITIONAL(ENABLE_LIRC,test "$enable_lirc" = "yes")
 
 AC_ARG_ENABLE(flac,
 	AS_HELP_STRING(--enable-flac,include flac support),
@@ -101,6 +105,11 @@ AM_CONDITIONAL(DISABLE_INTERNET_UPDATE,test "$enable_http_update" = "no")
 if test "$enable_upnp" = "yes"; then
 TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
 AC_DEFINE(ENABLE_UPNP,1,[include upnp support])
+fi
+
+if test "$enable_lirc" = "yes"; then
+TUXBOX_APPS_LIB_PKGCONFIG(LIRCDCLIENT,tuxbox-lircdclient)
+AC_DEFINE(ENABLE_LIRC,1,[include lirc support])
 fi
 
 if test "$enable_flac" = "yes"; then

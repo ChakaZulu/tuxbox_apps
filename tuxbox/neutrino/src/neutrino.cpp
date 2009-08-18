@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.969 2009/08/18 11:51:58 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.970 2009/08/18 18:06:14 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -75,7 +75,9 @@
 #include <driver/stream2file.h>
 #include <driver/vcrcontrol.h>
 #include <driver/shutdown_count.h>
+#ifdef ENABLE_LIRC
 #include <irsend/irsend.h>
+#endif
 
 #include "gui/widget/dirchooser.h"
 #include "gui/widget/hintbox.h"
@@ -2343,8 +2345,10 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 	dprintf(DEBUG_NORMAL, "initialized everything\n");
 
+#ifdef ENABLE_LIRC
 	CIRSend irs("neutrinoon");
 	irs.Send();
+#endif
 
 	if (g_settings.vcr_AutoSwitch)
 	{
@@ -3026,8 +3030,10 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 		}
 		else if( msg == NeutrinoMessages::SLEEPTIMER)
 		{
+#ifdef ENABLE_LIRC
 			CIRSend irs("sleep");
 			irs.Send();
+#endif
 
 			if(g_settings.shutdown_real)
 				ExitRun(true);
@@ -3303,8 +3309,10 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 				if (g_RCInput != NULL)
 					delete g_RCInput;
 
+#ifdef ENABLE_LIRC
 				CIRSend irs("neutrinooff");
 				irs.Send();
+#endif
 
 				exit(0);
 
@@ -3315,8 +3323,10 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 			if (g_RCInput != NULL)
 				delete g_RCInput;
 
+#ifdef ENABLE_LIRC
 			CIRSend irs("neutrinooff");
 			irs.Send();
+#endif
 
 			exit(0);
 
@@ -3361,7 +3371,7 @@ void CNeutrinoApp::paintMuteIcon( bool is_visible )
 
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
-#ifdef HAVE_DBOX_HARDWARE
+#ifdef ENABLE_LIRC
 	if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) // lirc
 	{ // bei LIRC wissen wir nicht wikrlich ob jetzt ge oder entmuted wird, deswegen nix zeigen---
 		if( !isEvent )
@@ -3400,7 +3410,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	neutrino_msg_t msg = key;
 	neutrino_msg_t msg_repeatok = key & ~CRCInput::RC_Repeat;
 
-#ifdef HAVE_DBOX_HARDWARE
+#ifdef ENABLE_LIRC
 	const bool lirc = (CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC;
 #else
 	const bool lirc = false;
@@ -3485,11 +3495,13 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 				if (current_muted)
 					AudioMute(false); // switch off mute on pressing the plus button
 				
+#ifdef ENABLE_LIRC
 				if (lirc)
 				{
 					current_volume = 60; //>50 is plus
 				}
 				else
+#endif
 				{
 					if (current_volume < 100 - a_step)
 						current_volume += a_step;
@@ -3499,11 +3511,13 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			}
 			else if (msg_repeatok == CRCInput::RC_minus)
 			{
+#ifdef ENABLE_LIRC
 				if (lirc)
 				{
 					current_volume = 40; //<40 is minus
 				}
 				else
+#endif
 				{
 					if (current_volume > a_step)
 						current_volume -= a_step;
@@ -3522,10 +3536,12 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			if (!(msg & CRCInput::RC_Release)) // no need to set on RC_minus release...
 				g_Controld->setVolume(current_volume, (CControld::volume_type)g_settings.audio_avs_Control);
 
+#ifdef ENABLE_LIRC
 			if (lirc)
 			{
 				current_volume = 50;
 			}
+#endif
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR] / 2);
 		}
 		else if (msg == NeutrinoMessages::EVT_VOLCHANGED)
@@ -3708,9 +3724,11 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		lastMode = mode;
 		mode = mode_standby;
 
+#ifdef ENABLE_LIRC
 		//Send ir
 		CIRSend irs("sbon");
 		irs.Send();
+#endif
 	}
 	else
 	{
@@ -3726,9 +3744,11 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		execute_start_file(NEUTRINO_LEAVE_STANDBY_SCRIPT);
 
+#ifdef ENABLE_LIRC
 		//Send ir
 		CIRSend irs("sboff");
 		irs.Send();
+#endif
 
 		mode = mode_unknown;
 

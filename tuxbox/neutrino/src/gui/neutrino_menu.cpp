@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.69 2009/08/18 11:51:59 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.70 2009/08/18 18:06:16 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1249,12 +1249,18 @@ const CMenuOptionChooser::keyval AUDIOMENU_ANALOGOUT_OPTIONS[AUDIOMENU_ANALOGOUT
 };
 
 #ifdef HAVE_DBOX_HARDWARE
+#ifdef ENABLE_LIRC
 #define AUDIOMENU_AVS_CONTROL_OPTION_COUNT 3
+#else
+#define AUDIOMENU_AVS_CONTROL_OPTION_COUNT 2
+#endif
 const CMenuOptionChooser::keyval AUDIOMENU_AVS_CONTROL_OPTIONS[AUDIOMENU_AVS_CONTROL_OPTION_COUNT] =
 {
 	{ CControld::TYPE_OST , LOCALE_AUDIOMENU_OST  },
 	{ CControld::TYPE_AVS , LOCALE_AUDIOMENU_AVS  },
+#ifdef ENABLE_LIRC
 	{ CControld::TYPE_LIRC, LOCALE_AUDIOMENU_LIRC }
+#endif
 };
 #endif
 

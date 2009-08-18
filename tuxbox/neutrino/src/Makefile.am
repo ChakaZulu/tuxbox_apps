@@ -32,12 +32,10 @@ neutrino_LDADD = \
 	gui/libneutrino_gui2.a \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
-	$(top_builddir)/lib/irsend/libirsend.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
 	@CURL_LIBS@ \
 	@FREETYPE_LIBS@ \
-	@LIRCDCLIENT_LIBS@ \
 	@NET_LIBS@ \
 	@UCODES_LIBS@ \
 	@ZAPIT_LIBS@ \
@@ -50,6 +48,12 @@ neutrino_LDADD = \
 	-lpthread \
 	-ldl \
 	@XML_LIBS@
+
+if ENABLE_LIRC
+neutrino_LDADD += \
+	$(top_builddir)/lib/irsend/libirsend.la \
+	@LIRCDCLIENT_LIBS@
+endif
 
 if ENABLE_AUDIOPLAYER
 

@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.69 2009/06/24 20:33:05 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.70 2009/08/18 18:06:16 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -67,7 +67,9 @@
 #include <system/settings.h>
 #include <xmltree/xmlinterface.h>
 
+#ifdef ENABLE_LIRC
 #include <irsend/irsend.h>
+#endif
 
 #include <algorithm>
 #include <sys/time.h>
@@ -306,9 +308,11 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true);
 
+#ifdef ENABLE_LIRC
 	//Send ir
 	CIRSend irs("audioplayeron");
 	irs.Send();
+#endif
 
 	puts("[audioplayer.cpp] executing " AUDIOPLAYER_START_SCRIPT "."); 
 	if (system(AUDIOPLAYER_START_SCRIPT) != 0) 
@@ -344,9 +348,11 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 	}
 #endif
 
+#ifdef ENABLE_LIRC
 	//Send ir
 	CIRSend irs2("audioplayeroff");
 	irs2.Send();
+#endif
 
 	puts("[audioplayer.cpp] executing " AUDIOPLAYER_END_SCRIPT "."); 
 	if (system(AUDIOPLAYER_END_SCRIPT) != 0) 

@@ -66,8 +66,6 @@
 
 #include <system/settings.h>
 
-#include <irsend/irsend.h>
-
 #ifdef ConnectLineBox_Width
 #undef ConnectLineBox_Width
 #endif

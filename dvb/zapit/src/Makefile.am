@@ -1,11 +1,15 @@
-SUBDIRS = zapci zapost zapsi irsend
+SUBDIRS = zapci zapost zapsi
 
 INCLUDES = \
 	-I$(top_srcdir)/include \
 	@CONFIGFILE_CFLAGS@ \
 	@CONNECTION_CFLAGS@ \
-	@LIRCDCLIENT_CFLAGS@ \
 	@XML_CFLAGS@
+
+if ENABLE_LIRC
+SUBDIRS += irsend
+INCLUDES += @LIRCDCLIENT_CFLAGS@
+endif
 
 bin_PROGRAMS = pzapit zapit controldc
 sbin_PROGRAMS = udpstreampes
@@ -36,12 +40,16 @@ zapit_LDADD = \
 	$(top_builddir)/src/zapci/libzapci.la \
 	$(top_builddir)/src/zapost/libzapost.la \
 	$(top_builddir)/src/zapsi/libzapsi.la \
-	$(top_builddir)/src/irsend/libirsend.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
-	@LIRCDCLIENT_LIBS@ \
 	@XML_LIBS@ \
 	-lpthread
+
+if ENABLE_LIRC
+zapit_LDADD += \
+	$(top_builddir)/src/irsend/libirsend.la \
+	@LIRCDCLIENT_LIBS@
+endif
 
 if BOXTYPE_DBOX2
 zapit_LDADD += \

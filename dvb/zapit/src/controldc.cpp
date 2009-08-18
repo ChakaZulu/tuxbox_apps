@@ -98,9 +98,11 @@ main(int argc, char *argv[]) {
     case 'o':
       vt = CControld::TYPE_OST;
       break;
+#ifdef ENABLE_LIRC
     case 'l':
       vt = CControld::TYPE_LIRC;
       break;
+#endif
     default:
       vt = CControld::TYPE_UNKNOWN;
     }
@@ -156,7 +158,11 @@ void usage(char *myname) {
 #ifdef HAVE_DBOX_HARDWARE
 	  " -a (avs),"
 #endif
-	  " -o (ost), or -l (lirc),\n"
+	  " -o (ost)"
+#ifdef ENABLE_LIRC
+	  ", or -l (lirc),"
+#endif
+	  "\n"
 	  "and COMMAND is one of\n"
 	  "getVolume\n"
 	  "setVolume  VOLUME\n"
