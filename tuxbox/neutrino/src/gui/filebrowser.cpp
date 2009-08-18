@@ -872,7 +872,10 @@ bool CFileBrowser::exec(const char * const dirname)
 		{
 			selected += listmaxshow;
 			if (selected >= filelist.size())
-				selected = 0;
+				if (((filelist.size() / listmaxshow) + 1) * listmaxshow == filelist.size() + listmaxshow) // last page has full entries
+					selected = 0;
+				else
+					selected = selected < (((filelist.size() / listmaxshow) + 1) * listmaxshow) ? (filelist.size() - 1) : 0;
 			liststart = (selected / listmaxshow) * listmaxshow;
 			paint();
 		}
