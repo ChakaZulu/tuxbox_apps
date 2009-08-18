@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.135 2009/07/26 14:39:15 rhabarber1848 Exp $
+	$Id: update.cpp,v 1.136 2009/08/18 11:51:59 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -54,15 +54,14 @@
 #include <gui/widget/hintbox.h>
 
 #include <system/flashtool.h>
+#include <sectionsdclient/sectionsdclient.h>
 #ifndef DISABLE_INTERNET_UPDATE
 #include <system/httptool.h>
-#endif
-
-#include <sectionsdclient/sectionsdclient.h>
 
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
+#endif
 
 #include <stdio.h>
 #include <unistd.h>

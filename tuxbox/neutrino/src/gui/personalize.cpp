@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.10 2009/08/11 10:00:00 rhabarber1848 Exp $
+        $Id: personalize.cpp,v 1.11 2009/08/18 11:51:59 rhabarber1848 Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -218,14 +218,18 @@ void CPersonalizeGui::ShowMainMenuOptions()
 		pMMMenu->addItem(new CMenuOptionChooser(LOCALE_ESOUND_NAME, (int *)&g_settings.personalize_esound,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 	}
 #endif
+#ifdef ENABLE_MOVIEPLAYER
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_MOVIEPLAYER, (int *)&g_settings.personalize_movieplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
+#endif
 #ifdef ENABLE_PICTUREVIEWER
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_PICTUREVIEWER, (int *)&g_settings.personalize_pictureviewer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 #endif
 #ifdef ENABLE_UPNP
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_UPNPBROWSER, (int *)&g_settings.personalize_upnpbrowser, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 #endif
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_INTERNETRADIO) || defined(ENABLE_ESD) || defined(ENABLE_MOVIEPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_UPNP)
 	pMMMenu->addItem(GenericMenuSeparatorLine);
+#endif
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SLEEPTIMER, (int *)&g_settings.personalize_sleeptimer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_REBOOT, (int *)&g_settings.personalize_reboot, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 	pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SHUTDOWN, (int *)&g_settings.personalize_shutdown, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_standby, NEUTRINO_ICON_BUTTON_POWER));
@@ -296,7 +300,9 @@ void CPersonalizeGui::ShowSettingsOptions()
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_PARENTALLOCK_PARENTALLOCK, (int *)&g_settings.personalize_youth, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_NETWORK, (int *)&g_settings.personalize_network, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_4));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_RECORDING, (int *)&g_settings.personalize_recording, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_5));
+#ifdef ENABLE_MOVIEPLAYER
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_STREAMING, (int *)&g_settings.personalize_streaming, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_6));
+#endif
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_LANGUAGE, (int *)&g_settings.personalize_language, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_7));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_COLORS, (int *)&g_settings.personalize_colors, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_8));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_LCD, (int *)&g_settings.personalize_lcd, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_9));

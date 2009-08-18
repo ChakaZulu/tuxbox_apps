@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.17 2009/04/18 22:24:40 rhabarber1848 Exp $
+	$Id: movieinfo.cpp,v 1.18 2009/08/18 11:51:59 rhabarber1848 Exp $
 
 	Kommentar:
 
@@ -432,6 +432,7 @@ bool CMovieInfo::parseXmlTree (char* text, MI_MOVIE_INFO* movie_info)
 }
 
 
+#ifdef ENABLE_MOVIEPLAYER
 /************************************************************************
 
 ************************************************************************/
@@ -558,6 +559,7 @@ void CMovieInfo::showMovieInfo(MI_MOVIE_INFO& movie_info)
 					CMsgBox::mbBack); // UTF-8*/ 
   
 } 
+#endif
 /************************************************************************
 
 ************************************************************************/
@@ -1007,11 +1009,13 @@ void CMovieInfo::clearMovieInfo(MI_MOVIE_INFO* movie_info)
 bool CMovieInfo::loadFile(CFile& file,char* buffer, int buffer_size)
 {
 	bool result = false;
+#ifdef ENABLE_MOVIEPLAYER_VLC
 	if (strncmp(file.getFileName().c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 	{
 		result = loadFile_vlc(file, buffer,buffer_size);
 	}
 	else
+#endif
 	{
 		result = loadFile_std(file, buffer,buffer_size);
 	}
@@ -1045,12 +1049,13 @@ bool CMovieInfo::loadFile_std(CFile& file,char* buffer, int buffer_size)
 	return(result);
 }
 
+#ifdef ENABLE_MOVIEPLAYER_VLC
 bool CMovieInfo::loadFile_vlc(CFile& /*file*/, char* /*buffer*/, int /*buffer_size*/)
 {
 	bool result = false;
 	return(result);
 }
-
+#endif
 
 /************************************************************************
 
@@ -1059,12 +1064,15 @@ bool CMovieInfo::saveFile(const CFile& file, const char* text, const int text_si
 {
 	bool result = false;
 	std::string fn = file.getFileName();
+#ifdef ENABLE_MOVIEPLAYER_VLC
 	if (strncmp(fn.c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 	{
 		result = saveFile_vlc(file, text,text_size);
 	}
 	// paranoia check, but saveFile should not even be called for .vdr files...
-	else if (fn.rfind(".vdr") == fn.length() - 4 && fn.length() > 3)
+	else
+#endif
+	if (fn.rfind(".vdr") == fn.length() - 4 && fn.length() > 3)
 	{
 		fprintf(stderr, "ERROR! CMovieInfo::saveFile called for VDR file %s\n", fn.c_str());
 		result = saveFile_vdr(file, text, text_size);
@@ -1098,11 +1106,13 @@ bool CMovieInfo::saveFile_std(const CFile& file, const char* text, const int tex
  	return(result);
 }
 
+#ifdef ENABLE_MOVIEPLAYER_VLC
 bool CMovieInfo::saveFile_vlc(const CFile& /*file*/, const char* /*text*/, const int /*text_size*/)
 {
 	bool result = false;
 	return(result);
 }
+#endif
 
 bool CMovieInfo::saveFile_vdr(const CFile& , const char* , const int)
 {

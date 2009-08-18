@@ -12,7 +12,7 @@ INCLUDES = \
 	@TUXTXT_CFLAGS@ \
 	-I$(top_srcdir)/lib
 
-noinst_LIBRARIES = libtimerlist.a libneutrino_gui.a libneutrino_gui2.a
+noinst_LIBRARIES = libtimerlist.a libneutrino_gui.a libneutrino_gui2.a libneutrino_gui3.a
 
 libneutrino_gui_a_SOURCES = \
 	neutrino_menu.cpp themes.cpp \
@@ -23,7 +23,9 @@ libneutrino_gui_a_SOURCES = \
 	rc_lock.cpp bookmarkmanager.cpp \
 	timeosd.cpp epgplus.cpp epg_menu.cpp personalize.cpp \
 	streaminfo2.cpp plugins.cpp imageinfo.cpp \
-	audio_select.cpp movieinfo.cpp
+	audio_select.cpp
+
+libneutrino_gui3_a_SOURCES =  movieinfo.cpp
 
 if ENABLE_ESD
 libneutrino_gui_a_SOURCES += esound.cpp
@@ -39,11 +41,13 @@ libneutrino_gui_a_SOURCES += \
 	pictureviewer.cpp
 endif
 
+if ENABLE_MOVIEPLAYER
 if ENABLE_MOVIEPLAYER2
 libneutrino_gui_a_SOURCES += movieplayer2.cpp
 else
 libneutrino_gui_a_SOURCES += \
 	movieviewer.cpp movieplayer.cpp moviebrowser.cpp
+endif
 endif
 
 #	experimental_menu.cpp
@@ -67,8 +71,4 @@ INCLUDES += \
 
 libneutrino_gui_a_SOURCES += \
 	upnpbrowser.cpp
-endif
-
-if ENABLE_MOVIEPLAYER2
-AM_CPPFLAGS = -DMOVIEPLAYER2 -Wshadow
 endif

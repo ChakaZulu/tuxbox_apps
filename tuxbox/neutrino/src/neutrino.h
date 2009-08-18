@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.211 2009/08/11 09:59:59 rhabarber1848 Exp $
+	$Id: neutrino.h,v 1.212 2009/08/18 11:51:58 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -191,7 +191,9 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 		CFdxChangeNotifier			*FdxSettingsChanger;
 		CRCLock				*rcLock;
+#ifdef ENABLE_MOVIEPLAYER
 		CMenuTarget* 			moviePlayerGui;
+#endif
 		bool 					parentallocked;
 		CFontSizeNotifier 		*fontsizenotifier;
 		bool 					waitforshutdown;
@@ -268,12 +270,14 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 				  CMenuWidget &languageSettings,
 				  CMenuWidget &miscSettings,
 				  CMenuWidget &driverSettings,
-				  CMenuWidget &service,
 #if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 				  CMenuWidget &audiopl_picSettings,
 #endif
+#ifdef ENABLE_MOVIEPLAYER
 				  CMenuWidget &streamingSettings,
-				  CMenuWidget &moviePlayer);
+				  CMenuWidget &moviePlayer,
+#endif
+				  CMenuWidget &service);
 		void addMenueIntroItems(CMenuWidget &item);
 
 		void SetupTiming();

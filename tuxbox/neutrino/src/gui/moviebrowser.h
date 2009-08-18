@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.h,v 1.8 2008/05/01 00:08:24 dbt Exp $
+	$Id: moviebrowser.h,v 1.9 2009/08/18 11:51:59 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -42,6 +42,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.h,v $
+	Revision 1.9  2009/08/18 11:51:59  rhabarber1848
+	Neutrino: new configure option --disable-movieplayer: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=369382#p369382
+	
 	Revision 1.8  2008/05/01 00:08:24  dbt
 	- add optional rounded corners in menues and most other windows, configurable in color menue, saved with themes
 	- revised buttonbars with uniformed background colors and more accurate captions
@@ -339,11 +342,15 @@ class CMovieBrowser : public CMenuTarget
 		void fileInfoStale(void); // call this function to force the Moviebrowser to reload all movie information from HD
 
 		bool readDir(const std::string & dirname, CFileList* flist);
+#ifdef ENABLE_MOVIEPLAYER_VLC
 		bool readDir_vlc(const std::string & dirname, CFileList* flist);
+#endif
 		bool readDir_std(const std::string & dirname, CFileList* flist);
 
 		bool delFile(CFile& file);
+#ifdef ENABLE_MOVIEPLAYER_VLC
 		bool delFile_vlc(CFile& file);
+#endif
 		bool delFile_std(CFile& file);
 		
 		std::string getMovieBrowserVersion(void);

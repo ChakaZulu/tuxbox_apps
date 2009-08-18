@@ -188,10 +188,14 @@ class CMovieInfo
 		bool parseXmlQuickFix(char* text, MI_MOVIE_INFO* movie_info);		// OK, this is very quick an dirty. It does not waist execution time nor flash (this is QUICK). But, do not play to much with the xml files (e.g. with MS Notepad) since small changes in the structure could cause the parser to fail (this it DIRTY). 
 		bool parseInfoVDR(char* text, MI_MOVIE_INFO* movie_info);
 		bool loadFile_std(CFile& file,char* buffer, int buffer_size);
+#ifdef ENABLE_MOVIEPLAYER_VLC
 		bool loadFile_vlc(CFile& file,char* buffer, int buffer_size);
+#endif
 		bool loadFile(CFile& file,char* buffer, int buffer_size);
 		bool saveFile_std(const CFile& file, const char* text, const int text_size);
+#ifdef ENABLE_MOVIEPLAYER_VLC
 		bool saveFile_vlc(const CFile& file, const char* text, const int text_sizet);
+#endif
 		bool saveFile_vdr(const CFile& file, const char* text, const int text_size);
 		bool saveFile(const CFile& file, const char* text, const int text_size);
 	private:// variables

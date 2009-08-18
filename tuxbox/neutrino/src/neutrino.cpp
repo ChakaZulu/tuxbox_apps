@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.968 2009/08/17 09:22:48 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.969 2009/08/18 11:51:58 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2102,7 +2102,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	fontsizenotifier		= new CFontSizeNotifier;
 
 	rcLock				= new CRCLock();
+#ifdef ENABLE_MOVIEPLAYER
 	moviePlayerGui			= new CMoviePlayerGui();
+#endif
 	//USERMENU
 	Timerlist			= new CTimerList;
 
@@ -2122,7 +2124,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK     , "lock.raw"            , 500);
 	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD              , "network.raw"         , 430);
 	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD            , "recording.raw"       );
+#ifdef ENABLE_MOVIEPLAYER
 	CMenuWidget    streamingSettings   (LOCALE_STREAMINGMENU_HEAD            , "streaming.raw"       );
+#endif
 	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD                , "colors.raw"          );
 	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 500);
@@ -2153,12 +2157,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 					languageSettings,
 					miscSettings,
 					driverSettings,
-					service,
 #if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 					audioplPicSettings,
 #endif
+#ifdef ENABLE_MOVIEPLAYER
 					streamingSettings,
-					moviePlayer);
+					moviePlayer,
+#endif
+					service);
 
 	//service
 	InitServiceSettings(service, scanSettingsMenu);
@@ -2298,8 +2304,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//Recording Setup
 	InitRecordingSettings(recordingSettings);
 
-	//VLC Setup
+#ifdef ENABLE_MOVIEPLAYER
+	//Movieplayer Setup
 	InitStreamingSettings(streamingSettings);
+#endif
 
 	//font Setup
 	InitFontSettings(fontSettings);

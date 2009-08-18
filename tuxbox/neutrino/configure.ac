@@ -12,7 +12,6 @@ AM_PROG_LIBTOOL
 
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
-TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 TUXBOX_APPS_LIB_PKGCONFIG(CONNECTION,tuxbox-connection)
@@ -51,12 +50,6 @@ AC_ARG_ENABLE(flac,
 	,[enable_flac=no])
 AM_CONDITIONAL(ENABLE_FLAC,test "$enable_flac" = "yes")
 
-# neutrino movieplayer2 (experimental) #########################
-AC_ARG_ENABLE(movieplayer2,
-	AS_HELP_STRING(--enable-movieplayer2,enable experimental neutrino movieplayer2),
-	,[enable_movieplayer2=no])
-AM_CONDITIONAL(ENABLE_MOVIEPLAYER2,test "$enable_movieplayer2" = "yes")
-
 # neutrino UK FreeSat EPG (experimental) #########################
 AC_ARG_ENABLE(freesatepg,
 	AS_HELP_STRING(--enable-freesatepg,enable experimental UK FreeSat Neutrino EPG),
@@ -78,6 +71,16 @@ AC_ARG_ENABLE(audioplayer,
 	,[enable_audioplayer=yes])
 AM_CONDITIONAL(ENABLE_AUDIOPLAYER,test "$enable_audioplayer" = "yes")
 AM_CONDITIONAL(ENABLE_INTERNETRADIO,test "$enable_audioplayer" = "yes")
+
+AC_ARG_ENABLE(movieplayer,
+	AS_HELP_STRING(--disable-movieplayer,include Neutrino movieplayer),
+	,[enable_movieplayer=yes])
+AM_CONDITIONAL(ENABLE_MOVIEPLAYER,test "$enable_movieplayer" = "yes")
+
+# neutrino movieplayer2 (experimental) #########################
+AC_ARG_ENABLE(movieplayer2,
+	AS_HELP_STRING(--enable-movieplayer2,enable experimental neutrino movieplayer2),
+	,[enable_movieplayer2=no])
 
 AC_ARG_ENABLE(pictureviewer,
 	AS_HELP_STRING(--disable-pictureviewer,include Neutrino pictureviewer),
@@ -120,10 +123,6 @@ if test "$enable_radiotext" = "yes"; then
 AC_DEFINE(ENABLE_RADIOTEXT,1,[include Radiotext support])
 fi
 
-if test "$enable_movieplayer2" != "yes"; then
-AC_DEFINE(ENABLE_MOVIEBROWSER,1,[include Moviebrowser support])
-fi
-
 if test "$enable_audioplayer" = "yes"; then
 AC_DEFINE(ENABLE_AUDIOPLAYER,1,[include Neutrino audioplayer/internetradio])
 AC_DEFINE(ENABLE_INTERNETRADIO,1,[include Neutrino internetradio])
@@ -132,9 +131,34 @@ TUXBOX_APPS_LIB_PKGCONFIG(MAD,mad)
 TUXBOX_APPS_LIB_PKGCONFIG(VORBISIDEC,vorbisidec)
 fi
 
+if test "$enable_movieplayer" = "yes"; then
+	AC_DEFINE(ENABLE_MOVIEPLAYER,1,[include Neutrino movieplayer])
+	AC_DEFINE(ENABLE_MOVIEPLAYER_VLC,1,[include Neutrino movieplayer VLC support])
+	if test "$enable_movieplayer2" = "yes"; then
+		AC_DEFINE(ENABLE_MOVIEPLAYER2,1,[include Movieplayer2 support])
+	else
+		AC_DEFINE(ENABLE_MOVIEBROWSER,1,[include Moviebrowser support])
+	fi
+else
+	enable_movieplayer2=no
+fi
+AM_CONDITIONAL(ENABLE_MOVIEPLAYER2,test "$enable_movieplayer2" = "yes")
+
 if test "$enable_pictureviewer" = "yes"; then
 AC_DEFINE(ENABLE_PICTUREVIEWER,1,[include Neutrino pictureviewer])
 TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
+fi
+
+if test "$enable_audioplayer" = "yes" -o \
+   "$enable_movieplayer" = "yes" -o \
+   "$enable_http_update" = "yes"; then
+TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
+AC_DEFINE(HAVE_CURL,1,[include Curl support])
+else
+CURL_LIBS=""
+CURL_CFLAGS=""
+AC_SUBST(CURL_LIBS)
+AC_SUBST(CURL_CFLAGS)
 fi
 
 CPPFLAGS="$CPPFLAGS -Wextra -Wshadow"

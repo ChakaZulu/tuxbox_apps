@@ -55,9 +55,11 @@
 #include <sstream>
 
 #include <sys/stat.h>
+#ifdef HAVE_CURL
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
+#endif
 
 #include <driver/encoding.h>
 
@@ -421,22 +423,27 @@ void CFileBrowser::ChangeDir(const std::string & filename, int selection)
 	{
 		std::string::size_type pos = Path.substr(0,Path.length()-1).rfind('/');
 
+#ifdef ENABLE_MOVIEPLAYER_VLC
 		bool is_vlc = (strncmp(Path.c_str(), VLC_URI, strlen(VLC_URI)) == 0);
-
+#endif
 		if (pos == std::string::npos)
 		{
 			newpath = Path;
 		}
 		else
 		{
+#ifdef ENABLE_MOVIEPLAYER_VLC
 			if (is_vlc && (pos < strlen(VLC_URI) - 1))
 				newpath = VLC_URI;
 			else
+#endif
 				newpath = Path.substr(0, pos + 1);
 		}
 
+#ifdef ENABLE_MOVIEPLAYER_VLC
 		if (strncmp(is_vlc ? &(newpath.c_str()[strlen(VLC_URI)]) : newpath.c_str(), base.c_str(), base.length()) != 0)
 			return;
+#endif
 	}
 	else
 	{
@@ -489,17 +496,20 @@ bool CFileBrowser::readDir(const std::string & dirname, CFileList* flist)
 	}
 	else
 #endif
+#ifdef ENABLE_MOVIEPLAYER_VLC
 	if (strncmp(dirname.c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 	{
 		ret = readDir_vlc(dirname, flist);
 	}
 	else
+#endif
 	{
 		ret = readDir_std(dirname, flist);
 	}
 	return ret;
 }
 
+#ifdef ENABLE_MOVIEPLAYER_VLC
 bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 {
 //	printf("readDir_vlc %s\n",dirname.c_str());
@@ -590,6 +600,7 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 
 	return false;
 }
+#endif /* ENABLE_MOVIEPLAYER_VLC */
 
 #ifdef ENABLE_INTERNETRADIO
 bool CFileBrowser::readDir_sc(const std::string & dirname, CFileList* flist)

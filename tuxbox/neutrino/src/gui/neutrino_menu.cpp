@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.68 2009/08/11 10:00:00 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.69 2009/08/18 11:51:59 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -110,12 +110,14 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &languageSettings,
 								CMenuWidget &miscSettings,
 								CMenuWidget &driverSettings,
-								CMenuWidget &service,
 #if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 								CMenuWidget &audiopl_picSettings,
 #endif
+#ifdef ENABLE_MOVIEPLAYER
 								CMenuWidget &streamingSettings,
-								CMenuWidget &moviePlayer)
+								CMenuWidget &moviePlayer,
+#endif
+								CMenuWidget &service)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 
@@ -176,6 +178,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	}
 #endif
 
+#ifdef ENABLE_MOVIEPLAYER
 	if (g_settings.personalize_movieplayer == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut++)));
 	else if (g_settings.personalize_movieplayer == 2)
@@ -199,6 +202,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(GenericMenuSeparatorLine);
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &streamingSettings, NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_MOUNT, true, NULL, new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
+#endif
 
 #ifdef ENABLE_PICTUREVIEWER
 	if (g_settings.personalize_pictureviewer == 1)
@@ -218,10 +222,12 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "",
 										CRCInput::convertDigitToKey(shortcut++)));
 
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_INTERNETRADIO) || defined(ENABLE_ESD) || defined(ENABLE_MOVIEPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_UPNP)
 	if (g_settings.personalize_audioplayer==0 && g_settings.personalize_inetradio==0 && g_settings.personalize_esound==0 && g_settings.personalize_movieplayer==0 && g_settings.personalize_pictureviewer==0 && g_settings.personalize_upnpbrowser==0)
 		;// Stop seperator from appearing when menu entries have been hidden
 	else
 		mainMenu.addItem(GenericMenuSeparatorLine); 
+#endif
 
 	if (g_settings.personalize_settings == 0)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL, CRCInput::convertDigitToKey(shortcut++)));
@@ -287,10 +293,12 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	else if (g_settings.personalize_recording == 2)
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_RECORDING, g_settings.personalize_pincode, true, true, NULL, &recordingSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
 
+#ifdef ENABLE_MOVIEPLAYER
 	if (g_settings.personalize_streaming == 1)
 		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_STREAMING, true, NULL, &streamingSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
 	else if (g_settings.personalize_streaming == 2)
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_STREAMING, g_settings.personalize_pincode, true, true, NULL, &streamingSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+#endif
 
 	if (g_settings.personalize_language == 1)
 		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LANGUAGE, true, NULL, &languageSettings , NULL, CRCInput::convertDigitToKey(shortcut2++)));
@@ -1611,6 +1619,7 @@ const CMenuOptionChooser::keyval STREAMINGMENU_STOPSECTIONSD_OPTIONS[STREAMINGME
 	{ 2, LOCALE_RECORDINGMENU_SECTIONSD_RESTART }
 };
 
+#ifdef ENABLE_MOVIEPLAYER
 /* streaming settings menu */
 void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 {
@@ -1630,7 +1639,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf5 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_AUDIORATE      , (g_settings.streaming_type==1), g_settings.streaming_audiorate      , streamingSettings_audiorate);
 	CMenuForwarder* mf6 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_SERVER_STARTDIR, (g_settings.streaming_type==1), g_settings.streaming_server_startdir, startdirInput);
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.network_nfs_moviedir,this,"moviedir");
-#ifndef MOVIEPLAYER2
+#ifndef ENABLE_MOVIEPLAYER2
 	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFPLUGIN, true, g_settings.movieplayer_plugin,this,"movieplugin");
 #endif
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_AUDIO      , &g_settings.streaming_transcode_audio      , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
@@ -1646,7 +1655,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 
 	CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,oj1,oj2,oj3,oj4,oj5);
 
-#ifndef MOVIEPLAYER2
+#ifndef ENABLE_MOVIEPLAYER2
 	CIntInput * streamingSettings_buffer_size = new CIntInput(LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE, (long&)g_settings.streaming_buffer_segment_size,3, LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE_HINT1, LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE_HINT2);
 	CMenuForwarder* mf9 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE , g_settings.streaming_use_buffer, streamingSettings_buffer_size->getValue()      , streamingSettings_buffer_size);
 	COnOffNotifier *bufferNotifier = new COnOffNotifier(mf9);
@@ -1674,7 +1683,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( oj2);
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf7);                          //default dir
-#ifndef MOVIEPLAYER2
+#ifndef ENABLE_MOVIEPLAYER2
 	streamingSettings.addItem( mf8);				//default movieplugin
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( oj6 );
@@ -1684,6 +1693,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( oj8 );
 	streamingSettings.addItem( oj9 );
 }
+#endif /* ENABLE_MOVIEPLAYER */
 
 /* for font settings menu */
 class CMenuNumberInput : public CMenuForwarder, CMenuTarget, CChangeObserver
@@ -2285,6 +2295,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 				menu->addItem(menu_item, false);
 				break;
 
+#ifdef ENABLE_MOVIEPLAYER
 			case SNeutrinoSettings::ITEM_MOVIEPLAYER_TS: 
 				menu_items++;
 				menu_prev = SNeutrinoSettings::ITEM_MOVIEPLAYER_TS;
@@ -2300,6 +2311,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 				menu_item = new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, this->moviePlayerGui, "tsmoviebrowser", key, icon);
 				menu->addItem(menu_item, false);
 				break;
+#endif
 
 			case SNeutrinoSettings::ITEM_TIMERLIST: 
 				menu_items++;
@@ -2498,8 +2510,10 @@ void CNeutrinoApp::ShowStreamFeatures()
 		StreamFeatureSelector->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, MAINMENU_RECORDING_OPTIONS, MAINMENU_RECORDING_OPTION_COUNT, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	}
 
+#ifdef ENABLE_MOVIEPLAYER
 	// -- Add TS Playback to blue button
 	StreamFeatureSelector->addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, this->moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
+#endif
 
 	// -- Timer-Liste
 	CTimerList *tmpTimerlist = new CTimerList;

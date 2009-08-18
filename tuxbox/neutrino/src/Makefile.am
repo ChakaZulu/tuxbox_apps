@@ -26,6 +26,8 @@ neutrino_LDADD = \
 	gui/widget/libneutrino_gui_widget.a \
 	gui/widget/libneutrino_gui_widget2.a \
 	driver/libneutrino_driver.a \
+	gui/libneutrino_gui3.a \
+	gui/widget/libneutrino_gui_widget3.a \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \

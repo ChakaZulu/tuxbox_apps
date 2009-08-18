@@ -144,9 +144,13 @@ class CFileBrowser
 
 		CFileList		selected_filelist;
 		bool			readDir(const std::string & dirname, CFileList* flist);
+#ifdef ENABLE_MOVIEPLAYER_VLC
 		bool			readDir_vlc(const std::string & dirname, CFileList* flist);
+#endif
 		bool			readDir_std(const std::string & dirname, CFileList* flist);
+#ifdef ENABLE_INTERNETRADIO
 		bool			readDir_sc(const std::string & dirname, CFileList* flist);
+#endif
 		void			addRecursiveDir(CFileList * re_filelist, std::string path, bool bRootCall, CProgressWindow * progress = NULL);
 		void SMSInput(const neutrino_msg_t msg);
 

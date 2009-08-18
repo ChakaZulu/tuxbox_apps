@@ -8,7 +8,7 @@ INCLUDES = \
 	@PLUGINS_CFLAGS@ \
 	@ZAPIT_CFLAGS@
 
-noinst_LIBRARIES = libneutrino_gui_widget.a libneutrino_gui_widget2.a 
+noinst_LIBRARIES = libneutrino_gui_widget.a libneutrino_gui_widget2.a libneutrino_gui_widget3.a
 
 libneutrino_gui_widget_a_SOURCES = \
 	buttons.cpp \
@@ -17,7 +17,10 @@ libneutrino_gui_widget_a_SOURCES = \
 	messagebox.cpp hintbox.cpp listbox.cpp listbox_legacy.cpp \
 	lcdcontroler.cpp rgbcsynccontroler.cpp \
 	drawable.cpp hintboxext.cpp helpbox.cpp mountchooser.cpp \
-	listframe.cpp msgbox.cpp textbox.cpp dirchooser.cpp progressbar.cpp
+	listframe.cpp dirchooser.cpp progressbar.cpp
 
 libneutrino_gui_widget2_a_SOURCES = \
 	progresswindow.cpp
+
+libneutrino_gui_widget3_a_SOURCES = \
+	msgbox.cpp textbox.cpp
