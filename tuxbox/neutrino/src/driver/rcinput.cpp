@@ -61,6 +61,7 @@
 
 #include <global.h>
 #include <neutrino.h>
+#include <fstream>		// used for reading conf file
 
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/rawir2"};
@@ -83,6 +84,232 @@ static struct termio orig_termio;
 static bool          saved_orig_termio = false;
 #endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 
+
+#define SYSTEM		0xFFF00000
+#define RELOAD_CONF	SYSTEM+1
+#define MODE_TV		SYSTEM+2
+#define MODE_RADIO	SYSTEM+3
+
+const char CRCInput::key_modifiers[] = " ru";
+
+const CRCInput::key CRCInput::keyname[] = {
+	{"rc_0",	 	RC_0},
+	{"rc_1",	 	RC_1},
+	{"rc_2",	 	RC_2},
+	{"rc_3",	 	RC_3},
+	{"rc_4",	 	RC_4},
+	{"rc_5",	 	RC_5},
+	{"rc_6",	 	RC_6},
+	{"rc_7",	 	RC_7},
+	{"rc_8",	 	RC_8},
+	{"rc_9",	 	RC_9},
+	{"rc_right",		RC_right},
+	{"rc_left",		RC_left},
+	{"rc_up",		RC_up},
+	{"rc_down",		RC_down},
+	{"rc_ok",		RC_ok},
+	{"rc_spkr",		RC_spkr},    // !!
+	{"rc_standby",		RC_standby}, // !!
+	{"rc_green",		RC_green},
+	{"rc_yellow",		RC_yellow},
+	{"rc_red",		RC_red},
+	{"rc_blue",		RC_blue},
+	{"rc_minus",		RC_minus}, // !!
+	{"rc_plus",		RC_plus},  // !!
+	{"rc_help",		RC_help},
+	{"rc_setup",		RC_setup},
+	{"rc_top_left",		RC_top_left},
+	{"rc_top_right",	RC_top_right},
+	{"rc_bottom_left",	RC_bottom_left},
+	{"rc_bottom_right",	RC_bottom_right},
+	{"rc_home",		RC_home},
+	{"rc_page_down",	RC_page_down},
+	{"rc_page_up",		RC_page_up},
+	{"rc_esc",		RC_esc},
+	{"rc_hyphen",		RC_hyphen}, // !!
+	{"rc_equal",		RC_equal},
+	{"rc_backspace",	RC_backspace},
+	{"rc_tab",		RC_tab},
+	{"rc_q",		RC_q},
+	{"rc_w",		RC_w},
+	{"rc_e",		RC_e},
+	{"rc_r",		RC_r},
+	{"rc_t",		RC_t},
+	{"rc_y",		RC_y},
+	{"rc_u",		RC_u},
+	{"rc_i",		RC_i},
+	{"rc_o",		RC_o},
+	{"rc_p",		RC_p},
+	{"rc_leftbrace",	RC_leftbrace},
+	{"rc_rightbrace",	RC_rightbrace},
+	{"rc_enter",		RC_enter},
+	{"rc_leftctrl",		RC_leftctrl},
+	{"rc_a",		RC_a},
+	{"rc_s",		RC_s},
+	{"rc_d",		RC_d},
+	{"rc_f",		RC_f},
+	{"rc_g",		RC_g},
+	{"rc_h",		RC_h},
+	{"rc_j",		RC_j},
+	{"rc_k",		RC_k},
+	{"rc_l",		RC_l},
+	{"rc_semicolon",	RC_semicolon},
+	{"rc_apostrophe",	RC_apostrophe},
+	{"rc_grave",		RC_grave},
+	{"rc_leftshift",	RC_leftshift},
+	{"rc_backslash",	RC_backslash},
+	{"rc_z",		RC_z},
+	{"rc_x",		RC_x},
+	{"rc_c",		RC_c},
+	{"rc_v",		RC_v},
+	{"rc_b",		RC_b},
+	{"rc_n",		RC_n},
+	{"rc_m",		RC_m},
+	{"rc_comma",		RC_comma}, 	
+	{"rc_dot",		RC_dot}, 		
+	{"rc_slash",		RC_slash}, 	
+	{"rc_rightshift",	RC_rightshift}, 	
+	{"rc_kpasterisk",	RC_kpasterisk}, 	
+	{"rc_leftalt",		RC_leftalt}, 	
+	{"rc_space",		RC_space}, 	
+	{"rc_capslock",		RC_capslock}, 
+	{"rc_f1",		RC_f1},
+	{"rc_f2",		RC_f2}, 	
+	{"rc_f3",		RC_f3}, 	
+	{"rc_f4",		RC_f4}, 	
+	{"rc_f5",		RC_f5}, 	
+	{"rc_f6",		RC_f6}, 	
+	{"rc_f7",		RC_f7}, 	
+	{"rc_f8",		RC_f8}, 	
+	{"rc_f9",		RC_f9}, 	
+	{"rc_f10",		RC_f10}, 	 
+	{"rc_numlock",		RC_numlock}, 	 
+	{"rc_scrolllock",	RC_scrolllock}, 
+	{"rc_kp7",		RC_kp7},
+	{"rc_kp8",		RC_kp8},	
+	{"rc_kp9",		RC_kp9},		
+	{"rc_kpminus",		RC_kpminus},		
+	{"rc_kp4",		RC_kp4},
+	{"rc_kp5",		RC_kp5},	
+	{"rc_kp6",		RC_kp6},	
+	{"rc_kpplus",		RC_kpplus},	
+	{"rc_kp1",		RC_kp1},		
+	{"rc_kp2",		RC_kp2},		
+	{"rc_kp3",		RC_kp3},		
+	{"rc_kp0",		RC_kp0},		
+	{"rc_kpdot",		RC_kpdot},		
+	{"rc_102nd",		RC_102nd}, 	 	
+	{"rc_kpenter",		RC_kpenter},	
+	{"rc_kpslash",		RC_kpslash},	
+	{"rc_sysrq",		RC_sysrq}, 
+	{"rc_rightalt",		RC_rightalt}, 
+	{"rc_end",		RC_end}, 	 
+	{"rc_insert",		RC_insert}, 
+	{"rc_delete",		RC_delete}, 
+	{"rc_pause",		RC_pause}, 	
+	{"rc_leftmeta",		RC_leftmeta},
+	{"rc_rightmeta",	RC_rightmeta},
+	{"rc_btn_left",		RC_btn_left}, 
+	{"rc_btn_right",	RC_btn_right},
+
+	{"system",		SYSTEM},
+	{"reload_conf",		RELOAD_CONF},
+	{"mode_radio",		MODE_RADIO},
+	{"mode_tv",		MODE_TV},
+
+
+	{"show_epg",		NeutrinoMessages::SHOW_EPG},
+	{"show_infobar",	NeutrinoMessages::SHOW_INFOBAR},
+	{"vcr_on",		NeutrinoMessages::VCR_ON},
+	{"vcr_off",		NeutrinoMessages::VCR_OFF},
+	{"standby_on",		NeutrinoMessages::STANDBY_ON},
+	{"standby_off",		NeutrinoMessages::STANDBY_OFF},
+	//{"standby_toggle",	NeutrinoMessages::STANDBY_TOGGLE},
+	{"shutdown",		NeutrinoMessages::SHUTDOWN},
+	//{"announce_shutdown", NeutrinoMessages::ANNOUNCE_SHUTDOWN},
+	//{"announce_zapto",	NeutrinoMessages::ANNOUNCE_ZAPTO},
+	//{"zapto",		NeutrinoMessages::ZAPTO},
+	//{"announce_record",	NeutrinoMessages::ANNOUNCE_RECORD},
+	//{"record_start",	NeutrinoMessages::RECORD_START},
+	//{"record_stop",	NeutrinoMessages::RECORD_STOP},
+	//{"announce_sleeptimer", NeutrinoMessages::ANNOUNCE_SLEEPTIMER},
+	//{"sleeptimer",	NeutrinoMessages::SLEEPTIMER},
+	//{"changemode",	NeutrinoMessages::CHANGEMODE},
+	//{"remind",		NeutrinoMessages::REMIND},
+	{"lock_rc",		NeutrinoMessages::LOCK_RC},
+	{"unlock_rc",		NeutrinoMessages::UNLOCK_RC},
+	{"esound_on",		NeutrinoMessages::ESOUND_ON},
+	{"esound_off",		NeutrinoMessages::ESOUND_OFF},
+
+	{"show_volume",		NeutrinoMessages::EVT_VOLCHANGED},
+	//{"evt_mutechanged",	NeutrinoMessages::EVT_MUTECHANGED},
+	//{"evt_vcrchanged",	NeutrinoMessages::EVT_VCRCHANGED},
+	//{"evt_modechanged",	NeutrinoMessages::EVT_MODECHANGED},
+	//{"evt_bouquetschanged", NeutrinoMessages::EVT_BOUQUETSCHANGED},
+        //{"evt_serviceschanged", EVT_SERVICESCHANGED},
+
+	//{"evt_scan_complete",	 NeutrinoMessages::EVT_SCAN_COMPLETE},
+	//{"evt_scan_num_transponders",	 NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS},
+	//{"evt_scan_num_channels",	 NeutrinoMessages::EVT_SCAN_NUM_CHANNELS},
+	//{"evt_shutdown",	NeutrinoMessages::EVT_SHUTDOWN},
+	//{"evt_timer",		NeutrinoMessages::EVT_TIMER},
+	//{"evt_programlockstatus",	 NeutrinoMessages::EVT_PROGRAMLOCKSTATUS},
+	//{"evt_recordmode",	NeutrinoMessages::EVT_RECORDMODE},
+	//{"evt_zap_ca_clear",	NeutrinoMessages::EVT_ZAP_CA_CLEAR},
+	//{"evt_zap_ca_lock",	NeutrinoMessages::EVT_ZAP_CA_LOCK},
+	//{"evt_zap_ca_fta",	NeutrinoMessages::EVT_ZAP_CA_FTA},
+	//{"evt_scan_failed",	NeutrinoMessages::EVT_SCAN_FAILED},
+	//{"evt_scan_report_num_scanned_transponders",	 NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS},
+	//{"evt_scan_report_frequency",	 NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY},
+	//{"evt_scan_found_radio_chan",	 NeutrinoMessages::EVT_SCAN_FOUND_RADIO_CHAN},
+	//{"evt_scan_found_data_chan",		NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN},
+	//{"evt_scan_found_tv_chan",	 NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN},
+	//{"evt_scan_report_frequencyp",	 NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP},
+	//{"evt_zap_motor",	NeutrinoMessages::EVT_ZAP_MOTOR},
+				/* sectionsd */
+	//{"evt_services_upd",	NeutrinoMessages::EVT_SERVICES_UPD},
+	//{"evt_si_finished",	NeutrinoMessages::EVT_SI_FINISHED},
+
+
+	//{"evt_currentepg",	NeutrinoMessages::EVT_CURRENTEPG},
+	//{"evt_nextepg",	NeutrinoMessages::EVT_NEXTEPG},
+
+	{"evt_popup",		NeutrinoMessages::EVT_POPUP},
+	{"evt_extmsg",		NeutrinoMessages::EVT_EXTMSG},
+	{"evt_start_plugin",	NeutrinoMessages::EVT_START_PLUGIN},
+
+				/* sectionsd */
+	//{"evt_currentnext_epg",	 NeutrinoMessages::EVT_CURRENTNEXT_EPG},
+	//{"evt_timeset",		NeutrinoMessages::EVT_TIMESET},
+
+				/* "sectionsd" events triggered by neutrino */
+	//{"evt_noepg_yet",	NeutrinoMessages::EVT_NOEPG_YET},
+
+				/* "timerd" events triggered by neutrino */
+	//{"evt_nextprogram",	NeutrinoMessages::EVT_NEXTPROGRAM},
+
+				/* zapit */
+	//{"evt_scan_found_a_chan",	 NeutrinoMessages::EVT_SCAN_FOUND_A_CHAN},
+	//{"evt_scan_provider",	 NeutrinoMessages::EVT_SCAN_PROVIDER},
+	//{"evt_scan_satellite", NeutrinoMessages::EVT_SCAN_SATELLITE},
+	//{"evt_scan_servicename",	 NeutrinoMessages::EVT_SCAN_SERVICENAME},
+	//{"evt_zap_complete",	NeutrinoMessages::EVT_ZAP_COMPLETE},
+	//{"evt_zap_failed",	NeutrinoMessages::EVT_ZAP_FAILED},
+	//{"evt_zap_isnvod",	NeutrinoMessages::EVT_ZAP_ISNVOD},
+	//{"evt_zap_sub_complete",	 NeutrinoMessages::EVT_ZAP_SUB_COMPLETE},
+	//{"evt_zap_sub_failed", NeutrinoMessages::EVT_ZAP_SUB_FAILED},
+
+				/* "zapit" events triggered by neutrino */
+	//{"evt_zap_got_subservices",		NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES},
+	//{"evt_zap_gotapids",	NeutrinoMessages::EVT_ZAP_GOTAPIDS},
+	//{"evt_zap_gotpids",	NeutrinoMessages::EVT_ZAP_GOTPIDS},
+
+				/* neutrino */
+	//{"evt_recording_ended",	 NeutrinoMessages::EVT_RECORDING_ENDED},
+
+	{"rc_null",		CRCInput::RC_ignore /* was: 0xFFFFFFFD*/},
+	{"rc_none",		CRCInput::RC_nokey /* was: 0xFFFFFFFF*/}
+};
 
 /**************************************************************************
 *	Constructor - opens rc-input device and starts threads
@@ -151,7 +378,196 @@ CRCInput::CRCInput()
 		fd_rc[i] = -1;
 	}
 
+	load_conf(true);
+
 	open();
+}
+
+uint CRCInput::modch2int(char c)
+{
+	for (uint i = 1; i < no_modifiers; i++)
+		if (c == key_modifiers[i])
+			return i;
+
+	return 0;
+}
+
+char CRCInput::modint2ch(uint i)
+{
+	if (i >= no_modifiers) {
+		printf("[rcinput] modint2ch called with invalid argument = %d\n", i);
+		return '?';
+	}
+	return key_modifiers[i];
+}
+
+void CRCInput::load_conf(bool initialize) {
+	debug_user_translate = false;
+	no_neutrinoevents_when_vc = false;
+
+	if (!initialize)
+	{
+		for (uint i = 0; i < no_modifiers; i++)
+		{
+			for (std::map<uint, neutrino_msg_data_t>::iterator it = user_translate_data[i].begin();
+			     it != user_translate_data[i].end();
+			     it++)
+				free((void*)it->second);
+
+			user_translate_data[i].clear();
+			user_translate_table[i].clear();
+		}
+	}
+
+	std::ifstream rc_conf(RC_CONF_PATH);
+	if (rc_conf.good())
+	{
+		printf("[rcinput] found "  RC_CONF_PATH ", parsing...\n");
+		std::string line, keyword, argument, action, data;
+		while (getline(rc_conf, line))
+		{
+			if (line[0] != '#') {	// Skip comments
+				int s = line.find("=");
+				int end_keyword = s;
+				if (s != -1)
+				{
+					uint modifier = 0;
+					int left_bracket = line.substr(0,s).find("[");
+					if (left_bracket != -1)
+					{
+						end_keyword = left_bracket;
+						char modifier_ch = line[left_bracket+1];
+						modifier = modch2int(modifier_ch);
+					}
+					keyword = trim(line.substr(0, end_keyword));
+					argument = line.substr(s+1);
+					if (argument.substr(0,7) == "system(")
+						s = argument.find_first_of("#");
+					else
+						s = argument.find_first_of(";#");
+					argument = trim(argument.substr(0,s));
+					s = argument.find_first_of("(");
+					if (s != -1)
+					{
+						action = argument.substr(0, s);
+						data = argument.substr(s+1);
+						s = data.find_last_of(")");
+						data = trim(data.substr(0,s));
+					}
+					else
+					{
+						action = argument;
+						data = "";
+					}
+					uint keycode = keyname2keycode(keyword);
+
+					if (keycode != RC_nokey && user_translate_table[modifier].find(keycode) != user_translate_table[modifier].end())
+					  printf("[rcinput] Warning: overriding previous binding of %s[%c]\n", keyword.c_str(), modint2ch(modifier));
+	  
+					if (keyword == "debug")
+					{
+						if (argument == "dump")
+							debug_dump();
+						else
+						{
+							debug_user_translate = (argument == "on" || argument == "yes");
+							printf("[rcinput] debug_user_translate is now %s\n", argument.c_str());
+						}
+					}
+					else if (keyword == "no_neutrinoevents_when_vc")
+					{
+						no_neutrinoevents_when_vc = (argument == "on" || argument == "yes");
+						printf("[rcinput] no_neutrinoevents_when_vc is now %s\n", argument.c_str());
+					}
+					else if (keycode == SYSTEM)
+					{
+						char *buf = (char *) malloc((data.length()+1)*sizeof(char));
+						strcpy(buf, data.c_str());
+						user_translate_data[modifier][keycode] = (neutrino_msg_data_t) buf;
+					}
+					else if (keycode != CRCInput::RC_nokey)
+					{
+					
+
+					  uint keyaction = keyname2keycode(action);
+						if (keyaction != CRCInput::RC_nokey)
+						{
+							if (debug_user_translate) {
+								if (data == "")
+								  printf("[rcinput] Binding %s[%c] -> %s\n", keyword.c_str(), modint2ch(modifier), argument.c_str());
+								else
+									printf("[rcinput] Binding %s[%c] -> %s(%s)\n", keyword.c_str(), modint2ch(modifier), action.c_str(), data.c_str());
+							}
+							user_translate_table[modifier][keycode] = (neutrino_msg_t) keyaction;
+							if (data != "")
+							{
+								char *data_str = (char *) malloc((data.length()+1)*sizeof(char));
+								strcpy(data_str, data.c_str());
+								user_translate_data[modifier][keycode] = (neutrino_msg_data_t) data_str;
+							}
+							else
+								user_translate_data[modifier][keycode] = (neutrino_msg_data_t) NULL;
+						}
+						else
+							//if (debug_user_translate)
+						        printf("[rcinput] Key Action `%s' not recognized\n", argument.c_str());
+					}
+					else
+						//if (debug_user_translate)
+						printf("[rcinput] Key `%s' not recognized\n", keyword.c_str());
+				}
+			}
+		}
+	}
+	else
+		printf("[rcinput] no file "  RC_CONF_PATH " was found\n");
+}
+
+void CRCInput::debug_dump()
+{
+	for (uint i = 0; i < no_modifiers; i++)
+	{
+		printf("[rcinput/debug_dump] Content of user_translate_table/user_translate_data[%c]:\n", modint2ch(i));
+		for (std::map<uint, neutrino_msg_t>::iterator it = user_translate_table[i].begin();
+		     it != user_translate_table[i].end(); it ++)
+		{
+			uint keycode = it->first;
+			std::map<uint, neutrino_msg_data_t>::iterator dat = user_translate_data[i].find(keycode); 
+			printf("[rcinput/debug_dump] %s\t%s\t%s\n",
+			       keycode2keyname(keycode),
+			       keycode2keyname((uint)it->second),
+			       dat == user_translate_data[i].end() ? ""
+			       //: dat->second == 1 ? "mode_TV"
+			       //: dat->second == 2 ? "mode_Radio"
+			       : (char *) dat->second);
+		}
+	}
+}
+
+unsigned CRCInput::keyname2keycode(std::string the_keyname)
+{
+	unsigned int i = 0;
+	while (the_keyname != keyname[i].name && keyname[i].code != RC_nokey)
+		i++;
+	return keyname[i].code;
+}
+
+const char *CRCInput::keycode2keyname(unsigned the_keycode)
+{
+	unsigned int i = 0;
+	while (the_keycode != keyname[i].code && keyname[i].code != RC_nokey)
+		i++;
+	return keyname[i].name;
+}
+
+std::string CRCInput::trim(std::string s)
+{
+	const char *whitespace = " \t\r\n";
+	int beg = s.find_first_not_of(whitespace);
+	if (beg == -1)
+		return "";
+	int end = s.find_last_not_of(whitespace);
+	return s.substr(beg, end+1);
 }
 
 void CRCInput::open()
@@ -1225,6 +1641,20 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 								break;
 							}
 							//fprintf(stderr, "%04x %04x\n", (int)*msg, (int)*data);
+							neutrino_msg_data_t the_data = 0;
+							user_translate(msg, &the_data);
+							//fprintf(stderr, "************ %u %s %u %u\n", *msg & KEY_MAX, keycode2keyname(*msg& KEY_MAX), *msg & (RC_Repeat | RC_Release), the_data);
+							if (the_data) {
+							  if (*msg == NeutrinoMessages::CHANGEMODE) {
+							    *data = /*(neutrino_msg_t)*/ the_data;
+							  } else {
+							    // Neutrino (see neutrino.cpp) is supposed to free the
+							    // memory allocated. This may or may not be working.
+							    char *buf = new char[(strlen((char *)the_data)+1)*sizeof(unsigned char)];
+							    strcpy((char *)buf, (char *) the_data);
+							    *data =(neutrino_msg_t) buf;
+							  }
+							}
 							if (*msg != RC_ignore) // no need to push events that need to be ignored anyway.
 								return;
 						}
@@ -1387,6 +1817,7 @@ int CRCInput::getUnicodeValue(const neutrino_msg_t key)
 **************************************************************************/
 const char * CRCInput::getSpecialKeyName(const unsigned int key)
 {
+#ifdef UGLY_OLD_CODE
 	switch(key)
 	{
 			case RC_standby:
@@ -1564,6 +1995,9 @@ const char * CRCInput::getSpecialKeyName(const unsigned int key)
 			default:
 			return "unknown";
 	}
+#else
+	return strlen(CRCInput::keycode2keyname(key)) ?  CRCInput::keycode2keyname(key) : "none"; 
+#endif
 }
 
 std::string CRCInput::getKeyName(const unsigned int key)
@@ -1746,4 +2180,88 @@ int CRCInput::translate(int code)
 		return RC_nokey;
 #endif /* OLD_RC_API */
 #endif /* HAVE_DREAMBOX_HARDWARE */
+}
+
+// This function is called with input message pointed to by the first
+// argument. This is looked up in the translate table, acted upon in
+// some cases, otherwise return the possibly changed message. The
+// second argument may, through the pointer, return data, like plugin
+// name.
+void CRCInput::user_translate(neutrino_msg_t *msg, neutrino_msg_data_t *data)
+{
+	*data = 0;
+	if (*msg == RC_ignore || *msg == RC_nokey)
+		return;
+
+	uint modifier = (*msg & (RC_Repeat | RC_Release)) >> 10;
+	neutrino_msg_t incode = *msg & KEY_MAX;
+	//printf("[rcinput] %u %u\n", incode, modint2ch(modifier));
+
+	if (!CFrameBuffer::getInstance()->getActiveReally() && no_neutrinoevents_when_vc)
+	{
+		if (debug_user_translate)
+			printf("[rcinput] key %s[%c] rejected (virtual console open)\n",
+			       keycode2keyname(incode), modint2ch(modifier));
+		*msg = RC_ignore;//RC_nokey;
+		return;
+	}
+
+	if (user_translate_table[modifier].find(incode) != user_translate_table[modifier].end())
+	{
+		*msg = user_translate_table[modifier][incode];
+
+		if (user_translate_data[modifier].find(incode) == user_translate_data[modifier].end()) {
+			*data = 0;
+			if (debug_user_translate)
+				printf("[rcinput] user_translate: %s[%c] -> %s\n", keycode2keyname(incode), modint2ch(modifier),
+				       keycode2keyname(*msg));
+		}
+		else
+		{
+			*data = user_translate_data[modifier][incode];
+			if (debug_user_translate)
+				printf("[rcinput] user_translate: %s[%c] -> %s(%s)\n",
+				       keycode2keyname(incode), modint2ch(modifier),
+				       keycode2keyname(*msg), (const char*) *data);
+		}
+	}
+	else
+	{
+		data = 0;
+		if (debug_user_translate)
+			printf("[rcinput] user_translate: %s[%c] NOT translated\n",
+			       keycode2keyname(incode&RC_MaxRC), modint2ch(modifier));
+	}
+
+	if (*msg == RELOAD_CONF)
+	{
+		load_conf(false);
+		*msg = RC_ignore;//nokey;
+	}
+	else if (*msg == SYSTEM)
+	{
+		const char *cmd = (const char *) user_translate_data[modifier][incode];
+		if (cmd)
+		{
+			if (debug_user_translate)
+				printf("[rcinput] user_translate system(%s), now trying to execute...\n", cmd);
+			int result = system(cmd);
+			if (debug_user_translate)
+				printf(".... return code: %d\n", result);
+		}
+		else
+			if (debug_user_translate)
+				printf("[rcinput] user_translate system NOT defined (internal error?)\n");    
+		*msg = RC_ignore;//RC_nokey;
+	}
+	else if (*msg == MODE_TV)
+	{
+		*data = 1;			// CNeutrinoApp::mode_tv (private(!!) in neutrino.h)
+		*msg = NeutrinoMessages::CHANGEMODE;
+	}
+	else if (*msg == MODE_RADIO)
+	{
+		*data = 2;			// CNeutrinoApp::mode_radio (private(!!) neutrino.h)
+		*msg = NeutrinoMessages::CHANGEMODE;
+	} /* else do nothing */
 }

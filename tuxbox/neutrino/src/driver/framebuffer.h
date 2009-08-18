@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.50 2009/05/19 17:58:10 seife Exp $
+	$Id: framebuffer.h,v 1.51 2009/08/18 18:50:17 barf Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -120,6 +120,7 @@ class CFrameBuffer
 		fb_pixel_t * getFrameBufferPointer() const; // pointer to framebuffer
 		unsigned int getStride() const;             // size of a single line in the framebuffer (in bytes)
 		bool getActive() const;                     // is framebuffer active?
+		bool getActiveReally() const;
 
 #ifdef HAVE_DBOX_HARDWARE
 		void setTransparency( int tr = 0 );

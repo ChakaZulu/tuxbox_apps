@@ -40,6 +40,7 @@
 #include <linux/input.h>
 #include <string>
 #include <vector>
+#include <map>
 
 #ifndef KEY_OK
 #define KEY_OK           0x160
@@ -86,6 +87,7 @@ typedef size_t neutrino_msg_data_t; // we are pushing pointer addresses around w
 
 #define NEUTRINO_UDS_NAME "/tmp/neutrino.sock"
 
+#define RC_CONF_PATH "/var/tuxbox/config/rc.conf"
 
 class CRCInput
 {
@@ -102,6 +104,13 @@ class CRCInput
 			unsigned long long	interval;
 			unsigned long long	times_out;
 			bool			correct_time;
+		};
+
+ public:
+		struct key
+		{
+			const char *name;
+			uint code;
 		};
 
 		uint               timerid;
@@ -131,6 +140,22 @@ class CRCInput
 		unsigned long long repeat_block;
 		unsigned long long repeat_block_generic;
 		bool repeat_kernel;
+
+		static const unsigned int no_modifiers = 3;
+		std::map<uint, neutrino_msg_t> user_translate_table[no_modifiers];
+		std::map<uint, neutrino_msg_data_t> user_translate_data[no_modifiers];
+		neutrino_msg_t keyname2keycode(std::string);
+		static const char *keycode2keyname(uint);
+		std::string trim(std::string);
+		void user_translate(neutrino_msg_t*, neutrino_msg_data_t*);
+		bool debug_user_translate;
+		bool no_neutrinoevents_when_vc;
+		void load_conf(bool initialize);
+		static const key keyname[];
+		uint modch2int(char c);
+		char modint2ch(uint i);
+		void debug_dump();
+		static const char key_modifiers[no_modifiers+1];
 
 	public:
 		//rc-code definitions

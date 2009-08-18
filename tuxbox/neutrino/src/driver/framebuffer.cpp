@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.74 2009/05/19 17:58:10 seife Exp $
+	$Id: framebuffer.cpp,v 1.75 2009/08/18 18:50:17 barf Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -228,6 +228,11 @@ fb_pixel_t * CFrameBuffer::getFrameBufferPointer() const
 bool CFrameBuffer::getActive() const
 {
 	return (active || (virtual_fb != NULL));
+}
+
+bool CFrameBuffer::getActiveReally() const
+{
+	return active;
 }
 
 t_fb_var_screeninfo *CFrameBuffer::getScreenInfo()
