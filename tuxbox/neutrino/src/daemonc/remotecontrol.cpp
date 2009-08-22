@@ -195,13 +195,13 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 
 				if ( needs_nvods )
 					getNVODs();
-
-				// is_video_started is only false if channel is locked
-				if ((!is_video_started && info_CN.current_fsk == 0) || (!is_video_started && g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED))
-					g_RCInput->postMsg(NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false);
-				else
-					g_RCInput->postMsg(NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN.current_fsk, false);
 			}
+
+			// is_video_started is only false if channel is locked
+			if ((!is_video_started && info_CN.current_fsk == 0) || (!is_video_started && g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED))
+				g_RCInput->postMsg(NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false);
+			else
+				g_RCInput->postMsg(NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN.current_fsk, false);
 		}
 		return messages_return::handled;
 	}
