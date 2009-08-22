@@ -853,10 +853,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 
 		uniqueEPGKey service( HILO(eit->service_id), HILO(eit->original_network_id), HILO(eit->transport_stream_id) );
 		if (!eEPGCache::getInstance()->CheckBouquets(service))
-		{
-			Unlock();
 			return 0;
-		}
 
 		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 		int eit_event_size;
