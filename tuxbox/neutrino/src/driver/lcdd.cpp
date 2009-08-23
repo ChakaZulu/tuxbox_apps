@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.76 2009/06/26 13:07:04 rhabarber1848 Exp $
+	$Id: lcdd.cpp,v 1.77 2009/08/23 19:12:58 dbt Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -993,7 +993,7 @@ void CLCD::showInfoBox(const char * const title, const char * const text ,int au
 	//printf("[lcdd] Info: \n");
 	if(text != NULL)
 		m_infoBoxText = text;
-	if(text != NULL)
+	if(title != NULL)
 		m_infoBoxTitle = title;
 	if(timer != -1)
 		m_infoBoxTimer = timer;
@@ -1008,7 +1008,7 @@ void CLCD::showInfoBox(const char * const title, const char * const text ,int au
 		display.draw_fill_rect (EPG_INFO_WINDOW_POS, EPG_INFO_WINDOW_POS, 	LCD_WIDTH-EPG_INFO_WINDOW_POS+1, 	  LCD_HEIGTH-EPG_INFO_WINDOW_POS+1,    CLCDDisplay::PIXEL_OFF);
 		display.draw_fill_rect (EPG_INFO_LINE_POS, 	 EPG_INFO_LINE_POS, 	LCD_WIDTH-EPG_INFO_LINE_POS-1, 	  LCD_HEIGTH-EPG_INFO_LINE_POS-1, 	 CLCDDisplay::PIXEL_ON);
 		display.draw_fill_rect (EPG_INFO_BORDER_POS, EPG_INFO_BORDER_POS, 	LCD_WIDTH-EPG_INFO_BORDER_POS-3,  LCD_HEIGTH-EPG_INFO_BORDER_POS-3, CLCDDisplay::PIXEL_OFF);
-	
+
 		// paint title
 		if(!m_infoBoxTitle.empty())
 		{
