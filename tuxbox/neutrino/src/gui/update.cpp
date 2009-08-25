@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.136 2009/08/18 11:51:59 rhabarber1848 Exp $
+	$Id: update.cpp,v 1.137 2009/08/25 18:50:12 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -404,6 +404,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	CFlashTool ft;
 	ft.setStatusViewer(this);
 
+#ifndef DISABLE_INTERNET_UPDATE
 #ifdef HAVE_DREAMBOX_HARDWARE
 	// This check was previously used only on squashfs-images
 	if(g_settings.softupdate_mode==1) //internet-update
@@ -417,6 +418,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 			return menu_return::RETURN_REPAINT;
 		}
 	}
+#endif
 #endif
 
 	struct stat buf;
