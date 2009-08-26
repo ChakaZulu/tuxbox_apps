@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.262 2009/08/17 06:28:50 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.263 2009/08/26 06:08:24 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1090,12 +1090,12 @@ void CInfoViewer::showRadiotext()
 		//				sprintf(stext[0], g_Radiotext->RT_PTY == 0 ? "%s - %s %s%s" : "%s - %s (%s)%s",
 		//				g_Radiotext->RT_Titel, tr("Radiotext"), g_Radiotext->RT_PTY == 0 ? g_Radiotext->RDS_PTYN : g_Radiotext->ptynr2string(g_Radiotext->RT_PTY), g_Radiotext->RT_MsgShow ? ":" : tr("  [waiting ...]"));
 				if ((lines) || (g_Radiotext->RT_PTY !=0)) {
-					sprintf(stext[0], g_Radiotext->RT_PTY == 0 ? "%s %s%s" : "%s (%s)%s",
-						tr("Radiotext"), g_Radiotext->RT_PTY == 0 ? g_Radiotext->RDS_PTYN : g_Radiotext->ptynr2string(g_Radiotext->RT_PTY), ":");
+					sprintf(stext[0], g_Radiotext->RT_PTY == 0 ? "%s %s%s" : "%s (%s)%s", tr("Radiotext"), g_Radiotext->RT_PTY == 0 ? g_Radiotext->RDS_PTYN : g_Radiotext->ptynr2string(g_Radiotext->RT_PTY), ":");
 
 					frameBuffer->paintBoxRel(x+SHADOW_OFFSET, y+SHADOW_OFFSET, dx, dy, COL_INFOBAR_SHADOW_PLUS_0);
 					frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0);
-					g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+10, y+ 30, dx-20, stext[0], COL_INFOBAR, 0, RTisIsUTF); // UTF-8
+					std::string s_rtext = ZapitTools::Latin1_to_UTF8(stext[0]);
+					g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+10, y+ 30, dx-20, s_rtext, COL_INFOBAR, 0, RTisIsUTF); // UTF-8
 				}
 				yoff = 17;
 				ii = 1;
