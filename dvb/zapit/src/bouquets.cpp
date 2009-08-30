@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.113 2009/08/30 10:04:31 seife Exp $
+ * $Id: bouquets.cpp,v 1.114 2009/08/30 20:39:51 seife Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -378,13 +378,14 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 				newBouquet = Bouquets[bnum];
 			else
 			{
-				newBouquet = addBouquet(xmlGetAttribute(search, "name"));
+				newBouquet = addBouquet(name);
 				char* hidden = xmlGetAttribute(search, "hidden");
 				char* locked = xmlGetAttribute(search, "locked");
 				newBouquet->type = xmlGetNumericAttribute(search, "type", 16);
 				newBouquet->bouquet_id = xmlGetNumericAttribute(search, "bouquet_id", 16);
 				newBouquet->bHidden = hidden ? (strcmp(hidden, "1") == 0) : false;
 				newBouquet->bLocked = locked ? (strcmp(locked, "1") == 0) : false;
+				bnum = Bouquets.size() - 1;
 			}
 
 			channel_node = search->xmlChildrenNode;
