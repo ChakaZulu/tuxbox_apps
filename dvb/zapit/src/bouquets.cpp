@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.112 2009/03/06 18:37:37 rhabarber1848 Exp $
+ * $Id: bouquets.cpp,v 1.113 2009/08/30 10:04:31 seife Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -359,7 +359,6 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 	xmlNodePtr search=root->xmlChildrenNode;
 	xmlNodePtr channel_node;
-	
 
 	if (search)
 	{
@@ -372,15 +371,23 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 		while ((search = xmlGetNextOccurence(search, "Bouquet")) != NULL)
 		{
-			CBouquet* newBouquet = addBouquet(xmlGetAttribute(search, "name"));
-			char* hidden = xmlGetAttribute(search, "hidden");
-			char* locked = xmlGetAttribute(search, "locked");
-			newBouquet->type = xmlGetNumericAttribute(search, "type", 16);
-			newBouquet->bouquet_id = xmlGetNumericAttribute(search, "bouquet_id", 16);
-			newBouquet->bHidden = hidden ? (strcmp(hidden, "1") == 0) : false;
-			newBouquet->bLocked = locked ? (strcmp(locked, "1") == 0) : false;
-			channel_node = search->xmlChildrenNode;
+			CBouquet *newBouquet;
+			char *name = xmlGetAttribute(search, "name");
+			int bnum = existsBouquet(name);
+			if (bnum != -1)
+				newBouquet = Bouquets[bnum];
+			else
+			{
+				newBouquet = addBouquet(xmlGetAttribute(search, "name"));
+				char* hidden = xmlGetAttribute(search, "hidden");
+				char* locked = xmlGetAttribute(search, "locked");
+				newBouquet->type = xmlGetNumericAttribute(search, "type", 16);
+				newBouquet->bouquet_id = xmlGetNumericAttribute(search, "bouquet_id", 16);
+				newBouquet->bHidden = hidden ? (strcmp(hidden, "1") == 0) : false;
+				newBouquet->bLocked = locked ? (strcmp(locked, "1") == 0) : false;
+			}
 
+			channel_node = search->xmlChildrenNode;
 			while ((channel_node = xmlGetNextOccurence(channel_node, "channel")) != NULL)
 			{
 				GET_ATTR(channel_node, "serviceID", SCANF_SERVICE_ID_TYPE, service_id);
@@ -393,7 +400,13 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 				if (chan != NULL) {
 					if (channel_names_from_bouquet)
 						chan->setName(xmlGetAttribute(channel_node, "name"));
-					newBouquet->addService(chan);
+
+					if (existsChannelInBouquet(bnum, CREATE_CHANNEL_ID)) {
+						DBG("b %d '%s' ch %012llx sat %3d name '%s' exists, not added",
+						    bnum, name, CREATE_CHANNEL_ID, satellitePosition,
+						    chan->getName().c_str());
+					} else
+						newBouquet->addService(chan);
 				}
 
 				channel_node = channel_node->xmlNextNode;
@@ -458,18 +471,26 @@ void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 
 	if (ignoreBouquetFile == false)
 	{
-		parser = parseXmlFile(BOUQUETS_XML);
-
+		parser = parseXmlFile(UBOUQUETS_XML);
 		if (parser != NULL)
 		{
+			INFO("reading " UBOUQUETS_XML);
 			parseBouquetsXml(xmlDocGetRootElement(parser));
 			xmlFreeDoc(parser);
 		}
-		
-		parser = parseXmlFile(CURRENTSERVICES_XML);
-		
+
+		parser = parseXmlFile(BOUQUETS_XML);
 		if (parser != NULL)
 		{
+			INFO("reading " BOUQUETS_XML);
+			parseBouquetsXml(xmlDocGetRootElement(parser));
+			xmlFreeDoc(parser);
+		}
+
+		parser = parseXmlFile(CURRENTSERVICES_XML);
+		if (parser != NULL)
+		{
+			INFO("reading " CURRENTSERVICES_XML);
 			makeBouquetfromCurrentservices(xmlDocGetRootElement(parser));
 			xmlFreeDoc(parser);
 		}

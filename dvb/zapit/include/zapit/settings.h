@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.21 2007/06/10 19:30:32 houdini Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.23 2009/08/30 10:04:14 seife Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -40,6 +40,7 @@
 #define STATICPIDS_XML		ZAPITCONFIGDIR "/staticpids.xml"
 #define SERVICES_TMP    	"/tmp/services.tmp"
 #define BOUQUETS_XML    	ZAPITCONFIGDIR "/bouquets.xml"
+#define UBOUQUETS_XML		ZAPITCONFIGDIR "/ubouquets.xml"
 #define BOUQUETS_TMP    	"/tmp/bouquets.tmp"
 #define CURRENTSERVICES_XML	"/tmp/currentservices.xml"
 #define CURRENTSERVICES_TMP	"/tmp/currentservices.tmp"
@@ -62,6 +63,8 @@
 #define FRONTEND_DEVICE 	"/dev/dvb/adapter0/frontend0"
 #define VIDEO_DEVICE    	"/dev/dvb/adapter0/video0"
 #endif
+#define AVS_DEVICE		"/dev/dbox/avs0"
+#define SAA7126_DEVICE		"/dev/dbox/saa0"
 
 #define CAMD_UDS_NAME  		"/tmp/camd.socket"
 
