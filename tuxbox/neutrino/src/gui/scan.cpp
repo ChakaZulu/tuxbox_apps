@@ -53,6 +53,13 @@
 #include <ost/sec.h>
 #endif
 
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" int  tuxtxt_init();
+extern "C" int  tuxtxt_start(int tpid);
+//extern "C" int  tuxtxt_stop();
+extern "C" void tuxtxt_close();
+#endif
+
 CScanTs::CScanTs()
 {
 	frameBuffer = CFrameBuffer::getInstance();
@@ -79,6 +86,10 @@ int CScanTs::exec(CMenuTarget* /*parent*/, const std::string &)
 
 printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %d TP_diseqc %d\n", get_set.TP_scan, get_set.TP_freq, get_set.TP_rate, get_set.TP_fec, get_set.TP_pol, get_set.TP_mod, (uint8_t)get_set.TP_diseqc);
 
+#ifndef TUXTXT_CFG_STANDALONE
+	if (g_settings.tuxtxt_cache)
+		tuxtxt_close();
+#endif
 	// manual TP scan
 	if(get_set.TP_scan == CScanTs::SCAN_ONE_TP)
 	{
@@ -182,6 +193,15 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 
 	g_Sectionsd->setPauseScanning(false);
 
+#ifndef TUXTXT_CFG_STANDALONE
+	if (g_settings.tuxtxt_cache)
+	{
+		int vtpid = g_RemoteControl->current_PIDs.PIDs.vtxtpid;
+		tuxtxt_init();
+		if (vtpid)
+			tuxtxt_start(vtpid);
+	}
+#endif
 
 	if(g_settings.video_Format != g_settings.video_backgroundFormat)
 		g_Controld->setVideoFormat(g_settings.video_Format);
