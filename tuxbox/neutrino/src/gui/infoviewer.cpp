@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.264 2009/08/26 10:29:56 seife Exp $
+	$Id: infoviewer.cpp,v 1.265 2009/08/31 16:09:37 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -970,16 +970,11 @@ void CInfoViewer::showIcon_RadioText(bool rt_available, bool rt_enabled) const
 void CInfoViewer::showIcon_16_9() const
 {
 #ifdef ENABLE_RADIOTEXT
-	if (g_Zapit->getMode() !=2) {
-		frameBuffer->paintIcon((aspectRatio != 0) ? "16_9.raw" : "16_9_gray.raw",
-					BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
-					BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
-	}
-#else
+	if (g_Zapit->getMode() !=2)
+#endif
 	frameBuffer->paintIcon((aspectRatio != 0) ? "16_9.raw" : "16_9_gray.raw",
 				BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
-#endif
 }
 
 void CInfoViewer::showIcon_VTXT() const
