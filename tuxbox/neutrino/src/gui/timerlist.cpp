@@ -1,5 +1,5 @@
 /*
-	$Id: timerlist.cpp,v 1.100 2009/03/28 14:48:57 seife Exp $
+	$Id: timerlist.cpp,v 1.101 2009/09/02 12:27:04 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -529,12 +529,9 @@ int CTimerList::show()
 		{
 			update=true;
 		}
-		else if((msg==CRCInput::RC_blue)||
-				  (CRCInput::isNumeric(msg)) )
+		else if ( msg == CRCInput::RC_blue || CRCInput::isNumeric(msg) )
 		{
-			//pushback key if...
-			g_RCInput->postMsg( msg, data );
-			loop=false;
+			//Ignore
 		}
 		else if(msg==CRCInput::RC_setup)
 		{
@@ -773,7 +770,7 @@ void CTimerList::paintFoot()
 	{
 		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + height + 1, ButtonWidth, 3, TimerListButtons);
 
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY_SMALL, x + width - ButtonWidth + 10, y + height + 3);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + width - ButtonWidth + 10, y + height);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + width - ButtonWidth + 38, y + height + 24 - 1, ButtonWidth - 28, g_Locale->getText(LOCALE_TIMERLIST_MODIFY), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 	}
 }
