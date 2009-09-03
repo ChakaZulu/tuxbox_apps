@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.32 2009/08/11 10:00:00 rhabarber1848 Exp $
+	$Id: imageinfo.cpp,v 1.33 2009/09/03 20:06:39 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -28,10 +28,11 @@
 #include <gui/imageinfo.h>
 
 #ifdef ENABLE_MOVIEBROWSER
-#include <gui/moviebrowser.h>
+#include "moviebrowser.h"
 #endif /* ENABLE_MOVIEBROWSER */
-#include <gui/pictureviewer.h>
-#include <gui/streaminfo2.h>
+#include "movieplayer.h"
+#include "pictureviewer.h"
+#include "streaminfo2.h"
 
 #include <gui/widget/icons.h>
 #include <gui/widget/buttons.h>
@@ -39,6 +40,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <errno.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -51,6 +53,7 @@
 
 #include <system/flashtool.h>
 
+#define VERSION_FILE "/.version"
 using namespace std;
 
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
@@ -309,7 +312,7 @@ void CImageInfo::paintRevisionInfos(int y_startposition)
 	
 	y_startposition += iheight;
 	paintContent(font_info, xpos, y_startposition, "Imageinfo:", COL_MENUCONTENTINACTIVE );
-	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.32 $").c_str());
+	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.33 $").c_str());
 	
 #ifdef ENABLE_MOVIEBROWSER
 	y_startposition += iheight;
@@ -317,6 +320,11 @@ void CImageInfo::paintRevisionInfos(int y_startposition)
 	paintContent(font_info, xpos, y_startposition, "Moviebrowser:", COL_MENUCONTENTINACTIVE );
 	paintContent(font_info, xpos+x_offset_large, y_startposition, mb.getMovieBrowserVersion().c_str());
 #endif /* ENABLE_MOVIEBROWSER */
+
+	y_startposition += iheight;
+	static CMoviePlayerGui mp;
+	paintContent(font_info, xpos, y_startposition, "Movieplayer:", COL_MENUCONTENTINACTIVE );
+	paintContent(font_info, xpos+x_offset_large, y_startposition, mp.getMoviePlayerVersion().c_str());
 
 #ifdef ENABLE_PICTUREVIEWER
 	y_startposition += iheight;
@@ -334,9 +342,13 @@ void CImageInfo::paintRevisionInfos(int y_startposition)
 
 string CImageInfo::readFile(string filename)
 {
-	string systxt;
+	string systxt = "";
 
 	ifstream f(filename.c_str());
+	if (!f) { 
+       		cerr << "[imageinfo] readFile: error while reading "<<filename<<" " <<strerror(errno)<<endl;
+		return systxt;
+	}
 	char ch;
 	while(f.get(ch)) {
 		systxt += ch;
@@ -441,7 +453,7 @@ string CImageInfo::getChipInfo()
 void CImageInfo::LoadImageInfo(void)
 {
 	CConfigFile config('\t');
-	config.loadConfig("/.version");
+	config.loadConfig(VERSION_FILE);
 	
 	homepage		= config.getString("homepage", "http://www.tuxbox.org");
 	creator		= config.getString("creator", "");
@@ -553,16 +565,23 @@ void CImageInfo::paint()
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_DATE), COL_MENUCONTENTINACTIVE);
 	paintLine(xpos + x_offset_large, font_info, imagedate.c_str()); //date of generation 
 
-
 	//LCD view
-	std::string lcdinfo = (std::string)getImageInfo(IMAGENAME) + "\n" +
-									(std::string)getImageInfo(SUBVERSION) + "\n" +
-									imagetype + "\n" +
-									imagedate.substr(0,11) + "\n" +
-									imagedate.substr(11) +" by " + getImageInfo(CREATOR);
+	std::string lcdinfo;
+	if (access(VERSION_FILE, R_OK) ==0) {
+		lcdinfo = (std::string)getImageInfo(IMAGENAME) + "\n" ;
+		lcdinfo += (std::string)getImageInfo(SUBVERSION) + "\n" ;
+		lcdinfo += imagetype + "\n";
+		lcdinfo += imagedate.substr(0,11) + "\n" ;
+		lcdinfo += imagedate.substr(11) ;
+		lcdinfo += " by " ;
+		lcdinfo += getImageInfo(CREATOR) ;
+	}
+	else {
+		lcdinfo = "Informations\nnot alvailable!" ;
+	}
+
 	CLCD::getInstance()->showInfoBox("Image-Info", lcdinfo.c_str() );
 
-	
 	//paint creator, cvslevel, info, comment only if present in /.version
 	ypos += iheight;
 	if (creator.length())
@@ -589,29 +608,29 @@ void CImageInfo::paint()
 		
 }
 
-/* 	useful stuff for version informations * getModulVersion()
+/* 	usefull stuff for version informations * getModulVersion()
  * 	returns a numeric version string for better version handling from any module without 	
- * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.32 $" becomes "1.146", 
+ * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.33 $" becomes "1.xx", 
  * 	argument prefix can be empty or a replacement for "Revision"-string eg. "Version: " or "v." as required,
- * 	argument ID_string must be a CVS-keyword like "$Revision: 1.32 $", used and changed by 
+ * 	argument ID_string must be a CVS-keyword like "$ Revision $", used and changed by 
  * 	cvs-committs or a version data string eg: "1.xxx" by yourself
+ * 	Note for imagemakers: Keywords will working only with CVS without local -kx options,
+ *	if you are using an other CMS like Git or so..., you must change these entries manually
  * 	some examples:
- * 	getModulVersion("Version: ","$Revision: 1.32 $")	 returns "Version: 1.153"	
- * 	getModulVersion("v.","$Revision: 1.32 $")			 returns "v.1.153"
- *  	getModulVersion("","$Revision: 1.32 $")		 		 returns "1.153"
+ * 	getModulVersion("Version: ","$Revision: 1.33 $")	 returns "Version: 1.x"	
+ * 	getModulVersion("v.","$Revision: 1.33 $")			 returns "v.1.x"
+ *  	getModulVersion("","$Revision: 1.33 $")		 		 returns "1.x"
  */
-std::string CImageInfo::getModulVersion(const std::string &/*prefix_string*/, std::string ID_string)
+std::string CImageInfo::getModulVersion(const std::string &prefix_string, std::string ID_string)
 {
 	string revstr = ID_string;
-	while (revstr.find("$") !=string::npos)
-	{
+	while (revstr.find("$") !=string::npos) {
 		revstr.replace(revstr.find("$"),1 ,""); //normalize output, remove "$"	
 	}
 	
-	while (revstr.find("Revision: ") !=string::npos)
-	{
+	while (revstr.find("Revision: ") !=string::npos) {
 		revstr.replace(revstr.find("Revision: "),10 ,""); //normalize output, remove "Revision:"	
 	}
 	
-	return revstr;
+	return prefix_string + revstr;
 }
