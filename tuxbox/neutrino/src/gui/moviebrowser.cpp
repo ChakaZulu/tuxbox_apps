@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.25 2009/08/18 11:51:59 rhabarber1848 Exp $
+	$Id: moviebrowser.cpp,v 1.26 2009/09/03 19:57:57 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.26  2009/09/03 19:57:57  dbt
+	removed compiler warnings
+	
 	Revision 1.25  2009/08/18 11:51:59  rhabarber1848
 	Neutrino: new configure option --disable-movieplayer: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=369382#p369382
 	
@@ -90,10 +93,10 @@
 	- mehr Versionsinformationen in Image Informationen
 	- Kommentarzeilen fuer Zusatzinfos bei Image Image-Informationen (geholt aus ./version)
 	- Motorsetup ueberarbeitet
-	- Senderlogos im Infobar möglich
+	- Senderlogos im Infobar moeglich
 	- Aufnahme-, Umschalt- und aktualisierungs-Buttons jetzt standardmaessig in der EPG-Vorschau aktiviert
 	- Warnmeldung, falls kein Aufnahmeverzeichnis angegeben wurde, wenn  Aufnahme vorgemerkt werden soll
-	- weitere Icons für das Usermnue jetzt nutzbar
+	- weitere Icons fuer das Usermnue jetzt nutzbar
 	
 	special THX to Ingrid and PaulFoul for some inputs ;-)
 	
@@ -474,7 +477,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.25 2009/08/18 11:51:59 rhabarber1848 Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.26 2009/09/03 19:57:57 dbt Exp $\r\n");
 	init();
 }
 
@@ -2054,7 +2057,7 @@ bool CMovieBrowser::onButtonPressLastRecordList(neutrino_msg_t msg)
 /************************************************************************
 
 ************************************************************************/
-bool CMovieBrowser::onButtonPressBookmarkList(neutrino_msg_t msg) 
+bool CMovieBrowser::onButtonPressBookmarkList(neutrino_msg_t /*msg*/) 
 {
 	//TRACE("[mb]->onButtonPressBookmarkList %d\r\n",msg);
 	bool result = true;
@@ -2632,7 +2635,7 @@ bool CMovieBrowser::readDir(const std::string & dirname, CFileList* flist)
 /************************************************************************
 
 ************************************************************************/
-bool CMovieBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
+bool CMovieBrowser::readDir_vlc(const std::string & /*dirname*/, CFileList* /*flist*/)
 {
 	return false;
 }
@@ -2703,7 +2706,7 @@ bool CMovieBrowser::delFile(CFile& file)
 
 ************************************************************************/
 #ifdef ENABLE_MOVIEPLAYER_VLC
-bool CMovieBrowser::delFile_vlc(CFile& file)
+bool CMovieBrowser::delFile_vlc(CFile& /*file*/)
 {
 	bool result = false;
 	return(result);
@@ -3095,7 +3098,7 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
 /************************************************************************
 
 ************************************************************************/
-bool CMovieBrowser::showMenu(MI_MOVIE_INFO* movie_info)
+bool CMovieBrowser::showMenu(MI_MOVIE_INFO* /*movie_info*/)
 {
     /* first clear screen */
     m_pcWindow->paintBoxRel(    0,
@@ -3657,7 +3660,7 @@ CMenuSelector::CMenuSelector(const char * OptionName, const bool Active , std::s
     returnInt =         ReturnInt;
 };
 
-int CMenuSelector::exec(CMenuTarget* parent)
+int CMenuSelector::exec(CMenuTarget* /*parent*/)
 { 
 	if(returnInt != NULL)
 		*returnInt= returnIntValue;
@@ -3705,7 +3708,7 @@ int CMenuSelector::paint(bool selected)
 /************************************************************************
 
 ************************************************************************/
-int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
+int CMovieHelp::exec(CMenuTarget* /*parent*/, const std::string & /*actionKey*/)
 {
 	CMovieBrowser mb;
 	std::string version = "Moviebrowser: " + mb.getMovieBrowserVersion();
@@ -3905,7 +3908,7 @@ std::string CMovieBrowser::getMovieBrowserVersion(void)
 /************************************************************************/
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.25 $");
+	return imageinfo.getModulVersion("","$Revision 1.25$");
 }
 
 /************************************************************************/
