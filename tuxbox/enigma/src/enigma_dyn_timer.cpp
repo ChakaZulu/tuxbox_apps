@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_timer.cpp,v 1.24 2009/07/17 19:36:54 dbluelle Exp $
+ * $Id: enigma_dyn_timer.cpp,v 1.25 2009/09/03 18:18:27 rhabarber1848 Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -348,6 +348,7 @@ static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
+	eString eventType = opt["type"];
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
 	eString syear = opt["syear"];
@@ -360,6 +361,11 @@ static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString 
 	eString emin = opt["emin"];
 	eString channel = httpUnescape(opt["channel"]);
 	eString description = httpUnescape(opt["descr"]);
+
+	int type = ePlaylistEntry::recDVR;
+	if( eventType == "ngrab" )
+		type = ePlaylistEntry::recNgrab;
+
 	if (!description)
 		description = "No description available";
 
@@ -429,7 +435,7 @@ static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString 
 		{
 			if (command == "add")
 			{
-				ePlaylistEntry entry(string2ref(result1), eventStartTime, duration, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+				ePlaylistEntry entry(string2ref(result1), eventStartTime, duration, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | type);
 				entry.service.descr = channel + "/" + description;
 
 				if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
@@ -447,7 +453,7 @@ static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString 
 				ePlaylistEntry e(
 					string2ref(result1),
 					eventStartTime,
-					-1, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+					-1, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | type);
 
 				eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
 				eTimerManager::getInstance()->saveTimerList();
