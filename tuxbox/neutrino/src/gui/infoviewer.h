@@ -65,15 +65,25 @@ class CInfoViewer
 	int            BoxStartY;
 	int            ButtonWidth;
 
+#ifdef ENABLE_RADIOTEXT
+	// dimensions of radiotext window
+	int 		rt_dx;
+	int 		rt_dy;
+	int 		rt_x;
+	int 		rt_y;
+	int 		rt_h;
+	int 		rt_w;
+#endif
+
  	std::string ChannelName;
 	char strChanNum[10]; 
  
-	int			 ChanNameX;	
-	int			 ChanNameY;
-	int 			 ChanNameW; 
-	int            ChanWidth;
-	int            ChanHeight;
-	int            ChanInfoX;
+	int		ChanNameX;	
+	int		ChanNameY;
+	int		ChanNameW; 
+	int		ChanWidth;
+	int		ChanHeight;
+	int		ChanInfoX;
 
 	CSectionsdClient::CurrentNextInfo info_CurrentNext;
         t_channel_id   channel_id;
