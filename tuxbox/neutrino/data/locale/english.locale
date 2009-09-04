@@ -1327,4 +1327,10 @@ zapit.scantype.all all services
 zapit.scantype.radio only radio
 zapit.scantype.tv only tv
 zapit.scantype.tvradio tv & radio
+zapitconfig.head Zapit
+zapitconfig.remaining_bouquet Bouquet Others
+zapitconfig.save_audio_pid Save Audio-PIDs
+zapitconfig.save_last_channel save last channel
+zapitconfig.start_radio Radio start channel
+zapitconfig.start_tv TV start channel
 zaptotimer.announce Zapto timer in one minute

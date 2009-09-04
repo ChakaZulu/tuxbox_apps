@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.71 2009/08/21 07:00:10 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.72 2009/09/04 11:25:29 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1024,6 +1024,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 															CMenuWidget &miscSettingsInfobar,
 															CMenuWidget &miscSettingsChannellist,
 															CMenuWidget &miscSettingsEPGSettings,
+															CMenuWidget &miscSettingsZapitSettings,
 															CMenuWidget &miscSettingsRemoteControl,
 															CMenuWidget &miscSettingsFilebrowser)
 {
@@ -1045,6 +1046,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettings.addItem(GenericMenuSeparatorLine);
 	// epg settings
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_HEAD, true, NULL, &miscSettingsEPGSettings, NULL, CRCInput::convertDigitToKey(shortcut++)));
+	// zapit settings
+	miscSettings.addItem(new CMenuForwarder(LOCALE_ZAPITCONFIG_HEAD, true, NULL, &miscSettingsZapitSettings, NULL, CRCInput::convertDigitToKey(shortcut++)));
 	// remote control
 	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_RC, true, NULL, &miscSettingsRemoteControl, NULL, CRCInput::convertDigitToKey(shortcut++)));
 	// filebrowser
@@ -1118,6 +1121,9 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsEPGSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, true, g_settings.epg_max_events, miscSettings_epg_max_events));
 	miscSettingsEPGSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_DIR, true, g_settings.epg_dir, this, "epgdir"));
 
+	//zapit settings
+	miscSettingsZapitSettings.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_ZAPITCONFIG_HEAD));
+
 	// remote control
 	miscSettingsRemoteControl.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_RC));
 	addMenueIntroItems(miscSettingsRemoteControl);
@@ -1136,6 +1142,37 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsFilebrowser.addItem(new CMenuOptionChooser(LOCALE_FILESYSTEM_IS_UTF8            , &g_settings.filesystem_is_utf8            , MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTIONS, MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTION_COUNT, true ));
 	miscSettingsFilebrowser.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS        , &g_settings.filebrowser_showrights        , MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
 	miscSettingsFilebrowser.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE, &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
+}
+
+/* These variables need to be defined outside InitZapitSettings,
+   otherwise locale "INTERNAL ERROR - PLEASE REPORT" is displayed
+   instead of the option values */
+int remainingChannelsBouquet = 0;
+int saveaudiopids = 0;
+int savelastchannel = 0;
+char CstartChannelRadio[30]; /* zapitclient.h, responseChannels, char name[30]; */
+char CstartChannelTV[30];
+
+void CNeutrinoApp::InitZapitSettings(CMenuWidget &miscSettingsZapitSettings)
+{
+	addMenueIntroItems(miscSettingsZapitSettings);
+	CZapitSetupNotifier *zapitSetupNotifier = new CZapitSetupNotifier(NULL, NULL);
+
+	savelastchannel = g_Zapit->getSaveLastChannel() ? 1 : 0;
+	strcpy(CstartChannelRadio,g_Zapit->getChannelNrName(g_Zapit->getStartChannelRadio(), CZapitClient::MODE_RADIO).c_str());
+	strcpy(CstartChannelTV,g_Zapit->getChannelNrName(g_Zapit->getStartChannelTV(), CZapitClient::MODE_TV).c_str());
+	CMenuForwarder *c1 = new CMenuForwarder(LOCALE_ZAPITCONFIG_START_TV, !savelastchannel, CstartChannelTV, this, "zapit_starttv");
+	CMenuForwarder *c2 = new CMenuForwarder(LOCALE_ZAPITCONFIG_START_RADIO, !savelastchannel, CstartChannelRadio, this, "zapit_startradio");
+	CZapitSetupNotifier *zapitSaveLastNotifier = new CZapitSetupNotifier(c1, c2);
+	miscSettingsZapitSettings.addItem(new CMenuOptionChooser(LOCALE_ZAPITCONFIG_SAVE_LAST_CHANNEL, &savelastchannel, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, zapitSaveLastNotifier));
+	miscSettingsZapitSettings.addItem(c1);
+	miscSettingsZapitSettings.addItem(c2);
+
+	saveaudiopids = g_Zapit->getSaveAudioPIDs() ? 1 : 0;
+	miscSettingsZapitSettings.addItem(new CMenuOptionChooser(LOCALE_ZAPITCONFIG_SAVE_AUDIO_PID, &saveaudiopids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, zapitSetupNotifier));
+
+	remainingChannelsBouquet = g_Zapit->getRemainingChannelsBouquet() ? 1 : 0;
+	miscSettingsZapitSettings.addItem(new CMenuOptionChooser(LOCALE_ZAPITCONFIG_REMAINING_BOUQUET, &remainingChannelsBouquet, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, zapitSetupNotifier));
 }
 
 /* for driver and boot settings menu */

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.141 2009/08/07 07:22:53 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.142 2009/09/04 11:25:31 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1354,6 +1354,12 @@ const char * locale_real_names[] =
 	"zapit.scantype.radio",
 	"zapit.scantype.tv",
 	"zapit.scantype.tvradio",
+	"zapitconfig.head",
+	"zapitconfig.remaining_bouquet",
+	"zapitconfig.save_audio_pid",
+	"zapitconfig.save_last_channel",
+	"zapitconfig.start_radio",
+	"zapitconfig.start_tv",
 	"zaptotimer.announce",
 };
 #endif

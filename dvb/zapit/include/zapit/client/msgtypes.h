@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.35 2009/02/22 18:45:33 seife Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.37 2009/09/04 11:25:25 rhabarber1848 Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -38,7 +38,7 @@
 class CZapitMessages
 {
  public:
-	static const char ACTVERSION = 7;
+	static const char ACTVERSION = 8;
 
 	enum commands
 		{
@@ -140,6 +140,21 @@ class CZapitMessages
 
 			CMD_SET_FASTZAP			   = 82,
 			CMD_REZAP			   = 83,
+
+			CMD_SET_STARTCHANNEL_RADIO	   = 84,
+			CMD_SET_STARTCHANNEL_TV		   = 85,
+			CMD_GET_STARTCHANNEL_RADIO	   = 86,
+			CMD_GET_STARTCHANNEL_TV		   = 87,
+			CMD_SET_SAVE_LAST_CHANNEL	   = 88,
+			CMD_GET_SAVE_LAST_CHANNEL	   = 89,
+			CMD_SET_SAVE_AUDIO_PIDS		   = 90,
+			CMD_GET_SAVE_AUDIO_PIDS		   = 91,
+			CMD_SET_REMAINING_CHANNELS_BOUQUET = 92,
+			CMD_GET_REMAINING_CHANNELS_BOUQUET = 93,
+
+			CMD_SAVECONFIG			   = 94,
+			CMD_GET_CHANNELNR_NAME             = 95,
+
 		};
 
 	struct commandBoolean
@@ -219,6 +234,11 @@ class CZapitMessages
 		t_channel_id channel_id;
 	};
 
+	struct commandGetChannelNrName
+	{
+		unsigned int channel;
+		CZapitClient::channelsMode mode;
+	};
 
 	struct commandAddChannelToBouquet
 	{
@@ -343,6 +363,11 @@ class CZapitMessages
 	{
 		bool    scan_mode;
 		int8_t  diseqc;
+	};
+
+	struct startChannel
+	{
+		unsigned int channel;
 	};
 
 };

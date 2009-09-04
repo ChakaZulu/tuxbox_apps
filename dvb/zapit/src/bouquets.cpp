@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.114 2009/08/30 20:39:51 seife Exp $
+ * $Id: bouquets.cpp,v 1.115 2009/09/04 11:25:26 rhabarber1848 Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -536,7 +536,7 @@ void CBouquetManager::renumServices()
 	deleteBouquet(remainChannels);
 	remainChannels = NULL;
 	
-	if (config.getBool("makeRemainingChannelsBouquet", true)) {
+	if (remainingChannelsBouquet) {
 		makeRemainingChannelsBouquet();
 	}
 }

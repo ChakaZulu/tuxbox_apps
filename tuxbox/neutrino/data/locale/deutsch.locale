@@ -1327,4 +1327,10 @@ zapit.scantype.all Alle Services
 zapit.scantype.radio Nur Radio
 zapit.scantype.tv Nur TV
 zapit.scantype.tvradio TV & Radio
+zapitconfig.head Zapit
+zapitconfig.remaining_bouquet Bouquet Andere
+zapitconfig.save_audio_pid Audio-PIDs speichern
+zapitconfig.save_last_channel letzten Kanal speichern
+zapitconfig.start_radio Radio-Startkanal
+zapitconfig.start_tv TV-Startkanal
 zaptotimer.announce In einer Minute wird umgeschaltet.

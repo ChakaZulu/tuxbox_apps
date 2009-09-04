@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.63 2009/03/06 18:37:37 rhabarber1848 Exp $
+ * $Id: bouquets.h,v 1.64 2009/09/04 11:25:25 rhabarber1848 Exp $
  */
 
 #ifndef __bouquets_h__
@@ -125,6 +125,8 @@ class CBouquetManager
 		void clearAll();
 
 		CZapitChannel* findChannelByChannelID(const t_channel_id channel_id);
+
+		bool remainingChannelsBouquet;
 
 };
 

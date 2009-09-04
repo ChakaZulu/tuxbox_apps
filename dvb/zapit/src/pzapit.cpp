@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.65 2009/04/13 20:07:30 rhabarber1848 Exp $
+ * $Id: pzapit.cpp,v 1.66 2009/09/04 11:25:26 rhabarber1848 Exp $
  *
  * simple commandline client for zapit
  *
@@ -61,6 +61,7 @@ int usage (const char * basename)
 		  << "\t-vol <0..64>\t\tset volume" << std::endl
 		  << "\t-rn\t\t\tregister neutrino as event client" << std::endl
 		  << "\t-kill\t\t\tshutdown zapit" << std::endl
+		  << "\t-save\t\t\tsave zapit settings" << std::endl
 		  << "\t-esb\t\t\tenter standby" << std::endl
 		  << "\t-lsb\t\t\tleave standby" << std::endl
 		  << "\t--ntsc\t\t\tswitch to NTSC mode" << std::endl
@@ -113,6 +114,7 @@ int main (int argc, char** argv)
 	bool zapByName = false;
 	bool rezap = false;
 	bool killzapit = false;
+	bool savezapit = false;
 	bool enterStandby = false;
 	bool leaveStandby = false;
 	bool sendMotorCommand = false;
@@ -378,6 +380,11 @@ int main (int argc, char** argv)
 		else if (!strncmp(argv[i], "-gsi", 4))
 		{
 			getserviceinfo = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-save", 5))
+		{
+			savezapit = true;
 			continue;
 		}
 		else if (i < argc - 1)
@@ -731,6 +738,14 @@ int main (int argc, char** argv)
 		printf("spage = 0x%04x\n", si.spage);
 		printf("pcrpid = 0x%04x\n", si.pcrpid);
 		printf("vtxtpid = 0x%04x\n", si.vtxtpid);
+		return 0;
+	}
+
+	/* save zapit*/
+	if (savezapit)
+	{
+		zapit.saveSettings();
+		std::cout << "zapit settings saved" << std::endl;
 		return 0;
 	}
 

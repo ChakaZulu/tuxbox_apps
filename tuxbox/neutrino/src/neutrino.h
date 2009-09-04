@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.212 2009/08/18 11:51:58 rhabarber1848 Exp $
+	$Id: neutrino.h,v 1.213 2009/09/04 11:25:28 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -247,12 +247,14 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitScreenSettings(CMenuWidget &);
 		void InitAudioplPicSettings(CMenuWidget &);
 		void InitDriverSettings(CMenuWidget &);
+		void InitZapitSettings(CMenuWidget &miscSettingsZapitSettings);
 		void InitMiscSettings(CMenuWidget &miscSettings,
 								CMenuWidget &miscSettingsGeneral,
 								CMenuWidget &miscSettingsOSDExtras,
 								CMenuWidget &miscSettingsInfobar,
 								CMenuWidget &miscSettingsChannellist,
 								CMenuWidget &miscSettingsEPGSettings,
+								CMenuWidget &miscSettingsZapitSettings,
 								CMenuWidget &miscSettingsRemoteControl,
 								CMenuWidget &miscSettingsFilebrowser);
 		void InitScanSettings(CMenuWidget &);

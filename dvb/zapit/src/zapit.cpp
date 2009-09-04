@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.435 2009/09/02 11:35:15 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.436 2009/09/04 11:25:26 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -174,6 +174,9 @@ int fastzap = 0;
 
 uint32_t lastChannelRadio;
 uint32_t lastChannelTV;
+uint32_t startChannelRadio;
+uint32_t startChannelTV;
+bool saveLastChannel = true;
 
 //stolen from scan.cpp - check how to include
 void cpy(const char *from, const char *to)
@@ -692,13 +695,14 @@ void saveSettings(bool write)
 	}
 
 	if (write) {
-		if (config.getBool("saveLastChannel", true))
-		{
-			config.setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
-
-			config.setInt32("lastChannelRadio", lastChannelRadio);
-			config.setInt32("lastChannelTV", lastChannelTV);
-		}
+		config.setBool("saveLastChannel", saveLastChannel);
+		config.setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
+		config.setInt32("lastChannelRadio", lastChannelRadio);
+		config.setInt32("lastChannelTV", lastChannelTV);
+		config.setInt32("startChannelRadio", startChannelRadio);
+		config.setInt32("startChannelTV", startChannelTV);
+		config.setBool("saveAudioPIDs", save_audioPIDs);
+		config.setBool("makeRemainingChannelsBouquet", bouquetManager->remainingChannelsBouquet);
 
 		config.setInt32("lastSatellitePosition", frontend->getCurrentSatellitePosition());
 		config.setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
@@ -730,7 +734,11 @@ CZapitClient::responseGetLastChannel load_settings(void)
 	else
 		lastchannel.mode = 't';
 
-	lastchannel.channelNumber = (currentMode & RADIO_MODE) ? lastChannelRadio : lastChannelTV;
+	if (saveLastChannel)
+		lastchannel.channelNumber = (currentMode & RADIO_MODE) ? lastChannelRadio : lastChannelTV;
+	else
+		lastchannel.channelNumber = (currentMode & RADIO_MODE) ? startChannelRadio : startChannelTV;
+
 	return lastchannel;
 }
 
@@ -1450,6 +1458,10 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_SHUTDOWN:
 		return false;
 
+	case CZapitMessages::CMD_SAVECONFIG:
+		saveSettings(true);
+		break;
+
 	case CZapitMessages::CMD_ZAPTO:
 	{
 		CZapitMessages::commandZapto msgZapto;
@@ -1702,6 +1714,86 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			msgResponseZapComplete.zapStatus = 0;
 
 		CBasicServer::send_data(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete));
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_STARTCHANNEL_RADIO:
+	{
+		CZapitMessages::startChannel msg;
+		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
+		startChannelRadio=(msg.channel);
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_STARTCHANNEL_TV:
+	{
+		CZapitMessages::startChannel msg;
+		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
+		startChannelTV=(msg.channel);
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_STARTCHANNEL_RADIO:
+	{
+		CZapitMessages::startChannel msg;
+		msg.channel = startChannelRadio;
+		CBasicServer::send_data(connfd, &msg, sizeof(msg));
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_STARTCHANNEL_TV:
+	{
+		CZapitMessages::startChannel msg;
+		msg.channel = startChannelTV;
+		CBasicServer::send_data(connfd, &msg, sizeof(msg));
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_SAVE_LAST_CHANNEL:
+	{
+		CZapitMessages::commandBoolean msg;
+		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
+		saveLastChannel = msg.truefalse;
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_SAVE_LAST_CHANNEL:
+	{
+		CZapitMessages::commandBoolean msg;
+		msg.truefalse = saveLastChannel;
+		CBasicServer::send_data(connfd, &msg, sizeof(msg));
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_SAVE_AUDIO_PIDS:
+	{
+		CZapitMessages::commandBoolean msg;
+		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
+		save_audioPIDs = msg.truefalse;
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_SAVE_AUDIO_PIDS:
+	{
+		CZapitMessages::commandBoolean msg;
+		msg.truefalse = save_audioPIDs;
+		CBasicServer::send_data(connfd, &msg, sizeof(msg));
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_REMAINING_CHANNELS_BOUQUET:
+	{
+		CZapitMessages::commandBoolean msg;
+		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
+		bouquetManager->remainingChannelsBouquet = msg.truefalse;
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_REMAINING_CHANNELS_BOUQUET:
+	{
+		CZapitMessages::commandBoolean msg;
+		msg.truefalse = bouquetManager->remainingChannelsBouquet;
+		CBasicServer::send_data(connfd, &msg, sizeof(msg));
 		break;
 	}
 
@@ -2240,6 +2332,26 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			response.name[0] = 0;
 		else
 			strncpy(response.name, it->second.getName().c_str(), 30);
+
+		CBasicServer::send_data(connfd, &response, sizeof(response));
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_CHANNELNR_NAME:
+	{
+		CZapitMessages::commandGetChannelNrName msg;
+		CZapitMessages::responseGetChannelName response;
+		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
+
+		CBouquetManager::ChannelIterator cit = ((msg.mode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).FindChannelNr(msg.channel);
+		if (cit.EndOfChannels())
+		{
+			response.name[0] = 0;
+		}
+		else
+		{
+			strncpy(response.name, (*cit)->getName().c_str(), 30);
+		}
 
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		break;
@@ -2875,7 +2987,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.435 2009/09/02 11:35:15 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.436 2009/09/04 11:25:26 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;
@@ -2953,8 +3065,12 @@ int main(int argc, char **argv)
 	/* create bouquet manager */
 	bouquetManager = new CBouquetManager();
 
+	saveLastChannel = config.getBool("saveLastChannel", true);
 	lastChannelRadio = config.getInt32("lastChannelRadio", 0);
 	lastChannelTV    = config.getInt32("lastChannelTV", 0);
+	startChannelRadio = config.getInt32("startChannelRadio", 0);
+	startChannelTV    = config.getInt32("startChannelTV", 0);
+	bouquetManager->remainingChannelsBouquet = config.getBool("makeRemainingChannelsBouquet", true);
 
 	if (config.getInt32("lastChannelMode", 0))
 		setRadioMode();

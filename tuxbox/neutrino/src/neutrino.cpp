@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.970 2009/08/18 18:06:14 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.971 2009/09/04 11:25:27 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2188,6 +2188,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    miscSettingsOSDExtras        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    miscSettingsChannellist        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    miscSettingsEPGSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
+	CMenuWidget    miscSettingsZapitSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    miscSettingsRemoteControl        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    miscSettingsFilebrowser        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	
@@ -2197,6 +2198,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 							miscSettingsInfobar,
 							miscSettingsChannellist,
 							miscSettingsEPGSettings,
+							miscSettingsZapitSettings,
 							miscSettingsRemoteControl,
 							miscSettingsFilebrowser);	
 
@@ -2208,6 +2210,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	// ScanSettings
 	InitScanSettings(scanSettingsMenu);
+
+	// zapit settings
+	InitZapitSettings(miscSettingsZapitSettings);
 
 	dprintf( DEBUG_NORMAL, "registering as event client\n");
 
@@ -3989,6 +3994,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_Zapit->setDiseqcType(CNeutrinoApp::getInstance()->getScanSettings().diseqcMode);
 		/* send diseqc repeat to zapit */
 		g_Zapit->setDiseqcRepeat(CNeutrinoApp::getInstance()->getScanSettings().diseqcRepeat);
+		g_Zapit->saveSettings();
 
 		hintBox->hide();
 		delete hintBox;
@@ -4146,6 +4152,18 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_Sectionsd->setPauseScanning(false);
 		g_Sectionsd->setServiceChanged(g_RemoteControl->current_channel_id, false);
 		SendSectionsdConfig();
+	}
+	if(actionKey == "zapit_starttv")
+	{
+		parent->hide();
+		InitZapitChannelHelper(CZapitClient::MODE_TV);
+		return menu_return::RETURN_REPAINT;
+	}
+	else if(actionKey == "zapit_startradio")
+	{
+		parent->hide();
+		InitZapitChannelHelper(CZapitClient::MODE_RADIO);
+		return menu_return::RETURN_REPAINT;
 	}
 	
 	return returnval;

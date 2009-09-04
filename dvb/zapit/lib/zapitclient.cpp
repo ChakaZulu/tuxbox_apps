@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.123 2009/02/24 19:09:05 seife Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.125 2009/09/04 11:25:25 rhabarber1848 Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -117,6 +117,105 @@ void CZapitClient::getLastChannel(unsigned int &channumber, char &mode)
 	mode = response.mode;
 
 	close_connection();
+}
+
+void CZapitClient::setStartChannelRadio(unsigned int channel)
+{
+	CZapitMessages::startChannel msg;
+
+	msg.channel = channel;
+	send(CZapitMessages::CMD_SET_STARTCHANNEL_RADIO, (char*)&msg, sizeof(msg));
+
+	close_connection();
+}
+
+void CZapitClient::setStartChannelTV(unsigned int channel)
+{
+	CZapitMessages::startChannel msg;
+
+	msg.channel = channel;
+	send(CZapitMessages::CMD_SET_STARTCHANNEL_TV, (char*)&msg, sizeof(msg));
+
+	close_connection();
+}
+
+unsigned int CZapitClient::getStartChannelRadio(void)
+{
+	send(CZapitMessages::CMD_GET_STARTCHANNEL_RADIO);
+
+	CZapitMessages::startChannel msg;
+	CBasicClient::receive_data((char *)&msg, sizeof(msg));
+
+	close_connection();
+	return msg.channel;
+}
+
+unsigned int CZapitClient::getStartChannelTV(void)
+{
+	send(CZapitMessages::CMD_GET_STARTCHANNEL_TV);
+
+	CZapitMessages::startChannel msg;
+	CBasicClient::receive_data((char *)&msg, sizeof(msg));
+
+	close_connection();
+	return msg.channel;
+}
+
+void CZapitClient::setSaveLastChannel(const bool save)
+{
+	CZapitMessages::commandBoolean msg;
+	msg.truefalse = save;
+	send(CZapitMessages::CMD_SET_SAVE_LAST_CHANNEL, (char*)&msg, sizeof(msg));
+	close_connection();
+}
+
+bool CZapitClient::getSaveLastChannel(void)
+{
+	send(CZapitMessages::CMD_GET_SAVE_LAST_CHANNEL);
+
+	CZapitMessages::commandBoolean msg;
+	CBasicClient::receive_data((char *)&msg, sizeof(msg));
+
+	close_connection();
+	return msg.truefalse;
+}
+
+void CZapitClient::setSaveAudioPIDs(const bool save)
+{
+	CZapitMessages::commandBoolean msg;
+	msg.truefalse = save;
+	send(CZapitMessages::CMD_SET_SAVE_AUDIO_PIDS, (char*)&msg, sizeof(msg));
+	close_connection();
+}
+
+bool CZapitClient::getSaveAudioPIDs(void)
+{
+	send(CZapitMessages::CMD_GET_SAVE_AUDIO_PIDS);
+
+	CZapitMessages::commandBoolean msg;
+	CBasicClient::receive_data((char *)&msg, sizeof(msg));
+
+	close_connection();
+	return msg.truefalse;
+}
+
+void CZapitClient::setRemainingChannelsBouquet(const bool save)
+{
+	CZapitMessages::commandBoolean msg;
+	msg.truefalse = save;
+	send(CZapitMessages::CMD_SET_REMAINING_CHANNELS_BOUQUET, (char*)&msg, sizeof(msg));
+	close_connection();
+}
+
+bool CZapitClient::getRemainingChannelsBouquet(void)
+{
+	send(CZapitMessages::CMD_GET_REMAINING_CHANNELS_BOUQUET);
+
+	CZapitMessages::commandBoolean msg;
+	CBasicClient::receive_data((char *)&msg, sizeof(msg));
+
+	close_connection();
+	return msg.truefalse;
 }
 
 int32_t CZapitClient::getCurrentSatellitePosition(void)
@@ -383,6 +482,20 @@ bool CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode,
 std::string CZapitClient::getChannelName(const t_channel_id channel_id)
 {
 	send(CZapitMessages::CMD_GET_CHANNEL_NAME, (char *) & channel_id, sizeof(channel_id));
+
+	CZapitMessages::responseGetChannelName response;
+	CBasicClient::receive_data((char* )&response, sizeof(response));
+	close_connection();
+	return std::string(response.name);
+}
+
+std::string CZapitClient::getChannelNrName(const unsigned int channel, channelsMode mode)
+{
+	CZapitMessages::commandGetChannelNrName msg;
+	msg.channel = channel;
+	msg.mode = mode;
+
+	send(CZapitMessages::CMD_GET_CHANNELNR_NAME, (char*)&msg, sizeof(msg));
 
 	CZapitMessages::responseGetChannelName response;
 	CBasicClient::receive_data((char* )&response, sizeof(response));
@@ -899,14 +1012,6 @@ bool CZapitClient::isPlayBackActive()
 	return response.activated;
 }
 
-void CZapitClient::setDisplayFormat(const video_display_format_t format)
-{
-	CZapitMessages::commandInt msg;
-	msg.val = format;
-	send(CZapitMessages::CMD_SET_DISPLAY_FORMAT, (char*)&msg, sizeof(msg));
-	close_connection();
-}
-
 void CZapitClient::setAudioMode(const int mode)
 {
 	CZapitMessages::commandInt msg;
@@ -1005,5 +1110,11 @@ void CZapitClient::unRegisterEvent(const unsigned int eventID, const unsigned in
 
 	send(CZapitMessages::CMD_UNREGISTEREVENTS, (char*)&msg, sizeof(msg));
 
+	close_connection();
+}
+
+void CZapitClient::saveSettings()
+{
+	send(CZapitMessages::CMD_SAVECONFIG);
 	close_connection();
 }
