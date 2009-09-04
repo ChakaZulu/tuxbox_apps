@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.60 2009/07/26 17:02:46 rhabarber1848 Exp $
+// $Id: SIsections.cpp,v 1.61 2009/09/04 18:37:00 dbt Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -995,11 +995,11 @@ void SIsectionBAT::parse(void)
 			int loop_count = 1;
 		 	while (loop_count >= 0) {
 			
-				const char *des = ((const char *)sv) + sizeof(struct bat_service);
+				const char *des_ = ((const char *)sv) + sizeof(struct bat_service);
 				len = descriptors_length;
 			
 				while(len>=sizeof(struct descr_generic_header)) {
-    					desc=(struct descr_generic_header *)des;
+    					desc=(struct descr_generic_header *)des_;
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
 //    printf("Length: %hhu\n", desc->descriptor_length);
 					const char *buf = (const char *) desc;
@@ -1128,7 +1128,7 @@ void SIsectionBAT::parse(void)
 						}
 					}
 	    				len-=desc->descriptor_length+2;
-    					des+=desc->descriptor_length+2;
+    					des_+=desc->descriptor_length+2;
   				}
 				loop_count--;	
 			}
