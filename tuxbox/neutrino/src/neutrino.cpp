@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.972 2009/09/05 16:54:02 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.973 2009/09/05 19:17:15 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -158,7 +158,7 @@ static void initGlobals(void)
 	g_PluginList    = NULL;
 }
 
-bool CNeutrinoApp::execute_start_file(const char *filename, const bool blocking)
+bool CNeutrinoApp::execute_start_file(const char *filename, const bool blocking, const bool verbose)
 /* returns true if execution of a script was successfully */
 {
 	std::string command = filename;
@@ -166,10 +166,11 @@ bool CNeutrinoApp::execute_start_file(const char *filename, const bool blocking)
 	if (stat(filename, &statbuf) == 0) {
 		if (false == blocking)
 			command += " &";
-		printf("[neutrino] executing %s\n", command.c_str());
+		if (verbose)
+			printf("[neutrino] executing %s\n", command.c_str());
 		int result = system(command.c_str());
 		if (result !=0 ) {
-			printf("[neutrino] %s failed with return code = %d\n", filename, WEXITSTATUS(result));
+			printf("[neutrino] %s failed with return code = %d...\n", filename, WEXITSTATUS(result));
 			return false;
 		}
 	}
@@ -181,16 +182,16 @@ bool CNeutrinoApp::execute_start_file(const char *filename, const bool blocking)
 	return true;
 }
 
-bool CNeutrinoApp::execute_sys_command(const char *command)
-/* returns true for successfully executed system command */
+int CNeutrinoApp::execute_sys_command(const char *command)
+/* returns exit code after executed system command */
 {
-	printf("[neutrino] executing %s\n", command);
 	int result = system(command);
+	int exit_code = WEXITSTATUS(result);
+
 	if (result !=0)	{
-		printf("[neutrino] %s failed with return code = %d\n", command, WEXITSTATUS(result));
-		return false;
+		printf("[neutrino] %s failed with return code = %d\n", command, exit_code);
 	}
-	return true;
+	return exit_code;
 }
 
 
@@ -3991,10 +3992,10 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MAINSETTINGS_SAVESETTINGSNOW_HINT)); // UTF-8
 		hintBox->paint();
 
-		g_Controld->saveSettings();
-		networkConfig.automatic_start = (network_automatic_start == 1);
-		networkConfig.commitConfig();
-		saveSetup();
+ 		g_Controld->saveSettings();
+ 		networkConfig.automatic_start = (network_automatic_start == 1);
+ 		networkConfig.commitConfig();
+ 		saveSetup();
 
 		/* send motor position list to zapit */
 		if (scanSettings.diseqcMode == DISEQC_1_2)
