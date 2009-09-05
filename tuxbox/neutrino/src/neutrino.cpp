@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.971 2009/09/04 11:25:27 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.972 2009/09/05 16:54:02 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3605,6 +3605,14 @@ void CNeutrinoApp::tvMode( bool rezap )
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_TV_MODE, false );
 
+#ifdef ENABLE_RADIOTEXT
+		if (g_settings.radiotext_enable && g_Radiotext != NULL)
+		{
+			delete g_Radiotext;
+			g_Radiotext = NULL;
+		}
+#endif
+
 #ifdef HAVE_DBOX_HARDWARE
 		if(g_settings.misc_spts==1)
 			g_Zapit->PlaybackSPTS();
@@ -3644,12 +3652,6 @@ void CNeutrinoApp::tvMode( bool rezap )
 		channelsInit(init_mode_switch, mode_tv);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
-#ifdef ENABLE_RADIOTEXT
-	if (g_settings.radiotext_enable) 
-	{
-		g_Radiotext = new CRadioText;
-	}
-#endif
 }
 
 void CNeutrinoApp::scartMode( bool bOnOff )
@@ -3709,6 +3711,13 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 			g_Controld->setScartMode( 0 );
 		}
 
+#ifdef ENABLE_RADIOTEXT
+		if (mode == mode_radio && g_settings.radiotext_enable && g_Radiotext != NULL)
+		{
+			delete g_Radiotext;
+			g_Radiotext = NULL;
+		}
+#endif
 		frameBuffer->useBackground(false);
 		frameBuffer->paintBackground();
 
@@ -3817,6 +3826,12 @@ void CNeutrinoApp::radioMode( bool rezap)
 		channelsInit(init_mode_switch, mode_radio);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
+#ifdef ENABLE_RADIOTEXT
+	if (g_settings.radiotext_enable && g_Radiotext == NULL)
+	{
+		g_Radiotext = new CRadioText;
+	}
+#endif
 }
 
 void CNeutrinoApp::startNextRecording()
