@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.267 2009/09/05 20:26:50 dbt Exp $
+	$Id: infoviewer.cpp,v 1.268 2009/09/06 12:59:22 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -111,6 +111,7 @@ CInfoViewer::CInfoViewer()
 	gotTime          = g_Sectionsd->getIsTimeSet();
 	CA_Status        = false;
 	virtual_zap_mode = false;
+	rticon           = true;
 }
 
 void CInfoViewer::start()
@@ -397,7 +398,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 #ifdef ENABLE_RADIOTEXT
 	if (g_settings.radiotext_enable && g_Radiotext) {
 		g_Radiotext->S_RtOsd = true;
-		g_Radiotext->RT_MsgShow = true;
+		g_Radiotext->RT_MsgShow = false;
 	}
 #endif
 	
@@ -623,7 +624,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	}
 	else if ((!g_settings.radiotext_enable) && (CNeutrinoApp::getInstance()->getMode() == 2))
 	{
-		showIcon_RadioText(false,false);	
+		showIcon_RadioText(false);
 	}
 #endif
 	infobarLoop(calledFromNumZap, fadeIn);
@@ -676,6 +677,11 @@ requests to sectionsd.
 				}
 			}
 #endif
+
+			if (CRCInput::isNumeric(msg))
+			{
+				rticon = false;
+			}
 
 			if ( msg == CRCInput::RC_help )
 			{
@@ -948,22 +954,21 @@ void CInfoViewer::showSubchan()
 }
 
 #ifdef ENABLE_RADIOTEXT
-void CInfoViewer::showIcon_RadioText(bool rt_available, bool rt_enabled) const
+void CInfoViewer::showIcon_RadioText(bool rt_available) const
 // painting the icon for radiotext mode
 {
+	if ( rticon )
+	{
 	int mode = g_Zapit->getMode();
-	std::string rt_icon;
+	std::string rt_icon = "radiotextoff.raw";
 	if ((!virtual_zap_mode) && (mode == 2))
 	{
 		if (g_settings.radiotext_enable){
 				rt_icon = rt_available ? "radiotextget.raw" : "radiotextwait.raw";
 			}
-		else if (rt_enabled==false){
-				rt_icon = "radiotextoff.raw";
-			}
-		else rt_icon = "radiotextoff.raw";
 	}
 	frameBuffer->paintIcon(rt_icon, BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+	}
 }
 #endif
 
@@ -1023,6 +1028,7 @@ void CInfoViewer::showInfoIcons()
 	showIcon_SubT();
 	showButton_Audio();
 	showIcon_CA_Status();
+	rticon = true;
 }
 
 void CInfoViewer::showFailure()
@@ -1058,8 +1064,8 @@ void CInfoViewer::showRadiotext()
 
 	if (g_Radiotext == NULL) return;
 
-	if (1 && g_Radiotext->S_RtOsd) {
-		showIcon_RadioText(g_Radiotext->RT_MsgShow, true);
+	if (g_Radiotext->S_RtOsd) {
+		showIcon_RadioText(g_Radiotext->RT_MsgShow);
 
 		// dimensions of radiotext window
 		rt_dx = BoxEndX - BoxStartX;

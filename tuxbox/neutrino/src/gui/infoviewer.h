@@ -54,6 +54,7 @@ class CInfoViewer
 	bool           gotTime;
 	bool           recordModeActive;
 	bool           CA_Status;
+	bool           rticon;
 	
 	int            InfoHeightY;
 	int            InfoHeightY_Info;
@@ -124,7 +125,7 @@ class CInfoViewer
 	int showChannelLogo(  const t_channel_id logo_channel_id );
 	void showInfoFile();
 #ifdef ENABLE_RADIOTEXT
-	void showIcon_RadioText(bool rt_available, bool rt_enabled) const;
+	void showIcon_RadioText(bool rt_available) const;
 	void showRadiotext();
 	void killRadiotext();
 #endif
