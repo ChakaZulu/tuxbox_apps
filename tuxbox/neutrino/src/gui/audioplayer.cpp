@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.70 2009/08/18 18:06:16 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.71 2009/09/06 12:58:10 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -758,7 +758,7 @@ int CAudioPlayerGui::show()
 				update = true;
 			}
 		}
-		else if ((msg >= CRCInput::RC_1) && (msg <= CRCInput::RC_9) && !(m_playlist.empty()))
+		else if (CRCInput::isNumeric(msg) && !(m_playlist.empty()))
 		{ //numeric zap or SMS zap
 			if (m_select_title_by_name)
 			{
@@ -784,7 +784,7 @@ int CAudioPlayerGui::show()
 // 						->RenderString(x1,y1,w+1,selectedKey,COL_MENUCONTENTSELECTED,0);
 
 
-				} while ((msg >= CRCInput::RC_1) && (msg <= CRCInput::RC_9) && !(m_playlist.empty()));
+				} while (CRCInput::isNumeric(msg) && !(m_playlist.empty()));
 
 				if (msg == CRCInput::RC_timeout
 						|| msg == CRCInput::RC_nokey)
