@@ -54,7 +54,6 @@ class CInfoViewer
 	bool           gotTime;
 	bool           recordModeActive;
 	bool           CA_Status;
-	bool           rticon;
 	
 	int            InfoHeightY;
 	int            InfoHeightY_Info;
