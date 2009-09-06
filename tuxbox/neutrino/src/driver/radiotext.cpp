@@ -1,5 +1,5 @@
 /*
-	$Id: radiotext.cpp,v 1.2 2009/09/06 12:59:22 rhabarber1848 Exp $
+	$Id: radiotext.cpp,v 1.3 2009/09/06 19:22:21 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -280,14 +280,17 @@ int CRadioText::PES_Receive(unsigned char *data, int len)
 							//mec = val;
 							switch (val) {
 								case 0x0a:			// RT
+									have_radiotext = true;
 								case 0x46:			// RTplus-Tags
 								case 0xda:			// RASS
 								case 0x07:			// PTY
 								case 0x3e:			// PTYN
-								case 0x02:	mec = val;	// PS
-										break;
-								default:	rt_start = false;
-										if (S_Verbose >= 2)
+								case 0x02:			// PS
+									mec = val;
+									break;
+								default:
+									rt_start = false;
+									if (S_Verbose >= 2)
 										printf("(RDS-MEC '%02x' not used -> End)\n", val);
 							}
 						}
@@ -2378,7 +2381,7 @@ CRadioText::CRadioText(void)
 	RT_Replay 	= false;
 	RT_ReOpen 	= false;
 	for (int i=0; i<5; i++) strcpy(RT_Text[i], "");
-
+	have_radiotext	= false;
 }
 
 void CRadioText::radiotext_stop(void)
@@ -2393,6 +2396,7 @@ void CRadioText::radiotext_stop(void)
 //		pthread_cancel(getThread());
 		pthread_join(getThread(), NULL);
 		pid = 0;
+		have_radiotext = false;
 	}
 
 }

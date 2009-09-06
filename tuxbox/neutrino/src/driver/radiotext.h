@@ -1,5 +1,5 @@
 /*
-	$Id: radiotext.h,v 1.1 2009/08/07 07:22:31 rhabarber1848 Exp $
+	$Id: radiotext.h,v 1.2 2009/09/06 19:22:21 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -107,6 +107,7 @@ public:
 
 private:
 	bool enabled;
+	bool have_radiotext;
 	char *imagepath;
 	bool imageShown;
 	int imagedelay;
@@ -146,6 +147,7 @@ public:
 //	s_rt_thread& getThreadParams(void) { return rt; }
 	pthread_t getThread(void) { return threadRT; }
 	void radiotext_stop(void);
+	bool haveRadiotext(void) {return have_radiotext; }
 
 	s_rt_thread rt;
 
