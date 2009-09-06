@@ -71,6 +71,7 @@ struct enigmaMainActions
 	eAction showMainMenu, standby_press, standby_nomenu_press, standby_repeat, standby_release,
 		showInfobar, hideInfobar, showInfobarEPG, showServiceSelector,
 		showSubservices, showAudioOrPause, showAudio, pluginVTXT, pluginExt, showEPGList, showEPG,
+		showMultiEPG,
 		nextSubService, prevSubService, nextService, prevService,
 		playlistNextService, playlistPrevService, serviceListDown,
 		serviceListUp, volumeUp, volumeDown, toggleMute,
@@ -102,6 +103,7 @@ struct enigmaMainActions
 		pluginExt(map, "pluginExt", _("show extension Plugins"), eAction::prioDialog),
 		showEPGList(map, "showEPGList", _("show epg schedule list"), eAction::prioDialog),
 		showEPG(map, "showEPG", _("show extended info"), eAction::prioDialog),
+		showMultiEPG(map, "showMultiEPG", _("show EPG overview"), eAction::prioDialog),
 		nextSubService(map, "nextSubService", _("zap to next subService"), eAction::prioDialog),
 		prevSubService(map, "prevSubService", _("zap to prev subService"), eAction::prioDialog),
 		nextService(map, "nextService", _("quickzap next"), eAction::prioDialog),
@@ -5819,6 +5821,10 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_enigmaMainActions->showEPGList)
 		{
 			showSelectorStyleEPG();
+		}
+		else if (event.action == &i_enigmaMainActions->showMultiEPG)
+		{
+			showMultiEPG();
 		}
 		else if ( subservicesel.quickzapmode() && event.action == &i_enigmaMainActions->nextSubService )
 		{

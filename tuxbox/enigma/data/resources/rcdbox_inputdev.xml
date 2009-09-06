@@ -83,7 +83,8 @@
 			<action name="showAudio" key="yellow" flags="m" />
 			<action name="pluginExt" key="blue" flags="r" />
 			<action name="pluginVTXT" key="blue" flags="b" />
-			<action name="showEPGList" key="red" flags="m" />
+			<action name="showEPGList" key="red" flags="b" />
+			<action name="showMultiEPG" key="red" flags="r" />
 			<action name="volumeUp" key="+" flags="mr" />
 			<action name="volumeDown" key="-" flags="mr" />
 			<action name="toggleMute" key="mute" flags="mr" />
