@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.437 2009/09/06 12:43:30 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.438 2009/09/07 13:24:40 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2718,6 +2718,23 @@ int startPlayBack(CZapitChannel *thisChannel)
 	}
 #endif
 
+	/* those HAVE_TRIPLEDRAGON ifdefs are here for a reason:
+	   - the tripledragon drivers sometimes seem to crash when the ordering of starting
+	     audio/video demultiplexers and decoders is not as they expect it
+	     so strace'd the original software and implemented the ioctl()'s in the same
+	     order - no more crashes
+	   - the nokia dbox2 with avia500 and SPTS mode makes crackling noise and delays
+	     video decoding if audio decoder is started before the video decoder.
+	   - the dreambox does not seem to care ;)
+	 */
+#ifndef HAVE_TRIPLEDRAGON
+	/* start video */
+	if (have_video) {
+		videoDecoder->setSource(VIDEO_SOURCE_DEMUX);
+		videoDecoder->start();
+	}
+#endif
+
 	/* select audio output and start audio */
 	if (have_audio) {
 		if (thisChannel->getAudioChannel()->isAc3)
@@ -2729,11 +2746,13 @@ int startPlayBack(CZapitChannel *thisChannel)
 		audioDecoder->start();
 	}
 
+#ifdef HAVE_TRIPLEDRAGON
 	/* start video */
 	if (have_video) {
 		videoDecoder->setSource(VIDEO_SOURCE_DEMUX);
 		videoDecoder->start();
 	}
+#endif
 
 	return 0;
 }
@@ -2987,7 +3006,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.437 2009/09/06 12:43:30 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.438 2009/09/07 13:24:40 seife Exp $\n");
 
 	bool check_lock = true;
 	int opt;
