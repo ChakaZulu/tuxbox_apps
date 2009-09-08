@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.974 2009/09/08 09:13:10 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.975 2009/09/08 12:09:35 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1260,7 +1260,7 @@ void CNeutrinoApp::saveSetup()
 void CNeutrinoApp::firstChannel(bool initrun)
 {
 	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
-	if (initrun)
+	if ((initrun) && !g_Zapit->getSaveLastChannel())
 	{
 		if (firstchannel.mode == 't')
 			firstchannel.channelNumber = g_Zapit->getStartChannelTV();
