@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.269 2009/09/06 19:32:24 dbt Exp $
+	$Id: infoviewer.cpp,v 1.270 2009/09/08 07:20:11 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1114,8 +1114,8 @@ void CInfoViewer::showRadiotext()
 			}
 			// Body
 			if (lines) {
-				frameBuffer->paintBoxRel(rt_x+SHADOW_OFFSET, rt_y+rt_dy+SHADOW_OFFSET, rt_dx, 7+rt_dy*lines, COL_INFOBAR_SHADOW_PLUS_0, CORNER_RADIUS_LARGE, CORNER_BOTTOM);
-				frameBuffer->paintBoxRel(rt_x, rt_y+rt_dy, rt_dx, 7+rt_dy*lines, COL_INFOBAR_PLUS_0, CORNER_RADIUS_LARGE, CORNER_BOTTOM);
+				frameBuffer->paintBoxRel(rt_x+SHADOW_OFFSET, rt_y+rt_dy+SHADOW_OFFSET, rt_dx, 7+rt_dy* g_Radiotext->S_RtOsdRows, COL_INFOBAR_SHADOW_PLUS_0, CORNER_RADIUS_LARGE, CORNER_BOTTOM);
+				frameBuffer->paintBoxRel(rt_x, rt_y+rt_dy, rt_dx, 7+rt_dy* g_Radiotext->S_RtOsdRows, COL_INFOBAR_PLUS_0, CORNER_RADIUS_LARGE, CORNER_BOTTOM);
 
 				// RT-Text roundloop
 				int ind = (g_Radiotext->RT_Index == 0) ? g_Radiotext->S_RtOsdRows - 1 : g_Radiotext->RT_Index - 1;
