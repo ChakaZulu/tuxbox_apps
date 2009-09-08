@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.438 2009/09/07 13:24:40 seife Exp $
+ * $Id: zapit.cpp,v 1.439 2009/09/08 09:13:09 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -734,10 +734,7 @@ CZapitClient::responseGetLastChannel load_settings(void)
 	else
 		lastchannel.mode = 't';
 
-	if (saveLastChannel)
-		lastchannel.channelNumber = (currentMode & RADIO_MODE) ? lastChannelRadio : lastChannelTV;
-	else
-		lastchannel.channelNumber = (currentMode & RADIO_MODE) ? startChannelRadio : startChannelTV;
+	lastchannel.channelNumber = (currentMode & RADIO_MODE) ? lastChannelRadio : lastChannelTV;
 
 	return lastchannel;
 }
@@ -3006,7 +3003,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.438 2009/09/07 13:24:40 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.439 2009/09/08 09:13:09 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;
