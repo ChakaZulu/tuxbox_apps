@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.976 2009/09/09 11:05:00 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.977 2009/09/09 19:01:08 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1257,17 +1257,9 @@ void CNeutrinoApp::saveSetup()
 *                                                                                     *
 **************************************************************************************/
 
-void CNeutrinoApp::firstChannel(bool initrun)
+void CNeutrinoApp::firstChannel()
 {
 	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
-	if ((initrun) && !g_Zapit->getSaveLastChannel())
-	{
-		if (firstchannel.mode == 't')
-			firstchannel.channelNumber = g_Zapit->getStartChannelTV();
-		else
-			firstchannel.channelNumber = g_Zapit->getStartChannelRadio();
-	}
-
 }
 
 #ifdef HAVE_DBOX_HARDWARE
@@ -1924,7 +1916,7 @@ void CNeutrinoApp::InitZapper()
 	g_InfoViewer->start();
 	g_EpgData->start();
 
-	firstChannel(true);
+	firstChannel();
 
 	// EPG-Config
 	SendSectionsdConfig();
@@ -1953,14 +1945,14 @@ void CNeutrinoApp::InitZapper()
 	if(firstchannel.mode == 't')
 	{
 		channelsInit(init_mode_init, mode_tv);
-		tvMode(true, true);
+		tvMode();
 	}
 	else
 	{
 		channelsInit(init_mode_init, mode_radio);
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
-		radioMode(true, true);
+		radioMode();
 	}
 }
 
@@ -2153,7 +2145,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	
 
 	// needs to run before initMainMenu()
-	firstChannel(true);
+	firstChannel();
 
 	InitMainMenu(	mainMenu,
 					mainSettings,
@@ -3607,7 +3599,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	}
 }
 
-void CNeutrinoApp::tvMode( bool rezap, bool initrun )
+void CNeutrinoApp::tvMode( bool rezap )
 {
 	if(mode==mode_radio )
 	{
@@ -3657,7 +3649,7 @@ void CNeutrinoApp::tvMode( bool rezap, bool initrun )
 	g_RemoteControl->tvMode();
 	if( rezap )
 	{
-		firstChannel(initrun);
+		firstChannel();
 		channelsInit(init_mode_switch, mode_tv);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
@@ -3790,7 +3782,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	}
 }
 
-void CNeutrinoApp::radioMode( bool rezap, bool initrun)
+void CNeutrinoApp::radioMode( bool rezap)
 {
 	if(mode==mode_tv )
 	{
@@ -3831,7 +3823,7 @@ void CNeutrinoApp::radioMode( bool rezap, bool initrun)
 	g_RemoteControl->radioMode();
 	if( rezap )
 	{
-		firstChannel(initrun);
+		firstChannel();
 		channelsInit(init_mode_switch, mode_radio);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
