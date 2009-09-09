@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.975 2009/09/08 12:09:35 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.976 2009/09/09 11:05:00 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -381,7 +381,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.infobar_channel_logodir, configfile.getString( "infobar_channel_logodir", "/var/share/tuxbox/neutrino/icons/").c_str()); 
 	g_settings.infobar_show_channellogo	= configfile.getInt32("infobar_show_channellogo"		,0);
 	g_settings.infobar_channellogo_background		= configfile.getInt32("infobar_channellogo_background"		,0);
-	g_settings.startmode			= configfile.getInt32("startmode" , 0 );
+	g_settings.startmode			= configfile.getInt32("startmode" , STARTMODE_RESTORE );
 
 	g_settings.radiotext_enable		= configfile.getBool("radiotext_enable"          , false);
 	//audio
