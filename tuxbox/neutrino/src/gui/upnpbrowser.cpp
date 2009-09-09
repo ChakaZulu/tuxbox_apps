@@ -124,7 +124,10 @@ int CUpnpBrowserGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// tell neutrino we're in audio mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_audio );
 	// remember last mode
-	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	if (CNeutrinoApp::getInstance()->zapto_on_init_done)
+		m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	else
+		m_LastMode=(CNeutrinoApp::getInstance()->getLastMode());
 
 	m_width = 710;
 	if((g_settings.screen_EndX - g_settings.screen_StartX) < m_width+ConnectLineBox_Width)

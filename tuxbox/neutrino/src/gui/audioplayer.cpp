@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.71 2009/09/06 12:58:10 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.72 2009/09/09 19:05:35 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -303,7 +303,10 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string &)
 	// tell neutrino we're in audio mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_audio );
 	// remember last mode
-	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	if (CNeutrinoApp::getInstance()->zapto_on_init_done)
+		m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	else
+		m_LastMode=(CNeutrinoApp::getInstance()->getLastMode());
 
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true);

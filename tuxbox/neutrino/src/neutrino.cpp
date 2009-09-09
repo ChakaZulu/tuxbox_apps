@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.977 2009/09/09 19:01:08 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.978 2009/09/09 19:05:34 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -227,6 +227,7 @@ CNeutrinoApp::CNeutrinoApp()
 	volumeBarIsVisible	= true;
 	wakeupfromScart    = false;
 	standbyAfterRecord = false;
+	zapto_on_init_done = false;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -1260,6 +1261,14 @@ void CNeutrinoApp::saveSetup()
 void CNeutrinoApp::firstChannel()
 {
 	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
+	if ((!zapto_on_init_done) && !g_Zapit->getSaveLastChannel())
+	{
+		if (firstchannel.mode == 't')
+			firstchannel.channelNumber = g_Zapit->getStartChannelTV() + 1;
+		else
+			firstchannel.channelNumber = g_Zapit->getStartChannelRadio() + 1;
+	}
+
 }
 
 #ifdef HAVE_DBOX_HARDWARE
@@ -1942,17 +1951,25 @@ void CNeutrinoApp::InitZapper()
 	}
 #endif
 
-	if(firstchannel.mode == 't')
+	if((g_settings.startmode == STARTMODE_TV) || ((g_settings.startmode == STARTMODE_RESTORE) && (firstchannel.mode == 't')))
 	{
 		channelsInit(init_mode_init, mode_tv);
-		tvMode();
+		tvMode(true);
 	}
-	else
+	else if((g_settings.startmode == STARTMODE_RADIO) || ((g_settings.startmode == STARTMODE_RESTORE) && (firstchannel.mode != 't')))
 	{
 		channelsInit(init_mode_init, mode_radio);
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
-		radioMode();
+		radioMode(true);
+	}
+	else
+	{
+		// channel lists need to be initialized, they are needed
+		// when switching back from non TV/radio modes
+		// use the last known zapit mode for this
+		tunerMode = mode = firstchannel.mode == 'r' ? mode_radio : mode_tv;
+		channelsInit(init_mode_init, tunerMode);
 	}
 }
 
@@ -2373,15 +2390,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		}
 	}
 
-	if(g_settings.startmode == STARTMODE_TV)
-	{
-		tvMode();
-	}
-	else if(g_settings.startmode == STARTMODE_RADIO)
-	{
-		radioMode();
-	}
-	else if(g_settings.startmode == STARTMODE_SCART)
+	if(g_settings.startmode == STARTMODE_SCART)
 	{
 		lastMode = mode;
 		handleMsg(NeutrinoMessages::EVT_VCRCHANGED, VCR_STATUS_ON);
@@ -3652,6 +3661,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 		firstChannel();
 		channelsInit(init_mode_switch, mode_tv);
 		channelList->zapTo( firstchannel.channelNumber -1 );
+		zapto_on_init_done = true;
 	}
 }
 
@@ -3685,9 +3695,9 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 			wakeupfromScart = false;
 		}
 		else if (tunerMode == mode_radio)
-			radioMode(false);
+			radioMode(!zapto_on_init_done);
 		else
-			tvMode(false);
+			tvMode(!zapto_on_init_done);
 	}
 }
 
@@ -3769,9 +3779,9 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		//re-set mode
 		if (tunerMode == mode_radio)
-			radioMode(false);
+			radioMode(!zapto_on_init_done);
 		else
-			tvMode(false);
+			tvMode(!zapto_on_init_done);
 		
 		//show mute icon ONLY if muted or current volume value is 0
 		if (current_muted || doShowMuteIcon())
@@ -3826,6 +3836,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 		firstChannel();
 		channelsInit(init_mode_switch, mode_radio);
 		channelList->zapTo( firstchannel.channelNumber -1 );
+		zapto_on_init_done = true;
 	}
 #ifdef ENABLE_RADIOTEXT
 	if (g_settings.radiotext_enable && g_Radiotext == NULL)

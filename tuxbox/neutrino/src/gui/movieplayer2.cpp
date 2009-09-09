@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.33 2009/09/03 20:26:33 dbt Exp $
+  $Id: movieplayer2.cpp,v 1.34 2009/09/09 19:05:35 rhabarber1848 Exp $
 
 
   License: GPL
@@ -363,7 +363,10 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	// tell neutrino we're in ts_mode
 	CNeutrinoApp::getInstance()->handleMsg(NeutrinoMessages::CHANGEMODE, NeutrinoMessages::mode_ts);
 	// remember last mode
-	m_LastMode = (CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	if (CNeutrinoApp::getInstance()->zapto_on_init_done)
+		m_LastMode = (CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	else
+		m_LastMode = (CNeutrinoApp::getInstance()->getLastMode());
 
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true);
@@ -3232,7 +3235,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.33 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.34 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()

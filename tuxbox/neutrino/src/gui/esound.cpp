@@ -1,5 +1,5 @@
 /*
-  $Id: esound.cpp,v 1.8 2009/08/18 18:06:16 rhabarber1848 Exp $
+  $Id: esound.cpp,v 1.9 2009/09/09 19:05:35 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   based on
@@ -182,7 +182,10 @@ int CEsoundGui::exec(CMenuTarget* parent, const std::string &)
 	// tell neutrino we're in audio mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_audio );
 	// remember last mode
-	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	if (CNeutrinoApp::getInstance()->zapto_on_init_done)
+		m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	else
+		m_LastMode=(CNeutrinoApp::getInstance()->getLastMode());
 
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true);
