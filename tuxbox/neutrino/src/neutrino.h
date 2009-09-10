@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.218 2009/09/09 19:05:34 rhabarber1848 Exp $
+	$Id: neutrino.h,v 1.219 2009/09/10 07:56:51 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -323,7 +323,8 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		int getLastMode() {return lastMode;}
 		bool isMuted() {return current_muted;}
 		int recordingstatus;
-		bool zapto_on_init_done;
+		bool zapto_tv_on_init_done;
+		bool zapto_radio_on_init_done;
 		void SendSectionsdConfig(void);
 
 		bool execute_start_file(const char *filename, const bool blocking = true, const bool verbose = false);

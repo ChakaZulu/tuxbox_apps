@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.978 2009/09/09 19:05:34 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.979 2009/09/10 07:56:51 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -227,7 +227,8 @@ CNeutrinoApp::CNeutrinoApp()
 	volumeBarIsVisible	= true;
 	wakeupfromScart    = false;
 	standbyAfterRecord = false;
-	zapto_on_init_done = false;
+	zapto_tv_on_init_done = false;
+	zapto_radio_on_init_done = false;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -1261,14 +1262,17 @@ void CNeutrinoApp::saveSetup()
 void CNeutrinoApp::firstChannel()
 {
 	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
-	if ((!zapto_on_init_done) && !g_Zapit->getSaveLastChannel())
+	if (!g_Zapit->getSaveLastChannel())
 	{
-		if (firstchannel.mode == 't')
+		if (!zapto_tv_on_init_done && firstchannel.mode == 't')
+		{
 			firstchannel.channelNumber = g_Zapit->getStartChannelTV() + 1;
-		else
+		}
+		else if (!zapto_radio_on_init_done && firstchannel.mode == 'r')
+		{
 			firstchannel.channelNumber = g_Zapit->getStartChannelRadio() + 1;
+		}
 	}
-
 }
 
 #ifdef HAVE_DBOX_HARDWARE
@@ -3661,7 +3665,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 		firstChannel();
 		channelsInit(init_mode_switch, mode_tv);
 		channelList->zapTo( firstchannel.channelNumber -1 );
-		zapto_on_init_done = true;
+		zapto_tv_on_init_done = true;
 	}
 }
 
@@ -3695,9 +3699,9 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 			wakeupfromScart = false;
 		}
 		else if (tunerMode == mode_radio)
-			radioMode(!zapto_on_init_done);
+			radioMode(!zapto_radio_on_init_done);
 		else
-			tvMode(!zapto_on_init_done);
+			tvMode(!zapto_tv_on_init_done);
 	}
 }
 
@@ -3779,9 +3783,9 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		//re-set mode
 		if (tunerMode == mode_radio)
-			radioMode(!zapto_on_init_done);
+			radioMode(!zapto_radio_on_init_done);
 		else
-			tvMode(!zapto_on_init_done);
+			tvMode(!zapto_tv_on_init_done);
 		
 		//show mute icon ONLY if muted or current volume value is 0
 		if (current_muted || doShowMuteIcon())
@@ -3836,7 +3840,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 		firstChannel();
 		channelsInit(init_mode_switch, mode_radio);
 		channelList->zapTo( firstchannel.channelNumber -1 );
-		zapto_on_init_done = true;
+		zapto_radio_on_init_done = true;
 	}
 #ifdef ENABLE_RADIOTEXT
 	if (g_settings.radiotext_enable && g_Radiotext == NULL)

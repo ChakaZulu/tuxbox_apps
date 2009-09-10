@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.69 2009/09/09 19:05:35 rhabarber1848 Exp $
+	$Id: pictureviewer.cpp,v 1.70 2009/09/10 07:56:53 rhabarber1848 Exp $
 
 	MP3Player by Dirch
 	
@@ -165,7 +165,11 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & /*actionKey
 	// tell neutrino we're in pic_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_pic );
 	// remember last mode
-	if (CNeutrinoApp::getInstance()->zapto_on_init_done)
+	CZapitClient::responseGetLastChannel firstchannel;
+	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
+	if ((firstchannel.mode == 'r') ?
+	    (CNeutrinoApp::getInstance()->zapto_radio_on_init_done) :
+	    (CNeutrinoApp::getInstance()->zapto_tv_on_init_done))
 		m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
 	else
 		m_LastMode=(CNeutrinoApp::getInstance()->getLastMode());
@@ -721,7 +725,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.69 $");
+	return imageinfo.getModulVersion("","$Revision: 1.70 $");
 }
 
 void CPictureViewerGui::showHelp()
