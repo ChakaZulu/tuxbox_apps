@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.176 2009/09/10 07:56:53 rhabarber1848 Exp $
+  $Id: movieplayer.cpp,v 1.177 2009/09/11 06:37:08 dbt Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -283,7 +283,7 @@ CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 
 //------------------------------------------------------------------------
 
-int CAPIDSelectExec::exec(CMenuTarget* parent, const std::string & actionKey)
+int CAPIDSelectExec::exec(CMenuTarget* /*parent*/, const std::string & actionKey)
 {
 	g_apidchanged = 0;
 	unsigned int sel= atoi(actionKey.c_str());
@@ -1790,7 +1790,7 @@ REFILL_ERR:
 	return res;
 }
 
-void *TPtrQueue::readerRun(void *p)
+void *TPtrQueue::readerRun(void */*p*/)
 {
   	uint8_t *seg;
   	int     rd;
@@ -1918,7 +1918,7 @@ void TPtrQueue::terminateReader(void)
 //===========================
 static void mp_switchBufferingBox(bool visible)
 {
-	static CHintBox *bufferingBox = bufferingBox = new CHintBox
+	static CHintBox *buffering_Box = bufferingBox = new CHintBox
 	(
 		LOCALE_MESSAGEBOX_INFO, 
 		g_Locale->getText(LOCALE_MOVIEPLAYER_BUFFERING)
@@ -1927,10 +1927,10 @@ static void mp_switchBufferingBox(bool visible)
 	if (visible)
 	{
 		fprintf(stderr, "[mp] buffering ...\n");
-		bufferingBox->paint();
+		buffering_Box->paint();
 	}
 	else
-		bufferingBox->hide();
+		buffering_Box->hide();
 }
 
 
@@ -4463,7 +4463,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer1 ","$Revision: 1.176 $");
+	return imageinfo.getModulVersion("Movieplayer1 ","$Revision: 1.177 $");
 }
 
 void CMoviePlayerGui::showHelpTS()

@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.h,v 1.9 2009/08/18 11:51:59 rhabarber1848 Exp $
+	$Id: moviebrowser.h,v 1.10 2009/09/11 06:37:08 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -42,6 +42,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.h,v $
+	Revision 1.10  2009/09/11 06:37:08  dbt
+	removed compiler warnings
+	
 	Revision 1.9  2009/08/18 11:51:59  rhabarber1848
 	Neutrino: new configure option --disable-movieplayer: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=369382#p369382
 	
@@ -61,10 +64,10 @@
 	- mehr Versionsinformationen in Image Informationen
 	- Kommentarzeilen fuer Zusatzinfos bei Image Image-Informationen (geholt aus ./version)
 	- Motorsetup ueberarbeitet
-	- Senderlogos im Infobar möglich
+	- Senderlogos im Infobar mï¿½glich
 	- Aufnahme-, Umschalt- und aktualisierungs-Buttons jetzt standardmaessig in der EPG-Vorschau aktiviert
 	- Warnmeldung, falls kein Aufnahmeverzeichnis angegeben wurde, wenn  Aufnahme vorgemerkt werden soll
-	- weitere Icons für das Usermnue jetzt nutzbar
+	- weitere Icons fï¿½r das Usermnue jetzt nutzbar
 	
 	special THX to Ingrid and PaulFoul for some inputs ;-)
 	
@@ -450,7 +453,7 @@ class CSelectedMenu : public CMenuTarget
 	public:
 		bool selected;
 		CSelectedMenu(void){selected = false;};
-inline	int exec(CMenuTarget* parent, const std::string & actionKey){selected = true; return menu_return::RETURN_EXIT;};
+inline	int exec(CMenuTarget* /*parent*/, const std::string & /*actionKey*/){selected = true; return menu_return::RETURN_EXIT;};
 };
 
 
