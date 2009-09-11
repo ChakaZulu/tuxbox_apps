@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.27 2009/09/11 07:33:52 rhabarber1848 Exp $
+	$Id: moviebrowser.cpp,v 1.28 2009/09/11 18:36:40 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,10 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.28  2009/09/11 18:36:40  dbt
+	fix segfault in help window
+	see: http://www.dreambox-fan.de/forum/viewtopic.php?p=370192#p370192
+	
 	Revision 1.27  2009/09/11 07:33:52  rhabarber1848
 	Neutrino: Use locales instead of hard-coded text in moviebrowser´s help window
 	
@@ -480,7 +484,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.27 2009/09/11 07:33:52 rhabarber1848 Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.28 2009/09/11 18:36:40 dbt Exp $\r\n");
 	init();
 }
 
@@ -3713,7 +3717,7 @@ int CMenuSelector::paint(bool selected)
 ************************************************************************/
 int CMovieHelp::exec(CMenuTarget* /*parent*/, const std::string & /*actionKey*/)
 {
-	CMovieBrowser mb;
+	static CMovieBrowser mb;
 	std::string version = "Moviebrowser: " + mb.getMovieBrowserVersion();
 	Helpbox helpbox;
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP20));
