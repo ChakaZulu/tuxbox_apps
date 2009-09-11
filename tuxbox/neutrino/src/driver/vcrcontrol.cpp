@@ -382,6 +382,14 @@ void CVCRControl::CFileAndServerDevice::RestoreNeutrino(void)
 			tuxtxt_start(vtpid);
 	}
 #endif
+#ifdef ENABLE_RADIOTEXT
+	if (CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_radio &&
+	    g_settings.radiotext_enable && g_Radiotext == NULL)
+	{
+		g_Radiotext = new CRadioText;
+		g_Zapit->ReZap();
+	}
+#endif
 }
 
 void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id channel_id, const int mode)
@@ -417,6 +425,13 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 	{
 		tuxtxt_stop();
 		tuxtxt_close();
+	}
+#endif
+#if ENABLE_RADIOTEXT
+	if (mode == NeutrinoMessages::mode_radio && g_settings.radiotext_enable && g_Radiotext != NULL)
+	{
+		delete g_Radiotext;
+		g_Radiotext = NULL;
 	}
 #endif
 	if(StopPlayBack && g_Zapit->isPlayBackActive())	// wenn playback gestoppt werden soll und noch l�uft
