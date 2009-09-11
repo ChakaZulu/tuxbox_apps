@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.213 2009/08/07 07:22:53 rhabarber1848 Exp $
+  $Id: settings.h,v 1.214 2009/09/11 05:58:39 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -397,9 +397,9 @@ struct SNeutrinoSettings
 #define DRIVER_SETTING_FILES_COUNT 2
 #else
 #if HAVE_DVB_API_VERSION == 1
-#define DRIVER_SETTING_FILES_COUNT 7
+#define DRIVER_SETTING_FILES_COUNT 8
 #else
-#define DRIVER_SETTING_FILES_COUNT 6
+#define DRIVER_SETTING_FILES_COUNT 7
 #endif
 #endif
 

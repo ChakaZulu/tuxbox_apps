@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.72 2009/09/04 11:25:29 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.73 2009/09/11 05:58:38 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1211,6 +1211,7 @@ const driver_setting_files_struct_t driver_setting_files[DRIVER_SETTING_FILES_CO
 	{LOCALE_DRIVERSETTINGS_NOENXWATCHDOG , "/var/etc/.no_enxwatchdog", OPTIONS_OFF1_ON0_OPTIONS },
 	{LOCALE_DRIVERSETTINGS_PHILIPSRCPATCH, "/var/etc/.philips_rc_patch", OPTIONS_OFF0_ON1_OPTIONS },
 #endif
+	{LOCALE_DRIVERSETTINGS_SPTSFIX       , "/var/etc/.sptsfix"       , OPTIONS_OFF0_ON1_OPTIONS },
 	{LOCALE_DRIVERSETTINGS_PMTUPDATE     , "/var/etc/.no_pmt_update" , OPTIONS_OFF1_ON0_OPTIONS }
 };
 
@@ -1244,6 +1245,8 @@ void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
 		if (!strcmp(driver_setting_files[i].filename, "/var/etc/.philips_rc_patch") && (boxtype == 1)) // usefully for Philips RC and sometimes for Sagem RC
 			item_enabled[i] = false;
 		else if (!strcmp(driver_setting_files[i].filename, "/var/etc/.no_enxwatchdog") && (boxtype == 1)) // not for Nokia
+			item_enabled[i] = false;
+		else if (!strcmp(driver_setting_files[i].filename, "/var/etc/.sptsfix") && (boxtype != 1)) // only Nokia has Avia500
 			item_enabled[i] = false;
 		else
 			item_enabled[i] = true;
