@@ -691,6 +691,7 @@ moviebrowser.browser_row_head Spalten Einstellungen
 moviebrowser.browser_row_item Spalteninfo
 moviebrowser.browser_row_nr Anzahl Spalten
 moviebrowser.browser_row_width Spaltenbreite [Punkte]
+moviebrowser.change_view +/- Ansicht wechseln
 moviebrowser.dir Pfad
 moviebrowser.dir_head Zusätzliche Verzeichnisse
 moviebrowser.edit_book Bookmark ändern
@@ -718,6 +719,9 @@ moviebrowser.hint_newbook_forward Neuer Werbesprung\n 'blau' für Endposition
 moviebrowser.info_audio Audio
 moviebrowser.info_channel Kanal
 moviebrowser.info_filename Name
+moviebrowser.info_film_delete Film löschen
+moviebrowser.info_film_during Während der Filmwiedergabe:
+moviebrowser.info_film_reload Filminfos neu laden
 moviebrowser.info_genre_major Genre
 moviebrowser.info_genre_minor Genre
 moviebrowser.info_head Film Informationen
@@ -752,6 +756,8 @@ moviebrowser.menu_main_bookmarks Markierungen
 moviebrowser.menu_main_head Einstellungen
 moviebrowser.menu_main_movieinfo Filminfo
 moviebrowser.menu_main_saveandback Speichern und verlassen
+moviebrowser.menu_mark Markierungsmenü
+moviebrowser.menu_mark_noaction Markierungsaktion nicht ausführen
 moviebrowser.menu_nfs_head NFS Einstellung
 moviebrowser.menu_parental_lock_activated aktiviert
 moviebrowser.menu_parental_lock_activated_no nein
@@ -795,6 +801,8 @@ moviebrowser.update_if_dest_empty_only Übernehme nur wenn Ziel leer
 moviebrowser.use_dir Verzeichnis verwenden
 moviebrowser.use_movie_dir Wiedergabeverzeichnis verwenden
 moviebrowser.use_rec_dir Aufnahmeverzeichnis verwenden
+moviebrowser.window_change_active Aktives Fenster wechseln
+moviebrowser.window_filter Filterfenster einblenden
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmark Name
 movieplayer.bookmarkname_hint1 Geben Sie den Namen

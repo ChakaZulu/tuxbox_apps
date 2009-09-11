@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.26 2009/09/03 19:57:57 dbt Exp $
+	$Id: moviebrowser.cpp,v 1.27 2009/09/11 07:33:52 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.27  2009/09/11 07:33:52  rhabarber1848
+	Neutrino: Use locales instead of hard-coded text in moviebrowser´s help window
+	
 	Revision 1.26  2009/09/03 19:57:57  dbt
 	removed compiler warnings
 	
@@ -477,7 +480,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.26 2009/09/03 19:57:57 dbt Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.27 2009/09/11 07:33:52 rhabarber1848 Exp $\r\n");
 	init();
 }
 
@@ -3713,17 +3716,17 @@ int CMovieHelp::exec(CMenuTarget* /*parent*/, const std::string & /*actionKey*/)
 	CMovieBrowser mb;
 	std::string version = "Moviebrowser: " + mb.getMovieBrowserVersion();
 	Helpbox helpbox;
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, "Sortierung ändern");
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_GREEN, "Filterfenster einblenden");
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_YELLOW, "Aktives Fenster wechseln");
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, "Filminfos neu laden");
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_DBOX, "Hauptmenü");
-	helpbox.addLine("+/- Ansicht wechseln");
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_MUTE, "Film löschen");
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP20));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_GREEN, g_Locale->getText(LOCALE_MOVIEBROWSER_WINDOW_FILTER));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_YELLOW, g_Locale->getText(LOCALE_MOVIEBROWSER_WINDOW_CHANGE_ACTIVE));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_FILM_RELOAD));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_DBOX, g_Locale->getText(LOCALE_MAINMENU_HEAD));
+	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEBROWSER_CHANGE_VIEW));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_MUTE, g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_FILM_DELETE));
 	helpbox.addLine("");
-	helpbox.addLine("Während der Filmwiedergabe:");
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, " Markierungsmenu ");
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
+	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_FILM_DURING));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, g_Locale->getText(LOCALE_MOVIEBROWSER_MENU_MARK));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_MOVIEBROWSER_MENU_MARK_NOACTION));
 	helpbox.addLine("");
 	helpbox.addLine("");
 	helpbox.addLine(version);

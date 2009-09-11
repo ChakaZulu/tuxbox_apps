@@ -691,6 +691,7 @@ moviebrowser.browser_row_head Row settings
 moviebrowser.browser_row_item Row item
 moviebrowser.browser_row_nr Number of rows
 moviebrowser.browser_row_width Row width
+moviebrowser.change_view +/- Change view
 moviebrowser.dir Path
 moviebrowser.dir_head Additional paths
 moviebrowser.edit_book Bookmark change
@@ -718,6 +719,9 @@ moviebrowser.hint_newbook_forward New jump forward\n 'blue' for endposition
 moviebrowser.info_audio Audio
 moviebrowser.info_channel Channel
 moviebrowser.info_filename Name
+moviebrowser.info_film_delete Delete movie
+moviebrowser.info_film_during During movie playback:
+moviebrowser.info_film_reload Reload movie infos
 moviebrowser.info_genre_major Genre
 moviebrowser.info_genre_minor Genre
 moviebrowser.info_head Film Informations
@@ -752,6 +756,8 @@ moviebrowser.menu_main_bookmarks Bookmarks
 moviebrowser.menu_main_head Settings
 moviebrowser.menu_main_movieinfo Movie info
 moviebrowser.menu_main_saveandback save and back
+moviebrowser.menu_mark Marking menu
+moviebrowser.menu_mark_noaction Not execute marking action 
 moviebrowser.menu_nfs_head NFS settings
 moviebrowser.menu_parental_lock_activated activated
 moviebrowser.menu_parental_lock_activated_no no
@@ -795,6 +801,8 @@ moviebrowser.update_if_dest_empty_only Copy if destination is empty only
 moviebrowser.use_dir Use directory
 moviebrowser.use_movie_dir Use movie directory
 moviebrowser.use_rec_dir Use record directory
+moviebrowser.window_change_active Change active window
+moviebrowser.window_filter Show filter window
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmarkname
 movieplayer.bookmarkname_hint1 Enter a name for your new bookmark

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.143 2009/09/11 05:58:39 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.144 2009/09/11 07:33:53 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -718,6 +718,7 @@ const char * locale_real_names[] =
 	"moviebrowser.browser_row_item",
 	"moviebrowser.browser_row_nr",
 	"moviebrowser.browser_row_width",
+	"moviebrowser.change_view",
 	"moviebrowser.dir",
 	"moviebrowser.dir_head",
 	"moviebrowser.edit_book",
@@ -745,6 +746,9 @@ const char * locale_real_names[] =
 	"moviebrowser.info_audio",
 	"moviebrowser.info_channel",
 	"moviebrowser.info_filename",
+	"moviebrowser.info_film_delete",
+	"moviebrowser.info_film_during",
+	"moviebrowser.info_film_reload",
 	"moviebrowser.info_genre_major",
 	"moviebrowser.info_genre_minor",
 	"moviebrowser.info_head",
@@ -779,6 +783,8 @@ const char * locale_real_names[] =
 	"moviebrowser.menu_main_head",
 	"moviebrowser.menu_main_movieinfo",
 	"moviebrowser.menu_main_saveandback",
+	"moviebrowser.menu_mark",
+	"moviebrowser.menu_mark_noaction",
 	"moviebrowser.menu_nfs_head",
 	"moviebrowser.menu_parental_lock_activated",
 	"moviebrowser.menu_parental_lock_activated_no",
@@ -822,6 +828,8 @@ const char * locale_real_names[] =
 	"moviebrowser.use_dir",
 	"moviebrowser.use_movie_dir",
 	"moviebrowser.use_rec_dir",
+	"moviebrowser.window_change_active",
+	"moviebrowser.window_filter",
 	"movieplayer.bookmark",
 	"movieplayer.bookmarkname",
 	"movieplayer.bookmarkname_hint1",
