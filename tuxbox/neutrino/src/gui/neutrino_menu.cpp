@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.73 2009/09/11 05:58:38 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.74 2009/09/11 07:03:48 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -129,14 +129,14 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainMenu.addItem(GenericMenuSeparator);
 
 	if (g_settings.personalize_tvmode == 1)
-		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), firstchannel.mode != 'r');
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), (g_settings.startmode == STARTMODE_TV || firstchannel.mode != 'r'));
 	else if (g_settings.personalize_tvmode == 2)
-		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_TVMODE, g_settings.personalize_pincode, true, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), firstchannel.mode != 'r');
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_TVMODE, g_settings.personalize_pincode, true, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), (g_settings.startmode == STARTMODE_TV || firstchannel.mode != 'r'));
 
 	if (g_settings.personalize_radiomode == 1)
-		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), firstchannel.mode == 'r');
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), (g_settings.startmode == STARTMODE_RADIO || (!(g_settings.startmode == STARTMODE_TV) && firstchannel.mode == 'r')));
 	else if (g_settings.personalize_radiomode == 2)
-		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_RADIOMODE, g_settings.personalize_pincode, true, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), firstchannel.mode == 'r');
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_RADIOMODE, g_settings.personalize_pincode, true, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), (g_settings.startmode == STARTMODE_RADIO || (!(g_settings.startmode == STARTMODE_TV) && firstchannel.mode == 'r')));
 
 	if (g_settings.personalize_scartmode == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
