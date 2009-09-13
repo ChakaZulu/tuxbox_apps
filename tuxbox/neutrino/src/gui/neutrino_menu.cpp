@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.74 2009/09/11 07:03:48 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.75 2009/09/13 16:44:07 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1210,8 +1210,8 @@ const driver_setting_files_struct_t driver_setting_files[DRIVER_SETTING_FILES_CO
 	{LOCALE_DRIVERSETTINGS_NOAVIAWATCHDOG, "/var/etc/.no_watchdog"   , OPTIONS_OFF1_ON0_OPTIONS },
 	{LOCALE_DRIVERSETTINGS_NOENXWATCHDOG , "/var/etc/.no_enxwatchdog", OPTIONS_OFF1_ON0_OPTIONS },
 	{LOCALE_DRIVERSETTINGS_PHILIPSRCPATCH, "/var/etc/.philips_rc_patch", OPTIONS_OFF0_ON1_OPTIONS },
-#endif
 	{LOCALE_DRIVERSETTINGS_SPTSFIX       , "/var/etc/.sptsfix"       , OPTIONS_OFF0_ON1_OPTIONS },
+#endif
 	{LOCALE_DRIVERSETTINGS_PMTUPDATE     , "/var/etc/.no_pmt_update" , OPTIONS_OFF1_ON0_OPTIONS }
 };
 
