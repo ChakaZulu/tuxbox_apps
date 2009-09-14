@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.271 2009/09/14 13:34:21 seife Exp $
+	$Id: infoviewer.cpp,v 1.272 2009/09/14 13:35:53 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1354,6 +1354,13 @@ void CInfoViewer::getEPG(const t_channel_id for_channel_id, CSectionsdClient::Cu
 {
 	static CSectionsdClient::CurrentNextInfo oldinfo;
 
+	/* to clear the oldinfo for channels without epg, call getEPG() with for_channel_id = 0 */
+	if (for_channel_id == 0)
+	{
+		oldinfo.current_uniqueKey = 0;
+		return;
+	}
+
 	g_Sectionsd->getCurrentNextServiceKey(for_channel_id, info );
 
 	if (info.current_uniqueKey != oldinfo.current_uniqueKey || info.next_uniqueKey != oldinfo.next_uniqueKey)
@@ -1556,6 +1563,9 @@ void CInfoViewer::show_Data(bool calledFromEvent)
 		/* send message. Parental pin check gets triggered on EPG events... */
 		char *p = new char[sizeof(t_channel_id)];
 		memcpy(p, &channel_id, sizeof(t_channel_id));
+		/* clear old info in getEPG */
+		CSectionsdClient::CurrentNextInfo dummy;
+		getEPG(0, dummy);
 		g_RCInput->postMsg(NeutrinoMessages::EVT_NOEPG_YET, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 		return;
 	}
