@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.439 2009/09/08 09:13:09 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.440 2009/09/14 05:57:50 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1532,7 +1532,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::commandSetSubtitle msgSetSubtitle;
 		CBasicServer::receive_data(connfd, &msgSetSubtitle, sizeof(msgSetSubtitle));
 		change_subtitle(msgSetSubtitle.index);
-
+		break;
 	}
 	case CZapitMessages::CMD_SET_MODE:
 	{
@@ -3003,7 +3003,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.439 2009/09/08 09:13:09 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.440 2009/09/14 05:57:50 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;
