@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.305 2009/07/30 12:41:39 seife Exp $
+//  $Id: sectionsd.cpp,v 1.306 2009/09/14 13:33:28 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2531,7 +2531,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.305 2009/07/30 12:41:39 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.306 2009/09/14 13:33:28 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -7565,12 +7565,6 @@ static void *cnThread(void *)
 						messaging_need_eit_version = false;
 						unlockMessaging();
 						sendToSleepNow = true;
-					} else if (timeoutsDMX >= TIMEOUTS_EIT_VERSION_WAIT) {
-						dprintf("more than %d EIT DMX timeouts - bail out...\n", TIMEOUTS_EIT_VERSION_WAIT);
-						writeLockMessaging();
-						messaging_need_eit_version = false;
-						unlockMessaging();
-						sendToSleepNow = true;
 					}
 				}
 
@@ -7594,7 +7588,6 @@ static void *cnThread(void *)
 			{
 				unlockMessaging();
 				sendToSleepNow = true;
-				timeoutsDMX = 0;
 			}
 			else {
 				unlockMessaging();
@@ -7633,17 +7626,6 @@ static void *cnThread(void *)
 			}
 			else {
 #endif
-				if (timeoutsDMX > 0)
-					usleep(timeoutsDMX*1000);
-//			}
-
-			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
-			{
-				dprintf("timeoutsDMX (%d) >= CHECK_RESTART_DMX_AFTER_TIMEOUTS (%d) && scanning => sendtosleepnow=true\n",
-					timeoutsDMX, CHECK_RESTART_DMX_AFTER_TIMEOUTS);
-				sendToSleepNow = true;
-				timeoutsDMX = 0;
-			}
 
 			if (sendToSleepNow && !messaging_need_eit_version || channel_is_blacklisted)
 			{
@@ -8492,7 +8474,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.305 2009/07/30 12:41:39 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.306 2009/09/14 13:33:28 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
