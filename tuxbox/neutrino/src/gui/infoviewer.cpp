@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.272 2009/09/14 13:35:53 seife Exp $
+	$Id: infoviewer.cpp,v 1.273 2009/09/15 13:29:46 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -618,12 +618,12 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	}
 
 #ifdef ENABLE_RADIOTEXT
-	if ((g_settings.radiotext_enable) && (CNeutrinoApp::getInstance()->getMode() == 2)) {
-		showRadiotext();
-	}
-	else if ((!g_settings.radiotext_enable) && (CNeutrinoApp::getInstance()->getMode() == 2))
+	if (CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_radio)
 	{
-		showIcon_RadioText(false);
+		if ((g_settings.radiotext_enable) && (!recordModeActive))
+			showRadiotext();
+		else
+			showIcon_RadioText(false);
 	}
 #endif
 	infobarLoop(calledFromNumZap, fadeIn);
@@ -954,7 +954,7 @@ void CInfoViewer::showIcon_RadioText(bool rt_available) const
 	{
 		int mode = g_Zapit->getMode();
 		std::string rt_icon = "radiotextoff.raw";
-		if ((!virtual_zap_mode) && (mode == 2))
+		if ((!virtual_zap_mode) && (!recordModeActive) && (mode == NeutrinoMessages::mode_radio))
 		{
 			if (g_settings.radiotext_enable){
 					rt_icon = rt_available ? "radiotextget.raw" : "radiotextwait.raw";
