@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.h,v 1.10 2009/09/11 06:37:08 dbt Exp $
+	$Id: moviebrowser.h,v 1.11 2009/09/15 08:05:47 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -42,6 +42,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.h,v $
+	Revision 1.11  2009/09/15 08:05:47  rhabarber1848
+	Fix broken umlauts in comments since last commit: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=370233#p370233
+	
 	Revision 1.10  2009/09/11 06:37:08  dbt
 	removed compiler warnings
 	
@@ -64,10 +67,10 @@
 	- mehr Versionsinformationen in Image Informationen
 	- Kommentarzeilen fuer Zusatzinfos bei Image Image-Informationen (geholt aus ./version)
 	- Motorsetup ueberarbeitet
-	- Senderlogos im Infobar m�glich
+	- Senderlogos im Infobar moeglich
 	- Aufnahme-, Umschalt- und aktualisierungs-Buttons jetzt standardmaessig in der EPG-Vorschau aktiviert
 	- Warnmeldung, falls kein Aufnahmeverzeichnis angegeben wurde, wenn  Aufnahme vorgemerkt werden soll
-	- weitere Icons f�r das Usermnue jetzt nutzbar
+	- weitere Icons fuer das Usermenue jetzt nutzbar
 	
 	special THX to Ingrid and PaulFoul for some inputs ;-)
 	
