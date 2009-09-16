@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.273 2009/09/15 13:29:46 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.274 2009/09/16 06:59:18 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -674,6 +674,13 @@ requests to sectionsd.
 						showLcdPercentOver();
 					}
 				}
+			}
+#endif
+#ifdef ENABLE_RADIOTEXT
+			if (g_settings.radiotext_enable)
+			{
+				if (((CNeutrinoApp::getInstance()->getMode()) == NeutrinoMessages::mode_radio) && (( msg == CRCInput::RC_up ) | ( msg == CRCInput::RC_down )))
+					killRadiotext();
 			}
 #endif
 			if ( msg == CRCInput::RC_help )
