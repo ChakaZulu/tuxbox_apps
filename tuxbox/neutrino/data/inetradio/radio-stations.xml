@@ -741,17 +741,12 @@
 	
 	<station
 		name="Stadtradio Göttingen"
-		url="http://stream.stadtradio-goettingen.de:8000/stadtradiolower.ogg.m3u"
+		url="http://stream.stadtradio-goettingen.de:8000/stadtradiolow.m3u"
 		/>
 	
 	<station
 		name="Stadtradio Göttingen"
-		url="http://stream.stadtradio-goettingen.de:8000/stadtradiolow.ogg.m3u"
-		/>
-	
-	<station
-		name="Stadtradio Göttingen"
-		url="http://stream.stadtradio-goettingen.de:8000/stadtradio.ogg.m3u"
+		url="http://stream.stadtradio-goettingen.de:8000/stadtradio.m3u"
 		/>
 	
 	<station
