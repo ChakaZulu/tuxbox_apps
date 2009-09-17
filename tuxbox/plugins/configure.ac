@@ -68,6 +68,8 @@ tuxcal/daemon/Makefile
 tuxtxt/Makefile
 tuxtxt/font/Makefile
 tuxcom/Makefile
+tuxclock/Makefile
+tuxclock/daemon/Makefile
 vncviewer/Makefile
 vncviewer/rfb/Makefile
 dvbsub/Makefile
