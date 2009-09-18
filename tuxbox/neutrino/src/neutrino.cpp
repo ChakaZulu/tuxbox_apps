@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.979 2009/09/10 07:56:51 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.980 2009/09/18 06:16:40 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3033,7 +3033,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 				if(recordingstatus==0)
 				{
 					t_channel_id channel_id=((CTimerd::RecordingInfo*)data)->channel_id;
-					g_Zapit->zapTo_serviceID_NOWAIT(channel_id);
+					if(g_Zapit->getCurrentServiceID() != channel_id)
+						g_Zapit->zapTo_serviceID_NOWAIT(channel_id);
 				}
 			}
 			delete [] (unsigned char*) data;
