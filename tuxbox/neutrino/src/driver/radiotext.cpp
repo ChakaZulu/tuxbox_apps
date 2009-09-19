@@ -1,5 +1,5 @@
 /*
-	$Id: radiotext.cpp,v 1.3 2009/09/06 19:22:21 dbt Exp $
+	$Id: radiotext.cpp,v 1.4 2009/09/19 14:06:13 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -76,11 +76,12 @@
 #include <neutrino.h>
 #include <gui/color.h>
 
+extern "C" {
+#include "ringbuffer.h"
+}
+
 #include "radiotext.h"
 #include "radiotools.h"
-
-bool rt_start;
-bool rt_bstuff;
 
 rtp_classes rtp_content;
 
@@ -125,8 +126,8 @@ unsigned char rds_addchar[128] = {
     0xfe, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
 };
 
-char *entitystr[5]  = { "&apos;", "&amp;", "&quote;", "&gt", "&lt" };
-char *entitychar[5] = { "'", "&", "\"", ">", "<" };
+static const char *entitystr[5]  = { "&apos;", "&amp;", "&quote;", "&gt", "&lt" };
+static const char *entitychar[5] = { "'", "&", "\"", ">", "<" };
 
 char *CRadioText::rds_entitychar(char *text)
 {
@@ -183,7 +184,7 @@ char* CRadioText::ptynr2string(int nr)
 	}
 }
 
-bool CRadioText::DividePes(unsigned char *data, int length, int *substart, int *subend)
+bool CRadioText::DividePes(char *data, int length, int *substart, int *subend)
 {
 	int i = *substart;
 	int found = 0;
@@ -210,7 +211,7 @@ bool CRadioText::DividePes(unsigned char *data, int length, int *substart, int *
 	}
 }
 
-int CRadioText::PES_Receive(unsigned char *data, int len)
+int CRadioText::PES_Receive(char *data, int len)
 {
 	const int mframel = 263;  // max. 255(MSG)+4(ADD/SQC/MFL)+2(CRC)+2(Start/Stop) of RDS-data
 	static unsigned char mtext[mframel+1];
@@ -222,8 +223,10 @@ int CRadioText::PES_Receive(unsigned char *data, int len)
 
 	while (true) 
 	{
-		int pesl = (offset+5 < len) ? (data[offset+4] << 8) + data[offset+5] + 6 : -1;
-		if (pesl <= 0 || offset+pesl > len)
+		if (len < offset + 6)
+			return offset;
+		int pesl = (data[offset + 4] << 8) + data[offset + 5] + 6;
+		if (pesl <= 0 || offset + pesl > len)
 			return offset;
 		offset += pesl;
 
@@ -232,11 +235,11 @@ int CRadioText::PES_Receive(unsigned char *data, int len)
 		int subend = 0;
 		while (DividePes(&data[0], pesl, &substart, &subend))
 		{
-			substart = subend;
-			int inner_offset = subend+1;
-			int rdsl = data[inner_offset -2];	// RDS DataFieldLength
+			int inner_offset = subend + 1;
+if (inner_offset < 3) fprintf(stderr, "RT %s: inner_offset < 3 (%d)\n", __FUNCTION__, inner_offset);
+			int rdsl = data[subend - 1];	// RDS DataFieldLength
 			// RDS DataSync = 0xfd @ end
-			if (data[inner_offset -1] == 0xfd && rdsl > 0) {
+			if (data[subend] == 0xfd && rdsl > 0) {
 				// print RawData with RDS-Info
 				if (S_Verbose >= 3) {
 					printf("\n\nPES-Data(%d/%d): ", pesl, len);
@@ -245,7 +248,9 @@ int CRadioText::PES_Receive(unsigned char *data, int len)
 					printf("(End)\n\n");
 				}
 
-				for (int i = inner_offset -3, val; i > inner_offset -3-rdsl; i--) {	// <-- data reverse, from end to start
+if (subend-2-rdsl < 0) fprintf(stderr, "RT %s: start: %d subend-2-rdsl < 0 (%d-2-%d)\n", __FUNCTION__, substart,subend,rdsl);
+				for (int i = subend - 2, val; i > subend - 2 - rdsl; i--) { // <-- data reverse, from end to start
+if (i < 0) { fprintf(stderr, "RT %s: i < 0 (%d)\n", __FUNCTION__, i); break; }
 					val = data[i];
 
 					if (val == 0xfe) {	// Start
@@ -253,7 +258,7 @@ int CRadioText::PES_Receive(unsigned char *data, int len)
 						rt_start = true;
 						rt_bstuff = false;
 						if (S_Verbose >= 2)
-							printf("\nRDS-Start: ");
+							printf("RDS-Start: ");
 					}
 
 					if (rt_start) {
@@ -350,6 +355,7 @@ int CRadioText::PES_Receive(unsigned char *data, int len)
 					}
 				}
 			}
+			substart = subend;
 		}
 	}
 }
@@ -379,14 +385,16 @@ void CRadioText::RadiotextDecode(unsigned char *mtext, int len)
 		}
 		// byte 9 = RT-Status bitcodet (0=AB-flagcontrol, 1-4=Transmission-Number, 5+6=Buffer-Config,
 		//				    ingnored, always 0x01 ?)
+fprintf(stderr, "MEC=0x%02x DSN=0x%02x PSN=0x%02x MEL=%02d STATUS=0x%02x MFL=%02d\n", mtext[5], mtext[6], mtext[7], mtext[8], mtext[9], mtext[4]);
 		char temptext[RT_MEL];
 		memset(temptext, 0x20, RT_MEL-1);
+		temptext[RT_MEL - 1] = '\0';
 		for (int i = 1, ii = 0; i < mtext[8]; i++) {
 			if (mtext[9+i] <= 0xfe)
 			// additional rds-character, see RBDS-Standard, Annex E
 				temptext[ii++] = (mtext[9+i] >= 0x80) ? rds_addchar[mtext[9+i]-0x80] : mtext[9+i];
 		}
-		memcpy(plustext, temptext, RT_MEL-1);
+		memcpy(plustext, temptext, RT_MEL);
 		rds_entitychar(temptext);
 		// check repeats
 		bool repeat = false;
@@ -398,7 +406,7 @@ void CRadioText::RadiotextDecode(unsigned char *mtext, int len)
 			}
 		}
 		if (!repeat) {
-			memcpy(RT_Text[RT_Index], temptext, RT_MEL-1);
+			memcpy(RT_Text[RT_Index], temptext, RT_MEL);
 			// +Memory
 			char *temp;
 			asprintf(&temp, "%s", RT_Text[RT_Index]);
@@ -2274,16 +2282,9 @@ eOSState cRTplusList::ProcessKey(eKeys Key)
 #endif
 
 
-/* conversion buffer sizes */
-#define READ_BUF_SIZE 		(64 * 1024)  	// larger (64KB + 6 Bytes) !!!/
-#define PUSHBACK_BUF_SIZE 	(128)		// < 1024 bytes!!  see below  
+static int pes_SyncBufferRead (int fd, ringbuffer_t *buf, u_long *skipped_bytes);
 
-static long pes_SyncBufferRead (int fd, u_char *buf, u_long max_len, u_long *skipped_bytes);
-static int  pes_rawBufferedPushByte (u_char c);
-static long pes_rawBufferedRead (int fd, u_char *dest_buf, u_long dest_len);
-
-static pthread_mutex_t rtMutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-static pthread_mutex_t rtMutexback = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+static bool rtThreadRunning;
 
 void *RadioTextThread(void *data)
 {
@@ -2291,7 +2292,7 @@ void *RadioTextThread(void *data)
 	int fd = ((CRadioText::s_rt_thread*)data)->fd;
 	struct dmx_pes_filter_params flt;
 
-//printf("in RadioTextThread fd = %d\n", fd);
+printf("in RadioTextThread fd = %d\n", fd);
 
 //	while (1) 
 	{
@@ -2312,42 +2313,48 @@ void *RadioTextThread(void *data)
 			/*
 			-- read PES packet for pid
 			*/
-			u_char  buf[READ_BUF_SIZE]; 		/* data buffer */
-			u_char  *b;				/* ptr to packet start */
+			ringbuffer_t *buf_in = ringbuffer_create(0x1FFFF);
+			char  *b;				/* ptr to packet start */
 			long    count = 0;
-			int rc = 0;
-			pthread_mutex_lock(&rtMutexback);
-			while ((rc = pthread_mutex_trylock(&rtMutex)) == 0)
+			rtThreadRunning = true;
+			while(rtThreadRunning)
 			{
-				long    n;
+				int n;
+				int offset;
+				size_t rd;
 				u_long  skipped_bytes = 0;
 
 //printf("."); fflush(stdout);
 				//  -- Read PES packet  (sync Read)
-				n = pes_SyncBufferRead (fd, buf, sizeof(buf), &skipped_bytes);
-				pthread_mutex_unlock(&rtMutex);
-				b = buf;
+				n = pes_SyncBufferRead (fd, buf_in, &skipped_bytes);
 
 				// -- error or eof?
 				if (n <= 0) {
+					usleep(10000); /* save CPU if nothing read */
 					continue;
 				}
-
-				count ++;
-
-				// -- skipped Data to get sync byte?
-				if (skipped_bytes) {
-					printf("!!! %ld bytes skipped to get PS/PES sync!!!\n",skipped_bytes);
+				rd = ringbuffer_get_readpointer(buf_in, &b, n);
+/* this can not happen, because pes_SyncBufferRead() returns -1 if ringbuffer is empty
+				if (rd <= 0) {
+					continue;
 				}
-				rt->PES_Receive(b, n);
+*/
+				count ++;
+				// -- skipped Data to get sync byte?
+				offset = rt->PES_Receive(b, n);
+//				if (skipped_bytes) {
+//					printf("!!! %ld bytes skipped to get PS/PES sync!!! read: %d processed: %d\n",skipped_bytes, n, offset);
+//				}
+				ringbuffer_read_advance(buf_in, offset);
 			}
 
 			if (ioctl(fd, DMX_STOP) < 0) {
 				perror("DMX_STOP");
 				pthread_exit(NULL);
 			}
-			pthread_mutex_unlock(&rtMutexback);
+			ringbuffer_free(buf_in);
 	}
+fprintf(stderr, "RT %s: exit\n", __FUNCTION__);
 	pthread_exit(NULL);
 }
 
@@ -2362,7 +2369,7 @@ CRadioText::CRadioText(void)
 	S_RtOsdTags 	= 2;
 	S_RtOsdPos 	= 2;
 	S_RtOsdRows 	= 3;
-	S_RtOsdLoop 	= 0;
+	S_RtOsdLoop 	= 1;
 	S_RtOsdTO 	= 60;
 	S_RtSkinColor 	= false;
 	S_RtBgCol 	= 0;
@@ -2389,11 +2396,7 @@ void CRadioText::radiotext_stop(void)
 	if (getPid() != 0) {
 		// this stuff takes a while sometimes - look for a better syncronisation
 		printf("Stopping RT Thread\n");
-		pthread_mutex_lock(&rtMutex);       // signal break to thread
-		pthread_mutex_lock(&rtMutexback);   // wait until dmx is stopped by thread
-		pthread_mutex_unlock(&rtMutexback); // unlock the stuff
-		pthread_mutex_unlock(&rtMutex);     // unlock the stuff
-//		pthread_cancel(getThread());
+		rtThreadRunning = false;
 		pthread_join(getThread(), NULL);
 		pid = 0;
 		have_radiotext = false;
@@ -2426,10 +2429,12 @@ void CRadioText::setPid(uint inPid)
 		// open the device if first pid
 		if (0 == oldPid)
 		{
-			dmxfd = open(DMXDEV, O_RDWR);
 			if (dmxfd < 0) {
-				perror(DMXDEV);
-				pthread_exit(NULL);
+				dmxfd = open(DMXDEV, O_RDWR|O_NONBLOCK);
+				if (dmxfd < 0) {
+					perror(DMXDEV);
+					pthread_exit(NULL);
+				}
 			}
 			rt.rt_object = this;
 			rt.fd = dmxfd;
@@ -2444,7 +2449,7 @@ void CRadioText::setPid(uint inPid)
 		S_RtOsdTags = 2;
 		S_RtOsdPos = 2;
 		S_RtOsdRows = 3;
-		S_RtOsdLoop = 0;
+		S_RtOsdLoop = 1;
 		S_RtOsdTO = 60;
 		S_RtSkinColor = false;
 		S_RtBgCol = 0;
@@ -2489,10 +2494,11 @@ void CRadioText::setPid(uint inPid)
   -- return: len // read()-return code
 */
 
-static long pes_SyncBufferRead (int fd, u_char *buf, u_long max_len, u_long *skipped_bytes)
+static int pes_SyncBufferRead(int fd, ringbuffer_t *buf, /*u_long max_len,*/ u_long *skipped_bytes)
 {
-	u_long  sync;
-	u_char  *org_buf = buf;
+	ringbuffer_data_t vec;
+	int rd;
+	char *ppes;
 
 	// -- simple PES sync... seek for 0x000001 (PES_SYNC_BYTE)
 	// ISO/IEC 13818-1:
@@ -2503,63 +2509,80 @@ static long pes_SyncBufferRead (int fd, u_char *buf, u_long max_len, u_long *ski
 	// -- '0000 0000 0000 0000 0000 0001' (0x000001).
 
 	*skipped_bytes = 0;
-	sync = 0xFFFFFFFF;
-
-	// -- seek packet sync start
-	while (1) {
-		u_char b[4];
-		int    n;
-
-		n = pes_rawBufferedRead (fd, b,1);
-		if (n <= 0) return n;			// error or strange, abort
-
-		// -- byte shift for packet_start_code_prefix
-		// -- sync found? 0x000001 + valid PESstream_ID or PS_stream_ID
-
-		sync = (sync << 8) | *b;
-		if ( (sync & 0xFFFFFF00) == 0x00000100 ) {
-			*skipped_bytes -= 3;
-			buf[0] = 0x00;			// write sync + ID to buffer
-			buf[1] = 0x00;
-			buf[2] = 0x01;
-			buf[3] = *b;
-			break;
+	ringbuffer_get_write_vector(buf, &vec);
+	if (vec.len == 0)
+	{
+		fprintf(stderr, "RT %s: ringbuffer full\n", __FUNCTION__);
+		/* do not read anything from demux, but continue with sync */
+	}
+	else
+	{
+		rd = read(fd, vec.buf, vec.len);
+		if (rd < 0)
+		{
+			if (errno != EAGAIN)
+			{
+				fprintf(stderr, "RT %s: read %d errno %d (%m)\n", __FUNCTION__, rd, errno);
+				return rd;
+			}
+			/* if EAGAIN, still process contents of ringbuffer */
+			rd = 0;
 		}
 
-		// -- count skipped bytes
-		(*skipped_bytes)++;
+		ringbuffer_write_advance(buf, rd);
+	}
+
+	rd = ringbuffer_get_readpointer(buf, &ppes, 6);
+	if (rd < 6)
+	{
+//		fprintf(stderr, "RT %s: ringbuffer empty (%d < 6)\n", __FUNCTION__, rd);
+		return -1;
+	}
+
+	if ((ppes[0] != 0x00) || (ppes[1] != 0x00) || (ppes[2] != 0x01))
+	{
+		//INFO("async, not 000001: %02x%02x%02x ", ppes[0], ppes[1], ppes[2]);
+		int deleted = 0;
+		do {
+			ringbuffer_read_advance(buf, 1); // remove 1 Byte
+			rd = ringbuffer_get_readpointer(buf, &ppes, 6);
+			deleted++;
+			(*skipped_bytes)++;
+			//fprintf(stderr, "%d", rd);
+			if ((ppes[0] == 0x00) || (ppes[1] == 0x00) || (ppes[2] == 0x01))
+			{
+				deleted = 0;
+				break;
+			}
+		}
+		while (rd == 6);
+		//fprintf(stderr, "\n");
+		if (deleted > 0)
+		{
+//			fprintf(stderr, "RT %s: No valid PES signature found. %d Bytes deleted.\n", __FUNCTION__, deleted);
+			return -1;
+		}
 	}
 
 	// -- Sync found!
 	// -- evaluate packet_id and seek packet end (next sync)
-	if (buf[3] >= 0xBC)  {			// PES system packet with length
-		long    n1,n2;
-		long    l;
+	if (ppes[3] >= 0xBC) {			// PES system packet with length
+		unsigned int l;
+		l = (ppes[4] << 8) + ppes[5];		// PES packet size...
 
-		n1 = pes_rawBufferedRead (fd, buf+4,2);
-		if (n1 < 0) return n1;
-
-		if (n1 == 2) {
-        		l = (buf[4]<<8) + buf[5];		// PES packet size...
-			n1 = 6; 				// 4+2 bytes read
-
-			if (l > 0) {
-				n2 = pes_rawBufferedRead (fd, buf+n1, (unsigned int) l );
-				return  (n2 < 0) ? n2 : n1+n2;
-			} else {	// unbound stream!
-				max_len -= n1;					// l=0
-				buf     += n1;
-			}
-		} else {
-			max_len -= n1 + 4;
-			buf     += n1 + 4;
-		}
-
+		if (l > 0) {
+			if (ringbuffer_read_space(buf) >= l + 6)
+				return (l + 6);
+			else
+				return 0;
+		} else
+			ringbuffer_read_advance(buf, 6);
 	} else {
-		max_len -=  4;
-		buf     +=  4;
+		// will resync automatically on next invocation. Enough?
+		ringbuffer_read_advance(buf, 4);
 	}
 
+#if 0
 	// -- seek packet end (sync to next packet)
 	// -- ISO 13818-1 length=0 packets (unbound video streams)
 	// -- ISO 13818-2 packets
@@ -2591,65 +2614,8 @@ static long pes_SyncBufferRead (int fd, u_char *buf, u_long max_len, u_long *ski
 			return (long) (buf - org_buf);
 		}
 	}
+#endif
 
+//	fprintf(stderr, "RT %s: unsynced, ret = -1! (this never happens) ppes[3] = 0x%02x\n", __FUNCTION__, ppes[3]);
 	return -1;					// buffer overflow
-}
-
-
-// -----------------------------------------------------------
-//
-// -- PS/PES raw buffer operations (prior to pes sync)
-//
-
-//
-// -- Byte Push Back Buffer to raw stream buffer
-// -- return: -1: buffer overflow
-//
-
-static u_char  PB_buffer[PUSHBACK_BUF_SIZE];   // not to large, many bytes might be pushed
-static int     PB_pos = 0;
-
-
-static int pes_rawBufferedPushByte (u_char c)
-{
-	if ( PB_pos >= (int)((sizeof(PB_buffer) / sizeof(u_char))) ) {
-		return -1;		// overflow
-	}
-
-	PB_buffer[PB_pos++] = c;
-	return 0;
-}
-
-
-//
-// -- 2 implementations to choose...
-// -- over time only one will survive...
-//
-
-/*
-  -- raw read PES stream (check push backs)
-  -- pre-read bytes for next call
-  -- return: len // read()-return code
-*/
-
-static long pes_rawBufferedRead (int fd, u_char *dest_buf, u_long dest_len)
-{
-	int n1 = 0;
-	int n2 = 0;
-
-	// -- Bytes in PushBack buffer?
-	// -- copy to destination buffer
- 
-	while ( (PB_pos > 0) && (dest_len > 0) ) {
-		*dest_buf++ = PB_buffer[--PB_pos];
-		dest_len--;
-		n1++;
-	}
-
-	if (dest_len > 0) {
-		n2 = read(fd, dest_buf, dest_len);
-		if (n2 < 0) return n2;
-	}
-
-	return n1 + n2;
 }

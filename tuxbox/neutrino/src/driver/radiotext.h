@@ -1,5 +1,5 @@
 /*
-	$Id: radiotext.h,v 1.2 2009/09/06 19:22:21 dbt Exp $
+	$Id: radiotext.h,v 1.3 2009/09/19 14:06:13 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -121,7 +121,7 @@ private:
 	void RadioStatusMsg(void);
 	void AudioRecorderService(void);
 	void RassDecode(uchar *Data, int Length);
-	bool DividePes(unsigned char *data, int length, int *substart, int *subend);
+	bool DividePes(char *data, int length, int *substart, int *subend);
 
 	uint pid;
 	pthread_t threadRT;
@@ -130,7 +130,7 @@ private:
 public:
 	CRadioText(void);
 	~CRadioText(void);
-	int  PES_Receive(unsigned char *data, int len);
+	int  PES_Receive(char *data, int len);
 	int  RassImage(int QArchiv, int QKey, bool DirUp);
 	void EnableRadioTextProcessing(const char *Titel, bool replay = false);
 	void DisableRadioTextProcessing();
