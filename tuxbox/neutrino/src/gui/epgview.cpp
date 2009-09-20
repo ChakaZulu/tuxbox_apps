@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.147 2009/03/29 15:56:06 seife Exp $
+	$Id: epgview.cpp,v 1.148 2009/09/20 10:09:36 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -427,11 +427,6 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 	int height;
 	height = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->getHeight();
-	if (doLoop)
-	{
-		frameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_INFOBAR_PLUS_0);
-		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
-	}
 
 	GetEPGData(channel_id, id, &startzeit );
 	if (doLoop)
