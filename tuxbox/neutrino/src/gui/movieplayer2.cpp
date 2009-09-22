@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.36 2009/09/22 18:25:02 seife Exp $
+  $Id: movieplayer2.cpp,v 1.37 2009/09/22 18:26:08 seife Exp $
 
 
   License: GPL
@@ -172,6 +172,14 @@ bool skipabsolute = false;
 
 int buffer_time = 0;
 
+// globals for multi-file handling.
+// this should be implemented as a class...
+CFileList *g_f = NULL;
+const char *g_fn = NULL;
+int g_fd = -1;
+int g_numfiles = 0;
+int g_fileno = -1;
+
 // global variables shared by playthread and PlayFile
 static CMoviePlayerGui::state g_playstate;
 // the input thread requests skipping (e.g. for retrying)
@@ -208,13 +216,19 @@ bool  g_showaudioselectdialog = false;
 
 // Function prototypes for helper functions
 static void checkAspectRatio (int vdec, bool init);
-static off_t mp_seekSync(int fd, off_t pos);
+static off_t mp_seekSync(off_t pos);
 static inline void skip(int seconds, bool remote, bool absolute);
 static inline int get_filetime(void);
 static inline int get_pts(char *p, bool pes);
 static int mp_syncPES(ringbuffer_t *buf, char **pes);
 std::string url_escape(const char *url);
 size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data);
+
+static int mf_open(int fileno);
+static int mf_close(void);
+static off_t mf_lseek(off_t pos);
+static off_t mf_getsize(void);
+
 //------------------------------------------------------------------------
 
 int CAPIDSelectExec::exec(CMenuTarget* /*parent*/, const std::string & actionKey)
@@ -1120,17 +1134,15 @@ void *
 ReadTSFileThread(void *parm)
 {
 	/* reads a TS file into *ringbuf */
-	CFileList *f = (CFileList *)parm;
-	const char *fn = (*f)[0].Name.c_str();
-	int fd = open(fn, O_RDONLY);
+	g_f = (CFileList *)parm;
+	g_fd = mf_open(0);
 	g_EOF = false;
-	INFO("start, filename = '%s', fd = %d, f.size = %d\n", fn, fd, (*f).size());
+	INFO("start, filename = '%s', fd = %d, f.size = %d\n", (*g_f)[0].Name.c_str(), g_fd, (*g_f).size());
 	ssize_t len;
 	size_t readsize;
 	off_t bytes_per_second = 500000;
 	off_t filesize = 0;
 	off_t filepos = 0;
-	off_t offset = 0;
 	unsigned int lastpts = 0, smooth = 0;
 	off_t lastpos = 0, ptspos = 0;
 	time_t last = 0;
@@ -1138,8 +1150,6 @@ ReadTSFileThread(void *parm)
 	int i;
 	char *ts;
 	ringbuffer_data_t vec[2];
-	int numfiles = (*f).size();
-	int fileno = 0;
 
 	g_percent = 0;
 	hintBox->hide(); // the "connecting to streaming server" hintbox
@@ -1148,19 +1158,18 @@ ReadTSFileThread(void *parm)
 
 	g_input_failed = false;
 
-	for (i = 0; i < numfiles; i++)
-		filesize += (*f)[i].Size;
-	INFO("Number of files: %d overall size: %lld\n", numfiles, filesize);
+	filesize = mf_getsize();
+	INFO("Number of files: %d overall size: %lld\n", g_numfiles, filesize);
 
-	filepos = mp_seekSync(fd, 0);
+	filepos = mp_seekSync(0);
 	if (filepos < 0)
 		perror("ReadTSFileThread lseek");
-	INFO("file starts at %ld\n", filepos);
+	INFO("file starts at %lld\n", filepos);
 
 	pidv = 0;
 	memset(&g_apids, 0, sizeof(g_apids));
 	memset(&g_ac3flags, 0, sizeof(g_ac3flags));
-	find_all_avpids(fd, &pidv, g_apids, g_ac3flags, &g_numpida);
+	find_all_avpids(g_fd, &pidv, g_apids, g_ac3flags, &g_numpida);
 	pida = g_apids[0];
 	g_currentac3 = g_ac3flags[0];
 	g_currentapid = -1;
@@ -1179,15 +1188,15 @@ ReadTSFileThread(void *parm)
 	g_currentapid = pida;
 #endif
 
-	lseek(fd, filepos, SEEK_SET);
+	mf_lseek(filepos);
 	ringbuffer_reset(ringbuf);
 	ringbuffer_get_write_vector(ringbuf, &(vec[0]));
 	readsize = vec[0].len / 188 * 188;
-	len = read(fd, vec[0].buf, readsize); // enough?
+	len = read(g_fd, vec[0].buf, readsize); // enough?
 	if (len < 0)
 	{
 		INFO("first read failed (%m)\n");
-		close(fd);
+		mf_close();
 		INFO("ends now.\n");
 		g_input_failed = true;
 		pthread_exit(NULL);
@@ -1212,7 +1221,7 @@ ReadTSFileThread(void *parm)
 	if (len % 188)
 	{
 		ringbuffer_reset(ringbuf); // not aligned anymore, so reset...
-		lseek(fd, filepos, SEEK_SET);
+		mf_lseek(filepos);
 	}
 	else
 		filepos += len;
@@ -1236,51 +1245,13 @@ ReadTSFileThread(void *parm)
 				// smooth = 0;
 				last = 0;
 				bufferingBox->paint();
- repeat:
-				INFO("lseek to %lld, partsize %lld fileno %d numfiles %d\n", filepos, (*f)[fileno].Size, fileno, numfiles);
-				if (filepos > (*f)[fileno].Size && fileno + 1 < numfiles)
-				{
-					INFO("skipping to next file...\n");
-					close(fd);
-					offset  += (*f)[fileno].Size;
-					filepos -= (*f)[fileno].Size;
-					fileno++;
-					fn = (*f)[fileno].Name.c_str();
-					fd = (open (fn, O_RDONLY));
-					if (fd < 0)
-					{
-						INFO("cannot open %s (%m)\n", fn);
-						g_EOF = true;
-					}
-					else
-						INFO("opened %s, filepos: %lld\n", fn, filepos);
-					goto repeat;
-				}
-				if (filepos < 0 && fileno > 0)
-				{
-					INFO("skipping to previous file...\n");
-					close(fd);
-					fileno--;
-					offset  -= (*f)[fileno].Size;
-					filepos += (*f)[fileno].Size;
-					fn = (*f)[fileno].Name.c_str();
-					fd = (open (fn, O_RDONLY));
-					if (fd < 0)
-					{
-						INFO("cannot open %s (%m)\n", fn);
-						g_EOF = true;
-					}
-					else
-						INFO("opened %s, filepos: %lld\n", fn, filepos);
-					goto repeat;
-				}
 
-				if (filepos >= (*f)[fileno].Size)
-					filepos -= (filepos - (*f)[fileno].Size + 30 * bytes_per_second) / 188 * 188;
+				if (filepos >= filesize)
+					filepos -= (filepos - filesize + 30 * bytes_per_second) / 188 * 188;
 				if (filepos < 0)
 					filepos = 0;
-				if (mp_seekSync(fd, filepos) < 0)
-					perror("ReadTSFileThread lseek");
+				if (mp_seekSync(filepos) < 0)
+					INFO("ReadTSFileThread mp_seekSync < 0!\n");
 			}
 			DBG("BUFFERRESET!\n");
 			while (!bufferreset && g_playstate != CMoviePlayerGui::STOPPED)
@@ -1358,7 +1329,7 @@ ReadTSFileThread(void *parm)
 			ringbuffer_get_write_vector(ringbuf, &(vec[0]));
 			if (vec[0].len >= todo) // everything fits into vec[0].buf...
 			{
-				len = read(fd, vec[0].buf, todo);
+				len = read(g_fd, vec[0].buf, todo);
 				if (todo == readsize) // only first read of the while() loop, so we are still TS-aligned
 				{
 					ts = vec[0].buf;
@@ -1368,7 +1339,7 @@ ReadTSFileThread(void *parm)
 						if (pts != -1)
 						{
 							g_pts = pts;
-							ptspos = offset + filepos + (ts - vec[0].buf);
+							ptspos = filepos + (ts - vec[0].buf);
 							if (skipabsolute && !g_skiprequest)
 							{
 								time_t timediff = skipseconds - get_filetime();
@@ -1394,7 +1365,7 @@ ReadTSFileThread(void *parm)
 			{
 				/* this is the "ringbuffer wraparound" case */
 				DBG("v[0].l: %ld v[1].l: %ld, todo: %ld\n", vec[0].len, vec[1].len, todo);
-				len = read(fd, vec[0].buf, vec[0].len);
+				len = read(g_fd, vec[0].buf, vec[0].len);
 				if (len < 0)
 				{
 					perror("ReadTSFileThread read");
@@ -1403,7 +1374,7 @@ ReadTSFileThread(void *parm)
 				}
 				done += len;
 				todo -= len;
-				len = read(fd, vec[1].buf, todo);
+				len = read(g_fd, vec[1].buf, todo);
 			}
 			else
 			{
@@ -1420,18 +1391,10 @@ ReadTSFileThread(void *parm)
 					perror("ReadTSFileThread read");
 					g_input_failed = true;
 				}
-				else if (fileno + 1 < numfiles)
+				else if (g_fileno + 1 < g_numfiles)
 				{
-					close(fd);
-					offset += (*f)[fileno].Size;
-					fn = (*f)[++fileno].Name.c_str();
-					fd = (open (fn, O_RDONLY));
-					if (fd > -1)
-					{
-						filepos = 0;
-						INFO("opened %s, filepos: %ld\n", fn, filepos);
+					if (mf_lseek(filepos) >= 0) // filepos points at byte 0 of next file
 						continue;
-					}
 					g_input_failed = true;
 				}
 				INFO("error or EOF => exiting\n");
@@ -1446,12 +1409,81 @@ ReadTSFileThread(void *parm)
 		}
 
 		if (filesize)
-			g_percent = (filepos + offset) * 100 / filesize;	// overflow? not with 64 bits...
+			g_percent = filepos * 100 / filesize;	// overflow? not with 64 bits...
 	}
-	close(fd);
+	mf_close();
 	INFO("ends now.\n");
 	pthread_exit(NULL);
 } // ReadTSFileThread
+
+int mf_open(int fileno)
+{
+	if (g_f == NULL)
+		return -1;
+
+	mf_close();
+
+	g_fd = open((*g_f)[fileno].Name.c_str(), O_RDONLY);
+	if (g_fd != -1)
+		g_fileno = fileno;
+
+	return g_fd;
+}
+
+int mf_close(void)
+{
+	int ret = 0;
+
+	if (g_fd != -1)
+		ret = close(g_fd);
+	g_fd = g_fileno = -1;
+
+	return ret;
+}
+
+off_t mf_getsize(void)
+{
+	off_t ret = 0;
+
+	g_numfiles = (*g_f).size();
+
+	for (int i = 0; i < g_numfiles; i++)
+		ret += (*g_f)[i].Size;
+
+	return ret;
+}
+
+off_t mf_lseek(off_t pos)
+{
+	off_t offset = 0, lpos = pos;
+	int fileno, ret;
+	for (fileno = 0; fileno < (int)(*g_f).size(); fileno++)
+	{
+		if (lpos < (*g_f)[fileno].Size)
+			break;
+		offset += (*g_f)[fileno].Size;
+		lpos   -= (*g_f)[fileno].Size;
+	}
+	if (fileno == (int)(*g_f).size())
+		return -2;	// EOF
+
+	if (fileno != g_fileno)
+	{
+		INFO("old fileno: %d new fileno: %d, offset: %lld\n", g_fileno, fileno, lpos);
+		g_fd = mf_open(fileno);
+		if (g_fd < 0)
+		{
+			INFO("cannot open file %d:%s (%m)\n", fileno, (*g_f)[fileno].Name.c_str());
+			return -1;
+		}
+	}
+
+	ret = lseek(g_fd, lpos, SEEK_SET);
+	if (ret < 0)
+		return ret;
+
+	return offset + ret;
+}
 
 void *
 ReadMPEGFileThread(void *parm)
@@ -1460,17 +1492,15 @@ ReadMPEGFileThread(void *parm)
 	   then remultiplexes it as a TS into *ringbuf.
 	   TODO: get rid of the input ringbuffer if possible
 	 */
-	CFileList *f = (CFileList *)parm;
-	const char *fn = (*f)[0].Name.c_str();
-	int fd = open(fn, O_RDONLY);
+	g_f = (CFileList *)parm;
+	mf_open(0);
 	g_EOF = false;
-	INFO("start, filename = '%s', fd = %d, f.size = %d\n", fn, fd, (*f).size());
+	INFO("start, filename = '%s', fd = %d, f.size = %d\n", (*g_f)[0].Name.c_str(), g_fd, (*g_f).size());
 	int len, size;
 	size_t rd;
 	off_t bytes_per_second = 500000;
 	off_t filesize = 0;
 	off_t filepos = 0;
-	off_t offset = 0;
 	g_percent = 0;
 	char *ppes;
 	char ts[188];
@@ -1482,14 +1512,11 @@ ReadMPEGFileThread(void *parm)
 	unsigned int pesPacketLen;
 	int tsPacksCount;
 	unsigned char rest;
-	int numfiles = (*f).size();
-	int fileno = 0;
 
 	hintBox->hide(); // the "connecting to streaming server" hintbox
 
-	for (int i = 0; i < numfiles; i++)
-		filesize += (*f)[i].Size;
-	INFO("Number of files: %d overall size: %lld\n", numfiles, filesize);
+	filesize = mf_getsize();
+	INFO("Number of files: %d overall size: %lld\n", g_numfiles, filesize);
 	pidv = 100;
 	pida = 101;
 
@@ -1548,55 +1575,15 @@ ReadMPEGFileThread(void *parm)
 				// smooth = 0; // reset the bitrate smoothing counter after seek?
 				last = 0;
 				bufferingBox->paint();
- repeat:
-				INFO("lseek to %lld, partsize %lld\n", filepos, (*f)[fileno].Size);
-				if (filepos > (*f)[fileno].Size && fileno + 1 < numfiles)
+
+				if (filepos >= filesize)
 				{
-					INFO("skipping to next file...\n");
-					close(fd);
-					offset  += (*f)[fileno].Size;
-					filepos -= (*f)[fileno].Size;
-					fileno++;
-					fn = (*f)[fileno].Name.c_str();
-					fd = (open (fn, O_RDONLY));
-					if (fd < 0)
-					{
-						INFO("cannot open %s (%m)\n", fn);
-						g_EOF = true;
-					}
-					else
-						INFO("opened %s, filepos: %lld\n", fn, filepos);
-					goto repeat;
-				}
-				if (filepos < 0 && fileno > 0)
-				{
-					INFO("skipping to previous file...\n");
-					close(fd);
-					fileno--;
-					offset  -= (*f)[fileno].Size;
-					filepos += (*f)[fileno].Size;
-					fn = (*f)[fileno].Name.c_str();
-					fd = (open (fn, O_RDONLY));
-					if (fd < 0)
-					{
-						INFO("cannot open %s (%m)\n", fn);
-						g_EOF = true;
-					}
-					else
-						INFO("opened %s, filepos: %lld\n", fn, filepos);
-					goto repeat;
-				}
-				/* if this is true, we must be on the last file */
-				if (filepos >= (*f)[fileno].Size)
-				{
-					filepos = (*f)[fileno].Size - 30 * bytes_per_second;
+					filepos = filesize - 30 * bytes_per_second;
 					skipabsolute = false;
 				}
-				/* if this is true, we must be on the first file... */
 				if (filepos < 0)
 					filepos = 0;
-
-				if (lseek(fd, filepos, SEEK_SET) < 0)
+				if (mf_lseek(filepos) < 0)
 					perror("ReadMPEGFileThread lseek");
 			}
 			DBG("BUFFERRESET!\n");
@@ -1705,7 +1692,7 @@ ReadMPEGFileThread(void *parm)
 		ringbuffer_get_write_vector(buf_in, &vec_in[0]);
 		if ((size = vec_in[0].len) != 0 && !g_EOF)
 		{
-			len = read(fd, vec_in[0].buf, size);
+			len = read(g_fd, vec_in[0].buf, size);
 			if (len > 0)
 				ringbuffer_write_advance(buf_in, len);
 			else if (len < 0)
@@ -1720,19 +1707,8 @@ ReadMPEGFileThread(void *parm)
 				continue;
 			if (!len)
 			{
-				if (fileno + 1 < numfiles)
-				{
-					close(fd);
-					offset += (*f)[fileno].Size;
-					fn = (*f)[++fileno].Name.c_str();
-					fd = (open (fn, O_RDONLY));
-					if (fd > -1)
-					{
-						filepos = 0;
-						INFO("opened %s, filepos: %ld\n", fn, filepos);
-						continue;
-					}
-				}
+				if (mf_lseek(filepos) >=0 )
+					continue;
 				g_EOF = true;
 			}
 		}
@@ -1918,7 +1894,7 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 				{
 					gotpts = time(NULL);
 					g_pts = pts;
-					ptspos = (offset + filepos); // not exact: disregards the bytes in the buffer!
+					ptspos = filepos; // not exact: disregards the bytes in the buffer!
 					if (g_startpts == -1) // only works if we are starting from the start of the file
 					{
 						g_startpts = pts;
@@ -1987,9 +1963,9 @@ TODO: OTOH, if we only have an AC3 stream there will be no sound.
 		ringbuffer_read_advance(buf_in, pesPacketLen);
 
 		if (filesize)
-			g_percent = (filepos + offset) * 100 / filesize;	// overflow? not with 64 bits...
+			g_percent = filepos * 100 / filesize;	// overflow? not with 64 bits...
 	}
-	close(fd);
+	mf_close();
 	ringbuffer_free(buf_in);
 	INFO("ends now.\n");
 	pthread_exit(NULL);
@@ -2379,35 +2355,35 @@ void updateLcd(const std::string &s)
 //====================================================
 #define SIZE_PROBE  (100 * 188)
 
-static off_t mp_seekSync(int fd, off_t pos)
+static off_t mp_seekSync(off_t pos)
 {
 	off_t npos = pos;
 	off_t ret;
 	uint8_t pkt[188];
 
-	ret = lseek(fd, npos, SEEK_SET);
+	ret = mf_lseek(npos);
 	if (ret < 0)
 		INFO("lseek ret < 0 (%m)\n");
 
-	while (read(fd, pkt, 1) > 0)
+	while (read(g_fd, pkt, 1) > 0)
 	{
 		//-- check every byte until sync word reached --
 		npos++;
 		if (*pkt == 0x47)
 		{
 			//-- if found double check for next sync word --
-			if (read(fd, pkt, 188) == 188)
+			if (read(g_fd, pkt, 188) == 188)
 			{
 				if(pkt[188-1] == 0x47)
 				{
-					ret = lseek(fd, npos-1, SEEK_SET); // assume sync ok
+					ret = mf_lseek(npos - 1); // assume sync ok
 					if (ret < 0)
 						INFO("lseek ret < 0 (%m)\n");
 					return ret;
 				}
 				else
 				{
-					ret = lseek(fd, npos, SEEK_SET); // oops, next pkt doesn't start with sync
+					ret = mf_lseek(npos); // oops, next pkt doesn't start with sync
 					if (ret < 0)
 						INFO("lseek ret < 0 (%m)\n");
 				}
@@ -2420,7 +2396,7 @@ static off_t mp_seekSync(int fd, off_t pos)
 	}
 
 	//-- on error stay on actual position --
-	return lseek(fd, pos, SEEK_SET);
+	return mf_lseek(pos);
 }
 
 /* returns: 0 == was already synchronous, > 0 == is now synchronous, -1 == could not sync */
@@ -3240,7 +3216,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.36 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.37 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
