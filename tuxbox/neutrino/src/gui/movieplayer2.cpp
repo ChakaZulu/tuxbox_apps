@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.35 2009/09/10 07:56:53 rhabarber1848 Exp $
+  $Id: movieplayer2.cpp,v 1.36 2009/09/22 18:25:02 seife Exp $
 
 
   License: GPL
@@ -212,6 +212,7 @@ static off_t mp_seekSync(int fd, off_t pos);
 static inline void skip(int seconds, bool remote, bool absolute);
 static inline int get_filetime(void);
 static inline int get_pts(char *p, bool pes);
+static int mp_syncPES(ringbuffer_t *buf, char **pes);
 std::string url_escape(const char *url);
 size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data);
 //------------------------------------------------------------------------
@@ -1763,31 +1764,11 @@ ReadMPEGFileThread(void *parm)
 			continue;
 		}
 
-		bool resync = false;	// TODO: improve
-		if ((ppes[0] != 0x00) || (ppes[1] != 0x00) || (ppes[2] != 0x01))
-		{
-			//INFO("async, not 000001: %02x%02x%02x ", ppes[0], ppes[1], ppes[2]);
-			int deleted = 0;
-			do {
-				ringbuffer_read_advance(buf_in, 1); // remove 1 Byte
-				rd = ringbuffer_get_readpointer(buf_in, &ppes, 10);
-				deleted++;
-				//fprintf(stderr, "%d", rd);
-				if ((ppes[0] == 0x00) || (ppes[1] == 0x00) || (ppes[2] == 0x01))
-				{
-					deleted = 0;
-					break;
-				}
-			}
-			while (rd == 10);
-			//fprintf(stderr, "\n");
-			if (deleted > 0)
-			{
-				INFO("No valid PES signature found. %d Bytes deleted.\n", deleted);
-				continue;
-			}
-			resync = true;
-		}
+		int r = mp_syncPES(buf_in, &ppes);
+		if (r < 0)
+			continue;
+		bool resync = (r > 0);
+		// if (resync) INFO("after mp_syncPES, r=%d resync=%d\n",r, resync);
 
 		int av = 0; // 1 = video, 2 = audio
 		switch(ppes[3])
@@ -2441,6 +2422,26 @@ static off_t mp_seekSync(int fd, off_t pos)
 	//-- on error stay on actual position --
 	return lseek(fd, pos, SEEK_SET);
 }
+
+/* returns: 0 == was already synchronous, > 0 == is now synchronous, -1 == could not sync */
+static int mp_syncPES(ringbuffer_t *ring, char **pes)
+{
+	int rd = 10;
+	int ret = 0;
+	do {
+		if ((*pes)[0] == 0x00 && (*pes)[1] == 0x00 && (*pes)[2] == 0x01)
+			return ret;
+		//INFO("%02x %02x %02x\n", (*pes)[0], (*pes)[1], (*pes)[2]);
+		ringbuffer_read_advance(ring, 1); // remove 1 Byte
+		rd = ringbuffer_get_readpointer(ring, &(*pes), 10);
+		ret++;
+	}
+	while (rd == 10);
+
+	INFO("No valid PES signature found. %d Bytes deleted.\n", ret);
+	return -1;
+}
+
 
 //=======================================
 //== CMoviePlayerGui::ParentalEntrance ==
@@ -3239,7 +3240,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.35 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.36 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
