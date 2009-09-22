@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.37 2009/09/22 18:26:08 seife Exp $
+  $Id: movieplayer2.cpp,v 1.38 2009/09/22 18:37:25 seife Exp $
 
 
   License: GPL
@@ -207,6 +207,7 @@ unsigned short g_prozent=0;
 
 time_t g_pts = 0;
 time_t g_startpts = -1;
+time_t g_endpts = -1;
 
 #if HAVE_DVB_API_VERSION >=3
 video_size_t   g_size;
@@ -218,9 +219,10 @@ bool  g_showaudioselectdialog = false;
 static void checkAspectRatio (int vdec, bool init);
 static off_t mp_seekSync(off_t pos);
 static inline void skip(int seconds, bool remote, bool absolute);
-static inline int get_filetime(void);
+static inline int get_filetime(bool remaining = false);
 static inline int get_pts(char *p, bool pes);
 static int mp_syncPES(ringbuffer_t *buf, char **pes);
+static int get_PES_PTS(ringbuffer_t *buf, off_t position);
 std::string url_escape(const char *url);
 size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data);
 
@@ -1216,15 +1218,46 @@ ReadTSFileThread(void *parm)
 	else
 		INFO("PTS at file start: %ld\n", g_startpts);
 
-	lastpts = g_startpts;
-	g_pts = g_startpts;
-	if (len % 188)
+	off_t endpos = filepos + (filesize - filepos - 1024*1024) / 188 * 188;
+	g_endpts = -1;
+	if (endpos > filepos)
 	{
-		ringbuffer_reset(ringbuf); // not aligned anymore, so reset...
-		mf_lseek(filepos);
+		mf_lseek(endpos);
+		ringbuffer_reset(ringbuf);
+		ringbuffer_get_write_vector(ringbuf, &(vec[0]));
+		readsize = vec[0].len / 188 * 188;
+		len = read(g_fd, vec[0].buf, readsize); // enough?
+		if (len < 0)
+			INFO("last read failed??? (%m)\n");
+		else
+		{
+			ts = vec[0].buf;
+			i = 0;
+			while (i + 188 < len)
+			{
+				g_endpts = get_pts(ts + i, false);
+				if (g_endpts != -1)
+					break;
+				i  += 188;
+			}
+			if (g_endpts == -1)
+				INFO("could not determine PTS at file end\n");
+			else
+			{
+				if (g_endpts < g_startpts)
+					g_endpts += 95443717; // (0x200000000 / 90);
+				INFO("PTS at file end: %ld filelen: %ld\n", g_endpts, g_endpts - g_startpts);
+			}
+		}
 	}
 	else
-		filepos += len;
+		INFO("file too short for determining PTS at file end\n");
+
+	lastpts = g_startpts;
+	g_pts = g_startpts;
+
+	ringbuffer_reset(ringbuf); // not aligned anymore, so reset...
+	mf_lseek(filepos);
 
 	skipabsolute = false;
 	skipseconds = 0;
@@ -1541,10 +1574,26 @@ ReadMPEGFileThread(void *parm)
 	g_currentac3 = 0;
 	g_numpida = 0;
 	g_startpts = -1;
+	g_endpts = -1;
 	bool input_empty = true;
 	g_input_failed = false;
 	skipabsolute = false;
 	skipseconds = 0;
+
+	g_startpts = get_PES_PTS(buf_in, 0);
+	INFO("PTS at file start: %ld\n", g_startpts);
+	if (filesize > 1024*1024)
+	{
+		g_endpts = get_PES_PTS(buf_in, filesize - 1024*1024);
+		if (g_endpts >= 0 && g_endpts < g_startpts)
+			g_endpts += 95443717; // (0x200000000 / 90);
+		INFO("PTS at file end:   %ld, file len: %ld\n", g_endpts, g_endpts - g_startpts);
+	}
+	else
+		INFO("file is too short to determine PTS at file end\n");
+
+	ringbuffer_reset(buf_in);
+	mf_lseek(0);
 
 	while (g_playstate != CMoviePlayerGui::STOPPED)
 	{
@@ -2911,7 +2960,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			if (stream)
 				StreamTime.update();
 			else
-				StreamTime.show(get_filetime());
+				StreamTime.show(get_filetime(StreamTime.GetMode() == CTimeOSD::MODE_DESC));
 		}
 
 		if (msg == CRCInput::RC_green)
@@ -3022,14 +3071,22 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		{
 			if (StreamTime.IsVisible())
 			{
-				if (stream && (StreamTime.GetMode() == CTimeOSD::MODE_ASC))
+				if (StreamTime.GetMode() == CTimeOSD::MODE_ASC)
 				{
-					int stream_length = VlcGetStreamLength();
-					int stream_time = VlcGetStreamTime();
-					if (stream_time >= 0 && stream_length >= 0)
+					if (stream)
+					{
+						int stream_length = VlcGetStreamLength();
+						int stream_time = VlcGetStreamTime();
+						if (stream_time >= 0 && stream_length >= 0)
+						{
+							StreamTime.SetMode(CTimeOSD::MODE_DESC);
+							StreamTime.show(stream_length - stream_time + buffer_time);
+						}
+					}
+					else if (g_endpts != -1)
 					{
 						StreamTime.SetMode(CTimeOSD::MODE_DESC);
-						StreamTime.show(stream_length - stream_time + buffer_time);
+						StreamTime.show(get_filetime(true));
 					}
 					else
 						StreamTime.hide();
@@ -3216,7 +3273,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.37 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.38 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
@@ -3302,9 +3359,14 @@ static inline void skip(int seconds, bool /*remote*/, bool absolute)
 	g_playstate = CMoviePlayerGui::SKIP;
 }
 
-static inline int get_filetime(void)
+static inline int get_filetime(bool remaining)
 {
-	int filetime = g_pts - g_startpts;
+	int filetime;
+	if (remaining)
+		filetime = g_endpts - g_pts;
+	else
+		filetime = g_pts - g_startpts;
+
 	if (filetime < 0)
 		filetime += (int)(0x1ffffffffLL / 90);
 	filetime /= 1000;
@@ -3365,6 +3427,87 @@ static inline int get_pts(char *p, bool pes)
 	//INFO("time: %02d:%02d:%02d\n", msec / 3600000, (msec / 60000) % 60, (msec / 1000) % 60);
 	return pts / 90;
 }
+
+/* gets the PTS at a specific file position from a PES
+   ATTENTION! resets buf!  */
+int get_PES_PTS(ringbuffer_t *buf, off_t position)
+{
+	int pts = -1;
+	char *ppes;
+	int rd, eof = 0;;
+	ringbuffer_data_t vec_in;
+	ringbuffer_reset(buf);
+
+	if (mf_lseek(position) < 0)
+	{
+		INFO("could not mf_lseek to %lld\n", position);
+		return -1;
+	}
+
+	while (pts == -1)
+	{
+		ringbuffer_get_write_vector(buf, &vec_in);
+		if (vec_in.len != 0 && eof < 2);
+		{
+			rd = read(g_fd, vec_in.buf, vec_in.len);
+			if (rd > 0)
+			{
+				ringbuffer_write_advance(buf, rd);
+				position += rd;
+				eof = 0;
+			}
+			if (rd == 0)
+			{
+				eof++;
+				if (mf_lseek(position) < 0)
+					eof++;
+			}
+
+			rd = ringbuffer_get_readpointer(buf, &ppes, 10); // we need 10 bytes for AC3
+			if (rd != 10)
+			{
+				INFO("WTF??? rd != 10\n");
+				return -1;
+			}
+		}
+
+		int r = mp_syncPES(buf, &ppes);
+		if (r < 0)
+			break;
+
+		rd = ((ppes[4] << 8) | ppes[5]) + 6;
+
+		switch(ppes[3])
+		{
+			case 0xe0 ... 0xef:	// video!
+				pts = get_pts(ppes, true);
+				break;
+			case 0xbb:
+			case 0xbe:
+			case 0xbf:
+			case 0xf0 ... 0xf3:
+			case 0xff:
+			case 0xc0 ... 0xcf:
+			case 0xd0 ... 0xdf:
+				break;
+			case 0xb9:
+			case 0xba:
+			case 0xbc:
+			default:
+				rd = 1;
+				break;
+		}
+		if ((int)ringbuffer_read_space(buf) < rd)
+		{
+			INFO("ringbuffer_read_space %ld < rd %d\n", ringbuffer_read_space(buf), rd);
+			continue;
+		}
+		ringbuffer_read_advance(buf, rd);
+	}
+	ringbuffer_reset(buf);
+	return pts;
+}
+
 
 std::string url_escape(const char *url)
 {
