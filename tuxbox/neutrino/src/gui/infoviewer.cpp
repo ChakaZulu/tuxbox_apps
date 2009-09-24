@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.274 2009/09/16 06:59:18 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.275 2009/09/24 09:29:30 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -396,8 +396,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	is_visible = true;
 #ifdef ENABLE_RADIOTEXT
 	if (g_settings.radiotext_enable && g_Radiotext) {
-		g_Radiotext->S_RtOsd = true;
-		g_Radiotext->RT_MsgShow = false;
+		g_Radiotext->RT_MsgShow = true;
 	}
 #endif
 	
@@ -620,7 +619,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 #ifdef ENABLE_RADIOTEXT
 	if (CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_radio)
 	{
-		if ((g_settings.radiotext_enable) && (!recordModeActive))
+		if ((g_settings.radiotext_enable) && (!recordModeActive) && (!calledFromNumZap))
 			showRadiotext();
 		else
 			showIcon_RadioText(false);
@@ -1062,10 +1061,9 @@ void CInfoViewer::showRadiotext()
 	bool RTisIsUTF = false;
 
 	if (g_Radiotext == NULL) return;
+	showIcon_RadioText(g_Radiotext->haveRadiotext());
 
 	if (g_Radiotext->S_RtOsd) {
-		showIcon_RadioText(g_Radiotext->haveRadiotext());
-
 		// dimensions of radiotext window
 		rt_dx = BoxEndX - BoxStartX;
 		rt_dy = 25;
@@ -1731,7 +1729,7 @@ void CInfoViewer::killTitle()
 		frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX+ SHADOW_OFFSET, bottom);
 #ifdef ENABLE_RADIOTEXT
 		if (g_settings.radiotext_enable && g_Radiotext) {
-			g_Radiotext->S_RtOsd = 0;
+			g_Radiotext->S_RtOsd = g_Radiotext->haveRadiotext() ? 1 : 0;
 			killRadiotext();
 		}
 #endif

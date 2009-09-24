@@ -1,5 +1,5 @@
 /*
-	$Id: radiotext.cpp,v 1.4 2009/09/19 14:06:13 rhabarber1848 Exp $
+	$Id: radiotext.cpp,v 1.5 2009/09/24 09:29:30 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -420,6 +420,7 @@ fprintf(stderr, "MEC=0x%02x DSN=0x%02x PSN=0x%02x MEL=%02d STATUS=0x%02x MFL=%02
 		}
 		RTP_TToggle = 0x03;		// Bit 0/1 = Title/Artist
 		RT_MsgShow = true;
+		S_RtOsd = 1;
 		RT_Info = (RT_Info > 0) ? : 1;
 		RadioStatusMsg();
 	}
@@ -2400,6 +2401,7 @@ void CRadioText::radiotext_stop(void)
 		pthread_join(getThread(), NULL);
 		pid = 0;
 		have_radiotext = false;
+		S_RtOsd = 0;
 	}
 
 }
@@ -2444,7 +2446,7 @@ void CRadioText::setPid(uint inPid)
 //		S_Activate = false;
 //		S_HMEntry = false;
 		S_RtFunc = 1;
-		S_RtOsd = 1;
+		S_RtOsd = 0;
 		S_RtOsdTitle = 1;
 		S_RtOsdTags = 2;
 		S_RtOsdPos = 2;
