@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.38 2009/09/22 18:37:25 seife Exp $
+  $Id: movieplayer2.cpp,v 1.39 2009/09/25 08:05:34 seife Exp $
 
 
   License: GPL
@@ -1488,8 +1488,8 @@ off_t mf_getsize(void)
 
 off_t mf_lseek(off_t pos)
 {
-	off_t offset = 0, lpos = pos;
-	int fileno, ret;
+	off_t offset = 0, lpos = pos, ret;
+	int fileno;
 	for (fileno = 0; fileno < (int)(*g_f).size(); fileno++)
 	{
 		if (lpos < (*g_f)[fileno].Size)
@@ -3273,7 +3273,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.38 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.39 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
