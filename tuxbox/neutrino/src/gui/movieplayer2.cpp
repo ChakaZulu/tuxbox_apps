@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.40 2009/09/25 08:10:14 seife Exp $
+  $Id: movieplayer2.cpp,v 1.41 2009/09/25 17:43:36 seife Exp $
 
 
   License: GPL
@@ -222,7 +222,7 @@ static inline void skip(int seconds, bool remote, bool absolute);
 static inline int get_filetime(bool remaining = false);
 static inline int get_pts(char *p, bool pes);
 static int mp_syncPES(ringbuffer_t *buf, char **pes);
-static int get_PES_PTS(ringbuffer_t *buf, off_t position);
+static int get_PES_PTS(ringbuffer_t *buf, off_t position, bool until_eof = false);
 std::string url_escape(const char *url);
 size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data);
 
@@ -1222,7 +1222,9 @@ ReadTSFileThread(void *parm)
 	g_endpts = -1;
 	if (endpos > filepos)
 	{
-		mf_lseek(endpos);
+		off_t syncpos = mp_seekSync(endpos);
+		if (syncpos != endpos)
+			INFO("seeking to end of file: out of sync (wanted %lld got %lld)\n", endpos, syncpos);
 		ringbuffer_reset(ringbuf);
 		ringbuffer_get_write_vector(ringbuf, &(vec[0]));
 		readsize = vec[0].len / 188 * 188;
@@ -1232,13 +1234,14 @@ ReadTSFileThread(void *parm)
 		else
 		{
 			ts = vec[0].buf;
-			i = 0;
-			while (i + 188 < len)
+			i = (len / 188 * 188) - 188;
+			/* go backwards from the end of the buffer */
+			while (i >= 0)
 			{
 				g_endpts = get_pts(ts + i, false);
 				if (g_endpts != -1)
 					break;
-				i  += 188;
+				i -= 188;
 			}
 			if (g_endpts == -1)
 				INFO("could not determine PTS at file end\n");
@@ -1246,7 +1249,7 @@ ReadTSFileThread(void *parm)
 			{
 				if (g_endpts < g_startpts)
 					g_endpts += 95443717; // (0x200000000 / 90);
-				INFO("PTS at file end: %ld filelen: %ld\n", g_endpts, g_endpts - g_startpts);
+				INFO("PTS at file pos %lld: %ld filelen: %ld\n", syncpos + i, g_endpts, g_endpts - g_startpts);
 			}
 		}
 	}
@@ -1515,7 +1518,7 @@ ReadMPEGFileThread(void *parm)
 	INFO("PTS at file start: %ld\n", g_startpts);
 	if (filesize > 1024*1024)
 	{
-		g_endpts = get_PES_PTS(buf_in, filesize - 1024*1024);
+		g_endpts = get_PES_PTS(buf_in, filesize - 1024*1024, true); // until EOF
 		if (g_endpts >= 0 && g_endpts < g_startpts)
 			g_endpts += 95443717; // (0x200000000 / 90);
 		INFO("PTS at file end:   %ld, file len: %ld\n", g_endpts, g_endpts - g_startpts);
@@ -2310,7 +2313,7 @@ OutputThread(void *arg)
 void updateLcd(const std::string &s)
 {
 	static int  l_playstate = -1;
-	std::string lcd = "";
+	std::string lcd = s;
 
 	if (l_playstate == g_playstate)
 		return;
@@ -2324,7 +2327,6 @@ void updateLcd(const std::string &s)
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
 		break;
 	}
-	lcd += s;
 	StrSearchReplace(lcd,"_", " ");
 	CLCD::getInstance()->setMovieInfo("", lcd);
 }
@@ -3273,7 +3275,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.40 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.41 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
@@ -3430,7 +3432,7 @@ static inline int get_pts(char *p, bool pes)
 
 /* gets the PTS at a specific file position from a PES
    ATTENTION! resets buf!  */
-int get_PES_PTS(ringbuffer_t *buf, off_t position)
+int get_PES_PTS(ringbuffer_t *buf, off_t position, bool until_eof)
 {
 	int pts = -1;
 	char *ppes;
@@ -3444,7 +3446,7 @@ int get_PES_PTS(ringbuffer_t *buf, off_t position)
 		return -1;
 	}
 
-	while (pts == -1)
+	while (pts == -1 || until_eof)
 	{
 		ringbuffer_get_write_vector(buf, &vec_in);
 		if (vec_in.len != 0 && eof < 2);
@@ -3463,12 +3465,9 @@ int get_PES_PTS(ringbuffer_t *buf, off_t position)
 					eof++;
 			}
 
-			rd = ringbuffer_get_readpointer(buf, &ppes, 10); // we need 10 bytes for AC3
-			if (rd != 10)
-			{
-				INFO("WTF??? rd != 10\n");
-				return -1;
-			}
+			rd = ringbuffer_get_readpointer(buf, &ppes, 14); // ppes[13] contains last pts bits
+			if (rd != 14) // EOF?.
+				break;
 		}
 
 		int r = mp_syncPES(buf, &ppes);
@@ -3479,8 +3478,11 @@ int get_PES_PTS(ringbuffer_t *buf, off_t position)
 
 		switch(ppes[3])
 		{
+			int tmppts;
 			case 0xe0 ... 0xef:	// video!
-				pts = get_pts(ppes, true);
+				tmppts = get_pts(ppes, true);
+				if (tmppts >= 0)
+					pts = tmppts;
 				break;
 			case 0xbb:
 			case 0xbe:
