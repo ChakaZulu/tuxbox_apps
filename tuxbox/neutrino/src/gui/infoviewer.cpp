@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.275 2009/09/24 09:29:30 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.276 2009/09/25 06:27:42 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -678,7 +678,7 @@ requests to sectionsd.
 #ifdef ENABLE_RADIOTEXT
 			if (g_settings.radiotext_enable)
 			{
-				if (((CNeutrinoApp::getInstance()->getMode()) == NeutrinoMessages::mode_radio) && (( msg == CRCInput::RC_up ) | ( msg == CRCInput::RC_down )))
+				if (((CNeutrinoApp::getInstance()->getMode()) == NeutrinoMessages::mode_radio) && (( msg == CRCInput::RC_up ) | ( msg == CRCInput::RC_down ) | ( msg == CRCInput::RC_0 )))
 					killRadiotext();
 			}
 #endif
