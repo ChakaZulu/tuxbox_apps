@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.39 2009/09/25 08:05:34 seife Exp $
+  $Id: movieplayer2.cpp,v 1.40 2009/09/25 08:10:14 seife Exp $
 
 
   License: GPL
@@ -1449,75 +1449,6 @@ ReadTSFileThread(void *parm)
 	pthread_exit(NULL);
 } // ReadTSFileThread
 
-int mf_open(int fileno)
-{
-	if (g_f == NULL)
-		return -1;
-
-	mf_close();
-
-	g_fd = open((*g_f)[fileno].Name.c_str(), O_RDONLY);
-	if (g_fd != -1)
-		g_fileno = fileno;
-
-	return g_fd;
-}
-
-int mf_close(void)
-{
-	int ret = 0;
-
-	if (g_fd != -1)
-		ret = close(g_fd);
-	g_fd = g_fileno = -1;
-
-	return ret;
-}
-
-off_t mf_getsize(void)
-{
-	off_t ret = 0;
-
-	g_numfiles = (*g_f).size();
-
-	for (int i = 0; i < g_numfiles; i++)
-		ret += (*g_f)[i].Size;
-
-	return ret;
-}
-
-off_t mf_lseek(off_t pos)
-{
-	off_t offset = 0, lpos = pos, ret;
-	int fileno;
-	for (fileno = 0; fileno < (int)(*g_f).size(); fileno++)
-	{
-		if (lpos < (*g_f)[fileno].Size)
-			break;
-		offset += (*g_f)[fileno].Size;
-		lpos   -= (*g_f)[fileno].Size;
-	}
-	if (fileno == (int)(*g_f).size())
-		return -2;	// EOF
-
-	if (fileno != g_fileno)
-	{
-		INFO("old fileno: %d new fileno: %d, offset: %lld\n", g_fileno, fileno, lpos);
-		g_fd = mf_open(fileno);
-		if (g_fd < 0)
-		{
-			INFO("cannot open file %d:%s (%m)\n", fileno, (*g_f)[fileno].Name.c_str());
-			return -1;
-		}
-	}
-
-	ret = lseek(g_fd, lpos, SEEK_SET);
-	if (ret < 0)
-		return ret;
-
-	return offset + ret;
-}
-
 void *
 ReadMPEGFileThread(void *parm)
 {
@@ -2467,6 +2398,75 @@ static int mp_syncPES(ringbuffer_t *ring, char **pes)
 	return -1;
 }
 
+/* the mf_* functions are wrappers for multiple-file I/O */
+int mf_open(int fileno)
+{
+	if (g_f == NULL)
+		return -1;
+
+	mf_close();
+
+	g_fd = open((*g_f)[fileno].Name.c_str(), O_RDONLY);
+	if (g_fd != -1)
+		g_fileno = fileno;
+
+	return g_fd;
+}
+
+int mf_close(void)
+{
+	int ret = 0;
+
+	if (g_fd != -1)
+		ret = close(g_fd);
+	g_fd = g_fileno = -1;
+
+	return ret;
+}
+
+off_t mf_getsize(void)
+{
+	off_t ret = 0;
+
+	g_numfiles = (*g_f).size();
+
+	for (int i = 0; i < g_numfiles; i++)
+		ret += (*g_f)[i].Size;
+
+	return ret;
+}
+
+off_t mf_lseek(off_t pos)
+{
+	off_t offset = 0, lpos = pos, ret;
+	int fileno;
+	for (fileno = 0; fileno < (int)(*g_f).size(); fileno++)
+	{
+		if (lpos < (*g_f)[fileno].Size)
+			break;
+		offset += (*g_f)[fileno].Size;
+		lpos   -= (*g_f)[fileno].Size;
+	}
+	if (fileno == (int)(*g_f).size())
+		return -2;	// EOF
+
+	if (fileno != g_fileno)
+	{
+		INFO("old fileno: %d new fileno: %d, offset: %lld\n", g_fileno, fileno, lpos);
+		g_fd = mf_open(fileno);
+		if (g_fd < 0)
+		{
+			INFO("cannot open file %d:%s (%m)\n", fileno, (*g_f)[fileno].Name.c_str());
+			return -1;
+		}
+	}
+
+	ret = lseek(g_fd, lpos, SEEK_SET);
+	if (ret < 0)
+		return ret;
+
+	return offset + ret;
+}
 
 //=======================================
 //== CMoviePlayerGui::ParentalEntrance ==
@@ -3273,7 +3273,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.39 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.40 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
