@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.75 2009/09/13 16:44:07 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.76 2009/09/26 09:18:37 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -69,7 +69,9 @@
 #include "gui/imageinfo.h"
 #include "gui/keyhelper.h"
 #include "gui/motorcontrol.h"
+#ifdef ENABLE_GUI_MOUNT
 #include "gui/nfs.h"
+#endif
 #include "gui/personalize.h"
 #include "gui/pictureviewer.h"
 #include "gui/pluginlist.h"
@@ -205,7 +207,9 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_VCDPLAYBACK, true, NULL, moviePlayerGui, "vcdplayback", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	moviePlayer.addItem(GenericMenuSeparatorLine);
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &streamingSettings, NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
+#ifdef ENABLE_GUI_MOUNT
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_MOUNT, true, NULL, new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
+#endif
 #endif
 
 #ifdef ENABLE_PICTUREVIEWER
@@ -1477,9 +1481,11 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem(new CMenuOptionChooser(LOCALE_NETWORKMENU_NTPENABLE, &g_settings.network_ntpenable, OPTIONS_NTPENABLE_OPTIONS, OPTIONS_NTPENABLE_OPTION_COUNT, true, sectionsdConfigNotifier));
 	networkSettings.addItem( m6);
 	networkSettings.addItem( m7);
+#ifdef ENABLE_GUI_MOUNT
 	networkSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_NETWORKMENU_MOUNT));
 	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_MOUNT , true, NULL, new CNFSMountGui(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_UMOUNT, true, NULL, new CNFSUmountGui(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+#endif
 }
 
 /* for record settings menu */

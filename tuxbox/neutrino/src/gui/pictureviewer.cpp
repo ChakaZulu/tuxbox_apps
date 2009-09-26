@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.70 2009/09/10 07:56:53 rhabarber1848 Exp $
+	$Id: pictureviewer.cpp,v 1.71 2009/09/26 09:18:37 rhabarber1848 Exp $
 
 	MP3Player by Dirch
 	
@@ -47,7 +47,9 @@
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 
+#ifdef ENABLE_GUI_MOUNT
 #include <gui/nfs.h>
+#endif
 #include <gui/infoviewer.h>
 
 #include <gui/widget/buttons.h>
@@ -487,6 +489,7 @@ int CPictureViewerGui::show()
 			if (!playlist.empty())
 				view(selected, true);
 		}
+#ifdef ENABLE_GUI_MOUNT
 		else if (msg == CRCInput::RC_setup)
 		{
 			if (m_state == MENU)
@@ -497,6 +500,7 @@ int CPictureViewerGui::show()
 				CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(LOCALE_PICTUREVIEWER_HEAD));
 			}
 		}
+#endif
 		else if (msg == NeutrinoMessages::CHANGEMODE)
 		{
 			if ((data & NeutrinoMessages::mode_mask) != NeutrinoMessages::mode_pic)
@@ -603,7 +607,9 @@ void CPictureViewerGui::paintHead()
 	if(theight > 26)
 		ypos = (theight-26) / 2 + y ;
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 60, ypos );
+#ifdef ENABLE_GUI_MOUNT
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+ width- 30, ypos );
+#endif
 //	printf("paintHead}\n");
 }
 
@@ -725,7 +731,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.70 $");
+	return imageinfo.getModulVersion("","$Revision: 1.71 $");
 }
 
 void CPictureViewerGui::showHelp()

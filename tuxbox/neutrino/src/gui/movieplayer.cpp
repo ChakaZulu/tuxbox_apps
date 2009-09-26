@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.177 2009/09/11 06:37:08 dbt Exp $
+  $Id: movieplayer.cpp,v 1.178 2009/09/26 09:18:37 rhabarber1848 Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -45,7 +45,9 @@
 #include <gui/eventlist.h>
 #include <gui/color.h>
 #include <gui/infoviewer.h>
+#ifdef ENABLE_GUI_MOUNT
 #include <gui/nfs.h>
+#endif
 #include <gui/bookmarkmanager.h>
 #include <gui/timeosd.h>
 #include <gui/movieviewer.h>
@@ -4463,7 +4465,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer1 ","$Revision: 1.177 $");
+	return imageinfo.getModulVersion("Movieplayer1 ","$Revision: 1.178 $");
 }
 
 void CMoviePlayerGui::showHelpTS()

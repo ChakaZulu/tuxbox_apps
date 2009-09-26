@@ -1,5 +1,5 @@
 /*
-	$Id: timerlist.cpp,v 1.101 2009/09/02 12:27:04 rhabarber1848 Exp $
+	$Id: timerlist.cpp,v 1.102 2009/09/26 09:18:37 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -62,7 +62,9 @@
 #include <gui/widget/dirchooser.h>
 
 #include <system/settings.h>
+#ifdef ENABLE_GUI_MOUNT
 #include <system/fsmounter.h>
+#endif
 
 #include <global.h>
 #include <neutrino.h>

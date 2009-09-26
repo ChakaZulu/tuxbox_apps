@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.28 2009/09/11 18:36:40 dbt Exp $
+	$Id: moviebrowser.cpp,v 1.29 2009/09/26 09:18:37 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.29  2009/09/26 09:18:37  rhabarber1848
+	New cdk/configure option --disable-gui-mount to disable GUI mount functionality, to be used in automount-only- or HDD/network-less images, currently only active in Neutrino, GUI mount is enabled by default, thanks to barf: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=18&t=41744
+	
 	Revision 1.28  2009/09/11 18:36:40  dbt
 	fix segfault in help window
 	see: http://www.dreambox-fan.de/forum/viewtopic.php?p=370192#p370192
@@ -191,7 +194,9 @@
 #include <gui/widget/stringinput.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#ifdef ENABLE_GUI_MOUNT
 #include <gui/nfs.h>
+#endif
 #include <neutrino.h>
 #include <sys/vfs.h> // for statfs
 #include <gui/widget/icons.h>
@@ -484,7 +489,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.28 2009/09/11 18:36:40 dbt Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.29 2009/09/26 09:18:37 rhabarber1848 Exp $\r\n");
 	init();
 }
 
@@ -1097,7 +1102,9 @@ int CMovieBrowser::exec(const char* path)
 			if(g_settings.network_nfs_automount[i])
 				umount2(g_settings.network_nfs_local_dir[i],MNT_FORCE);
 		}
+#ifdef ENABLE_GUI_MOUNT
 		CFSMounter::automount();
+#endif
 	}
 
 	if(m_file_info_stale == true)
@@ -3218,7 +3225,9 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* /*movie_info*/)
 /********************************************************************/
 /**  main menu ******************************************************/
     CMovieHelp* movieHelp = new CMovieHelp();
+#ifdef ENABLE_GUI_MOUNT
     CNFSSmallMenu* nfs =    new CNFSSmallMenu();
+#endif
 
     CMenuWidget mainMenu(LOCALE_MOVIEBROWSER_MENU_MAIN_HEAD, "streaming.raw");
     mainMenu.addItem(GenericMenuSeparator);
@@ -3227,7 +3236,9 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* /*movie_info*/)
     mainMenu.addItem( new CMenuForwarder(LOCALE_EPGPLUS_OPTIONS,                    true, NULL, &optionsMenu,NULL,                                  CRCInput::RC_green,  NEUTRINO_ICON_BUTTON_GREEN));
     mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD, true, NULL, &dirMenu,    NULL,                                  CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
     mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_SCAN_FOR_MOVIES,       true, NULL, this,        "reload_movie_info",                   CRCInput::RC_blue,   NEUTRINO_ICON_BUTTON_BLUE));
+#ifdef ENABLE_GUI_MOUNT
     //mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_NFS_HEAD,       true, NULL, nfs,         NULL,                                  CRCInput::RC_setup,  NEUTRINO_ICON_BUTTON_DBOX_SMALL));
+#endif
 #ifdef MOVEMANAGER
     mainMenu.addItem(GenericMenuSeparatorLine);
     mainMenu.addItem( new CMenuForwarderNonLocalized("Kopierwerk",        true, NULL,  CMoveManager::getInstance(),   NULL));
@@ -3275,7 +3286,9 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* /*movie_info*/)
         delete browserRowWidthIntInput[i];
 
     delete movieHelp;
+#ifdef ENABLE_GUI_MOUNT
     delete nfs;
+#endif
     
     //restart_mb_timeout = 1;
 
@@ -3808,6 +3821,7 @@ int CDirMenu::exec(CMenuTarget* parent, const std::string & actionKey)
 
                 dirOptionText[number]="STARTE SERVER";
             }
+#ifdef ENABLE_GUI_MOUNT
             else if(dirState[number] == DIR_STATE_NOT_MOUNTED)
             {
                 printf("[CDirMenu] try to mount %d,%d\n",number,dirNfsMountNr[number]);
@@ -3828,6 +3842,7 @@ int CDirMenu::exec(CMenuTarget* parent, const std::string & actionKey)
                 updateDirState();
                 changed = true;
             }
+#endif
             else if(dirState[number] == DIR_STATE_MOUNTED)
             {
                 if(*(*dirList)[number].used == true)
@@ -3867,6 +3882,7 @@ void CDirMenu::updateDirState(void)
                 dirOptionText[i] = g_Locale->getText(LOCALE_RECDIRCHOOSER_SERVER_DOWN);
                 dirState[i] = DIR_STATE_SERVER_DOWN;
             }
+#ifdef ENABLE_GUI_MOUNT
             else if (retvalue == 1)//LOCALE_PING_OK
             {
                 if(CFSMounter::isMounted (g_settings.network_nfs_local_dir[dirNfsMountNr[i]]) == 0)
@@ -3879,6 +3895,7 @@ void CDirMenu::updateDirState(void)
                       dirState[i] = DIR_STATE_MOUNTED;
                 }
             }
+#endif
         }
         else
         {

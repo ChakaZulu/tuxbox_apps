@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.138 2009/08/26 14:26:05 seife Exp $
+	$Id: update.cpp,v 1.139 2009/09/26 09:18:37 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -47,7 +47,9 @@
 
 #include <gui/color.h>
 #include <gui/filebrowser.h>
+#ifdef ENABLE_GUI_MOUNT
 #include <system/fsmounter.h>
+#endif
 #include <gui/imageinfo.h>
 
 #include <gui/widget/messagebox.h>
@@ -514,9 +516,11 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 
 	hide();
 
+#ifdef ENABLE_GUI_MOUNT
 	// Unmount all NFS & CIFS volumes
 	nfs_mounted_once = false; /* needed by update.cpp to prevent removal of modules after flashing a new cramfs, since rmmod (busybox) might no longer be available */
 	CFSMounter::umount();
+#endif
 
 	ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_FLASHUPDATE_FLASHREADYREBOOT)); // UTF-8
 	ft.reboot();

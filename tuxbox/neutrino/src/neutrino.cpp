@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.980 2009/09/18 06:16:40 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.981 2009/09/26 09:18:35 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -90,7 +90,9 @@
 #endif
 #include "gui/bouquetlist.h"
 #include "gui/movieplayer.h"
+#ifdef ENABLE_GUI_MOUNT
 #include "gui/nfs.h"
+#endif
 #include "gui/screensetup.h"
 #include "gui/esound.h"
 
@@ -98,7 +100,9 @@
 #include <system/settings.h>
 #include <system/debug.h>
 #include <system/flashtool.h>
+#ifdef ENABLE_GUI_MOUNT
 #include <system/fsmounter.h>
+#endif
 
 #include <timerdclient/timerdmsg.h>
 
@@ -1832,6 +1836,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer, char * file
 						if(nfs_nr != -1)
 						{
 							recDir = g_settings.network_nfs_local_dir[nfs_nr];
+#ifdef ENABLE_GUI_MOUNT
 							if (!CFSMounter::isMounted(g_settings.network_nfs_local_dir[nfs_nr]))
 							{
 				         		printf("not mounted, try to mount: %d\n",nfs_nr);
@@ -1852,6 +1857,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer, char * file
 											CMessageBox::mbrBack, CMessageBox::mbBack,NEUTRINO_ICON_ERROR, 450, 10); // UTF-8
 								}
 							}
+#endif
 						}
 					}
 					else
@@ -2102,8 +2108,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_PluginList 	= new CPlugins;
 	g_PluginList->setPluginDir(PLUGINDIR);
 
+#ifdef ENABLE_GUI_MOUNT
 	// mount shares before scanning for plugins
 	CFSMounter::automount();
+#endif
 
 	//load Pluginlist before main menu (only show script menu if at least one
 	// script is available
@@ -3874,6 +3882,7 @@ void CNeutrinoApp::startNextRecording()
 						recDir = g_settings.recording_dir[dirid].c_str();
 					printf("[neutrino.cpp] getFirstFreeRecDirNr %d\n",dirid);
 				}
+#ifdef ENABLE_GUI_MOUNT
 				if (!CFSMounter::isMounted(recDir))
 				{
 					printf("[neutrino.cpp] trying to mount %s\n",recDir);
@@ -3908,6 +3917,7 @@ void CNeutrinoApp::startNextRecording()
 						doRecord = true;
 					}
 				}
+#endif
 				if (doRecord)
 				{
 					printf("[neutrino.cpp] recording to %s\n",recDir);

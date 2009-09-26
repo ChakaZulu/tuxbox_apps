@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.73 2009/09/10 07:56:53 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.74 2009/09/26 09:18:37 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -54,7 +54,9 @@
 #include <gui/eventlist.h>
 #include <gui/color.h>
 #include <gui/infoviewer.h>
+#ifdef ENABLE_GUI_MOUNT
 #include <gui/nfs.h>
+#endif
 
 #include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
@@ -813,6 +815,7 @@ int CAudioPlayerGui::show()
 
 		}
 
+#ifdef ENABLE_GUI_MOUNT
 		else if(msg == CRCInput::RC_setup)
 		{
 			CNFSSmallMenu nfsMenu;
@@ -824,6 +827,7 @@ int CAudioPlayerGui::show()
 			//g_RCInput->postMsg( msg, data );
 			//loop = false;
 		}
+#endif
 		else if(msg == NeutrinoMessages::CHANGEMODE)
 		{
 			if((data & NeutrinoMessages::mode_mask) != NeutrinoMessages::mode_audio)
@@ -1579,7 +1583,9 @@ void CAudioPlayerGui::paintHead()
 	int ypos = m_y + m_title_height;
 	if(m_theight > 26)
 		ypos = (m_theight - 26) / 2 + m_y + m_title_height;
+#ifdef ENABLE_GUI_MOUNT
 	m_frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, m_x + m_width - 30, ypos);
+#endif
 	if( CNeutrinoApp::getInstance()->isMuted() )
 	{
 		int xpos = m_x + m_width - 75;

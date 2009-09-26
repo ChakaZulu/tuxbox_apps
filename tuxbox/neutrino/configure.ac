@@ -102,6 +102,11 @@ AC_ARG_ENABLE(http-update,
 	,[enable_http_update=yes])
 AM_CONDITIONAL(DISABLE_INTERNET_UPDATE,test "$enable_http_update" = "no")
 
+AC_ARG_ENABLE(gui-mount,
+	AS_HELP_STRING(--disable-gui-mount,disable GUI mount functionality),
+	,[enable_gui_mount=yes])
+AM_CONDITIONAL(ENABLE_GUI_MOUNT,test "$enable_gui_mount" = "yes")
+
 if test "$enable_upnp" = "yes"; then
 TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
 AC_DEFINE(ENABLE_UPNP,1,[include upnp support])
@@ -118,6 +123,10 @@ fi
 
 if test "$enable_http_update" = "no"; then
 AC_DEFINE(DISABLE_INTERNET_UPDATE,1,[deactivate http update])
+fi
+
+if test "$enable_gui_mount" = "yes"; then
+AC_DEFINE(ENABLE_GUI_MOUNT,1,[activate GUI mount functionality])
 fi
 
 if test "$enable_freesatepg" = "yes"; then
