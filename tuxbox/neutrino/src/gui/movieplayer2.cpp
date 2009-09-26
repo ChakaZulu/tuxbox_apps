@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.41 2009/09/25 17:43:36 seife Exp $
+  $Id: movieplayer2.cpp,v 1.42 2009/09/26 15:27:03 seife Exp $
 
 
   License: GPL
@@ -357,6 +357,17 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	
 	filebrowser->Multi_Select = !!g_settings.streaming_allow_multiselect;
 
+	/* remember last mode,
+	   needs to be done while zapit is still not paused */
+	CZapitClient::responseGetLastChannel firstchannel;
+	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
+	if ((firstchannel.mode == 'r') ?
+	    (CNeutrinoApp::getInstance()->zapto_radio_on_init_done) :
+	    (CNeutrinoApp::getInstance()->zapto_tv_on_init_done))
+		m_LastMode = (CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+	else
+		m_LastMode = (CNeutrinoApp::getInstance()->getLastMode());
+
 	g_ZapitsetStandbyState = false; // 'Init State
 
 	// if filebrowser playback we check if we should disable the tv (other modes might be added later)
@@ -379,15 +390,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 
 	// tell neutrino we're in ts_mode
 	CNeutrinoApp::getInstance()->handleMsg(NeutrinoMessages::CHANGEMODE, NeutrinoMessages::mode_ts);
-	// remember last mode
-	CZapitClient::responseGetLastChannel firstchannel;
-	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
-	if ((firstchannel.mode == 'r') ?
-	    (CNeutrinoApp::getInstance()->zapto_radio_on_init_done) :
-	    (CNeutrinoApp::getInstance()->zapto_tv_on_init_done))
-		m_LastMode = (CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
-	else
-		m_LastMode = (CNeutrinoApp::getInstance()->getLastMode());
 
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true);
@@ -3275,7 +3277,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.41 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.42 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
