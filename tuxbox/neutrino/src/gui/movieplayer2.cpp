@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.43 2009/09/26 15:28:03 seife Exp $
+  $Id: movieplayer2.cpp,v 1.44 2009/09/26 15:28:47 seife Exp $
 
 
   License: GPL
@@ -2544,6 +2544,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		mrl_str += g_settings.streaming_server_cddrive;
 		mrl_str += "@1";
 		INFO("Generated MRL: %s\n", mrl_str.c_str());
+		CFile file;
+		file.Name = mrl_str;
+		filelist.push_back(file);
 		sel_filename = "DVD";
 		open_filebrowser = false;
 		start_play = true;
@@ -2554,6 +2557,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		mrl_str = "vcd:";
 		mrl_str += g_settings.streaming_server_cddrive;
 		INFO("Generated MRL: %s\n", mrl_str.c_str());
+		CFile file;
+		file.Name = mrl_str;
+		filelist.push_back(file);
 		sel_filename = "(S)VCD";
 		open_filebrowser = false;
 		start_play = true;
@@ -2806,7 +2812,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			//TODO: Add Dialog (Remove Dialog later)
 			hintBox->paint();
 			buffer_time=0;
-			if (autoplaylist)
+			if (autoplaylist || cdDvd)
 				outArg = &filelist;
 			else
 			{
@@ -3279,7 +3285,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.43 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.44 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
