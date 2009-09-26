@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.44 2009/09/26 15:28:47 seife Exp $
+  $Id: movieplayer2.cpp,v 1.45 2009/09/26 15:29:31 seife Exp $
 
 
   License: GPL
@@ -3285,7 +3285,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.44 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.45 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
@@ -3342,17 +3342,23 @@ void CMoviePlayerGui::showFileInfoVLC()
 			}
 			while (element)
 			{
-				helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, xmlGetAttribute(element, "name"));
+				char *data = xmlGetAttribute(element, "name");
+				if (data)
+					helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, data);
 				xmlNodePtr element1 = element->xmlChildrenNode;
 				while (element1)
 				{
 					char tmp[50] = "-- ";
-					strcat(tmp, xmlGetAttribute(element1, "name"));
-					strcat(tmp, " : ");
-					char* data = xmlGetData(element1);
-					if (data != NULL)
+					data = xmlGetAttribute(element1, "name");
+					if (data)
+					{
 						strcat(tmp, data);
-					helpbox.addLine(tmp);
+						strcat(tmp, " : ");
+						data = xmlGetData(element1);
+						if (data)
+							strcat(tmp, data);
+						helpbox.addLine(tmp);
+					}
 					element1 = element1->xmlNextNode;
 				}
 				element = element->xmlNextNode;
