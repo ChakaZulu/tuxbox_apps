@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.42 2009/09/26 15:27:03 seife Exp $
+  $Id: movieplayer2.cpp,v 1.43 2009/09/26 15:28:03 seife Exp $
 
 
   License: GPL
@@ -834,6 +834,8 @@ ReceiveStreamThread(void *arg)
 			else
 				transcodeAudio = 1;
 		}
+		if (sMRL.find("vlc://") == 0)
+			sMRL = sMRL.substr(6);
 		VlcRequestStream(sMRL, transcodeVideo, transcodeAudio);
 
 		// TODO: Better way to detect if http://<server>:8080/dboxstream is already alive. For example repetitive checking for HTTP 404.
@@ -3277,7 +3279,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.42 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.43 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
