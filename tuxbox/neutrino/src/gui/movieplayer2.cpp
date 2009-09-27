@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.45 2009/09/26 15:29:31 seife Exp $
+  $Id: movieplayer2.cpp,v 1.46 2009/09/27 13:49:15 seife Exp $
 
 
   License: GPL
@@ -357,6 +357,9 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	
 	filebrowser->Multi_Select = !!g_settings.streaming_allow_multiselect;
 
+	// tell neutrino we're in ts_mode
+	CNeutrinoApp::getInstance()->handleMsg(NeutrinoMessages::CHANGEMODE, NeutrinoMessages::mode_ts);
+
 	/* remember last mode,
 	   needs to be done while zapit is still not paused */
 	CZapitClient::responseGetLastChannel firstchannel;
@@ -387,9 +390,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 	system(MOVIEPLAYER_START_SCRIPT);
 	startBox->hide();
 	delete startBox;
-
-	// tell neutrino we're in ts_mode
-	CNeutrinoApp::getInstance()->handleMsg(NeutrinoMessages::CHANGEMODE, NeutrinoMessages::mode_ts);
 
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true);
@@ -3285,7 +3285,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.45 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.46 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
