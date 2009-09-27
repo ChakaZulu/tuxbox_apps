@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.51 2009/08/18 18:50:17 barf Exp $
+	$Id: framebuffer.h,v 1.52 2009/09/27 14:54:14 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -149,10 +149,10 @@ class CFrameBuffer
 
 		void paintLine(int xa, int ya, int xb, int yb, const fb_pixel_t col);
 
-		void paintVLine(int x, int ya, int yb, const fb_pixel_t col);
+		inline void paintVLine(int x, int ya, int yb, const fb_pixel_t col) { paintVLineRel(x, ya, yb - ya, col); }
 		void paintVLineRel(int x, int y, int dy, const fb_pixel_t col);
 
-		void paintHLine(int xa, int xb, int y, const fb_pixel_t col);
+		inline void paintHLine(int xa, int xb, int y, const fb_pixel_t col) { paintHLineRel(xa, xb - xa, y, col); }
 		void paintHLineRel(int x, int dx, int y, const fb_pixel_t col);
 
 		void setIconBasePath(const std::string & iconPath);

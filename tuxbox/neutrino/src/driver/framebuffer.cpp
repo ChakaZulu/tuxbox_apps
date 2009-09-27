@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.75 2009/08/18 18:50:17 barf Exp $
+	$Id: framebuffer.cpp,v 1.76 2009/09/27 14:54:14 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -392,21 +392,6 @@ void CFrameBuffer::paletteSet(struct fb_cmap *map)
 #endif
 }
 
-void CFrameBuffer::paintVLine(int x, int ya, int yb, const fb_pixel_t col)
-{
-	if (!getActive())
-		return;
-
-	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * ya;
-
-	int dy = yb-ya;
-	for (int count = 0; count < dy; count++)
-	{
-		*(fb_pixel_t *)pos = col;
-		pos += stride;
-	}
-}
-
 void CFrameBuffer::paintVLineRel(int x, int y, int dy, const fb_pixel_t col)
 {
 	if (!getActive())
@@ -419,24 +404,6 @@ void CFrameBuffer::paintVLineRel(int x, int y, int dy, const fb_pixel_t col)
 		*(fb_pixel_t *)pos = col;
 		pos += stride;
 	}
-}
-
-void CFrameBuffer::paintHLine(int xa, int xb, int y, const fb_pixel_t col)
-{
-	if (!getActive())
-		return;
-
-	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + xa * sizeof(fb_pixel_t) + stride * y;
-
-	int dx = xb -xa;
-#ifdef FB_USE_PALETTE
-	memset(pos, col, dx);
-//	memset(pos, col, dx * sizeof(fb_pixel_t));
-#else
-	fb_pixel_t * dest = (fb_pixel_t *)pos;
-	for (int i = 0; i < dx; i++)
-		*(dest++) = col;
-#endif
 }
 
 void CFrameBuffer::paintHLineRel(int x, int dx, int y, const fb_pixel_t col)
