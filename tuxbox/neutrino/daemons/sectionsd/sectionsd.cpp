@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.306 2009/09/14 13:33:28 seife Exp $
+//  $Id: sectionsd.cpp,v 1.307 2009/09/28 07:50:46 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2531,8 +2531,8 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.306 2009/09/14 13:33:28 seife Exp $\n"
-		"Current time: %s"
+		"$Id: sectionsd.cpp,v 1.307 2009/09/28 07:50:46 rhabarber1848 Exp $\n"
+		"%sCurrent time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
 		"Events are old %ldmin after their end time\n"
@@ -2546,6 +2546,12 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 		"handed out by malloc: %d (%dkb)\n"
 		"Total bytes memory allocated with `sbrk' by malloc,\n"
 		"in bytes: %d (%dkb)\n",
+#ifdef ENABLE_FREESATEPG
+		"FreeSat enabled\n"
+#else
+		""
+#endif
+		,
 		ctime(&zeit),
 		secondsToCache / (60*60L), secondsExtendedTextCache / (60*60L), oldEventsAre / 60, anzServices, anzNVODservices, anzEvents, anzNVODevents, anzMetaServices,
 		//    resourceUsage.ru_maxrss, resourceUsage.ru_ixrss, resourceUsage.ru_idrss, resourceUsage.ru_isrss,
@@ -8474,7 +8480,10 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.306 2009/09/14 13:33:28 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.307 2009/09/28 07:50:46 rhabarber1848 Exp $\n");
+#ifdef ENABLE_FREESATEPG
+	printf("[sectionsd] FreeSat enabled\n");
+#endif
 
 	SIlanguage::loadLanguages();
 
