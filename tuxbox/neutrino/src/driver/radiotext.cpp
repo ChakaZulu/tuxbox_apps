@@ -1,5 +1,5 @@
 /*
-	$Id: radiotext.cpp,v 1.5 2009/09/24 09:29:30 rhabarber1848 Exp $
+	$Id: radiotext.cpp,v 1.6 2009/09/28 07:54:21 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2389,6 +2389,7 @@ CRadioText::CRadioText(void)
 	RT_Replay 	= false;
 	RT_ReOpen 	= false;
 	for (int i=0; i<5; i++) strcpy(RT_Text[i], "");
+	strcpy(RDS_PTYN, "");
 	have_radiotext	= false;
 }
 
@@ -2468,7 +2469,8 @@ void CRadioText::setPid(uint inPid)
 		RT_PlusShow = false;
 		RT_Replay = false;
 		RT_ReOpen = false;
-		for (int i=0; i<5; i++) strcpy(g_Radiotext->RT_Text[i], "");
+		for (int i=0; i<5; i++) strcpy(RT_Text[i], "");
+		strcpy(RDS_PTYN, "");
 
 #if ENABLE_RASS
 		// Rass ...
