@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.139 2009/09/26 09:18:37 rhabarber1848 Exp $
+	$Id: update.cpp,v 1.140 2009/09/28 07:55:56 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -613,6 +613,16 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 	CFlashTool ft;
 	ft.setStatusViewer( this );
 	ft.setMTDDevice( CMTDInfo::getInstance()->getMTDFileName(mtdNumber) );
+
+#ifdef ENABLE_RADIOTEXT
+	/* stop Radiotext if in Radiomode */
+	if (CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_radio &&
+	    g_settings.radiotext_enable && g_Radiotext != NULL)
+	{
+		delete g_Radiotext;
+		g_Radiotext = NULL;
+	}
+#endif
 
 	CSectionsdClient sd;
 	bool sd_scan = sd.getIsScanningActive();
