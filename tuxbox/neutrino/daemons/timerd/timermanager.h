@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.48 2009/03/29 16:15:35 seife Exp $
+	$Id: timermanager.h,v 1.49 2009/09/28 08:08:17 rhabarber1848 Exp $
 
 	License: GPL
 
@@ -36,6 +36,8 @@
 #include <timerdclient/timerdtypes.h>
 
 #define CONFIGFILE CONFIGDIR "/timerd.conf"
+
+extern char *config_file_name;
 
 class CTimerEvent
 {

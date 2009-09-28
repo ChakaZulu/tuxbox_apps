@@ -6,7 +6,7 @@
 
 	Copyright (C) 2009 Stefan Seyfried
 
-   $Id: timermanager.cpp,v 1.95 2009/08/11 20:36:57 houdini Exp $
+   $Id: timermanager.cpp,v 1.96 2009/09/28 08:08:17 rhabarber1848 Exp $
 
 	License: GPL
 
@@ -430,10 +430,10 @@ void CTimerManager::loadEventsFromConfig()
 {
 	CConfigFile config(',');
 
-	if(!config.loadConfig(CONFIGFILE))
+	if(!config.loadConfig(config_file_name))
 	{
 		/* set defaults if no configuration file exists */
-		dprintf("%s not found\n", CONFIGFILE);
+		dprintf("%s not found\n", config_file_name);
 	}
 	else
 	{
@@ -638,10 +638,10 @@ void CTimerManager::loadRecordingSafety()
 {
 	CConfigFile config(',');
 
-	if(!config.loadConfig(CONFIGFILE))
+	if(!config.loadConfig(config_file_name))
 	{
 		/* set defaults if no configuration file exists */
-		dprintf("%s not found\n", CONFIGFILE);
+		dprintf("%s not found\n", config_file_name);
 	}
 	else
 	{
@@ -670,9 +670,9 @@ void CTimerManager::saveEventsToConfig()
 	dprintf("setting EXTRA_TIME_START to %d\n",m_extraTimeStart);
 	config.setInt32 ("EXTRA_TIME_END", m_extraTimeEnd);
 	dprintf("setting EXTRA_TIME_END to %d\n",m_extraTimeEnd);
-	dprintf("now saving config to %s...\n",CONFIGFILE);
-	config.saveConfig(CONFIGFILE);
-	dprintf("config saved!\n");
+	dprintf("now saving config to %s...\n",config_file_name);
+	config.saveConfig(config_file_name);
+	printf("[timerd] using config file %s\n", config_file_name);
 	m_saveEvents=false;			
 
 	// Freigeben !!!
