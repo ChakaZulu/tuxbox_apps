@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.307 2009/09/28 07:50:46 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.308 2009/09/29 09:50:07 rhabarber1848 Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2531,7 +2531,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.307 2009/09/28 07:50:46 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.308 2009/09/29 09:50:07 rhabarber1848 Exp $\n"
 		"%sCurrent time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2992,7 +2992,7 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		dmxCN.setCurrentService(messaging_current_servicekey & 0xffff);
 		dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
 #ifdef ENABLE_FREESATEPG
-		dmxFSEIT.change( 0 );
+		dmxFSEIT.setCurrentService(messaging_current_servicekey & 0xffff);
 #endif
 	}
 	else
@@ -6935,19 +6935,18 @@ static void *fseitThread(void *)
 				sleep(1);
 			time_t zeit = time(NULL);
 
-			rc = dmxSDT.getSection(static_buf, timeoutInMSeconds, timeoutsDMX);
+			rc = dmxFSEIT.getSection(static_buf, timeoutInMSeconds, timeoutsDMX);
 
-			if (rc < 0)
-				continue;
-
-			if (timeoutsDMX < 0)
+			if (timeoutsDMX < 0 && !channel_is_blacklisted)
 			{
+				if (timeoutsDMX == -1)
+					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_HAS_ALL_SECTIONS_SKIPPING)\n", dmxFSEIT.filter_index+1 );
+				else if (timeoutsDMX == -2)
+					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxFSEIT.filter_index+1 );
+				else
+					dprintf("[freesatEitThread] skipping to next filter(%d) (timeouts %d)\n", dmxFSEIT.filter_index+1, timeoutsDMX);
 				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
 				{
-					if (timeoutsDMX == -1)
-					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_HAS_ALL_SECTIONS_SKIPPING)\n", dmxFSEIT.filter_index+1 );
-					if (timeoutsDMX == -2)
-					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxFSEIT.filter_index+1 );
 					timeoutsDMX = 0;
 					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
 				}
@@ -6957,10 +6956,9 @@ static void *fseitThread(void *)
 				}
 			}
 
-			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1 && !channel_is_blacklisted)
 			{
 				readLockServices();
-				readLockMessaging();
 
 				MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
 				//dprintf("timeoutsDMX %x\n",currentServiceKey);
@@ -7000,15 +6998,14 @@ static void *fseitThread(void *)
 							}
 						}
 				}
-				unlockMessaging();
 				unlockServices();
 			}
 
-			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning && !channel_is_blacklisted)
 			{
+				dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_TIMEOUT_SKIPPING %d)\n", dmxFSEIT.filter_index+1, timeoutsDMX);
 				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
 				{
-					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_TIMEOUT_SKIPPING)\n", dmxEIT.filter_index+1 );
 					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
 				}
 				else
@@ -7017,12 +7014,11 @@ static void *fseitThread(void *)
 				timeoutsDMX = 0;
 			}
 
-			if (sendToSleepNow)
+			if (sendToSleepNow || channel_is_blacklisted)
 			{
 				sendToSleepNow = false;
 
 				dmxFSEIT.real_pause();
-				pthread_mutex_lock( &dmxFSEIT.start_stop_mutex );
 				writeLockMessaging();
 				messaging_zap_detected = false;
 				unlockMessaging();
@@ -7032,23 +7028,23 @@ static void *fseitThread(void *)
 					dmxNIT.change( 0 );
 				}
 
-				struct timespec abs_wait;
-				struct timeval now;
-				gettimeofday(&now, NULL);
-				TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-				abs_wait.tv_sec += TIME_EIT_SCHEDULED_PAUSE;
-				dprintf("dmxFSEIT: going to sleep for %d seconds...\n", TIME_EIT_SCHEDULED_PAUSE);
+				int rs;
+				do {
+					struct timespec abs_wait;
+					struct timeval now;
+					gettimeofday(&now, NULL);
+					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+					abs_wait.tv_sec += TIME_EIT_SCHEDULED_PAUSE;
+					dprintf("dmxFSEIT: going to sleep for %d seconds...\n", TIME_EIT_SCHEDULED_PAUSE);
 
-				int rs = pthread_cond_timedwait( &dmxFSEIT.change_cond, &dmxFSEIT.start_stop_mutex, &abs_wait );
-
-				pthread_mutex_unlock( &dmxFSEIT.start_stop_mutex );
+					pthread_mutex_lock( &dmxFSEIT.start_stop_mutex );
+					rs = pthread_cond_timedwait( &dmxFSEIT.change_cond, &dmxFSEIT.start_stop_mutex, &abs_wait );
+					pthread_mutex_unlock( &dmxFSEIT.start_stop_mutex );
+				} while (channel_is_blacklisted);
 
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxFSEIT: waking up again - timed out\n");
-// must call dmxFSEIT.change after! unpause otherwise dev is not open,
-// dmxFSEIT.lastChanged will not be set, and filter is advanced the next iteration
-// maybe .change should imply .real_unpause()? -- seife
 					dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxFSEIT.filters.size() );
 					dmxFSEIT.change(1); // -> restart
 				}
@@ -7059,6 +7055,7 @@ static void *fseitThread(void *)
 				else
 				{
 					dprintf("dmxFSEIT:  waking up again - unknown reason %d\n",rs);
+					dmxFSEIT.real_unpause();
 				}
 				// update zeit after sleep
 				zeit = time(NULL);
@@ -7067,9 +7064,9 @@ static void *fseitThread(void *)
 			{
 				readLockMessaging();
 
+				dprintf("[freesatEitThread] skipping to next filter(%d) (> TIME_FSEIT_SKIPPING)\n", dmxFSEIT.filter_index+1 );
 				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
 				{
-					dprintf("[freesatEitThread] skipping to next filter(%d) (> TIME_FSEIT_SKIPPING)\n", dmxFSEIT.filter_index+1 );
 					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
 				}
 				else
@@ -7078,7 +7075,10 @@ static void *fseitThread(void *)
 				unlockMessaging();
 			}
 
-			if (rc <= (int)sizeof(struct SI_section_header))
+			if (rc < 0)
+				continue;
+
+			if (rc < (int)sizeof(struct SI_section_header))
 			{
 				xprintf("%s rc < sizeof(SI_Section_header) (%d < %d)\n", __FUNCTION__, rc, sizeof(struct SI_section_header));
 				continue;
@@ -7087,9 +7087,7 @@ static void *fseitThread(void *)
 			header = (SI_section_header*)static_buf;
 			unsigned short section_length = header->section_length_hi << 8 | header->section_length_lo;
 			
-
-
-			if ((header->current_next_indicator) && (!dmxFSEIT.real_pauseCounter ))
+			if (header->current_next_indicator)
 			{
 				// Wir wollen nur aktuelle sections
 
@@ -7141,11 +7139,10 @@ static void *fseitThread(void *)
 			} // if
 			else
 			{
-				delete[] static_buf;
-
-				//dprintf("[eitThread] skipped sections for table 0x%x\n", header.table_id);
+				dprintf("[freesatEitThread] skipped sections for table 0x%x\n", header->table_id);
 			}
 		} // for
+		delete[] static_buf;
 	} // try
 	catch (std::exception& e)
 	{
@@ -8480,7 +8477,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.307 2009/09/28 07:50:46 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.308 2009/09/29 09:50:07 rhabarber1848 Exp $\n");
 #ifdef ENABLE_FREESATEPG
 	printf("[sectionsd] FreeSat enabled\n");
 #endif
