@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.982 2009/09/29 14:53:27 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.983 2009/09/29 21:28:07 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -4069,8 +4069,8 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_Zapit->reinitChannels();
 
 		int result = system(mode == mode_radio
-				    ? "wget -q -O /dev/null http://127.0.0.1/control/setmode?radio > /dev/null 2>&1"
-				    : "wget -q -O /dev/null http://127.0.0.1/control/setmode?tv > /dev/null 2>&1");
+				    ? "wget -t 1 -T 5 -q -O /dev/null http://127.0.0.1/control/setmode?radio > /dev/null 2>&1"
+				    : "wget -t 1 -T 5 -q -O /dev/null http://127.0.0.1/control/setmode?tv > /dev/null 2>&1");
 		if (result)
 			perror("Kicking nhttpd failed");
 
