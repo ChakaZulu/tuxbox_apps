@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.43 2009/08/07 07:22:50 rhabarber1848 Exp $
+	$Id: streaminfo2.cpp,v 1.44 2009/09/29 14:53:28 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -100,14 +100,12 @@ CStreamInfo2::CStreamInfo2()
 	int mode = g_Zapit->getMode();
 
 #ifdef ENABLE_RADIOTEXT
-   /* stop Radiotext if in Radiomode */
-  if (mode == 2) {
-      if (g_settings.radiotext_enable && g_Radiotext) {
-         delete g_Radiotext;
-         g_Radiotext = NULL;
-		 std::cout<<"[streaminfo] disable radiotext during streaminfo executing"<<std::endl;
-      }
-   }
+	/* stop Radiotext if in Radiomode */
+	if (mode == NeutrinoMessages::mode_radio && g_settings.radiotext_enable)
+	{
+		delete g_Radiotext;
+		g_Radiotext = NULL;
+	}
 #endif
  
 	if (!g_Zapit->isRecordModeActive())
@@ -161,14 +159,11 @@ CStreamInfo2::~CStreamInfo2()
 		
 #ifdef ENABLE_RADIOTEXT
 	/* restart Radiotext if in Radiomode and enabled */
-	int mode = g_Zapit->getMode();
-	if (mode == 2) {
-     	 if (g_settings.radiotext_enable) {
-  				std::cout<<"[streaminfo] enable radiotext again"<<std::endl;       
-				g_Radiotext = new CRadioText;
-        		g_Radiotext->setPid(g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
-     	 	}			
-   	}	
+	if ((CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_radio) && g_settings.radiotext_enable)
+	{
+		g_Radiotext = new CRadioText;
+		g_Radiotext->setPid(g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
+	}
 #endif
 }
 
@@ -801,7 +796,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.43 $");
+	return imageinfo.getModulVersion("","$Revision: 1.44 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &)

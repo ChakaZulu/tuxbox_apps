@@ -387,7 +387,7 @@ void CVCRControl::CFileAndServerDevice::RestoreNeutrino(void)
 	    g_settings.radiotext_enable && g_Radiotext == NULL)
 	{
 		g_Radiotext = new CRadioText;
-		g_Zapit->ReZap();
+		g_Radiotext->setPid(g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
 	}
 #endif
 }

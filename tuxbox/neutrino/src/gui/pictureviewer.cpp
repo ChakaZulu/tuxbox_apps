@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.71 2009/09/26 09:18:37 rhabarber1848 Exp $
+	$Id: pictureviewer.cpp,v 1.72 2009/09/29 14:53:28 rhabarber1848 Exp $
 
 	MP3Player by Dirch
 	
@@ -195,6 +195,7 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & /*actionKey
 	
 	// Restore last mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
+	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
 	// always exit all	
 	return menu_return::RETURN_EXIT_ALL;
@@ -731,7 +732,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.71 $");
+	return imageinfo.getModulVersion("","$Revision: 1.72 $");
 }
 
 void CPictureViewerGui::showHelp()
