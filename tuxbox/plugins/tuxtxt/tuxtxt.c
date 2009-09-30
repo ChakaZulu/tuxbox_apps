@@ -7,12 +7,18 @@
  *                       and DBLuelle <dbluelle@blau-weissoedingen.de>        *
  *	russian and arabic support by Leonid Protasov <Lprot@mail.ru>         *
  *                                                                            *
+ *                           TripleDragon support:                            *
+ *        (c)2009 by Stefan Seyfried <seife@tuxboxcvs.slipkontur.de>          *
+ *                                                                            *
  ******************************************************************************/
 
 
 
 #include "tuxtxt.h"
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <td-compat/tdlcd-plugin-compat.c>
+#endif
 
 int getIndexOfPageInHotlist()
 {
@@ -139,7 +145,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.109 $";
+	char cvs_revision[] = "$Revision: 1.110 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -235,13 +241,9 @@ void plugin_exec(PluginParam *par)
 
 				case RC_HELP: /* switch to scart input and back */
 				{
-					int i, n;
 #ifdef HAVE_DBOX_HARDWARE
+					int i, n;
 					int vendor = tuxbox_get_vendor() - 1;
-#else
-					int vendor = 3; /* values unknown, rely on requested values */
-#endif
-
 					if (vendor < 3) /* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 					{
 						for (i = 0; i < 6; i++) /* FIXME: FBLK seems to cause troubles */
@@ -274,6 +276,7 @@ void plugin_exec(PluginParam *par)
 								perror("TuxTxt <ioctl(avs)>");
 						}
 					}
+#endif
 					continue; /* otherwise ignore exit key */
 				}
 				default:
@@ -536,9 +539,9 @@ int Init()
 
 	/* setup rc */
 	fcntl(rc, F_SETFL, O_NONBLOCK);
+#ifndef HAVE_TRIPLEDRAGON
 	ioctl(rc, RC_IOCTL_BCODES, 1);
-
-
+#endif
 
 
 	gethotlist();
@@ -573,13 +576,10 @@ void CleanUp()
 	tuxtxt_stop();
 #endif
 
+#ifdef HAVE_DBOX_HARDWARE
 	if (restoreaudio)
 	{
-#ifdef HAVE_DBOX_HARDWARE
 		int vendor = tuxbox_get_vendor() - 1;
-#else
-		int vendor = 3; /* values unknown, rely on requested values */
-#endif
 		if (vendor < 3) /* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 		{
 			for (i = 1; i < 6; i += 2) /* restore dvb audio */
@@ -590,7 +590,7 @@ void CleanUp()
 			}
 		}
 	}
-
+#endif
 
 	if (hotlistchanged)
 		savehotlist();
@@ -660,6 +660,7 @@ int GetTeletextPIDs()
 	RenderMessage(ShowInfoBar);
 
 	/* read PAT to get all PMT's */
+#ifndef HAVE_TRIPLEDRAGON
 #if HAVE_DVB_API_VERSION < 3
 	memset(dmx_flt.filter.filter, 0, DMX_FILTER_SIZE);
 	memset(dmx_flt.filter.mask, 0, DMX_FILTER_SIZE);
@@ -667,12 +668,19 @@ int GetTeletextPIDs()
 	memset(&dmx_flt.filter, 0x00, sizeof(struct dmx_filter));
 #endif
 
-	dmx_flt.pid              = 0x0000;
-	dmx_flt.flags            = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 	dmx_flt.filter.filter[0] = 0x00;
 	dmx_flt.filter.mask[0]   = 0xFF;
-	dmx_flt.timeout          = 5000;
+#else
+	memset(&dmx_flt, 0, sizeof(struct dmx_sct_filter_params));
+	dmx_flt.filter[0]        = 0x00;
+	dmx_flt.mask[0]          = 0xFF;
+	dmx_flt.filter_length    = 3;
+#define DMX_CHECK_CRC 0
+#endif
 
+	dmx_flt.pid              = 0x0000;
+	dmx_flt.flags            = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+	dmx_flt.timeout          = 5000;
 
 	if (ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
 	{
@@ -712,10 +720,15 @@ int GetTeletextPIDs()
 #endif
 		dmx_flt.pid               = (PAT[pat_scan]<<8 | PAT[pat_scan+1]) & 0x1FFF;
 		dmx_flt.flags             = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+		dmx_flt.timeout           = 5000;
+#ifndef HAVE_TRIPLEDRAGON
 		dmx_flt.filter.filter[0]  = 0x02;
 		dmx_flt.filter.mask[0]    = 0xFF;
-		dmx_flt.timeout           = 5000;
-
+#else
+		dmx_flt.filter[0]         = 0x02;
+		dmx_flt.mask[0]           = 0xFF;
+		dmx_flt.filter_length     = 3;
+#endif
 		if (ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
 		{
 			perror("TuxTxt <DMX_SET_FILTER PMT>");
@@ -796,8 +809,14 @@ skip_pid:
 
 	dmx_flt.pid              = 0x0011;
 	dmx_flt.flags            = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+#ifndef HAVE_TRIPLEDRAGON
 	dmx_flt.filter.filter[0] = 0x42;
 	dmx_flt.filter.mask[0]   = 0xFF;
+#else
+	dmx_flt.filter[0]        = 0x42;
+	dmx_flt.mask[0]          = 0xFF;
+	dmx_flt.filter_length    = 3;
+#endif
 	dmx_flt.timeout          = 5000;
 
 	if (ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
@@ -1736,10 +1755,10 @@ void ConfigMenu(int Init)
 
 					memcpy(&menu[Menu_Width*MenuLine[M_SC1] + Menu_Width - 5], &configonoff[menulanguage][renderinfo.screen_mode1  ? 3 : 0], 3);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
-
+#ifndef HAVE_TRIPLEDRAGON
 					ioctl(renderinfo.avs, AVSIOSSCARTPIN8, &fncmodes[renderinfo.screen_mode1]);
 					ioctl(renderinfo.saa, SAAIOSWSS, &saamodes[renderinfo.screen_mode1]);
-
+#endif
 					break;
 
 				case M_SC2:
@@ -2334,18 +2353,20 @@ void SwitchTranspMode()
 	else if (renderinfo.transpmode == 1) /* semi-transparent BG with FG text */
 	{
 		/* restore videoformat */
+#ifndef HAVE_TRIPLEDRAGON
 		ioctl(renderinfo.avs, AVSIOSSCARTPIN8, &renderinfo.fnc_old);
 		ioctl(renderinfo.saa, SAAIOSWSS, &renderinfo.saa_old);
-
+#endif
 		tuxtxt_ClearBB(&renderinfo,tuxtxt_color_transp);
 		tuxtxt_cache.pageupdate = 1;
 	}
 	else /* TV mode */
 	{
 		/* restore videoformat */
+#ifndef HAVE_TRIPLEDRAGON
 		ioctl(renderinfo.avs, AVSIOSSCARTPIN8, &renderinfo.fnc_old);
 		ioctl(renderinfo.saa, SAAIOSWSS, &renderinfo.saa_old);
-
+#endif
 		tuxtxt_ClearFB(&renderinfo,tuxtxt_color_transp);
 		renderinfo.clearbbcolor = tuxtxt_cache.FullScrColor;
 	}
@@ -2442,7 +2463,7 @@ void RenderMessage(int Message)
 	renderinfo.zoommode = 0;
 
 	/* set colors */
-#ifdef HAVE_DBOX_HARDWARE
+#if defined(HAVE_DBOX_HARDWARE) || defined(HAVE_TRIPLEDRAGON)
 	if (renderinfo.screenmode)
 	{
 		fbcolor   = tuxtxt_color_black;
@@ -2575,7 +2596,11 @@ void UpdateLCD()
 			}
 		}
 
+#ifdef HAVE_TRIPLEDRAGON
+		dbox2_to_tdLCD(lcd, lcd_backbuffer);
+#else
 		write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
+#endif
 
 		for (y = 16; y < 56; y += 8)	/* clear rectangle in backbuffer */
 			for (x = 1; x < 118; x++)
@@ -2702,14 +2727,18 @@ void UpdateLCD()
 	}
 
 	if (update_lcd)
+#ifdef HAVE_TRIPLEDRAGON
+		dbox2_to_tdLCD(lcd, lcd_backbuffer);
+#else
 		write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
+#endif
 }
 
 
 /******************************************************************************
  * GetRCCode                                                                  *
  ******************************************************************************/
-
+#ifndef HAVE_TRIPLEDRAGON
 int GetRCCode()
 {
 #if HAVE_DVB_API_VERSION < 3
@@ -2793,6 +2822,65 @@ int GetRCCode()
 
 	return 0;
 }
+#else /* tripledragon */
+int GetRCCode()
+{
+	static unsigned short LastKey = -1;
+	if (read(rc, &RCCode, 2) == 2)
+	{
+		// fprintf(stderr, "rccode: %04x\n", RCCode);
+		if (RCCode != LastKey)
+		{
+			LastKey = RCCode;
+			if ((RCCode & 0xFF00) == 0x0000)
+			{
+				switch (RCCode)
+				{
+				case 0x18:		RCCode = RC_UP;		break;
+				case 0x1c:		RCCode = RC_DOWN;	break;
+				case 0x19:		RCCode = RC_LEFT;	break;
+				case 0x1b:		RCCode = RC_RIGHT;	break;
+				case 0x1a:		RCCode = RC_OK;		break;
+				case 0x0e:		RCCode = RC_0;		break;
+				case 0x02:		RCCode = RC_1;		break;
+				case 0x03:		RCCode = RC_2;		break;
+				case 0x04:		RCCode = RC_3;		break;
+				case 0x05:		RCCode = RC_4;		break;
+				case 0x06:		RCCode = RC_5;		break;
+				case 0x07:		RCCode = RC_6;		break;
+				case 0x09:		RCCode = RC_7;		break;
+				case 0x0a:		RCCode = RC_8;		break;
+				case 0x0b:		RCCode = RC_9;		break;
+				case 0x1f:		RCCode = RC_RED;	break;
+				case 0x20:		RCCode = RC_GREEN;	break;
+				case 0x21:		RCCode = RC_YELLOW;	break;
+				case 0x22:		RCCode = RC_BLUE;	break;
+				case 0x29:		RCCode = RC_PLUS;	break; // [=X=] key -> double height
+				case 0x27:		RCCode = RC_MINUS;	break; // [txt] key -> split mode
+				case 0x11:		RCCode = RC_MUTE;	break;
+				case 0x28:		RCCode = RC_MUTE;	break; // [ /=] key
+				case 0x14:		RCCode = RC_HELP;	break;
+				case 0x2a:		RCCode = RC_HELP;	break; // [==?] key
+				case 0x12:		RCCode = RC_DBOX;	break;
+				case 0x15:		RCCode = RC_HOME;	break;
+				case 0x01:		RCCode = RC_STANDBY;	break;
+				}
+				return 1;
+			}
+		}
+		else
+			RCCode = -1;
+
+		return 1;
+	}
+
+	RCCode = -1;
+	usleep(1000000/100);
+
+	return 0;
+}
+#endif
+
 /* Local Variables: */
 /* indent-tabs-mode:t */
 /* tab-width:3 */

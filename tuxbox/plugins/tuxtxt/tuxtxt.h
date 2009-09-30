@@ -14,7 +14,7 @@
 
 #include <config.h>
 
-#ifndef DREAMBOX
+#ifdef HAVE_DBOX_HARDWARE
 #include <tuxbox.h>
 #endif
 #if HAVE_DVB_API_VERSION >= 3
@@ -36,10 +36,11 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#ifndef HAVE_TRIPLEDRAGON
 #include <dbox/fp.h>
-#include <plugin.h>
 #include <dbox/lcd-ks0713.h>
-
+#endif
+#include <plugin.h>
 
 #include "tuxtxt_def.h"
 
@@ -226,6 +227,7 @@ struct _pid_table
 }pid_table[128];
 
 unsigned char restoreaudio = 0;
+#ifndef HAVE_TRIPLEDRAGON
 /* 0 Nokia, 1 Philips, 2 Sagem */
 /* typ_vcr/dvb: 	v1 a1 v2 a2 v3 a3 (vcr_only: fblk) */
 const int avstable_ioctl[7] =
@@ -248,6 +250,7 @@ unsigned char avstable_dvb[3][7] =
 	{ 1, 1, 1, 1, 1, 1, 0 },
 	{ 0, 0, 0, 0, 0, 0, 0 },
 };
+#endif
 
 /* language dependent texts */
 #define MAXMENULANGUAGE 10 /* 0 deutsch, 1 englisch, 2 französisch, 3 niederländisch, 4 griechisch, 5 italienisch, 6 polnisch, 7 schwedisch, 8 suomi, 9 portuguesa, 10 russian */
