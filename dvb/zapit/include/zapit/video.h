@@ -1,5 +1,5 @@
 /*
- * $Id: video.h,v 1.9 2009/09/30 17:12:39 seife Exp $
+ * $Id: video.h,v 1.10 2009/09/30 17:47:00 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -43,6 +43,16 @@ class CVideo
 	private:
 		/* video device */
 		int fd;
+#ifdef HAVE_TRIPLEDRAGON
+		/* apparently we cannot query the driver's state
+		   => remember it */
+		video_play_state_t playstate;
+		video_displayformat_t croppingMode;
+		int z[2]; /* zoomvalue for 4:3 (0) and 16:9 (1) in percent */
+		int *zoomvalue;
+		void *blank_data[2]; /* we store two blank MPEGs (PAL/NTSC) in there */
+		int blank_size[2];
+#endif
 
 	public:
 		/* constructor & destructor */
@@ -76,6 +86,15 @@ class CVideo
 
 		/* set video_system */
 		int setVideoSystem(int video_system);
+#ifdef HAVE_TRIPLEDRAGON
+		/* that's S-Video, RGB, CVBS, ... */
+		int setVideoOutput(vidOutFmt_t arg);
+		int setZoom(int zoom);
+		int getZoom(void);
+		void setZoomAspect(int index);
+		void setPig(int x, int y, int w, int h, bool aspect);
+		int VdecIoctl(int request, int arg);
+#endif
 };
 
 #endif /* __zapit_video_h__ */

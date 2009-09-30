@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.37 2009/09/04 11:25:25 rhabarber1848 Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.38 2009/09/30 17:46:54 seife Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -155,6 +155,12 @@ class CZapitMessages
 			CMD_SAVECONFIG			   = 94,
 			CMD_GET_CHANNELNR_NAME             = 95,
 
+#ifdef HAVE_TRIPLEDRAGON
+			CMD_SET_ZOOMLEVEL		   = 120,
+			CMD_GET_ZOOMLEVEL		   = 121,
+			CMD_SET_PIG			   = 122,
+			CMD_VID_IOCTL			   = 123,
+#endif
 		};
 
 	struct commandBoolean
@@ -370,6 +376,22 @@ class CZapitMessages
 		unsigned int channel;
 	};
 
+#ifdef HAVE_TRIPLEDRAGON
+	struct commandPig
+	{
+		int x;
+		int y;
+		int w;
+		int h;
+		bool aspect;
+	};
+
+	struct commandIoctl
+	{
+		int request;
+		int arg;
+	};
+#endif
 };
 
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.441 2009/09/30 17:34:20 seife Exp $
+ * $Id: zapit.cpp,v 1.442 2009/09/30 17:47:04 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2751,6 +2751,9 @@ int startPlayBack(CZapitChannel *thisChannel)
 #ifdef HAVE_TRIPLEDRAGON
 	/* start video */
 	if (have_video) {
+#ifdef HAVE_TRIPLEDRAGON
+		videoDecoder->setBlank(true);
+#endif
 		videoDecoder->setSource(VIDEO_SOURCE_DEMUX);
 		videoDecoder->start();
 	}
@@ -3008,7 +3011,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.441 2009/09/30 17:34:20 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.442 2009/09/30 17:47:04 seife Exp $\n");
 
 	bool check_lock = true;
 	int opt;
