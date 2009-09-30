@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.65 2007/06/03 14:27:45 dbluelle Exp $
+ * $Id: getservices.h,v 1.66 2009/09/30 17:12:39 seife Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,7 +22,9 @@
 #ifndef __getservices_h__
 #define __getservices_h__
 
-#if HAVE_DVB_API_VERSION < 3
+#ifdef HAVE_TRIPLEDRAGON
+#include "td-frontend-compat.h"
+#elif HAVE_DVB_API_VERSION < 3
 #include <ost/frontend.h>
 #define fe_type_t	FrontendType
 #else

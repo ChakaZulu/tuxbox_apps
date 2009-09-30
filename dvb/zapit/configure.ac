@@ -10,10 +10,13 @@ AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 
+if test "$BOXTYPE" != "tripledragon"; then
 if test "$BOXTYPE" != "generic"; then
 TUXBOX_APPS_DRIVER
 fi
 TUXBOX_APPS_DVB
+fi
+
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 TUXBOX_APPS_LIB_PKGCONFIG(CONNECTION,tuxbox-connection)
 TUXBOX_APPS_LIB_PKGCONFIG(EVENTSERVER,tuxbox-eventserver)

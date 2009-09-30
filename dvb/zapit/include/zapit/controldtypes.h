@@ -42,7 +42,7 @@ public:
 	enum volume_type
         {  
 		TYPE_OST=0,
-#ifdef HAVE_DBOX_HARDWARE
+#if defined(HAVE_DBOX_HARDWARE) || defined(HAVE_TRIPLEDRAGON)
 		// this #ifdef catches runtime errors already at compiletime
 		TYPE_AVS=1,
 		// TYPE_LIRC is also not available on dreambox, but this saves

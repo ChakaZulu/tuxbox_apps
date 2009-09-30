@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.h,v 1.12 2003/03/26 16:59:02 thegoodguy Exp $
+ * $Id: dmx.h,v 1.13 2009/09/30 17:12:39 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -44,6 +44,8 @@ struct dmx_pes_filter_params
         uint16_t                     port;
 };
 
+#elif defined(HAVE_TRIPLEDRAGON)
+#include "td-demux-compat.h"
 #else /* HAVE_OST_DMX_H */
 
 #include <linux/dvb/dmx.h>

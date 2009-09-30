@@ -1,5 +1,5 @@
 /*
- * $Id: video.h,v 1.7 2007/06/17 18:23:57 dbluelle Exp $
+ * $Id: video.h,v 1.9 2009/09/30 17:12:39 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,6 +22,10 @@
 #ifndef __zapit_video_h__
 #define __zapit_video_h__
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <zapit/td-video-compat.h>
+#include <clip/clipinfo.h>
+#else
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/video.h>
 #define video_format_t videoFormat_t
@@ -31,7 +35,8 @@
 #define video_status		videoStatus
 #else
 #include <linux/dvb/video.h>
-#endif
+#endif /* HAVE_DVB_API_VERSION */
+#endif /* !HAVE_TRIPLEDRAGON */
 
 class CVideo
 {
@@ -51,6 +56,8 @@ class CVideo
 		/* cropping mode */
 		video_displayformat_t getCroppingMode(void);
 		int setCroppingMode(video_displayformat_t format);
+		/* video format (auto/16:9/4:3LB/4:3PS) */
+		void setVideoFormat(int format);
 
 		/* stream source */
 		video_stream_source_t getSource(void);
