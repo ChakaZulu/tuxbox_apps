@@ -6,6 +6,8 @@ SUBDIRS = \
 	libtuxtxt
 
 if !BOXTYPE_GENERIC
+if !BOXTYPE_TRIPLE
 SUBDIRS += \
 	libavs
-endif	
+endif
+endif
