@@ -1,5 +1,5 @@
 /*
- * $Id: video.h,v 1.10 2009/09/30 17:47:00 seife Exp $
+ * $Id: video.h,v 1.11 2009/09/30 17:54:43 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -37,6 +37,11 @@
 #include <linux/dvb/video.h>
 #endif /* HAVE_DVB_API_VERSION */
 #endif /* !HAVE_TRIPLEDRAGON */
+
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+#include <dbox/avs_core.h>
+#include <dbox/saa7126_core.h>
+#endif
 
 class CVideo
 {

@@ -42,9 +42,7 @@
 #include <sys/un.h>
 
 #if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
-#include <dbox/avs_core.h>
 #include <dbox/fp.h>
-#include <dbox/saa7126_core.h>
 #endif
 #include <zapit/audio.h>
 #include <zapit/channel.h>
