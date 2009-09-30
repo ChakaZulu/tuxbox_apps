@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.18 2009/08/18 11:51:59 rhabarber1848 Exp $
+	$Id: movieinfo.cpp,v 1.19 2009/09/30 19:09:00 dbt Exp $
 
 	Kommentar:
 
@@ -336,7 +336,7 @@ bool CMovieInfo::loadMovieInfo( MI_MOVIE_INFO* movie_info, CFile* file )
 /************************************************************************
 
 ************************************************************************/
-bool CMovieInfo::parseXmlTree (char* text, MI_MOVIE_INFO* movie_info)
+bool CMovieInfo::parseXmlTree (char* /*text*/, MI_MOVIE_INFO* /*movie_info*/)
 {
 #ifndef XMLTREE_LIB
 	return (false); // no XML lib available return false
