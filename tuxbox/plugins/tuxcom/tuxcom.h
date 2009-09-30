@@ -39,8 +39,12 @@
 #include <sys/stat.h>
 #include <plugin.h>
 
+#ifndef HAVE_TRIPLEDRAGON
 #include <dbox/avs_core.h>
 #include <dbox/saa7126_core.h>
+#define AVS "/dev/dbox/avs0"
+#define SAA "/dev/dbox/saa0"
+#endif
 
 #include <netinet/in.h>
 #include <netdb.h>
@@ -56,9 +60,6 @@
 #ifdef HAVE_DBOX_HARDWARE
 #include <linux/input.h>
 #endif
-
-#define AVS "/dev/dbox/avs0"
-#define SAA "/dev/dbox/saa0"
 
 #define MENUROWS      10
 #define MENUITEMS     10
@@ -81,7 +82,6 @@
 #define MSG_COPYRIGHT  "© dbluelle 2004-2007"
 
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
-
 //rc codes
 #define KEY_0		0x5C00
 #define KEY_1		0x5C01
@@ -109,7 +109,9 @@
 #define KEY_YELLOW	0x5C52
 #define KEY_GREEN	0x5C55
 #define KEY_HELP	0x5C82
+#endif
 
+#ifndef HAVE_DBOX_HARDWARE
 #define	RC_0		0x00
 #define	RC_1		0x01
 #define	RC_2		0x02
@@ -136,8 +138,29 @@
 #define	RC_HELP		0x17
 #define	RC_DBOX		0x18
 #define	RC_HOME		0x1F
+#endif
 
-#else
+#ifdef HAVE_TRIPLEDRAGON
+/* translate from TD rc code to the above defines */
+static const signed char rccodes[0x23] =
+	{ -1,
+			RC_STANDBY,
+	RC_1,	RC_2,	RC_3,
+	RC_4,	RC_5,	RC_6,	-1,
+	RC_7,	RC_8,	RC_9,	-1,
+	-1,	RC_0,	-1,	-1,
+		RC_MUTE,
+	RC_DBOX, -1, RC_HELP, RC_HOME,
+	    -1,		    -1,
+		   RC_UP,
+	  RC_LEFT, RC_OK, RC_RIGHT,
+		   RC_DOWN,
+	    RC_MINUS,	    RC_PLUS,
+	RC_RED,RC_GREEN,RC_YELLOW,RC_BLUE };
+#endif
+
+
+#ifdef HAVE_DBOX_HARDWARE
 // rc codes
 #define	RC_0			'0'
 #define	RC_1			'1'
@@ -246,8 +269,8 @@ int rcaltgrtable[] =
 #define KBC_PAGEUP	0x0B
 #define KBC_PAGEDOWN	0x0C
 #define KBC_RETURN	0x0D
-
 #endif
+
 #define KBLCKFILE "/tmp/keyboard.lck"										//! file to lock keyboard-conversion
 
 
@@ -339,8 +362,10 @@ char szTextSearchstring[FILENAME_MAX];
 char szPass[20];
 long commandsize;
 
+#ifndef HAVE_TRIPLEDRAGON
 int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
 int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
+#endif
 
 FILE *conf;
 int language, langselect, autosave, filesize_in_byte;

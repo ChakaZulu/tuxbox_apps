@@ -2,6 +2,7 @@
 	TuxCom - TuxBox-Commander Plugin
 
 	Copyright (C) 2004 'dbluelle' (dbluelle@blau-weissoedingen.de)
+	Tripledragon adaption: (C) 2009 Stefan Seyfried
 
 	Homepage: http://www.blau-weissoedingen.de/dreambox/
 
@@ -122,11 +123,9 @@ int GetRCCode(int mode)
 		usleep(1000000/100);
 		return 0;
 }
-
 #endif
 
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
-
 int GetRCCode(int mode)
 {
 	static int count = 0;
@@ -288,6 +287,35 @@ int GetRCCode(int mode)
 		rccode = -1;
 		usleep(1000000/100);
 		return 0;
+}
+#endif
+
+#ifdef HAVE_TRIPLEDRAGON
+int GetRCCode()
+{
+	static unsigned short LastKey = -1;
+	if (read(rc, &rccode, 2) == 2)
+	{
+		// fprintf(stderr, "rccode: %04x\n", rccode);
+		if (rccode != LastKey)
+		{
+			LastKey = rccode;
+			if ((rccode & 0xFF00) == 0x0000)
+				if (rccode < 0x23)
+				{
+					rccode = rccodes[rccode];
+					return 1;
+				}
+		}
+		rccode = -1;
+
+		return 1;
+	}
+
+	rccode = -1;
+	usleep(1000000/100);
+
+	return 0;
 }
 #endif
 
@@ -666,6 +694,7 @@ void plugin_exec(PluginParam *par)
 	memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);
 	RenderBox(0,0,var_screeninfo.xres,var_screeninfo.yres,FILL,BLACK);
 
+#ifndef HAVE_TRIPLEDRAGON
 	//open avs
 	if((avs = open(AVS, O_RDWR)) == -1)
 	{
@@ -680,7 +709,7 @@ void plugin_exec(PluginParam *par)
 		printf("TuxCom <open SAA>");
 		return;
 	}
-
+#endif
 
 
 	//init data
@@ -727,8 +756,10 @@ void plugin_exec(PluginParam *par)
 
 	SetLanguage();
 
+#ifndef HAVE_TRIPLEDRAGON
 	ioctl(saa, SAAIOGWSS, &saa_old);
 	ioctl(saa, SAAIOSWSS, &saamodes[screenmode]);
+#endif
 	// setup screen
 	RenderFrame(LEFTFRAME);
 	RenderFrame(RIGHTFRAME);
@@ -740,7 +771,8 @@ void plugin_exec(PluginParam *par)
 
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
  	fcntl(rc, F_SETFL, O_NONBLOCK);
-#else
+#endif
+#ifdef HAVE_DBOX_HARDWARE
 	fcntl(rc, F_SETFL, fcntl(rc, F_GETFL) &~ O_NONBLOCK);
 #endif
 
@@ -1381,6 +1413,7 @@ void plugin_exec(PluginParam *par)
 	// enable keyboard-conversion again
 	unlink(KBLCKFILE);
 
+#ifndef HAVE_TRIPLEDRAGON
 	//restore videoformat
 	ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
 	ioctl(saa, SAAIOSWSS, &saa_old);
@@ -1388,6 +1421,7 @@ void plugin_exec(PluginParam *par)
 	close(saa);
 
  	fcntl(rc, F_SETFL, O_NONBLOCK);
+#endif
 
 	ClearEntries   (LEFTFRAME );
 	ClearEntries   (RIGHTFRAME);
@@ -2227,8 +2261,10 @@ void DoMainMenu()
 								return;
 							case 2:
 								screenmode = 1-screenmode;
+#ifndef HAVE_TRIPLEDRAGON
 								ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screenmode]);
 								ioctl(saa, SAAIOSWSS, &saamodes[screenmode]);
+#endif
 								return;
 							case 3:
 								SetPassword();
