@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.443 2009/09/30 18:11:13 seife Exp $
+ * $Id: zapit.cpp,v 1.444 2009/09/30 18:17:43 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -44,7 +44,8 @@
 #include <config.h>
 #endif
 
-#if HAVE_DVB_API_VERSION < 3
+#if defined(HAVE_DREAMBOX_HARDWARE) || defined(HAVE_IPBOX_HARDWARE) || defined(HAVE_TRIPLEDRAGON)
+/* dreambox for fastzap, td for stbgfx ioctl */
 #include <sys/ioctl.h>
 #endif
 
@@ -81,6 +82,9 @@
 
 #include "controld.h"
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <tdgfx/stb04gfx.h>
+#endif
 /* the conditional access module */
 CCam *cam = NULL;
 /* the configuration file */
@@ -848,6 +852,11 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	}
 
 	stopPlayBack();
+#ifdef HAVE_TRIPLEDRAGON
+	if (cam)
+		delete cam;
+	cam = new CCam();
+#endif
 
 	/* have motor move satellite dish to satellite's position if necessary */
 	if ((diseqcType == DISEQC_1_2) && (motorPositions[cc->getSatellitePosition()] != 0))
@@ -3055,7 +3064,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.443 2009/09/30 18:11:13 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.444 2009/09/30 18:17:43 seife Exp $\n");
 
 	bool check_lock = true;
 	int opt;
@@ -3128,6 +3137,42 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 	}
+
+#ifdef HAVE_TRIPLEDRAGON
+	Stb04GFXOsdControl gfxctrl;
+	int gfxfd = open("/dev/stb/tdgfx", O_RDONLY);
+	if (ioctl(gfxfd, STB04GFX_OSD_ONOFF, 1) < 0)
+		WARN("STB04GFX_OSD_ONOFF failed: %m");
+	if (ioctl(gfxfd, STB04GFX_OSD_GETCONTROL, &gfxctrl) < 0)
+		WARN("STB04GFX_OSD_GETCONTROL failed: %m");
+	WARN("x: %d y: %d w: %d h: %d off: %d depth: %d ga: %d use_ga: %d ff: %d 169ad: %d sqp: %d gc: %d undef: %d",
+		gfxctrl.x,
+		gfxctrl.y,
+		gfxctrl.width,
+		gfxctrl.height,
+		gfxctrl.offset,
+		gfxctrl.depth,
+		(int)gfxctrl.global_alpha,
+		gfxctrl.use_global_alpha,
+		gfxctrl.enable_flicker_filter,
+		gfxctrl.enable_16_9_adjust,
+		gfxctrl.enable_square_pixel_filter,
+		gfxctrl.enable_gamma_correction,
+		gfxctrl.undefined_Colors_Transparent);
+#if 0
+//defaults after boot:
+//[zapit.cpp:main:2991] x: 0 y: 0 w: 720 h: 576 off: 0 depth: 32 ga: 176 use_ga: 1 ff: 1 169ad: 0 sqp: 0 gc: 0 undef: 0
+	gfxctrl.use_global_alpha = 1;
+	gfxctrl.global_alpha=176; //default
+	gfxctrl.enable_gamma_correction = 1;
+#endif
+	/* this is needed, otherwise the picture will be shaded
+	   unfortunately, this is all pretty much undocumented... */
+	// TODO: should this be done in the CVideo class?
+	gfxctrl.undefined_Colors_Transparent = 1;
+	if (ioctl(gfxfd, STB04GFX_OSD_SETCONTROL, &gfxctrl) < 0)
+		WARN("STB04GFX_OSD_SETCONTROL failed: %m");
+#endif
 
 	scan_runs = 0;
 	found_channels = 0;

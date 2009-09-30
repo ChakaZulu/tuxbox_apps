@@ -12,7 +12,10 @@ INCLUDES += @LIRCDCLIENT_CFLAGS@
 endif
 
 bin_PROGRAMS = pzapit zapit controldc
+
+if !BOXTYPE_TRIPLE
 sbin_PROGRAMS = udpstreampes
+endif
 
 pzapit_SOURCES = \
 	pzapit.cpp
