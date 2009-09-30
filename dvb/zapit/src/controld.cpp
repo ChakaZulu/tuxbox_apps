@@ -70,8 +70,17 @@
 #define CONF_FILE CONFIGDIR "/controld.conf"
 #define FORMAT_16_9_FILE CONFIGDIR "/16:9.start"
 #define FORMAT_4_3_FILE  CONFIGDIR "/4:3.start"
+
+#ifndef HAVE_TRIPLEDRAGON
 #define AVS_DEVICE	"/dev/dbox/avs0"
 #define SAA7126_DEVICE	"/dev/dbox/saa0"
+#else
+#include <tddevices.h>
+#define AVS_DEVICE	"/dev/" DEVICE_NAME_AVS
+#define SAA7126_DEVICE	"/dev/" DEVICE_NAME_VIDEO
+#define SAA_MODE_FBAS	VID_OUTFMT_CVBS
+#endif
+
 
 extern CAudio *audioDecoder;
 extern CVideo *videoDecoder;
@@ -470,6 +479,46 @@ void setvideooutput(CControld::video_format, bool)
 }
 #endif
 
+#ifdef HAVE_TRIPLEDRAGON
+void setvideooutput(CControld::video_format format, bool bSaveSettings)
+{
+	if ((format < 0) || (format >=  CControld::no_video_formats))
+	{
+		printf("[controld] illegal format %d specified (using default)\n", format);
+		format = CControld::FORMAT_RGB; // FORMAT_CVBS switches off RGB - bad default.
+	}
+
+	if (bSaveSettings) // only set settings if we dont come from watchdog
+	{
+		settings.videooutput = format;
+		controldconfig->setInt32("videooutput", settings.videooutput);
+	}
+
+	vidOutFmt_t arg;
+	switch (format)
+	{
+	case CControld::FORMAT_SVIDEO:		// not used on TD
+		arg = VID_OUTFMT_SVIDEO_SVIDEO;
+		break;
+	case CControld::FORMAT_YUV_VBS:		// not used on TD
+	case CControld::FORMAT_YUV_CVBS:
+		arg = VID_OUTFMT_YBR_SVIDEO;
+		break;
+	case CControld::FORMAT_CVBS:
+		arg = VID_OUTFMT_RGBKILL_CVBS;
+		break;
+	// case CControld::FORMAT_RGB:		// this one is best.
+	default:
+		arg = VID_OUTFMT_RGBC_SVIDEO;
+		break;
+	};
+
+	//fprintf(stderr, "%s:%d CControld::video_format: %d arg %d\n",__FUNCTION__,__LINE__, format, arg);
+	if (videoDecoder)
+		videoDecoder->setVideoOutput(arg);
+}
+#endif
+
 void execute_start_file(const char *filename)
 {
 	struct stat statbuf;
@@ -623,6 +672,41 @@ void routeVideo()
 }
 #endif
 
+#ifdef HAVE_TRIPLEDRAGON
+void routeVideo()
+{
+	int fd;
+	printf("[controld] %s VCR SCART\n", settings.vcr?"enabling":"disabling");
+
+	fd = open(AVS_DEVICE, O_RDWR);
+	if (fd < 0)
+	{
+		perror("routeVideo: "AVS_DEVICE);
+		return;
+	}
+
+	if (settings.vcr)
+	{
+		printf("[controld] setting FASTBLANK to follow VCR SCART\n");
+		if (ioctl(fd, IOC_AVS_FASTBLANK_SET, (unsigned char)3) < 0)
+			perror("IOC_AVS_FASTBLANK_SET, 3");
+		/* TODO: should probably depend on aspect ratio setting */
+		printf("[controld] setting SCART_PIN_8 to follow VCR SCART\n");
+		if (ioctl(fd, IOC_AVS_SCART_PIN8_FOLLOW_VCR) < 0)
+			perror("IOC_AVS_SCART_PIN8_FOLLOW_VCR");
+		printf("[controld] routing VCR to TV SCART\n");
+		if (ioctl(fd, IOC_AVS_ROUTE_VCR2TV) < 0)
+			perror("IOC_AVS_ROUTE_VCR2TV");
+	}
+	else
+	{
+		printf("[controld] routing TV encoder to TV SCART\n");
+		if (ioctl(fd, IOC_AVS_ROUTE_ENC2TV) < 0)
+			perror("IOC_AVS_ROUTE_ENC2TV");
+	}
+}
+#endif
+
 #ifndef HAVE_GENERIC_HARDWARE
 /* if dbox || dreambox || ipbox || tripled */
 void switch_vcr( bool vcr_on)
@@ -700,7 +784,6 @@ void disableVideoOutput(bool disable)
 		close(fd);
 	}
 #endif
-
 	/*
 	  arg=disable?0:0xf;
 	  if((fd = open("/dev/dbox/fp0",O_RDWR|O_NONBLOCK)) < 0)
@@ -731,7 +814,12 @@ void disableVideoOutput(bool disable)
 	}
 	else
 	{
+#ifdef HAVE_TRIPLEDRAGON
+		if (videoDecoder)
+			videoDecoder->setVideoOutput(VID_OUTFMT_DISABLE_DACS);
+#else
 		setvideooutput(CControld::FORMAT_CVBS, false);
+#endif
 		videoDecoder->setVideoFormat(-1);
 		//zapit.setStandby(true);
 		audioDecoder->mute();
@@ -877,6 +965,12 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 	else
 		activeAspectRatio = settings.aspectRatio_dvb;
 
+#ifdef HAVE_TRIPLEDRAGON
+	// probably not correct for VCR scart
+	videoDecoder->setZoomAspect(activeAspectRatio != 0);
+	videoDecoder->setZoom(-1);
+	videoDecoder->setVideoFormat(settings.videoformat);
+#else
 	if (settings.videoformat == 0 && (settings.vcr || !settings.videoOutputDisabled))
 	{
 		switch (activeAspectRatio)
@@ -895,5 +989,6 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 #if HAVE_DVB_API_VERSION < 3
 	else
 		videoDecoder->setVideoFormat(settings.videoformat);
+#endif
 #endif
 }

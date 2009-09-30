@@ -24,6 +24,9 @@
 #include <config.h>
 #endif
 
+#ifdef HAVE_TRIPLEDRAGON
+#include "zapit/video.h"
+#else
 #if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #include <dbox/event.h>
 #endif
@@ -36,6 +39,7 @@
 #else
 #include <linux/dvb/video.h>
 #define VIDEO_DEVICE	"/dev/dvb/adapter0/video0"
+#endif
 #endif
 
 #include <sys/poll.h>
@@ -65,6 +69,7 @@ void CEventWatchDog::startThread()
 	}
 }
 
+#ifndef HAVE_TRIPLEDRAGON
 int CEventWatchDog::getVideoMode()
 {
 #if HAVE_DVB_API_VERSION < 3
@@ -119,7 +124,17 @@ int CEventWatchDog::getVideoMode()
 	return size.aspect_ratio;
 #endif
 }
+#else
+extern CVideo *videoDecoder;
+int CEventWatchDog::getVideoMode()
+{
+	if (videoDecoder)
+		return videoDecoder->getAspectRatio();
+	return -1;
+}
+#endif
 
+#ifndef HAVE_TRIPLEDRAGON
 int CEventWatchDog::getVCRMode()
 {
 	int val = 0;
@@ -135,6 +150,24 @@ int CEventWatchDog::getVCRMode()
 #endif
 	return val;
 }
+#else
+int CEventWatchDog::getVCRMode()
+{
+	int val = 0;
+	int fp = open(AVS_DEVICE, O_RDWR);
+
+	if (fp >= 0) {
+		ioctl(fp, IOC_AVS_GET_EVENT, &val);
+		close(fp);
+		//printf("getVCRMode= %d\n", val);
+		/* the td has 0/1=0V, 2=6V, 3=12V, dbox has 0=0V, 1=6V, 2=12 */
+		if (val > 0)	/* return the same values as dbox: 0,1,2 */
+			val--;
+	}
+
+	return val;
+}
+#endif
 
 void CEventWatchDog::videoModeChanged( int nNewVideoMode )
 {
@@ -159,6 +192,7 @@ void CEventWatchDog::vcrModeChanged( int nNewVCRMode )
 /* too many subtle differences between old and new API, so i just have this
    code twice - much more readable than putting #ifdefs all over the place
  */
+#ifndef HAVE_TRIPLEDRAGON
 #if HAVE_DVB_API_VERSION >= 3
 void *CEventWatchDog::watchdogThread(void *arg)
 {
@@ -341,6 +375,48 @@ void *CEventWatchDog::watchdogThread(void *arg)
 		close(fd_ev);
 		sleep(1);
 	}
+	pthread_exit(NULL);
+}
+#endif
+#else /* TRIPLEDRAGON */
+void *CEventWatchDog::watchdogThread(void *arg)
+{
+	const char *verb_aratio[] = { "4:3", "16:9", "2.21:1", "unknown" };
+
+	CEventWatchDog *WatchDog = (CEventWatchDog *)arg;
+
+	while (true)
+	{
+		sleep(1);
+		int newVCRMode = WatchDog->getVCRMode();
+		if (newVCRMode != WatchDog->VCRMode)
+		{
+			printf("[controld] VCR SCART PIN8 changed from %dV to %dV\n", WatchDog->VCRMode * 6, newVCRMode * 6);
+			pthread_mutex_lock( &WatchDog->wd_mutex );
+			WatchDog->VCRMode = newVCRMode;
+			WatchDog->vcrModeChanged( newVCRMode );
+
+			if(newVCRMode > 0) {
+				//Set Aspect ratio of scart input signal (1->4:3 / 2->16:9)
+				// vcr AR is saved in Bit 8-15, DVB AR is saved in bits 0-7
+				WatchDog->VideoMode = (WatchDog->VideoMode & 0xFF) | ((newVCRMode-1) << 8);
+				WatchDog->videoModeChanged(WatchDog->VideoMode);
+			}
+			pthread_mutex_unlock( &WatchDog->wd_mutex );
+		}
+		int aspect = WatchDog->getVideoMode();
+		if ((WatchDog->VideoMode & 0xFF) != aspect) {
+			printf("[controld] aspect ratio changed %u -> %u (%s -> %s)\n",
+				(WatchDog->VideoMode & 0xFF), aspect,
+				verb_aratio[WatchDog->VideoMode&3],
+				verb_aratio[aspect]);
+			pthread_mutex_lock(&WatchDog->wd_mutex);
+			WatchDog->VideoMode = (WatchDog->VideoMode & 0xFF00) | aspect;
+			WatchDog->videoModeChanged(WatchDog->VideoMode);
+			pthread_mutex_unlock(&WatchDog->wd_mutex);
+		}
+	}
+
 	pthread_exit(NULL);
 }
 #endif

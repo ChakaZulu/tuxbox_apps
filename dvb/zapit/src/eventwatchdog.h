@@ -28,8 +28,15 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <avs/avs_inf.h>
+#include <tddevices.h>
+#define AVS_DEVICE "/dev/" DEVICE_NAME_AVS
+#endif
+
 #if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 #include <dbox/fp.h>
+#define EVENT_DEVICE "/dev/dbox/event0"
 #endif
 
 #include <string>
@@ -40,8 +47,6 @@
 using namespace std;
 
 extern  CEventServer        *eventServer;
-
-#define EVENT_DEVICE "/dev/dbox/event0"
 
 // Events which can occur
 #define WDE_VIDEOMODE 		(uint)1		// Videomode changed from 4:3 to 16:9 or from 16:9 to 4:3
