@@ -14,6 +14,11 @@
 #include <sys/time.h>
 #include <pthread.h>
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <tuxbox/zapit/td-demux-compat.h>
+#include <tddevices.h>
+#define DMX "/dev/" DEVICE_NAME_DEMUX "0"
+#else
 #if HAVE_DVB_API_VERSION < 3
  #define dmx_pes_filter_params dmxPesFilterParams
  #define pes_type pesType
@@ -24,6 +29,7 @@
  #include <linux/dvb/dmx.h>
  #define DMX "/dev/dvb/adapter0/demux0"
 #endif
+#endif
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -31,8 +37,10 @@
 #include FT_CACHE_SMALL_BITMAPS_H
 #include <linux/fb.h>
 
+#ifndef HAVE_TRIPLEDRAGON
 #include <dbox/avs_core.h>
 #include <dbox/saa7126_core.h>
+#endif
 
 #define FLOFSIZE 4
 
@@ -72,8 +80,10 @@
 #define hold_mosaic         0x1E
 #define release_mosaic      0x1F
 
+#ifndef HAVE_TRIPLEDRAGON
 const int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
 const int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
+#endif
 
 typedef enum /* object type */
 {

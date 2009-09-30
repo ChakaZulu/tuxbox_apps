@@ -14,18 +14,22 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include "tuxtxt_def.h"
-#if !defined HAVE_DREAMBOX_HARDWARE && !defined HAVE_IPBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 #include <tuxbox.h>
 #endif
 #if TUXTXT_COMPRESS == 1
 #include <zlib.h>
 #endif
 
+#ifndef HAVE_TRIPLEDRAGON
 #if HAVE_DVB_API_VERSION < 3
 #include <dbox/avia_gt_pig.h>
 #else
 #include <linux/input.h>
 #include <linux/videodev.h>
+#endif
+#else
+#include <tdgfx/stb04gfx.h>
 #endif
 
 const char *ObjectSource[] =
@@ -1683,8 +1687,16 @@ int tuxtxt_start_thread()
 
 	/* set filter & start demuxer */
 	dmx_flt.pid      = tuxtxt_cache.vtxtpid;
+#ifndef HAVE_TRIPLEDRAGON
 	dmx_flt.input    = DMX_IN_FRONTEND;
 	dmx_flt.output   = DMX_OUT_TAP;
+#else
+	struct UnloaderConfig_t u;
+	u.unloader_type  = UNLOADER_TYPE_PAYLOAD;
+	u.threshold      = 64;
+	dmx_flt.unloader = u;
+	dmx_flt.output   = OUT_MEMORY;
+#endif
 	dmx_flt.pes_type = DMX_PES_OTHER;
 	dmx_flt.flags    = DMX_IMMEDIATE_START;
 
@@ -4300,7 +4312,7 @@ void tuxtxt_RenderClearMenuLineBB(tstRenderInfo* renderinfo,char *p, tstPageAttr
 
 void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 {
-#if HAVE_DVB_API_VERSION >= 3
+#if HAVE_DVB_API_VERSION >= 3 && !defined(HAVE_TRIPLEDRAGON)
 	struct v4l2_format format;
 #endif
 	/* reset transparency mode */
@@ -4323,7 +4335,7 @@ void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 	tuxtxt_cache.pageupdate = 1;
 
 	/* clear back buffer */
-#if !defined HAVE_DREAMBOX_HARDWARE && !defined HAVE_IPBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	renderinfo->clearbbcolor = tuxtxt_color_black;
 #else
 	renderinfo->clearbbcolor = renderinfo->screenmode?tuxtxt_color_transp:tuxtxt_cache.FullScrColor;
@@ -4370,6 +4382,7 @@ void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 
 		tuxtxt_setfontwidth(renderinfo,fw);
 
+#ifndef HAVE_TRIPLEDRAGON
 #if HAVE_DVB_API_VERSION < 3
 		avia_pig_hide(renderinfo->pig);
 		avia_pig_set_pos(renderinfo->pig, tx, ty);
@@ -4391,21 +4404,31 @@ void tuxtxt_SwitchScreenMode(tstRenderInfo* renderinfo,int newscreenmode)
 #endif
 		ioctl(renderinfo->avs, AVSIOSSCARTPIN8, &fncmodes[renderinfo->screen_mode2]);
 		ioctl(renderinfo->saa, SAAIOSWSS, &saamodes[renderinfo->screen_mode2]);
+#else
+		char command[64];
+		sprintf(command, "pzapit --pig %d %d %d %d 1", tx, ty, tw, th);
+		system(command);
+#endif
 	}
 	else /* not split */
 	{
+#ifndef HAVE_TRIPLEDRAGON
 #if HAVE_DVB_API_VERSION < 3
 		avia_pig_hide(renderinfo->pig);
 #else
 		ioctl(renderinfo->pig, VIDIOC_OVERLAY, &renderinfo->screenmode);
 #endif
+#else
+		system("pzapit --pig 0 0 0 0 0");
+#endif
 
 		tuxtxt_setfontwidth(renderinfo,renderinfo->fontwidth_normal);
 		renderinfo->displaywidth= (renderinfo->ex-renderinfo->sx);
 		renderinfo->StartX = renderinfo->sx; //+ (ex-sx - 40*fontwidth) / 2; /* center screen */
-
+#ifndef HAVE_TRIPLEDRAGON
 		ioctl(renderinfo->avs, AVSIOSSCARTPIN8, &fncmodes[renderinfo->screen_mode1]);
 		ioctl(renderinfo->saa, SAAIOSWSS, &saamodes[renderinfo->screen_mode1]);
+#endif
 	}
 }
 
@@ -4613,6 +4636,28 @@ void tuxtxt_CreateLine25(tstRenderInfo* renderinfo)
 		tuxtxt_setfontwidth(renderinfo,renderinfo->fontwidth_topmenumain);
 	}
 }
+
+#ifdef HAVE_TRIPLEDRAGON
+void tdfb_attr(void)
+{
+	int gfx = open("/dev/stb/tdgfx", O_RDONLY);
+	if (gfx < 0)
+	{
+		perror("/dev/stb/tdgfx");
+		return;
+	}
+	Stb04GFXOsdControl tmpctrl;
+	if (ioctl(gfx, STB04GFX_OSD_GETCONTROL, &tmpctrl) < 0)
+		perror("[tuxtxt:tdfb_attr] STB04GFX_OSD_GETCONTROL failed");
+	tmpctrl.use_global_alpha = 0;
+	tmpctrl.undefined_Colors_Transparent = 1;
+	if (ioctl(gfx, STB04GFX_OSD_SETCONTROL, &tmpctrl) < 0)
+		perror("[tuxtxt:tdfb_attr] STB04GFX_OSD_SETCONTROL failed");
+	close(gfx);
+}
+#endif
+
+
 /******************************************************************************
  * CopyBB2FB                                                                  *
  ******************************************************************************/
@@ -4635,7 +4680,9 @@ void tuxtxt_CopyBB2FB(tstRenderInfo* renderinfo)
 			renderinfo->var_screeninfo.yoffset = renderinfo->var_screeninfo.yres;
 		if (ioctl(renderinfo->fb, FBIOPAN_DISPLAY, &renderinfo->var_screeninfo) == -1)
 			perror("TuxTxt <FBIOPAN_DISPLAY>");
-
+#ifdef HAVE_TRIPLEDRAGON
+		tdfb_attr();
+#endif
 		if (renderinfo->StartX > 0 && *renderinfo->lfb != *(renderinfo->lfb + renderinfo->var_screeninfo.xres * renderinfo->var_screeninfo.yres)) /* adapt background of backbuffer if changed */
 			tuxtxt_FillBorder(renderinfo,*(renderinfo->lfb + renderinfo->var_screeninfo.xres * renderinfo->var_screeninfo.yoffset));
 //			 ClearBB(*(lfb + renderinfo->var_screeninfo.xres * renderinfo->var_screeninfo.yoffset));
@@ -4719,7 +4766,7 @@ void tuxtxt_setcolors(tstRenderInfo* renderinfo,unsigned short *pcolormap, int o
 
 	unsigned short t = renderinfo->tr0[tuxtxt_color_transp2];
 	renderinfo->tr0[tuxtxt_color_transp2] = (renderinfo->trans_mode+7)<<11 | 0x7FF;
-#if !defined HAVE_DREAMBOX_HARDWARE && !defined HAVE_IPBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	/* "correct" semi-transparent for Nokia (GTX only allows 2(?) levels of transparency) */
 	if (tuxbox_get_vendor() == TUXBOX_VENDOR_NOKIA)
 		renderinfo->tr0[tuxtxt_color_transp2] = 0xFFFF;
@@ -4755,6 +4802,9 @@ void tuxtxt_setcolors(tstRenderInfo* renderinfo,unsigned short *pcolormap, int o
 	if (changed)
 		if (ioctl(renderinfo->fb, FBIOPUTCMAP, &colormap_0) == -1)
 			perror("TuxTxt <FBIOPUTCMAP>");
+#ifdef HAVE_TRIPLEDRAGON
+	tdfb_attr();
+#endif
 }
 
 /******************************************************************************
@@ -5408,6 +5458,7 @@ int tuxtxt_InitRendering(tstRenderInfo* renderinfo,int setTVFormat)
 		renderinfo->page_atrb[i].doublew = 0;
 		renderinfo->page_atrb[i].IgnoreAtBlackBgSubst = 0;
 	}
+#ifndef HAVE_TRIPLEDRAGON
 	if (setTVFormat)
 	{
 		/* open avs */
@@ -5441,6 +5492,7 @@ int tuxtxt_InitRendering(tstRenderInfo* renderinfo,int setTVFormat)
 		FT_Done_FreeType(renderinfo->library);
 		return 0;
 	}
+#endif
 	return 1;	
 }
 /******************************************************************************
@@ -5449,6 +5501,7 @@ int tuxtxt_InitRendering(tstRenderInfo* renderinfo,int setTVFormat)
 void tuxtxt_EndRendering(tstRenderInfo* renderinfo)
 {
 	int i;
+#ifndef HAVE_TRIPLEDRAGON
 	if (renderinfo->pig >= 0)
 		close(renderinfo->pig);
 	renderinfo->pig = -1;
@@ -5457,6 +5510,9 @@ void tuxtxt_EndRendering(tstRenderInfo* renderinfo)
 		ioctl(renderinfo->avs, AVSIOSSCARTPIN8, &renderinfo->fnc_old);
 	if (renderinfo->saa >= 0)
 		ioctl(renderinfo->saa, SAAIOSWSS, &renderinfo->saa_old);
+#else
+	system("pzapit --pig 0 0 0 0 0");
+#endif
 	/* clear subtitlecache */
 	for (i = 0; i < SUBTITLE_CACHESIZE; i++)
 	{
