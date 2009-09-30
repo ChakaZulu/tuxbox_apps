@@ -90,6 +90,7 @@ class CEventWatchDog
 	int 	VideoMode;
 	int    	VCRMode;
 	CEventWatchDog();
+	~CEventWatchDog();
 
 	static void * watchdogThread (void *arg);
 	void registerNotifier( uint watchdogEvent, CEventWatchdogNotifier* notifier );

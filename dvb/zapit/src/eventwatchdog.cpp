@@ -52,10 +52,17 @@ CEventWatchDog::CEventWatchDog()
 {
 	bThreadRunning = false;
 	VideoMode = 0;
+	VCRMode = 0;
 	Notifiers.insert( pair<uint, EventWatchdogNotifiers*>(WDE_VIDEOMODE, new EventWatchdogNotifiers));
 	Notifiers.insert( pair<uint, EventWatchdogNotifiers*>(WDE_VCRONOFF, new EventWatchdogNotifiers));
 	startThread();
 
+}
+
+CEventWatchDog::~CEventWatchDog()
+{
+	pthread_cancel(thrSender);
+	bThreadRunning = false;
 }
 
 void CEventWatchDog::startThread()
@@ -66,6 +73,7 @@ void CEventWatchDog::startThread()
 	if (pthread_create (&thrSender, NULL, CEventWatchDog::watchdogThread, (void *) this) != 0 )
 	{
 		perror("CWatchdog: Create WatchDogThread failed\n");
+		bThreadRunning = false;
 	}
 }
 

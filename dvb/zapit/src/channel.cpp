@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.22 2009/03/27 16:05:13 houdini Exp $
+ * $Id: channel.cpp,v 1.23 2009/09/30 18:22:47 seife Exp $
  *
  * (C) 2002 by Steffen Hehn <mcclean@berlios.de>
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
@@ -111,6 +111,7 @@ void CZapitChannel::resetPids(void)
 	privatePid = 0;
 
 	pidsFlag = false;
+	pidsUpdated = false;
 }
 
 void CZapitChannel::addTTXSubtitle ( const unsigned int pid, const std::string langCode, const unsigned char magazine_number, const unsigned char page_number, const bool impaired )

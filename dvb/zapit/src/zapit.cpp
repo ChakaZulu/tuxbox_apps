@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.444 2009/09/30 18:17:43 seife Exp $
+ * $Id: zapit.cpp,v 1.445 2009/09/30 18:22:47 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -3064,7 +3064,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.444 2009/09/30 18:17:43 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.445 2009/09/30 18:22:47 seife Exp $\n");
 
 	bool check_lock = true;
 	int opt;
@@ -3316,6 +3316,8 @@ int main(int argc, char **argv)
 	if (scanInputParser)
 		xmlFreeDoc(scanInputParser);
 
+	/* TODO: the destructor of bouquetManager should actually do that */
+	bouquetManager->clearAll();
 	delete bouquetManager;
 	delete eventServer;
 
