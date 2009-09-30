@@ -51,6 +51,7 @@
 		#define KEY_BOTTOMRIGHT	0x1a5
 	#endif
 #else
+/* dream and tripledragon */
 	#define RC_0			0x00
 	#define RC_1			0x01
 	#define RC_2			0x02
@@ -80,6 +81,25 @@
 	#define RC_PAGE_DOWN		0x53
 	#define RC_PAGE_UP		0x54
 #endif // HAVE_DREAMBOX_HARDWARE
+
+#ifdef HAVE_TRIPLEDRAGON
+/* translate from TD rc code to the above defines */
+static const signed char rccodes[0x23] =
+	{ -1,
+			RC_STANDBY,
+	RC_1,	RC_2,	RC_3,
+	RC_4,	RC_5,	RC_6,	-1,
+	RC_7,	RC_8,	RC_9,	-1,
+	-1,	RC_0,	-1,	-1,
+		RC_SPKR,
+	RC_SETUP,-1, RC_HELP, RC_HOME,
+	RC_PAGE_DOWN,	RC_PAGE_UP,
+		   RC_UP,
+	  RC_LEFT, RC_OK, RC_RIGHT,
+		   RC_DOWN,
+	    RC_MINUS,	    RC_PLUS,
+	RC_RED,RC_GREEN,RC_YELLOW,RC_BLUE };
+#endif
 
 extern	void			RcGetActCode( void );
 extern	int			RcInitialize( int extfd );

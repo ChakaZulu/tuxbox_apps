@@ -8,6 +8,42 @@
 #include <sys/ioctl.h>
 #include <config.h>
 
+#include <config.h>
+
+#ifdef HAVE_TRIPLEDRAGON
+// ugly, but works
+int fx2_use_pig = 1;
+extern FBFillRect(int x, int y, int dx, int dy, unsigned char col);
+
+void Fx2SetPig(int x, int y, int w, int h)
+{
+	return;
+}
+
+void Fx2ShowPig(int x, int y, int width, int height)
+{
+	char command[64];
+	FBFillRect(x, y, width, height, 0); // Fill transp.
+	sprintf(command, "pzapit --pig %d %d %d %d 0", x, y, width, height);
+	system(command);
+}
+
+void Fx2StopPig(void)
+{
+	system("pzapit --pig 0 0 0 0 0");
+}
+
+void Fx2PigPause(void)
+{
+	return;
+}
+
+void Fx2PigResume(void)
+{
+	return;
+}
+#else // !TRIPLEDRAGON
+
 #ifndef i386
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	#include <dbox/avia_gt_pig.h>
@@ -200,4 +236,5 @@ void	Fx2PigResume( void )
 {
 	return;
 }
+#endif
 #endif

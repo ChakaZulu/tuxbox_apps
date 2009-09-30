@@ -13,6 +13,8 @@
 #include "draw.h"
 #include "rcinput.h"
 
+#include <config.h>
+
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	static int fd_is_ext = 0;
 	static int keyboard = 0;
@@ -173,13 +175,22 @@ int	RcInitialize( int extfd )
 	}
 /* clear rc-buffer */
 	read( fd, buf, 32 );
-#else
+#endif
+#ifdef HAVE_DBOX_HARDWARE
 	//KbInitialize();
 	fd = open( "/dev/input/event0", O_RDONLY );
 	if ( fd == -1 )
 	{
 		return kbfd;
 	}
+	fcntl(fd, F_SETFL, O_NONBLOCK );
+#endif
+#ifdef HAVE_TRIPLEDRAGON
+	/* not handled yet... */
+	if (extfd == -1)
+		return -1;
+
+	fd = extfd;
 	fcntl(fd, F_SETFL, O_NONBLOCK );
 #endif
 	return 0;
@@ -234,7 +245,65 @@ static unsigned short translate( unsigned short code )
 }
 #endif
 
+#ifdef HAVE_TRIPLEDRAGON
 
+#ifdef HAVE_TRIPLEDRAGON
+void RcGetActCode(void)
+{
+	static unsigned short cw = 0;
+	unsigned short code = 0;
+	if (read(fd, &code, 2) == 2)
+	{
+		if ((code & 0xFF00) == 0x0000)
+		{
+			if (code < 0x23)
+				realcode = rccodes[code];
+		}
+		else
+			realcode = 0xee;
+	}
+	else
+		realcode = 0xee;
+
+	if (realcode == 0xee)
+	{
+		if (cw == 1)
+			cw = 0;
+	}
+
+	if (cw == 2)
+	{
+		actcode = realcode;
+		return;
+	}
+
+	switch(realcode)
+	{
+	case RC_SPKR:
+		if (!cw)
+		{
+			cw = 2;
+			FBPause();
+			cw = 0;
+		}
+		break;
+	case RC_HOME:
+		doexit = 3;
+		break;
+	default :
+		cw = 0;
+		actcode = realcode;
+		break;
+	}
+
+	return;
+}
+#endif
+
+void RcClose(void)
+{
+}
+#else
 void		RcGetActCode( void )
 {
 	int				x=0;
@@ -379,3 +448,4 @@ void	RcClose( void )
 #endif
 	close(fd);
 }
+#endif
