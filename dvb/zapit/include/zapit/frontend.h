@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.35 2009/03/21 14:29:11 seife Exp $
+ * $Id: frontend.h,v 1.37 2009/09/30 17:34:20 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -51,15 +51,23 @@ class CFrontend
 		int32_t lnbOffsetsHigh[MAX_LNBS];
 		/* current Transponderdata */
 		TP_params currentTransponder;
+#ifndef HAVE_TRIPLEDRAGON
 		/* speed up sat and cable search*/
 		fe_spectral_inversion_t last_inversion;
 		/* speed up cable seach */
 		fe_modulation_t last_qam;
+#endif
 		/* selects different software control modes for uncommitted switch */
 		int uncommitted_switch_mode;
+		/* automatically get fec from frontend? (maybe dreambox only) */
+		int auto_fec;
 
+#ifndef HAVE_TRIPLEDRAGON
 #if HAVE_DVB_API_VERSION >= 3
 		uint32_t			getDiseqcReply(const int timeout_ms) const;
+#endif
+#else
+		int finetune;
 #endif
 		dvb_frontend_event	getEvent(void);
 		dvb_frontend_parameters	getFrontend(void) const;
@@ -81,7 +89,7 @@ class CFrontend
 
 
 	public:
-		CFrontend(int _uncomitted_switch_mode = 0);
+		CFrontend(int _uncomitted_switch_mode = 0, int extra_flags = 0); // extra flags might be implementation specific
 		~CFrontend(void);
 
 		static fe_code_rate_t		getCodeRate(const uint8_t fec_inner);
@@ -89,12 +97,18 @@ class CFrontend
 		uint8_t				getDiseqcRepeats(void) const		{ return diseqcRepeats; }
 		diseqc_t			getDiseqcType(void) const		{ return diseqcType; }
 		uint32_t			getFrequency(void) const;
+#ifndef HAVE_TRIPLEDRAGON
+		// TD has no cable/terrestrial
 		static fe_modulation_t		getModulation(const uint8_t modulation);
-		uint8_t				getPolarization(void) const;
-		const dvb_frontend_info *getInfo(void) const			{ return &info; };
 		/* those two don't really belong to frontend, but they are hardware/API dependent, so i put them here */
 		static fe_code_rate_t		xml2FEC(const uint8_t fec);
 		static uint8_t			FEC2xml(fe_code_rate_t fec);
+#else
+		static unsigned int		xml2FEC(const uint8_t fec);
+		static uint8_t			FEC2xml(unsigned int fec);
+#endif
+		uint8_t				getPolarization(void) const;
+		const dvb_frontend_info*	getInfo(void) const			{ return &info; };
 
 		uint32_t			getBitErrorRate(void) const;
 		uint16_t			getSignalNoiseRatio(void) const;
@@ -111,7 +125,9 @@ class CFrontend
 		int					setParameters(TP_params *TP);
 		int					setParameters(dvb_frontend_parameters *feparams, const uint8_t polarization = VERTICAL, const uint8_t diseqc = 0);
 		const TP_params*	getParameters(void) const			{ return &currentTransponder; };
+#ifndef HAVE_TRIPLEDRAGON
 		dvb_frontend_event*	setParametersResponse(TP_params *TP);
+#endif
 		void 				setCurrentSatellitePosition(int32_t satellitePosition) {currentSatellitePosition = satellitePosition; }
 
 		void 				positionMotor(uint8_t motorPosition);

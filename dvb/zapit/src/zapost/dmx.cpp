@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.19 2003/05/03 03:13:33 obi Exp $
+ * $Id: dmx.cpp,v 1.20 2009/09/30 17:34:20 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -44,14 +44,24 @@ int CDemux::sectionFilter(const unsigned short pid, const unsigned char * const 
 {
 	struct dmx_sct_filter_params sctFilterParams;
 
+	fop(ioctl, DMX_STOP);
 	memset(&sctFilterParams, 0, sizeof(struct dmx_sct_filter_params));
+#ifndef HAVE_TRIPLEDRAGON
+#define XPDF_NO_CRC 0
 	memcpy(&sctFilterParams.filter.filter, filter, DMX_FILTER_SIZE);
 	memcpy(&sctFilterParams.filter.mask, mask, DMX_FILTER_SIZE);
-
+#else
+	sctFilterParams.filter[0] = filter[0];
+	sctFilterParams.mask[0] = mask[0];
+	/* we'll lose the latest 2 bytes of filter and mask here, but those are not really used anyway */
+	memcpy(&sctFilterParams.filter[3], filter + 1, DMX_FILTER_SIZE - 2 - 1);
+	memcpy(&sctFilterParams.mask[3], mask + 1, DMX_FILTER_SIZE - 2 - 1);
+	sctFilterParams.filter_length = DMX_FILTER_SIZE;
+#endif
 	sctFilterParams.pid = pid;
 	sctFilterParams.flags = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 
-	switch (sctFilterParams.filter.filter[0]) {
+	switch (filter[0]) {
 	case 0x00: /* program_association_section */
 		sctFilterParams.timeout = 2000;
 		break;
@@ -109,17 +119,20 @@ int CDemux::sectionFilter(const unsigned short pid, const unsigned char * const 
 
 	case 0x70: /* time_date_section */
 		sctFilterParams.flags  &= (~DMX_CHECK_CRC); /* section has no CRC */
+		sctFilterParams.flags  |= (XPDF_NO_CRC); /* section has no CRC */
 		sctFilterParams.pid     = 0x0014;
 		sctFilterParams.timeout = 30000;
 		break;
 
 	case 0x71: /* running_status_section */
 		sctFilterParams.flags  &= (~DMX_CHECK_CRC); /* section has no CRC */
+		sctFilterParams.flags  |= (XPDF_NO_CRC); /* section has no CRC */
 		sctFilterParams.timeout = 0;
 		break;
 
 	case 0x72: /* stuffing_section */
 		sctFilterParams.flags  &= (~DMX_CHECK_CRC); /* section has no CRC */
+		sctFilterParams.flags  |= (XPDF_NO_CRC); /* section has no CRC */
 		sctFilterParams.timeout = 0;
 		break;
 
@@ -132,6 +145,7 @@ int CDemux::sectionFilter(const unsigned short pid, const unsigned char * const 
 
 	case 0x7E: /* discontinuity_information_section */
 		sctFilterParams.flags  &= (~DMX_CHECK_CRC); /* section has no CRC */
+		sctFilterParams.flags  |= (XPDF_NO_CRC); /* section has no CRC */
 		sctFilterParams.timeout = 0;
 		break;
 
@@ -162,7 +176,9 @@ int CDemux::pesFilter(const unsigned short pid, const dmx_output_t output, const
 	memset(&pesFilterParams, 0, sizeof(struct dmx_pes_filter_params));
 	
 	pesFilterParams.pid = pid;
+#ifndef HAVE_TRIPLEDRAGON
 	pesFilterParams.input = DMX_IN_FRONTEND;
+#endif
 	pesFilterParams.output = output;
 	pesFilterParams.pes_type = pes_type;
 

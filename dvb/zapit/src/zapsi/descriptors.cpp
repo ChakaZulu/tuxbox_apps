@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.76 2009/07/18 21:42:41 rhabarber1848 Exp $
+ * $Id: descriptors.cpp,v 1.77 2009/09/30 17:34:21 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,6 +35,19 @@
 #include <zapit/sdt.h>
 #include <zapit/debug.h>
 
+#ifdef HAVE_TRIPLEDRAGON
+#ifdef _DVBFRONTEND_H_
+#error HAVE_TRIPLEDRAGON && _DVBFRONTEND_H_
+#endif
+#else /* !TRIPLEDRAGON */
+#if HAVE_DVB_API_VERSION < 3
+#define frequency Frequency
+#define symbol_rate SymbolRate
+#define inversion Inversion
+#define fec_inner FEC_inner
+#define modulation QAM
+#endif
+#endif
 extern tallchans allchans;              //  defined in zapit.cpp
 extern transponder_list_t transponders; //  defined in zapit.cpp
 std::string curr_chan_name;
@@ -49,14 +62,6 @@ std::map <t_channel_id, uint8_t> service_types;
 
 extern CFrontend *frontend;
 extern CEventServer *eventServer;
-
-#if HAVE_DVB_API_VERSION < 3
-#define frequency Frequency
-#define symbol_rate SymbolRate
-#define inversion Inversion
-#define fec_inner FEC_inner
-#define modulation QAM
-#endif
 
 void generic_descriptor(const unsigned char * const)
 {
@@ -253,6 +258,12 @@ int satellite_delivery_system_descriptor(const unsigned char * const buffer, con
 		((buffer[5] & 0x0F)	* 10)
 	);
 
+	/* workarounds for braindead broadcasters (e.g. on Telstar 12 at 15.0W) */
+	if (feparams.frequency >= 100000000)
+		feparams.frequency /= 10;
+	polarization = (buffer[8] >> 5) & 0x03;
+
+#ifndef HAVE_TRIPLEDRAGON
 	feparams.inversion = INVERSION_AUTO;
 
 	feparams.u.qpsk.symbol_rate =
@@ -266,14 +277,26 @@ int satellite_delivery_system_descriptor(const unsigned char * const buffer, con
 		((buffer[12] >> 4)	* 100)
 	);
 
-	feparams.u.qpsk.fec_inner = CFrontend::getCodeRate(buffer[12] & 0x0F);
-	polarization = (buffer[8] >> 5) & 0x03;
-
-	/* workarounds for braindead broadcasters (e.g. on Telstar 12 at 15.0W) */
-	if (feparams.frequency >= 100000000)
-		feparams.frequency /= 10;
+	/* workaround */
 	if (feparams.u.qpsk.symbol_rate >= 50000000)
 		feparams.u.qpsk.symbol_rate /= 10;
+
+	feparams.u.qpsk.fec_inner = CFrontend::getCodeRate(buffer[12] & 0x0F);
+#else
+	feparams.symbolrate =
+	(
+		((buffer[9] >> 4)	* 100000) +
+		((buffer[9] & 0x0F)	* 10000) +
+		((buffer[10] >> 4)	* 1000) +
+		((buffer[10] & 0x0F)	* 100) +
+		((buffer[11] >> 4)	* 10) +
+		((buffer[11] & 0x0F))
+	);
+	if (feparams.symbolrate >= 50000)
+		feparams.symbolrate /= 10;
+
+	feparams.fec = CFrontend::getCodeRate(buffer[12] & 0x0F);
+#endif
 
 	zfrequency = FREQUENCY_IN_KHZ(feparams.frequency);
 	const transponder_id_t transponder_id = (transponder_id2) | (((transponder_id_t)zfrequency)<<48);
@@ -313,6 +336,7 @@ int satellite_delivery_system_descriptor(const unsigned char * const buffer, con
 /* 0x44 */
 int cable_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id2)
 {
+#ifndef HAVE_TRIPLEDRAGON
 	frequency_kHz_t zfrequency;
 	
 	if (frontend->getInfo()->type != FE_QAM)
@@ -379,6 +403,11 @@ int cable_delivery_system_descriptor(const unsigned char * const buffer, const t
 	}
 
 	return 0;
+#else
+	/* use the variables... no compiler warnings, please */
+	WARN("TD CABLE DESCRIPTOR??? '%s' %llx", buffer, transponder_id2);
+	return -1;
+#endif
 }
 
 /* 0x45 */

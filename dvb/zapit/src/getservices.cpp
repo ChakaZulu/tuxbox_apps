@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.103 2009/03/21 14:29:12 seife Exp $
+ * $Id: getservices.cpp,v 1.104 2009/09/30 17:34:20 seife Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -29,7 +29,7 @@
 #include <configfile.h>
 #include <sys/stat.h>
 
-#if HAVE_DVB_API_VERSION < 3
+#if !defined HAVE_TRIPLEDRAGON && HAVE_DVB_API_VERSION < 3
 #define frequency Frequency
 #define symbol_rate SymbolRate
 #define inversion Inversion
@@ -69,6 +69,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 		transport_stream_id = xmlGetNumericAttribute(node, "id", 16);
 		original_network_id = xmlGetNumericAttribute(node, "onid", 16);
 		feparams.frequency = xmlGetNumericAttribute(node, "frequency", 0);
+#ifndef HAVE_TRIPLEDRAGON
 		feparams.inversion = (fe_spectral_inversion_t) xmlGetNumericAttribute(node, "inversion", 0);
 
 		/* cable */
@@ -95,9 +96,21 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 			feparams.u.qpsk.fec_inner = CFrontend::xml2FEC(xmlGetNumericAttribute(node, "fec_inner", 0));
 			polarization = xmlGetNumericAttribute(node, "polarization", 0);
 		}
+		if(feparams.u.qpsk.symbol_rate < 50000) feparams.u.qpsk.symbol_rate = feparams.u.qpsk.symbol_rate * 1000;
+#else
+		int sym = xmlGetNumericAttribute(node, "symbol_rate", 0);
+		if (sym >= 50000)
+			feparams.symbolrate = sym / 1000;
+		else
+			feparams.symbolrate = sym;
+
+		feparams.fec = CFrontend::xml2FEC(xmlGetNumericAttribute(node, "fec_inner", 0));
+		polarization = xmlGetNumericAttribute(node, "polarization", 0);
+		feparams.polarity = polarization;
+		//DBG("id: %04x onid: %04x sym: %hu fec: %hd pol: %d",transport_stream_id,original_network_id, feparams.symbolrate, feparams.fec, polarization);
+#endif
 
 		if(feparams.frequency < 20000) feparams.frequency = feparams.frequency*1000;
-		if(feparams.u.qpsk.symbol_rate < 50000) feparams.u.qpsk.symbol_rate = feparams.u.qpsk.symbol_rate * 1000;
 		frequency = FREQUENCY_IN_KHZ(feparams.frequency);
 		
 		/* add current transponder to list */

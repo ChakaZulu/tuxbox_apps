@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.169 2009/07/11 18:41:49 seife Exp $
+ * $Id: scan.cpp,v 1.170 2009/09/30 17:34:20 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -39,7 +39,7 @@
 #include <zapit/settings.h>
 #include <xmltree/xmlinterface.h>
 
-#if HAVE_DVB_API_VERSION < 3
+#if !defined HAVE_TRIPLEDRAGON && HAVE_DVB_API_VERSION < 3
 #define frequency Frequency
 #define symbol_rate SymbolRate
 #define inversion Inversion
@@ -223,7 +223,6 @@ int add_transponder(transponder_id_t transponder_id, dvb_frontend_parameters *fe
 	if (transponders.find(transponder_id) == transponders.end())
 	{
 		found_transponders++;
-
 		eventServer->sendEvent
 		(
 			CZapitClient::EVT_SCAN_NUM_TRANSPONDERS,
@@ -393,6 +392,7 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 		{
 			if (emptyTransponder)
 			{
+#ifndef HAVE_TRIPLEDRAGON
 				switch (frontend->getInfo()->type)
 				{
 				case FE_QAM: /* cable */
@@ -438,6 +438,17 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 				default:
 					return;
 				}
+#else
+				fprintf(fd,
+					"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
+					one_flag ? one_tpid : transponder.transport_stream_id,
+					one_flag ? one_onid : transponder.original_network_id,
+					transponder.feparams.frequency,
+					INVERSION_AUTO,	// transponder.feparams.inversion,
+					(unsigned int)transponder.feparams.symbolrate * 1000,
+					CFrontend::FEC2xml(transponder.feparams.fec),
+					transponder.polarization);
+#endif
 				emptyTransponder = false;
 			}
 
@@ -533,10 +544,10 @@ bool write_provider(FILE *fd, const char * const frontendType, const char * cons
 int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellite_position, uint8_t diseqc_pos)
 {
 	uint8_t polarization = 0;
+#ifndef HAVE_TRIPLEDRAGON
 	dvb_frontend_parameters feparams;
 	memset(&feparams, 0x00, sizeof(dvb_frontend_parameters));
 
-	feparams.frequency = xmlGetNumericAttribute(transponder, "frequency", 0);
 	feparams.inversion = INVERSION_AUTO;
 
 	/* cable */
@@ -580,7 +591,15 @@ int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellit
 		feparams.u.ofdm.hierarchy_information = HIERARCHY_AUTO;
 #endif
 	}
-
+#else
+	tunersetup feparams;
+	memset(&feparams, 0, sizeof(tunersetup));
+	feparams.symbolrate = xmlGetNumericAttribute(transponder, "symbol_rate", 0) / 1000;
+	feparams.fec = CFrontend::xml2FEC(xmlGetNumericAttribute(transponder, "fec_inner", 0));
+	polarization = xmlGetNumericAttribute(transponder, "polarization", 0);
+	feparams.polarity = polarization;
+#endif
+	feparams.frequency = xmlGetNumericAttribute(transponder, "frequency", 0);
 		/* read network information table */
 	status = get_nits(&feparams, polarization, satellite_position, diseqc_pos);
 
@@ -626,8 +645,8 @@ void scan_provider(xmlNodePtr search, const char * const providerName, uint8_t d
 	{
 		if (scan_should_be_aborted)
 			return;
-
 		scan_transponder(transponder, satellite_position, diseqc_pos);
+		DBG("after scan_transponder, found_transponders: %d", found_transponders);
 
 		/* next transponder */
 		transponder = transponder->xmlNextNode;
@@ -810,8 +829,13 @@ int copy_to_satellite_inc(TP_params * TP, FILE * fd, FILE * fd1, char * provider
 	//look for sat to be scanned... or end of file
 
 	sprintf(freq, "frequency=\"%d\"", TP->feparams.frequency);
+#ifdef HAVE_TRIPLEDRAGON
+	sprintf(rate, "symbol_rate=\"%d\"", TP->feparams.symbolrate * 1000);
+	sprintf(fec, "fec_inner=\"%d\"", CFrontend::FEC2xml(TP->feparams.fec));
+#else
 	sprintf(rate, "symbol_rate=\"%d\"", TP->feparams.u.qpsk.symbol_rate);
 	sprintf(fec, "fec_inner=\"%d\"", CFrontend::FEC2xml(TP->feparams.u.qpsk.fec_inner));
+#endif
 	sprintf(pol, "polarization=\"%d\"", TP->polarization);
 
 	DBG("%s %s %s %s", freq, rate, fec, pol);
@@ -880,12 +904,15 @@ int scan_transponder(TP_params *TP)
 			break;
 		}
 	printf("[scan_transponder] scanning sat %s diseqc %d\n", providerName, diseqc_pos);
+#ifndef HAVE_TRIPLEDRAGON
 	printf("[scan_transponder] freq %d rate %d fec %d pol %d mod %d\n", TP->feparams.frequency, TP->feparams.u.qam.symbol_rate, CFrontend::FEC2xml(TP->feparams.u.qam.fec_inner), TP->polarization, TP->feparams.u.qam.modulation);
+#else
+	printf("[scan_transponder] freq %d rate %d fec %d pol %d\n", TP->feparams.frequency, TP->feparams.symbolrate, CFrontend::FEC2xml(TP->feparams.fec), TP->polarization);
+#endif
 
 	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, providerName, strlen(providerName) + 1);
 
 	scan_mode = true;
-	TP->feparams.inversion = INVERSION_AUTO;
 
 	satellite_position = driveMotorToSatellitePosition(providerName);
 
@@ -893,6 +920,9 @@ int scan_transponder(TP_params *TP)
 	if (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET)
 		sat_provider = providerName;
 
+#ifndef HAVE_TRIPLEDRAGON
+	TP->feparams.inversion = INVERSION_AUTO;
+#endif
 	get_nits(&(TP->feparams), TP->polarization, satellite_position, diseqc_pos);
 	status = get_sdts(satellite_position, frontendType, sat_provider);
 
@@ -944,7 +974,11 @@ int scan_transponder(TP_params *TP)
 
 abort_scan:
 	stop_scan(status);
+#ifndef HAVE_TRIPLEDRAGON
 	DBG("[scan_transponder] done scan freq %d rate %d fec %d pol %d\n", TP->feparams.frequency, TP->feparams.u.qpsk.symbol_rate, TP->feparams.u.qpsk.fec_inner, TP->polarization);
+#else
+	DBG("[scan_transponder] done scan freq %d rate %d fec %d pol %d\n", TP->feparams.frequency, TP->feparams.symbolrate, TP->feparams.fec, TP->polarization);
+#endif
 	return status;
 }
 
