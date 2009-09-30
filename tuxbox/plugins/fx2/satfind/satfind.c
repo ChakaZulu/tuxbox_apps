@@ -32,12 +32,29 @@
 #include <errno.h>
 #include <stdint.h>
 
-#include <dbox/lcd-ks0713.h>
 #include <config.h>
 
 #include "icons.h"
 #include "font.h"
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <tuxbox/zapit/td-demux-compat.h>
+#include <tuxbox/zapit/td-frontend-compat.h>
+#define FE_READ_BER	IOC_TUNER_GET_ERRORS
+#include <tddevices.h>
+#define DMX "/dev/" DEVICE_NAME_DEMUX "0"
+#define FE  "/dev/" DEVICE_NAME_TUNER "0"
+#define LCD "/dev/" DEVICE_NAME_LCD
+#include <td-compat/tdlcd-plugin-compat.c>
+// these are the values of the dbox display!
+#define LCD_ROWS	8
+#define LCD_COLS	120
+#define LCD_BUFFER_SIZE	(8 * 120)
+#define LCD_PIXEL_OFF	0
+#define LCD_PIXEL_ON	1
+#define LCD_PIXEL_INV	2
+#else
+#include <dbox/lcd-ks0713.h>
 #if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/dmx.h> 
 #include <linux/dvb/frontend.h> 
@@ -52,6 +69,7 @@
 #define dmx_sct_filter_params dmxSctFilterParams
 #endif
 #define LCD "/dev/dbox/lcd0"
+#endif
 
 #include <rcinput.h>
 #include <plugin.h>
@@ -71,9 +89,16 @@ struct signal {
 
 int max_values[3]={0,0xFFFF,0xFFFF}, lcd_fd;
 
+#ifndef HAVE_TRIPLEDRAGON
 int draw_screen(screen_t screen,int lcd_fd) {
   return write(lcd_fd,screen,LCD_BUFFER_SIZE);
 }
+#else
+int draw_screen(screen_t screen, int lcd_fd) {
+  dbox2_to_tdLCD(lcd_fd, screen);
+  return 0;
+}
+#endif
 
 void put_pixel(screen_t screen,int x, int y,char col) {
   switch (col&3) {
@@ -137,6 +162,12 @@ void draw_bmp(screen_t screen,char *icon,int x, int y) {
 }
 
 int get_signal(struct signal *signal_data, int fe_fd) {
+#ifdef HAVE_TRIPLEDRAGON
+  if (ioctl(fe_fd, IOC_TUNER_SET_ERROR_SOURCE, QPSKERRORSOURCE_QPSK_BIT_ERRORS) < 0) {
+    fprintf(stderr,"frontend ioctl - Can't set error source: %d (%m)\n", errno);
+    return -1;
+  }
+#endif
   if(ioctl(fe_fd,FE_READ_BER,&signal_data->ber)<0) {
     fprintf(stderr,"frontend ioctl - Can't read BER: %d\n",errno);
     return -1;
@@ -278,12 +309,14 @@ int satfind_exec() {
     return -1;
   }
 
+#ifndef HAVE_TRIPLEDRAGON
   /* switch LCD to binary mode and clear it */
   lcd_mode=LCD_MODE_BIN;
   if ((ioctl(lcd_fd,LCD_IOCTL_ASC_MODE,&lcd_mode)<0) || (ioctl(lcd_fd,LCD_IOCTL_CLEAR)<0)) {
     perror("[satfind.so] error setting LCD-mode/clearing LCD");
     return -1;
   }
+#endif
   memset(screen,0,sizeof(screen));
   memset(&old_signal,0,sizeof(old_signal));
   
@@ -291,8 +324,14 @@ int satfind_exec() {
   memset(&flt, 0, sizeof(flt));
 
   flt.pid=0x10;
+#ifndef HAVE_TRIPLEDRAGON
   flt.filter.filter[0]=0x40;
   flt.filter.mask[0]=0xFF;
+#else
+  flt.filter[0] = 0x40;
+  flt.mask[0] = 0xff;
+  flt.filter_length = 3;
+#endif
   flt.timeout=10000;
   flt.flags=DMX_IMMEDIATE_START;
   

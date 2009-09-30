@@ -22,7 +22,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <config.h>
+
+#ifdef HAVE_TRIPLEDRAGON
+#include <td-compat/tdlcd-plugin-compat.c>
+#else
 #include <dbox/lcd-ks0713.h>
+#endif
 
 #include "sinus.h"
 #include <rcinput.h>
@@ -48,10 +54,12 @@ typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 int lcd_fd;
 
 void clr() {
+#ifndef HAVE_TRIPLEDRAGON
 	if (ioctl(lcd_fd,LCD_IOCTL_CLEAR) < 0) {
 		perror("clr()");
 		exit(1);
 	}
+#endif
 }
 
 void init() {
@@ -69,10 +77,15 @@ void init() {
 	}*/
 }
 
+#ifdef HAVE_TRIPLEDRAGON
+void draw_screen(screen_t s) {
+	dbox2_to_tdLCD(lcd_fd, s);
+}
+#else
 void draw_screen(screen_t s) {
 	write(lcd_fd, s, LCD_BUFFER_SIZE);
 }
-
+#endif
 
 unsigned char Sqrt[SQRT];
 unsigned char field[FIELD_Y>>3][FIELD_X];
