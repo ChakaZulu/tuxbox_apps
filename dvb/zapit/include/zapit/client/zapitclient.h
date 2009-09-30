@@ -501,7 +501,12 @@ class CZapitClient:public CBasicClient
 	void PlaybackPES();
 	int PlaybackState();
 #endif
-
+#ifdef HAVE_TRIPLEDRAGON
+	void setZoom(int zoomlevel);
+	int getZoom(void);
+	void setPIG(int x, int y, int w, int h, bool aspect);
+	int VdecIoctl(int request, int arg);
+#endif
 
 	/****************************************/
 	/*					*/
@@ -520,8 +525,13 @@ class CZapitClient:public CBasicClient
 	void unRegisterEvent(const unsigned int eventID, const unsigned int clientID);
 };
 
+#ifdef HAVE_TRIPLEDRAGON
+#define PAL	1
+#define NTSC	0
+#else
 #define PAL	0
 #define NTSC	1
+#endif
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.125 2009/09/04 11:25:25 rhabarber1848 Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.126 2009/09/30 18:11:12 seife Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -981,7 +981,7 @@ void CZapitClient::setStandby(const bool enable)
 
 void CZapitClient::setVideoSystem_a(int video_system)
 {
-	if (video_system == 0)
+	if (video_system == PAL)
 		send(CZapitMessages::CMD_SET_PAL);
 	else
 		send(CZapitMessages::CMD_SET_NTSC);
@@ -1083,6 +1083,48 @@ int CZapitClient::PlaybackState()
 	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	close_connection();
+	return response.number;
+}
+#endif
+#ifdef HAVE_TRIPLEDRAGON
+void CZapitClient::setZoom(int zoomlevel)
+{
+	CZapitMessages::commandInt msg;
+	msg.val = zoomlevel;
+	send(CZapitMessages::CMD_SET_ZOOMLEVEL, (char*)&msg, sizeof(msg));
+	close_connection();
+}
+
+int CZapitClient::getZoom(void)
+{
+	send(CZapitMessages::CMD_GET_ZOOMLEVEL);
+	CZapitMessages::responseGeneralInteger response;
+	CBasicClient::receive_data((char*)&response, sizeof(response));
+
+	close_connection();
+	return response.number;
+}
+
+void CZapitClient::setPIG(int x, int y, int w, int h, bool aspect)
+{
+	CZapitMessages::commandPig msg;
+	msg.x = x;
+	msg.y = y;
+	msg.w = w;
+	msg.h = h;
+	msg.aspect = aspect;
+	send(CZapitMessages::CMD_SET_PIG, (char*)&msg, sizeof(msg));
+	close_connection();
+}
+
+int CZapitClient::VdecIoctl(int request, int arg)
+{
+	CZapitMessages::commandIoctl msg;
+	CZapitMessages::responseGeneralInteger response;
+	msg.request = request;
+	msg.arg = arg;
+	send(CZapitMessages::CMD_VID_IOCTL, (char*)&msg, sizeof(msg));
+	CBasicClient::receive_data((char*)&response, sizeof(response));
 	return response.number;
 }
 #endif

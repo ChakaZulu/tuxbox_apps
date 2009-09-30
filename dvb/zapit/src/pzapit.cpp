@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.66 2009/09/04 11:25:26 rhabarber1848 Exp $
+ * $Id: pzapit.cpp,v 1.67 2009/09/30 18:11:13 seife Exp $
  *
  * simple commandline client for zapit
  *
@@ -77,6 +77,10 @@ int usage (const char * basename)
 		  << "\t--spts\t\t\tset decoder to SPTS mode" << std::endl
 		  << "\t--decmode\t\tget decoder mode (0=PES, 1=SPTS)" << std::endl
 #endif
+#ifdef HAVE_TRIPLEDRAGON
+		  << "\t--zoom <percent> zoom picture" << std::endl
+		  << "\t--pig <x y w h a> PIG" << std::endl
+#endif
 		;
 	return -1;
 }
@@ -125,6 +129,16 @@ int main (int argc, char** argv)
 	bool pes = false;
 	bool spts = false;
 	bool decmode = false;
+#endif
+#ifdef HAVE_TRIPLEDRAGON
+	bool zoom = false;
+	int zoomlevel = 0;
+	bool pig = false;
+	int pig_x = 0;
+	int pig_y = 0;
+	int pig_w = 0;
+	int pig_h = 0;
+	int pig_a = 0;
 #endif
 	bool getchannel = false;
 	bool getmode = false;
@@ -356,6 +370,36 @@ int main (int argc, char** argv)
                         continue;
                 }
 #endif
+#ifdef HAVE_TRIPLEDRAGON
+		else if (!strncmp(argv[i], "--zoom", 6))
+		{
+			zoom = true;
+			if (i < argc - 1) {
+				sscanf(argv[++i], "%d", &zoomlevel);
+			}
+			continue;
+		}
+		else if (!strncmp(argv[i], "--pig", 5))
+		{
+			pig = true;
+			if (i < argc - 1) {
+				sscanf(argv[++i], "%d", &pig_x);
+			}
+			if (i < argc - 1) {
+				sscanf(argv[++i], "%d", &pig_y);
+			}
+			if (i < argc - 1) {
+				sscanf(argv[++i], "%d", &pig_w);
+			}
+			if (i < argc - 1) {
+				sscanf(argv[++i], "%d", &pig_h);
+			}
+			if (i < argc - 1) {
+				sscanf(argv[++i], "%d", &pig_a);
+			}
+			continue;
+		}
+#endif
 		else if (!strncmp(argv[i], "-vol", 4))
 		{
 			if (i < argc - 1)
@@ -511,7 +555,21 @@ int main (int argc, char** argv)
 		return 0;
 	}
 #endif
-
+#ifdef HAVE_TRIPLEDRAGON
+	if (zoom)
+	{
+		if (zoomlevel > 0)
+			zapit.setZoom(zoomlevel);
+		std::cout << "zoom = " << zapit.getZoom() << "%" << std::endl;
+		return 0;
+	}
+	if (pig)
+	{
+		zapit.setPIG(pig_x, pig_y, pig_w, pig_h, !!pig_a);
+		std::cout << "pig = " << pig_x << "." << pig_y << "." << pig_w << "." << pig_h << ":" << pig_a << std::endl;
+		return 0;
+	}
+#endif
 	/* reload services */
 	if (reload)
 	{

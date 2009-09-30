@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.75 2009/04/28 06:43:01 rhabarber1848 Exp $
+ * $Id: zapit.h,v 1.76 2009/09/30 18:11:12 seife Exp $
  */
 
 #ifndef __zapit_h__
@@ -38,7 +38,12 @@ void setDemuxMode(int);
 #endif
 void setFastZap(int);
 
+#ifdef HAVE_TRIPLEDRAGON
+#define PAL	1
+#define NTSC	0
+#else
 #define PAL	0
 #define NTSC	1
+#endif
 
 #endif /* __zapit_h__ */
