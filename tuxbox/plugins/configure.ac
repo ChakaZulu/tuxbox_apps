@@ -9,11 +9,14 @@ AC_PROG_CXX
 AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 
+TUXBOX_BOXTYPE
+
+if test "$BOXTYPE" != "tripledragon"; then
+# we neither have dvb headers nor driver sources nor the dbox capture api on TD ;)
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 TUXBOX_APPS_CAPTURE
-
-TUXBOX_BOXTYPE
+fi
 
 # needed by enigma/movieplayer
 TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
