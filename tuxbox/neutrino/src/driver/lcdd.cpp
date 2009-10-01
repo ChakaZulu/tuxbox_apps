@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.79 2009/10/01 21:08:12 seife Exp $
+	$Id: lcdd.cpp,v 1.80 2009/10/01 21:17:17 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -221,12 +221,12 @@ void CLCD::displayUpdate()
 		display.update();
 }
 
+#ifndef HAVE_TRIPLEDRAGON
 void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const int inverse, const int bias)
 {
 #if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	if (!display.isAvailable())
 		return;
-
 	int fd;
 	if (power == 0)
 		dimm = 0;
@@ -277,6 +277,23 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 	}
 #endif
 }
+#else
+void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const int inverse, const int bias)
+{
+	int fd = open("/dev/" DEVICE_NAME_LCD, O_RDWR);
+	if (fd < 0)
+	{
+		perror("CLCD::setlcdparameter open " DEVICE_NAME_LCD);
+		return;
+	}
+	if (ioctl(fd, IOC_LCD_INVERS, inverse & 1) < 0)
+		perror("CLCD::setlcdparameter ioctl IOC_LCD_INVERS");
+	if (ioctl(fd, IOC_LCD_POTI, contrast) < 0)
+		perror("CLCD::setlcdparameter ioctl IOC_LCD_POTI");
+
+	close(fd);
+}
+#endif
 
 void CLCD::setlcdparameter(void)
 {
