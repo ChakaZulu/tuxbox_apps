@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.19 2009/09/30 19:09:00 dbt Exp $
+	$Id: movieinfo.cpp,v 1.20 2009/10/01 20:02:17 seife Exp $
 
 	Kommentar:
 
@@ -53,6 +53,7 @@
 #include <gui/widget/msgbox.h>
 #include <gui/movieinfo.h>
 #include <zapit/client/zapittools.h> /* ZapitTools::Latin1_to_UTF8 */
+#include <driver/encoding.h>
 #define TRACE printf
 #define VLC_URI "vlc://"
 
@@ -819,7 +820,8 @@ static inline std::string convertVDRline(char *text, int len)
 {
 	std::string s;
 	s = ((std::string)text).substr(2, len - 2);
-	s = ZapitTools::Latin1_to_UTF8(s.c_str());
+	if (!isUTF8(s))
+		s = Latin1_to_UTF8(s);
 	return s;
 }
 
@@ -849,6 +851,7 @@ bool CMovieInfo::parseInfoVDR(char* text, MI_MOVIE_INFO* movie_info)
 			break;
 		case 'D':	// Long EPG
 			movie_info->epgInfo2 = convertVDRline(text, nl - text);
+			StrSearchReplace(movie_info->epgInfo2, "|", "\n");
 			break;
 		case 'E':	// EPG ID, start time, duration
 			tmp = convertVDRline(text, nl - text);

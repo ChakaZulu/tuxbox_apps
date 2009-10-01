@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/encoding.h,v 1.2 2003/09/27 11:48:09 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/encoding.h,v 1.3 2009/10/01 20:02:17 seife Exp $
  *
  * conversion of character encodings - d-box2 linux project
  *
@@ -27,5 +27,8 @@
 #include <string>
 
 std::string Latin1_to_UTF8(const std::string & s);
+
+bool isUTF8(const char* text, int len);
+bool isUTF8(const std::string &s);
 
 #endif /* __neutrino__encoding_h__ */
