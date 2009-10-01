@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.77 2009/08/23 19:12:58 dbt Exp $
+	$Id: lcdd.cpp,v 1.78 2009/10/01 20:10:40 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -36,6 +36,7 @@
 #include <neutrino.h>
 #include <system/settings.h>
 
+#include <driver/encoding.h>
 #include <driver/newclock.h>
 #include <lcddisplay/lcddisplay.h>
 #include <gui/widget/icons.h>
@@ -355,6 +356,8 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 	   this is where the "-1 to 120" intead of "0 to 119" comes from */
 	display.draw_fill_rect(-1, 10, 120, 51, CLCDDisplay::PIXEL_OFF);
 
+	bool big_utf8 = false;
+	bool small_utf8 = false;
 	std::string cname[2];
 	std::string event[4];
 	int namelines = 0, eventlines = 0, maxnamelines = 2;
@@ -364,12 +367,13 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 	if ((showmode & 1) && !big.empty())
 	{
 		bool dumb = false;
+		big_utf8 = isUTF8(big);
 		while (true)
 		{
 			namelines = 0;
 			std::string title = big;
 			do { // first try "intelligent" splitting
-				cname[namelines] = splitString(title, 120, fonts.channelname, dumb, true);
+				cname[namelines] = splitString(title, 120, fonts.channelname, dumb, big_utf8);
 				title = removeLeadingSpaces(title.substr(cname[namelines].length()));
 				namelines++;
 			} while (title.length() > 0 && namelines < maxnamelines);
@@ -387,12 +391,13 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 	if ((showmode & 2) && !small.empty())
 	{
 		bool dumb = false;
+		small_utf8 = isUTF8(small);
 		while (true)
 		{
 			eventlines = 0;
 			std::string title = small;
 			do { // first try "intelligent" splitting
-				event[eventlines] = splitString(title, 120, fonts.menu, dumb, false);
+				event[eventlines] = splitString(title, 120, fonts.menu, dumb, small_utf8);
 				title = removeLeadingSpaces(title.substr(event[eventlines].length()));
 				eventlines++;
 			} while (title.length() >0 && eventlines < maxeventlines);
@@ -411,10 +416,10 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 		y += 14;
 		if (centered)
 		{
-			int w = fonts.channelname->getRenderWidth(cname[i].c_str(), true);
+			int w = fonts.channelname->getRenderWidth(cname[i].c_str(), big_utf8);
 			x = 60 - (w / 2);
 		}
-		fonts.channelname->RenderString(x, y, 130, cname[i].c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+		fonts.channelname->RenderString(x, y, 130, cname[i].c_str(), CLCDDisplay::PIXEL_ON, 0, big_utf8);
 	}
 	y++;
 	if (eventlines > 0 && namelines > 0 && showmode & 4)
@@ -428,10 +433,10 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 			y += 10;
 			if (centered)
 			{
-				int w = fonts.menu->getRenderWidth(event[i].c_str(), false);
+				int w = fonts.menu->getRenderWidth(event[i].c_str(), small_utf8);
 				x = 60 - (w / 2);
 			}
-			fonts.menu->RenderString(x, y, 130, event[i].c_str(), CLCDDisplay::PIXEL_ON, 0,false); // UTF-8
+			fonts.menu->RenderString(x, y, 130, event[i].c_str(), CLCDDisplay::PIXEL_ON, 0, small_utf8);
 		}
 	}
 
@@ -441,7 +446,7 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 	displayUpdate();
 }
 
-void CLCD::showMoviename(const std::string name) // UTF-8
+void CLCD::showMoviename(const std::string name)
 {
 	// is this needed?
 	if (mode != MODE_TVRADIO)
@@ -450,7 +455,7 @@ void CLCD::showMoviename(const std::string name) // UTF-8
 	showTextScreen(name, "", 1, false, false);
 }
 
-void CLCD::showServicename(const std::string name, const bool perform_wakeup) // UTF-8
+void CLCD::showServicename(const std::string name, const bool perform_wakeup)
 {
 	/*
 	   1 = show servicename
@@ -680,9 +685,9 @@ void CLCD::showAudioTrack(const std::string & artist, const std::string & title,
 	display.draw_fill_rect (-1,10,121,24, CLCDDisplay::PIXEL_OFF);
 	display.draw_fill_rect (-1,20,121,37, CLCDDisplay::PIXEL_OFF);
 	display.draw_fill_rect (-1,33,121,50, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,22, 125, artist.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
-	fonts.menu->RenderString(0,35, 125, album.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
-	fonts.menu->RenderString(0,48, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+	fonts.menu->RenderString(0, 22, 125, artist.c_str(), CLCDDisplay::PIXEL_ON, 0, isUTF8(artist));
+	fonts.menu->RenderString(0, 35, 125, album.c_str(),  CLCDDisplay::PIXEL_ON, 0, isUTF8(album));
+	fonts.menu->RenderString(0, 48, 125, title.c_str(),  CLCDDisplay::PIXEL_ON, 0, isUTF8(title));
 	wake_up();
 	displayUpdate();
 
