@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.215 2009/08/07 07:22:46 rhabarber1848 Exp $
+	$Id: channellist.cpp,v 1.216 2009/10/02 13:14:22 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -1012,14 +1012,14 @@ void CChannelList::paintDetails(unsigned int index)
 		char cSeit[50]; // UTF-8
 
 		struct		tm *pStartZeit = localtime(&p_event->startTime);
-		unsigned 	seit = ( time(NULL) - p_event->startTime ) / 60;
+		unsigned    seit = ( time(NULL) - p_event->startTime + 30) / 60;
 
 		if (displayNext) {
 			sprintf(cNoch, "(%d min)", p_event->duration / 60);
 			sprintf(cSeit, g_Locale->getText(LOCALE_CHANNELLIST_START), pStartZeit->tm_hour, pStartZeit->tm_min);
 		} else {
 			sprintf(cSeit, g_Locale->getText(LOCALE_CHANNELLIST_SINCE), pStartZeit->tm_hour, pStartZeit->tm_min);
-			int noch = (p_event->startTime + p_event->duration - time(NULL)) / 60;
+			int noch = (p_event->duration / 60) - seit;
 			if ((noch< 0) || (noch>=10000))
 				noch= 0;
 			sprintf(cNoch, "(%d / %d min)", seit, noch);
