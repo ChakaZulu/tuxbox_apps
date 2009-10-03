@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.52 2009/09/27 14:54:14 seife Exp $
+	$Id: framebuffer.h,v 1.53 2009/10/03 16:34:39 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -34,6 +34,10 @@
 
 #include <stdint.h>
 #include <string>
+
+#ifdef HAVE_TRIPLEDRAGON
+#include <tdgfx/stb04gfx.h>
+#endif
 
 #ifdef FB_USE_PALETTE
 #define fb_pixel_t uint8_t
@@ -93,6 +97,10 @@ class CFrameBuffer
 		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
 		std::string getIconFilePath(const std::string & filename); //return alternatively or default path for user-defined icons
 
+#ifdef HAVE_TRIPLEDRAGON
+		int			gfxfd;
+		Stb04GFXOsdControl	gfxctrl;
+#endif
 		int 	kd_mode;
 		struct	vt_mode vt_mode;
 		bool	active;
@@ -112,7 +120,9 @@ class CFrameBuffer
 	
 		void init(const char * const fbDevice = "/dev/fb/0");
 		int setMode(unsigned int xRes, unsigned int yRes, unsigned int bpp);
-
+#ifdef HAVE_TRIPLEDRAGON
+		void makeTransparent(void);
+#endif
 
 		int getFileHandle() const; //only used for plugins (games) !!
 		t_fb_var_screeninfo *getScreenInfo();

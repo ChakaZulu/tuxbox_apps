@@ -47,7 +47,12 @@ int convertSetupColor2RGB(const unsigned char r, const unsigned char g, const un
 
 int convertSetupAlpha2Alpha(unsigned char alpha)
 {
+#ifndef HAVE_TRIPLEDRAGON
+	/* TODO: check on dreamboxen */
 	return 0x7777 * (int)alpha / 100;
+#else
+	return 0xFFFF * (int)alpha / 100;
+#endif
 }
 
 void recalcColor(unsigned char &orginal, int fade)

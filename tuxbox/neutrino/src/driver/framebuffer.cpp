@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.77 2009/10/03 10:09:29 seife Exp $
+	$Id: framebuffer.cpp,v 1.78 2009/10/03 16:34:39 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -73,6 +73,9 @@ CFrameBuffer::CFrameBuffer()
 
 	fd	= 0;
 	tty	= 0;
+#ifdef HAVE_TRIPLEDRAGON
+	gfxfd = -1;
+#endif
 }
 
 CFrameBuffer* CFrameBuffer::getInstance()
@@ -188,6 +191,15 @@ CFrameBuffer::~CFrameBuffer()
 		delete[] backupBackground;
 	}
 
+#ifdef HAVE_TRIPLEDRAGON
+	if (gfxfd > -1)
+	{
+		if (ioctl(gfxfd, STB04GFX_OSD_SETCONTROL, &gfxctrl) < 0)
+			fprintf(stderr, "[Framebuffer] STB04GFX_OSD_SETCONTROL failed: %m\n");
+		close(gfxfd);
+		gfxfd = -1;
+	}
+#endif
 #ifdef RETURN_FROM_GRAPHICS_MODE
 	if (-1 == ioctl(tty,KDSETMODE, kd_mode))
 		perror("ioctl KDSETMODE");
@@ -206,6 +218,58 @@ CFrameBuffer::~CFrameBuffer()
 	if (virtual_fb)
 		delete[] virtual_fb;
 }
+
+#ifdef HAVE_TRIPLEDRAGON
+void CFrameBuffer::makeTransparent()
+{
+	// fprintf(stderr, "%s\n", __PRETTY_FUNCTION__);
+	Stb04GFXOsdControl tmpctrl;
+	if (gfxfd < 0)
+	{
+		gfxfd = open("/dev/stb/tdgfx", O_RDONLY);
+		if (ioctl(gfxfd, STB04GFX_OSD_ONOFF, 1) < 0)
+			fprintf(stderr, "[CFB::%s] STB04GFX_OSD_ONOFF failed: %m\n", __FUNCTION__);
+		if (ioctl(gfxfd, STB04GFX_OSD_GETCONTROL, &gfxctrl) < 0)
+			fprintf(stderr, "[CFB::%s:%d] STB04GFX_OSD_GETCONTROL failed: %m\n", __FUNCTION__, __LINE__);
+		fprintf(stderr, "FB: x: %d y: %d w: %d h: %d off: %d depth: %d ga: %d use_ga: %d ff: %d 169ad: %d sqp: %d gc: %d undef: %d\n",
+			gfxctrl.x,
+			gfxctrl.y,
+			gfxctrl.width,
+			gfxctrl.height,
+			gfxctrl.offset,
+			gfxctrl.depth,
+			(int)gfxctrl.global_alpha,
+			gfxctrl.use_global_alpha,
+			gfxctrl.enable_flicker_filter,
+			gfxctrl.enable_16_9_adjust,
+			gfxctrl.enable_square_pixel_filter,
+			gfxctrl.enable_gamma_correction,
+			gfxctrl.undefined_Colors_Transparent);
+		memcpy(&tmpctrl, &gfxctrl, sizeof(tmpctrl));
+#if 0
+//defaults after boot:
+//[zapit.cpp:main:2991] x: 0 y: 0 w: 720 h: 576 off: 0 depth: 32 ga: 176 use_ga: 1 ff: 1 169ad: 0 sqp: 0 gc: 0 undef: 0
+	gfxctrl.use_global_alpha = 1;
+	gfxctrl.global_alpha=176; //default
+	gfxctrl.enable_gamma_correction = 1;
+#endif
+	/* this is needed, otherwise the picture will be shaded
+	   unfortunately, this is all pretty much undocumented... */
+	}
+	else
+	{
+		if (ioctl(gfxfd, STB04GFX_OSD_GETCONTROL, &tmpctrl) < 0)
+			fprintf(stderr, "[CFB::%s:%d] STB04GFX_OSD_GETCONTROL failed: %m\n", __FUNCTION__, __LINE__);
+	}
+	/* if "use_global_alpha = 1" then the transparency of the framebuffer does not work.
+	   but we can set the global transparency. global transparency means that there is
+	   no individual setting, so we don't use it. */
+	tmpctrl.use_global_alpha = 0;
+	tmpctrl.undefined_Colors_Transparent = 1;
+	if (ioctl(gfxfd, STB04GFX_OSD_SETCONTROL, &tmpctrl) < 0)
+		fprintf(stderr, "[CFB::%s] STB04GFX_OSD_SETCONTROL failed: %m\n", __FUNCTION__);
+}
+#endif
 
 int CFrameBuffer::getFileHandle() const
 {
@@ -396,6 +460,9 @@ void CFrameBuffer::paletteSet(struct fb_cmap *map)
 		realcolor[i] = make16color(cmap.red[i], cmap.green[i], cmap.blue[i], cmap.transp[i],
 					   rl, ro, gl, go, bl, bo, tl, to);
 	}
+#endif
+#ifdef HAVE_TRIPLEDRAGON
+	makeTransparent();
 #endif
 }
 
