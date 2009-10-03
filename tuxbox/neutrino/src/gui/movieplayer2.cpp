@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.46 2009/09/27 13:49:15 seife Exp $
+  $Id: movieplayer2.cpp,v 1.47 2009/10/03 14:28:51 seife Exp $
 
 
   License: GPL
@@ -697,7 +697,7 @@ bool VlcRequestStream(std::string mrl, int transcodeVideo, int transcodeAudio)
 	
 	std::string url = baseurl;
 	url += "requests/status.xml?command=in_play&input=";
-	url += mrl;
+	url += url_escape(mrl.c_str());
 	url += "%20%3Asout%3D";
 	url += url_escape(souturl.c_str());
 	printf("[movieplayer.cpp] URL(enc) : %s\n", url.c_str());
@@ -3285,7 +3285,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.46 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.47 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
