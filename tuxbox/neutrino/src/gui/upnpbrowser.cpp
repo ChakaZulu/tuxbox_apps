@@ -1045,6 +1045,7 @@ void CUpnpBrowserGui::paintDevice()
 	if(m_theight > 26)
 		ypos = (m_theight - 26) / 2 + m_y + m_title_height;
 	m_frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, m_x + m_width - 30, ypos);
+#if 0
 	if( CNeutrinoApp::getInstance()->isMuted() )
 	{
 		xpos = m_x + m_width - 75;
@@ -1053,6 +1054,7 @@ void CUpnpBrowserGui::paintDevice()
 			ypos = (m_theight - 32) / 2 + m_y + m_title_height;
 		m_frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, xpos, ypos);
 	}
+#endif
 
 	// Items
 	for (unsigned int count=0;count<m_listmaxshow;count++)
@@ -1166,6 +1168,7 @@ void CUpnpBrowserGui::paintItem(std::vector<UPnPEntry> *entry, unsigned int sele
 	if(m_theight > 26)
 		ypos = (m_theight - 26) / 2 + m_y + m_title_height;
 	m_frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, m_x + m_width - 30, ypos);
+#if 0
 	if( CNeutrinoApp::getInstance()->isMuted() )
 	{
 		xpos = m_x + m_width - 75;
@@ -1174,6 +1177,7 @@ void CUpnpBrowserGui::paintItem(std::vector<UPnPEntry> *entry, unsigned int sele
 			ypos = (m_theight - 32) / 2 + m_y + m_title_height;
 		m_frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, xpos, ypos);
 	}
+#endif
 
 	// Items
 	for (unsigned int count=0;count<m_listmaxshow;count++)
