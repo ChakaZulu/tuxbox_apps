@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.78 2009/10/03 16:34:39 seife Exp $
+	$Id: framebuffer.cpp,v 1.79 2009/10/03 22:19:36 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -66,6 +66,8 @@ CFrameBuffer::CFrameBuffer()
 	cmap.transp		= trans;
 	backgroundColor	= 0;
 	background		= NULL;
+	mute_save_bg		= NULL;
+	mute_shown		= false;
 
 	useBackgroundPaint	= false;
 	backupBackground	= NULL;
@@ -185,6 +187,9 @@ CFrameBuffer::~CFrameBuffer()
 	{
 		delete[] background;
 	}
+
+	if (mute_save_bg)
+		delete[] mute_save_bg;
 
 	if (backupBackground)
 	{
@@ -591,6 +596,10 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 	width  = (header.width_hi  << 8) | header.width_lo;
 	height = (header.height_hi << 8) | header.height_lo;
 
+	bool muted = checkMute(x, width, y, height);
+	if (muted)
+		paintMuteIcon(false, mute_x, mute_y);
+
 	unsigned char pixbuf[768];
 
 	uint8_t * d = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
@@ -613,6 +622,10 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 		d += stride;
 	}
 	close(icon_fd);
+
+	if (muted)
+		paintMuteIcon(true, mute_x, mute_y);
+
 	return true;
 }	
 
@@ -638,7 +651,11 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 
 	width  = (header.width_hi  << 8) | header.width_lo;
 	height = (header.height_hi << 8) | header.height_lo;
-	
+
+	bool muted = checkMute(x, width, y, height);
+	if (muted)
+		paintMuteIcon(false, mute_x, mute_y);
+
 	unsigned char pixbuf[768];
 	uint8_t * d = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 	fb_pixel_t * d2;
@@ -667,6 +684,9 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 		}
 		d += stride;
 	}
+
+	if (muted)
+		paintMuteIcon(true, mute_x, mute_y);
 
 	close(icon_fd);
 	return true;
@@ -748,6 +768,10 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 #else
 	fb_pixel_t *dest0, *dest1;
 #endif
+
+	bool muted = checkMute(x, dx, y, dy);
+	if (muted)
+		paintMuteIcon(false, mute_x, mute_y);
 
 	if(R)
 	{
@@ -845,6 +869,9 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 #endif
 		pos += line;
 	}
+
+	if (muted)
+		paintMuteIcon(true, mute_x, mute_y);
 }
 
 void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, const fb_pixel_t col)
@@ -1129,6 +1156,10 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	}
 	else
 	{
+		bool muted = checkMute(x, dx, y, dy);
+		if (muted)
+			paintMuteIcon(false, mute_x, mute_y);
+
 		uint8_t * fbpos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 		fb_pixel_t * bkpos = background + x + BACKGROUNDIMAGEWIDTH * y;
 		for(int count = 0;count < dy; count++)
@@ -1137,6 +1168,8 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 			fbpos += stride;
 			bkpos += BACKGROUNDIMAGEWIDTH;
 		}
+		if (muted)
+			paintMuteIcon(true, mute_x, mute_y);
 	}
 }
 
@@ -1144,6 +1177,10 @@ void CFrameBuffer::paintBackground()
 {
 	if (!getActive())
 		return;
+
+	bool muted = mute_shown; // no need to check region...
+	if (muted)
+		paintMuteIcon(false, mute_x, mute_y);
 
 	if (useBackgroundPaint && (background != NULL))
 	{
@@ -1158,12 +1195,19 @@ void CFrameBuffer::paintBackground()
 		paintBoxRel(0, 0, BACKGROUNDIMAGEWIDTH, 576, backgroundColor);
 #endif
 	}
+
+	if (muted)
+		paintMuteIcon(true, mute_x, mute_y);
 }
 
 void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, fb_pixel_t * const memp)
 {
 	if (!getActive())
 		return;
+
+	bool muted = checkMute(x, dx, y, dy);
+	if (muted)
+		paintMuteIcon(false, mute_x, mute_y);
 
 	uint8_t * fbpos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 	fb_pixel_t * bkpos = memp;
@@ -1174,12 +1218,18 @@ void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, fb_pixel_t * const m
 		bkpos += dx;
 	}
 
+	if (muted)
+		paintMuteIcon(true, mute_x, mute_y);
 }
 
 void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, fb_pixel_t * const memp)
 {
 	if (!getActive())
 		return;
+
+	bool muted = checkMute(x, dx, y, dy);
+	if (muted)
+		paintMuteIcon(false, mute_x, mute_y);
 
 	uint8_t * fbpos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 	fb_pixel_t * bkpos = memp;
@@ -1189,6 +1239,9 @@ void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, fb_pixel_t * cons
 		fbpos += stride;
 		bkpos += dx;
 	}
+
+	if (muted)
+		paintMuteIcon(true, mute_x, mute_y);
 }
 
 void CFrameBuffer::switch_signal (int signal)
@@ -1213,6 +1266,67 @@ void CFrameBuffer::switch_signal (int signal)
 			memcpy(thiz->lfb, virtual_fb, thiz->stride * thiz->yRes);
 		else
 			memset(thiz->lfb, 0, thiz->stride * thiz->yRes);
+	}
+}
+
+void CFrameBuffer::setScreenSize(int sx, int sy, int ex, int ey)
+{
+	screen_StartX = sx;
+	screen_StartY = sy;
+	screen_EndX = ex;
+	screen_EndY = ey;
+}
+
+// returns if area overlaps mute icon
+bool CFrameBuffer::checkMute(int xs, int dx, int ys, int dy)
+{
+	if (! mute_shown)
+		return false;
+	if (ys > mute_y + 40)
+		return false;
+	if (xs + dx < mute_x)
+		return false;
+	if (xs > mute_x + 40)
+		return false;
+	if (ys + dy < mute_y)
+		return false;
+
+	// fprintf(stderr, "%s xs: %d dx: %d ys: %d dy: %d m_x: %d m_y: %d\n", __FUNCTION__, xs, dx, ys, dy, mute_x, mute_y);
+	return true;
+}
+
+void CFrameBuffer::paintMuteIcon(bool is_visible, int _x, int _y)
+{
+	if (_x < 0)
+		mute_x = screen_EndX - MUTE_WIDTH;
+	else
+		mute_x = _x;
+	if (_y < 0)
+		mute_y = screen_StartY;
+	else
+		mute_y = _y;
+
+	// fprintf(stderr, "%s: visible: %d mute_shown: %d\n", __FUNCTION__, is_visible, mute_shown);
+	if (mute_shown == is_visible) // nothing to do.
+			return;
+	if (is_visible)
+	{
+		if (! mute_save_bg)
+			mute_save_bg = new fb_pixel_t[MUTE_WIDTH * MUTE_HEIGHT];
+		if (mute_save_bg)
+			SaveScreen(mute_x, mute_y, MUTE_WIDTH, MUTE_HEIGHT, mute_save_bg);
+
+		paintBoxRel(mute_x, mute_y, MUTE_WIDTH, MUTE_HEIGHT, COL_INFOBAR_PLUS_0, 12); // 12 = RADIUS_LARGE
+		paintIcon(NEUTRINO_ICON_BUTTON_MUTE, mute_x + 4, mute_y + 4);
+		mute_shown = true;
+	}
+	else
+	{
+		mute_shown = false;
+		if (mute_save_bg)
+			RestoreScreen(mute_x, mute_y, MUTE_WIDTH, MUTE_HEIGHT, mute_save_bg);
+		else
+			paintBackgroundBoxRel(mute_x, mute_y, MUTE_WIDTH, MUTE_HEIGHT);
 	}
 }
 

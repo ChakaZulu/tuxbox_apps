@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.76 2009/10/03 10:36:29 seife Exp $
+  $Id: audioplayer.cpp,v 1.77 2009/10/03 22:19:37 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -1588,6 +1588,7 @@ void CAudioPlayerGui::paintHead()
 	if (!m_inetmode)
 		m_frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, m_x + m_width - 30, ypos);
 #endif
+#if 0
 	if( CNeutrinoApp::getInstance()->isMuted() )
 	{
 		int xpos = m_x + m_width - 75;
@@ -1596,6 +1597,7 @@ void CAudioPlayerGui::paintHead()
 			ypos = (m_theight - 32) / 2 + m_y + m_title_height;
 		m_frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, xpos, ypos);
 	}
+#endif
 }
 
 //------------------------------------------------------------------------

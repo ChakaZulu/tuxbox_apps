@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.78 2009/10/03 19:39:54 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.79 2009/10/03 22:19:37 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2612,7 +2612,6 @@ void CNeutrinoApp::ShowStreamFeatures()
 	StreamFeatureSelector->exec(NULL,"");
 
 	// restore mute symbol
-	AudioMute(current_muted, true);
 	delete StreamFeatureSelector;
 	delete tmpFavorites;
 	delete tmpTimerlist;

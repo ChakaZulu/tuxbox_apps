@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.987 2009/10/03 19:39:53 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.988 2009/10/03 22:19:32 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -654,6 +654,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.screen_StartY = configfile.getInt32( "screen_StartY", 23 );
 	g_settings.screen_EndX = configfile.getInt32( "screen_EndX", 668 );
 	g_settings.screen_EndY = configfile.getInt32( "screen_EndY", 555 );
+	frameBuffer->setScreenSize(g_settings.screen_StartX, g_settings.screen_StartY, g_settings.screen_EndX, g_settings.screen_EndY);
 
 #ifndef DISABLE_INTERNET_UPDATE
 	//Software-update
@@ -2463,7 +2464,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				mainMenu.exec(NULL, "");
 				// restore mute symbol
-				AudioMute(current_muted, true);
 			}
 			else if(msg == CRCInput::RC_ok)
 			{
@@ -2769,8 +2769,9 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			}
 			else
 			{
-				//mute
-				AudioMute( !current_muted );
+				//mute, but only if volume is not already == 0
+				if (! doShowMuteIcon())
+					AudioMute(!current_muted);
 			}
 			return messages_return::handled;	
 		}
@@ -3398,27 +3399,16 @@ bool CNeutrinoApp::doShowMuteIcon()
 
 void CNeutrinoApp::paintMuteIcon( bool is_visible )
 {
-	int dx =  40;
-	int dy =  40;
-	int x = g_settings.screen_EndX-dx;
-	int y = g_settings.screen_StartY;
-
-	if ( is_visible )
-			{
-				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0, RADIUS_LARGE);
-				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+4, y+4);
-			}
-			else
-				frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
-
+	//fprintf(stderr, "%s: %d\n", __PRETTY_FUNCTION__, is_visible);
+	frameBuffer->paintMuteIcon(is_visible);
 }
 
-void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
+void CNeutrinoApp::AudioMute(bool newValue, bool onlyIcon)
 {
 #ifdef ENABLE_LIRC
 	if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) // lirc
 	{ // bei LIRC wissen wir nicht wikrlich ob jetzt ge oder entmuted wird, deswegen nix zeigen---
-		if( !isEvent )
+		if (!onlyIcon)
 			g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
 	}
 	else
@@ -3429,22 +3419,22 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		{
 			current_muted = newValue;
 
-			if( !isEvent )
+			if (!onlyIcon)
 			{
 				if( current_muted )
 					g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
 				else
 					g_Controld->UnMute((CControld::volume_type)g_settings.audio_avs_Control);
 			}
-		}
 
-		if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic) && ( volumeBarIsVisible ) )
-		{
-			// show mute icon ONLY on event or current volume value is 0
-			if (( current_muted ) || (doShowMuteIcon()))
-				paintMuteIcon();
-			else
-				paintMuteIcon(false);
+			if (mode != mode_scart && mode != mode_pic)
+			{
+				// show mute icon ONLY on event or current volume value is 0
+				if (current_muted || doShowMuteIcon())
+					paintMuteIcon();
+				else
+					paintMuteIcon(false);
+			}
 		}
 	}
 }
@@ -3536,9 +3526,6 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		{
 			if (msg_repeatok == CRCInput::RC_plus)
 			{
-				if (current_muted)
-					AudioMute(false); // switch off mute on pressing the plus button
-				
 #ifdef ENABLE_LIRC
 				if (lirc)
 				{
@@ -3580,6 +3567,10 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			if (!(msg & CRCInput::RC_Release)) // no need to set on RC_minus release...
 				g_Controld->setVolume(current_volume, (CControld::volume_type)g_settings.audio_avs_Control);
 
+			/* the doShowMuteIcon code checks for the real volume,
+			   so we must do this after g_Controld->setVolume() */
+			if (current_muted && msg_repeatok == CRCInput::RC_plus)
+				AudioMute(false); // switch off mute on pressing the plus button
 #ifdef ENABLE_LIRC
 			if (lirc)
 			{
@@ -3611,13 +3602,8 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			/* erase the numbers... */
 			frameBuffer->paintBoxRel(x+dx-nw-b-r/2, y+b,     nw, dy-2*b,     COL_INFOBAR_PLUS_1);
 			g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x+dx-nw-r/2, y+dy, nw, p, COL_INFOBAR_PLUS_1);
-		
- 			if ( ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic))  {
-				if ( ( current_muted ) || ( doShowMuteIcon() ))
-					paintMuteIcon();				
-				else	
-					paintMuteIcon(false);
-			}
+			if (mode != mode_scart && mode != mode_pic && doShowMuteIcon())
+				AudioMute(true, true);
 		}
 						
 		CLCD::getInstance()->showVolume(current_volume);

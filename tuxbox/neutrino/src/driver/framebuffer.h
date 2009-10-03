@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.53 2009/10/03 16:34:39 seife Exp $
+	$Id: framebuffer.h,v 1.54 2009/10/03 22:19:37 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -54,6 +54,10 @@
 #define CORNER_LEFT			0x9
 #define CORNER_BOTTOM		0xC
 
+// TODO: should not be hardcoded.
+#define MUTE_WIDTH	40
+#define MUTE_HEIGHT	40
+
 typedef struct fb_var_screeninfo t_fb_var_screeninfo;
 
 /** Ausfuehrung als Singleton */
@@ -105,6 +109,18 @@ class CFrameBuffer
 		struct	vt_mode vt_mode;
 		bool	active;
 		static	void switch_signal (int);
+
+		int mute_x;
+		int mute_y;
+		bool mute_shown;
+		fb_pixel_t *mute_save_bg;
+
+		bool checkMute(int xs, int dx, int ys, int dy);
+
+		int screen_StartX;
+		int screen_StartY;
+		int screen_EndX;
+		int screen_EndY;
 
 	public:
 #ifndef FB_USE_PALETTE
@@ -196,6 +212,8 @@ class CFrameBuffer
 
 		void ClearFrameBuffer();
 
+		void paintMuteIcon(bool visible = true, int x = -1, int y = -1);
+		void setScreenSize(int sx, int sy, int ex, int ey);
 };
 
 
