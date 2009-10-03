@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.214 2009/09/11 05:58:39 rhabarber1848 Exp $
+  $Id: settings.h,v 1.215 2009/10/03 15:31:48 seife Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -393,14 +393,14 @@ struct SNeutrinoSettings
 #define UTF8_TO_FILESYSTEM_ENCODING(a) (g_settings.filesystem_is_utf8 ? (a) : ZapitTools::UTF8_to_Latin1(a).c_str())
 #define FILESYSTEM_ENCODING_TO_UTF8_STRING(a) (g_settings.filesystem_is_utf8 ? (a) : Latin1_to_UTF8(a))
 
-#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
-#define DRIVER_SETTING_FILES_COUNT 2
-#else
+#ifdef HAVE_DBOX_HARDWARE
 #if HAVE_DVB_API_VERSION == 1
 #define DRIVER_SETTING_FILES_COUNT 8
 #else
 #define DRIVER_SETTING_FILES_COUNT 7
 #endif
+#else /* not dbox */
+#define DRIVER_SETTING_FILES_COUNT 2
 #endif
 
 // #define MISC_SETTING_SPTS_MODE 0
