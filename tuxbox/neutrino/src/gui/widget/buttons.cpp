@@ -1,5 +1,5 @@
 /*
- * $Id: buttons.cpp,v 1.7 2009/03/28 14:48:58 seife Exp $
+ * $Id: buttons.cpp,v 1.8 2009/10/03 10:09:30 seife Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -90,7 +90,7 @@ void paintButtons(CFrameBuffer * const frameBuffer, Font * const font,
 		// paint icon and text
 		frameBuffer->paintIcon(icon, xstart , yicon_start);
 		int xbuttontext = xstart + max_iconw + space;
-		font->RenderString(xbuttontext, ytext_start, bwidth, buttontext, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		font->RenderString(xbuttontext, ytext_start, bwidth, buttontext, COL_INFOBAR_SHADOW + 1, 0, true); // UTF-8
 		
 		/* 	set next startposition x, if text is length=0 then offset is =renderwidth of icon, 
  		* 		for generating buttons without captions, 

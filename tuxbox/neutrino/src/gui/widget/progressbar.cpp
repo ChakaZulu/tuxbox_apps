@@ -50,10 +50,10 @@ void CProgressBar::paintProgressBar (	const int pos_x,
 					const int pb_height,
 					const int value,
 					const int max_value,	
-					const uint8_t activebar_col,
-					const uint8_t passivebar_col,
-					const uint8_t backgroundbar_col,
-					const uint8_t shadowbar_col,
+					const fb_pixel_t activebar_col,
+					const fb_pixel_t passivebar_col,
+					const fb_pixel_t backgroundbar_col,
+					const fb_pixel_t shadowbar_col,
 					const char * upper_labeltext,
 					const uint8_t uppertext_col,
 					const char * iconfile,
@@ -61,8 +61,8 @@ void CProgressBar::paintProgressBar (	const int pos_x,
 {
 	
 	// set colors
-	int active_col = activebar_col != 0 ? activebar_col : COL_INFOBAR_PLUS_7;
-	int passive_col = passivebar_col != 0 ? passivebar_col : COL_INFOBAR_PLUS_3;
+	fb_pixel_t active_col = activebar_col != 0 ? activebar_col : COL_INFOBAR_PLUS_7;
+	fb_pixel_t passive_col = passivebar_col != 0 ? passivebar_col : COL_INFOBAR_PLUS_3;
 	
 	int c_rad = RADIUS_SMALL;								
 	
@@ -139,5 +139,5 @@ void CProgressBar::paintProgressBarDefault (	const int pos_x,
 						const int value,
 						const int max_value)
 {
-	paintProgressBar (pos_x, pos_y, pb_width, pb_height, value, max_value, 0, 0, COL_SILVER, 0, "", 0);
+	paintProgressBar (pos_x, pos_y, pb_width, pb_height, value, max_value, 0, 0, COL_INFOBAR_SHADOW_PLUS_1, 0, "", 0);
 }

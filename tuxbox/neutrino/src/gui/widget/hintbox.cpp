@@ -147,7 +147,7 @@ void CHintBox::refresh(void)
 
 	int c_rad_mid = RADIUS_MID;
 
-	window->paintBoxRel(SHADOW_OFFSET, SHADOW_OFFSET, width, (entries_per_page + 1) * fheight + theight, (CFBWindow::color_t)COL_INFOBAR_SHADOW, c_rad_mid);
+	window->paintBoxRel(SHADOW_OFFSET, SHADOW_OFFSET, width, (entries_per_page + 1) * fheight + theight, (CFBWindow::color_t)COL_INFOBAR_SHADOW_PLUS_0, c_rad_mid);
 	window->paintBoxRel(0, 0, width, theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0, c_rad_mid , CORNER_TOP);
 
 	if (!iconfile.empty())

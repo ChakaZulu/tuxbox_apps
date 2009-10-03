@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.127 2009/08/11 20:40:38 houdini Exp $
+	$Id: eventlist.cpp,v 1.128 2009/10/03 10:09:29 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -770,7 +770,7 @@ void  EventList::showFunctionBar (bool show)
 		// paint 1st button
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW + 1, 0, true); // UTF-8
 
 		bx += cellwidth;
 	}
@@ -789,7 +789,7 @@ void  EventList::showFunctionBar (bool show)
 		// paint second button
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW + 1, 0, true); // UTF-8
 		
 		bx += cellwidth;
 	}
@@ -810,7 +810,7 @@ void  EventList::showFunctionBar (bool show)
 		// paint 3rd button
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8	
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW + 1, 0, true); // UTF-8
 
 		bx += cellwidth;
 	}
@@ -828,7 +828,7 @@ void  EventList::showFunctionBar (bool show)
 		// paint 4th button
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW + 1, 0, true); // UTF-8
 		bx += cellwidth;
 	}
 
@@ -842,7 +842,7 @@ void  EventList::showFunctionBar (bool show)
 		h_iconoffset = frameBuffer->getIconHeight(icon)> 16 ? h_minoffset : h_maxoffset;
 		frameBuffer->paintIcon(icon, bx, by+h_iconoffset);
 		iconw = frameBuffer->getIconWidth(icon)+4;
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+iconw, by+bh-h_offset, bw-30, btncaption, COL_INFOBAR_SHADOW + 1, 0, true); // UTF-8
 	}
 
 }

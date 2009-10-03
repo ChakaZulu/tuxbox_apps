@@ -1,5 +1,5 @@
 /*
-	$Id: timerlist.cpp,v 1.102 2009/09/26 09:18:37 rhabarber1848 Exp $
+	$Id: timerlist.cpp,v 1.103 2009/10/03 10:09:30 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -773,7 +773,7 @@ void CTimerList::paintFoot()
 		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + height + 1, ButtonWidth, 3, TimerListButtons);
 
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + width - ButtonWidth + 10, y + height);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + width - ButtonWidth + 38, y + height + 24 - 1, ButtonWidth - 28, g_Locale->getText(LOCALE_TIMERLIST_MODIFY), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + width - ButtonWidth + 38, y + height + 24 - 1, ButtonWidth - 28, g_Locale->getText(LOCALE_TIMERLIST_MODIFY), COL_INFOBAR_SHADOW + 1, 0, true); // UTF-8
 	}
 }
 

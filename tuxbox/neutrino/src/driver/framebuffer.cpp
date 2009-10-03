@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.76 2009/09/27 14:54:14 seife Exp $
+	$Id: framebuffer.cpp,v 1.77 2009/10/03 10:09:29 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -321,6 +321,7 @@ void CFrameBuffer::setBlendLevel(int blev1, int blev2)
 }
 #endif
 
+#ifdef FB_USE_PALETTE
 void CFrameBuffer::setAlphaFade(int in, int num, int tr)
 {
 	for (int i=0; i<num; i++)
@@ -329,6 +330,12 @@ void CFrameBuffer::setAlphaFade(int in, int num, int tr)
 		//tr++;
 	}
 }
+#else
+/* does not work in non-palette mode */
+void CFrameBuffer::setAlphaFade(int, int, int)
+{
+}
+#endif
 
 void CFrameBuffer::paletteGenFade(int in, __u32 rgb1, __u32 rgb2, int num, int tr)
 {
@@ -349,7 +356,7 @@ void CFrameBuffer::paletteSetColor(int i, __u32 rgb, int tr)
 }
 
 #ifndef FB_USE_PALETTE
-inline unsigned short make16color(uint16_t r, uint16_t g, uint16_t b, uint16_t t,
+inline fb_pixel_t make16color(uint16_t r, uint16_t g, uint16_t b, uint16_t t,
 				  uint32_t rl, uint32_t ro,
 				  uint32_t gl, uint32_t go,
 				  uint32_t bl, uint32_t bo,
@@ -655,12 +662,16 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 	int corner2 = (corners>>1) & 1;	// upper right
 	int corner3 = (corners>>2) & 1;	// lower right
 	int corner4 = (corners>>3) & 1;	// lower left
+	int line = stride / sizeof(fb_pixel_t);
 
 	if (!getActive())
 		return;
 
-	uint8_t *pos=((uint8_t *)getFrameBufferPointer())+x*sizeof(fb_pixel_t)+stride*y;
-	uint8_t *pos0, *pos1, *pos2, *pos3;
+	/* helpful for debugging problems with the color definitions */
+	//assert (!col || col > 0xff);
+
+	fb_pixel_t *pos = getFrameBufferPointer() + x + y * line;
+	fb_pixel_t *pos0, *pos1, *pos2, *pos3;
 
 #ifdef FB_USE_PALETTE
 	if (dxx<0) {
@@ -704,10 +715,10 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 		F=1-R;
 		rx=R-sx;
 		ry=R-sy;
-		pos0=pos+((dyy-ry)*stride);
-		pos1=pos+(ry*stride);
-		pos2=pos+(rx*stride);
-		pos3=pos+((dyy-rx)*stride);
+		pos0 = pos + (dyy - ry) * line;
+		pos1 = pos + ry * line;
+		pos2 = pos + rx * line;
+		pos3 = pos + (dyy-rx) * line;
 
 		while (sx <= sy)
 		{
@@ -739,8 +750,8 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 
 #endif
 			sx++;
-			pos2-=stride;
-			pos3+=stride;
+			pos2 -= line;
+			pos3 += line;
 			if (F<0)
 			{
 				F+=(sx<<1)-1;
@@ -749,11 +760,11 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 			{
 				F+=((sx-sy)<<1);
 				sy--;
-				pos0-=stride;
-				pos1+=stride;
+				pos0 -= line;
+				pos1 += line;
 			}
 		}
-		pos+=R*stride;
+		pos += R * line;
 	}
 
 	for (int count=R; count<(dyy-R); count++)
@@ -765,7 +776,7 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 		for (int i=0; i<dxx; i++)
 			*(dest0++)=col;
 #endif
-		pos+=stride;
+		pos += line;
 	}
 }
 

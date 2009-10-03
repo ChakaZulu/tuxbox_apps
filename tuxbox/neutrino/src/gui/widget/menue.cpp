@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.154 2009/06/13 12:49:00 seife Exp $
+	$Id: menue.cpp,v 1.155 2009/10/03 10:09:30 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -952,7 +952,8 @@ int CMenuSeparator::paint(bool selected)
 	int height;
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 	height = getHeight();
-	uint8_t color, bgcolor0;
+	uint8_t    color;
+	fb_pixel_t bgcolor0;
 	
 	if ((type & SUB_HEAD))
 	{

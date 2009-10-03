@@ -365,6 +365,8 @@ void CPlugins::startPlugin(int number,int param)
 #endif
 	if (plugin_list[number].fb)
 	{
+		/* most plugins are 8bit only -> switch FB to 8bit mode */
+		frameBuffer->setMode(720, 576, 8);
 		startparam = makeParam(P_ID_FBUFFER  , frameBuffer->getFileHandle()    , startparam);
 	}
 	if (plugin_list[number].rc)
@@ -508,6 +510,8 @@ void CPlugins::startPlugin(int number,int param)
 
 		if (plugin_list[number].fb)
 		{
+			/* restore FB mode */
+			frameBuffer->setMode(720, 576, 8 * sizeof(fb_pixel_t));
 			frameBuffer->paletteSet();
 			frameBuffer->paintBackgroundBox(0,0,720,576);
 		}
