@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.80 2009/10/01 21:17:17 seife Exp $
+	$Id: lcdd.cpp,v 1.81 2009/10/03 15:07:26 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -416,6 +416,10 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 			do { // first try "intelligent" splitting
 				event[eventlines] = splitString(title, LCD_COLS, fonts.menu, dumb, small_utf8);
 				title = removeLeadingSpaces(title.substr(event[eventlines].length()));
+				/* DrDish TV appends a 0x0a to the EPG title. We could strip it in sectionsd...
+				   ...instead, strip all control characters at the end of the text for now */
+				if (event[eventlines].length() > 0 && event[eventlines].at(event[eventlines].length() - 1) < ' ')
+					event[eventlines].erase(event[eventlines].length() - 1);
 				eventlines++;
 			} while (title.length() >0 && eventlines < maxeventlines);
 			if (title.length() == 0)
