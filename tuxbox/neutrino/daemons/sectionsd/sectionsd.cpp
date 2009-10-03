@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.310 2009/10/03 15:49:12 seife Exp $
+//  $Id: sectionsd.cpp,v 1.311 2009/10/03 16:05:01 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2531,7 +2531,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.310 2009/10/03 15:49:12 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.311 2009/10/03 16:05:01 seife Exp $\n"
 		"%sCurrent time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6940,20 +6940,13 @@ static void *fseitThread(void *)
 			if (timeoutsDMX < 0 && !channel_is_blacklisted)
 			{
 				if (timeoutsDMX == -1)
-					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_HAS_ALL_SECTIONS_SKIPPING)\n", dmxFSEIT.filter_index+1 );
+					dprintf("[freesatEitThread] going to sleep (> DMX_HAS_ALL_SECTIONS_SKIPPING)\n");
 				else if (timeoutsDMX == -2)
-					dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxFSEIT.filter_index+1 );
+					dprintf("[freesatEitThread] going to sleep (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n");
 				else
-					dprintf("[freesatEitThread] skipping to next filter(%d) (timeouts %d)\n", dmxFSEIT.filter_index+1, timeoutsDMX);
-				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
-				{
-					timeoutsDMX = 0;
-					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
-				}
-				else {
-					sendToSleepNow = true;
-					timeoutsDMX = 0;
-				}
+					dprintf("[freesatEitThread] going to sleep (timeouts %d)\n", timeoutsDMX);
+				sendToSleepNow = true;
+				timeoutsDMX = 0;
 			}
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1 && !channel_is_blacklisted)
@@ -6968,48 +6961,16 @@ static void *fseitThread(void *)
 
 				if (si != mySIservicesOrderUniqueKey.end())
 				{
-					// 1 and 3 == scheduled
-					// 2 == current/next
-					if ((dmxFSEIT.filter_index == 2 && !si->second->eitPresentFollowingFlag()) ||
-					   ((dmxFSEIT.filter_index == 1 || dmxFSEIT.filter_index == 3) && !si->second->eitScheduleFlag()))
-					{
-						timeoutsDMX = 0;
-						dprintf("[freesatEitThread] timeoutsDMX for 0x"
-							PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-							" reset to 0 (not broadcast)\n", messaging_current_servicekey );
-
-						dprintf("New Filterindex: %d (ges. %d)\n", dmxFSEIT.filter_index + 1, (signed) dmxFSEIT.filters.size() );
-						dmxFSEIT.change( dmxFSEIT.filter_index + 1 );
-					}
-					else
-						if (dmxFSEIT.filter_index >= 1)
-						{
-							if (dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
-							{
-								dprintf("New Filterindex: %d (ges. %d)\n", dmxFSEIT.filter_index + 1, (signed) dmxFSEIT.filters.size() );
-								dmxFSEIT.change(dmxFSEIT.filter_index + 1);
-								//dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n" );
-								timeoutsDMX = 0;
-							}
-							else
-							{
-								sendToSleepNow = true;
-								dputs("sendToSleepNow = true");
-							}
-						}
+					sendToSleepNow = true;
+					dputs("sendToSleepNow = true");
 				}
 				unlockServices();
 			}
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning && !channel_is_blacklisted)
 			{
-				dprintf("[freesatEitThread] skipping to next filter(%d) (> DMX_TIMEOUT_SKIPPING %d)\n", dmxFSEIT.filter_index+1, timeoutsDMX);
-				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
-				{
-					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
-				}
-				else
-					sendToSleepNow = true;
+				dprintf("[freesatEitThread] going to sleep (> DMX_TIMEOUT_SKIPPING %d)\n", timeoutsDMX);
+				sendToSleepNow = true;
 
 				timeoutsDMX = 0;
 			}
@@ -7041,7 +7002,7 @@ static void *fseitThread(void *)
 				{
 					dprintf("dmxFSEIT: waking up again - timed out\n");
 					dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxFSEIT.filters.size() );
-					dmxFSEIT.change(1); // -> restart
+					dmxFSEIT.change(0); // -> restart
 				}
 				else if (rs == 0)
 				{
@@ -7057,17 +7018,8 @@ static void *fseitThread(void *)
 			}
 			else if (zeit > dmxFSEIT.lastChanged + TIME_FSEIT_SKIPPING )
 			{
-				readLockMessaging();
-
-				dprintf("[freesatEitThread] skipping to next filter(%d) (> TIME_FSEIT_SKIPPING)\n", dmxFSEIT.filter_index+1 );
-				if ( dmxFSEIT.filter_index + 1 < (signed) dmxFSEIT.filters.size() )
-				{
-					dmxFSEIT.change(dmxFSEIT.filter_index + 1);
-				}
-				else
-					sendToSleepNow = true;
-
-				unlockMessaging();
+				dprintf("[freesatEitThread] going to sleep (> TIME_FSEIT_SKIPPING)\n");
+				sendToSleepNow = true;
 			}
 
 			if (rc < 0)
@@ -8472,7 +8424,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.310 2009/10/03 15:49:12 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.311 2009/10/03 16:05:01 seife Exp $\n");
 #ifdef ENABLE_FREESATEPG
 	printf("[sectionsd] FreeSat enabled\n");
 #endif
