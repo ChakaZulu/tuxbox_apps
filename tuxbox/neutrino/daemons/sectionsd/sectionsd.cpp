@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.311 2009/10/03 16:05:01 seife Exp $
+//  $Id: sectionsd.cpp,v 1.312 2009/10/03 16:41:22 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2153,6 +2153,21 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 #ifdef ENABLE_PPT
 		dmxPPT.request_unpause();
 #endif
+		// trigger rescan for current/next...
+		writeLockEvents();
+		if (myCurrentEvent) {
+			delete myCurrentEvent;
+			myCurrentEvent = NULL;
+		}
+		if (myNextEvent) {
+			delete myNextEvent;
+			myNextEvent = NULL;
+		}
+		unlockEvents();
+		writeLockMessaging();
+		messaging_have_CN = 0x00;
+		messaging_got_CN = 0x00;
+		unlockMessaging();
 		scanning = 1;
 		dmxCN.change(0);
 		dmxEIT.change(0);
@@ -2531,7 +2546,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.311 2009/10/03 16:05:01 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.312 2009/10/03 16:41:22 seife Exp $\n"
 		"%sCurrent time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -8424,7 +8439,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.311 2009/10/03 16:05:01 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.312 2009/10/03 16:41:22 seife Exp $\n");
 #ifdef ENABLE_FREESATEPG
 	printf("[sectionsd] FreeSat enabled\n");
 #endif
