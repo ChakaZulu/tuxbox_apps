@@ -367,7 +367,10 @@ void CPlugins::startPlugin(int number,int param)
 	{
 		/* most plugins are 8bit only -> switch FB to 8bit mode */
 		if (sizeof(fb_pixel_t) != 1)
+		{
 			frameBuffer->setMode(720, 576, 8);
+			frameBuffer->paletteSet();
+		}
 		startparam = makeParam(P_ID_FBUFFER  , frameBuffer->getFileHandle()    , startparam);
 	}
 	if (plugin_list[number].rc)
