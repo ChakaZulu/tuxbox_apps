@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.312 2009/10/03 16:41:22 seife Exp $
+//  $Id: sectionsd.cpp,v 1.313 2009/10/03 16:58:00 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2169,6 +2169,13 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 		messaging_got_CN = 0x00;
 		unlockMessaging();
 		scanning = 1;
+		if (!bTimeCorrect && !ntpenable)
+		{
+			pthread_mutex_lock(&timeThreadSleepMutex);
+			// wake up time thread
+			pthread_cond_broadcast(&timeThreadSleepCond);
+			pthread_mutex_unlock(&timeThreadSleepMutex);
+		}
 		dmxCN.change(0);
 		dmxEIT.change(0);
 #ifdef ENABLE_FREESATEPG
@@ -2546,7 +2553,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.312 2009/10/03 16:41:22 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.313 2009/10/03 16:58:00 seife Exp $\n"
 		"%sCurrent time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6724,8 +6731,9 @@ static void *timeThread(void *)
 				pthread_cond_broadcast(&timeIsSetCond);
 				pthread_mutex_unlock(&timeIsSetMutex );
 				eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &actTime, sizeof(actTime) );
-			} else {
-				if (dvb_time_update) {
+			}
+			else if (scanning && dvb_time_update)
+			{
 				if (getUTC(&UTC, true)) // always use TDT, a lot of transponders don't provide a TOT
 				{
 					tim = changeUTCtoCtime((const unsigned char *) &UTC);
@@ -6755,7 +6763,6 @@ static void *timeThread(void *)
 					pthread_mutex_unlock(&timeIsSetMutex );
 					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim));
 				}
-				}
 			}
 
 			if (timeset && dvb_time_update) {
@@ -6765,7 +6772,7 @@ static void *timeThread(void *)
 				if(time_ntp){
 					xprintf("[%sThread] Time set via NTP, going to sleep for %d seconds.\n", "time", seconds);
 				}
-				else {
+				else if (scanning) {
 					xprintf("[%sThread] Time set via DVB, going to sleep for %d seconds.\n", "time", seconds);
 				}
 			}
@@ -8439,7 +8446,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.312 2009/10/03 16:41:22 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.313 2009/10/03 16:58:00 seife Exp $\n");
 #ifdef ENABLE_FREESATEPG
 	printf("[sectionsd] FreeSat enabled\n");
 #endif
