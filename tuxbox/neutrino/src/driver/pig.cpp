@@ -31,7 +31,9 @@
 
 #include "pig.h"
 
-
+#ifdef HAVE_TRIPLEDRAGON
+#include <zapit/client/zapitclient.h>
+#endif
 
 
 //  Video4Linux API  for PIG
@@ -90,6 +92,7 @@ CPIG::~CPIG()
 int CPIG::pigopen (int pig_nr)
 {
 
+#ifndef HAVE_TRIPLEDRAGON
  char  *pigdevs[] = {
 		PIG_DEV "0"		// PIG device 0
 		// PIG_DEV "1",		// PIG device 1
@@ -110,6 +113,10 @@ int CPIG::pigopen (int pig_nr)
 	}
 
     }
+#else
+	status = HIDE;
+	px = py = pw = ph = 0;
+#endif
 
     return -1;
 }
@@ -127,6 +134,10 @@ void CPIG::pigclose ()
 	status = CLOSED;
 	px = py = pw = ph = 0;
    }
+#ifdef HAVE_TRIPLEDRAGON
+	CZapitClient z;
+	z.setPIG(0, 0, 0, 0, true);
+#endif
    return;
 }
 
@@ -139,6 +150,7 @@ void CPIG::pigclose ()
 void CPIG::_set_window (int x, int y, int w, int h)
 {
   // -- Modul interne Routine
+#ifndef HAVE_TRIPLEDRAGON
 #if HAVE_DVB_API_VERSION < 3
 	avia_pig_set_pos(fd, x, y);
 	avia_pig_set_size(fd, w, h);
@@ -167,6 +179,7 @@ void CPIG::_set_window (int x, int y, int w, int h)
 	coord.fmt.win.w.height = h;
 
 	err = ioctl(fd, VIDIOC_S_FMT, &coord);
+#endif
 #endif
 }
 
@@ -251,6 +264,7 @@ void CPIG::show (int x, int y, int w, int h)
 
 void CPIG::show (void)
 {
+#ifndef HAVE_TRIPLEDRAGON
 	if ( fd >= 0 ) {
 #if HAVE_DVB_API_VERSION < 3
 		avia_pig_show(fd);
@@ -262,10 +276,16 @@ void CPIG::show (void)
 #endif
 		status = SHOW;
 	}
+#else
+	CZapitClient z;
+	z.setPIG(px, py, pw, ph, true);
+	status = SHOW;
+#endif
 }
 
 void CPIG::hide (void)
 {
+#ifndef HAVE_TRIPLEDRAGON
 	if ( fd >= 0 ) {
 #if HAVE_DVB_API_VERSION < 3
 		avia_pig_hide(fd);
@@ -277,6 +297,11 @@ void CPIG::hide (void)
 #endif
 		status = HIDE;
 	}
+#else
+	CZapitClient z;
+	z.setPIG(0, 0, 0, 0, true);
+	status = HIDE;
+#endif
 }
 
 

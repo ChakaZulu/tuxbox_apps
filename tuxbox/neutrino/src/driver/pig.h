@@ -36,12 +36,14 @@ using namespace std;
 #include <config.h>
 #endif
 
+#ifndef HAVE_TRIPLEDRAGON
 #if HAVE_DVB_API_VERSION < 3
 #include <dbox/avia_gt_pig.h>
 #define PIG_DEV "/dev/dbox/pig"
 #else
 #include <linux/videodev.h>
 #define PIG_DEV "/dev/v4l/video"		// PigNr will be appended!
+#endif
 #endif
 
 
