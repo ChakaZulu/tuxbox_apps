@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.75 2009/09/26 18:48:56 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.76 2009/10/03 10:36:29 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -1104,7 +1104,8 @@ void CAudioPlayerGui::scanXmlFile(std::string filename)
 	scanXmlData(answer_parser, "name", "url");
 }
 
-void CAudioPlayerGui::scanXmlData(xmlDocPtr answer_parser, char *nametag, char *urltag, char *bitratetag, bool usechild)
+void CAudioPlayerGui::scanXmlData(xmlDocPtr answer_parser, const char *nametag, const char *urltag,
+				  const char *bitratetag, bool usechild)
 {
 #define IC_typetag "server_type"
 

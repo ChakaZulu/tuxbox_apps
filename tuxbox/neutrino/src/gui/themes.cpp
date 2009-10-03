@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.cpp,v 1.10 2009/04/12 16:46:07 rhabarber1848 Exp $ 
+	$Id: themes.cpp,v 1.11 2009/10/03 10:36:29 seife Exp $ 
 
 	Copyright (C) 2007, 2008, 2009 (flasher) Frank Liebelt
 
@@ -95,7 +95,7 @@ void CThemes::readThemes(CMenuWidget &themes)
 {
 	struct dirent **themelist;
 	int n;
-	char *pfade[] = {THEMEDIR,USERDIR};
+	const char *pfade[] = {THEMEDIR, USERDIR};
 	bool hasCVSThemes, hasUserThemes;
 	hasCVSThemes = hasUserThemes = false;
 	std::string userThemeFile = "";

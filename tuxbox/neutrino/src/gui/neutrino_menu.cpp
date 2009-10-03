@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.76 2009/09/26 09:18:37 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.77 2009/10/03 10:36:29 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1275,7 +1275,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	int n;
 	//		printf("scanning locale dir now....(perhaps)\n");
 
-	char *pfad[] = {DATADIR "/neutrino/locale","/var/tuxbox/config/locale"};
+	const char *pfad[] = {DATADIR "/neutrino/locale","/var/tuxbox/config/locale"};
 
 	for(int p = 0;p < 2;p++)
 	{

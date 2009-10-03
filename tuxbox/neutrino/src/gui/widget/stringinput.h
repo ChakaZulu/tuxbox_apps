@@ -125,7 +125,7 @@ class CPINInput : public CStringInput
 	protected:
 		virtual void paintChar(int pos);
 	public:
-		CPINInput(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		CPINInput(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, const char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, "lock.raw") {};
 
 		 int exec( CMenuTarget* parent, const std::string & actionKey );
@@ -151,7 +151,7 @@ class CPLPINInput : public CPINInput
 class CPINChangeWidget : public CStringInput
 {
 	public:
-		CPINChangeWidget(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		CPINChangeWidget(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, const char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		: CStringInput(Name, Value, Size, Hint_1, NONEXISTANT_LOCALE, Valid_Chars, Observ){};
 };
 

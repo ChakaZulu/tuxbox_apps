@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.h,v 1.23 2009/03/21 10:25:16 rhabarber1848 Exp $
+  $Id: audioplayer.h,v 1.24 2009/10/03 10:36:29 seife Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -187,7 +187,7 @@ class CAudioPlayerGui : public CMenuTarget
 	/**
 	 * Processes a loaded XML file/data of internet audiostreams or playlists
 	 */
-	void scanXmlData(xmlDocPtr answer_parser, char *nametag, char *urltag, char *bitratetag = NULL, bool usechild = false);
+	void scanXmlData(xmlDocPtr answer_parser, const char *nametag, const char *urltag, const char *bitratetag = NULL, bool usechild = false);
 
 	/**
 	 * Reads the icecast directory (XML file) and calls scanXmlData
