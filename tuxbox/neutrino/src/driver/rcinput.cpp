@@ -1269,32 +1269,57 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 						switch(emsg.eventID)
 						{
 							case CSectionsdClient::EVT_TIMESET:
-								{
-									gettimeofday( &tv, NULL );
-									long long timeOld = tv.tv_usec + tv.tv_sec * 1000000LL;
+							{
+								printf("[neutrino] received CSectionsdClient::EVT_TIMESET, setting system time...\n");
+								gettimeofday(&tv, NULL);
+								long long timeOld = tv.tv_usec + tv.tv_sec * 1000000LL;
 
-									stime((time_t*) p);
+								time_t dvbtime = *((time_t*)p);
 
-									gettimeofday( &tv, NULL );
-									long long timeNew = tv.tv_usec + tv.tv_sec * 1000000LL;
-
-									delete [] p;
-									p= new unsigned char[ sizeof(long long) ];
-									*(long long*) p = timeNew - timeOld;
-
-									if ((long long)last_keypress > *(long long*)p)
-										last_keypress += *(long long *)p;
-
-									// Timer anpassen
-									for(std::vector<timer>::iterator e = timers.begin(); e != timers.end(); ++e)
-										if (e->correct_time)
-											e->times_out+= *(long long*) p;
-
-									*msg          = NeutrinoMessages::EVT_TIMESET;
-									*data         = (neutrino_msg_data_t) p;
-									dont_delete_p = true;
+								if (dvbtime) {
+									time_t difftime = dvbtime - tv.tv_sec;
+									if (abs(difftime) > 120)
+									{
+										printf("[neutrino] Time difference is %ld seconds, stepping...\n", difftime);
+										tv.tv_sec = dvbtime;
+										tv.tv_usec = 0;
+										if (settimeofday(&tv, NULL) < 0)
+											perror("[neutrino] settimeofday");
+									}
+									else if (difftime != 0)
+									{
+										struct timeval oldd;
+										tv.tv_sec = difftime;
+										tv.tv_usec = 0;
+										if (adjtime(&tv, &oldd))
+											perror("adjtime");
+										long long t = oldd.tv_sec * 1000000LL + oldd.tv_usec;
+										printf("[neutrino] Time difference is %ld seconds, using adjtime(). Olddelta: %lld us\n", difftime, t);
+									}
+									else
+										printf("[neutrino] Time difference 0 seconds, nothing to do...\n");
 								}
+
+								gettimeofday(&tv, NULL);
+								long long timeNew = tv.tv_usec + tv.tv_sec * 1000000LL;
+
+								delete [] p;
+								p = new unsigned char[sizeof(long long)];
+								*(long long*) p = timeNew - timeOld;
+
+								if ((long long)last_keypress > *(long long*)p)
+									last_keypress += *(long long *)p;
+
+								// Timer anpassen
+								for (std::vector<timer>::iterator e = timers.begin(); e != timers.end(); ++e)
+									if (e->correct_time)
+										e->times_out += *(long long*) p;
+
+								*msg  = NeutrinoMessages::EVT_TIMESET;
+								*data = (neutrino_msg_data_t) p;
+								dont_delete_p = true;
 								break;
+							}
 							case CSectionsdClient::EVT_GOT_CN_EPG:
 									*msg          = NeutrinoMessages::EVT_CURRENTNEXT_EPG;
 									*data         = (neutrino_msg_data_t) p;
