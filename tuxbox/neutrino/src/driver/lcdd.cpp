@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.81 2009/10/03 15:07:26 seife Exp $
+	$Id: lcdd.cpp,v 1.82 2009/10/03 15:34:02 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -98,6 +98,7 @@ void CLCD::wake_up() {
 	}
 }
 
+#ifndef BOXMODEL_DM500
 void* CLCD::TimeThread(void *)
 {
 	while(1)
@@ -112,6 +113,37 @@ void* CLCD::TimeThread(void *)
 	}
 	return NULL;
 }
+#else
+// there is no LCD on DM500, so let's use the timethread for blinking the LED during record
+void* CLCD::TimeThread(void *)
+{
+	int led = 0;
+	int old_led = 0;
+	int led_fd = open("/dev/dbox/fp0", O_RDWR);
+
+	if (led_fd != -1)
+	{
+		perror("CLCD::TimeThread: /dev/dbox/fp0");
+		return NULL;
+	}
+	// printf("CLCD:TimeThread dm500 led_fd: %d\n",led_fd);
+	while(1)
+	{
+		sleep(1);
+		if (CNeutrinoApp::getInstance()->recordingstatus)
+			led = !led;
+		else
+			led = (CLCD::getInstance()->mode == MODE_STANDBY);
+
+		if (led != old_led) {
+			//printf("CLCD:TimeThread ioctl(led_fd,11, &%d)\n",led);
+			ioctl(led_fd, 11, &led);
+			old_led = led;
+		}
+	}
+	return NULL;
+}
+#endif
 
 void CLCD::init(const char * fontfile, const char * fontname,
                 const char * fontfile2, const char * fontname2,
@@ -122,7 +154,10 @@ void CLCD::init(const char * fontfile, const char * fontname,
 	if (!lcdInit(fontfile, fontname, fontfile2, fontname2, fontfile3, fontname3 ))
 	{
 		printf("[lcdd] LCD-Init failed!\n");
+#ifndef BOXMODEL_DM500
+		// on the dm500, we need the timethread for the front LEDs
 		return;
+#endif
 	}
 
 	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )

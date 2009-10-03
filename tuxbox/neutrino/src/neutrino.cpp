@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.985 2009/10/03 10:55:30 seife Exp $
+	$Id: neutrino.cpp,v 1.986 2009/10/03 15:34:02 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3733,14 +3733,6 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 void CNeutrinoApp::standbyMode( bool bOnOff )
 {
 	//printf( ( bOnOff ) ? "mode: standby on\n" : "mode: standby off\n" );
-#ifdef BOXMODEL_DM500
-	int fd = open("/dev/dbox/fp0", O_RDWR);
-	if (fd != -1) {
-		int standby = bOnOff?1:0;
-		ioctl(fd, 11, &standby);
-		close(fd);
-	}
-#endif
 
 	if( bOnOff )
 	{
