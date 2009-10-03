@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.144 2009/09/11 07:33:53 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.145 2009/10/03 19:39:55 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -218,6 +218,8 @@ const char * locale_real_names[] =
 	"audioplayer.shuffle",
 	"audioplayer.stop",
 	"audioplayer.title_artist",
+	"audioplayeresoundpicsettings.general",
+	"audioplayeresoundsettings.general",
 	"audioplayerpicsettings.general",
 	"bookmarkmanager.delete",
 	"bookmarkmanager.name",
@@ -988,6 +990,7 @@ const char * locale_real_names[] =
 	"pictureviewer.decode_server_ip",
 	"pictureviewer.decode_server_port",
 	"pictureviewer.defdir",
+	"pictureviewer.esound.settings.general",
 	"pictureviewer.head",
 	"pictureviewer.help1",
 	"pictureviewer.help10",

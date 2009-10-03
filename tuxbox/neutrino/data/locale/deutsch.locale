@@ -191,6 +191,8 @@ audioplayer.show_playlist Playlist anzeigen
 audioplayer.shuffle Shuffle
 audioplayer.stop Stopp
 audioplayer.title_artist Titel, Interpret
+audioplayeresoundpicsettings.general Audioplayer / Bildb. / Esound
+audioplayeresoundsettings.general Audioplayer / Esound
 audioplayerpicsettings.general Audioplayer / Bildbetrachter
 bookmarkmanager.delete Löschen
 bookmarkmanager.name Bookmarks
@@ -961,6 +963,7 @@ personalize.visible sichtbar
 pictureviewer.decode_server_ip Decoding-Server IP
 pictureviewer.decode_server_port Decoding-Server Port
 pictureviewer.defdir Start-Verz.
+pictureviewer.esound.settings.general Bildbetrachter / Esound
 pictureviewer.head Bildbetrachter
 pictureviewer.help1 Menü-Modus
 pictureviewer.help10 Anzeige-Modus

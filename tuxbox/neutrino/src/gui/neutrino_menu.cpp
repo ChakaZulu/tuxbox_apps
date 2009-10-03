@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.77 2009/10/03 10:36:29 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.78 2009/10/03 19:39:54 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -349,9 +349,9 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 //blue
 #if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 	if (g_settings.personalize_audpic == 1)
-		mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+		mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	else if (g_settings.personalize_audpic == 2)
-		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, g_settings.personalize_pincode, true, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU, g_settings.personalize_pincode, true, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 #endif
 
 //green

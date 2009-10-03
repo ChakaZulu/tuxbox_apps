@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.11 2009/08/18 11:51:59 rhabarber1848 Exp $
+        $Id: personalize.cpp,v 1.12 2009/10/03 19:39:54 rhabarber1848 Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -308,7 +308,7 @@ void CPersonalizeGui::ShowSettingsOptions()
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_LCD, (int *)&g_settings.personalize_lcd, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_9));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_KEYBINDING, (int *)&g_settings.personalize_keybinding, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_0));
 #if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
-	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, (int *)&g_settings.personalize_audpic, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU, (int *)&g_settings.personalize_audpic, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 #endif
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_DRIVER, (int *)&g_settings.personalize_driver, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_MISC, (int *)&g_settings.personalize_misc, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
