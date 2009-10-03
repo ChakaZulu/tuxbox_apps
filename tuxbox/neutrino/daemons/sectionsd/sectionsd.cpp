@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.308 2009/09/29 09:50:07 rhabarber1848 Exp $
+//  $Id: sectionsd.cpp,v 1.309 2009/10/03 15:44:05 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2531,7 +2531,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.308 2009/09/29 09:50:07 rhabarber1848 Exp $\n"
+		"$Id: sectionsd.cpp,v 1.309 2009/10/03 15:44:05 seife Exp $\n"
 		"%sCurrent time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6903,7 +6903,7 @@ static void *fseitThread(void *)
 	unsigned timeoutInMSeconds = EIT_READ_TIMEOUT;
 	bool sendToSleepNow = false;
 
-	dmxFSEIT.addfilter(0x60, 0xff); //other TS, scheduled, freesat epg is only broadcast using table_ids 0x60 (scheduled) and 0x61 (scheduled later)
+	dmxFSEIT.addfilter(0x60, 0xfe); //other TS, scheduled, freesat epg is only broadcast using table_ids 0x60 (scheduled) and 0x61 (scheduled later)
 	
 	if (debug) {
 		int policy;
@@ -8477,7 +8477,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.308 2009/09/29 09:50:07 rhabarber1848 Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.309 2009/10/03 15:44:05 seife Exp $\n");
 #ifdef ENABLE_FREESATEPG
 	printf("[sectionsd] FreeSat enabled\n");
 #endif
