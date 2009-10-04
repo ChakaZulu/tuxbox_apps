@@ -850,32 +850,32 @@
 		/>
 
 	<station
-		url="http://145.58.33.31:8100/listen.pls"
+		url="http://shoutcast.omroep.nl:8100/listen.pls"
 		name="Radio 1 (NL)"
 		/>
 
 	<station
-		url="http://145.58.33.31:8102/listen.pls"
+		url="http://shoutcast.omroep.nl:8102/listen.pls"
 		name="Radio 2 (NL)"
 		/>
 
 	<station
-		url="http://145.58.33.31:8104/listen.pls"
+		url="http://shoutcast.omroep.nl:8104/listen.pls"
 		name="Radio 3FM (NL)"
 		/>
 
 	<station
-		url="http://145.58.33.31:8106/listen.pls"
+		url="http://shoutcast.omroep.nl:8106/listen.pls"
 		name="Radio 4 Classic (NL)"
 		/>
 
 	<station
-		url="http://145.58.33.31:8108/listen.pls"
+		url="http://shoutcast.omroep.nl:8108/listen.pls"
 		name="Radio 5 Nieuws (NL)"
 		/>
 
 	<station
-		url="http://145.58.33.31:8110/listen.pls"
+		url="http://shoutcast.omroep.nl:8110/listen.pls"
 		name="Radio 6 World Music/Jazz (NL)"
 		/>
 
