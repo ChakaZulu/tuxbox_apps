@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.988 2009/10/03 22:19:32 seife Exp $
+	$Id: neutrino.cpp,v 1.989 2009/10/05 09:58:48 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -47,6 +47,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/sysinfo.h>
 #include <fcntl.h>
 #include <dlfcn.h>
 #include <signal.h>
@@ -233,6 +234,7 @@ CNeutrinoApp::CNeutrinoApp()
 	standbyAfterRecord = false;
 	zapto_tv_on_init_done = false;
 	zapto_radio_on_init_done = false;
+	obeyStartMode   = true;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -1267,7 +1269,7 @@ void CNeutrinoApp::saveSetup()
 void CNeutrinoApp::firstChannel()
 {
 	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
-	if (!g_Zapit->getSaveLastChannel())
+	if (!g_Zapit->getSaveLastChannel() && obeyStartMode)
 	{
 		if (!zapto_tv_on_init_done && firstchannel.mode == 't')
 		{
@@ -1962,12 +1964,28 @@ void CNeutrinoApp::InitZapper()
 	}
 #endif
 
-	if((g_settings.startmode == STARTMODE_TV) || ((g_settings.startmode == STARTMODE_RESTORE) && (firstchannel.mode == 't')))
+	if(
+	/* If Neutrino is started at boot time switch to TV */
+	(obeyStartMode && (
+	/* if the startmode is TV or */
+	(g_settings.startmode == STARTMODE_TV) ||
+	/* the last zapit mode should be used in case it was TV. */
+	(g_settings.startmode == STARTMODE_RESTORE && firstchannel.mode == 't'))) ||
+	/* If Neutrino is restarted later switch to firstchannel mode. */
+	(!obeyStartMode && firstchannel.mode == 't'))
 	{
 		channelsInit(init_mode_init, mode_tv);
 		tvMode(true);
 	}
-	else if((g_settings.startmode == STARTMODE_RADIO) || ((g_settings.startmode == STARTMODE_RESTORE) && (firstchannel.mode != 't')))
+	else if(
+	/* If Neutrino is started at boot time switch to Radio */
+	(obeyStartMode && (
+	/* if the startmode is Radio or */
+	(g_settings.startmode == STARTMODE_RADIO) ||
+	/* the last zapit mode should be used in case it was not TV. */
+	(g_settings.startmode == STARTMODE_RESTORE && firstchannel.mode != 't'))) ||
+	/* If Neutrino is restarted later switch to firstchannel mode. */
+	(!obeyStartMode && firstchannel.mode != 't'))
 	{
 		channelsInit(init_mode_init, mode_radio);
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
@@ -2044,6 +2062,14 @@ void CNeutrinoApp::prepareEnviroment()
 
 int CNeutrinoApp::run(int argc, char **argv)
 {
+	/* Obey startmode setting for no longer than 180s uptime */
+	struct sysinfo info;
+	long uptime;
+	sysinfo(&info);
+	uptime = info.uptime;
+	if (uptime > 120)
+		obeyStartMode = false;
+
 	CmdParser(argc, argv);
 
 	prepareEnviroment();
@@ -2403,35 +2429,38 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		}
 	}
 
-	if(g_settings.startmode == STARTMODE_SCART)
+	if (obeyStartMode)
 	{
-		lastMode = mode;
-		handleMsg(NeutrinoMessages::EVT_VCRCHANGED, VCR_STATUS_ON);
-	}
+		if(g_settings.startmode == STARTMODE_SCART)
+		{
+			lastMode = mode;
+			handleMsg(NeutrinoMessages::EVT_VCRCHANGED, VCR_STATUS_ON);
+		}
 #ifdef ENABLE_AUDIOPLAYER
-	else if(g_settings.startmode == STARTMODE_AUDIOPLAYER)
-	{
-		CAudioPlayerGui::CAudioPlayerGui tmpAudioPlayerGui;
-		tmpAudioPlayerGui.exec(NULL, "");
-	}
+		else if(g_settings.startmode == STARTMODE_AUDIOPLAYER)
+		{
+			CAudioPlayerGui::CAudioPlayerGui tmpAudioPlayerGui;
+			tmpAudioPlayerGui.exec(NULL, "");
+		}
 #ifdef ENABLE_INTERNETRADIO
-	else if(g_settings.startmode == STARTMODE_INETRADIO)
-	{
-		CAudioPlayerGui::CAudioPlayerGui tmpAudioPlayerGui(true);
-		tmpAudioPlayerGui.exec(NULL, "");
-	}
+		else if(g_settings.startmode == STARTMODE_INETRADIO)
+		{
+			CAudioPlayerGui::CAudioPlayerGui tmpAudioPlayerGui(true);
+			tmpAudioPlayerGui.exec(NULL, "");
+		}
 #endif
 #endif
 #ifdef ENABLE_ESD
-	else if(g_settings.startmode == STARTMODE_ESOUND)
-	{
-		CEsoundGui::CEsoundGui tmpEsoundGui;
-		tmpEsoundGui.exec(NULL, "");
-	}
+		else if(g_settings.startmode == STARTMODE_ESOUND)
+		{
+			CEsoundGui::CEsoundGui tmpEsoundGui;
+			tmpEsoundGui.exec(NULL, "");
+		}
 #endif
-	else if(g_settings.startmode == STARTMODE_STANDBY)
-	{
-		handleMsg(NeutrinoMessages::STANDBY_ON, 0);
+		else if(g_settings.startmode == STARTMODE_STANDBY)
+		{
+			handleMsg(NeutrinoMessages::STANDBY_ON, 0);
+		}
 	}
 
 	while( true )
