@@ -995,7 +995,7 @@ void CUpnpBrowserGui::paintItemPos(std::vector<UPnPEntry> *entry, unsigned int p
 void CUpnpBrowserGui::paintDevice()
 {
 	std::string tmp;
-	int w, xstart, xpos, ypos, top;
+	int w, xstart, ypos, top;
 	int c_rad_mid = RADIUS_MID;
 
 	// LCD
@@ -1087,7 +1087,7 @@ void CUpnpBrowserGui::paintItem(std::vector<UPnPEntry> *entry, unsigned int sele
 {
 	std::string tmp;
 	std::stringstream ts;
-	int w, xstart, xpos, ypos, top;
+	int w, xstart, ypos, top;
 	int preferred=(*entry)[selected].preferred;
 
 	// LCD
@@ -1284,7 +1284,7 @@ void CUpnpBrowserGui::paintDetails(std::vector<UPnPEntry> *entry, unsigned int i
 
 			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1);
 			if (!(text2.empty()))
-				text3 += " · ";
+				text3 += " . ";
 
 			xstart += g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text3);
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3, COL_MENUCONTENTDARK);
