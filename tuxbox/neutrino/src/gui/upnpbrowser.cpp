@@ -94,7 +94,7 @@ CUpnpBrowserGui::~CUpnpBrowserGui()
 
 //------------------------------------------------------------------------
 
-int CUpnpBrowserGui::exec(CMenuTarget* parent, const std::string & actionKey)
+int CUpnpBrowserGui::exec(CMenuTarget* parent, const std::string & /*actionKey*/)
 {
 
 	CAudioPlayer::getInstance()->init();
@@ -1320,7 +1320,7 @@ void CUpnpBrowserGui::clearItem2DetailsLine ()
 
 //------------------------------------------------------------------------
 
-void CUpnpBrowserGui::paintItem2DetailsLine (int pos, unsigned int ch_index)
+void CUpnpBrowserGui::paintItem2DetailsLine (int pos, unsigned int /*ch_index*/)
 {
 	int xpos  = m_x - ConnectLineBox_Width;
 	int ypos1 = m_y + m_title_height+0 + m_theight + pos*m_fheight;
