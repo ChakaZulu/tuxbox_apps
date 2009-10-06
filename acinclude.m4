@@ -450,6 +450,14 @@ fi
 # TODO: do we need more defines?
 if test "$BOXMODEL" = "dm500"; then
 	AC_DEFINE(BOXMODEL_DM500, 1, [dreambox 500])
+elif test "$BOXMODEL" = "ip200"; then
+	AC_DEFINE(BOXMODEL_IP200, 1, [ipbox 200])
+elif test "$BOXMODEL" = "ip250"; then
+	AC_DEFINE(BOXMODEL_IP250, 1, [ipbox 250])
+elif test "$BOXMODEL" = "ip350"; then
+	AC_DEFINE(BOXMODEL_IP350, 1, [ipbox 350])
+elif test "$BOXMODEL" = "ip400"; then
+	AC_DEFINE(BOXMODEL_IP400, 1, [ipbox 400])
 fi
 ])
 
