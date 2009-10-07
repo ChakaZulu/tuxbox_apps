@@ -845,7 +845,7 @@
 		/>
 
 	<station
-		url="http://sask1-1.radio.pionier.net.pl:8000/pl/wawa.ogg.m3u"
+		url="http://www.radio.pionier.net.pl/stream.pls?radio=wawa"
 		name="Radio WaWa (PL)"
 		/>
 
