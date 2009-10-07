@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.989 2009/10/05 09:58:48 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.990 2009/10/07 08:59:02 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -96,6 +96,7 @@
 #endif
 #include "gui/screensetup.h"
 #include "gui/esound.h"
+#include "gui/personalize.h"
 
 #include <system/setting_helpers.h>
 #include <system/settings.h>
@@ -499,53 +500,53 @@ int CNeutrinoApp::loadSetup()
 	g_settings.filesystem_is_utf8              = configfile.getBool("filesystem_is_utf8"                 , true );
 
 	// Personalization
-	g_settings.personalize_pinstatus = configfile.getInt32("personalize_pinstatus", 0);
+	g_settings.personalize_pinstatus = configfile.getInt32("personalize_pinstatus", CPersonalizeGui::PROTECT_MODE_NOT_PROTECTED);
 	strcpy( g_settings.personalize_pincode, configfile.getString( "personalize_pincode", "0000" ).c_str() );
-	g_settings.personalize_bluebutton = configfile.getInt32("personalize_bluebutton", 1);
-	g_settings.personalize_redbutton = configfile.getInt32("personalize_redbutton", 1);
+	g_settings.personalize_bluebutton = configfile.getInt32("personalize_bluebutton", CPersonalizeGui::PERSONALIZE_MODE_ENABLED); // infobar blue button
+	g_settings.personalize_redbutton = configfile.getInt32("personalize_redbutton", CPersonalizeGui::PERSONALIZE_MODE_ENABLED); // infobar red button
 
-	g_settings.personalize_tvmode = configfile.getInt32("personalize_tvmode", 1);
-	g_settings.personalize_radiomode = configfile.getInt32("personalize_radiomode", 1);
-	g_settings.personalize_scartmode = configfile.getInt32("personalize_scartmode", 1);
-	g_settings.personalize_games = configfile.getInt32("personalize_games", 1);
-	g_settings.personalize_audioplayer = configfile.getInt32("personalize_audioplayer", 1);
-	g_settings.personalize_inetradio = configfile.getInt32("personalize_inetradio", 0);
-	g_settings.personalize_esound = configfile.getInt32("personalize_esound", 0);
-	g_settings.personalize_movieplayer = configfile.getInt32("personalize_movieplayer", 1);
-	g_settings.personalize_pictureviewer = configfile.getInt32("personalize_pictureviewer", 1);
+	g_settings.personalize_tvmode = configfile.getInt32("personalize_tvmode", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_radiomode = configfile.getInt32("personalize_radiomode", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_scartmode = configfile.getInt32("personalize_scartmode", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_games = configfile.getInt32("personalize_games", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_audioplayer = configfile.getInt32("personalize_audioplayer", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_inetradio = configfile.getInt32("personalize_inetradio", CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE);
+	g_settings.personalize_esound = configfile.getInt32("personalize_esound", CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE);
+	g_settings.personalize_movieplayer = configfile.getInt32("personalize_movieplayer", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_pictureviewer = configfile.getInt32("personalize_pictureviewer", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 #if ENABLE_UPNP
- 	g_settings.personalize_upnpbrowser = configfile.getInt32("personalize_upnpbrowser", 1);
+ 	g_settings.personalize_upnpbrowser = configfile.getInt32("personalize_upnpbrowser", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 #endif
-	g_settings.personalize_settings = configfile.getInt32("personalize_settings", 0);
-	g_settings.personalize_service = configfile.getInt32("personalize_service", 0);
-	g_settings.personalize_sleeptimer = configfile.getInt32("personalize_sleeptimer", 1);
-	g_settings.personalize_reboot = configfile.getInt32("personalize_reboot", 1);
-	g_settings.personalize_shutdown = configfile.getInt32("personalize_shutdown", 1);
+	g_settings.personalize_settings = configfile.getInt32("personalize_settings", CPersonalizeGui::PROTECT_MODE_NOT_PROTECTED);
+	g_settings.personalize_service = configfile.getInt32("personalize_service", CPersonalizeGui::PROTECT_MODE_NOT_PROTECTED);
+	g_settings.personalize_sleeptimer = configfile.getInt32("personalize_sleeptimer", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_reboot = configfile.getInt32("personalize_reboot", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_shutdown = configfile.getInt32("personalize_shutdown", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 
-	g_settings.personalize_bouqueteditor = configfile.getInt32("personalize_bouqueteditor", 1);
-	g_settings.personalize_scants = configfile.getInt32("personalize_scants", 1);
-	g_settings.personalize_reload = configfile.getInt32("personalize_reload", 1);
-	g_settings.personalize_getplugins = configfile.getInt32("personalize_getplugins", 1);
-	g_settings.personalize_restart = configfile.getInt32("personalize_restart", 1);
-	g_settings.personalize_epgrestart = configfile.getInt32("personalize_epgrestart", 1);
-	g_settings.personalize_ucodecheck = configfile.getInt32("personalize_ucodecheck", 1);
-	g_settings.personalize_imageinfo = configfile.getInt32("personalize_imageinfo", 1);
-	g_settings.personalize_update = configfile.getInt32("personalize_update", 1);
-	g_settings.personalize_chan_epg_stat = configfile.getInt32("personalize_chan_epg_stat", 0);
+	g_settings.personalize_bouqueteditor = configfile.getInt32("personalize_bouqueteditor", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_scants = configfile.getInt32("personalize_scants", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_reload = configfile.getInt32("personalize_reload", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_getplugins = configfile.getInt32("personalize_getplugins", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_restart = configfile.getInt32("personalize_restart", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_epgrestart = configfile.getInt32("personalize_epgrestart", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_ucodecheck = configfile.getInt32("personalize_ucodecheck", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_imageinfo = configfile.getInt32("personalize_imageinfo", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_update = configfile.getInt32("personalize_update", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_chan_epg_stat = configfile.getInt32("personalize_chan_epg_stat", CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE);
 
-	g_settings.personalize_audio = configfile.getInt32("personalize_audio", 1);
-	g_settings.personalize_video = configfile.getInt32("personalize_video", 1);
-	g_settings.personalize_youth = configfile.getInt32("personalize_youth", 1);
-	g_settings.personalize_network = configfile.getInt32("personalize_network", 1);
-	g_settings.personalize_recording = configfile.getInt32("personalize_recording", 1);
-	g_settings.personalize_streaming = configfile.getInt32("personalize_streaming", 1);
-	g_settings.personalize_keybinding = configfile.getInt32("personalize_keybinding", 1);
-	g_settings.personalize_language = configfile.getInt32("personalize_language", 1);
-	g_settings.personalize_colors = configfile.getInt32("personalize_colors", 1);
-	g_settings.personalize_lcd = configfile.getInt32("personalize_lcd", 1);
-	g_settings.personalize_audpic = configfile.getInt32("personalize_audpic", 1);
-	g_settings.personalize_driver = configfile.getInt32("personalize_driver", 1);
-	g_settings.personalize_misc = configfile.getInt32("personalize_misc", 1);
+	g_settings.personalize_audio = configfile.getInt32("personalize_audio", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_video = configfile.getInt32("personalize_video", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_youth = configfile.getInt32("personalize_youth", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_network = configfile.getInt32("personalize_network", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_recording = configfile.getInt32("personalize_recording", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_streaming = configfile.getInt32("personalize_streaming", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_keybinding = configfile.getInt32("personalize_keybinding", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_language = configfile.getInt32("personalize_language", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_colors = configfile.getInt32("personalize_colors", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_lcd = configfile.getInt32("personalize_lcd", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_audpic = configfile.getInt32("personalize_audpic", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_driver = configfile.getInt32("personalize_driver", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_misc = configfile.getInt32("personalize_misc", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32("recording_type", RECORDING_OFF);

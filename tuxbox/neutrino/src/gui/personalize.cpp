@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.12 2009/10/03 19:39:54 rhabarber1848 Exp $
+        $Id: personalize.cpp,v 1.13 2009/10/07 08:59:03 rhabarber1848 Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -430,3 +430,53 @@ void CPersonalizeGui::SaveAndRestart()
 
 	CNeutrinoApp::getInstance()->exec(NULL, "restart");
 }
+
+/*adds a personalized menue entry to menue, based upon menue widget class/structur, expands with personalizing parameters*/
+int CPersonalizeGui::addItem(	CMenuWidget &item, 
+				const neutrino_locale_t Text, 
+				bool isActiv,
+				const char * const Option,
+				CMenuTarget* Target,
+				const char * const ActionKey,
+				neutrino_msg_t DirectKey,
+				const char * const IconName,
+				const bool defaultselected,
+				const int & personalize_mode,
+				const int & personalize_protect_mode,
+				const bool alwaysAsk)
+{
+	int ret = 1;
+
+	if (personalize_mode == PERSONALIZE_MODE_VISIBLE && personalize_protect_mode == PROTECT_MODE_NOT_PROTECTED)
+	{
+		item.addItem(new CMenuForwarder(Text, isActiv, Option, Target, ActionKey, DirectKey, IconName),  defaultselected);
+	}
+	else if (personalize_mode == PERSONALIZE_MODE_PIN || personalize_protect_mode == PROTECT_MODE_PIN_PROTECTED)
+	{
+		item.addItem(new CLockedMenuForwarder(Text, g_settings.personalize_pincode, alwaysAsk, isActiv, (char*)Option, Target, ActionKey, DirectKey, IconName), defaultselected);
+	}
+	else
+	{
+		ret = 0;
+	}
+	return ret;
+}
+
+// returns RC_key shortcut between key number 1 to 0, 10 returns 0, >10 returns no key
+// parameter alternate_rc_key allows tu use an alternate key, default is RC_nokey
+neutrino_msg_t CPersonalizeGui::setShortcut(const int & shortcut_num, neutrino_msg_t alternate_rc_key)
+{
+	if (shortcut_num < 10)
+	{
+		return CRCInput::convertDigitToKey(shortcut_num);
+	}
+	else if (shortcut_num == 10)
+	{
+		return CRCInput::RC_0;
+	}
+	else
+	{
+		return alternate_rc_key;
+	}
+}
+
