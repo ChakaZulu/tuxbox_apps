@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.80 2009/10/07 08:59:03 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.81 2009/10/08 06:27:40 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -153,16 +153,16 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		;// Stop seperator from appearing when menu entries have been hidden	
 	else
 		mainMenu.addItem(GenericMenuSeparatorLine); 
-
+	
 #ifdef ENABLE_AUDIOPLAYER
 	//1. audioplayer
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::convertDigitToKey(shortcut), NULL, false,   g_settings.personalize_audioplayer);
-
+	
 #ifdef ENABLE_INTERNETRADIO
 	//2. internet player
 	shortcut += personalize->addItem(mainMenu, LOCALE_INETRADIO_NAME, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, g_settings.personalize_inetradio);
 #endif
-#endif
+#endif	
 
 #ifdef ENABLE_ESD
 	//3. esound
@@ -208,7 +208,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_UPNPBROWSER, true, NULL, new CUpnpBrowserGui(), NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, g_settings.personalize_upnpbrowser);
 #endif
 
-//7.
+	//7.
 	if (g_PluginList->hasPlugin(CPlugins::P_TYPE_SCRIPT))
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "", CRCInput::convertDigitToKey(shortcut++)));
 
@@ -238,7 +238,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	else
 		mainMenu.addItem(GenericMenuSeparatorLine);
 
-//10. -- only 10 shortcuts (1-9, 0), the next could be the last also!(10. => 0)
+	//10. -- only 10 shortcuts (1-9, 0), the next could be the last also!(10. => 0)
 	//sleeptimer
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL, personalize->setShortcut(shortcut), NULL, false, g_settings.personalize_sleeptimer);
 
@@ -289,11 +289,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	
 	//9 lcd.
 	shortcut2 += personalize->addItem(mainSettings,LOCALE_MAINSETTINGS_LCD, true, NULL, &lcdSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_lcd);
-
-//10. -- only 10 shortcuts (1-9, 0), the next could be the last also!(10. => 0)
+	
+	//10. -- only 10 shortcuts (1-9, 0), the next could be the last also!(10. => 0)
 	//keybindings
 	shortcut2 += personalize->addItem(mainSettings,LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings, NULL, personalize->setShortcut(shortcut2), NULL, false, g_settings.personalize_keybinding);
-
+	
 	//blue (audioplayer, pictureviewer, esd)
 #if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
 	personalize->addItem(mainSettings, LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE, false, g_settings.personalize_audpic);
@@ -647,7 +647,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &menuSc
 	
 	//4. epg restart
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_EPGRESTART, true, NULL, this, "EPGrestart", CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_epgrestart);
-
+	
 #ifdef HAVE_DBOX_HARDWARE
 	//5. ucode check
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_ucodecheck);
@@ -671,7 +671,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &menuSc
 	personalize->addItem(service, LOCALE_SERVICEMENU_IMAGEINFO, true, NULL, new CImageInfo(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW, false, g_settings.personalize_imageinfo);
 
 	//softupdate
-	if(softupdate) // TODO: move software update to it's own class/file
+	if(softupdate) // TODO: move software update for it's own class/file
 	{
 		dprintf(DEBUG_DEBUG, "init soft-update-stuff\n");
 		CMenuWidget* updateSettings = new CMenuWidget(LOCALE_SERVICEMENU_UPDATE, "softupdate.raw", 550);
@@ -748,7 +748,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &menuSc
 
 		// blue software update
 		personalize->addItem(service, LOCALE_SERVICEMENU_UPDATE, true, NULL, updateSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE, false, g_settings.personalize_update);
-	}
+ 	}
 
 	delete personalize;
 }

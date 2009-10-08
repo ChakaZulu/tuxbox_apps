@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.13 2009/10/07 08:59:03 rhabarber1848 Exp $
+        $Id: personalize.cpp,v 1.14 2009/10/08 06:27:41 dbt Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -96,7 +96,6 @@ CPersonalizeGui::CPersonalizeGui()
 	height = hheight+13*mheight+ 10;
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
-
 }
 
 int CPersonalizeGui::exec(CMenuTarget* parent, const std::string & actionKey)
@@ -179,18 +178,18 @@ void CPersonalizeGui::ShowMainMenuOptions()
 	int old_scartmode	= g_settings.personalize_scartmode;
 	int old_games		= g_settings.personalize_games;
 	int old_audioplayer	= g_settings.personalize_audioplayer;
-	int old_inetradio		= g_settings.personalize_inetradio;
+	int old_inetradio	= g_settings.personalize_inetradio;
 	int old_esound		= g_settings.personalize_esound;
 	int old_movieplayer	= g_settings.personalize_movieplayer;
 	int old_pictureviewer	= g_settings.personalize_pictureviewer;
 #ifdef ENABLE_UPNP
 	int old_upnpbrowser	= g_settings.personalize_upnpbrowser;
 #endif
-	int old_settings		= g_settings.personalize_settings;
+	int old_settings	= g_settings.personalize_settings;
 	int old_service		= g_settings.personalize_service;
 	int old_sleeptimer	= g_settings.personalize_sleeptimer;
 	int old_reboot		= g_settings.personalize_reboot;
-	int old_shutdown		= g_settings.personalize_shutdown;
+	int old_shutdown	= g_settings.personalize_shutdown;
 
 	int shortcut = 1;
 
@@ -271,21 +270,21 @@ void CPersonalizeGui::ShowSettingsOptions()
 /*      Here we give the user the option to enable, disable, or PIN protect items on the Settings Menu.
         We also provide a means of PIN protecting the menu itself. */
 
-	int old_stprotect		= g_settings.personalize_settings;
+	int old_stprotect	= g_settings.personalize_settings;
 	int old_video		= g_settings.personalize_video;
 	int old_audio		= g_settings.personalize_audio;
 	int old_youth		= g_settings.personalize_youth;
 	int old_network		= g_settings.personalize_network;
-	int old_recording		= g_settings.personalize_recording;
+	int old_recording	= g_settings.personalize_recording;
 	int old_streaming	= g_settings.personalize_streaming;
-	int old_language		= g_settings.personalize_language;
+	int old_language	= g_settings.personalize_language;
 	int old_colors		= g_settings.personalize_colors;
-	int old_lcd			= g_settings.personalize_lcd;
+	int old_lcd		= g_settings.personalize_lcd;
 	int old_keybinding	= g_settings.personalize_keybinding;
 	int old_audpic		= g_settings.personalize_audpic;
 	int old_driver		= g_settings.personalize_driver;
 	int old_misc		= g_settings.personalize_misc;
-
+	
 	CMenuWidget* pSTMenu = new CMenuWidget(LOCALE_MAINMENU_SETTINGS,NEUTRINO_ICON_PROTECTING, width);
 
 	pSTMenu->addItem(GenericMenuSeparator);
@@ -432,22 +431,22 @@ void CPersonalizeGui::SaveAndRestart()
 }
 
 /*adds a personalized menue entry to menue, based upon menue widget class/structur, expands with personalizing parameters*/
-int CPersonalizeGui::addItem(	CMenuWidget &item, 
-				const neutrino_locale_t Text, 
-				bool isActiv,
-				const char * const Option,
-				CMenuTarget* Target,
-				const char * const ActionKey,
-				neutrino_msg_t DirectKey,
-				const char * const IconName,
-				const bool defaultselected,
-				const int & personalize_mode,
-				const int & personalize_protect_mode,
-				const bool alwaysAsk)
+int CPersonalizeGui::addItem(	CMenuWidget &item, 			
+				const neutrino_locale_t Text, 		
+				bool isActiv,				
+				const char * const Option, 		
+				CMenuTarget* Target, 			
+				const char * const ActionKey, 		
+				neutrino_msg_t DirectKey, 		
+				const char * const IconName, 		
+				const bool defaultselected, 		
+				const int & personalize_mode, 		
+				const int & personalize_protect_mode, 
+				const bool alwaysAsk)			
 {
 	int ret = 1;
 
-	if (personalize_mode == PERSONALIZE_MODE_VISIBLE && personalize_protect_mode == PROTECT_MODE_NOT_PROTECTED)
+	if (personalize_mode == PERSONALIZE_MODE_VISIBLE && personalize_protect_mode == PROTECT_MODE_NOT_PROTECTED) 
 	{
 		item.addItem(new CMenuForwarder(Text, isActiv, Option, Target, ActionKey, DirectKey, IconName),  defaultselected);
 	}
@@ -462,19 +461,19 @@ int CPersonalizeGui::addItem(	CMenuWidget &item,
 	return ret;
 }
 
-// returns RC_key shortcut between key number 1 to 0, 10 returns 0, >10 returns no key
-// parameter alternate_rc_key allows tu use an alternate key, default is RC_nokey
+// returns RC_key depends of shortcut between key number 1 to 0, 10 returns 0, >10 returns no key
+// parameter alternate_rc_key allows using an alternate key, default key is RC_nokey
 neutrino_msg_t CPersonalizeGui::setShortcut(const int & shortcut_num, neutrino_msg_t alternate_rc_key)
 {
-	if (shortcut_num < 10)
+	if (shortcut_num < 10) 
 	{
 		return CRCInput::convertDigitToKey(shortcut_num);
 	}
-	else if (shortcut_num == 10)
+	else if (shortcut_num == 10) 
 	{
 		return CRCInput::RC_0;
 	}
-	else
+	else	
 	{
 		return alternate_rc_key;
 	}
