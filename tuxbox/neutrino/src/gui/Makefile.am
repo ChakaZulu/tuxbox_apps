@@ -23,7 +23,7 @@ libneutrino_gui_a_SOURCES = \
 	rc_lock.cpp bookmarkmanager.cpp \
 	timeosd.cpp epgplus.cpp epg_menu.cpp personalize.cpp \
 	streaminfo2.cpp plugins.cpp imageinfo.cpp \
-	audio_select.cpp
+	audio_select.cpp software_update.cpp
 
 libneutrino_gui3_a_SOURCES =  movieinfo.cpp
 

@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.81 2009/10/08 06:27:40 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.82 2009/10/09 05:04:06 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -77,6 +77,7 @@
 #include "gui/pluginlist.h"
 #include "gui/scan.h"
 #include "gui/screensetup.h"
+#include "gui/software_update.h"
 #include "gui/streaminfo2.h"
 #include "gui/sleeptimer.h"
 #include "gui/update.h"
@@ -671,83 +672,10 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &menuSc
 	personalize->addItem(service, LOCALE_SERVICEMENU_IMAGEINFO, true, NULL, new CImageInfo(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW, false, g_settings.personalize_imageinfo);
 
 	//softupdate
-	if(softupdate) // TODO: move software update for it's own class/file
+	if(softupdate)
 	{
-		dprintf(DEBUG_DEBUG, "init soft-update-stuff\n");
-		CMenuWidget* updateSettings = new CMenuWidget(LOCALE_SERVICEMENU_UPDATE, "softupdate.raw", 550);
-		updateSettings->addItem(GenericMenuSeparator);
-		updateSettings->addItem(GenericMenuBack);
-		updateSettings->addItem(GenericMenuSeparatorLine);
-
-
-		// experts-functions to read/write to the mtd
-		CMenuWidget* mtdexpert = new CMenuWidget(LOCALE_FLASHUPDATE_EXPERTFUNCTIONS, "softupdate.raw");
-		mtdexpert->addItem(GenericMenuSeparator);
-		mtdexpert->addItem(GenericMenuBack);
-		mtdexpert->addItem(GenericMenuSeparatorLine);
-		CFlashExpert* fe = new CFlashExpert();
-		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_READFLASH    , true, NULL, fe, "readflash"       , CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
-		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_WRITEFLASH   , true, NULL, fe, "writeflash"      , CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-		mtdexpert->addItem(GenericMenuSeparatorLine);
-		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_READFLASHMTD , true, NULL, fe, "readflashmtd"    , CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_WRITEFLASHMTD, true, NULL, fe, "writeflashmtd"   , CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-#ifndef DISABLE_INTERNET_UPDATE
-		mtdexpert->addItem(GenericMenuSeparatorLine);
-
-		CStringInputSMS * updateSettings_url_file = new CStringInputSMS(LOCALE_FLASHUPDATE_URL_FILE, g_settings.softupdate_url_file, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789!""$%&/()=?-. ");
-		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_URL_FILE, true, g_settings.softupdate_url_file, updateSettings_url_file));
-#endif
-
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_EXPERTFUNCTIONS, true, NULL, mtdexpert, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
-
-#ifndef DISABLE_INTERNET_UPDATE
-#ifdef HAVE_DBOX_HARDWARE
-		updateSettings->addItem(GenericMenuSeparatorLine);
-		CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_FLASHUPDATE_UPDATEMODE, &g_settings.softupdate_mode, FLASHUPDATE_UPDATEMODE_OPTIONS, FLASHUPDATE_UPDATEMODE_OPTION_COUNT, true);
-		updateSettings->addItem( oj );
-#endif
-#endif
-
-		/* show current version */
-		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FLASHUPDATE_CURRENTVERSION_SEP));
-
-		/* get current version SBBBYYYYMMTTHHMM -- formatsting */
-		CConfigFile versionFile('\t');
-
-		const char * versionString = (versionFile.loadConfig("/.version")) ? (versionFile.getString( "version", "????????????????").c_str()) : "????????????????";
-
-		dprintf(DEBUG_INFO, "current flash-version: %s\n", versionString);
-
-		static CFlashVersionInfo versionInfo(versionString);
-		static CImageInfo imageinfo;
- 
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_IMAGENAME , false, imageinfo.getImageInfo(DISTRIBUTION)));
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONDATE    , false, versionInfo.getDate()));
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONTIME    , false, versionInfo.getTime()));
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTRELEASECYCLE   , false, versionInfo.getReleaseCycle()));
-		/* versionInfo.getType() returns const char * which is never deallocated */
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONSNAPSHOT, false, versionInfo.getType()));
-
-#ifndef DISABLE_INTERNET_UPDATE
-#ifdef HAVE_DBOX_HARDWARE
-		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FLASHUPDATE_PROXYSERVER_SEP));
-
-		CStringInputSMS * updateSettings_proxy = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYSERVER, g_settings.softupdate_proxyserver, 23, LOCALE_FLASHUPDATE_PROXYSERVER_HINT1, LOCALE_FLASHUPDATE_PROXYSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_PROXYSERVER, true, g_settings.softupdate_proxyserver, updateSettings_proxy));
-
-		CStringInputSMS * updateSettings_proxyuser = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYUSERNAME, g_settings.softupdate_proxyusername, 23, LOCALE_FLASHUPDATE_PROXYUSERNAME_HINT1, LOCALE_FLASHUPDATE_PROXYUSERNAME_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_PROXYUSERNAME, true, g_settings.softupdate_proxyusername, updateSettings_proxyuser));
-
-		CStringInputSMS * updateSettings_proxypass = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYPASSWORD, g_settings.softupdate_proxypassword, 20, LOCALE_FLASHUPDATE_PROXYPASSWORD_HINT1, LOCALE_FLASHUPDATE_PROXYPASSWORD_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_PROXYPASSWORD, true, g_settings.softupdate_proxypassword, updateSettings_proxypass));
-#endif
-#endif
-
-		updateSettings->addItem(GenericMenuSeparatorLine);
-		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CHECKUPDATE, true, NULL, new CFlashUpdate(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-
 		// blue software update
-		personalize->addItem(service, LOCALE_SERVICEMENU_UPDATE, true, NULL, updateSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE, false, g_settings.personalize_update);
+		personalize->addItem(service, LOCALE_SERVICEMENU_UPDATE, true, NULL, new CSoftwareUpdate(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE, false, g_settings.personalize_update);
  	}
 
 	delete personalize;
