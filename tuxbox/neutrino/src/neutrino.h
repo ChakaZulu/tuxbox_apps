@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.221 2009/10/05 09:58:48 rhabarber1848 Exp $
+	$Id: neutrino.h,v 1.222 2009/10/09 04:27:00 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -163,22 +163,22 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 			STARTMODE_STANDBY	= 7,
 		};
 
-		CConfigFile				configfile;
+		CConfigFile			configfile;
 		CScanSettings			scanSettings;
-		int					network_dhcp;
-		int					network_automatic_start;
+		int				network_dhcp;
+		int				network_automatic_start;
 
 		neutrino_font_descr_struct	font;
 
-		int					mode;
-		int					lastMode;
-		int					tunerMode;
-		bool					wakeupfromScart;
-		bool					standbyAfterRecord;
-		bool					obeyStartMode;
-		bool					softupdate;
-		bool					fromflash;
-		int					recording_id;
+		int				mode;
+		int				lastMode;
+		int				tunerMode;
+		bool				wakeupfromScart;
+		bool				standbyAfterRecord;
+		bool				obeyStartMode;
+		bool				softupdate;
+		bool				fromflash;
+		int				recording_id;
 		CTimerd::RecordingInfo* 	nextRecordingInfo;
 		//bool		record_mode;
 
@@ -187,37 +187,37 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CZapitClient::responseGetLastChannel    firstchannel;
 		st_rmsg				sendmessage;
 
-		bool					current_muted;
+		bool				current_muted;
 
-		bool					skipShutdownTimer;
+		bool				skipShutdownTimer;
 
 		CColorSetupNotifier		*colorSetupNotifier;
 
 		CKeySetupNotifier       	*keySetupNotifier;
-		CShutdownCountNotifier	*shutdownCountNotifier;
+		CShutdownCountNotifier		*shutdownCountNotifier;
 
 		CNVODChangeExec         	*NVODChanger;
 #ifdef HAVE_DBOX_HARDWARE
-		CUCodeCheckExec		*UCodeChecker;
+		CUCodeCheckExec			*UCodeChecker;
 #endif
 		CDVBInfoExec			*DVBInfo;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
-		CMoviePluginChangeExec 	*MoviePluginChanger;
+		CMoviePluginChangeExec 		*MoviePluginChanger;
 		CIPChangeNotifier		*MyIPChanger;
 //		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
-		CFdxChangeNotifier			*FdxSettingsChanger;
+		CFdxChangeNotifier		*FdxSettingsChanger;
 		CRCLock				*rcLock;
 #ifdef ENABLE_MOVIEPLAYER
 		CMenuTarget* 			moviePlayerGui;
 #endif
-		bool 					parentallocked;
+		bool 				parentallocked;
 		CFontSizeNotifier 		*fontsizenotifier;
-		bool 					waitforshutdown;
-		bool					volumeBarIsVisible;
+		bool 				waitforshutdown;
+		bool				volumeBarIsVisible;
 
 		// USERMENU
-		CTimerList				*Timerlist;
+		CTimerList			*Timerlist;
 
 		bool showUserMenu(int button);
 		bool getNVODMenu(CMenuWidget* menu);
