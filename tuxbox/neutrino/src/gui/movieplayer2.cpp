@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.50 2009/10/10 13:21:51 seife Exp $
+  $Id: movieplayer2.cpp,v 1.51 2009/10/10 13:22:17 seife Exp $
 
 
   License: GPL
@@ -1253,7 +1253,10 @@ ReadTSFileThread(void *parm)
 			{
 				if (g_endpts < g_startpts)
 					g_endpts += 95443717; // (0x200000000 / 90);
-				INFO("PTS at file pos %lld: %ld filelen: %ld\n", syncpos + i, g_endpts, g_endpts - g_startpts);
+				time_t tmp = (g_endpts - g_startpts) / 1000;
+				if (g_endpts != g_startpts)
+					bytes_per_second = (syncpos - filepos) / tmp;
+				INFO("PTS at file pos %lld: %ld filelen: %ld, bps: %lld\n", syncpos + i, g_endpts, tmp, bytes_per_second);
 			}
 		}
 	}
@@ -1306,6 +1309,8 @@ ReadTSFileThread(void *parm)
 			INFO("skip ends\n");
 			break;
 		case CMoviePlayerGui::PLAY:
+			if (g_startpts != -1 && g_endpts != -1)
+				break;	// no need to update bytes_per_second
 			if (last == 0)
 			{
 				last = time(NULL);
@@ -1525,7 +1530,10 @@ ReadMPEGFileThread(void *parm)
 		g_endpts = get_PES_PTS(buf_in, filesize - 1024*1024, true); // until EOF
 		if (g_endpts >= 0 && g_endpts < g_startpts)
 			g_endpts += 95443717; // (0x200000000 / 90);
-		INFO("PTS at file end:   %ld, file len: %ld\n", g_endpts, g_endpts - g_startpts);
+		time_t tmp = (g_endpts - g_startpts) / 1000;
+		if (g_startpts != -1 && g_startpts != g_endpts)
+			bytes_per_second = filesize / tmp;
+		INFO("PTS at file end:   %ld, file len: %ld, bps: %lld\n", g_endpts, tmp, bytes_per_second);
 	}
 	else
 		INFO("file is too short to determine PTS at file end\n");
@@ -1587,6 +1595,8 @@ ReadMPEGFileThread(void *parm)
 			DBG("skip ends\n");
 			break;
 		case CMoviePlayerGui::PLAY:
+			if (g_startpts != -1 && g_endpts != -1)
+				break;	// we already have pretty correct bytes_per_second
 			if (last == 0)
 			{
 				last = time(NULL);
@@ -3288,7 +3298,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.50 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.51 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
