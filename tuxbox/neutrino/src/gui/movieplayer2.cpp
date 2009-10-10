@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.52 2009/10/10 20:06:32 seife Exp $
+  $Id: movieplayer2.cpp,v 1.53 2009/10/10 20:16:08 seife Exp $
 
 
   License: GPL
@@ -323,7 +323,7 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 int
 CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 {
-	printf("[movieplayer.cpp] %s actionKey=%s\n", __PRETTY_FUNCTION__, actionKey.c_str());
+	printf("[%s] CMoviePlayerGui::exec actionKey='%s'\n", __FILE__, actionKey.c_str());
 
 	if (Path_vlc_settings != g_settings.streaming_server_startdir)
 	{
@@ -428,9 +428,28 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 			else
 			{
 				// TODO check if file is a TS. Not required right now as writing bookmarks is disabled for PES anyway
+				startfilename = "";
 				PlayFile();
 			}
 		}
+	}
+	else if (actionKey.find("file://") == 0)
+	{
+		std::string::size_type spos = actionKey.rfind("?startpos=");
+		std::string fn;
+		if (spos != std::string::npos)
+		{
+			const char *tmp = actionKey.substr(spos + 10).c_str();
+			g_startposition = atoll(tmp);
+		}
+		else
+		{
+			g_startposition = 0;
+			spos = actionKey.size();
+		}
+
+		startfilename = actionKey.substr(7, spos - 7);
+		PlayFile();
 	}
 
 	bookmarkmanager->flush();
@@ -2069,7 +2088,7 @@ OutputThread(void *arg)
 
 		if (g_startposition > 0 && g_startpts != - 1)
 		{
-			printf("[movieplayer.cpp] Was Bookmark. Skipping to startposition\n");
+			printf("[%s] Was Bookmark. Skipping to startposition %d %d\n", __FILE__, g_startposition, remote);
 			skip(g_startposition, remote, true);
 			g_startposition = 0;
 		}
@@ -2496,6 +2515,7 @@ void CMoviePlayerGui::ParentalEntrance(void)
 	CZapProtection pin(g_settings.parentallock_pincode, 18);
 	if(pin.check())
 	{
+		startfilename = "";
 		PlayFile(1);
 	}
 }
@@ -2540,7 +2560,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	std::string sel_filename, title;
 	bool update_info = true, start_play = false, exit = false;
 	bool open_filebrowser = true, cdDvd = false, aborted = false;
-	bool stream = true;
+	bool stream = true, from_mb = false;
 	std::string mrl_str;
 	int selected = 0;
 	CTimeOSD StreamTime;
@@ -2589,8 +2609,33 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	}
 	else if (streamtype == STREAMTYPE_LOCAL)
 	{
-		INFO("STREAMTYPE_LOCAL\n");
-		if (Path.find("vlc://") == 0)
+		INFO("STREAMTYPE_LOCAL '%s'\n", startfilename.c_str());
+		if (startfilename != "")
+		{
+			CFile file;
+			struct stat s;
+
+			filename = startfilename.c_str();
+			if (stat(filename, &s)) // file not exist
+			{
+				INFO("file not found: %s\n", filename);
+				exit = true;
+			}
+			else
+			{
+				file.Name = startfilename;
+				file.Size = s.st_size;
+				filelist.clear();
+				filelist.push_back(file);
+				autoplaylist = filelist_auto_add(filelist);
+				sel_filename = startfilename;
+				start_play = true;
+				update_info = true;
+				from_mb = true;
+				open_filebrowser = false;
+			}
+		}
+		else if (Path.find("vlc://") == 0)
 		{
 			INFO("old path was vlc, setting to local\n");
 			Path = Path_local;
@@ -2616,7 +2661,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 	 */
 	do
 	{
-		if (g_playstate == CMoviePlayerGui::STOPPED && !cdDvd)
+		if (g_playstate == CMoviePlayerGui::STOPPED && !cdDvd && !from_mb)
 		{
 			if (selected + 1 < (int)filelist.size() && !aborted && !autoplaylist)
 			{
@@ -2671,7 +2716,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			start_play = true;
 		}
 
-		if (open_filebrowser && !cdDvd)
+		if (open_filebrowser && !cdDvd && !from_mb)
 		{
 			g_playstate = CMoviePlayerGui::STOPPED;
 			if (g_settings.streaming_show_tv_in_browser == true &&
@@ -3197,6 +3242,9 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 		if (g_playstate == CMoviePlayerGui::SKIP && stream)
 			StreamTime.hide();
+
+		if (from_mb && g_playstate == CMoviePlayerGui::STOPPED)
+			break;
 	}
 	while (true);
 	INFO("waiting for output thread\n");
@@ -3273,7 +3321,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.52 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.53 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()

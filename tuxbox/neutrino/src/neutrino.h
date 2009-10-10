@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.222 2009/10/09 04:27:00 dbt Exp $
+	$Id: neutrino.h,v 1.223 2009/10/10 20:16:11 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -210,6 +210,9 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CRCLock				*rcLock;
 #ifdef ENABLE_MOVIEPLAYER
 		CMenuTarget* 			moviePlayerGui;
+#ifdef ENABLE_MOVIEBROWSER
+		CMenuTarget*			movieBrowser;
+#endif
 #endif
 		bool 				parentallocked;
 		CFontSizeNotifier 		*fontsizenotifier;

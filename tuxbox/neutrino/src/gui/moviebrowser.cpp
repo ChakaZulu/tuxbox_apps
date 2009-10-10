@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.29 2009/09/26 09:18:37 rhabarber1848 Exp $
+	$Id: moviebrowser.cpp,v 1.30 2009/10/10 20:16:08 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,16 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.30  2009/10/10 20:16:08  seife
+	neutrino: add moviebrowser support to movieplayer2
+	
+	Implement moviebrowser / mp2 integration. The mp2 gets called from
+	moviebrowser and gets a special URL to point to the file to play.
+	Might still have rough edges and probably still needs some work.
+	
+	Based on an idea and prototype by "Tahtu", see
+	http://forum.tuxbox.org/forum/viewtopic.php?p=370973#p370973
+	
 	Revision 1.29  2009/09/26 09:18:37  rhabarber1848
 	New cdk/configure option --disable-gui-mount to disable GUI mount functionality, to be used in automount-only- or HDD/network-less images, currently only active in Neutrino, GUI mount is enabled by default, thanks to barf: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=18&t=41744
 	
@@ -489,7 +499,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.29 2009/09/26 09:18:37 rhabarber1848 Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.30 2009/10/10 20:16:08 seife Exp $\r\n");
 	init();
 }
 
@@ -1083,7 +1093,12 @@ int CMovieBrowser::exec(const char* path)
 		m_playListLines.lineArray[i].clear();
 	}
 
-	m_selectedDir = path; 
+	if (path != NULL)
+		m_selectedDir = path;
+	else if(strlen(g_settings.network_nfs_moviedir) > 0)
+		m_selectedDir = g_settings.network_nfs_moviedir;
+	else
+		m_selectedDir = "/";
 	
 	if(paint() == false)
 		return res;// paint failed due to less memory , exit 
@@ -1168,8 +1183,24 @@ int CMovieBrowser::exec(const char* path)
 					}
 				}
 				TRACE("[mb] start pos: %d s\r\n",m_currentStartPos);
+#ifndef ENABLE_MOVIEPLAYER2
 				res = true;
 				loop = false;
+#else
+				char startpos[32];
+				sprintf(startpos, "%d", m_currentStartPos);
+				std::string actionKey = "mb.file://";
+				actionKey += getSelectedFile()->Name;
+				actionKey += "?startpos=";
+				actionKey += startpos;
+
+				hide();
+				CNeutrinoApp::getInstance()->exec(NULL, actionKey);
+				paint();
+
+				onSetGUIWindow(m_settings.gui);
+				refresh();
+#endif
 			}
 			else if (msg == CRCInput::RC_home)
 			{

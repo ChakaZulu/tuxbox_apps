@@ -153,10 +153,9 @@ fi
 if test "$enable_movieplayer" = "yes"; then
 	AC_DEFINE(ENABLE_MOVIEPLAYER,1,[include Neutrino movieplayer])
 	AC_DEFINE(ENABLE_MOVIEPLAYER_VLC,1,[include Neutrino movieplayer VLC support])
+	AC_DEFINE(ENABLE_MOVIEBROWSER,1,[include Moviebrowser support])
 	if test "$enable_movieplayer2" = "yes"; then
 		AC_DEFINE(ENABLE_MOVIEPLAYER2,1,[include Movieplayer2 support])
-	else
-		AC_DEFINE(ENABLE_MOVIEBROWSER,1,[include Moviebrowser support])
 	fi
 else
 	enable_movieplayer2=no

@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.990 2009/10/07 08:59:02 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.991 2009/10/10 20:16:11 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2165,6 +2165,12 @@ int CNeutrinoApp::run(int argc, char **argv)
 #ifdef ENABLE_MOVIEPLAYER
 	moviePlayerGui			= new CMoviePlayerGui();
 #endif
+#ifdef ENABLE_MOVIEPLAYER2
+#ifdef ENABLE_MOVIEBROWSER
+	movieBrowser				= new CMovieBrowser();
+#endif
+#endif
+
 	//USERMENU
 	Timerlist			= new CTimerList;
 
@@ -4231,7 +4237,12 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		InitZapitChannelHelper(CZapitClient::MODE_RADIO);
 		return menu_return::RETURN_REPAINT;
 	}
-	
+#ifdef ENABLE_MOVIEPLAYER2
+	else if (actionKey.find("mb.file://") == 0)
+	{
+		moviePlayerGui->exec(NULL, actionKey.substr(3));
+	}
+#endif
 	return returnval;
 }
 

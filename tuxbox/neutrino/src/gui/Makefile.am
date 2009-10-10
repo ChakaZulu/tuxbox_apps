@@ -46,11 +46,12 @@ libneutrino_gui_a_SOURCES += \
 endif
 
 if ENABLE_MOVIEPLAYER
+libneutrino_gui_a_SOURCES += moviebrowser.cpp
 if ENABLE_MOVIEPLAYER2
 libneutrino_gui_a_SOURCES += movieplayer2.cpp
 else
 libneutrino_gui_a_SOURCES += \
-	movieviewer.cpp movieplayer.cpp moviebrowser.cpp
+	movieviewer.cpp movieplayer.cpp
 endif
 endif
 

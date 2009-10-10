@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.82 2009/10/09 05:04:06 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.83 2009/10/10 20:16:08 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -183,7 +183,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK_PC, true, NULL, moviePlayerGui, "tsplayback_pc", CRCInput::RC_1));
 #ifdef ENABLE_MOVIEBROWSER
+#ifndef ENABLE_MOVIEPLAYER2
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, moviePlayerGui, "tsmoviebrowser", CRCInput::RC_2));
+#else
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, movieBrowser, "run", CRCInput::RC_2));
+#endif /* ENABLE_MOVIEPLAYER2 */
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_BOOKMARK, true, NULL, moviePlayerGui, "bookmarkplayback", CRCInput::RC_3));
 #else
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_BOOKMARK, true, NULL, moviePlayerGui, "bookmarkplayback", CRCInput::RC_2));
