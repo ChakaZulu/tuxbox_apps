@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.47 2009/10/03 14:28:51 seife Exp $
+  $Id: movieplayer2.cpp,v 1.48 2009/10/10 13:20:05 seife Exp $
 
 
   License: GPL
@@ -2128,7 +2128,8 @@ OutputThread(void *arg)
 					DBG("WAITING FOR BUFFERRESET\n");
 					usleep(250000);
 				}
-				g_playstate = CMoviePlayerGui::SOFTRESET;
+				if (g_playstate == CMoviePlayerGui::SKIP) // might be STOPPED now
+					g_playstate = CMoviePlayerGui::SOFTRESET;
 				DBG("skipping end\n");
 				break;
 			case CMoviePlayerGui::RESYNC:
@@ -2149,7 +2150,8 @@ OutputThread(void *arg)
 					usleep(100000);
 				}
 				ioctl(dmxa, DMX_START);
-				g_playstate = CMoviePlayerGui::PLAY;
+				if (g_playstate == CMoviePlayerGui::RESYNC) // might be STOPPED now
+					g_playstate = CMoviePlayerGui::PLAY;
 				break;
 			case CMoviePlayerGui::PLAY:
 			{
@@ -2259,7 +2261,8 @@ OutputThread(void *arg)
 				// on the dbox2, the dmx must be started for SET_AV_SYNC
 				if (ioctl(adec, AUDIO_SET_AV_SYNC, 1UL))
 					perror("AUDIO_SET_AV_SYNC");
-				g_playstate = CMoviePlayerGui::PLAY;
+				if (g_playstate != CMoviePlayerGui::STOPPED) // might be changed now
+					g_playstate = CMoviePlayerGui::PLAY;
 				break;
 			case CMoviePlayerGui::STOPPED:
 			case CMoviePlayerGui::PREPARING:
@@ -2274,7 +2277,7 @@ OutputThread(void *arg)
 				break;
 		}
 
-		if (g_skiprequest)
+		if (g_skiprequest && g_playstate != CMoviePlayerGui::STOPPED)
 		{
 			DBG("g_skiprequest == true!\n");
 			g_playstate = CMoviePlayerGui::SKIP;
@@ -3285,7 +3288,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.47 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.48 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
@@ -3374,7 +3377,8 @@ static inline void skip(int seconds, bool /*remote*/, bool absolute)
 {
 	skipseconds = seconds;
 	skipabsolute = absolute;
-	g_playstate = CMoviePlayerGui::SKIP;
+	if (!g_EOF)
+		g_playstate = CMoviePlayerGui::SKIP;
 }
 
 static inline int get_filetime(bool remaining)
@@ -3464,6 +3468,11 @@ int get_PES_PTS(ringbuffer_t *buf, off_t position, bool until_eof)
 
 	while (pts == -1 || until_eof)
 	{
+		if (g_playstate == CMoviePlayerGui::STOPPED)
+		{
+			pts = -1;
+			break;
+		}
 		ringbuffer_get_write_vector(buf, &vec_in);
 		if (vec_in.len != 0 && eof < 2);
 		{
