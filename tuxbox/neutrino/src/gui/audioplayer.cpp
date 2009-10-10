@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.77 2009/10/03 22:19:37 seife Exp $
+  $Id: audioplayer.cpp,v 1.78 2009/10/10 20:44:30 rhabarber1848 Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -106,7 +106,7 @@
 #define AUDIOPLAYER_END_SCRIPT CONFIGDIR "/audioplayer.end"
 #define DEFAULT_RADIOSTATIONS_XMLFILE CONFIGDIR "/radio-stations.xml"
 
-const long int GET_PLAYLIST_TIMEOUT = 5;
+const long int GET_PLAYLIST_TIMEOUT = 10;
 const char RADIO_STATION_XML_FILE[] = {DEFAULT_RADIOSTATIONS_XMLFILE};
 
 const std::string icecasturl = "http://dir.xiph.org/yp.xml";
