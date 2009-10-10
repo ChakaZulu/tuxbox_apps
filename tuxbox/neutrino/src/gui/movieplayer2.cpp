@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.51 2009/10/10 13:22:17 seife Exp $
+  $Id: movieplayer2.cpp,v 1.52 2009/10/10 20:06:32 seife Exp $
 
 
   License: GPL
@@ -225,6 +225,7 @@ static int mp_syncPES(ringbuffer_t *buf, char **pes);
 static int get_PES_PTS(ringbuffer_t *buf, off_t position, bool until_eof = false);
 std::string url_escape(const char *url);
 size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data);
+static bool filelist_auto_add(CFileList &filelist);
 
 static int mf_open(int fileno);
 static int mf_close(void);
@@ -2741,37 +2742,11 @@ CMoviePlayerGui::PlayStream(int streamtype)
 						mrl_str = filelist[0].Name;
 					INFO("Generated FILE MRL: %s\n", mrl_str.c_str());
 
-					autoplaylist = false;
-					if (filelist.size() == 1 && !stream)
-					{
-						char *ext;
-						ext = strrchr(filename, '.');	// FOO-xxx-2007-12-31.001.ts <- the dot before "ts"
-										// 001.vdr <- the dot before "vdr"
-						if (ext &&
-						    ((ext - 7 >= filename && *(ext - 4) == '.' && !strcmp(ext, ".ts")) ||
-						     (ext - 4 >= filename &&                      !strcmp(ext, ".vdr"))))
-						{
-							int num = 0;
-							struct stat s;
-							CFile *file = new CFile;
-							sscanf(ext - 3, "%d", &num);
-							do {
-								num++;
-								char nextfile[strlen(filename) + 1];
-								memcpy(nextfile, filename, strlen(filename)-strlen(ext)-3);
-								sprintf(nextfile+strlen(filename)-strlen(ext)-3,"%03d%s", num, ext);
-								if (stat(nextfile, &s))
-									break; // file does not exist
-								file->Name = nextfile;
-								file->Size = s.st_size;
-								INFO("auto-adding '%s' to playlist\n", nextfile);
-								filelist.push_back(*file);
-							} while (true);
-							delete file;
-						}
-						if (filelist.size() > 1)
-							autoplaylist = true;
-					}
+					if (stream)
+						autoplaylist = false;
+					else
+						autoplaylist = filelist_auto_add(filelist);
+
 					update_info = true;
 					start_play = true;
 					selected = 0;
@@ -3298,7 +3273,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.51 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.52 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
@@ -3566,4 +3541,42 @@ size_t curl_dummywrite (void *ptr, size_t size, size_t nmemb, void *data)
 	std::string* pStr = (std::string*) data;
 	*pStr += (char*) ptr;
 	return size * nmemb;
+}
+
+static bool filelist_auto_add(CFileList &filelist)
+{
+	if (filelist.size() != 1)
+		return false;
+
+	const char *filename = filelist[0].Name.c_str();
+	char *ext;
+	ext = strrchr(filename, '.');	// FOO-xxx-2007-12-31.001.ts <- the dot before "ts"
+					// 001.vdr <- the dot before "vdr"
+	// check if there is something to do...
+	if (! ext)
+		return false;
+	if (!((ext - 7 >= filename && !strcmp(ext, ".ts") && *(ext - 4) == '.') ||
+	      (ext - 4 >= filename && !strcmp(ext, ".vdr"))))
+		return false;
+
+	int num = 0;
+	struct stat s;
+	size_t numpos = strlen(filename) - strlen(ext) - 3;
+	CFile *file = new CFile;
+	sscanf(filename + numpos, "%d", &num);
+	do {
+		num++;
+		char nextfile[strlen(filename) + 1];
+		memcpy(nextfile, filename, numpos);
+		sprintf(nextfile + numpos, "%03d%s", num, ext);
+		if (stat(nextfile, &s))
+			break; // file does not exist
+		file->Name = nextfile;
+		file->Size = s.st_size;
+		INFO("auto-adding '%s' to playlist\n", nextfile);
+		filelist.push_back(*file);
+	} while (true && num < 999);
+	delete file;
+
+	return (filelist.size() > 1);
 }
