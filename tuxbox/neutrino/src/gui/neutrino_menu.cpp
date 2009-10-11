@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.83 2009/10/10 20:16:08 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.84 2009/10/11 12:22:33 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2239,7 +2239,11 @@ bool CNeutrinoApp::showUserMenu(int button)
 				menu_items++;
 				menu_prev = SNeutrinoSettings::ITEM_MOVIEPLAYER_MB;
 				keyhelper.get(&key,&icon,CRCInput::RC_green);
+#ifndef ENABLE_MOVIEPLAYER2
 				menu_item = new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, this->moviePlayerGui, "tsmoviebrowser", key, icon);
+#else
+				menu_item = new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, movieBrowser, "run", key, icon);
+#endif
 				menu->addItem(menu_item, false);
 				break;
 #endif
