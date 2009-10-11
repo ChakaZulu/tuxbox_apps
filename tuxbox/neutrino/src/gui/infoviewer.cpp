@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.281 2009/10/05 19:52:09 dbt Exp $
+	$Id: infoviewer.cpp,v 1.282 2009/10/11 18:47:36 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -263,7 +263,9 @@ void CInfoViewer::paintBackground(int col_NumBox)
 }
 
 void CInfoViewer::showMovieTitle(const int playstate, const std::string &title, const std::string &sub_title,
-				 const int percent, const int ac3state, const int num_apids)
+				 const int percent, const time_t time_elapsed, const time_t time_remaining,
+				 const int ac3state, const bool show_button_green,
+				 const char *text_button_green, const char *text_button_red)
 {
 	showButtonBar = true;
 	bool fadeIn = (g_info.box_Type != CControld::TUXBOX_MAKER_NOKIA) && // dreambox and eNX only 
@@ -306,6 +308,15 @@ void CInfoViewer::showMovieTitle(const int playstate, const std::string &title, 
 	int icon_y = BoxStartY + ChanHeight / 2 - icon_h / 2;
 	frameBuffer->paintIcon(icon, icon_x, icon_y);
 
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(
+				ChanNameX + 10,
+				ChanNameY + time_height,
+				BoxEndX - (ChanNameX + 20) - time_width - 15,
+				g_Locale->getText(LOCALE_MOVIEPLAYER_HEAD), COL_INFOBAR, 0, true);
+
+	paintTime(false, true);
+	showInfoFile();
+
 	frameBuffer->paintBoxRel(ChanInfoX, BoxEndY + BOTTOM_BAR_OFFSET,
 				 BoxEndX - ChanInfoX, InfoHeightY_Info - BOTTOM_BAR_OFFSET,
 				 COL_INFOBAR_BUTTONS_BACKGROUND, c_rad_large, CORNER_BOTTOM);
@@ -334,9 +345,9 @@ void CInfoViewer::showMovieTitle(const int playstate, const std::string &title, 
 				ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2 + 2),
 				txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 
-	if (num_apids > 1)
+	if (show_button_green)
 	{
-		txt = g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES);
+		txt = text_button_green;
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN,
 				       BoxEndX - ICON_OFFSET - 3 * ButtonWidth + 2 + 8,
 				       BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
@@ -347,7 +358,7 @@ void CInfoViewer::showMovieTitle(const int playstate, const std::string &title, 
 					txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	}
 
-	txt = g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP16);
+	txt = text_button_red;
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED,
 			       BoxEndX - ICON_OFFSET - 4 * ButtonWidth + 2,
 			       BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
@@ -357,24 +368,13 @@ void CInfoViewer::showMovieTitle(const int playstate, const std::string &title, 
 				ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2 + 2) + 8,
 				txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 
-	switch (ac3state)
-	{
-	case 1:	// AC3_availabe
-		icon = "dd_avail.raw";
-		break;
-	case 2:	// AC3 active
-		icon = "dd.raw";
-		break;
-	case 0:	// no AC3
-	default:
-		icon = "dd_gray.raw";
-		break;
-	}
-	frameBuffer->paintIcon(icon,
-			       BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
-			       BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+	aspectRatio = g_Controld->getAspectRatio();
+	showIcon_16_9();
+	showIcon_Audio(ac3state);
 
-	display_Info(title.c_str(), sub_title.c_str(), true, false, (percent * 120) / 100);
+	char runningRest[32]; // %d can be 10 digits max...
+	sprintf(runningRest, "%ld / %ld min", (time_elapsed + 30) / 60, (time_remaining + 30) / 60);
+	display_Info(title.c_str(), sub_title.c_str(), true, false, (percent * 112) / 100, NULL, runningRest);
 
 	infobarLoop(false, fadeIn);
 }
@@ -1017,6 +1017,28 @@ void CInfoViewer::showIcon_SubT() const
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 }
 
+void CInfoViewer::showIcon_Audio(const int ac3state) const
+{
+	const char *dd_icon;
+	switch (ac3state)
+	{
+		case AC3_ACTIVE:
+			dd_icon = "dd.raw";
+			break;
+		case AC3_AVAILABLE:
+			dd_icon = "dd_avail.raw";
+			break;
+		case NO_AC3:
+		default:
+			dd_icon = "dd_gray.raw";
+			break;
+	}
+
+	frameBuffer->paintIcon(dd_icon,
+			       BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
+			       BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+}
+
 void CInfoViewer::showInfoIcons()
 {
 	showButton_SubServices();
@@ -1456,7 +1478,10 @@ void CInfoViewer::display_Info(const char *current, const char *next,
 		frameBuffer->paintBox(InfoX, NextInfoY-height, BoxEndX, NextInfoY, COL_INFOBAR_PLUS_0);
 		if (nextStart != NULL)
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(InfoX, NextInfoY, 100, nextStart, COL_INFOBAR, 0, UTF8);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart, NextInfoY, nextTimeX - xStart - 5, next, COL_INFOBAR, 0, UTF8);
+		if (starttimes)
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart, NextInfoY, nextTimeX - xStart - 5, next, COL_INFOBAR, 0, UTF8);
+		else
+			g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->RenderString(xStart, NextInfoY, nextTimeX - xStart - 5, next, COL_INFOBAR, 0, UTF8);
 		if (nextTimeW != 0)
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(nextTimeX, NextInfoY, nextTimeW, nextDuration, COL_INFOBAR, 0, UTF8);
 	}
@@ -1702,18 +1727,16 @@ void CInfoViewer::showButton_Audio()
 					txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	};
 
-	const char * dd_icon;
+	int ac3state;
 	if ( ( g_RemoteControl->current_PIDs.PIDs.selected_apid < count ) &&
 	     ( g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3 ) )
-		dd_icon = "dd.raw";
+		ac3state = AC3_ACTIVE;
 	else if ( g_RemoteControl->has_ac3 )
-		dd_icon = "dd_avail.raw";
+		ac3state = AC3_AVAILABLE;
 	else
-		dd_icon = "dd_gray.raw";
+		ac3state = NO_AC3;
 
-	frameBuffer->paintIcon(dd_icon,
-			       BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
-			       BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
+	showIcon_Audio(ac3state);
 }
 
 void CInfoViewer::killTitle()
