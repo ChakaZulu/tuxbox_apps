@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.67 2009/09/30 18:11:13 seife Exp $
+ * $Id: pzapit.cpp,v 1.68 2009/10/11 17:13:07 seife Exp $
  *
  * simple commandline client for zapit
  *
@@ -492,6 +492,12 @@ int main (int argc, char** argv)
 
 	if (getchannel)
 	{
+		int mode = zapit.getMode();
+		if (mode == CZapitClient::MODE_STANDBY)
+		{
+			std::cerr << "zapit is in standby mode, no channel active." << std::endl;
+			return 1;
+		}
 		t_channel_id c = zapit.getCurrentServiceID();
 		printf("%llx (%s)\n", c, (zapit.getChannelName(c)).c_str());
 		return 0;

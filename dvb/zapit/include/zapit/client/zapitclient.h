@@ -95,7 +95,8 @@ class CZapitClient:public CBasicClient
 
 	typedef enum channelsMode_
 		{
-			MODE_CURRENT,
+			MODE_STANDBY = 0, // MODE_STANDBY is used for querying the mode
+			MODE_CURRENT = 0, // MODE_CURRENT is used for bouquet editing etc
 			MODE_TV,
 			MODE_RADIO,
 			MODE_ALL
