@@ -5,8 +5,12 @@ INCLUDES = \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
-	@TUXTXT_CFLAGS@ \
 	@XML_CFLAGS@
+
+if ENABLE_INTERNAL_TUXTXT
+INCLUDES += \
+	@TUXTXT_CFLAGS@
+endif
 
 noinst_LIBRARIES = libneutrino_system.a
 

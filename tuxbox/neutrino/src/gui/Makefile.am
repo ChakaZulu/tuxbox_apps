@@ -9,8 +9,12 @@ INCLUDES = \
 	@NET_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
 	@MPEGTOOLS_CFLAGS@ \
-	@TUXTXT_CFLAGS@ \
 	-I$(top_srcdir)/lib
+
+if ENABLE_INTERNAL_TUXTXT
+INCLUDES += \
+	@TUXTXT_CFLAGS@
+endif
 
 noinst_LIBRARIES = libtimerlist.a libneutrino_gui.a libneutrino_gui2.a libneutrino_gui3.a
 

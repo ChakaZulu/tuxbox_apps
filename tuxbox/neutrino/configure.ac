@@ -24,7 +24,6 @@ TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
-TUXBOX_APPS_LIB_PKGCONFIG(TUXTXT,tuxbox-tuxtxt)
 TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
 
 AC_ARG_ENABLE(16-bit-mode,
@@ -70,6 +69,11 @@ AC_ARG_ENABLE(radiotext,
 	AS_HELP_STRING(--enable-radiotext,include Radiotext support),
 	,[enable_radiotext=no])
 AM_CONDITIONAL(ENABLE_RADIOTEXT,test "$enable_radiotext" = "yes")
+
+AC_ARG_ENABLE(internal-tuxtxt,
+	AS_HELP_STRING(--disable-internal-tuxtxt,[include internal Tuxtxt, use only external Tuxtxt plugin when disabled]),
+	,[enable_internal_tuxtxt=yes])
+AM_CONDITIONAL(ENABLE_INTERNAL_TUXTXT,test "$enable_internal_tuxtxt" = "yes")
 
 AC_ARG_ENABLE(audioplayer,
 	AS_HELP_STRING(--disable-audioplayer,include Neutrino audioplayer/internetradio),
@@ -140,6 +144,12 @@ fi
 
 if test "$enable_radiotext" = "yes"; then
 AC_DEFINE(ENABLE_RADIOTEXT,1,[include Radiotext support])
+fi
+
+if test "$enable_internal_tuxtxt" = "yes"; then
+TUXBOX_APPS_LIB_PKGCONFIG(TUXTXT,tuxbox-tuxtxt)
+else
+AC_DEFINE(TUXTXT_CFG_STANDALONE,1,[exclude internal Tuxtxt, use only external Tuxtxt plugin])
 fi
 
 if test "$enable_audioplayer" = "yes"; then
@@ -217,4 +227,3 @@ data/locale/Makefile
 data/themes/Makefile
 data/inetradio/Makefile
 ])
-

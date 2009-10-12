@@ -9,8 +9,12 @@ INCLUDES = \
 	@LCDDISPLAY_CFLAGS@ \
 	@CONFIGFILE_CFLAGS@ \
 	@NET_CFLAGS@ \
-	@ZAPIT_CFLAGS@ \
+	@ZAPIT_CFLAGS@
+
+if ENABLE_INTERNAL_TUXTXT
+INCLUDES += \
 	@TUXTXT_CFLAGS@
+endif
 
 bin_PROGRAMS = neutrino
 
@@ -41,13 +45,17 @@ neutrino_LDADD = \
 	@ZAPIT_LIBS@ \
 	@LCDDISPLAY_LIBS@ \
 	@MPEGTOOLS_LIBS@ \
-	@TUXTXT_LIBS@ \
 	@XMLTREE_LIBS@ \
 	@UPNPCLIENT_LIBS@ \
 	-lresolv \
 	-lpthread \
 	-ldl \
 	@XML_LIBS@
+
+if ENABLE_INTERNAL_TUXTXT
+neutrino_LDADD += \
+	@TUXTXT_LIBS@
+endif
 
 if ENABLE_LIRC
 neutrino_LDADD += \
