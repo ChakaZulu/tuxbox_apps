@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.53 2009/06/28 20:49:50 seife Exp $
+	$Id: epgplus.cpp,v 1.54 2009/10/12 07:35:39 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1635,7 +1635,7 @@ int EpgPlus::MenuTargetAddReminder::exec(CMenuTarget*, const std::string&)
 							0,
 							(*It)->channelEvent.eventID,
 							(*It)->channelEvent.startTime,
-							0);
+							0, true);
 			ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 		}
 		else

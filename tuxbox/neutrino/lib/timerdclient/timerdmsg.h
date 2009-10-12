@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.11 2006/02/14 22:38:28 zwen Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.12 2009/10/12 07:35:39 rhabarber1848 Exp $
  *
  * types used for clientlib <-> timerd communication - d-box2 linux project
  *
@@ -57,7 +57,9 @@ class CTimerdMsg : public CBasicMessage
 			CMD_SETAPID,
 			CMD_GETRECSAFETY,
 			CMD_SETRECSAFETY,
-			CMD_STOPTIMER
+			CMD_STOPTIMER,
+			CMD_GETZAPTOSAFETY,
+			CMD_SETZAPTOSAFETY
 		};
 
 
@@ -122,6 +124,11 @@ class CTimerdMsg : public CBasicMessage
 	{
 		int pre;
 		int post;
+	};
+
+	struct commandZaptoSafety
+	{
+		int pre;
 	};
 
 

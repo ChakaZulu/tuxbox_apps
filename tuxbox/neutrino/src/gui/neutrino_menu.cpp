@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.84 2009/10/11 12:22:33 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.85 2009/10/12 07:35:42 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1398,16 +1398,23 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	CMenuOptionChooser* oj12 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORD_IN_SPTS_MODE, &g_settings.recording_in_spts_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT,(g_settings.recording_type == RECORDING_SERVER || g_settings.recording_type == RECORDING_FILE) );
 
-	int pre,post;
-	g_Timerd->getRecordingSafety(pre,post);
-	sprintf(g_settings.record_safety_time_before, "%02d", pre/60);
-	sprintf(g_settings.record_safety_time_after, "%02d", post/60);
+	int rec_pre,rec_post;
+	g_Timerd->getRecordingSafety(rec_pre,rec_post);
+	sprintf(g_settings.record_safety_time_before, "%02d", rec_pre/60);
+	sprintf(g_settings.record_safety_time_after, "%02d", rec_post/60);
 	CRecordingSafetyNotifier *RecordingSafetyNotifier = new CRecordingSafetyNotifier;
 	CStringInput * timerSettings_record_safety_time_before = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_BEFORE, g_settings.record_safety_time_before, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_BEFORE_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_BEFORE_HINT_2,"0123456789 ", RecordingSafetyNotifier);
 	CMenuForwarder *mf5 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_BEFORE, true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
 
 	CStringInput * timerSettings_record_safety_time_after = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER, g_settings.record_safety_time_after, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER_HINT_2,"0123456789 ", RecordingSafetyNotifier);
 	CMenuForwarder *mf6 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER, true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
+
+	int zapto_pre;
+	g_Timerd->getZaptoSafety(zapto_pre);
+	sprintf(g_settings.zapto_safety_time_before, "%02d", zapto_pre/60);
+	CZaptoSafetyNotifier *ZaptoSafetyNotifier = new CZaptoSafetyNotifier;
+	CStringInput * timerSettings_zapto_safety_time_before = new CStringInput(LOCALE_TIMERSETTINGS_ZAPTO_SAFETY_TIME_BEFORE, g_settings.zapto_safety_time_before, 2, LOCALE_TIMERSETTINGS_ZAPTO_SAFETY_TIME_BEFORE_HINT_1, LOCALE_TIMERSETTINGS_ZAPTO_SAFETY_TIME_BEFORE_HINT_2,"0123456789 ", ZaptoSafetyNotifier);
+	CMenuForwarder *mf14 = new CMenuForwarder(LOCALE_TIMERSETTINGS_ZAPTO_SAFETY_TIME_BEFORE, true, g_settings.zapto_safety_time_before, timerSettings_zapto_safety_time_before );
 
 	// default recording audio pids
 	CMenuWidget *apidRecordingSettings = new CMenuWidget(LOCALE_RECORDINGMENU_APIDS, "audio.raw");
@@ -1494,6 +1501,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_TIMERSETTINGS_SEPARATOR));
 	recordingSettings.addItem( mf5);
 	recordingSettings.addItem( mf6);
+	recordingSettings.addItem( mf14);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem(oj12);
 	recordingSettings.addItem( mf13);

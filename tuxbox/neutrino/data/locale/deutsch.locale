@@ -1280,6 +1280,9 @@ timersettings.record_safety_time_before Aufnahmestart-Korrektur
 timersettings.record_safety_time_before.hint_1 Korrekturzeit in Min. (00=aus), die beim Start
 timersettings.record_safety_time_before.hint_2 des jeweiligen Timers abgezogen werden
 timersettings.separator Timereinstellungen
+timersettings.zapto_safety_time_before Umschaltstart-Korrektur
+timersettings.zapto_safety_time_before.hint_1 Korrekturzeit in Min. (00=aus), die beim Start
+timersettings.zapto_safety_time_before.hint_2 des jeweiligen Timers abgezogen werden
 timing.chanlist Kanalliste
 timing.epg Epg
 timing.filebrowser Filebrowser

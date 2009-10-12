@@ -1280,6 +1280,9 @@ timersettings.record_safety_time_before Start Time Correction
 timersettings.record_safety_time_before.hint_1 Correction time in min. (00=off). This time
 timersettings.record_safety_time_before.hint_2 will be deducted of every record timer.
 timersettings.separator Timer settings
+timersettings.zapto_safety_time_before Zapto Start Time Correction
+timersettings.zapto_safety_time_before.hint_1 Correction time in min. (00=off). This time
+timersettings.zapto_safety_time_before.hint_2 will be deducted of every zapto timer.
 timing.chanlist Channellist
 timing.epg Epg
 timing.filebrowser Filebrowser

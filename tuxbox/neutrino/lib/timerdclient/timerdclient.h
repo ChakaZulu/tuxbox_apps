@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.49 2009/02/24 19:09:13 seife Exp $
+	$Id: timerdclient.h,v 1.50 2009/10/12 07:35:39 rhabarber1848 Exp $
 
 	License: GPL
 
@@ -142,13 +142,14 @@ class CTimerdClient:private CBasicClient
 		// adds new zapto timer event
 		int addZaptoTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t announcetime = 0, 
 				       time_t stoptime = 0, unsigned long long epgID=0, time_t epg_starttime=0,
-				       unsigned char apids=TIMERD_APIDS_STD) 
+				       unsigned char apids=TIMERD_APIDS_STD, bool safety=false)
 		{
 			CTimerd::EventInfo eventInfo;
 			eventInfo.channel_id = channel_id;
 			eventInfo.epgID = epgID;
 			eventInfo.epg_starttime = epg_starttime;
 			eventInfo.apids = apids;
+			eventInfo.recordingSafety = safety;
 			return addTimerEvent(CTimerd::TIMER_ZAPTO, &eventInfo, announcetime, alarmtime, stoptime);
 		};
 
@@ -165,6 +166,10 @@ class CTimerdClient:private CBasicClient
 		// set and get recording safety time (in sec)
 		void setRecordingSafety(int pre, int post);
 		void getRecordingSafety(int &pre, int &post);
+
+		// set and get zapto safety time (in sec)
+		void setZaptoSafety(int pre);
+		void getZaptoSafety(int &pre);
 
 		// Convert String of O and X to repeat type and vice versa
 		void getWeekdaysFromStr(int *rep, const char* str);

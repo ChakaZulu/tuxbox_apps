@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.145 2009/10/03 19:39:55 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.146 2009/10/12 07:35:44 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1307,6 +1307,9 @@ const char * locale_real_names[] =
 	"timersettings.record_safety_time_before.hint_1",
 	"timersettings.record_safety_time_before.hint_2",
 	"timersettings.separator",
+	"timersettings.zapto_safety_time_before",
+	"timersettings.zapto_safety_time_before.hint_1",
+	"timersettings.zapto_safety_time_before.hint_2",
 	"timing.chanlist",
 	"timing.epg",
 	"timing.filebrowser",

@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.179 2009/09/04 11:25:31 rhabarber1848 Exp $
+	$Id: setting_helpers.cpp,v 1.180 2009/10/12 07:35:44 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -279,6 +279,12 @@ bool CRecordingNotifier2::changeNotify(const neutrino_locale_t, void *)
 bool CRecordingSafetyNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	g_Timerd->setRecordingSafety(atoi(g_settings.record_safety_time_before)*60, atoi(g_settings.record_safety_time_after)*60);
+	return true;
+}
+
+bool CZaptoSafetyNotifier::changeNotify(const neutrino_locale_t, void *)
+{
+	g_Timerd->setZaptoSafety(atoi(g_settings.zapto_safety_time_before)*60);
 	return true;
 }
 

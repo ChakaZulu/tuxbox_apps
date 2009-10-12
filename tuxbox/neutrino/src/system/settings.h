@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.215 2009/10/03 15:31:48 seife Exp $
+  $Id: settings.h,v 1.216 2009/10/12 07:35:44 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -59,6 +59,7 @@ struct SNeutrinoSettings
 	int volumebar_disp_pos;
 	char record_safety_time_before[3];
 	char record_safety_time_after[3];
+	char zapto_safety_time_before[3];
 	int infobar_sat_display;
 	int infobar_subchan_disp_pos;
 	int misc_spts;

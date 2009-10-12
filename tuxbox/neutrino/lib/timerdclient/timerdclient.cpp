@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.56 2009/02/24 19:09:13 seife Exp $
+	$Id: timerdclient.cpp,v 1.57 2009/10/12 07:35:39 rhabarber1848 Exp $
 
 	License: GPL
 
@@ -428,6 +428,33 @@ void CTimerdClient::getRecordingSafety(int &pre, int &post)
 		/* fill with default values (cf. timermanager.cpp) */
 		pre  = 0;
 		post = 0;
+	}
+}
+//-------------------------------------------------------------------------
+void CTimerdClient::setZaptoSafety(int pre)
+{
+	CTimerdMsg::commandZaptoSafety data;
+	data.pre = pre;
+	send(CTimerdMsg::CMD_SETZAPTOSAFETY, (char*) &data, sizeof(data)); 
+	close_connection();
+}
+
+//-------------------------------------------------------------------------
+void CTimerdClient::getZaptoSafety(int &pre)
+{
+	send(CTimerdMsg::CMD_GETZAPTOSAFETY);
+	CTimerdMsg::commandZaptoSafety data;
+
+	bool success = receive_data((char*)&data, sizeof(data));
+	close_connection();
+	if (success)
+	{
+		pre = data.pre;
+	}
+	else
+	{
+		/* fill with default values (cf. timermanager.cpp) */
+		pre  = 0;
 	}
 }
 

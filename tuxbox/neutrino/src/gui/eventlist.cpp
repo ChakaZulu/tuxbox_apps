@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.128 2009/10/03 10:09:29 seife Exp $
+	$Id: eventlist.cpp,v 1.129 2009/10/12 07:35:41 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -498,7 +498,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				timerdclient.addZaptoTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID),
 								evtlist[selected].startTime,
 								evtlist[selected].startTime - ANNOUNCETIME, 0,
-								evtlist[selected].eventID, evtlist[selected].startTime, 0);
+								evtlist[selected].eventID, evtlist[selected].startTime, 0, true);
 				UpdateTimerList();
 				paintItem(selected - liststart);
 				showFunctionBar(true);

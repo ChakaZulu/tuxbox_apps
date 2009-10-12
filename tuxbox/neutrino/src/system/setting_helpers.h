@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.96 2009/09/04 11:25:31 rhabarber1848 Exp $
+	$Id: setting_helpers.h,v 1.97 2009/10/12 07:35:44 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -113,6 +113,12 @@ class CRecordingNotifier : public CChangeObserver
 };
 
 class CRecordingSafetyNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const neutrino_locale_t, void *);
+};
+
+class CZaptoSafetyNotifier : public CChangeObserver
 {
 	public:
 		bool changeNotify(const neutrino_locale_t, void *);

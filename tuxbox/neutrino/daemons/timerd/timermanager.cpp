@@ -6,7 +6,7 @@
 
 	Copyright (C) 2009 Stefan Seyfried
 
-   $Id: timermanager.cpp,v 1.96 2009/09/28 08:08:17 rhabarber1848 Exp $
+   $Id: timermanager.cpp,v 1.97 2009/10/12 07:35:37 rhabarber1848 Exp $
 
 	License: GPL
 
@@ -57,6 +57,7 @@ CTimerManager::CTimerManager()
 	m_saveEvents = false;
 	m_isTimeSet = false;
 	loadRecordingSafety();
+	loadZaptoSafety();
 
 	timer_wakeup = false; // fallback
 #if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
@@ -650,6 +651,21 @@ void CTimerManager::loadRecordingSafety()
 	}
 }
 // -------------------------------------------------------------------------------------
+void CTimerManager::loadZaptoSafety()
+{
+	CConfigFile config(',');
+
+	if(!config.loadConfig(config_file_name))
+	{
+		/* set defaults if no configuration file exists */
+		dprintf("%s not found\n", config_file_name);
+	}
+	else
+	{
+		m_zaptoExtraTimeStart = config.getInt32 ("ZAPTO_EXTRA_TIME_START",0);
+	}
+}
+// -------------------------------------------------------------------------------------
 void CTimerManager::saveEventsToConfig()
 {
 	pthread_mutex_lock(&tm_eventsMutex);
@@ -670,6 +686,8 @@ void CTimerManager::saveEventsToConfig()
 	dprintf("setting EXTRA_TIME_START to %d\n",m_extraTimeStart);
 	config.setInt32 ("EXTRA_TIME_END", m_extraTimeEnd);
 	dprintf("setting EXTRA_TIME_END to %d\n",m_extraTimeEnd);
+	config.setInt32 ("ZAPTO_EXTRA_TIME_START", m_zaptoExtraTimeStart);
+	dprintf("setting ZAPTO_EXTRA_TIME_START to %d\n",m_zaptoExtraTimeStart);
 	dprintf("now saving config to %s...\n",config_file_name);
 	config.saveConfig(config_file_name);
 	printf("[timerd] using config file %s\n", config_file_name);
@@ -783,6 +801,11 @@ void CTimerManager::setRecordingSafety(int pre, int post)
 	m_extraTimeStart=pre;
 	m_extraTimeEnd=post;
    m_saveEvents=true; // also saves extra times
+}
+void CTimerManager::setZaptoSafety(int pre)
+{
+	m_zaptoExtraTimeStart=pre;
+	m_saveEvents=true; // also saves extra times
 }
 //------------------------------------------------------------
 //=============================================================

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.65 2009/09/28 08:08:17 rhabarber1848 Exp $
+	$Id: timerd.cpp,v 1.66 2009/10/12 07:35:37 rhabarber1848 Exp $
 
 	License: GPL
 
@@ -338,6 +338,13 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					CBasicServer::receive_data(connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
 					if(evInfo.channel_id > 0)
 					{
+						if(evInfo.recordingSafety)
+						{
+							int pre;
+							CTimerManager::getInstance()->getZaptoSafety(pre);
+							msgAddTimer.announceTime -= pre;
+							msgAddTimer.alarmTime -= pre;
+						}
 						event = new CTimerEvent_Zapto(
 							msgAddTimer.announceTime,
 							msgAddTimer.alarmTime,
@@ -456,6 +463,20 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			{
 				CTimerdMsg::commandRecordingSafety data;
 				CTimerManager::getInstance()->getRecordingSafety(data.pre , data.post);
+				CBasicServer::send_data(connfd, &data, sizeof(data));
+			}
+			break;
+		case CTimerdMsg::CMD_SETZAPTOSAFETY:				  // umschaltkorrektur setzen
+			{
+				CTimerdMsg::commandZaptoSafety data;
+				CBasicServer::receive_data(connfd,&data, sizeof(data));
+				CTimerManager::getInstance()->setZaptoSafety(data.pre);
+			}
+			break;
+		case CTimerdMsg::CMD_GETZAPTOSAFETY:				  // umschaltkorrektur lesen
+			{
+				CTimerdMsg::commandZaptoSafety data;
+				CTimerManager::getInstance()->getZaptoSafety(data.pre);
 				CBasicServer::send_data(connfd, &data, sizeof(data));
 			}
 			break;
