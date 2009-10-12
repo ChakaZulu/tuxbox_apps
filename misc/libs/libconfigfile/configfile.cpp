@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.21 2009/02/24 19:09:05 seife Exp $
+ * $Id: configfile.cpp,v 1.22 2009/10/12 07:22:59 rhabarber1848 Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -163,8 +163,8 @@ bool CConfigFile::getBool(const std::string & key, const bool defaultVal)
 {
 	if (configData.find(key) == configData.end())
 	{
+		unknownKeyQueryedFlag = true;
 		if (saveDefaults) {
-			unknownKeyQueryedFlag = true;
 			storeBool(key, defaultVal);
 		}
 		else {
@@ -184,8 +184,8 @@ int32_t CConfigFile::getInt32(const std::string & key, const int32_t defaultVal)
 {
 	if (configData.find(key) == configData.end())
 	{
+		unknownKeyQueryedFlag = true;
 		if (saveDefaults) {
-			unknownKeyQueryedFlag = true;
 			storeInt32(key, defaultVal);
 		}
 		else {
@@ -205,8 +205,8 @@ int64_t CConfigFile::getInt64(const std::string & key, const int64_t defaultVal)
 {
 	if (configData.find(key) == configData.end())
 	{
+		unknownKeyQueryedFlag = true;
 		if (saveDefaults) {
-			unknownKeyQueryedFlag = true;
 			storeInt64(key, defaultVal);
 		}
 		else {
@@ -226,8 +226,8 @@ std::string CConfigFile::getString(const std::string & key, const std::string & 
 {
 	if (configData.find(key) == configData.end())
 	{
+		unknownKeyQueryedFlag = true;
 		if (saveDefaults) {
-			unknownKeyQueryedFlag = true;
 			storeString(key, defaultVal);
 		}
 		else {

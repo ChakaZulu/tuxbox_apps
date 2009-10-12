@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.446 2009/10/11 17:13:07 seife Exp $
+ * $Id: zapit.cpp,v 1.447 2009/10/12 07:22:55 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -88,7 +88,7 @@
 /* the conditional access module */
 CCam *cam = NULL;
 /* the configuration file */
-CConfigFile config(',');
+CConfigFile config(',', false);
 /* the event server */
 CEventServer *eventServer = NULL;
 /* the dvb audio device */
@@ -3067,7 +3067,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.446 2009/10/11 17:13:07 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.447 2009/10/12 07:22:55 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;
