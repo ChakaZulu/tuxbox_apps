@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.85 2009/10/12 07:35:42 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.86 2009/10/13 19:50:50 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -63,17 +63,27 @@
 #ifdef ENABLE_AUDIOPLAYER
 #include "gui/audioplayer.h"
 #endif
+#ifdef ENABLE_ESD
 #include "gui/esound.h"
+#endif
 #include "gui/epgplus.h"
 #include "gui/favorites.h"
 #include "gui/imageinfo.h"
 #include "gui/keyhelper.h"
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_INTERNETRADIO) || defined(ENABLE_ESD) || defined(ENABLE_PICTUREVIEWER) || defined (ENABLE_MOVIEPLAYER)
+#include "gui/mediaplayer_setup.h"
+#endif
+#ifdef ENABLE_MOVIEPLAYER
+#include "gui/movieplayer_setup.h"
+#endif
 #include "gui/motorcontrol.h"
 #ifdef ENABLE_GUI_MOUNT
 #include "gui/nfs.h"
 #endif
 #include "gui/personalize.h"
+#ifdef ENABLE_PICTUREVIEWER
 #include "gui/pictureviewer.h"
+#endif
 #include "gui/pluginlist.h"
 #include "gui/scan.h"
 #include "gui/screensetup.h"
@@ -102,7 +112,7 @@ static CTimingSettingsNotifier timingsettingsnotifier;
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &mainSettings,
-								CMenuWidget &audioSettings,
+ 								CMenuWidget &audioSettings,
 								CMenuWidget &parentallockSettings,
 								CMenuWidget &networkSettings,
 								CMenuWidget &recordingSettings,
@@ -113,11 +123,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &languageSettings,
 								CMenuWidget &miscSettings,
 								CMenuWidget &driverSettings,
-#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
-								CMenuWidget &audiopl_picSettings,
-#endif
 #ifdef ENABLE_MOVIEPLAYER
-								CMenuWidget &streamingSettings,
 								CMenuWidget &moviePlayer,
 #endif
 								CMenuWidget &service)
@@ -156,17 +162,17 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		mainMenu.addItem(GenericMenuSeparatorLine); 
 	
 #ifdef ENABLE_AUDIOPLAYER
-	//1. audioplayer
+	// audioplayer
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::convertDigitToKey(shortcut), NULL, false,   g_settings.personalize_audioplayer);
 	
 #ifdef ENABLE_INTERNETRADIO
-	//2. internet player
+	// internet player
 	shortcut += personalize->addItem(mainMenu, LOCALE_INETRADIO_NAME, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, g_settings.personalize_inetradio);
 #endif
 #endif	
 
 #ifdef ENABLE_ESD
-	//3. esound
+	// esound
 	if (access("/bin/esd", X_OK) == 0 || access("/var/bin/esd", X_OK) == 0)
 	{
 		puts("[neutrino] found esound, adding personalized esound entry to mainmenue");
@@ -175,7 +181,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 #endif
 
 #ifdef ENABLE_MOVIEPLAYER
-	//4. movieplayer
+	// movieplayer
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, g_settings.personalize_movieplayer);
 
 	addMenueIntroItems(moviePlayer);
@@ -197,28 +203,28 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_DVDPLAYBACK, true, NULL, moviePlayerGui, "dvdplayback", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_VCDPLAYBACK, true, NULL, moviePlayerGui, "vcdplayback", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	moviePlayer.addItem(GenericMenuSeparatorLine);
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &streamingSettings, NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, new CMoviePlayerSetup() /*&streamingSettings*/, NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
 #ifdef ENABLE_GUI_MOUNT
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_MOUNT, true, NULL, new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
 #endif
 #endif
 
 #ifdef ENABLE_PICTUREVIEWER
-	//5. pictureviewer
+	// pictureviewer
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, g_settings.personalize_pictureviewer);
 #endif
 
 #if ENABLE_UPNP
-	//6. upnpbrowser
+	// upnpbrowser
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_UPNPBROWSER, true, NULL, new CUpnpBrowserGui(), NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, g_settings.personalize_upnpbrowser);
 #endif
 
-	//7.
+	// scripts
 	if (g_PluginList->hasPlugin(CPlugins::P_TYPE_SCRIPT))
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "", CRCInput::convertDigitToKey(shortcut++)));
 
 #if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_INTERNETRADIO) || defined(ENABLE_ESD) || defined(ENABLE_MOVIEPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_UPNP)
-	//separator
+	// separator
 	if (	g_settings.personalize_audioplayer	== CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE && 
 		g_settings.personalize_inetradio	== CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE && 
 		g_settings.personalize_esound		== CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE && 
@@ -229,10 +235,10 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	else
 		mainMenu.addItem(GenericMenuSeparatorLine); 
 #endif
-	//8. settings
+	// settings
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, CPersonalizeGui::PERSONALIZE_MODE_VISIBLE, g_settings.personalize_settings);
 
-	//9. service
+	// service
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_SERVICE, true, NULL, &service, NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, CPersonalizeGui::PERSONALIZE_MODE_VISIBLE, g_settings.personalize_service);
 
 	//separator
@@ -247,10 +253,10 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	//sleeptimer
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL, personalize->setShortcut(shortcut), NULL, false, g_settings.personalize_sleeptimer);
 
-	//11. reboot
+	// reboot
 	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_REBOOT, true, NULL, this, "reboot", personalize->setShortcut(shortcut), NULL, false, g_settings.personalize_reboot);
 
-	//12. shutdown
+	// shutdown
 	personalize->addItem(mainMenu, LOCALE_MAINMENU_SHUTDOWN, true, NULL, this, "shutdown", CRCInput::RC_standby, NEUTRINO_ICON_BUTTON_POWER, false, g_settings.personalize_shutdown);
 
 //----------------------
@@ -259,13 +265,13 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_SAVESETTINGSNOW, true, NULL, this, "savesettings", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	mainSettings.addItem(GenericMenuSeparatorLine);
 
-	//1. video.
+	// video.
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_VIDEO, true, NULL, &videoSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_video);	
 
-	//2. audio
+	// audio
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_AUDIO, true, NULL, &audioSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_audio);
 	
-	//3. parental lock
+	// parental lock
 	if (g_settings.personalize_youth == CPersonalizeGui::PERSONALIZE_MODE_VISIBLE) {
 		if(g_settings.parentallock_prompt)
 			mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
@@ -275,33 +281,28 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	else if (g_settings.personalize_youth == CPersonalizeGui::PERSONALIZE_MODE_PIN)
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.personalize_pincode, true, true, NULL, &parentallockSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
 
-	//4. network
+	// network
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_NETWORK, true, NULL, &networkSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_network);
 
-	//5. record settings
+	// record settings
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_RECORDING, true, NULL, &recordingSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false,g_settings.personalize_recording);
 
-#ifdef ENABLE_MOVIEPLAYER
-	//6. movieplayer settings
-	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_STREAMING, true, NULL, &streamingSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_streaming);
-#endif
-
-	//7. language
+	// language
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_LANGUAGE, true, NULL, &languageSettings , NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_language);
 
-	//8. color
+	// color
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_COLORS, true, NULL, &colorSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_colors);
 	
-	//9 lcd.
+	// lcd.
 	shortcut2 += personalize->addItem(mainSettings,LOCALE_MAINSETTINGS_LCD, true, NULL, &lcdSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_lcd);
 	
 	//10. -- only 10 shortcuts (1-9, 0), the next could be the last also!(10. => 0)
 	//keybindings
 	shortcut2 += personalize->addItem(mainSettings,LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings, NULL, personalize->setShortcut(shortcut2), NULL, false, g_settings.personalize_keybinding);
 	
-	//blue (audioplayer, pictureviewer, esd)
-#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
-	personalize->addItem(mainSettings, LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE, false, g_settings.personalize_audpic);
+	//blue (audioplayer, pictureviewer, esd, mediaplayer)
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD) || defined(ENABLE_MOVIEPLAYER)
+	personalize->addItem(mainSettings, LOCALE_MEDIAPLAYERSETTINGS_GENERAL, true, NULL, new CMediaPlayerSetup, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE, false, g_settings.personalize_mediaplayer);
 #endif
 
 	//green (driver/boot settings)
@@ -310,7 +311,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	//yellow (miscSettings)
 	personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_MISC, true, NULL, &miscSettings, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW, false, g_settings.personalize_misc);
 	
-	//11. personalize
+	// personalize
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_PERSONALIZE_HEAD, true, NULL, new CPersonalizeGui(), NULL, personalize->setShortcut(shortcut2), NULL, false, CPersonalizeGui::PERSONALIZE_MODE_VISIBLE, g_settings.personalize_pinstatus);
 
 	delete personalize ;
@@ -641,24 +642,24 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &menuSc
 	else
 		service.addItem(GenericMenuSeparatorLine); 
 
-	//1. reload channels
+	// reload channels
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_RELOAD, true, NULL, this, "reloadchannels", CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_reload);
 
-	//2. reload plugins
+	// reload plugins
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this, "reloadplugins" , CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_getplugins);
 	
-	//3. restart neutrino
+	// restart neutrino
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_RESTART, true, NULL, this, "restart", CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_restart);
 	
-	//4. epg restart
+	// epg restart
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_EPGRESTART, true, NULL, this, "EPGrestart", CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_epgrestart);
 	
 #ifdef HAVE_DBOX_HARDWARE
-	//5. ucode check
+	// ucode check
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_ucodecheck);
 #endif
 
-	//6. epg status
+	// epg status
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_CHAN_EPG_STAT, true, NULL, DVBInfo, NULL, CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_chan_epg_stat);
 
 	// separator
@@ -685,74 +686,12 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &menuSc
 	delete personalize;
 }
 
-/* for audioplayer/pictureviewer settings menu*/
 #define MESSAGEBOX_NO_YES_OPTION_COUNT 2
 const CMenuOptionChooser::keyval MESSAGEBOX_NO_YES_OPTIONS[MESSAGEBOX_NO_YES_OPTION_COUNT] =
 {
 	{ 0, LOCALE_MESSAGEBOX_NO  },
 	{ 1, LOCALE_MESSAGEBOX_YES }
 };
-
-#ifdef ENABLE_PICTUREVIEWER
-#define PICTUREVIEWER_SCALING_OPTION_COUNT 3
-const CMenuOptionChooser::keyval PICTUREVIEWER_SCALING_OPTIONS[PICTUREVIEWER_SCALING_OPTION_COUNT] =
-{
-	{ CPictureViewer::SIMPLE, LOCALE_PICTUREVIEWER_RESIZE_SIMPLE        },
-	{ CPictureViewer::COLOR , LOCALE_PICTUREVIEWER_RESIZE_COLOR_AVERAGE },
-	{ CPictureViewer::NONE  , LOCALE_PICTUREVIEWER_RESIZE_NONE          }
-};
-#endif
-
-#ifdef ENABLE_AUDIOPLAYER
-#define AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT 2
-const CMenuOptionChooser::keyval AUDIOPLAYER_DISPLAY_ORDER_OPTIONS[AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT] =
-{
-	{ CAudioPlayerGui::ARTIST_TITLE, LOCALE_AUDIOPLAYER_ARTIST_TITLE },
-	{ CAudioPlayerGui::TITLE_ARTIST, LOCALE_AUDIOPLAYER_TITLE_ARTIST }
-};
-#endif
-
-/* audioplayer/pictureviewer settings menu*/
-void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
-{
-	audioplPicSettings.addItem(GenericMenuSeparator);
-	audioplPicSettings.addItem(GenericMenuBack);
-
-#ifdef ENABLE_PICTUREVIEWER
-	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PICTUREVIEWER_HEAD));
-	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_PICTUREVIEWER_SCALING  , &g_settings.picviewer_scaling     , PICTUREVIEWER_SCALING_OPTIONS  , PICTUREVIEWER_SCALING_OPTION_COUNT  , true ));
-	CStringInput * pic_timeout= new CStringInput(LOCALE_PICTUREVIEWER_SLIDE_TIME, g_settings.picviewer_slide_time, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_SLIDE_TIME, true, g_settings.picviewer_slide_time, pic_timeout));
-	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DEFDIR, true, g_settings.network_nfs_picturedir, this, "picturedir"));
-	CIPInput * audioplPicSettings_DecServerIP = new CIPInput( LOCALE_PICTUREVIEWER_DECODE_SERVER_IP, g_settings.picviewer_decode_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DECODE_SERVER_IP, true, g_settings.picviewer_decode_server_ip, audioplPicSettings_DecServerIP));
-	CStringInput * audioplPicSettings_DecServerPort= new CStringInput(LOCALE_PICTUREVIEWER_DECODE_SERVER_PORT, g_settings.picviewer_decode_server_port, 5, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DECODE_SERVER_PORT, true, g_settings.picviewer_decode_server_port, audioplPicSettings_DecServerPort));
-#endif
-
-#ifdef ENABLE_AUDIOPLAYER
-	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_AUDIOPLAYER_NAME));
-	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_DISPLAY_ORDER, &g_settings.audioplayer_display     , AUDIOPLAYER_DISPLAY_ORDER_OPTIONS, AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT, true ));
-	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_FOLLOW       , &g_settings.audioplayer_follow      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
-	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_SELECT_TITLE_BY_NAME       , &g_settings.audioplayer_select_title_by_name      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
-	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_REPEAT_ON       , &g_settings.audioplayer_repeat_on      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
-	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_SHOW_PLAYLIST, &g_settings.audioplayer_show_playlist, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true ));
-
-	CStringInput * audio_screensaver= new CStringInput(LOCALE_AUDIOPLAYER_SCREENSAVER_TIMEOUT, g_settings.audioplayer_screensaver, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYER_SCREENSAVER_TIMEOUT, true, g_settings.audioplayer_screensaver, audio_screensaver));
-
-	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_HIGHPRIO     , &g_settings.audioplayer_highprio    , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
-	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYER_DEFDIR, true, g_settings.network_nfs_audioplayerdir, this, "audioplayerdir"));
-	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_ENABLE_SC_METADATA, &g_settings.audioplayer_enable_sc_metadata, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true ));
-#endif
-
-#ifdef ENABLE_ESD
-	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_ESOUND_NAME));
-	CStringInput * audioplPicSettings_EsoundPort= new CStringInput(LOCALE_ESOUND_PORT, g_settings.esound_port, 5, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_ESOUND_PORT, true, g_settings.esound_port, audioplPicSettings_EsoundPort));
-#endif
-
-}
 
 /* for misc settings menu */
 #define OPTIONS_OFF1_ON0_OPTION_COUNT 2
@@ -1526,113 +1465,6 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingstatus = 0;
 }
 
-/* for streaming settings menu */
-#define STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTION_COUNT 2
-const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTIONS[STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTION_COUNT] =
-{
-	{ 0, LOCALE_STREAMINGMENU_MPEG1 },
-	{ 1, LOCALE_STREAMINGMENU_MPEG2 }
-};
-
-#define STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT 4
-const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS[STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT] =
-{
-	{ 0, LOCALE_STREAMINGMENU_352X288 },
-	{ 1, LOCALE_STREAMINGMENU_352X576 },
-	{ 2, LOCALE_STREAMINGMENU_480X576 },
-	{ 3, LOCALE_STREAMINGMENU_704X576 }
-};
-
-#define STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT 2
-const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_TYPE_OPTIONS[STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT] =
-{
-	{ 0, LOCALE_STREAMINGMENU_OFF },
-	{ 1, LOCALE_STREAMINGMENU_ON  }
-};
-
-#define STREAMINGMENU_STOPSECTIONSD_OPTION_COUNT 3
-const CMenuOptionChooser::keyval STREAMINGMENU_STOPSECTIONSD_OPTIONS[STREAMINGMENU_STOPSECTIONSD_OPTION_COUNT] =
-{
-	{ 0, LOCALE_RECORDINGMENU_SECTIONSD_RUN     },
-	{ 1, LOCALE_RECORDINGMENU_SECTIONSD_STOP    },
-	{ 2, LOCALE_RECORDINGMENU_SECTIONSD_RESTART }
-};
-
-#ifdef ENABLE_MOVIEPLAYER
-/* streaming settings menu */
-void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
-{
-	addMenueIntroItems(streamingSettings);
-
-	CIPInput * streamingSettings_server_ip = new CIPInput(LOCALE_STREAMINGMENU_SERVER_IP, g_settings.streaming_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CStringInput * streamingSettings_server_port = new CStringInput(LOCALE_STREAMINGMENU_SERVER_PORT, g_settings.streaming_server_port, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
-	CStringInputSMS * cddriveInput = new CStringInputSMS(LOCALE_STREAMINGMENU_STREAMING_SERVER_CDDRIVE, g_settings.streaming_server_cddrive, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
-	CStringInput * streamingSettings_videorate = new CStringInput(LOCALE_STREAMINGMENU_STREAMING_VIDEORATE, g_settings.streaming_videorate, 5, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
-	CStringInput * streamingSettings_audiorate = new CStringInput(LOCALE_STREAMINGMENU_STREAMING_AUDIORATE, g_settings.streaming_audiorate, 5, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
-	CStringInputSMS * startdirInput = new CStringInputSMS(LOCALE_STREAMINGMENU_STREAMING_SERVER_STARTDIR, g_settings.streaming_server_startdir, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-_:\\ ");
-
-	CMenuForwarder* mf1 = new CMenuForwarder(LOCALE_STREAMINGMENU_SERVER_IP                , (g_settings.streaming_type==1), g_settings.streaming_server_ip      , streamingSettings_server_ip);
-	CMenuForwarder* mf2 = new CMenuForwarder(LOCALE_STREAMINGMENU_SERVER_PORT              , (g_settings.streaming_type==1), g_settings.streaming_server_port    , streamingSettings_server_port);
-	CMenuForwarder* mf3 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_SERVER_CDDRIVE , (g_settings.streaming_type==1), g_settings.streaming_server_cddrive , cddriveInput);
-	CMenuForwarder* mf4 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_VIDEORATE      , (g_settings.streaming_type==1), g_settings.streaming_videorate      , streamingSettings_videorate);
-	CMenuForwarder* mf5 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_AUDIORATE      , (g_settings.streaming_type==1), g_settings.streaming_audiorate      , streamingSettings_audiorate);
-	CMenuForwarder* mf6 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_SERVER_STARTDIR, (g_settings.streaming_type==1), g_settings.streaming_server_startdir, startdirInput);
-	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.network_nfs_moviedir,this,"moviedir");
-#ifndef ENABLE_MOVIEPLAYER2
-	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFPLUGIN, true, g_settings.movieplayer_plugin,this,"movieplugin");
-#endif
-	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_AUDIO      , &g_settings.streaming_transcode_audio      , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-
-	CMenuOptionChooser* oj2 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_AVI_RAWAUDIO   , &g_settings.streaming_force_avi_rawaudio   , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-
-	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_TRANSCODE_VIDEO, &g_settings.streaming_force_transcode_video, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-
-// not yet supported by VLC
-	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC, &g_settings.streaming_transcode_video_codec, STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTIONS, STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTION_COUNT, true);
-
-	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_RESOLUTION           , &g_settings.streaming_resolution           , STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS, STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT, true);
-
-	CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,oj1,oj2,oj3,oj4,oj5);
-
-#ifndef ENABLE_MOVIEPLAYER2
-	CIntInput * streamingSettings_buffer_size = new CIntInput(LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE, (long&)g_settings.streaming_buffer_segment_size,3, LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE_HINT1, LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE_HINT2);
-	CMenuForwarder* mf9 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE , g_settings.streaming_use_buffer, streamingSettings_buffer_size->getValue()      , streamingSettings_buffer_size);
-	COnOffNotifier *bufferNotifier = new COnOffNotifier(mf9);
-	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_USE_BUFFER , &g_settings.streaming_use_buffer  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true,bufferNotifier);
-#endif
-	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SECTIONSD , &g_settings.streaming_stopsectionsd  , STREAMINGMENU_STOPSECTIONSD_OPTIONS, STREAMINGMENU_STOPSECTIONSD_OPTION_COUNT, true);
-	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_SHOW_TV_IN_BROWSER , &g_settings.streaming_show_tv_in_browser  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-	CMenuOptionChooser* oj9 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_FILEBROWSER_ALLOW_MULTISELECT , &g_settings.streaming_allow_multiselect  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-
-
-	streamingSettings.addItem(new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TYPE                  , &g_settings.streaming_type                 , STREAMINGMENU_STREAMING_TYPE_OPTIONS, STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT, true, StreamingNotifier));
-	streamingSettings.addItem(GenericMenuSeparatorLine);
-	streamingSettings.addItem( mf1);                          //Server IP
-	streamingSettings.addItem( mf2);                          //Server Port
-	streamingSettings.addItem( mf3);                          //CD-Drive
-	streamingSettings.addItem( mf6);                          //Startdir
-	streamingSettings.addItem(GenericMenuSeparatorLine);
-	streamingSettings.addItem( mf4);                          //Video-Rate
-	streamingSettings.addItem( oj3);
-	streamingSettings.addItem( oj4);
-	streamingSettings.addItem( oj5);
-	streamingSettings.addItem(GenericMenuSeparatorLine);
-	streamingSettings.addItem( mf5);                          //Audiorate
-	streamingSettings.addItem( oj1);
-	streamingSettings.addItem( oj2);
-	streamingSettings.addItem(GenericMenuSeparatorLine);
-	streamingSettings.addItem( mf7);                          //default dir
-#ifndef ENABLE_MOVIEPLAYER2
-	streamingSettings.addItem( mf8);				//default movieplugin
-	streamingSettings.addItem(GenericMenuSeparatorLine);
-	streamingSettings.addItem( oj6 );
-	streamingSettings.addItem( mf9 );
-#endif
-	streamingSettings.addItem( oj7 );
-	streamingSettings.addItem( oj8 );
-	streamingSettings.addItem( oj9 );
-}
-#endif /* ENABLE_MOVIEPLAYER */
 
 /* for font settings menu */
 class CMenuNumberInput : public CMenuForwarder, CMenuTarget, CChangeObserver
