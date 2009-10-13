@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.15 2009/10/09 04:58:18 dbt Exp $
+        $Id: personalize.cpp,v 1.16 2009/10/13 19:41:25 dbt Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -276,12 +276,11 @@ void CPersonalizeGui::ShowSettingsOptions()
 	int old_youth		= g_settings.personalize_youth;
 	int old_network		= g_settings.personalize_network;
 	int old_recording	= g_settings.personalize_recording;
-	int old_streaming	= g_settings.personalize_streaming;
 	int old_language	= g_settings.personalize_language;
 	int old_colors		= g_settings.personalize_colors;
 	int old_lcd		= g_settings.personalize_lcd;
 	int old_keybinding	= g_settings.personalize_keybinding;
-	int old_audpic		= g_settings.personalize_audpic;
+	int old_mediaplayer	= g_settings.personalize_mediaplayer;
 	int old_driver		= g_settings.personalize_driver;
 	int old_misc		= g_settings.personalize_misc;
 	
@@ -299,15 +298,12 @@ void CPersonalizeGui::ShowSettingsOptions()
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_PARENTALLOCK_PARENTALLOCK, (int *)&g_settings.personalize_youth, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_NETWORK, (int *)&g_settings.personalize_network, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_4));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_RECORDING, (int *)&g_settings.personalize_recording, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_5));
-#ifdef ENABLE_MOVIEPLAYER
-	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_STREAMING, (int *)&g_settings.personalize_streaming, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_6));
-#endif
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_LANGUAGE, (int *)&g_settings.personalize_language, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_7));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_COLORS, (int *)&g_settings.personalize_colors, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_8));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_LCD, (int *)&g_settings.personalize_lcd, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_9));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_KEYBINDING, (int *)&g_settings.personalize_keybinding, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_0));
-#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
-	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU, (int *)&g_settings.personalize_audpic, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD) || defined(ENABLE_MOVIEPLAYER)
+	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MEDIAPLAYERSETTINGS_GENERAL, (int *)&g_settings.personalize_mediaplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 #endif
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_DRIVER, (int *)&g_settings.personalize_driver, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_MISC, (int *)&g_settings.personalize_misc, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
@@ -323,12 +319,11 @@ void CPersonalizeGui::ShowSettingsOptions()
 		|| old_youth != g_settings.personalize_youth
 		|| old_network != g_settings.personalize_network
 		|| old_recording != g_settings.personalize_recording
-		|| old_streaming != g_settings.personalize_streaming
 		|| old_language != g_settings.personalize_language
 		|| old_colors != g_settings.personalize_colors
 		|| old_lcd != g_settings.personalize_lcd
 		|| old_keybinding != g_settings.personalize_keybinding
-		|| old_audpic != g_settings.personalize_audpic
+		|| old_mediaplayer != g_settings.personalize_mediaplayer
 		|| old_driver != g_settings.personalize_driver
 		|| old_misc != g_settings.personalize_misc) {
 
