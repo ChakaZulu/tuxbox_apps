@@ -19,15 +19,36 @@ endif
 noinst_LIBRARIES = libtimerlist.a libneutrino_gui.a libneutrino_gui2.a libneutrino_gui3.a
 
 libneutrino_gui_a_SOURCES = \
-	neutrino_menu.cpp themes.cpp \
-	bouquetlist.cpp channellist.cpp eventlist.cpp pluginlist.cpp \
-	color.cpp favorites.cpp sleeptimer.cpp screensetup.cpp \
-	epgview.cpp infoviewer.cpp scan.cpp update.cpp \
+	audio_select.cpp \
+	bookmarkmanager.cpp \
+	bouquetlist.cpp \
+	channellist.cpp \
+	color.cpp \
+	epg_menu.cpp \
+	epgplus.cpp \
+	epgview.cpp \
+	esd_setup.cpp \
+	eventlist.cpp \
+	favorites.cpp \
 	filebrowser.cpp \
-	rc_lock.cpp bookmarkmanager.cpp \
-	timeosd.cpp epgplus.cpp epg_menu.cpp personalize.cpp \
-	streaminfo2.cpp plugins.cpp imageinfo.cpp \
-	audio_select.cpp software_update.cpp
+	imageinfo.cpp \
+	infoviewer.cpp \
+	mediaplayer_setup.cpp \
+	neutrino_menu.cpp \
+	nfs.cpp \
+	personalize.cpp \
+	pluginlist.cpp \
+	plugins.cpp \
+	rc_lock.cpp \
+	scan.cpp \
+	screensetup.cpp \
+	sleeptimer.cpp \
+	software_update.cpp \
+	streaminfo2.cpp \
+	themes.cpp \
+	timeosd.cpp \
+	update.cpp
+	
 
 libneutrino_gui3_a_SOURCES =  movieinfo.cpp
 
@@ -41,21 +62,21 @@ endif
 
 if ENABLE_AUDIOPLAYER
 libneutrino_gui_a_SOURCES += \
-	audioplayer.cpp
+	audioplayer.cpp audioplayer_setup.cpp
 endif
 
 if ENABLE_PICTUREVIEWER
 libneutrino_gui_a_SOURCES += \
-	pictureviewer.cpp
+	pictureviewer.cpp pictureviewer_setup.cpp
 endif
 
 if ENABLE_MOVIEPLAYER
-libneutrino_gui_a_SOURCES += moviebrowser.cpp
+libneutrino_gui_a_SOURCES += moviebrowser.cpp movieplayer_setup.cpp
 if ENABLE_MOVIEPLAYER2
 libneutrino_gui_a_SOURCES += movieplayer2.cpp
 else
 libneutrino_gui_a_SOURCES += \
-	movieviewer.cpp movieplayer.cpp
+	movieviewer.cpp movieplayer.cpp movieplayer_setup.cpp
 endif
 endif
 
