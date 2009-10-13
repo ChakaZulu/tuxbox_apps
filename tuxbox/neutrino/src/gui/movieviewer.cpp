@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.13 2009/05/06 19:50:21 houdini Exp $
+	$Id: movieviewer.cpp,v 1.14 2009/10/13 19:05:36 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -308,7 +308,7 @@ void CMovieViewer::exec()
 /************************************************************************
  
 ************************************************************************/
-int CMovieViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
+int CMovieViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t /*data*/)
 {
 
 	if ( msg == NeutrinoMessages::EVT_TIMER )
