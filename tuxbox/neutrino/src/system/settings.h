@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.216 2009/10/12 07:35:44 rhabarber1848 Exp $
+  $Id: settings.h,v 1.217 2009/10/13 19:44:08 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -188,9 +188,7 @@ struct SNeutrinoSettings
 	int  network_nfs_type[NETWORK_NFS_NR_OF_ENTRIES];
 	char network_nfs_username[NETWORK_NFS_NR_OF_ENTRIES][31];
 	char network_nfs_password[NETWORK_NFS_NR_OF_ENTRIES][31];
-	char network_nfs_audioplayerdir[100];
-	char network_nfs_picturedir[100];
-	char network_nfs_moviedir[100];
+
 	char network_nfs_recordingdir[100];
 
 	//personalization
@@ -231,12 +229,11 @@ struct SNeutrinoSettings
 	int personalize_youth;
 	int personalize_network;
 	int personalize_recording;
-	int personalize_streaming;
 	int personalize_keybinding;
 	int personalize_language;
 	int personalize_colors;
 	int personalize_lcd;
-	int personalize_audpic;
+	int personalize_mediaplayer;
 	int personalize_driver;
 	int personalize_misc;
 
@@ -287,6 +284,7 @@ struct SNeutrinoSettings
 	int streaming_stopsectionsd;
 	int streaming_show_tv_in_browser;
 	int streaming_allow_multiselect;
+	std::string streaming_moviedir;
 
 	int filesystem_is_utf8;
 	// default plugin for ts-movieplayer (red button)
@@ -413,7 +411,8 @@ struct SNeutrinoSettings
 	char   picviewer_slide_time[3];
 	int    picviewer_scaling;
 	std::string picviewer_decode_server_ip;
-	char    picviewer_decode_server_port[6];
+	char   picviewer_decode_server_port[6];
+	char   picviewer_picturedir[100];
 
 	//audioplayer
 	int   audioplayer_display;
@@ -424,6 +423,7 @@ struct SNeutrinoSettings
 	int   audioplayer_repeat_on;
 	int   audioplayer_show_playlist;
 	int   audioplayer_enable_sc_metadata;
+	char  audioplayer_audioplayerdir[100];
 
 	//Esound
 	char  esound_port[6];
