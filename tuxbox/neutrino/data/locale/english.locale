@@ -191,7 +191,6 @@ audioplayer.show_playlist Show Playlist
 audioplayer.shuffle shuffle
 audioplayer.stop Stop
 audioplayer.title_artist Title, Artist
-audioplayeresoundpicsettings.general Audioplayer / Picviewer / Esound
 audioplayeresoundsettings.general Audioplayer / Esound
 audioplayerpicsettings.general Audioplayer / Picviewer
 bookmarkmanager.delete delete
@@ -598,6 +597,7 @@ mainsettings.savesettingsnow save settings now
 mainsettings.savesettingsnow_hint Saving settings,\nplease wait...
 mainsettings.streaming Movie Player
 mainsettings.video Video
+mediaplayersettings.general Mediaplayer
 menu.back back
 messagebox.back Back
 messagebox.cancel Cancel

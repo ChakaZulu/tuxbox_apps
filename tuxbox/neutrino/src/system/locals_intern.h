@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.146 2009/10/12 07:35:44 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.147 2009/10/13 19:52:07 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -218,7 +218,6 @@ const char * locale_real_names[] =
 	"audioplayer.shuffle",
 	"audioplayer.stop",
 	"audioplayer.title_artist",
-	"audioplayeresoundpicsettings.general",
 	"audioplayeresoundsettings.general",
 	"audioplayerpicsettings.general",
 	"bookmarkmanager.delete",
@@ -625,6 +624,7 @@ const char * locale_real_names[] =
 	"mainsettings.savesettingsnow_hint",
 	"mainsettings.streaming",
 	"mainsettings.video",
+	"mediaplayersettings.general",
 	"menu.back",
 	"messagebox.back",
 	"messagebox.cancel",

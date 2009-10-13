@@ -191,7 +191,6 @@ audioplayer.show_playlist Playlist anzeigen
 audioplayer.shuffle Shuffle
 audioplayer.stop Stopp
 audioplayer.title_artist Titel, Interpret
-audioplayeresoundpicsettings.general Audioplayer / Bildb. / Esound
 audioplayeresoundsettings.general Audioplayer / Esound
 audioplayerpicsettings.general Audioplayer / Bildbetrachter
 bookmarkmanager.delete Löschen
@@ -598,6 +597,7 @@ mainsettings.savesettingsnow Einstellungen jetzt speichern
 mainsettings.savesettingsnow_hint Einstellungen werden jetzt gespeichert,\nbitte warten...
 mainsettings.streaming Movieplayer
 mainsettings.video Video
+mediaplayersettings.general Medienwiedergabe
 menu.back Zurück
 messagebox.back Zurück
 messagebox.cancel Abbruch
