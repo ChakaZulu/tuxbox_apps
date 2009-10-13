@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.178 2009/09/26 09:18:37 rhabarber1848 Exp $
+  $Id: movieplayer.cpp,v 1.179 2009/10/13 19:40:01 dbt Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -306,8 +306,8 @@ CMoviePlayerGui::CMoviePlayerGui()
 	frameBuffer = CFrameBuffer::getInstance();
 	bookmarkmanager=0;
 
-	if(strlen (g_settings.network_nfs_moviedir) != 0)
-		Path_local = g_settings.network_nfs_moviedir;
+	if(g_settings.streaming_moviedir.length() != 0)
+		Path_local = g_settings.streaming_moviedir;
 	else
 		Path_local = "/";
 	Path_vlc  = "vlc://";
@@ -4465,7 +4465,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer1 ","$Revision: 1.178 $");
+	return imageinfo.getModulVersion("Movieplayer1 ","$Revision: 1.179 $");
 }
 
 void CMoviePlayerGui::showHelpTS()

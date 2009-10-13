@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: pictureviewer.cpp,v 1.72 2009/09/29 14:53:28 rhabarber1848 Exp $
+	$Id: pictureviewer.cpp,v 1.73 2009/10/13 19:42:34 dbt Exp $
 
 	MP3Player by Dirch
 	
@@ -94,8 +94,8 @@ CPictureViewerGui::CPictureViewerGui()
 	selected = 0;
 	m_sort = FILENAME;
 	m_viewer = new CPictureViewer();
-	if(strlen(g_settings.network_nfs_picturedir)!=0)
-		Path = g_settings.network_nfs_picturedir;
+	if(strlen(g_settings.picviewer_picturedir)!=0)
+		Path = g_settings.picviewer_picturedir;
 	else
 		Path = "/";
 
@@ -372,7 +372,7 @@ int CPictureViewerGui::show()
 		{
 			if (m_state == MENU)
 			{
-				CFileBrowser filebrowser((g_settings.filebrowser_denydirectoryleave) ? g_settings.network_nfs_picturedir : "");
+				CFileBrowser filebrowser((g_settings.filebrowser_denydirectoryleave) ? g_settings.picviewer_picturedir : "");
 
 				filebrowser.Multi_Select    = true;
 				filebrowser.Dirs_Selectable = true;
@@ -732,7 +732,7 @@ void CPictureViewerGui::endView()
 std::string CPictureViewerGui::getPictureViewerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.72 $");
+	return imageinfo.getModulVersion("","$Revision: 1.73 $");
 }
 
 void CPictureViewerGui::showHelp()

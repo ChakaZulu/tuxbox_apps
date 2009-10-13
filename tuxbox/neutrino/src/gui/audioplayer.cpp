@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.78 2009/10/10 20:44:30 rhabarber1848 Exp $
+  $Id: audioplayer.cpp,v 1.79 2009/10/13 19:40:01 dbt Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -188,8 +188,8 @@ CAudioPlayerGui::CAudioPlayerGui(bool inetmode)
 
 	m_select_title_by_name = g_settings.audioplayer_select_title_by_name==1;
 
-	if(strlen(g_settings.network_nfs_audioplayerdir)!=0)
-		m_Path = g_settings.network_nfs_audioplayerdir;
+	if(strlen(g_settings.audioplayer_audioplayerdir)!=0)
+		m_Path = g_settings.audioplayer_audioplayerdir;
 	else
 		m_Path = "/";
 
@@ -1201,7 +1201,7 @@ bool CAudioPlayerGui::openFilebrowser(void)
 {
 	bool result = false;
 	CFileBrowser filebrowser((g_settings.filebrowser_denydirectoryleave) 
-			? g_settings.network_nfs_audioplayerdir : "");
+			? g_settings.audioplayer_audioplayerdir : "");
 
 	filebrowser.Multi_Select    = true;
 	filebrowser.Dirs_Selectable = true;
@@ -2656,8 +2656,8 @@ void CAudioPlayerGui::savePlaylist()
 	dirFilter.addFilter("m3u");
 	browser.Filter = &dirFilter;
 	// select preferred directory if exists
-	if (strlen(g_settings.network_nfs_audioplayerdir) != 0)
-		path = g_settings.network_nfs_audioplayerdir;
+	if (strlen(g_settings.audioplayer_audioplayerdir) != 0)
+		path = g_settings.audioplayer_audioplayerdir;
 	else
 		path = "/";
 

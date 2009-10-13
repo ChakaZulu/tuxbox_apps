@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.30 2009/10/10 20:16:08 seife Exp $
+	$Id: moviebrowser.cpp,v 1.31 2009/10/13 19:40:01 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.31  2009/10/13 19:40:01  dbt
+	datatype and names for some settings variables matching for purpose changed, nfs* was not very matching
+	
 	Revision 1.30  2009/10/10 20:16:08  seife
 	neutrino: add moviebrowser support to movieplayer2
 	
@@ -499,7 +502,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.30 2009/10/10 20:16:08 seife Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.31 2009/10/13 19:40:01 dbt Exp $\r\n");
 	init();
 }
 
@@ -1095,8 +1098,8 @@ int CMovieBrowser::exec(const char* path)
 
 	if (path != NULL)
 		m_selectedDir = path;
-	else if(strlen(g_settings.network_nfs_moviedir) > 0)
-		m_selectedDir = g_settings.network_nfs_moviedir;
+	else if(g_settings.streaming_moviedir.length() > 0)
+		m_selectedDir = g_settings.streaming_moviedir;
 	else
 		m_selectedDir = "/";
 	
@@ -2531,9 +2534,9 @@ void CMovieBrowser::updateDir(void)
 {
     m_dir.clear();
     // check if there is a movie dir and if we should use it
-    if(g_settings.network_nfs_moviedir[0] != 0 )
+    if(g_settings.streaming_moviedir[0] != 0 )
     {
-        std::string name = g_settings.network_nfs_moviedir;
+        std::string name = g_settings.streaming_moviedir;
         addDir(name,&m_settings.storageDirMovieUsed);
     }
 	// check if there is a record dir and if we should use it
@@ -3173,14 +3176,14 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* /*movie_info*/)
     optionsMenuDir.addItem(GenericMenuSeparator);
 
     optionsMenuDir.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MOVIEBROWSER_USE_MOVIE_DIR));
-    optionsMenuDir.addItem( new CMenuOptionChooser(g_settings.network_nfs_moviedir,     (int*)(&m_settings.storageDirMovieUsed), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
+    optionsMenuDir.addItem( new CMenuOptionChooser(g_settings.streaming_moviedir.c_str(),     (int*)(&m_settings.storageDirMovieUsed), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
     
     optionsMenuDir.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_TIMERLIST_RECORDING_DIR));
     CMenuOptionChooser* chooserRec[MAX_RECORDING_DIR];
     for(i = 0; i < MAX_RECORDING_DIR; i++)
     {
         if(g_settings.recording_dir[i] != "" &&
-            g_settings.recording_dir[i] != g_settings.network_nfs_moviedir)
+            g_settings.recording_dir[i] != g_settings.streaming_moviedir)
         {
             chooserRec[i] =   new CMenuOptionChooser(g_settings.recording_dir[i].c_str() , &m_settings.storageDirRecUsed[i]  , MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true);
             optionsMenuDir.addItem(chooserRec[i] );
