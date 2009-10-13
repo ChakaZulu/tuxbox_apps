@@ -14,7 +14,7 @@ install_DATA = \
 	info.raw \
 	keybinding.raw \
 	language.raw lcd.raw left.raw lock.raw \
-	mainmenue.raw minus.raw	mounted.raw movieplayer.raw movie.raw mp3.raw mute.raw mute_small.raw \
+	mainmenue.raw minus.raw	mounted.raw movie.raw mp3.raw mute.raw mute_small.raw \
 	network.raw not_mounted.raw numericpad.raw \
 	ok.raw ok_small.raw \
 	pause.raw play.raw plus.raw power.raw protecting.raw \
@@ -36,6 +36,11 @@ endif
 if ENABLE_UPNP
 install_DATA += \
 	upnp.raw
+endif
+
+if ENABLE_MOVIEPLAYER
+install_DATA += \
+	movieplayer.raw
 endif
 
 if BOXTYPE_TRIPLE
