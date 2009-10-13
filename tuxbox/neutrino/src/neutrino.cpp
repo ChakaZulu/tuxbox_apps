@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.991 2009/10/10 20:16:11 seife Exp $
+	$Id: neutrino.cpp,v 1.992 2009/10/13 19:54:33 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -494,9 +494,6 @@ int CNeutrinoApp::loadSetup()
 		sprintf(cfg_key, "network_nfs_mac_%d", i);
 		strcpy( g_settings.network_nfs_mac[i], configfile.getString( cfg_key, "11:22:33:44:55:66").c_str() );
 	}
-	strcpy( g_settings.network_nfs_audioplayerdir, configfile.getString( "network_nfs_audioplayerdir", "" ).c_str() );
-	strcpy( g_settings.network_nfs_picturedir, configfile.getString( "network_nfs_picturedir", "" ).c_str() );
-	strcpy( g_settings.network_nfs_moviedir, configfile.getString( "network_nfs_moviedir", "" ).c_str() );
 	g_settings.filesystem_is_utf8              = configfile.getBool("filesystem_is_utf8"                 , true );
 
 	// Personalization
@@ -539,12 +536,11 @@ int CNeutrinoApp::loadSetup()
 	g_settings.personalize_youth = configfile.getInt32("personalize_youth", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_network = configfile.getInt32("personalize_network", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_recording = configfile.getInt32("personalize_recording", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
-	g_settings.personalize_streaming = configfile.getInt32("personalize_streaming", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_keybinding = configfile.getInt32("personalize_keybinding", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_language = configfile.getInt32("personalize_language", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_colors = configfile.getInt32("personalize_colors", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_lcd = configfile.getInt32("personalize_lcd", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
-	g_settings.personalize_audpic = configfile.getInt32("personalize_audpic", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_mediaplayer = configfile.getInt32("personalize_mediaplayer", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_driver = configfile.getInt32("personalize_driver", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_misc = configfile.getInt32("personalize_misc", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 
@@ -611,6 +607,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.streaming_stopsectionsd = configfile.getInt32("streaming_stopsectionsd", 1);
 	g_settings.streaming_show_tv_in_browser = configfile.getInt32("streaming_show_tv_in_browser", 0);
 	g_settings.streaming_allow_multiselect = configfile.getBool("streaming_allow_multiselect", false);
+	g_settings.streaming_moviedir = configfile.getString( "streaming_moviedir", "" );
 
 	// default plugin for movieplayer
 	g_settings.movieplayer_plugin = configfile.getString( "movieplayer_plugin", "Teletext" );
@@ -697,6 +694,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
 	g_settings.picviewer_decode_server_ip = configfile.getString("picviewer_decode_server_ip", "");
 	strcpy(g_settings.picviewer_decode_server_port, configfile.getString("picviewer_decode_server_port", "").c_str());
+	strcpy( g_settings.picviewer_picturedir, configfile.getString( "picviewer_picturedir", "" ).c_str() );
 
 	//Audio-Player
 #ifdef ENABLE_AUDIOPLAYER
@@ -711,6 +709,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.audioplayer_repeat_on = configfile.getInt32("audioplayer_repeat_on",0);
 	g_settings.audioplayer_show_playlist = configfile.getInt32("audioplayer_show_playlist",1);
 	g_settings.audioplayer_enable_sc_metadata = configfile.getInt32("audioplayer_enable_sc_metadata",1);
+	strcpy( g_settings.audioplayer_audioplayerdir, configfile.getString( "audioplayer_audioplayerdir", "" ).c_str() );
 
 	//Esound
 	strcpy(g_settings.esound_port, configfile.getString("esound_port", "").c_str());
@@ -1034,10 +1033,7 @@ void CNeutrinoApp::saveSetup()
 		sprintf(cfg_key, "network_nfs_mac_%d", i);
 		configfile.setString( cfg_key, g_settings.network_nfs_mac[i]);
 	}
-	configfile.setString( "network_nfs_audioplayerdir", g_settings.network_nfs_audioplayerdir);
-	configfile.setString( "network_nfs_picturedir", g_settings.network_nfs_picturedir);
-	configfile.setString( "network_nfs_moviedir", g_settings.network_nfs_moviedir);
-	configfile.setBool  ("filesystem_is_utf8"                 , g_settings.filesystem_is_utf8             );
+	configfile.setBool  ( "filesystem_is_utf8" , g_settings.filesystem_is_utf8);
 
 	// Personalization
 	configfile.setInt32 ( "personalize_pinstatus", g_settings.personalize_pinstatus );
@@ -1079,12 +1075,11 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "personalize_youth", g_settings.personalize_youth );
 	configfile.setInt32 ( "personalize_network", g_settings.personalize_network );
 	configfile.setInt32 ( "personalize_recording", g_settings.personalize_recording );
-	configfile.setInt32 ( "personalize_streaming", g_settings.personalize_streaming );
 	configfile.setInt32 ( "personalize_keybinding", g_settings.personalize_keybinding );
 	configfile.setInt32 ( "personalize_language", g_settings.personalize_language );
 	configfile.setInt32 ( "personalize_colors", g_settings.personalize_colors );
 	configfile.setInt32 ( "personalize_lcd", g_settings.personalize_lcd );
-	configfile.setInt32 ( "personalize_audpic", g_settings.personalize_audpic );
+	configfile.setInt32 ( "personalize_mediaplayer", g_settings.personalize_mediaplayer );
 	configfile.setInt32 ( "personalize_driver", g_settings.personalize_driver );
 	configfile.setInt32 ( "personalize_misc", g_settings.personalize_misc );
 
@@ -1144,6 +1139,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "streaming_stopsectionsd", g_settings.streaming_stopsectionsd);
 	configfile.setInt32 ( "streaming_show_tv_in_browser", g_settings.streaming_show_tv_in_browser);
 	configfile.setBool ("streaming_allow_multiselect", g_settings.streaming_allow_multiselect);
+	configfile.setString( "streaming_moviedir", g_settings.streaming_moviedir);
 
 	// default plugin for movieplayer
 	configfile.setString( "movieplayer_plugin", g_settings.movieplayer_plugin );
@@ -1211,6 +1207,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "picviewer_scaling", g_settings.picviewer_scaling );
 	configfile.setString( "picviewer_decode_server_ip", g_settings.picviewer_decode_server_ip );
 	configfile.setString( "picviewer_decode_server_port", g_settings.picviewer_decode_server_port);
+	configfile.setString( "picviewer_picturedir", g_settings.picviewer_picturedir);
 
 	//Audio-Player
 	configfile.setInt32( "audioplayer_display", g_settings.audioplayer_display );
@@ -1221,6 +1218,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "audioplayer_repeat_on", g_settings.audioplayer_repeat_on );
 	configfile.setInt32( "audioplayer_show_playlist", g_settings.audioplayer_show_playlist );
 	configfile.setInt32( "audioplayer_enable_sc_metadata", g_settings.audioplayer_enable_sc_metadata );
+	configfile.setString( "audioplayer_audioplayerdir", g_settings.audioplayer_audioplayerdir);
 
 	//Esound
 	configfile.setString( "esound_port", g_settings.esound_port);
@@ -2155,7 +2153,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	DVBInfo				= new CDVBInfoExec;
 	NVODChanger			= new CNVODChangeExec;
 	StreamFeaturesChanger		= new CStreamFeaturesChangeExec;
-	MoviePluginChanger		= new CMoviePluginChangeExec;
+// 	MoviePluginChanger		= new CMoviePluginChangeExec;
 	MyIPChanger			= new CIPChangeNotifier;
 	ConsoleDestinationChanger	= new CConsoleDestChangeNotifier;
 	FdxSettingsChanger		= new CFdxChangeNotifier;
@@ -2190,18 +2188,12 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK     , "lock.raw"            , 500);
 	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD              , "network.raw"         , 430);
 	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD            , "recording.raw"       );
-#ifdef ENABLE_MOVIEPLAYER
-	CMenuWidget    streamingSettings   (LOCALE_STREAMINGMENU_HEAD            , "streaming.raw"       );
-#endif
 	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD                , "colors.raw"          );
 	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 500);
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 450);
 	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD           , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
-#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
-	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU, NEUTRINO_ICON_SETTINGS);
-#endif
 	CMenuWidget    scanSettingsMenu    (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD              , "streaming.raw"       );
@@ -2223,11 +2215,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 					languageSettings,
 					miscSettings,
 					driverSettings,
-#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
-					audioplPicSettings,
-#endif
 #ifdef ENABLE_MOVIEPLAYER
-					streamingSettings,
 					moviePlayer,
 #endif
 					service);
@@ -2237,11 +2225,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//language Setup
 	InitLanguageSettings(languageSettings);
-
-#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
-	//audioplayer/picviewer Setup
-	InitAudioplPicSettings(audioplPicSettings);
-#endif
 
 	//driver Setup
 	InitDriverSettings(driverSettings);
@@ -2374,11 +2357,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//Recording Setup
 	InitRecordingSettings(recordingSettings);
-
-#ifdef ENABLE_MOVIEPLAYER
-	//Movieplayer Setup
-	InitStreamingSettings(streamingSettings);
-#endif
 
 	//font Setup
 	InitFontSettings(fontSettings);
@@ -4135,33 +4113,6 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 
 		SetupTiming();
 	}
-	else if(actionKey == "audioplayerdir")
-	{
-		parent->hide();
-		CFileBrowser b;
-		b.Dir_Mode=true;
-		if (b.exec(g_settings.network_nfs_audioplayerdir))
-			strncpy(g_settings.network_nfs_audioplayerdir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_audioplayerdir)-1);
-		return menu_return::RETURN_REPAINT;
-	}
-	else if(actionKey == "picturedir")
-	{
-		parent->hide();
-		CFileBrowser b;
-		b.Dir_Mode=true;
-		if (b.exec(g_settings.network_nfs_picturedir))
-			strncpy(g_settings.network_nfs_picturedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_picturedir)-1);
-		return menu_return::RETURN_REPAINT;
-	}
-	else if(actionKey == "moviedir")
-	{
-		parent->hide();
-		CFileBrowser b;
-		b.Dir_Mode=true;
-		if (b.exec(g_settings.network_nfs_moviedir))
-			strncpy(g_settings.network_nfs_moviedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_moviedir)-1);
-		return menu_return::RETURN_REPAINT;
-	}
 	else if(actionKey == "channel_logodir")
 	{
 		parent->hide();
@@ -4188,30 +4139,6 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 			SendSectionsdConfig(); // update notifier
 		}
 		return menu_return::RETURN_REPAINT;
-	}
-	else if(actionKey == "movieplugin")
-	{
-		parent->hide();
-		CMenuWidget MoviePluginSelector(LOCALE_MOVIEPLAYER_DEFPLUGIN, "features.raw", 350);
-		MoviePluginSelector.addItem(GenericMenuSeparator);
-
-		char id[5];
-		int cnt = 0;
-		int enabled_count = 0;
-		for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
-		{
-			if (g_PluginList->getType(count)== CPlugins::P_TYPE_TOOL && !g_PluginList->isHidden(count))
-			{
-				// zB vtxt-plugins
-				sprintf(id, "%d", count);
-				enabled_count++;
-				MoviePluginSelector.addItem(new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, MoviePluginChanger, id, CRCInput::convertDigitToKey(count)), (cnt == 0));
-				cnt++;
-			}
-		}
-
-		MoviePluginSelector.exec(NULL, "");
- 		return menu_return::RETURN_REPAINT;
 	}
 	else if(actionKey == "clearSectionsd")
 	{

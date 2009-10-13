@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.223 2009/10/10 20:16:11 seife Exp $
+	$Id: neutrino.h,v 1.224 2009/10/13 19:54:33 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -92,22 +92,6 @@ typedef struct font_sizes_groups
 
 extern const font_sizes_struct neutrino_font[];
 extern const char * locale_real_names[]; /* #include <system/locals_intern.h> */
-
-#if defined(ENABLE_AUDIOPLAYER) && defined(ENABLE_PICTUREVIEWER) && defined(ENABLE_ESD)
-#define LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_GENERAL
-#elif defined(ENABLE_AUDIOPLAYER) && defined(ENABLE_PICTUREVIEWER) && !defined(ENABLE_ESD)
-#define LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL
-#elif defined(ENABLE_AUDIOPLAYER) && !defined(ENABLE_PICTUREVIEWER) && defined(ENABLE_ESD)
-#define LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU LOCALE_AUDIOPLAYERESOUNDSETTINGS_GENERAL
-#elif defined(ENABLE_AUDIOPLAYER) && !defined(ENABLE_PICTUREVIEWER) && !defined(ENABLE_ESD)
-#define LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU LOCALE_AUDIOPLAYER_NAME
-#elif !defined(ENABLE_AUDIOPLAYER) && defined(ENABLE_PICTUREVIEWER) && defined(ENABLE_ESD)
-#define LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU LOCALE_PICTUREVIEWER_ESOUND_SETTINGS_GENERAL
-#elif !defined(ENABLE_AUDIOPLAYER) && defined(ENABLE_PICTUREVIEWER) && !defined(ENABLE_ESD)
-#define LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU LOCALE_PICTUREVIEWER_HEAD
-#elif !defined(ENABLE_AUDIOPLAYER) && !defined(ENABLE_PICTUREVIEWER) && defined(ENABLE_ESD)
-#define LOCALE_AUDIOPLAYERESOUNDPICSETTINGS_MENU LOCALE_ESOUND_NAME
-#endif
 
 #define OPTIONS_OFF0_ON1_OPTION_COUNT 2
 extern const CMenuOptionChooser::keyval OPTIONS_OFF0_ON1_OPTIONS[];
@@ -202,7 +186,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 #endif
 		CDVBInfoExec			*DVBInfo;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
-		CMoviePluginChangeExec 		*MoviePluginChanger;
 		CIPChangeNotifier		*MyIPChanger;
 //		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
@@ -293,11 +276,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 				  CMenuWidget &languageSettings,
 				  CMenuWidget &miscSettings,
 				  CMenuWidget &driverSettings,
-#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD)
-				  CMenuWidget &audiopl_picSettings,
-#endif
 #ifdef ENABLE_MOVIEPLAYER
-				  CMenuWidget &streamingSettings,
 				  CMenuWidget &moviePlayer,
 #endif
 				  CMenuWidget &service);
