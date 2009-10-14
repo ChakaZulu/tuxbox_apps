@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.993 2009/10/14 20:54:13 dbt Exp $
+	$Id: neutrino.cpp,v 1.994 2009/10/14 22:13:12 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3355,9 +3355,6 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 			networkConfig.commitConfig();
 			saveSetup();
 
-			if (frameBuffer != NULL)
-				delete frameBuffer;
-
 			if (!g_settings.epg_dir.empty()) {
 				waitforshutdown = true;
 				AudioMute(true);
@@ -3368,6 +3365,8 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 				if (g_RCInput != NULL)
 					delete g_RCInput;
 
+				if (frameBuffer != NULL)
+					delete frameBuffer;
 #ifdef ENABLE_LIRC
 				CIRSend irs("neutrinooff");
 				irs.Send();
@@ -3382,6 +3381,8 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 			if (g_RCInput != NULL)
 				delete g_RCInput;
 
+			if (frameBuffer != NULL)
+				delete frameBuffer;
 #ifdef ENABLE_LIRC
 			CIRSend irs("neutrinooff");
 			irs.Send();
