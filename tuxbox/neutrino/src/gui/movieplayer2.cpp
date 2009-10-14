@@ -10,7 +10,7 @@
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
 
-  $Id: movieplayer2.cpp,v 1.56 2009/10/13 19:40:01 dbt Exp $
+  $Id: movieplayer2.cpp,v 1.57 2009/10/14 21:46:11 seife Exp $
 
 
   License: GPL
@@ -2083,6 +2083,7 @@ OutputThread(void *arg)
 			// pida and pidv should have been set by ReceiveStreamThread now
 			INFO("while streaming found pida: 0x%04X ; pidv: 0x%04X ac3: %d\n",
 			      pida, pidv, g_currentac3);
+			CLCD::getInstance()->setMovieAudio(g_currentac3);
 
 			g_playstate = CMoviePlayerGui::SOFTRESET;
 		}
@@ -2352,6 +2353,7 @@ void updateLcd(const std::string &s)
 {
 	static int  l_playstate = -1;
 	std::string lcd = s;
+	CLCD::AUDIOMODES playmode;
 
 	if (l_playstate == g_playstate)
 		return;
@@ -2359,14 +2361,14 @@ void updateLcd(const std::string &s)
 	switch (g_playstate)
 	{
 	case CMoviePlayerGui::PAUSE:
-		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PAUSE);
+		playmode = CLCD::AUDIO_MODE_PAUSE;
 		break;
 	default:
-		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
+		playmode = CLCD::AUDIO_MODE_PLAY;
 		break;
 	}
 	StrSearchReplace(lcd,"_", " ");
-	CLCD::getInstance()->setMovieInfo("", lcd);
+	CLCD::getInstance()->setMovieInfo(playmode, "", lcd, false);
 }
 
 //== seek to pos with sync to next proper TS packet ==
@@ -2867,6 +2869,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				g_currentapid = g_apids[0];
 				g_currentac3 = g_ac3flags[0];
 				g_apidchanged = true;
+				CLCD::getInstance()->setMovieAudio(g_currentac3);
 			}
 			else if (last_apid != -1)
 			{
@@ -2878,6 +2881,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 						g_currentapid = g_apids[i];
 						g_currentac3 = g_ac3flags[i];
 						g_apidchanged = true;
+						CLCD::getInstance()->setMovieAudio(g_currentac3);
 						break;
 					}
 				}
@@ -2995,6 +2999,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 			if (g_currentapid == -1) // exit if inital pid is not selected
 				g_playstate = CMoviePlayerGui::STOPPED;
 			g_showaudioselectdialog = false;
+			CLCD::getInstance()->setMovieAudio(g_currentac3);
 			updateLcd(title);
 		}
 
@@ -3340,7 +3345,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.56 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.57 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()

@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.h,v 1.42 2009/04/12 21:11:44 rhabarber1848 Exp $
+	$Id: lcdd.h,v 1.43 2009/10/14 21:46:04 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -100,6 +100,7 @@ class CLCD
 		raw_display_t                   background[LCD_NUMBER_OF_BACKGROUNDS];
 
 		MODES				mode;
+		AUDIOMODES			movie_playmode;
 
 		std::string			servicename;
 		std::string			epg_title;
@@ -110,6 +111,8 @@ class CLCD
 		unsigned char			percentOver;
 		bool				muted;
 		bool				showclock;
+		bool				movie_centered;
+		bool				movie_is_ac3;
 		CConfigFile			configfile;
 		pthread_t			thrTime;
 		int                             last_toggle_state_power;
@@ -141,9 +144,9 @@ class CLCD
 		MODES getMode() { return mode; };
 
 		void showServicename(const std::string name, const bool perform_wakeup = true); // UTF-8
-		void showMoviename(const std::string name); // UTF-8
 		void setEPGTitle(const std::string title);
-		void setMovieInfo(const std::string big, const std::string small);
+		void setMovieInfo(const AUDIOMODES playmode, const std::string big, const std::string small, const bool centered = false);
+		void setMovieAudio(const bool is_ac3);
 		std::string getMenutitle() { return menutitle; };
 		void showTime();
 		/** blocks for duration seconds */

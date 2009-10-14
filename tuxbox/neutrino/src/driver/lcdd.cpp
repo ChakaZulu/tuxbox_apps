@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.82 2009/10/03 15:34:02 seife Exp $
+	$Id: lcdd.cpp,v 1.83 2009/10/14 21:46:04 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -502,15 +502,6 @@ void CLCD::showTextScreen(const std::string & big, const std::string & small, co
 	displayUpdate();
 }
 
-void CLCD::showMoviename(const std::string name)
-{
-	// is this needed?
-	if (mode != MODE_TVRADIO)
-		return;
-
-	showTextScreen(name, "", 1, false, false);
-}
-
 void CLCD::showServicename(const std::string name, const bool perform_wakeup)
 {
 	/*
@@ -543,18 +534,31 @@ void CLCD::setEPGTitle(const std::string title)
 	showServicename("", false);
 }
 
-void CLCD::setMovieInfo(const std::string big, const std::string small)
+void CLCD::setMovieInfo(const AUDIOMODES playmode, const std::string big, const std::string small, const bool centered)
 {
 	int showmode = g_settings.lcd_setting[SNeutrinoSettings::LCD_EPGMODE];
 	showmode |= 3; // take only the separator line from the config
 
+	movie_playmode = playmode;
 	movie_big = big;
 	movie_small = small;
+	movie_centered = centered;
 
 	if (mode != MODE_MOVIE)
 		return;
 
-	showTextScreen(movie_big, movie_small, showmode, true, false);
+	showAudioPlayMode(movie_playmode);
+	showTextScreen(movie_big, movie_small, showmode, true, movie_centered);
+}
+
+void CLCD::setMovieAudio(const bool is_ac3)
+{
+	movie_is_ac3 = is_ac3;
+
+	if (mode != MODE_MOVIE)
+		return;
+
+	showPercentOver(percentOver, true, MODE_MOVIE);
 }
 
 void CLCD::showTime()
@@ -671,12 +675,23 @@ void CLCD::showPercentOver(const unsigned char perc, const bool perform_update, 
 		{
 			left = 12; top = 3; width = 84;
 
-			if (g_RemoteControl != NULL && mode == MODE_TVRADIO)
+			if ((g_RemoteControl != NULL && mode == MODE_TVRADIO) || mode == MODE_MOVIE)
 			{
+				bool is_ac3;
+				if (mode == MODE_MOVIE)
+					is_ac3 = movie_is_ac3;
+				else
+				{
+					uint count = g_RemoteControl->current_PIDs.APIDs.size();
+					if ((g_RemoteControl->current_PIDs.PIDs.selected_apid < count) &&
+					    (g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3))
+						is_ac3 = true;
+					else
+						is_ac3 = false;
+				}
+
 				const char * icon;
-				uint count = g_RemoteControl->current_PIDs.APIDs.size();
-				if ((g_RemoteControl->current_PIDs.PIDs.selected_apid < count) &&
-				    (g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3))
+				if (is_ac3)
 					icon = DATADIR "/lcdd/icons/dd.raw";
 				else
 					icon = DATADIR "/lcdd/icons/stereo.raw";
@@ -857,7 +872,10 @@ void CLCD::setMode(const MODES m, const char * const title)
 		if (mode == MODE_TVRADIO)
 			showServicename(servicename);
 		else
-			setMovieInfo(movie_big, movie_small);
+		{
+			setMovieInfo(movie_playmode, movie_big, movie_small, movie_centered);
+			setMovieAudio(movie_is_ac3);
+		}
 		showclock = true;
 		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		break;
