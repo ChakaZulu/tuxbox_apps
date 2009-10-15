@@ -3,15 +3,13 @@
 
   Movieplayer "v2"
   (C) 2008, 2009 Novell, Inc. Author: Stefan Seyfried
+  (C) 2009 Stefan Seyfried
 
   Based on the old movieplayer code (c) 2003, 2004 by gagga
   which was based on code by Dirch, obi and the Metzler Bros. Thanks.
 
   The remultiplexer code was inspired by the vdrviewer plugin and the
   enigma1 demultiplexer.
-
-  $Id: movieplayer2.cpp,v 1.57 2009/10/14 21:46:11 seife Exp $
-
 
   License: GPL
 
@@ -27,35 +25,46 @@
 
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  Foundation, 51 Franklin Street, Fifth Floor Boston, MA 02110-1301, USA.
 */
 
-////////////////////////////////////////////////////////////
 /*
-  THIS IS AN ALPHA VERSION, NOT EVERYTHING WILL WORK.
-
   This code plays (tested):
-  * TS which were recorded with neutrino on dbox2
+  * TS which were recorded with neutrino
   * VDR 1.4.7 recordings (dual PES)
+  * VDR 1.6.0 recordings (dual PES)
   * mpeg files created from VDR recordings with dvbcut,
     "target DVD(libavformat)"
   It does not yet play correctly:
   * MPEG1 like e.g. the "Warriors Of The Net" movie from
     http://ftp.sunet.se/pub/tv+movies/warriors/warriors-700-VBR.mpg
 
-  The VLC code does still work, as far as I could test.
+  The VLC code allows playback of all files that are supported by VLC
+  via transcoding into MPEG1 or MPEG2 and multiplexing into TS.
+
+  Split TS recordings (Neutrino) and multi-file VDR recordings are played
+  back seamlessly without any interruption including seeking across file
+  boundaries etc. VLC file sets and split TS recordings are automatically
+  put together as an "auto-playlist" if the first file is selected for
+  playback.
+
+  VDR's info.vdr and neutrino's XML files are used to display information
+  about the recording.
+
+  MPEG timestamps are parsed and used to determine the total and elapsed
+  time. This is also used for exact seeking.
 
   TODO:
-  * the whole g_playstate state machine is too complicated and probably
-    horribly broken - clean it up.
-  * more error checking (end of file, anyone?)
   * bookmarks? what bookmarks?
+  * use index.vdr for precise seeking in VDR files.
+  * Test and fix AC3 (I now have hardware, thanks Ray! ;)
+  * the whole g_playstate state machine is too complicated and probably
+    broken in subtle ways - clean it up.
   * MPEG1 parser
-  * Test and fix AC3
   * check if the CLCD->setMode(MODE_MOVIE) are all correct (and needed)
   * ...lots more... ;)
 
-  To build it, configure with "--enable-movieplayer2":
+  To build it, configure with "--enable-movieplayer2".
   Enjoy.
  */
 
@@ -3345,7 +3354,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.57 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.58 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
