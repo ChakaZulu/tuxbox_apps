@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.148 2009/10/17 11:29:08 dbt Exp $
+ * $Id: locals_intern.h,v 1.149 2009/10/17 16:31:51 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -508,6 +508,7 @@ const char * locale_real_names[] =
 	"infoviewer.selecttime",
 	"infoviewer.streaminfo",
 	"infoviewer.subchan_disp_pos",
+	"infoviewer.subchan_portal",
 	"infoviewer.subservice",
 	"infoviewer.waittime",
 	"ipsetup.hint_1",
@@ -549,6 +550,8 @@ const char * locale_real_names[] =
 	"keybindingmenu.sort_head",
 	"keybindingmenu.subchanneldown",
 	"keybindingmenu.subchanneldown_head",
+	"keybindingmenu.subchanneltoggle",
+	"keybindingmenu.subchanneltoggle_head",
 	"keybindingmenu.subchannelup",
 	"keybindingmenu.subchannelup_head",
 	"keybindingmenu.tvradiomode",

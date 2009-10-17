@@ -80,6 +80,9 @@ CRemoteControl::CRemoteControl()
 	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
 	has_ac3 = 	false;
 	selected_subchannel = -1;
+	current_subchannel = 0;
+	old_subchannel = 0;
+	button_Portal = false;
 	needs_nvods = 	false;
 	director_mode = 0;
 //	current_programm_timer = 0;
@@ -484,17 +487,89 @@ static const std::string empty_string;
 
 const std::string & CRemoteControl::setSubChannel(const int numSub, const bool force_zap)
 {
-	if ((numSub < 0) || (numSub >= (int)subChannels.size()))
+	// DIRECTORMODE_TOGGLE / RC_0 for toggle last subchannel
+	// DIRECTORMODE_PORTAL / RC_blue for calling Portal with blue Button 
+	int tmp        = 0;
+	int subchannel = 0;
+	if (numSub > CNeutrinoApp::DIRECTORMODE_TOGGLE)
+		if (numSub < 0 || numSub >= (int)subChannels.size())
+			return empty_string;
+
+	if ((selected_subchannel == numSub) && (!force_zap))
 		return empty_string;
 
-	if ((selected_subchannel == numSub ) && (!force_zap))
-		return empty_string;
+	if (numSub == CNeutrinoApp::DIRECTORMODE_TOGGLE && director_mode) //toggle last subchannel
+	{
+		if (button_Portal)
+		{
+			swap<int>(current_subchannel, old_subchannel);
+			button_Portal = false; //Reset Button
+		}
+		if (old_subchannel >= (int)subChannels.size() && (int)subChannels.size() > 0)	// all subchannels available?
+			old_subchannel = (int)subChannels.size()-1;
 
-	selected_subchannel = numSub;
-	current_sub_channel_id = subChannels[numSub].getChannelID();
-	g_Zapit->zapTo_subServiceID_NOWAIT( current_sub_channel_id );
+		if (old_subchannel >= (int)subChannels.size() && current_subchannel >= (int)subChannels.size())
+			old_subchannel = current_subchannel = 0;
 
-	return subChannels[numSub].subservice_name;
+		if ((selected_subchannel == old_subchannel) && (!force_zap))
+			return empty_string;
+
+		subchannel = old_subchannel;
+	}
+	else if (numSub == CNeutrinoApp::DIRECTORMODE_PORTAL && director_mode)  // zap to Portal(0)
+	{
+		if ((selected_subchannel == 0) && (!force_zap))
+			return empty_string;
+		if (subchannel >= (int)subChannels.size())
+			return empty_string;
+
+		subchannel = 0;
+		button_Portal = true;
+	}
+	else
+	{
+		button_Portal = false;
+		subchannel = numSub;
+	}
+
+	if (director_mode && numSub != CNeutrinoApp::DIRECTORMODE_PORTAL)
+	{
+		if (subchannel == 0)
+			swap<int>(current_subchannel, old_subchannel);
+
+		if (subchannel > 0)	//remember subchannels, only feed 1-9
+		{	
+			if (current_subchannel == 0 && old_subchannel == 0)
+			{
+				current_subchannel = old_subchannel = subchannel;
+			}
+			else
+			{
+				if (selected_subchannel == 0)
+					swap<int>(current_subchannel, old_subchannel);
+
+				tmp = (subchannel == current_subchannel) ? old_subchannel : subchannel;
+				old_subchannel = current_subchannel;
+				current_subchannel = tmp;
+			}
+		}
+		if (old_subchannel > 0 && current_subchannel > 0 && subchannel == old_subchannel)
+		{
+			//swap feeds if select feed same as in old_subchannel stored
+			swap<int>(current_subchannel, old_subchannel);
+		}
+	}
+
+	selected_subchannel = subchannel;
+	current_sub_channel_id = subChannels[subchannel].getChannelID();
+	g_Zapit->zapTo_subServiceID_NOWAIT(current_sub_channel_id);
+
+	return subChannels[subchannel].subservice_name;
+}
+
+const std::string & CRemoteControl::toggleSubChannel(void)
+{
+	return setSubChannel(CNeutrinoApp::DIRECTORMODE_TOGGLE);
 }
 
 const std::string & CRemoteControl::subChannelUp(void)

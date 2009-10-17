@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.995 2009/10/17 11:29:31 dbt Exp $
+	$Id: neutrino.cpp,v 1.996 2009/10/17 16:31:41 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -635,6 +635,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_bouquet_down = (neutrino_msg_t)configfile.getInt32("key_bouquet_down", CRCInput::RC_left);
 	g_settings.key_subchannel_up = (neutrino_msg_t)configfile.getInt32("key_subchannel_up", CRCInput::RC_right);
 	g_settings.key_subchannel_down = (neutrino_msg_t)configfile.getInt32("key_subchannel_down", CRCInput::RC_left);
+	g_settings.key_subchannel_toggle = (neutrino_msg_t)configfile.getInt32("key_subchannel_toggle", CRCInput::RC_0);
 	g_settings.key_zaphistory = (neutrino_msg_t)configfile.getInt32("key_zaphistory", CRCInput::RC_home);
 	g_settings.key_lastchannel = (neutrino_msg_t)configfile.getInt32("key_lastchannel", CRCInput::RC_0);
 
@@ -1162,6 +1163,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "key_bouquet_down", (int)g_settings.key_bouquet_down );
 	configfile.setInt32( "key_subchannel_up", (int)g_settings.key_subchannel_up );
 	configfile.setInt32( "key_subchannel_down", (int)g_settings.key_subchannel_down );
+	configfile.setInt32( "key_subchannel_toggle", (int)g_settings.key_subchannel_toggle );
 	configfile.setInt32( "key_zaphistory", (int)g_settings.key_zaphistory );
 	configfile.setInt32( "key_lastchannel", (int)g_settings.key_lastchannel );
 
@@ -2542,13 +2544,18 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 			else if( msg == CRCInput::RC_blue )
 			{	// streaminfo
-				if (g_settings.personalize_bluebutton == 0)
+				if (g_RemoteControl->director_mode)
+				{
+					g_RemoteControl->setSubChannel(DIRECTORMODE_PORTAL); //Portal RC_blue
+					g_InfoViewer->showSubchan();
+				}				
+				else if (g_settings.personalize_bluebutton == 0)
 				{
 					// Features Menu - Personalization Check
 					ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_MENUDISABLEDHINT));
-				} else {
-					showUserMenu(SNeutrinoSettings::BUTTON_BLUE);
 				}
+				else 
+					showUserMenu(SNeutrinoSettings::BUTTON_BLUE);
 			}
 			else if( msg == CRCInput::RC_green )
 			{
@@ -2558,7 +2565,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{       // NVODs
 				showUserMenu(SNeutrinoSettings::BUTTON_YELLOW);
 			}
-			else if (CRCInput::isNumeric(msg) && g_RemoteControl->director_mode )
+			else if (CRCInput::isNumeric(msg) && msg != CRCInput::RC_0 && g_RemoteControl->director_mode)
 			{
 				g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
 				g_InfoViewer->showSubchan();
@@ -2584,6 +2591,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if(msg_repeatok == g_settings.key_subchannel_down)
 			{
 				g_RemoteControl->subChannelDown();
+				g_InfoViewer->showSubchan();
+			}
+			else if(msg == g_settings.key_subchannel_toggle && g_RemoteControl->director_mode)
+			{
+				g_RemoteControl->toggleSubChannel();
 				g_InfoViewer->showSubchan();
 			}
 			else if(msg == g_settings.key_zaphistory)

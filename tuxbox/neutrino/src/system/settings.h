@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.217 2009/10/13 19:44:08 dbt Exp $
+  $Id: settings.h,v 1.218 2009/10/17 16:31:51 rhabarber1848 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -308,6 +308,7 @@ struct SNeutrinoSettings
 	neutrino_msg_t key_bouquet_down;
 	neutrino_msg_t key_subchannel_up;
 	neutrino_msg_t key_subchannel_down;
+	neutrino_msg_t key_subchannel_toggle;
 	neutrino_msg_t key_zaphistory;
 	neutrino_msg_t key_lastchannel;
 

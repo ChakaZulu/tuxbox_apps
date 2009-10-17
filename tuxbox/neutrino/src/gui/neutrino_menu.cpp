@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.87 2009/10/17 11:29:31 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.88 2009/10/17 16:31:44 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1457,6 +1457,7 @@ enum keynames {
 	VIRTUALKEY_BOUQUET_DOWN,
 	VIRTUALKEY_SUBCHANNEL_UP,
 	VIRTUALKEY_SUBCHANNEL_DOWN,
+	VIRTUALKEY_SUBCHANNEL_TOGGLE,
 	VIRTUALKEY_ZAP_HISTORY,
 	VIRTUALKEY_LASTCHANNEL,
 
@@ -1480,6 +1481,7 @@ const neutrino_locale_t keydescription_head[] =
 	LOCALE_KEYBINDINGMENU_BOUQUETDOWN_HEAD,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELUP_HEAD,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN_HEAD,
+	LOCALE_KEYBINDINGMENU_SUBCHANNELTOGGLE_HEAD,
 	LOCALE_KEYBINDINGMENU_ZAPHISTORY_HEAD,
 	LOCALE_KEYBINDINGMENU_LASTCHANNEL_HEAD
 };
@@ -1501,6 +1503,7 @@ const neutrino_locale_t keydescription[] =
 	LOCALE_KEYBINDINGMENU_BOUQUETDOWN,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELUP,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN,
+	LOCALE_KEYBINDINGMENU_SUBCHANNELTOGGLE,
 	LOCALE_KEYBINDINGMENU_ZAPHISTORY,
 	LOCALE_KEYBINDINGMENU_LASTCHANNEL
 };
@@ -1534,6 +1537,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 			&g_settings.key_bouquet_down,
 			&g_settings.key_subchannel_up,
 			&g_settings.key_subchannel_down,
+			&g_settings.key_subchannel_toggle,
 			&g_settings.key_zaphistory,
 			&g_settings.key_lastchannel
 		};
@@ -1558,6 +1562,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	for (int i = VIRTUALKEY_CHANNEL_UP; i <= VIRTUALKEY_SUBCHANNEL_DOWN; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
+
+	keySettings.addItem(new CMenuForwarder(keydescription[VIRTUALKEY_SUBCHANNEL_TOGGLE], true, NULL, keychooser[VIRTUALKEY_SUBCHANNEL_TOGGLE]));
 
 	keySettings.addItem(new CMenuForwarder(keydescription[VIRTUALKEY_ZAP_HISTORY], true, NULL, keychooser[VIRTUALKEY_ZAP_HISTORY]));
 
@@ -2013,7 +2019,10 @@ bool CNeutrinoApp::getNVODMenu(CMenuWidget* menu)
 		}
 		else
 		{
-			menu->addItem(new CMenuForwarderNonLocalized((Latin1_to_UTF8(e->subservice_name)).c_str(), true, NULL, NVODChanger, nvod_id, CRCInput::convertDigitToKey(count)), (count == g_RemoteControl->selected_subchannel));
+			if (count == 0)
+				menu->addItem(new CMenuForwarderNonLocalized( (Latin1_to_UTF8(e->subservice_name)).c_str(), true, NULL, NVODChanger, nvod_id, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+			else
+				menu->addItem(new CMenuForwarderNonLocalized( (Latin1_to_UTF8(e->subservice_name)).c_str(), true, NULL, NVODChanger, nvod_id, CRCInput::convertDigitToKey(count)), (count == g_RemoteControl->selected_subchannel));
 		}
 
 		count++;

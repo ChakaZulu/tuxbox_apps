@@ -481,6 +481,7 @@ infoviewer.now now
 infoviewer.selecttime Timeselection
 infoviewer.streaminfo Features
 infoviewer.subchan_disp_pos Subchannel Display
+infoviewer.subchan_portal Portal
 infoviewer.subservice Subservices
 infoviewer.waittime Waiting for time...
 ipsetup.hint_1 Use 0..9, or use Up/Down,
@@ -522,6 +523,8 @@ keybindingmenu.sort change sort order
 keybindingmenu.sort_head change sort order
 keybindingmenu.subchanneldown subchannel down
 keybindingmenu.subchanneldown_head key subchannel down
+keybindingmenu.subchanneltoggle subchannel toggle
+keybindingmenu.subchanneltoggle_head key subchannel toggle
 keybindingmenu.subchannelup subchannel up
 keybindingmenu.subchannelup_head key subchannel up
 keybindingmenu.tvradiomode TV/Radio-mode

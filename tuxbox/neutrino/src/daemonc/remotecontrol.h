@@ -92,6 +92,9 @@ public:
 	// SubChannel/NVOD - Details
 	CSubServiceListSorted         subChannels;
 	int                           selected_subchannel;
+	int                           current_subchannel;
+	int                           old_subchannel;
+	bool                          button_Portal;
 	bool                          are_subchannels;
 	bool                          needs_nvods;
 	int                           director_mode;
@@ -109,6 +112,7 @@ public:
 	const std::string & setSubChannel(const int numSub, const bool force_zap = false);
 	const std::string & subChannelUp(void);
 	const std::string & subChannelDown(void);
+	const std::string & toggleSubChannel(void);
 
 	void radioMode();
 	void tvMode();

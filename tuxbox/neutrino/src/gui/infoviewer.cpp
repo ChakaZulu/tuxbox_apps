@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.282 2009/10/11 18:47:36 seife Exp $
+	$Id: infoviewer.cpp,v 1.283 2009/10/17 16:31:44 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -512,7 +512,9 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		// show blue button
 		// USERMENU
 		const char* txt = NULL;
-		if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_BLUE].empty() )
+		if (g_RemoteControl->director_mode)
+			txt = g_Locale->getText(LOCALE_INFOVIEWER_SUBCHAN_PORTAL);
+		else if (!g_settings.usermenu_text[SNeutrinoSettings::BUTTON_BLUE].empty())
 			txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_BLUE].c_str();
 		else	
 			txt = g_Locale->getText(LOCALE_INFOVIEWER_STREAMINFO);
@@ -738,7 +740,8 @@ requests to sectionsd.
 			}
 			else if (msg_repeatok == g_settings.key_quickzap_up ||
 				 msg_repeatok == g_settings.key_quickzap_down ||
-				/*msg == CRCInput::RC_0 ||*/
+				/* msg == CRCInput::RC_0 || Not longer used here, because RC_0 is used
+				   now for subchannel toggle, not for numeric Zap in director_mode */
 				 msg == NeutrinoMessages::SHOW_INFOBAR)
 			{
 #ifdef ENABLE_RADIOTEXT
@@ -837,7 +840,10 @@ void CInfoViewer::showSubchan()
 	if (!(subChannelName.empty()))
 	{
 		char text[100];
-		sprintf( text, "%d - %s", subchannel, subChannelName.c_str() );
+		if(subchannel == 0 && g_RemoteControl->are_subchannels)
+			sprintf( text, "%s - %s", "  ", subChannelName.c_str() );
+		else
+			sprintf( text, "%d - %s", subchannel, subChannelName.c_str() );
 
 		int dx = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(text, subChannelNameIsUTF) + 20;
 		int dy = 25;
@@ -854,7 +860,7 @@ void CInfoViewer::showSubchan()
 				int w= 20+ g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE), true) + 20; // UTF-8
 				if ( w> dx )
 					dx= w;
-				dy= dy* 2;
+				dy= dy* 3;
 			}
 			else
 				dy= dy +5;
@@ -897,20 +903,27 @@ void CInfoViewer::showSubchan()
 			{			
 			// show default small infobar for subchannel
 			frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0, RADIUS_SMALL);
+			if (subchannel == 0 && g_RemoteControl->are_subchannels)
+				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+ 8, y+ 8 );
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT, 0, subChannelNameIsUTF); // UTF-8
 			
-			// show yellow button
+			// show yellow and blue button
 			// USERMENU
-			const char* txt = NULL;
-			if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].empty() )
-				txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].c_str();
-			else if(g_RemoteControl->director_mode)	
-				txt = g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE);
-	
-			if ( txt != NULL )
+			const char* txt_a = NULL;
+			const char* txt_b = NULL;
+			if (!g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].empty())
+				txt_b = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].c_str();
+			else if (g_RemoteControl->director_mode)
+			{
+				txt_a = g_RemoteControl->subChannels[0].subservice_name.c_str();
+				txt_b = g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE);
+			}
+			if (txt_a != NULL && txt_b != NULL)
 			{
 				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+ 8, y+ dy- 20 );
-				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, txt, COL_MENUCONTENT, 0, true); // UTF-8
+				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+ 8, y+ dy- 40 );
+				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 22, dx- 40, txt_a, COL_MENUCONTENT, 0, true); // UTF-8
+				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, txt_b, COL_MENUCONTENT, 0, true); // UTF-8
 			}
 			
 			unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( 2 );
