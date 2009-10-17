@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.224 2009/10/13 19:54:33 dbt Exp $
+	$Id: neutrino.h,v 1.225 2009/10/17 11:29:31 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -234,9 +234,8 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void RealRun(CMenuWidget &mainSettings);
 		void InitZapper();
 		void InitKeySettings(CMenuWidget &);
-		void InitServiceSettings(CMenuWidget &, CMenuWidget &);
+		void InitServiceSettings(CMenuWidget &);
 		void InitColorSettingsMenuColors(CMenuWidget &);
-		void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier);
 		void InitColorSettings(CMenuWidget &, CMenuWidget &);
 		void InitLanguageSettings(CMenuWidget &);
 		void InitColorThemesSettings(CMenuWidget &);
@@ -265,7 +264,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitParentalLockSettings(CMenuWidget &);
 		void InitMainMenu(CMenuWidget &mainMenu,
 				  CMenuWidget &mainSettings,
-				  CMenuWidget &audioSettings,
 				  CMenuWidget &parentallockSettings,
 				  CMenuWidget &networkSettings,
 				  CMenuWidget &recordingSettings,

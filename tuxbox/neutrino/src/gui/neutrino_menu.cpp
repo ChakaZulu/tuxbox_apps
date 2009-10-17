@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.86 2009/10/13 19:50:50 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.87 2009/10/17 11:29:31 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -59,6 +59,7 @@
 #include "gui/widget/stringinput_ext.h"
 
 #include "gui/alphasetup.h"
+#include "gui/audio_setup.h"
 #include "gui/audio_select.h"
 #ifdef ENABLE_AUDIOPLAYER
 #include "gui/audioplayer.h"
@@ -86,6 +87,7 @@
 #endif
 #include "gui/pluginlist.h"
 #include "gui/scan.h"
+#include "gui/scan_setup.h"
 #include "gui/screensetup.h"
 #include "gui/software_update.h"
 #include "gui/streaminfo2.h"
@@ -101,7 +103,6 @@
 #include "gui/experimental_menu.h"
 #endif
 
-CZapitClient::SatelliteList satList;
 static CTimingSettingsNotifier timingsettingsnotifier;
 
 /**************************************************************************************
@@ -112,7 +113,6 @@ static CTimingSettingsNotifier timingsettingsnotifier;
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &mainSettings,
- 								CMenuWidget &audioSettings,
 								CMenuWidget &parentallockSettings,
 								CMenuWidget &networkSettings,
 								CMenuWidget &recordingSettings,
@@ -269,7 +269,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_VIDEO, true, NULL, &videoSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_video);	
 
 	// audio
-	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_AUDIO, true, NULL, &audioSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_audio);
+	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_AUDIO, true, NULL, new CAudioSetup(), NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_audio);
 	
 	// parental lock
 	if (g_settings.personalize_youth == CPersonalizeGui::PERSONALIZE_MODE_VISIBLE) {
@@ -317,307 +317,14 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	delete personalize ;
 }
 
-/* for scan settings menu*/
-#define SCANTS_BOUQUET_OPTION_COUNT 5
-const CMenuOptionChooser::keyval SCANTS_BOUQUET_OPTIONS[SCANTS_BOUQUET_OPTION_COUNT] =
-{
-	{ CZapitClient::BM_DELETEBOUQUETS        , LOCALE_SCANTS_BOUQUET_ERASE     },
-	{ CZapitClient::BM_CREATEBOUQUETS        , LOCALE_SCANTS_BOUQUET_CREATE    },
-	{ CZapitClient::BM_DONTTOUCHBOUQUETS     , LOCALE_SCANTS_BOUQUET_LEAVE     },
-	{ CZapitClient::BM_UPDATEBOUQUETS        , LOCALE_SCANTS_BOUQUET_UPDATE    },
-	{ CZapitClient::BM_CREATESATELLITEBOUQUET, LOCALE_SCANTS_BOUQUET_SATELLITE }
-};
-
-#define SCANTS_ZAPIT_SCANTYPE_COUNT 4
-const CMenuOptionChooser::keyval SCANTS_ZAPIT_SCANTYPE[SCANTS_ZAPIT_SCANTYPE_COUNT] =
-{
-	{  CZapitClient::ST_TVRADIO	, LOCALE_ZAPIT_SCANTYPE_TVRADIO     },
-	{  CZapitClient::ST_TV		, LOCALE_ZAPIT_SCANTYPE_TV    },
-	{  CZapitClient::ST_RADIO	, LOCALE_ZAPIT_SCANTYPE_RADIO     },
-	{  CZapitClient::ST_ALL		, LOCALE_ZAPIT_SCANTYPE_ALL }
-};
-
-#define SATSETUP_DISEQC_OPTION_COUNT 6
-const CMenuOptionChooser::keyval SATSETUP_DISEQC_OPTIONS[SATSETUP_DISEQC_OPTION_COUNT] =
-{
-	{ NO_DISEQC          , LOCALE_SATSETUP_NODISEQC    },
-	{ MINI_DISEQC        , LOCALE_SATSETUP_MINIDISEQC  },
-	{ DISEQC_1_0         , LOCALE_SATSETUP_DISEQC10    },
-	{ DISEQC_1_1         , LOCALE_SATSETUP_DISEQC11    },
-	{ DISEQC_1_2         , LOCALE_SATSETUP_DISEQC12    },
-	{ SMATV_REMOTE_TUNING, LOCALE_SATSETUP_SMATVREMOTE }
-
-};
-
-#define SATSETUP_SCANTP_FEC_COUNT 5
-#if HAVE_DVB_API_VERSION < 3
-const CMenuOptionChooser::keyval SATSETUP_SCANTP_FEC[SATSETUP_SCANTP_FEC_COUNT] =
-{
-	{ 1, LOCALE_SCANTP_FEC_1_2 },
-	{ 2, LOCALE_SCANTP_FEC_2_3 },
-	{ 3, LOCALE_SCANTP_FEC_3_4 },
-	{ 4, LOCALE_SCANTP_FEC_5_6 },
-	{ 5, LOCALE_SCANTP_FEC_7_8 }
-};
-#else
-const CMenuOptionChooser::keyval SATSETUP_SCANTP_FEC[SATSETUP_SCANTP_FEC_COUNT] =
-{
-        { 1, LOCALE_SCANTP_FEC_1_2 },
-        { 2, LOCALE_SCANTP_FEC_2_3 },
-        { 3, LOCALE_SCANTP_FEC_3_4 },
-        { 5, LOCALE_SCANTP_FEC_5_6 },
-        { 7, LOCALE_SCANTP_FEC_7_8 }
-};
-#endif
-
-#define SATSETUP_SCANTP_POL_COUNT 2
-const CMenuOptionChooser::keyval SATSETUP_SCANTP_POL[SATSETUP_SCANTP_POL_COUNT] =
-{
-	{ 0, LOCALE_SCANTP_POL_H },
-	{ 1, LOCALE_SCANTP_POL_V }
-};
-
-
-#define CABLESETUP_SCANTP_MOD_COUNT 7
-const CMenuOptionChooser::keyval CABLESETUP_SCANTP_MOD[CABLESETUP_SCANTP_MOD_COUNT] =
-{
-	{0, LOCALE_SCANTP_MOD_QPSK     } ,
-	{1, LOCALE_SCANTP_MOD_QAM_16   } ,
-	{2, LOCALE_SCANTP_MOD_QAM_32   } ,
-	{3, LOCALE_SCANTP_MOD_QAM_64   } ,
-	{4, LOCALE_SCANTP_MOD_QAM_128  } ,
-	{5, LOCALE_SCANTP_MOD_QAM_256  } ,
-	{6, LOCALE_SCANTP_MOD_QAM_AUTO }
-
-};
-
-#define SECTIONSD_SCAN_OPTIONS_COUNT 3
-const CMenuOptionChooser::keyval SECTIONSD_SCAN_OPTIONS[SECTIONSD_SCAN_OPTIONS_COUNT] =
-{
-	{ 0, LOCALE_OPTIONS_OFF },
-	{ 1, LOCALE_OPTIONS_ON  },
-	{ 2, LOCALE_OPTIONS_ON_WITHOUT_MESSAGES  }
-};
-
 const CMenuOptionChooser::keyval OPTIONS_OFF0_ON1_OPTIONS[OPTIONS_OFF0_ON1_OPTION_COUNT] =
 {
 	{ 0, LOCALE_OPTIONS_OFF },
 	{ 1, LOCALE_OPTIONS_ON  }
 };
 
-#define SCANTS_SCAN_OPTION_COUNT	3
-const CMenuOptionChooser::keyval SCANTS_SCAN_OPTIONS[SCANTS_SCAN_OPTION_COUNT] =
-{
-	{ CScanTs::SCAN_COMPLETE,	LOCALE_SCANTP_SCAN_ALL_SATS },
-	{ CScanTs::SCAN_ONE_TP,		LOCALE_SCANTP_SCAN_ONE_TP },
-	{ CScanTs::SCAN_ONE_SAT,	LOCALE_SCANTP_SCAN_ONE_SAT }
-};
-
-#define SCANTS_CABLESCAN_OPTION_COUNT	2
-const CMenuOptionChooser::keyval SCANTS_CABLESCAN_OPTIONS[SCANTS_CABLESCAN_OPTION_COUNT] =
-{
-	{ CScanTs::SCAN_COMPLETE,	LOCALE_SCANTP_SCAN_COMPLETE },
-	{ CScanTs::SCAN_ONE_TP,		LOCALE_SCANTP_SCAN_ONE_TP }
-};
-
-/* scan settings menu*/
-void CNeutrinoApp::InitScanSettings(CMenuWidget &menuScanSettings)
-{
-	dprintf(DEBUG_DEBUG, "init scansettings\n");
-
-	CMenuOptionChooser* ojScantype = new CMenuOptionChooser(LOCALE_ZAPIT_SCANTYPE, (int *)&scanSettings.scanType, SCANTS_ZAPIT_SCANTYPE, SCANTS_ZAPIT_SCANTYPE_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN);
-	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, SCANTS_BOUQUET_OPTIONS, SCANTS_BOUQUET_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
-
-	menuScanSettings.addItem(GenericMenuSeparator);
-	menuScanSettings.addItem(GenericMenuBack);
-	menuScanSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_SAVESETTINGSNOW, true, NULL, this, "savesettings", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
-	menuScanSettings.addItem(GenericMenuSeparatorLine);
-
-	//sat-lnb-settings
-	if(g_info.delivery_system == DVB_S)
-	{
-
-		satList.clear();
-		g_Zapit->getScanSatelliteList(satList);
-
-		printf("[neutrino] received %d sats\n", satList.size());
-		t_satellite_position currentSatellitePosition = g_Zapit->getCurrentSatellitePosition();
-
-		if (1/*scanSettings.diseqcMode == DISEQC_1_2*/)
-		{
-			for (uint i = 0; i < satList.size(); i++)
-			{
-				//printf("[neutrino] received %d: %s, %d\n", i, satList[i].satName, satList[i].satPosition);
-				scanSettings.satPosition[i] = satList[i].satPosition;
-				scanSettings.satMotorPos[i] = satList[i].motorPosition;
-				strcpy(scanSettings.satName[i], satList[i].satName);
-				//scanSettings.satDiseqc[i] = satList[i].satDiseqc;
-				if (satList[i].satPosition == currentSatellitePosition)
-					strcpy(scanSettings.satNameNoDiseqc, satList[i].satName);
-			}
-			for (uint i = satList.size(); i < MAX_SATELLITES; i++)
-			{
-				scanSettings.satName[i][0] = 0;
-				scanSettings.satPosition[i] = 0;
-				scanSettings.satDiseqc[i] = -1;
-			}
-		}
-
-		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.satNameNoDiseqc, ((scanSettings.diseqcMode == DISEQC_1_2) || (scanSettings.diseqcMode == NO_DISEQC)));
-		for (uint i=0; i < satList.size(); i++)
-		{
-			ojSat->addOption(satList[i].satName);
-			dprintf(DEBUG_DEBUG, "got scanprovider (sat): %s\n", satList[i].satName );
-		}
-
-		CMenuOptionNumberChooser * ojDiseqcRepeats = new CMenuOptionNumberChooser(LOCALE_SATSETUP_DISEQCREPEAT, (int *)&scanSettings.diseqcRepeat, (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0), 0, 2);
-
-		CMenuWidget* extSatSettings = new CMenuWidget(LOCALE_SATSETUP_EXTENDED, NEUTRINO_ICON_SETTINGS);
-
-		extSatSettings->addItem(GenericMenuSeparator);
-		extSatSettings->addItem(GenericMenuBack);
-		extSatSettings->addItem(GenericMenuSeparatorLine);
-
-		CMenuForwarder* ojExtSatSettings = new CMenuForwarder(LOCALE_SATSETUP_EXTENDED, (scanSettings.diseqcMode != NO_DISEQC), NULL, extSatSettings);
-		for( uint i=0; i < satList.size(); i++)
-		{
-			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.diseqscOfSat(satList[i].satName), true, -1, satList.size() - 1, 1, -1, LOCALE_OPTIONS_OFF, satList[i].satName);
-
-			extSatSettings->addItem(oj);
-		}
-
-		CMenuWidget* extMotorSettings = new CMenuWidget(LOCALE_SATSETUP_EXTENDED_MOTOR, NEUTRINO_ICON_SETTINGS);
-		extMotorSettings->addItem(GenericMenuSeparator);
-		extMotorSettings->addItem(GenericMenuBack);
-		extMotorSettings->addItem(new CMenuForwarder(LOCALE_SATSETUP_SAVESETTINGSNOW, true, NULL, this, "savesettings"));
-		extMotorSettings->addItem(new CMenuForwarder(LOCALE_SATSETUP_MOTORCONTROL   , true, NULL, new CMotorControl()));
-		extMotorSettings->addItem(GenericMenuSeparatorLine);
-
-		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder(LOCALE_SATSETUP_EXTENDED_MOTOR, (scanSettings.diseqcMode == DISEQC_1_2), NULL, extMotorSettings);
-
-		for( uint i=0; i < satList.size(); i++)
-		{
-			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.motorPosOfSat(satList[i].satName), true, 0, 64/*satList.size()*/, 0, 0, LOCALE_OPTIONS_OFF, satList[i].satName);
-
-			extMotorSettings->addItem(oj);
-		}
-
-		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQC, (int *)&scanSettings.diseqcMode, SATSETUP_DISEQC_OPTIONS, SATSETUP_DISEQC_OPTION_COUNT, true, new CSatDiseqcNotifier(ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
-
-		menuScanSettings.addItem( ojScantype );
-		menuScanSettings.addItem( ojBouquets );
-		menuScanSettings.addItem( ojDiseqc );
-		menuScanSettings.addItem( ojSat );
-		menuScanSettings.addItem( ojDiseqcRepeats );
-
-		menuScanSettings.addItem( ojExtSatSettings );
-		menuScanSettings.addItem( ojExtMotorSettings );
-	}
-	else
-	{//kabel
-
-		CZapitClient::SatelliteList providerList;
-		g_Zapit->getScanSatelliteList(providerList);
-
-		CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_CABLESETUP_PROVIDER, (char*)&scanSettings.satNameNoDiseqc, true);
-
-		for( uint i=0; i< providerList.size(); i++)
-		{
-			oj->addOption(providerList[i].satName);
-			dprintf(DEBUG_DEBUG, "got scanprovider (cable): %s\n", providerList[i].satName );
-		}
-		menuScanSettings.addItem( ojScantype );
-		menuScanSettings.addItem( ojBouquets );
-		menuScanSettings.addItem( oj);
-	}
-	CMenuOptionChooser* onoff_mode = ( new CMenuOptionChooser(LOCALE_SCANTP_SCANMODE, (int *)&scanSettings.scan_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
-	menuScanSettings.addItem(onoff_mode);
-	if(scanSettings.TP_fec == 0) {
-		scanSettings.TP_fec = 1;
-	}
-	menuScanSettings.addItem(GenericMenuSeparatorLine);
-
-	CStringInput* freq;
-	CMenuOptionChooser* pol_mod;
-	if(g_info.delivery_system == DVB_S)
-	{
-		freq = new CStringInput(LOCALE_SCANTP_FREQ, (char *) scanSettings.TP_freq, 8, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-		pol_mod = new CMenuOptionChooser(LOCALE_SCANTP_POL, (int *)&scanSettings.TP_pol, SATSETUP_SCANTP_POL, SATSETUP_SCANTP_POL_COUNT, scanSettings.TP_scan == 1);
-	} else {
-		freq = new CStringInput(LOCALE_SCANTP_FREQ, (char *) scanSettings.TP_freq, 9, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-		pol_mod = new CMenuOptionChooser(LOCALE_SCANTP_MOD, (int *)&scanSettings.TP_mod, CABLESETUP_SCANTP_MOD, CABLESETUP_SCANTP_MOD_COUNT, scanSettings.TP_scan == 1);
-	}
-	CStringInput* rate = new CStringInput(LOCALE_SCANTP_RATE, (char *) scanSettings.TP_rate, 8, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-
-	CMenuOptionChooser* fec = new CMenuOptionChooser(LOCALE_SCANTP_FEC, (int *)&scanSettings.TP_fec, SATSETUP_SCANTP_FEC, SATSETUP_SCANTP_FEC_COUNT, scanSettings.TP_scan == 1);
-	CMenuOptionChooser* onoffscanSectionsd = ( new CMenuOptionChooser(LOCALE_SECTIONSD_SCANMODE, (int *)&scanSettings.scanSectionsd, SECTIONSD_SCAN_OPTIONS, SECTIONSD_SCAN_OPTIONS_COUNT, true, new CSectionsdConfigNotifier));
-	CMenuForwarder *Rate = new CMenuForwarder(LOCALE_SCANTP_RATE, scanSettings.TP_scan == 1, scanSettings.TP_rate, rate);
-	CMenuForwarder *Freq = new CMenuForwarder(LOCALE_SCANTP_FREQ, scanSettings.TP_scan == 1, scanSettings.TP_freq, freq);
-
-	//sat-lnb-settings
-	if(g_info.delivery_system == DVB_S)
-	{
-		uint i;
-		int satfound = -1;
-		int firstentry = -1;
-
-		scanSettings.TP_SatSelectMenu = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.TP_satname, ((scanSettings.diseqcMode != NO_DISEQC) && scanSettings.TP_scan), new CScanSettingsSatManNotifier);
-
-		// add the sats which are configured (diseqc or motorpos) to the list of available sats */
-		for (i = 0; i < satList.size(); i++)
-		{
-			if ((((scanSettings.diseqcMode != DISEQC_1_2)) && (0 <= (*scanSettings.diseqscOfSat(satList[i].satName) ))) ||
-			    (((scanSettings.diseqcMode == DISEQC_1_2)) && (0 <= (*scanSettings.motorPosOfSat(satList[i].satName)))))
-			{
-				if (firstentry == -1) firstentry = i;
-				if (strcmp(scanSettings.TP_satname, satList[i].satName) == 0)
-					satfound = i;
-				scanSettings.TP_SatSelectMenu->addOption(satList[i].satName);
-				dprintf(DEBUG_DEBUG, "satName = %s, diseqscOfSat(%d) = %d, motorPosOfSat(%d) = %d\n", satList[i].satName, i, *scanSettings.diseqscOfSat(satList[i].satName), i, *scanSettings.motorPosOfSat(satList[i].satName));
-			}
-		}
-		// if scanSettings.TP_satname cannot be found in the list of available sats use 1st in list
-		if ((satfound == -1) && (satList.size())) {
-//			strcpy(scanSettings.TP_satname, satList[firstentry].satName);
-			strcpy(scanSettings.TP_satname, scanSettings.satNameNoDiseqc);
-		}
-	} else {
-		scanSettings.TP_SatSelectMenu = NULL;
-	}
-	CTP_scanNotifier *TP_scanNotifier;
-	CMenuOptionChooser* scan;
-	if(g_info.delivery_system == DVB_S) {
-		TP_scanNotifier= new CTP_scanNotifier(fec, pol_mod, Freq, Rate, scanSettings.TP_SatSelectMenu);
-		scan = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, SCANTS_SCAN_OPTIONS, SCANTS_SCAN_OPTION_COUNT, true/*(g_info.delivery_system == DVB_S)*/, TP_scanNotifier));
-	} else {
-		TP_scanNotifier= new CTP_scanNotifier(fec, pol_mod, Freq, Rate, 0);
-		scan = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, SCANTS_CABLESCAN_OPTIONS, SCANTS_CABLESCAN_OPTION_COUNT, true/*(g_info.delivery_system == DVB_S)*/, TP_scanNotifier));
-	}
-	menuScanSettings.addItem(scan);
-	if(g_info.delivery_system == DVB_S) {
-		menuScanSettings.addItem(scanSettings.TP_SatSelectMenu);
-	}
-	menuScanSettings.addItem(Freq);
-	menuScanSettings.addItem(pol_mod);
-	menuScanSettings.addItem(Rate);
-	menuScanSettings.addItem(fec);
-	menuScanSettings.addItem(GenericMenuSeparatorLine);
-	menuScanSettings.addItem(onoffscanSectionsd);
-	menuScanSettings.addItem(GenericMenuSeparatorLine);
-
-	menuScanSettings.addItem(new CMenuForwarder(LOCALE_SCANTS_STARTNOW, true, NULL, new CScanTs(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-}
-
-/* for service menu*/
-#define FLASHUPDATE_UPDATEMODE_OPTION_COUNT 2
-const CMenuOptionChooser::keyval FLASHUPDATE_UPDATEMODE_OPTIONS[FLASHUPDATE_UPDATEMODE_OPTION_COUNT] =
-{
-	{ 0, LOCALE_FLASHUPDATE_UPDATEMODE_MANUAL   },
-	{ 1, LOCALE_FLASHUPDATE_UPDATEMODE_INTERNET }
-};
-
 /* service menu*/
-void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &menuScanSettings)
+void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 {
 	dprintf(DEBUG_DEBUG, "init serviceSettings\n");
 
@@ -633,7 +340,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &menuSc
 	personalize->addItem(service, LOCALE_BOUQUETEDITOR_NAME, true, NULL, new CBEBouquetWidget(), NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED, false, g_settings.personalize_bouqueteditor);
 
 	// channel scan
-	personalize->addItem(service, LOCALE_SERVICEMENU_SCANTS, true, NULL, &menuScanSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN, false, g_settings.personalize_scants);
+	personalize->addItem(service, LOCALE_SERVICEMENU_SCANTS, true, NULL, new CScanSetup, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN, false, g_settings.personalize_scants);
 
 	// separator
 	if (	g_settings.personalize_bouqueteditor	== CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE && 
@@ -1101,81 +808,6 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	}
 }
 
-/* for audio settings menu */
-#define AUDIOMENU_ANALOGOUT_OPTION_COUNT 3
-const CMenuOptionChooser::keyval AUDIOMENU_ANALOGOUT_OPTIONS[AUDIOMENU_ANALOGOUT_OPTION_COUNT] =
-{
-	{ 0, LOCALE_AUDIOMENU_STEREO    },
-	{ 1, LOCALE_AUDIOMENU_MONOLEFT  },
-	{ 2, LOCALE_AUDIOMENU_MONORIGHT }
-};
-
-#ifdef HAVE_DBOX_HARDWARE
-#ifdef ENABLE_LIRC
-#define AUDIOMENU_AVS_CONTROL_OPTION_COUNT 3
-#else
-#define AUDIOMENU_AVS_CONTROL_OPTION_COUNT 2
-#endif
-const CMenuOptionChooser::keyval AUDIOMENU_AVS_CONTROL_OPTIONS[AUDIOMENU_AVS_CONTROL_OPTION_COUNT] =
-{
-	{ CControld::TYPE_OST , LOCALE_AUDIOMENU_OST  },
-	{ CControld::TYPE_AVS , LOCALE_AUDIOMENU_AVS  },
-#ifdef ENABLE_LIRC
-	{ CControld::TYPE_LIRC, LOCALE_AUDIOMENU_LIRC }
-#endif
-};
-#endif
-
-#define AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT 2
-const CMenuOptionChooser::keyval AUDIOMENU_LEFT_RIGHT_SELECTABEL_OPTIONS[AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT] =
-{
-      { true, LOCALE_OPTIONS_ON },
-      { false, LOCALE_OPTIONS_OFF }
-};
-
-#define AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_COUNT 2
-const CMenuOptionChooser::keyval AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_OPTIONS[AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_COUNT] =
-{
-        { true, LOCALE_OPTIONS_ON },
-        { false, LOCALE_OPTIONS_OFF }
-};
-
-/* audio settings menu */
-void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier)
-{
-	addMenueIntroItems(audioSettings);
-
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_ANALOGOUT, &g_settings.audio_AnalogMode, AUDIOMENU_ANALOGOUT_OPTIONS, AUDIOMENU_ANALOGOUT_OPTION_COUNT, true, audioSetupNotifier);
-
-	audioSettings.addItem( oj );
-	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AUDIO_LEFT_RIGHT_SELECTABLE, &g_settings.audio_left_right_selectable, AUDIOMENU_LEFT_RIGHT_SELECTABEL_OPTIONS, AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT, true, audioSetupNotifier);
-	audioSettings.addItem( oj );
-
-	audioSettings.addItem(GenericMenuSeparatorLine);
-
-	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE, &g_settings.audiochannel_up_down_enable, AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_OPTIONS, AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_COUNT, true, audioSetupNotifier);
-	audioSettings.addItem( oj );
-
-	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_DOLBYDIGITAL, &g_settings.audio_DolbyDigital, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, audioSetupNotifier);
-	audioSettings.addItem(oj);
-	
-#ifdef HAVE_DBOX_HARDWARE
-	audioSettings.addItem(GenericMenuSeparatorLine);
-
-	CStringInput * audio_PCMOffset = new CStringInput(LOCALE_AUDIOMENU_PCMOFFSET, g_settings.audio_PCMOffset, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ", audioSetupNotifier);
-	CMenuForwarder *mf = new CMenuForwarder(LOCALE_AUDIOMENU_PCMOFFSET, (g_settings.audio_avs_Control == CControld::TYPE_LIRC), g_settings.audio_PCMOffset, audio_PCMOffset );
-	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(mf);
-
-	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AVS_CONTROL, &g_settings.audio_avs_Control, AUDIOMENU_AVS_CONTROL_OPTIONS, AUDIOMENU_AVS_CONTROL_OPTION_COUNT, true, audioSetupNotifier2);
-	audioSettings.addItem(oj);
-	audioSettings.addItem(mf);
-#endif
-	
-	// volume bar steps
-	CStringInput * audio_step = new CStringInput(LOCALE_AUDIOMENU_VOLUMEBAR_AUDIOSTEPS,g_settings.audio_step, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ", audioSetupNotifier);
-	CMenuForwarder *as = new CMenuForwarder(LOCALE_AUDIOMENU_VOLUMEBAR_AUDIOSTEPS, true, g_settings.audio_step, audio_step );
-	audioSettings.addItem(as);
-}
 
 /* for parental lock settings menu */
 #if 1

@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.994 2009/10/14 22:13:12 seife Exp $
+	$Id: neutrino.cpp,v 1.995 2009/10/17 11:29:31 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1257,6 +1257,7 @@ void CNeutrinoApp::saveSetup()
 		dprintf(DEBUG_INFO, "saving neutrino txt-config\n");
 		configfile.saveConfig(NEUTRINO_SETTINGS_FILE);
 	}
+
 }
 
 /**************************************************************************************
@@ -2184,7 +2185,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    mainSettings        (LOCALE_MAINSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    languageSettings    (LOCALE_LANGUAGESETUP_HEAD            , "language.raw"        );
 	CVideoSettings videoSettings                                                                      ;
-	CMenuWidget    audioSettings       (LOCALE_AUDIOMENU_HEAD                , "audio.raw"           ,420);
 	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK     , "lock.raw"            , 500);
 	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD              , "network.raw"         , 430);
 	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD            , "recording.raw"       );
@@ -2204,7 +2204,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	InitMainMenu(	mainMenu,
 					mainSettings,
-					audioSettings,
 					parentallockSettings,
 					networkSettings,
 					recordingSettings,
@@ -2221,7 +2220,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 					service);
 
 	//service
-	InitServiceSettings(service, scanSettingsMenu);
+	InitServiceSettings(service);
 
 	//language Setup
 	InitLanguageSettings(languageSettings);
@@ -2249,14 +2248,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 							miscSettingsRemoteControl,
 							miscSettingsFilebrowser);	
 
-	//audio Setup
-	InitAudioSettings(audioSettings, audioSetupNotifier);
-
 	// Parentallock settings
 	InitParentalLockSettings(parentallockSettings);
-
-	// ScanSettings
-	InitScanSettings(scanSettingsMenu);
 
 	// zapit settings
 	InitZapitSettings(miscSettingsZapitSettings);
