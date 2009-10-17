@@ -1,7 +1,7 @@
 #ifndef __fb_window_h__
 #define __fb_window_h__
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.h,v 1.6 2009/10/03 10:09:29 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.h,v 1.7 2009/10/17 07:38:04 seife Exp $
  *
  * abstract fb_window class - d-box2 linux project
  *
@@ -33,10 +33,10 @@ class CFBWindow
 
  private:
 	private_data_t private_data;
-
- public:
 	int x, y;   /* upper left corner */
 	int dx, dy; /* dimension         */
+
+ public:
 
 	CFBWindow(const int _x, const int _y, const int _dx, const int _dy);
 	virtual~CFBWindow();

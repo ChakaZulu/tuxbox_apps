@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.54 2009/10/03 22:19:37 seife Exp $
+	$Id: framebuffer.h,v 1.55 2009/10/17 07:38:04 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -183,8 +183,10 @@ class CFrameBuffer
 
 		void setIconBasePath(const std::string & iconPath);
 
-		bool paintIcon (const char * const filename, const int x, const int y, const unsigned char offset = 1);
-		bool paintIcon (const std::string & filename, const int x, const int y, const unsigned char offset = 1);
+		bool paintIcon (const char * const filename, const int x, const int y,
+				const unsigned char offset = 1, const int max_w = -1, const int max_h = -1);
+		bool paintIcon (const std::string & filename, const int x, const int y,
+				const unsigned char offset = 1, const int max_w = -1, const int max_h = -1);
 		bool paintIcon8(const std::string & filename, const int x, const int y, const unsigned char offset = 0);
 		void loadPal   (const std::string & filename, const unsigned char offset = 0, const unsigned char endidx = 255);
 

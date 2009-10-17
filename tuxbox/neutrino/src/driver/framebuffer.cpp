@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.79 2009/10/03 22:19:36 seife Exp $
+	$Id: framebuffer.cpp,v 1.80 2009/10/17 07:38:04 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -629,7 +629,8 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 	return true;
 }	
 
-bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const int y, const unsigned char offset)
+bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const int y,
+			     const unsigned char offset, const int max_w, const int max_h)
 {
 	if (!getActive())
 		return false;
@@ -651,6 +652,13 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 
 	width  = (header.width_hi  << 8) | header.width_lo;
 	height = (header.height_hi << 8) | header.height_lo;
+
+	/* if used from CFBWindow, respect the given maximal size,
+	   to avoid painting outside the window */
+	if (max_w != -1 && width > max_w)
+		width = max_w;
+	if (max_h != -1 && height > max_h)
+		height = max_h;
 
 	bool muted = checkMute(x, width, y, height);
 	if (muted)
@@ -692,9 +700,10 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 	return true;
 }
 
-bool CFrameBuffer::paintIcon(const char * const filename, const int x, const int y, const unsigned char offset)
+bool CFrameBuffer::paintIcon(const char * const filename, const int x, const int y,
+			     const unsigned char offset, const int max_w, const int max_h)
 {
-	return paintIcon(std::string(filename), x, y, offset);
+	return paintIcon(std::string(filename), x, y, offset, max_w, max_h);
 }
 
 void CFrameBuffer::loadPal(const std::string & filename, const unsigned char offset, const unsigned char endidx)
