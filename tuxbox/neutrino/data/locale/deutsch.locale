@@ -1134,6 +1134,7 @@ servicemenu.restart Neutrino neu starten
 servicemenu.restart_failed Neustart von Neutrino schlug fehl.
 servicemenu.restart_hint Neutrino wird neu gestartet...
 servicemenu.restart_refused_recording Aufnahme läuft. Restart nicht möglich.
+servicemenu.scanmodes Scan Modi
 servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
 servicemenu.update Software-Aktualisierung
