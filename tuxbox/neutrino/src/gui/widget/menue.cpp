@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.155 2009/10/03 10:09:30 seife Exp $
+	$Id: menue.cpp,v 1.156 2009/10/18 10:44:11 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -700,7 +700,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
 	}
 
-	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor);
+	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor, RADIUS_SMALL);
 
 	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(optionValue);
 	int stringstartposName = x + offx + 10;
