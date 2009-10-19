@@ -65,8 +65,6 @@ AC_ARG_WITH(enigma-debug,
 	[ENIGMA_DEBUG="$withval"],[ENIGMA_DEBUG="no"])
 
 AC_SUBST(ENIGMA_DEBUG)
-AM_CONDITIONAL(ENIGMA_DEBUG_NO,test "$ENIGMA_DEBUG" != "yes")
-AM_CONDITIONAL(ENIGMA_DEBUG_YES,test "$ENIGMA_DEBUG" = "yes")
 
 AC_ARG_ENABLE(freesatepg,
 	AS_HELP_STRING(--enable-freesatepg,enable UK FreeSat EPG),
