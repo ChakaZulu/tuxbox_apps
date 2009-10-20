@@ -304,6 +304,7 @@ and combinations of this -->
 		<transponder frequency="11526000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="11727000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 		<transponder frequency="12168500" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12226160" symbol_rate="16300000" polarization="1" fec_inner="3"/>
 		<transponder frequency="12692000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12731000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 	</sat>
