@@ -4,6 +4,8 @@
  *	simulates the remote control, sends the requested key
  *                                                                            
  *	(c) 2003 Carsten Juttner (carjay@gmx.net)
+ *	(c) 2009 Stefan Seyfried, add code to use the neutrino socket instead
+ *			of the input subsystem for dreambox / tripledragon
  *  									      
  * 	This program is free software; you can redistribute it and/or modify
  * 	it under the terms of the GNU General Public License as published by
@@ -17,10 +19,10 @@
  *
  * 	You should have received a copy of the GNU General Public License
  * 	along with this program; if not, write to the Free Software
- * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * 	Foundation, 51 Franklin Street, Fifth Floor Boston, MA 02110-1301, USA.
  *
  ******************************************************************************
- * $Id: rcsim.c,v 1.5 2005/01/19 02:18:09 carjay Exp $
+ * $Id: rcsim.c,v 1.6 2009/10/21 18:59:24 seife Exp $
  ******************************************************************************/
 
 #include <stdio.h>
@@ -34,7 +36,34 @@
 #include <linux/input.h>
 #include <error.h>
 
+#ifdef HAVE_DBOX_HARDWARE
 #define EVENTDEV "/dev/input/event0"
+#else
+/* dreambox and tripledragon do not use a "normal" input device, so we cannot
+   (ab-)use the event repeating function of it. use the neutrino socket instead. */
+#include <sys/socket.h>
+#include <sys/un.h>
+#define NEUTRINO_SOCKET "/tmp/neutrino.sock"
+
+/* those structs / values are stolen from libeventserver */
+struct eventHead
+{
+	unsigned int eventID;
+	unsigned int initiatorID;
+	unsigned int dataSize;
+};
+
+enum initiators
+{
+	INITID_CONTROLD,
+	INITID_SECTIONSD,
+	INITID_ZAPIT,
+	INITID_TIMERD,
+	INITID_HTTPD,
+	INITID_NEUTRINO,
+	INITID_GENERIC_INPUT_EVENT_PROVIDER
+};
+#endif
 
 /* compatibility stuff */
 
@@ -126,13 +155,73 @@ void usage(char *n){
 	}
 }
 
-int send (int ev, unsigned int code, unsigned int value){
+/* we could also use the neutrino socket on the dbox, but this needs more testing.
+   so leave it as is for now */
+#ifdef HAVE_DBOX_HARDWARE
+int push(int ev, unsigned int code, unsigned int value)
+{
 	struct input_event iev;
 	iev.type=EV_KEY;
 	iev.code=code;
 	iev.value=value;
 	return write (ev,&iev,sizeof(iev));
 }
+#else
+int push(int ev, unsigned int code, unsigned int value)
+{
+	struct eventHead eh;
+	struct sockaddr_un servaddr;
+	int clilen, fd;
+	const char *errmsg;
+
+	/* ev is unused - stupid compiler... */
+	fd = ev;
+
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, NEUTRINO_SOCKET);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+
+	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+	{
+		perror("cannot open socket " NEUTRINO_SOCKET);
+		return fd;
+	}
+
+	if (connect(fd, (struct sockaddr*) &servaddr, clilen) < 0)
+	{
+		errmsg = "connect " NEUTRINO_SOCKET;
+		goto error;
+	}
+
+	eh.initiatorID = INITID_GENERIC_INPUT_EVENT_PROVIDER;
+	eh.eventID = 0; // data field
+	eh.dataSize = sizeof(int);
+	if (value == KEY_AUTOREPEAT)
+		code |= 0x0400; // neutrino:CRCInput::RC_repeat
+	if (value == KEY_RELEASED)
+		code |= 0x0800; // neutrino:CRCInput::RC_release
+
+	if (write(fd, &eh, sizeof(eh)) < 0)
+	{
+		errmsg = "write() eventHead";
+		goto error;
+	}
+
+	if (write(fd, &code, sizeof(code)) < 0)
+	{
+		errmsg = "write() event";
+		goto error;
+	}
+	close(fd);
+	return 0;
+
+ error:
+	perror(errmsg);
+	close(fd);
+	return -1;
+}
+#endif
 
 int main (int argc, char **argv){
 	int evd;
@@ -140,7 +229,7 @@ int main (int argc, char **argv){
 	unsigned int keys = sizeof(keyname)/sizeof(struct key);
 	unsigned long time=0;
 	unsigned long reptime=500;
-	int offset;
+	unsigned int offset;
 
 	if (argc<2||argc>4){
 		usage(argv[0]);
@@ -173,26 +262,30 @@ int main (int argc, char **argv){
 		time=(atol (argv[2])*1000)/reptime;
 	}
 
+#ifdef HAVE_DBOX_HARDWARE
 	evd=open (EVENTDEV,O_RDWR);
 	if (evd<0){
 		perror ("opening event0 failed");
 		return 1;
 	}
+#else
+	evd = -1; // close(-1) does not harm... ;)
+#endif
 	printf ("sending key %s for %ld seconds\n",keyname[offset].name,(reptime*time)/1000);
-	if (send (evd,sendcode,KEY_PRESSED)<0){
+	if (push (evd,sendcode,KEY_PRESSED)<0){
 		perror ("writing 'key_pressed' event failed");
 		close (evd);
 		return 1;
 	}
 	while (time--){
 		usleep(reptime*1000);
-		if (send (evd,sendcode,KEY_AUTOREPEAT)<0){
+		if (push (evd,sendcode,KEY_AUTOREPEAT)<0){
 			perror ("writing 'key_autorepeat' event failed");
 			close (evd);
 			return 1;
 		}
 	}
-	if (send (evd,sendcode,KEY_RELEASED)<0){
+	if (push (evd,sendcode,KEY_RELEASED)<0){
 		perror ("writing 'key_released' event failed");
 		close (evd);
 		return 1;
