@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.17 2009/10/13 21:55:38 dbt Exp $
+        $Id: personalize.cpp,v 1.18 2009/10/21 08:34:16 dbt Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -102,6 +102,11 @@ int CPersonalizeGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 
+	if (parent)
+	{
+		parent->hide();
+	}
+
 	if(actionKey=="mainmenu_options") {                                     // Personalize the Main Menu
 		ShowMainMenuOptions();
 		return res;
@@ -120,11 +125,6 @@ int CPersonalizeGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	if (actionKey=="personalize_help") {                                     // Personalize help
 		ShowHelpPersonalize();
 		return res;
-	}
-
-	if (parent)
-	{
-		parent->hide();
 	}
 
 	ShowPersonalizationMenu();                                              // Show main Personalization Menu
@@ -177,11 +177,21 @@ void CPersonalizeGui::ShowMainMenuOptions()
 	int old_radiomode	= g_settings.personalize_radiomode;
 	int old_scartmode	= g_settings.personalize_scartmode;
 	int old_games		= g_settings.personalize_games;
+#ifdef ENABLE_AUDIOPLAYER
 	int old_audioplayer	= g_settings.personalize_audioplayer;
+#ifdef ENABLE_INTERNETRADIO
 	int old_inetradio	= g_settings.personalize_inetradio;
+#endif
+#endif
+#ifdef ENABLE_ESD
 	int old_esound		= g_settings.personalize_esound;
+#endif
+#ifdef ENABLE_MOVIEPLAYER
 	int old_movieplayer	= g_settings.personalize_movieplayer;
+#endif
+#ifdef ENABLE_PICTUREVIEWER
 	int old_pictureviewer	= g_settings.personalize_pictureviewer;
+#endif
 #ifdef ENABLE_UPNP
 	int old_upnpbrowser	= g_settings.personalize_upnpbrowser;
 #endif
@@ -244,11 +254,21 @@ void CPersonalizeGui::ShowMainMenuOptions()
 		|| old_radiomode != g_settings.personalize_radiomode
 		|| old_scartmode != g_settings.personalize_scartmode
 		|| old_games != g_settings.personalize_games
+#ifdef ENABLE_AUDIOPLAYER
 		|| old_audioplayer != g_settings.personalize_audioplayer
+#ifdef ENABLE_INTERNETRADIO
 		|| old_inetradio != g_settings.personalize_inetradio
+#endif
+#endif
+#ifdef ENABLE_ESD
 		|| old_esound != g_settings.personalize_esound
+#endif
+#ifdef ENABLE_MOVIEPLAYER
 		|| old_movieplayer != g_settings.personalize_movieplayer
+#endif
+#ifdef ENABLE_PICTUREVIEWER
 		|| old_pictureviewer != g_settings.personalize_pictureviewer
+#endif
 #ifdef ENABLE_UPNP
 		|| old_upnpbrowser != g_settings.personalize_upnpbrowser
 #endif
@@ -280,7 +300,9 @@ void CPersonalizeGui::ShowSettingsOptions()
 	int old_colors		= g_settings.personalize_colors;
 	int old_lcd		= g_settings.personalize_lcd;
 	int old_keybinding	= g_settings.personalize_keybinding;
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD) || defined(ENABLE_MOVIEPLAYER)
 	int old_mediaplayer	= g_settings.personalize_mediaplayer;
+#endif
 	int old_driver		= g_settings.personalize_driver;
 	int old_misc		= g_settings.personalize_misc;
 	
@@ -323,7 +345,9 @@ void CPersonalizeGui::ShowSettingsOptions()
 		|| old_colors != g_settings.personalize_colors
 		|| old_lcd != g_settings.personalize_lcd
 		|| old_keybinding != g_settings.personalize_keybinding
+#if defined(ENABLE_AUDIOPLAYER) || defined(ENABLE_PICTUREVIEWER) || defined(ENABLE_ESD) || defined(ENABLE_MOVIEPLAYER)
 		|| old_mediaplayer != g_settings.personalize_mediaplayer
+#endif
 		|| old_driver != g_settings.personalize_driver
 		|| old_misc != g_settings.personalize_misc) {
 
