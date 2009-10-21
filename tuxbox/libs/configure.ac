@@ -18,11 +18,8 @@ fi
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
 TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 
-AC_SUBST(LIBTUXBOX_LIBS)
-if test "$BOXTYPE" = "dbox2" ; then
-	LIBTUXBOX_LIBS=-ltuxbox
-else
-	LIBTUXBOX_LIBS=
+if test "$BOXTYPE" = "dbox2"; then
+	TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 fi
 
 AC_OUTPUT([

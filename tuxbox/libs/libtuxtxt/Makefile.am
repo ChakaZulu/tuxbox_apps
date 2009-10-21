@@ -11,6 +11,14 @@ AM_CPPFLAGS = \
 libtuxtxt_la_LIBADD = \
 	@FREETYPE_LIBS@
 
+if BOXTYPE_DBOX2
+AM_CPPFLAGS += \
+	@TUXBOX_CFLAGS@
+
+libtuxtxt_la_LIBADD += \
+	@TUXBOX_LIBS@
+endif
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = tuxbox-tuxtxt.pc
 
