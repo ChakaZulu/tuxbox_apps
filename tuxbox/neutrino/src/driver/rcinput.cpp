@@ -37,6 +37,11 @@
 #include <driver/rcinput.h>
 #include <driver/stream2file.h>
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <tdpanel/ir_ruwido.h>
+#include <hardware/avs/avs_inf.h>
+#include <hardware/avs/bios_system_config.h>
+#endif
 #include <stdio.h>
 #include <asm/types.h>
 #include <sys/ioctl.h>
@@ -67,7 +72,10 @@
 const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/rawir2"};
 #define RC_standby_release (KEY_MAX + 1)
 typedef struct { __u16 code; } t_input_event;
-#else
+#elif defined(HAVE_TRIPLEDRAGON)
+const char *const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/stb/tdremote"};
+typedef struct { __u16 code; } t_input_event;
+#else /* DBOX */
 #ifdef OLD_RC_API
 const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/dbox/rc0"};
 #define RC_standby_release (KEY_MAX + 1)
@@ -122,6 +130,29 @@ const CRCInput::key CRCInput::keyname[] = {
 	{"rc_top_right",	RC_top_right},
 	{"rc_bottom_left",	RC_bottom_left},
 	{"rc_bottom_right",	RC_bottom_right},
+	{"rc_tv",		RC_tv},
+	{"rc_radio",		RC_radio},
+	{"rc_text",		RC_text},
+	{"rc_audio",		RC_audio},
+	{"rc_video",		RC_video},
+	{"rc_next",		RC_next},
+	{"rc_prev",		RC_prev},
+	{"rc_aux",		RC_aux},
+	{"rc_timer",		RC_timer},
+	{"rc_epg",		RC_epg},
+	{"rc_fav",		RC_fav},
+	{"rc_tttv",		RC_tttv},
+	{"rc_ttzoom",		RC_ttzoom},
+	{"rc_ttreveal",		RC_ttreveal},
+	{"rc_playpause",	RC_playpause},
+	{"rc_stop",		RC_stop},
+	{"rc_eject",		RC_eject},
+	{"rc_forward",		RC_forward},
+	{"rc_back",		RC_back},
+	{"rc_record",		RC_record},
+	{"rc_zoomin",		RC_zoomin},
+	{"rc_zoomout",		RC_zoomout},
+	{"rc_zoomoff",		RC_zoomoff},
 	{"rc_home",		RC_home},
 	{"rc_page_down",	RC_page_down},
 	{"rc_page_up",		RC_page_up},
@@ -922,7 +953,7 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 	static unsigned long long last_keypress = 0ULL;
 	unsigned long long getKeyBegin;
 
-#ifdef OLD_RC_API
+#if defined(OLD_RC_API) || defined(HAVE_TRIPLEDRAGON)
 	static int rc_last_key = 0;
 #endif
 	static bool repeating = false;
@@ -1572,7 +1603,17 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 			if ((fd_rc[i] != -1) &&
 			    (FD_ISSET(fd_rc[i], &rfds)))
 			{
+#ifdef HAVE_TRIPLEDRAGON
+				int count = 0;
+				/* clear the input queue and process only the latest event
+				   hack to improve the behaviour of the TD remote
+				   otherwise we lose key_up events due to CRCInput::clearRCMsg() */
+				while (read(fd_rc[i], &ev, sizeof(t_input_event)) == sizeof(t_input_event))
+					count++;
+				if (count)
+#else
 				if (read(fd_rc[i], &ev, sizeof(t_input_event)) == sizeof(t_input_event))
+#endif
 				{
 					uint trkey = translate(ev.code);
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
@@ -1587,21 +1628,35 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 						}
 					}
 #endif /* HAVE_DREAMBOX_HARDWARE || HAVE_IPBOX_HARDWARE */
+#ifdef HAVE_TRIPLEDRAGON
+if (trkey == RC_nokey || count > 1) fprintf(stderr, "ev.code: %04hx trkey: %04x count:%d\n", ev.code, trkey, count);
+					if ((ev.code & 0xff00) == 0x8000)
+					{
+						*data = 1; // compat
+						*msg = trkey | RC_Release;
+						rc_last_key = 0; /* we use rc_last_key to differentiate "press" and "repeat" */
+						return;
+					}
+#endif
 					if (trkey != RC_nokey)
 					{
-#ifdef OLD_RC_API
-						if (ev.code != 0x5cfe)
+#if defined(OLD_RC_API) || defined(HAVE_TRIPLEDRAGON)
+						if (ev.code != 0x5cfe) // always true for TD
 						{
 							unsigned long long now_pressed;
 							bool keyok = true;
 
 							gettimeofday( &tv, NULL );
 							now_pressed = tv.tv_usec + tv.tv_sec * 1000000ULL;
+#ifndef HAVE_TRIPLEDRAGON
 							//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
 							if ((ev.code & 0xff00) == 0x5c00)
 								rc_last_key = 0;
 
 							if ((ev.code & 0x8000) == 0)
+#else
+							if (rc_last_key != trkey)
+#endif
 							{	// key pressed
 								*msg = trkey;
 								last_keypress = now_pressed;
@@ -1735,6 +1790,21 @@ void CRCInput::setRepeat(unsigned int delay,unsigned int period)
 	repeat_block_generic = period * 1000ULL;
 	repeat_kernel = false;
 
+#ifdef HAVE_TRIPLEDRAGON
+	int avsfd = ::open("/dev/stb/tdsystem", O_RDWR);
+	struct BIOS_CONFIG_AREA bca;
+	unsigned short rc_addr = 0xff;
+	if (ioctl(avsfd, IOC_AVS_GET_LOADERCONFIG, &bca) == 0)
+	{
+		rc_addr = bca.ir_adrs;
+		if (ioctl(fd_rc[0], IOC_IR_SET_ADDRESS, rc_addr) < 0)
+			printf("[neutrino] %s: IOC_IR_SET_ADDRESS %d failed: %m\n", __FUNCTION__, rc_addr);
+	}
+	/* short delay in the driver improves responsiveness and reduces spurious
+	   "key up" events during zapping */
+	ioctl(fd_rc[0], IOC_IR_SET_DELAY, 1);
+	printf("[neutrino] %s: delay=%d period=%d rc_addr=%d\n", __FUNCTION__, delay, period, rc_addr);
+#else
 	int ret;
 	struct my_repeat {
 		unsigned int delay;	// in ms
@@ -1756,8 +1826,8 @@ void CRCInput::setRepeat(unsigned int delay,unsigned int period)
 				repeat_kernel = true;
 		}
 	}
-
 	printf("[neutrino] %s: delay=%d period=%d use kernel-repeat: %s\n", __FUNCTION__, delay, period, repeat_kernel?"yes":"no");
+#endif
 }
 
 void CRCInput::postMsg(const neutrino_msg_t msg, const neutrino_msg_data_t data, const bool Priority)
@@ -1777,6 +1847,7 @@ void CRCInput::postMsg(const neutrino_msg_t msg, const neutrino_msg_data_t data,
 
 void CRCInput::clearRCMsg()
 {
+#ifndef HAVE_TRIPLEDRAGON
 	t_input_event ev;
 
 	for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
@@ -1787,6 +1858,7 @@ void CRCInput::clearRCMsg()
 				;
 		}
 	}
+#endif
 }
 
 /**************************************************************************
@@ -1881,6 +1953,16 @@ const char * CRCInput::getSpecialKeyName(const unsigned int key)
 			return "mute";
 			case RC_help:
 			return "help";
+			case RC_tv:
+				return "tv";
+			case RC_radio:
+				return "radio";
+			case RC_audio:
+				return "audio";
+			case RC_video:
+				return "video";
+			case RC_text:
+				return "txt";
 
 			// Keyboard keys
 			case RC_esc:
@@ -2045,6 +2127,62 @@ std::string CRCInput::getKeyName(const unsigned int key)
 **************************************************************************/
 int CRCInput::translate(int code)
 {
+#ifdef HAVE_TRIPLEDRAGON
+	switch (code&0xFF)
+	{
+		case 0x01: return RC_standby;
+		case 0x02: return RC_1;
+		case 0x03: return RC_2;
+		case 0x04: return RC_3;
+		case 0x05: return RC_4;
+		case 0x06: return RC_5;
+		case 0x07: return RC_6;
+		case 0x08: return RC_timer;
+		case 0x09: return RC_7;
+		case 0x0a: return RC_8;
+		case 0x0b: return RC_9;
+		case 0x0c: return RC_zoomin;
+		case 0x0d: return RC_fav;
+		case 0x0e: return RC_0;
+		case 0x0f: return RC_zoomoff;	// red hand
+		case 0x10: return RC_zoomout;
+		case 0x11: return RC_spkr;	// MUTE
+		case 0x12: return RC_setup;	// menu
+		case 0x13: return RC_epg;
+		case 0x14: return RC_help;	// INFO
+		case 0x15: return RC_home;	// EXIT
+		case 0x16: return RC_page_down;	// vv
+		case 0x17: return RC_page_up;	// ^^
+		case 0x18: return RC_up;
+		case 0x19: return RC_left;
+		case 0x1a: return RC_ok;
+		case 0x1b: return RC_right;
+		case 0x1c: return RC_down;
+		case 0x1d: return RC_minus;
+		case 0x1e: return RC_plus;
+		case 0x1f: return RC_red;
+		case 0x20: return RC_green;
+		case 0x21: return RC_yellow;
+		case 0x22: return RC_blue;
+		case 0x23: return RC_tv;	// TV/RADIO
+		case 0x24: return RC_video;	// MP3/PVR
+		case 0x25: return RC_audio;	// CD/DVD
+		case 0x26: return RC_aux;	// AUX
+		case 0x27: return RC_text;	// [=]
+		case 0x28: return RC_tttv;	// [ /=]
+		case 0x29: return RC_ttzoom;	// [=x=]
+		case 0x2a: return RC_ttreveal;	// [=?]
+		case 0x2b: return RC_back;	// <<
+		case 0x2c: return RC_stop;	// X
+		case 0x2d: return RC_playpause;	// ||>
+		case 0x2e: return RC_forward;	// >>
+		case 0x2f: return RC_prev;	// |<<
+		case 0x30: return RC_eject;
+		case 0x31: return RC_record;
+		case 0x32: return RC_next;	// >>|
+	}
+	return RC_nokey;
+#endif
 #if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	switch (code&0xFF)
 	{

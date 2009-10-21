@@ -80,7 +80,16 @@
 #define KEY_BOTTOMRIGHT  0x1a5
 #endif
 
-
+#ifndef KEY_FN_F1
+// use for all keys that don't have their own symbol in input.h
+#define KEY_FN_F1        0x1d2
+#define KEY_FN_F2        0x1d3
+#define KEY_FN_F3        0x1d4
+#define KEY_FN_F4        0x1d5
+#define KEY_FN_F5        0x1d6
+#define KEY_FN_F6        0x1d7
+#define KEY_FN_F7        0x1d8
+#endif
 
 typedef uint neutrino_msg_t;
 typedef size_t neutrino_msg_data_t; // we are pushing pointer addresses around with this, so it needs to be long
@@ -118,7 +127,7 @@ class CRCInput
 
 		int 		fd_pipe_high_priority[2];
 		int 		fd_pipe_low_priority[2];
-#ifdef OLD_RC_API
+#if defined(OLD_RC_API) || defined(HAVE_TRIPLEDRAGON)
 #define NUMBER_OF_EVENT_DEVICES 1
 #else /* OLD_RC_API */
 #define NUMBER_OF_EVENT_DEVICES 2
@@ -201,7 +210,6 @@ class CRCInput
 			RC_top_right    = KEY_TOPRIGHT,     /* /include/linux/input.h: #define KEY_TOPRIGHT     0x1a3        */ /* in patched input.h */
 			RC_bottom_left  = KEY_BOTTOMLEFT,   /* /include/linux/input.h: #define KEY_BOTTOMLEFT   0x1a4        */ /* in patched input.h */
 			RC_bottom_right = KEY_BOTTOMRIGHT,  /* /include/linux/input.h: #define KEY_BOTTOMRIGHT  0x1a5        */ /* in patched input.h */
-#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 			// definitions for additional buttons on Dreambox remote
 			RC_tv           = KEY_TV,           /* /include/linux/input.h: #define KEY_TV		0x179 */
 			RC_radio        = KEY_RADIO,        /* /include/linux/input.h: #define KEY_RADIO	0x181 */
@@ -210,8 +218,26 @@ class CRCInput
 			RC_video        = KEY_VIDEO,        /* /include/linux/input.h: #define KEY_VIDEO	0x189 */
 			RC_next         = KEY_NEXT,         /* /include/linux/input.h: #define KEY_NEXT		0x197 */
 			RC_prev         = KEY_PREVIOUS,     /* /include/linux/input.h: #define KEY_PREVIOUS	0x19c */
-#endif
-		        //////////////// Keys on the IR Keyboard, not the RC ////////////////
+			RC_aux		= KEY_AUX,          /* 0x186 */
+			RC_timer	= KEY_TIME,
+			RC_epg		= KEY_EPG,
+			RC_fav		= KEY_FAVORITES,
+			RC_tttv		= KEY_FN_F1,
+			RC_ttzoom	= KEY_FN_F2,
+			RC_ttreveal	= KEY_FN_F3,
+			// PVR / media player keys
+			RC_playpause	= KEY_PLAYPAUSE,
+			RC_stop		= KEY_STOP,
+			RC_eject	= KEY_EJECTCD,
+			RC_forward	= KEY_FORWARD,
+			RC_back		= KEY_BACK,
+			RC_record	= KEY_RECORD,
+			//
+			RC_zoomin	= KEY_FN_F4,
+			RC_zoomout	= KEY_FN_F5,
+			RC_zoomoff	= KEY_FN_F6,
+
+			//////////////// Keys on the IR Keyboard, not the RC ////////////////
 			RC_esc		= KEY_ESC,		/* #define KEY_ESC		 	1  */
 
 			// RC_minus is (mis-)used above above volume, call it RC_hyphen instead
