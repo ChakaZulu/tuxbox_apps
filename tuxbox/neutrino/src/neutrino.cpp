@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.997 2009/10/21 10:41:35 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.998 2009/10/21 14:48:40 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2777,27 +2777,24 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 				}
 			}
 		}
+
+		if (msg == CRCInput::RC_spkr && !repeat)
+		{
+			if (mode == mode_standby) //switch lcd off/on
+				CLCD::getInstance()->togglePower();
+			else if (! doShowMuteIcon()) //mute, but only if volume is not already == 0
+				AudioMute(!current_muted);
+			return messages_return::handled;
+		}
+
+		if (mode == mode_standby && msg <= CRCInput::RC_MaxRC)
+			return messages_return::handled; // don't process RC events in standby mode
 		else if ((msg == CRCInput::RC_plus) ||
 			 (msg == CRCInput::RC_minus) ||
 			 (msg == NeutrinoMessages::EVT_VOLCHANGED))
 		{
 			setVolume(msg, (mode != mode_scart));
 			return messages_return::handled;
-		}
-		else if(msg == CRCInput::RC_spkr && !repeat)
-		{
-			if( mode == mode_standby )
-			{
-				//switch lcd off/on
-				CLCD::getInstance()->togglePower();
-			}
-			else
-			{
-				//mute, but only if volume is not already == 0
-				if (! doShowMuteIcon())
-					AudioMute(!current_muted);
-			}
-			return messages_return::handled;	
 		}
 
 		/* HACK: mark all key-repeat and key-release events as "handled" in order not to
