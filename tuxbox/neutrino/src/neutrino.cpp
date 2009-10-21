@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.996 2009/10/17 16:31:41 rhabarber1848 Exp $
+	$Id: neutrino.cpp,v 1.997 2009/10/21 10:41:35 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -94,6 +94,7 @@
 #ifdef ENABLE_GUI_MOUNT
 #include "gui/nfs.h"
 #endif
+#include "gui/scan_setup.h"
 #include "gui/screensetup.h"
 #include "gui/esound.h"
 #include "gui/personalize.h"
@@ -2346,6 +2347,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 		configfile.setModifiedFlag(true);
 		saveSetup();
 	}
+
+	//init scan settings
+	CScanSetup scansetup;
+	scansetup.initScanSettings();
 
 	//init programm
 	InitZapper();

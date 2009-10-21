@@ -1,5 +1,5 @@
 /*
-	$Id: scan_setup.cpp,v 1.1 2009/10/17 11:29:07 dbt Exp $
+	$Id: scan_setup.cpp,v 1.2 2009/10/21 10:41:36 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -29,6 +29,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: scan_setup.cpp,v $
+	Revision 1.2  2009/10/21 10:41:36  rhabarber1848
+	Neutrino: Fix scan provider list, patch by dbt: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=371611#p371611
+	
 	Revision 1.1  2009/10/17 11:29:07  dbt
 	init scan_setup for it's own module
 	see: http://www.dreambox-fan.de/forum/viewtopic.php?p=371500#p371500
@@ -72,6 +75,9 @@ CScanSetup::CScanSetup()
 	menue_width = 550;
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+
+	sat_list_size = 0;
+	provider_list_size = 0;
 }
 
 CScanSetup::~CScanSetup()
@@ -202,7 +208,8 @@ const CMenuOptionChooser::keyval SCANTS_CABLESCAN_OPTIONS[SCANTS_CABLESCAN_OPTIO
 void CScanSetup::showScanService()
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
-
+	initScanSettings();
+	
 	//menue init
 	CMenuWidget* scansetup = new CMenuWidget(LOCALE_SERVICEMENU_HEAD, NEUTRINO_ICON_SETTINGS, menue_width);
 
@@ -227,37 +234,12 @@ void CScanSetup::showScanService()
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
 	{
-
-		satList.clear();
-		g_Zapit->getScanSatelliteList(satList);
-
-		printf("[neutrino] received %d sats\n", satList.size());
-		t_satellite_position currentSatellitePosition = g_Zapit->getCurrentSatellitePosition();
-
-		if (1/*scanSettings.diseqcMode == DISEQC_1_2*/)
-		{
-			for (uint i = 0; i < satList.size(); i++)
-			{
-				//printf("[neutrino] received %d: %s, %d\n", i, satList[i].satName, satList[i].satPosition);
-				scanSettings.satPosition[i] = satList[i].satPosition;
-				scanSettings.satMotorPos[i] = satList[i].motorPosition;
-				strcpy(scanSettings.satName[i], satList[i].satName);
-				//scanSettings.satDiseqc[i] = satList[i].satDiseqc;
-				if (satList[i].satPosition == currentSatellitePosition)
-					strcpy(scanSettings.satNameNoDiseqc, satList[i].satName);
-			}
-			for (uint i = satList.size(); i < MAX_SATELLITES; i++)
-			{
-				scanSettings.satName[i][0] = 0;
-				scanSettings.satPosition[i] = 0;
-				scanSettings.satDiseqc[i] = -1;
-			}
-		}
+ 		g_Zapit->getScanSatelliteList(satList);
 
 		//prepare diseqc
 		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.satNameNoDiseqc, ((scanSettings.diseqcMode == DISEQC_1_2) || (scanSettings.diseqcMode == NO_DISEQC)));
 
-		for (uint i=0; i < satList.size(); i++)
+		for (uint i=0; i < sat_list_size; i++)
 		{
 			ojSat->addOption(satList[i].satName);
 			dprintf(DEBUG_DEBUG, "got scanprovider (sat): %s\n", satList[i].satName );
@@ -278,9 +260,9 @@ void CScanSetup::showScanService()
 		CMenuForwarder* ojExtSatSettings = new CMenuForwarder(LOCALE_SATSETUP_EXTENDED, (scanSettings.diseqcMode != NO_DISEQC), NULL, extSatSettings, NULL, CRCInput::RC_1);
 
 		//make sat list
-		for( uint i=0; i < satList.size(); i++)
+		for( uint i=0; i < sat_list_size; i++)
 		{
-			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.diseqscOfSat(satList[i].satName), true, -1, satList.size() - 1, 1, -1, LOCALE_OPTIONS_OFF, satList[i].satName);
+			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.diseqscOfSat(satList[i].satName), true, -1, sat_list_size - 1, 1, -1, LOCALE_OPTIONS_OFF, satList[i].satName);
 
 			extSatSettings->addItem(oj);
 		}
@@ -305,9 +287,9 @@ void CScanSetup::showScanService()
 		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder(LOCALE_SATSETUP_EXTENDED_MOTOR, (scanSettings.diseqcMode == DISEQC_1_2), NULL, extMotorSettings, NULL, CRCInput::RC_2);
 
 		//prepare/show sat list with options
-		for( uint i=0; i < satList.size(); i++)
+		for( uint i=0; i < sat_list_size; i++)
 		{
-			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.motorPosOfSat(satList[i].satName), true, 0, 64/*satList.size()*/, 0, 0, LOCALE_OPTIONS_OFF, satList[i].satName);
+			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.motorPosOfSat(satList[i].satName), true, 0, 64/*sat_list_size*/, 0, 0, LOCALE_OPTIONS_OFF, satList[i].satName);
 
 			extMotorSettings->addItem(oj);
 		}
@@ -331,11 +313,11 @@ void CScanSetup::showScanService()
 
 		CZapitClient::SatelliteList providerList;
 		g_Zapit->getScanSatelliteList(providerList);
-
+		
 		//prepare/show providers
 		CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_CABLESETUP_PROVIDER, (char*)&scanSettings.satNameNoDiseqc, true);
 
-		for( uint i=0; i< providerList.size(); i++)
+		for( uint i=0; i< provider_list_size; i++)
 		{
 			oj->addOption(providerList[i].satName);
 			dprintf(DEBUG_DEBUG, "got scanprovider (cable): %s\n", providerList[i].satName );
@@ -409,7 +391,7 @@ void CScanSetup::showScanService()
 		scanSettings.TP_SatSelectMenu = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.TP_satname, ((scanSettings.diseqcMode != NO_DISEQC) && scanSettings.TP_scan), new CScanSettingsSatManNotifier);
 
 		// add the sats which are configured (diseqc or motorpos) to the list of available sats */
-		for (i = 0; i < satList.size(); i++)
+		for (i = 0; i < sat_list_size; i++)
 		{
 			if ((((scanSettings.diseqcMode != DISEQC_1_2)) && (0 <= (*scanSettings.diseqscOfSat(satList[i].satName) ))) ||
 			    (((scanSettings.diseqcMode == DISEQC_1_2)) && (0 <= (*scanSettings.motorPosOfSat(satList[i].satName)))))
@@ -422,7 +404,7 @@ void CScanSetup::showScanService()
 			}
 		}
 		// if scanSettings.TP_satname cannot be found in the list of available sats use 1st in list
-		if ((satfound == -1) && (satList.size())) {
+		if ((satfound == -1) && (sat_list_size)) {
 //			strcpy(scanSettings.TP_satname, satList[firstentry].satName);
 			strcpy(scanSettings.TP_satname, scanSettings.satNameNoDiseqc);
 		}
@@ -460,6 +442,48 @@ void CScanSetup::showScanService()
 	scansetup->exec(NULL, "");
 	scansetup->hide();
 	delete scansetup;
+}
 
+void CScanSetup::initScanSettings()
+{
+	if(g_info.delivery_system == DVB_S) // sat
+	{
+		satList.clear();
+		g_Zapit->getScanSatelliteList(satList);
+	
+		printf("[scan-setup] received %d sats\n", satList.size());
+		t_satellite_position currentSatellitePosition = g_Zapit->getCurrentSatellitePosition();
+	
+		if (1/*scanSettings.diseqcMode == DISEQC_1_2*/)
+		{
+			for (uint i = 0; i < satList.size(); i++)
+			{
+				//printf("[neutrino] received %d: %s, %d\n", i, satList[i].satName, satList[i].satPosition);
+				scanSettings.satPosition[i] = satList[i].satPosition;
+				scanSettings.satMotorPos[i] = satList[i].motorPosition;
+				strcpy(scanSettings.satName[i], satList[i].satName);
+				//scanSettings.satDiseqc[i] = satList[i].satDiseqc;
+				if (satList[i].satPosition == currentSatellitePosition)
+					strcpy(scanSettings.satNameNoDiseqc, satList[i].satName);
+			}
+			for (uint i = satList.size(); i < MAX_SATELLITES; i++)
+			{
+				scanSettings.satName[i][0] = 0;
+				scanSettings.satPosition[i] = 0;
+				scanSettings.satDiseqc[i] = -1;
+			}
+		}
+		
+		sat_list_size = satList.size();
+	}
+	else // cable
+	{
+		CZapitClient::SatelliteList providerList;
+		g_Zapit->getScanSatelliteList(providerList);
+
+		printf("[scan-setup] received %d providers\n", providerList.size());
+		provider_list_size = providerList.size();	
+	}
+	
 }
 

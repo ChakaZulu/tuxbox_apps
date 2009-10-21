@@ -1,5 +1,5 @@
 /*
-	$Id: scan_setup.h,v 1.1 2009/10/17 11:29:07 dbt Exp $
+	$Id: scan_setup.h,v 1.2 2009/10/21 10:41:36 rhabarber1848 Exp $
 
 	Copyright (C) 2009 Thilo Graf (dbt)
 	http://www.dbox2-tuning.de
@@ -23,6 +23,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: scan_setup.h,v $
+	Revision 1.2  2009/10/21 10:41:36  rhabarber1848
+	Neutrino: Fix scan provider list, patch by dbt: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=371611#p371611
+	
 	Revision 1.1  2009/10/17 11:29:07  dbt
 	init scan_setup for it's own module
 	see: http://www.dreambox-fan.de/forum/viewtopic.php?p=371500#p371500
@@ -46,6 +49,9 @@ class CScanSetup : public CMenuTarget
 		CFrameBuffer *frameBuffer;
 		int x, y, width, height, menue_width, hheight, mheight;
 
+		uint sat_list_size;
+		uint provider_list_size;
+
 		void hide();
 		void showScanService();
 
@@ -53,6 +59,7 @@ class CScanSetup : public CMenuTarget
 		CScanSetup();
 		~CScanSetup();
 		int exec(CMenuTarget* parent, const std::string & actionKey);
+		void initScanSettings();
 };
 
 
