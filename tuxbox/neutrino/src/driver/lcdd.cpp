@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.83 2009/10/14 21:46:04 seife Exp $
+	$Id: lcdd.cpp,v 1.84 2009/10/22 20:07:48 seife Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -121,7 +121,7 @@ void* CLCD::TimeThread(void *)
 	int old_led = 0;
 	int led_fd = open("/dev/dbox/fp0", O_RDWR);
 
-	if (led_fd != -1)
+	if (led_fd < 0)
 	{
 		perror("CLCD::TimeThread: /dev/dbox/fp0");
 		return NULL;
