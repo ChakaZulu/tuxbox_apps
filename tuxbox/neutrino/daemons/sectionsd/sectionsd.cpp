@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.313 2009/10/03 16:58:00 seife Exp $
+//  $Id: sectionsd.cpp,v 1.314 2009/10/22 20:48:22 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2553,7 +2553,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.313 2009/10/03 16:58:00 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.314 2009/10/22 20:48:22 seife Exp $\n"
 		"%sCurrent time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -5109,7 +5109,7 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 				(t_transport_stream_id) xmlGetNumericAttribute(tp_node, "id", 16),
 				(t_original_network_id) xmlGetNumericAttribute(tp_node, "onid", 16),
 				(uint32_t) xmlGetNumericAttribute(tp_node, "frequency", 0),
-				(fe_spectral_inversion_t) xmlGetNumericAttribute(tp_node, "inversion", 0),
+				(unsigned short) xmlGetNumericAttribute(tp_node, "inversion", 0),
 				(uint32_t) xmlGetNumericAttribute(tp_node, "symbol_rate", 0),
 				(fe_code_rate_t) xmlGetNumericAttribute(tp_node, "fec_inner", 0),
 				(uint8_t) xmlGetNumericAttribute(tp_node, "polarization", 0));
@@ -5119,10 +5119,10 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 				(t_transport_stream_id) xmlGetNumericAttribute(tp_node, "id", 16),
 				(t_original_network_id) xmlGetNumericAttribute(tp_node, "onid", 16),
 				(uint32_t) xmlGetNumericAttribute(tp_node, "frequency", 0),
-				(fe_spectral_inversion_t) xmlGetNumericAttribute(tp_node, "inversion", 0),
+				(unsigned short) xmlGetNumericAttribute(tp_node, "inversion", 0),
 				(uint32_t) xmlGetNumericAttribute(tp_node, "symbol_rate", 0),
 				(fe_code_rate_t) xmlGetNumericAttribute(tp_node, "fec_inner", 0),
-				(fe_modulation_t) xmlGetNumericAttribute(tp_node, "modulation", 0));
+				(unsigned short) xmlGetNumericAttribute(tp_node, "modulation", 0));
 	}
 
 	if (!copy)
@@ -5621,6 +5621,8 @@ fe_code_rate_t getCodeRate(const uint8_t fec_inner)
 		return FEC_AUTO;
 	}
 }
+
+#ifndef HAVE_TRIPLEDRAGON // no dvb-t and dvb-c on TD yet.
 //also stolen from frontend.cpp. please fix.
 fe_modulation_t getModulation(const uint8_t modulation)
 {
@@ -5646,6 +5648,7 @@ fe_modulation_t getModulation(const uint8_t modulation)
 #endif
 	}
 }
+#endif
 
 static void writeTransponderFromDescriptor(FILE *dst, const t_original_network_id onid, const t_transport_stream_id tsid, const char *ddp, const bool is_sat)
 {
@@ -5676,7 +5679,9 @@ static void writeTransponderFromDescriptor(FILE *dst, const t_original_network_i
 		((sdd->symbol_rate_4 >> 4)	* 100),
 		(fe_code_rate_t) getCodeRate(sdd->fec_inner & 0x0F),
 		sdd->polarization);
+		fprintf(dst,"\t\t</transponder>\n");
 	}
+#ifndef HAVE_TRIPLEDRAGON
 	else {
 		cdd = (struct cable_delivery_descriptor *)ddp;
 		fprintf(dst,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%09u\" inversion=\"%hu\" symbol_rate=\"%07u\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
@@ -5701,8 +5706,14 @@ static void writeTransponderFromDescriptor(FILE *dst, const t_original_network_i
 		((cdd->symbol_rate_4 >> 4)	* 100),
 		(fe_code_rate_t) getCodeRate(cdd->fec_inner & 0x0F),
 		(fe_modulation_t) getModulation(cdd->modulation));
+		fprintf(dst,"\t\t</transponder>\n");
 	}
-	fprintf(dst,"\t\t</transponder>\n");
+#else
+	else
+	{
+		xprintf("NON-SAT TRANSPONDER???\n");
+	}
+#endif
 }
 
 static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, const t_transport_stream_id tsid,
@@ -6854,6 +6865,7 @@ int eit_set_update_filter(int *fd)
 
 	/* potential race: eit version could have been updated until now.
 	   how to handle best? */
+#ifndef HAVE_TRIPLEDRAGON
 	dsfp.filter.filter[0] = 0x4e;	/* table_id */
 	dsfp.filter.filter[1] = (unsigned char)(messaging_current_servicekey >> 8);
 	dsfp.filter.filter[2] = (unsigned char)messaging_current_servicekey;
@@ -6874,6 +6886,21 @@ int eit_set_update_filter(int *fd)
 	mode[3] = 0x1F << 1;
 	dsfp.flags = DMX_CHECK_CRC;
 #endif
+#else	// TRIPLEDRAGON
+	if (ioctl(*fd, DEMUX_SET_BUFFER_SIZE, 32 * 4096) < 0)
+		perror("eit_set_update_filter DEMUX_SET_BUFFER_SIZE");
+	dsfp.filter[0] = 0x4e;
+	dsfp.filter[3] = (unsigned char)(messaging_current_servicekey >> 8);
+	dsfp.filter[4] = (unsigned char)messaging_current_servicekey;
+	dsfp.filter[5] = (cur_eit << 1) | 0x01;
+	dsfp.mask[0] = 0xFF;
+	dsfp.mask[3] = 0xFF;
+	dsfp.mask[4] = 0xFF;
+	dsfp.mask[5] = (0x1F << 1) | 0x01;
+	dsfp.positive[5] = 0x1F << 1;
+	dsfp.flags = DMX_IMMEDIATE_START;
+	dsfp.filter_length = 6;
+#endif
 	dsfp.pid = 0x12;
 	dsfp.timeout = 0;
 
@@ -6882,7 +6909,7 @@ int eit_set_update_filter(int *fd)
 		close(*fd);
 		return -1;
 	}
-#if HAVE_DVB_API_VERSION < 3
+#if defined(HAVE_DREAMBOX_HARDWARE) && HAVE_DVB_API_VERSION < 3
 #define DMX_SET_NEGFILTER_MASK   _IOW('o',48,uint8_t *)
 	if (ioctl(*fd, DMX_SET_NEGFILTER_MASK, mode) < 0)
 		perror("DMX_SET_NEGFILTER_MASK");
@@ -8446,7 +8473,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.313 2009/10/03 16:58:00 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.314 2009/10/22 20:48:22 seife Exp $\n");
 #ifdef ENABLE_FREESATEPG
 	printf("[sectionsd] FreeSat enabled\n");
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.51 2009/06/14 21:46:03 rhabarber1848 Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.52 2009/10/22 20:48:22 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -93,6 +93,10 @@ void DMX::closefd(void)
 {
 	if (isOpen())
 	{
+		// maybe this helps with kernel crashes on TD...
+		if (ioctl(fd, DMX_STOP) < 0)
+			xprintf("DMX_STOP: %m\n");
+
 		close(fd);
 		fd = -1;
 	}
@@ -110,7 +114,7 @@ int DMX::immediate_stop(void)
 {
 	if (!isOpen())
 		return 1;
-	
+
 	closefd();
 	
 	return 0;

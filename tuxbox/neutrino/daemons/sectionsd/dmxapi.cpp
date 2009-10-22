@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.cpp,v 1.6 2009/02/19 12:59:45 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.cpp,v 1.7 2009/10/22 20:48:22 seife Exp $
  *
  * DMX low level functions (sectionsd) - d-box2 linux project
  *
@@ -37,8 +37,14 @@ bool setfilter(const int fd, const uint16_t pid, const uint8_t filter, const uin
 	memset(&flt, 0, sizeof(struct dmx_sct_filter_params));
 
 	flt.pid              = pid;
+#ifndef HAVE_TRIPLEDRAGON
 	flt.filter.filter[0] = filter;
 	flt.filter.mask  [0] = mask;
+#else
+	flt.filter[0] = filter;
+	flt.mask[0] = mask;
+	flt.filter_length = 1 + 2;
+#endif
 	flt.timeout          = 0;
 	flt.flags            = flags;
 
@@ -92,10 +98,16 @@ bool getUTC(UTC_t * const UTC, const bool TDT)
 	memset(&flt, 0, sizeof(struct dmx_sct_filter_params));
 
 	flt.pid              = 0x0014;
+#ifndef HAVE_TRIPLEDRAGON
 	flt.filter.filter[0] = TDT ? 0x70 : 0x73;
 	flt.filter.mask  [0] = 0xFF;
+#else
+	flt.filter[0] = TDT ? 0x70 : 0x73;
+	flt.mask  [0] = 0xFF;
+	flt.filter_length = 1 + 2;
+#endif
 	flt.timeout          = 31000;
-	flt.flags            = TDT ? (DMX_ONESHOT | DMX_IMMEDIATE_START) : (DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START);
+	flt.flags            = TDT ? (DMX_ONESHOT | DMX_IMMEDIATE_START | XPDF_NO_CRC) : (DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START);
 
 	if (::ioctl(fd, DMX_SET_FILTER, &flt) == -1)
 	{

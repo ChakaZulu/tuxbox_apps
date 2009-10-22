@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.h,v 1.3 2003/03/01 19:26:51 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.h,v 1.4 2009/10/22 20:48:22 seife Exp $
  *
  * DMX low level functions (sectionsd) - d-box2 linux project
  *
@@ -31,6 +31,18 @@
 #include <stdint.h>
 
 
+#ifdef HAVE_TRIPLEDRAGON
+extern "C"
+{
+#include <zapit/td-demux-compat.h>
+#include <tddevices.h>
+}
+const char DEMUX_DEVICE[] = "/dev/" DEVICE_NAME_DEMUX "2";
+
+#else
+
+#define XPDF_NO_CRC 0
+
 #ifdef HAVE_OST_DMX_H
 
 #include <ost/dmx.h>
@@ -44,6 +56,7 @@ const char DEMUX_DEVICE[] = "/dev/dvb/card0/demux0";
 const char DEMUX_DEVICE[] = "/dev/dvb/adapter0/demux0";
 
 #endif /* HAVE_OST_DMX_H */
+#endif /* HAVETRIPLEDRAGON */
 
 
 bool setfilter(const int fd, const uint16_t pid, const uint8_t filter, const uint8_t mask, const uint32_t flags);
