@@ -62,6 +62,7 @@ class CScanTs : public CMenuTarget
 		int ypos_channel;
 		int ypos_service_numbers;
 		bool success;
+		bool canceled;
 		bool istheend;
 		uint found_transponder;
 		time_t start_time;

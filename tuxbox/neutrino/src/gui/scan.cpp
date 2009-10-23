@@ -75,6 +75,7 @@ CScanTs::CScanTs()
 	ypos_radar = y + hheight + (mheight >> 1);
 	xpos1 = x + 10;
 	found_transponder = 0;
+	canceled = false;
 }
 #define get_set (CNeutrinoApp::getInstance()->getScanSettings())
 #define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
@@ -193,7 +194,8 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 		while (!(msg == CRCInput::RC_timeout));
 	}
 
-	ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, success ? LOCALE_SCANTS_FINISHED : LOCALE_SCANTS_FAILED, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO);
+	if (!canceled)
+		ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, success ? LOCALE_SCANTS_FINISHED : LOCALE_SCANTS_FAILED, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO);
 
 	hide();
 
@@ -288,6 +290,7 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 			if (ShowLocalizedMessage(LOCALE_SCANTS_ABORT_HEADER, LOCALE_SCANTS_ABORT_BODY, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo) == CMessageBox::mbrYes)
 			{
 				g_Zapit->stopScan();
+				canceled = true;
 			}
 			break;
 		default:
