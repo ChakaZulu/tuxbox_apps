@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.998 2009/10/21 14:48:40 seife Exp $
+	$Id: neutrino.cpp,v 1.999 2009/10/23 19:34:13 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2477,7 +2477,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if( msg == CRCInput::RC_setup )
 			{
 				mainMenu.exec(NULL, "");
-				// restore mute symbol
 			}
 			else if(msg == CRCInput::RC_ok)
 			{
