@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.88 2009/10/17 16:31:44 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.89 2009/10/23 07:13:46 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -569,7 +569,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	CMenuOptionChooser *m5 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_RC_STANDBY_OFF_WITH, &g_settings.standby_off_with, REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS, REMOTE_CONTROL_STANDBY_OFF_WITH_OPTIONS_COUNT, !g_settings.shutdown_real);
 	CShutdownCountNotifier *shutDownCountNotifier = new CShutdownCountNotifier;
 	CStringInput * miscSettings_shutdown_count = new CStringInput(LOCALE_MISCSETTINGS_SHUTDOWN_COUNT, g_settings.shutdown_count, 3, LOCALE_MISCSETTINGS_SHUTDOWN_COUNT_HINT1, LOCALE_MISCSETTINGS_SHUTDOWN_COUNT_HINT2, "0123456789 ", shutDownCountNotifier);
-	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_MISCSETTINGS_SHUTDOWN_COUNT, true, g_settings.shutdown_count, miscSettings_shutdown_count);
+	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_MISCSETTINGS_SHUTDOWN_COUNT, !g_settings.shutdown_real, g_settings.shutdown_count, miscSettings_shutdown_count);
 	CMenuOptionChooser *m3 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_STANDBY_SAVE_POWER, &g_settings.standby_save_power, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, !g_settings.shutdown_real);
 	CMiscNotifier* miscNotifier = new CMiscNotifier(m1, m3, m4, m5);
 	CMenuOptionChooser *m2 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL, &g_settings.shutdown_real, OPTIONS_OFF1_ON0_OPTIONS, OPTIONS_OFF1_ON0_OPTION_COUNT, true, miscNotifier);
@@ -577,6 +577,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsGeneral.addItem(m2);
 	miscSettingsGeneral.addItem(m3);
 	miscSettingsGeneral.addItem(m4);
+	miscSettingsGeneral.addItem(m1);
+	miscSettingsGeneral.addItem(m5);
 
 #ifndef TUXTXT_CFG_STANDALONE
 	CTuxtxtCacheNotifier *tuxtxtcacheNotifier = new CTuxtxtCacheNotifier;
@@ -639,8 +641,6 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	keySetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	miscSettingsRemoteControl.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCK, true, g_settings.repeat_blocker, keySettings_repeatBlocker));
 	miscSettingsRemoteControl.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, true, g_settings.repeat_genericblocker, keySettings_repeat_genericblocker));
-	miscSettingsRemoteControl.addItem(m1);
-	miscSettingsRemoteControl.addItem(m5);
 		
 	// filebrowser
 	miscSettingsFilebrowser.addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
