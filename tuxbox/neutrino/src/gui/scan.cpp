@@ -41,6 +41,7 @@
 
 #include <gui/widget/menue.h>
 #include <gui/widget/messagebox.h>
+#include <gui/widget/icons.h>
 
 #include <system/settings.h>
 
@@ -77,12 +78,20 @@ CScanTs::CScanTs()
 }
 #define get_set (CNeutrinoApp::getInstance()->getScanSettings())
 #define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
-int CScanTs::exec(CMenuTarget* /*parent*/, const std::string &)
+int CScanTs::exec(CMenuTarget* parent, const std::string &)
 {
 	diseqc_t		diseqcType = NO_DISEQC;
 	neutrino_msg_t		msg;
 	neutrino_msg_data_t	data;
 	TP_params		TP;
+
+	if (parent)
+	{
+		parent->hide();
+	}
+
+	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
+	frameBuffer->loadPicture2FrameBuffer("scan.raw");
 
 printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %d TP_diseqc %d\n", get_set.TP_scan, get_set.TP_freq, get_set.TP_rate, get_set.TP_fec, get_set.TP_pol, get_set.TP_mod, (uint8_t)get_set.TP_diseqc);
 
@@ -124,9 +133,6 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 
 	if(g_settings.video_Format != g_settings.video_backgroundFormat)
 		g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
-
-	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
-	frameBuffer->loadPicture2FrameBuffer("scan.raw");
 
 	g_Sectionsd->Restart();
 	g_Sectionsd->RegisterNeutrino();
@@ -187,7 +193,7 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 		while (!(msg == CRCInput::RC_timeout));
 	}
 
-	ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, success ? LOCALE_SCANTS_FINISHED : LOCALE_SCANTS_FAILED, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+	ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, success ? LOCALE_SCANTS_FINISHED : LOCALE_SCANTS_FAILED, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO);
 
 	hide();
 
