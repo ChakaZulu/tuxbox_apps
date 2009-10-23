@@ -502,7 +502,7 @@ const std::string & CRemoteControl::setSubChannel(const int numSub, const bool f
 	{
 		if (button_Portal)
 		{
-			swap<int>(current_subchannel, old_subchannel);
+			std::swap<int>(current_subchannel, old_subchannel);
 			button_Portal = false; //Reset Button
 		}
 		if (old_subchannel >= (int)subChannels.size() && (int)subChannels.size() > 0)	// all subchannels available?
@@ -535,7 +535,7 @@ const std::string & CRemoteControl::setSubChannel(const int numSub, const bool f
 	if (director_mode && numSub != CNeutrinoApp::DIRECTORMODE_PORTAL)
 	{
 		if (subchannel == 0)
-			swap<int>(current_subchannel, old_subchannel);
+			std::swap<int>(current_subchannel, old_subchannel);
 
 		if (subchannel > 0)	//remember subchannels, only feed 1-9
 		{	
@@ -546,7 +546,7 @@ const std::string & CRemoteControl::setSubChannel(const int numSub, const bool f
 			else
 			{
 				if (selected_subchannel == 0)
-					swap<int>(current_subchannel, old_subchannel);
+					std::swap<int>(current_subchannel, old_subchannel);
 
 				tmp = (subchannel == current_subchannel) ? old_subchannel : subchannel;
 				old_subchannel = current_subchannel;
@@ -556,7 +556,7 @@ const std::string & CRemoteControl::setSubChannel(const int numSub, const bool f
 		if (old_subchannel > 0 && current_subchannel > 0 && subchannel == old_subchannel)
 		{
 			//swap feeds if select feed same as in old_subchannel stored
-			swap<int>(current_subchannel, old_subchannel);
+			std::swap<int>(current_subchannel, old_subchannel);
 		}
 	}
 

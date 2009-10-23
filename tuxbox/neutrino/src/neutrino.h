@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.226 2009/10/17 16:31:41 rhabarber1848 Exp $
+	$Id: neutrino.h,v 1.227 2009/10/23 09:28:24 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -85,14 +85,6 @@ typedef struct font_sizes_groups
 	const SNeutrinoSettings::FONT_TYPES * const content;
 	const char * const                          actionkey;
 } font_sizes_groups_struct;
-
-template <class T>
-	void swap(T& a, T& b)
-	{
-		T temp = a;
-		a = b;
-		b = temp;
-	}
 
 #define FONT_STYLE_REGULAR 0
 #define FONT_STYLE_BOLD    1
