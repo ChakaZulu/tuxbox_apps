@@ -1301,17 +1301,17 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 						{
 							case CSectionsdClient::EVT_TIMESET:
 							{
-								printf("[neutrino] received CSectionsdClient::EVT_TIMESET, setting system time...\n");
 								gettimeofday(&tv, NULL);
 								long long timeOld = tv.tv_usec + tv.tv_sec * 1000000LL;
 
 								time_t dvbtime = *((time_t*)p);
 
 								if (dvbtime) {
+									printf("[neutrino] timeset event. ");
 									time_t difftime = dvbtime - tv.tv_sec;
 									if (abs(difftime) > 120)
 									{
-										printf("[neutrino] Time difference is %ld seconds, stepping...\n", difftime);
+										printf("difference is %ld s, stepping...\n", difftime);
 										tv.tv_sec = dvbtime;
 										tv.tv_usec = 0;
 										if (settimeofday(&tv, NULL) < 0)
@@ -1325,10 +1325,10 @@ void CRCInput::getMsg_us(neutrino_msg_t *msg, neutrino_msg_data_t *data, unsigne
 										if (adjtime(&tv, &oldd))
 											perror("adjtime");
 										long long t = oldd.tv_sec * 1000000LL + oldd.tv_usec;
-										printf("[neutrino] Time difference is %ld seconds, using adjtime(). Olddelta: %lld us\n", difftime, t);
+										printf("difference is %ld s, using adjtime(). oldd: %lld us\n", difftime, t);
 									}
 									else
-										printf("[neutrino] Time difference 0 seconds, nothing to do...\n");
+										printf("difference is 0 s, nothing to do...\n");
 								}
 
 								gettimeofday(&tv, NULL);
