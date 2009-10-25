@@ -55,7 +55,6 @@
   time. This is also used for exact seeking.
 
   TODO:
-  * bookmarks? what bookmarks?
   * use index.vdr for precise seeking in VDR files.
   * Test and fix AC3 (I now have hardware, thanks Ray! ;)
   * the whole g_playstate state machine is too complicated and probably
@@ -437,7 +436,6 @@ CMoviePlayerGui::exec(CMenuTarget *parent, const std::string &actionKey)
 			else
 			{
 				// TODO check if file is a TS. Not required right now as writing bookmarks is disabled for PES anyway
-				startfilename = "";
 				PlayFile();
 			}
 		}
@@ -2041,6 +2039,7 @@ OutputThread(void *arg)
 
 	INFO("mrl:%s\n", fn);
 
+	g_currentapid = -1;	// this gets also set by the input threads, but maybe too late.
 	g_input_failed = false; // there is no input thread running now... hopefully.
 	pthread_t rcvt;	// the input / "receive" thread
 	if (remote)
@@ -2097,9 +2096,9 @@ OutputThread(void *arg)
 			g_playstate = CMoviePlayerGui::SOFTRESET;
 		}
 
-		if (g_startposition > 0 && g_startpts != - 1)
+		if (g_startposition > 0 && g_startpts != - 1 && g_currentapid != -1)
 		{
-			printf("[%s] Was Bookmark. Skipping to startposition %d %d\n", __FILE__, g_startposition, remote);
+			INFO("Was Bookmark. Skipping to startposition %d %d\n", g_startposition, remote);
 			skip(g_startposition, remote, true);
 			g_startposition = 0;
 		}
@@ -3074,6 +3073,14 @@ CMoviePlayerGui::PlayStream(int streamtype)
 					else
 						DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_WRONGVLCVERSION)); // UTF-8
 				}
+				else
+				{
+					std::stringstream bookmarktime;
+					int f_time = get_filetime();
+					bookmarktime << f_time;
+					INFO("bookmarktime: %s\n", bookmarktime.str().c_str());
+					bookmarkmanager->createBookmark(filename, bookmarktime.str());
+				}
 			}
 			else
 			{
@@ -3354,7 +3361,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.58 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.59 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
