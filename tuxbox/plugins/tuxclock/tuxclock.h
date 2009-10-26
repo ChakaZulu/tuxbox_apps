@@ -124,7 +124,7 @@ FT_Library       library;
 FTC_Manager      manager;
 FTC_SBitCache    cache;
 FTC_SBit         sbit;
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 FTC_ImageDesc    desc;
 #else
 FTC_ImageTypeRec desc;
