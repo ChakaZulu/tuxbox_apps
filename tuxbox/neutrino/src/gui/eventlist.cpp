@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.129 2009/10/12 07:35:41 rhabarber1848 Exp $
+	$Id: eventlist.cpp,v 1.130 2009/10/27 08:41:31 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1018,11 +1018,6 @@ int CEventFinderMenu::exec(CMenuTarget* parent, const std::string &actionkey)
 			parent->hide();
 		showMenu();
 	}
-	else if(actionkey =="1")
-	{
-		*m_event = true;
-		res = menu_return::RETURN_EXIT_ALL;
-	}
 	else if(actionkey =="2")
 	{
 		/*
@@ -1076,6 +1071,11 @@ int CEventFinderMenu::exec(CMenuTarget* parent, const std::string &actionkey)
 			}
 		}
 	}
+	else if(actionkey =="5")
+	{
+		*m_event = true;
+		res = menu_return::RETURN_EXIT_ALL;
+	}
 	
 	return res;
 }
@@ -1102,21 +1102,21 @@ int CEventFinderMenu::showMenu(void)
 	
 	CStringInputSMS stringInput(LOCALE_EVENTFINDER_KEYWORD,m_search_keyword, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
 	
-	CMenuForwarder* mf0 		= new CMenuForwarder(LOCALE_EVENTFINDER_START_SEARCH, true, NULL, this, "1", CRCInput::RC_1 );
+	CMenuForwarder* mf0 		= new CMenuForwarder(LOCALE_EVENTFINDER_KEYWORD ,true, *m_search_keyword, &stringInput, NULL, CRCInput::RC_1 );
 	CMenuOptionChooser* mo0 	= new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WITHIN_LIST , m_search_list, SEARCH_LIST_OPTIONS, SEARCH_LIST_OPTION_COUNT, true, NULL, CRCInput::RC_2);
 	CMenuForwarderNonLocalized* mf1	= new CMenuForwarderNonLocalized("", *m_search_list != EventList::SEARCH_LIST_ALL, m_search_channelname, this, "3", CRCInput::RC_3 );
 	CMenuOptionChooser* mo1 	= new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WITHIN_EPG, m_search_epg_item, SEARCH_EPG_OPTIONS, SEARCH_EPG_OPTION_COUNT, true, NULL, CRCInput::RC_4);
-	CMenuForwarder* mf2	= new CMenuForwarder(LOCALE_EVENTFINDER_KEYWORD ,true, *m_search_keyword, &stringInput, NULL, CRCInput::RC_5 );
+	CMenuForwarder* mf2	= new CMenuForwarder(LOCALE_EVENTFINDER_START_SEARCH, true, NULL, this, "5", CRCInput::RC_5 );
 	
-	CMenuWidget searchMenu(LOCALE_EVENTFINDER_HEAD, "features.raw", 450);
+	CMenuWidget searchMenu(LOCALE_EVENTFINDER_HEAD, NEUTRINO_ICON_FEATURES, 450);
 	searchMenu.addItem(GenericMenuSeparator);
-	searchMenu.addItem(mf2, false);
+	searchMenu.addItem(mf0, false);
 	searchMenu.addItem(GenericMenuSeparatorLine);
 	searchMenu.addItem(mo0, false);
 	searchMenu.addItem(mf1, false);
 	searchMenu.addItem(mo1, false);
 	searchMenu.addItem(GenericMenuSeparatorLine);
-	searchMenu.addItem(mf0, false);
+	searchMenu.addItem(mf2, false);
 	
 	res = searchMenu.exec(NULL,"");
 	return(res);
