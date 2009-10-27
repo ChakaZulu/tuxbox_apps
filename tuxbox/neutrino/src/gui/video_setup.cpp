@@ -1,5 +1,5 @@
 /*
-	$Id: video_setup.cpp,v 1.2 2009/10/27 21:29:31 dbt Exp $
+	$Id: video_setup.cpp,v 1.3 2009/10/27 21:35:08 dbt Exp $
 
 	video setup implementation - Neutrino-GUI
 
@@ -27,6 +27,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: video_setup.cpp,v $
+	Revision 1.3  2009/10/27 21:35:08  dbt
+	removed unnecessary include
+	
 	Revision 1.2  2009/10/27 21:29:31  dbt
 	added missing correct parameter to enable/disable option chooser for rgbsync and video output
 	
@@ -129,7 +132,7 @@ const CMenuOptionChooser::keyval VIDEOMENU_VIDEOFORMAT_OPTIONS[VIDEOMENU_VIDEOFO
 	{ CControldClient::VIDEOFORMAT_16_9, LOCALE_VIDEOMENU_VIDEOFORMAT_169        },
 	{ CControldClient::VIDEOFORMAT_AUTO, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT }
 };
-#include <iostream>
+
 void CVideoSetup::showVideoSetup()
 {
 	//init
