@@ -1,5 +1,5 @@
 /*
-	$Id: audio_setup.cpp,v 1.1 2009/10/17 11:38:37 dbt Exp $
+	$Id: audio_setup.cpp,v 1.2 2009/10/27 21:37:29 dbt Exp $
 
 	audio setup implementation - Neutrino-GUI
 
@@ -27,6 +27,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: audio_setup.cpp,v $
+	Revision 1.2  2009/10/27 21:37:29  dbt
+	removed forgotten comment
+	
 	Revision 1.1  2009/10/17 11:38:37  dbt
 	init audio_setup for it's own modules
 	
@@ -128,7 +131,7 @@ const CMenuOptionChooser::keyval AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_OPTIONS[A
 };
 
 /* audio settings menu */
-void CAudioSetup::showAudioSetup(/*CAudioSetupNotifier* audioSetupNotifier*/)
+void CAudioSetup::showAudioSetup()
 {
 	CAudioSetupNotifier *audioSetupNotifier = new CAudioSetupNotifier;
 
