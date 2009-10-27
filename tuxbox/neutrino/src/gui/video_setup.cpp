@@ -1,5 +1,5 @@
 /*
-	$Id: video_setup.cpp,v 1.1 2009/10/27 20:28:42 dbt Exp $
+	$Id: video_setup.cpp,v 1.2 2009/10/27 21:29:31 dbt Exp $
 
 	video setup implementation - Neutrino-GUI
 
@@ -27,9 +27,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: video_setup.cpp,v $
+	Revision 1.2  2009/10/27 21:29:31  dbt
+	added missing correct parameter to enable/disable option chooser for rgbsync and video output
+	
 	Revision 1.1  2009/10/27 20:28:42  dbt
 	init video setup for it's own modul
-	
 */
 
 #ifdef HAVE_CONFIG_H
@@ -151,7 +153,8 @@ void CVideoSetup::showVideoSetup()
 
 	//rgb centering
 	CRGBCSyncControler * RGBCSyncControler = new CRGBCSyncControler(LOCALE_VIDEOMENU_RGB_CENTERING, &g_settings.video_csync);
-	SyncControlerForwarder = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, true, NULL , RGBCSyncControler, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
+	bool sc_active = ((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal ==  CControldClient::VIDEOOUTPUT_YUV_CVBS));
+	SyncControlerForwarder = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, sc_active, NULL , RGBCSyncControler, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
 	
 
 	if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
@@ -168,7 +171,8 @@ void CVideoSetup::showVideoSetup()
  	// Switching VCR Output presently does not work on the Philips.
 	if (g_info.box_Type != CControld::TUXBOX_MAKER_PHILIPS)
 	{
-		VcrVideoOutSignalOptionChooser = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSIGNAL, &vcr_video_out_signal, VIDEOMENU_VCRSIGNAL_OPTIONS, VIDEOMENU_VCRSIGNAL_OPTION_COUNT, false, this);
+		bool vo_active = ((video_out_signal == CControldClient::VIDEOOUTPUT_COMPOSITE) || (video_out_signal == CControldClient::VIDEOOUTPUT_SVIDEO));
+		VcrVideoOutSignalOptionChooser = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSIGNAL, &vcr_video_out_signal, VIDEOMENU_VCRSIGNAL_OPTIONS, VIDEOMENU_VCRSIGNAL_OPTION_COUNT, vo_active, this);
 		videosetup->addItem(VcrVideoOutSignalOptionChooser);
 	}
 	else
@@ -215,4 +219,5 @@ bool CVideoSetup::changeNotify(const neutrino_locale_t OptionName, void *)
 
 	return true;
 }
+
 
