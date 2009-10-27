@@ -47,7 +47,8 @@ libneutrino_gui_a_SOURCES = \
 	streaminfo2.cpp \
 	themes.cpp \
 	timeosd.cpp \
-	update.cpp
+	update.cpp \
+	video_setup.cpp
 	
 
 libneutrino_gui3_a_SOURCES =  movieinfo.cpp

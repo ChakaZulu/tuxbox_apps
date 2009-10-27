@@ -1319,7 +1319,7 @@ usermenu.item_none
 usermenu.item_vtxt Videotext
 usermenu.name Name
 videomenu.csync sync correction
-videomenu.head Video Settings
+videomenu.head Video
 videomenu.osd OSD
 videomenu.rgb_centering RGB centering
 videomenu.screensetup OSD region

@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.89 2009/10/23 07:13:46 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.90 2009/10/27 20:28:42 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -60,6 +60,7 @@
 
 #include "gui/alphasetup.h"
 #include "gui/audio_setup.h"
+#include "gui/video_setup.h"
 #include "gui/audio_select.h"
 #ifdef ENABLE_AUDIOPLAYER
 #include "gui/audioplayer.h"
@@ -119,7 +120,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &colorSettings,
 								CMenuWidget &lcdSettings,
 								CMenuWidget &keySettings,
-								CMenuWidget &videoSettings,
 								CMenuWidget &languageSettings,
 								CMenuWidget &miscSettings,
 								CMenuWidget &driverSettings,
@@ -203,7 +203,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_DVDPLAYBACK, true, NULL, moviePlayerGui, "dvdplayback", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_VCDPLAYBACK, true, NULL, moviePlayerGui, "vcdplayback", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	moviePlayer.addItem(GenericMenuSeparatorLine);
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, new CMoviePlayerSetup() /*&streamingSettings*/, NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, new CMoviePlayerSetup(), NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
 #ifdef ENABLE_GUI_MOUNT
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_MOUNT, true, NULL, new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
 #endif
@@ -266,7 +266,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainSettings.addItem(GenericMenuSeparatorLine);
 
 	// video.
-	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_VIDEO, true, NULL, &videoSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_video);	
+	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_VIDEO, true, NULL, new CVideoSetup(), NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_video);	
 
 	// audio
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_AUDIO, true, NULL, new CAudioSetup(), NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_audio);

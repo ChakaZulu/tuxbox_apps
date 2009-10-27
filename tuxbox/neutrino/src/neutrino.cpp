@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.999 2009/10/23 19:34:13 seife Exp $
+	$Id: neutrino.cpp,v 1.1000 2009/10/27 20:28:42 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -83,7 +83,6 @@
 #include "gui/widget/dirchooser.h"
 #include "gui/widget/hintbox.h"
 #include "gui/widget/icons.h"
-#include "gui/widget/rgbcsynccontroler.h"
 #include "gui/widget/messagebox.h"
 
 #ifdef ENABLE_AUDIOPLAYER
@@ -1669,129 +1668,6 @@ void CNeutrinoApp::SetupTiming()
 }
 
 
-/* cut here */
-#define VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT 5
-const CMenuOptionChooser::keyval VIDEOMENU_VIDEOSIGNAL_OPTIONS[VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT] =
-{
-	{ 1, LOCALE_VIDEOMENU_VIDEOSIGNAL_RGB       },
-	{ 2, LOCALE_VIDEOMENU_VIDEOSIGNAL_SVIDEO    },
-	{ 3, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_V     },
-	{ 4, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_C     },
-	{ 0, LOCALE_VIDEOMENU_VIDEOSIGNAL_COMPOSITE }
-};
-
-#define VIDEOMENU_VCRSIGNAL_OPTION_COUNT 2
-const CMenuOptionChooser::keyval VIDEOMENU_VCRSIGNAL_OPTIONS[VIDEOMENU_VCRSIGNAL_OPTION_COUNT] =
-{
-	{ 2, LOCALE_VIDEOMENU_VCRSIGNAL_SVIDEO    },
-	{ 0, LOCALE_VIDEOMENU_VCRSIGNAL_COMPOSITE }
-};
-
-#define VIDEOMENU_VIDEOFORMAT_OPTION_COUNT 4
-const CMenuOptionChooser::keyval VIDEOMENU_VIDEOFORMAT_OPTIONS[VIDEOMENU_VIDEOFORMAT_OPTION_COUNT] =
-{
-	{ CControldClient::VIDEOFORMAT_4_3, LOCALE_VIDEOMENU_VIDEOFORMAT_43         },
-	{ CControldClient::VIDEOFORMAT_4_3_PS, LOCALE_VIDEOMENU_VIDEOFORMAT_431        },
-	{ CControldClient::VIDEOFORMAT_16_9, LOCALE_VIDEOMENU_VIDEOFORMAT_169        },
-	{ CControldClient::VIDEOFORMAT_AUTO, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT }
-};
-
-class CVideoSettings : public CMenuWidget, CChangeObserver
-{
-	CMenuForwarder *   SyncControlerForwarder;
-	CMenuOptionChooser * VcrVideoOutSignalOptionChooser;
-	CRGBCSyncControler RGBCSyncControler;
-	CScreenSetup       ScreenSetup;
-	int                video_out_signal;
-	int                vcr_video_out_signal;
-
-public:
-	CVideoSettings() : CMenuWidget(LOCALE_VIDEOMENU_HEAD, "video.raw"), RGBCSyncControler(LOCALE_VIDEOMENU_RGB_CENTERING, &g_settings.video_csync)
-		{
-			addItem(GenericMenuSeparator);
-			addItem(GenericMenuBack);
-			addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_VIDEOMENU_TV_SCART));
-
-			addItem(new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &video_out_signal, VIDEOMENU_VIDEOSIGNAL_OPTIONS, VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT, true, this));
-
-			CMenuOptionChooser * oj1 = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT, true, this);
-			CMenuOptionChooser * oj2 = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT_BG, &g_settings.video_backgroundFormat, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT-1, true, this);
-
-			if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
-			{
-				changeNotify(LOCALE_VIDEOMENU_VIDEOFORMAT, NULL);
-			}
-			
-			addItem(oj1);
-			addItem(oj2);
-
-			SyncControlerForwarder = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, false, NULL, &RGBCSyncControler);
-			addItem(SyncControlerForwarder);
-
-			addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_VIDEOMENU_VCR_SCART));
-			// Switching VCR Output presently does not work on the Philips.
-			if (g_info.box_Type != CControld::TUXBOX_MAKER_PHILIPS)
-			{
-				VcrVideoOutSignalOptionChooser = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSIGNAL, &vcr_video_out_signal, VIDEOMENU_VCRSIGNAL_OPTIONS, VIDEOMENU_VCRSIGNAL_OPTION_COUNT, false, this);
-				addItem(VcrVideoOutSignalOptionChooser);
-			}
-			else
-				VcrVideoOutSignalOptionChooser = 0;
-			addItem(new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
-
-			addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_VIDEOMENU_OSD));
-			addItem(new CMenuForwarder(LOCALE_VIDEOMENU_SCREENSETUP, true, NULL, &ScreenSetup));
-		};
-
-	virtual bool changeNotify(const neutrino_locale_t OptionName, void *)
-		{
-			CNeutrinoApp * neutrino = CNeutrinoApp::getInstance();
-
-			if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOSIGNAL))
-			{
-				while ((vcr_video_out_signal) == CControldClient::VIDEOOUTPUT_SVIDEO && (video_out_signal != CControldClient::VIDEOOUTPUT_SVIDEO) && (video_out_signal != CControldClient::VIDEOOUTPUT_COMPOSITE) )
-					video_out_signal = (video_out_signal + 1) % 5;
-				g_Controld->setVideoOutput(video_out_signal);
-				if (VcrVideoOutSignalOptionChooser)
-					VcrVideoOutSignalOptionChooser->setActive((video_out_signal == CControldClient::VIDEOOUTPUT_COMPOSITE) || (video_out_signal == CControldClient::VIDEOOUTPUT_SVIDEO));
-				SyncControlerForwarder->setActive((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_CVBS));
-			}
-			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VCRSIGNAL))
-			{
-				g_Controld->setVCROutput(vcr_video_out_signal);
-			}
-			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT) && (neutrino->getMode() != NeutrinoMessages::mode_radio))
-			{
-				g_Controld->setVideoFormat(g_settings.video_Format);
-			}
-			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT_BG) && (neutrino->getMode() == NeutrinoMessages::mode_radio))
-			{
-				g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
-			}
-
-			return true;
-		};
-
-	virtual void paint()
-		{
-			video_out_signal = g_Controld->getVideoOutput();
-			vcr_video_out_signal = g_Controld->getVCROutput();
-
-			if (VcrVideoOutSignalOptionChooser)
-				VcrVideoOutSignalOptionChooser->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_COMPOSITE) || (video_out_signal == CControldClient::VIDEOOUTPUT_SVIDEO));
-			SyncControlerForwarder->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal ==  CControldClient::VIDEOOUTPUT_YUV_CVBS));
-
-			//g_settings.video_Format = g_Controld->getVideoFormat();
-
-			CMenuWidget::paint();
-		};
-};
-
-
-
-
-
-
 bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer, char * filename)
 {
 	CTimerd::RecordingInfo eventinfo;
@@ -2169,7 +2045,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 #endif
 #ifdef ENABLE_MOVIEPLAYER2
 #ifdef ENABLE_MOVIEBROWSER
-	movieBrowser				= new CMovieBrowser();
+	movieBrowser			= new CMovieBrowser();
 #endif
 #endif
 
@@ -2187,7 +2063,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    mainMenu            (LOCALE_MAINMENU_HEAD                 , "mainmenue.raw"       );
 	CMenuWidget    mainSettings        (LOCALE_MAINSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    languageSettings    (LOCALE_LANGUAGESETUP_HEAD            , "language.raw"        );
-	CVideoSettings videoSettings                                                                      ;
 	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK     , "lock.raw"            , 500);
 	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD              , "network.raw"         , 430);
 	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD            , "recording.raw"       );
@@ -2213,7 +2088,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 					colorSettings,
 					lcdSettings,
 					keySettings,
-					videoSettings,
 					languageSettings,
 					miscSettings,
 					driverSettings,
