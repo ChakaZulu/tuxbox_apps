@@ -22,7 +22,7 @@
  * 	Foundation, 51 Franklin Street, Fifth Floor Boston, MA 02110-1301, USA.
  *
  ******************************************************************************
- * $Id: rcsim.c,v 1.6 2009/10/21 18:59:24 seife Exp $
+ * $Id: rcsim.c,v 1.7 2009/10/28 19:50:56 seife Exp $
  ******************************************************************************/
 
 #include <stdio.h>
@@ -35,6 +35,9 @@
 #include <unistd.h>
 #include <linux/input.h>
 #include <error.h>
+
+/* if you want use HAVE_XX_HARDWARE, better include config.h :-) */
+#include "config.h"
 
 #ifdef HAVE_DBOX_HARDWARE
 #define EVENTDEV "/dev/input/event0"
