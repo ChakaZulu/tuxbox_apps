@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.31 2009/10/13 19:40:01 dbt Exp $
+	$Id: moviebrowser.cpp,v 1.32 2009/10/28 20:48:42 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,12 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.32  2009/10/28 20:48:42  seife
+	moviebrowser: fix segfault on "OK" with empty TS archive
+	
+	reported and debugged by GetAway, see
+	http://forum.tuxbox.org/forum/viewtopic.php?p=371817#p371817
+	
 	Revision 1.31  2009/10/13 19:40:01  dbt
 	datatype and names for some settings variables matching for purpose changed, nfs* was not very matching
 	
@@ -502,7 +508,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.31 2009/10/13 19:40:01 dbt Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.32 2009/10/28 20:48:42 seife Exp $\r\n");
 	init();
 }
 
@@ -1153,7 +1159,7 @@ int CMovieBrowser::exec(const char* path)
     refreshTitle();
  	onSetGUIWindow(m_settings.gui);
  
- 	bool loop = true;
+	bool loop = !m_vMovieInfo.empty(); // if the movie archive is empty, skip the loop
 	bool result;
 	g_RCInput->clearRCMsg();	//
 	while (loop)
