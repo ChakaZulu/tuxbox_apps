@@ -1297,9 +1297,6 @@ ReadTSFileThread(void *parm)
 	ringbuffer_reset(ringbuf); // not aligned anymore, so reset...
 	mf_lseek(filepos);
 
-	skipabsolute = false;
-	skipseconds = 0;
-
 	while (g_playstate != CMoviePlayerGui::STOPPED && !g_EOF && !g_input_failed)
 	{
 		time_t now;
@@ -1548,8 +1545,6 @@ ReadMPEGFileThread(void *parm)
 	g_endpts = -1;
 	bool input_empty = true;
 	g_input_failed = false;
-	skipabsolute = false;
-	skipseconds = 0;
 
 	g_startpts = get_PES_PTS(buf_in, 0);
 	INFO("PTS at file start: %ld\n", g_startpts);
@@ -2039,6 +2034,8 @@ OutputThread(void *arg)
 
 	INFO("mrl:%s\n", fn);
 
+	skipabsolute = false;
+	skipseconds = 0;
 	g_currentapid = -1;	// this gets also set by the input threads, but maybe too late.
 	g_input_failed = false; // there is no input thread running now... hopefully.
 	pthread_t rcvt;	// the input / "receive" thread
@@ -3361,7 +3358,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.59 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.60 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
