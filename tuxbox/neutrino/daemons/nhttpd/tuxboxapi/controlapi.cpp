@@ -1291,7 +1291,25 @@ void CControlAPI::ZaptoCGI(CyhookHandler *hh)
 			hh->SendOk();
 		}
 		else if (hh->ParamList["1"] == "statussectionsd")
-			hh->Write((char *) (NeutrinoAPI->Sectionsd->getIsScanningActive() ? "1" : "0"));
+			hh->Write((char *) (NeutrinoAPI->Sectionsd->getIsScanningActive() ? "scanning active" : "scanning paused\n"));
+		else if (hh->ParamList["1"] == "restartsectionsd")
+		{
+			NeutrinoAPI->Sectionsd->Restart();
+			hh->printf("--&gt; restarting sectionsd...<br>");
+			NeutrinoAPI->Sectionsd->RegisterNeutrino();
+			hh->printf("--&gt; registering neutrino...<br>");
+			NeutrinoAPI->Sectionsd->setPauseScanning(false);
+			hh->printf("--&gt; set scanning active...<br>");
+			NeutrinoAPI->Sectionsd->setServiceChanged(NeutrinoAPI->Zapit->getCurrentServiceID(), false);
+			hh->printf("--&gt; send sectionsd ServiceChanged...<br>");
+			hh->printf("<hr style=\"color:black; background-color:black; height:2px; width:250px; margin-left:0; text-align:left;\">");
+			hh->Write((char *) (NeutrinoAPI->Sectionsd->getIsScanningActive() ? "sectionsd restarted, scanning active!" : "sectionsd restarted, scanning paused"));
+		}
+		else if (hh->ParamList["1"] == "freememsectionsd")
+		{
+			NeutrinoAPI->Sectionsd->freeMemory();
+			hh->printf("freeing memory... done!\n");
+		}
 		else if (hh->ParamList["1"] == "getallsubchannels")
 		{
 			t_channel_id current_channel = NeutrinoAPI->Zapit->getCurrentServiceID();
