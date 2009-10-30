@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1001 2009/10/30 22:06:04 seife Exp $
+	$Id: neutrino.cpp,v 1.1002 2009/10/30 22:38:01 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3672,6 +3672,17 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 			g_Sectionsd->setPauseScanning(true);
 			CLCD::getInstance()->setEPGTitle("");
 		}
+#ifdef HAVE_TRIPLEDRAGON
+		/* this is ugly, and it would belong into zapit.
+		   IOC_AVS_STANDBY_ENTER switches off the frontpanel LEDs and
+		   it disables the power supply of the frontend, so this needs
+		   to come after zapit->standby() and needs to be disabled
+		   before zapit is woken up again */
+#define IOC_AVS_STANDBY_ENTER _IOW(0x73, 98, unsigned int)
+		int fd = open("/dev/stb/tdsystem", O_RDONLY);
+		ioctl(fd, IOC_AVS_STANDBY_ENTER);
+		close(fd);
+#endif
 
 		standbyAfterRecord = false; // reset
 		wakeupfromScart = false; //reset
@@ -3687,6 +3698,12 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	else
 	{
 		// STANDBY AUS
+#ifdef HAVE_TRIPLEDRAGON
+#define IOC_AVS_STANDBY_LEAVE _IOW(0x73, 99, unsigned int)
+		int fd = open("/dev/stb/tdsystem", O_RDONLY);
+		ioctl(fd, IOC_AVS_STANDBY_LEAVE);
+		close(fd);
+#endif
 
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		if (g_settings.standby_save_power)
