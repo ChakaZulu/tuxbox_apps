@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.44 2009/09/29 14:53:28 rhabarber1848 Exp $
+	$Id: streaminfo2.cpp,v 1.45 2009/10/30 23:22:40 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -114,6 +114,7 @@ CStreamInfo2::CStreamInfo2()
 #ifdef HAVE_DBOX_HARDWARE
 			actmode = g_Zapit->PlaybackState();
 			if (actmode == 0) { //PES Mode aktiv
+#endif
 				CZapitClient::responseGetPIDs allpids;
 				g_Zapit->getPIDS(allpids);
 				for (unsigned int i = 0; i < allpids.APIDs.size(); i++) {
@@ -125,6 +126,7 @@ CStreamInfo2::CStreamInfo2()
 						}
 					}
 				}	
+#ifdef HAVE_DBOX_HARDWARE
 				g_Zapit->PlaybackSPTS();
 			}
 #endif
@@ -201,62 +203,65 @@ int CStreamInfo2::doSignalStrengthLoop ()
 	CZapitClient::responseFESignal s;
 	int i = 0;
 	unsigned int long_average = 0;
+#ifdef HAVE_TRIPLEDRAGON
+#define INTERVAL 250
+#else
+#define INTERVAL 100
+#endif
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd_MS(INTERVAL);
 
 	while (1) {
 		neutrino_msg_data_t data;
 
-		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd_MS(100);
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-		// -- read signal from Frontend
-		g_Zapit->getFESignal(s);
+		/* only do the processing loop if we are not more than 1ms short
+		   which can happen if e.g. a key is pressed or a message comes in */
+		if((long long)timeoutEnd - CRCInput::calcTimeoutEnd_MS(0) < 1000)
+		{
+			// -- read signal from Frontend
+			g_Zapit->getFESignal(s);
 
-		signal.sig = s.sig & 0xFFFF;
-		signal.snr = s.snr & 0xFFFF;
-		signal.ber = (s.ber < 0x3FFFF) ? s.ber : 0x3FFFF;  // max. Limit
+			signal.sig = s.sig & 0xFFFF;
+			signal.snr = s.snr & 0xFFFF;
+			signal.ber = (s.ber < 0x3FFFF) ? s.ber : 0x3FFFF;  // max. Limit
 
-		if (brc) {
-			rate.short_average = brc->calc(long_average);
-		}
-		if (paint_mode == 0 && i == AVERAGE_OVER_X_MEASUREMENTS + 5) {
-			paint_bitrate(long_average);
-		}
-		if (i == AVERAGE_OVER_X_MEASUREMENTS + 5) {
-			if (rate.max_short_average < rate.short_average) {
-				rate.max_short_average = rate.short_average;
+			if (brc)
+				rate.short_average = brc->calc(long_average);
+
+			if (paint_mode == 0 && i == AVERAGE_OVER_X_MEASUREMENTS + 5)
+				paint_bitrate(long_average);
+
+			if (i == AVERAGE_OVER_X_MEASUREMENTS + 5)
+			{
+				if (rate.max_short_average < rate.short_average)
+					rate.max_short_average = rate.short_average;
+				if (rate.min_short_average > rate.short_average)
+					rate.min_short_average = rate.short_average;
+				paint_signal_fe(rate, signal);
+				signal.old_sig = signal.sig;
+				signal.old_snr = signal.snr;
+				signal.old_ber = signal.ber;
 			}
-			if (rate.min_short_average > rate.short_average) {
-				rate.min_short_average = rate.short_average;
-			}
-			paint_signal_fe(rate, signal);
-			signal.old_sig = signal.sig;
-			signal.old_snr = signal.snr;
-			signal.old_ber = signal.ber;
-		} else {
-			i++;
-		}
-		
-		if (signal.max_ber < signal.ber) {
-			signal.max_ber = signal.ber;
-		}
-		if (signal.max_sig < signal.sig) {
-			signal.max_sig = signal.sig;
-		}
-		if (signal.max_snr < signal.snr) {
-			signal.max_snr = signal.snr;
-		}
-		
-		if (signal.min_ber > signal.ber) {
-			signal.min_ber = signal.ber;
-		}
-		if (signal.min_sig > signal.sig) {
-			signal.min_sig = signal.sig;
-		}
-		if (signal.min_snr > signal.snr) {
-			signal.min_snr = signal.snr;
-		}
+			else
+				i++;
 
+			if (signal.max_ber < signal.ber)
+				signal.max_ber = signal.ber;
+			if (signal.max_sig < signal.sig)
+				signal.max_sig = signal.sig;
+			if (signal.max_snr < signal.snr)
+				signal.max_snr = signal.snr;
 
+			if (signal.min_ber > signal.ber)
+				signal.min_ber = signal.ber;
+			if (signal.min_sig > signal.sig)
+				signal.min_sig = signal.sig;
+			if (signal.min_snr > signal.snr)
+				signal.min_snr = signal.snr;
+
+			timeoutEnd = CRCInput::calcTimeoutEnd_MS(INTERVAL);
+		}
 
 		// switch paint mode
 		if (msg == CRCInput::RC_red) {
@@ -505,6 +510,9 @@ void CStreamInfo2::paint(int/*mode*/)
 void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 {
 	// Info Output
+	char buf[100], buf2[100];
+	int count = 0;
+#ifndef HAVE_TRIPLEDRAGON
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
 	if (fd==NULL)
 	{
@@ -514,8 +522,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 
 	long bitInfo[10];
 
-	char *key,*tmpptr,buf[100], buf2[100];
-	int count = 0;
+	char *key,*tmpptr;
 	long value;
 	int pos=0;
 	fgets(buf,35,fd);//dummy
@@ -606,6 +613,9 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	g_Font[font_info]->RenderString(xpos, ypos+ iheight, width-10, g_Locale->getText(LOCALE_STREAMINFO_AUDIOTYPE), COL_MENUCONTENT, 0, true); // UTF-8
 	g_Font[font_info]->RenderString(outputpos_x, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= iheight+ 10;
+#else /* tripledragon */
+	ypos+= iheight * 3 + 10;
+#endif
 
 	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
 	
@@ -796,7 +806,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 std::string CStreamInfo2Misc::getStreamInfoVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("","$Revision: 1.44 $");
+	return imageinfo.getModulVersion("","$Revision: 1.45 $");
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &)
