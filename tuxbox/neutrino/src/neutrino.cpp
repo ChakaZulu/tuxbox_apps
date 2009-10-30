@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1003 2009/10/30 22:38:23 seife Exp $
+	$Id: neutrino.cpp,v 1.1004 2009/10/30 22:48:35 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2298,15 +2298,29 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	irs.Send();
 #endif
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <tddevices.h>
+#include <avs/avs_inf.h>
+#define VCR_DEVICE	"/dev/" DEVICE_NAME_AVS
+#define VCR_IOCTL	IOC_AVS_GET_EVENT
+/* the TD has 0/1=0V, 2=6V, 3=12V */
+#define VCR_0V		1
+#else
+#define VCR_DEVICE	"/dev/dbox/fp0"
+#define VCR_IOCTL	FP_IOCTL_GET_VCR
+/* dbox has 0=0V, 1=6V, 2=12V */
+#define VCR_0V		0
+#endif
+
 	if (g_settings.vcr_AutoSwitch)
 	{
 		int val = 0;
-		int fp = open("/dev/dbox/fp0",O_RDWR);
+		int fp = open(VCR_DEVICE ,O_RDWR);
 		if (fp >= 0)
 		{
-			ioctl(fp, FP_IOCTL_GET_VCR, &val);
+			ioctl(fp, VCR_IOCTL, &val);
 			close(fp);
-			if (val > 0)
+			if (val > VCR_0V)
 			{
 				dprintf(DEBUG_NORMAL, "Switching to scart mode...\n");
 				lastMode = mode;
