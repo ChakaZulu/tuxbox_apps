@@ -53,7 +53,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#ifdef HAVE_TRIPLEDRAGON
+#else
 #include <dbox/fb.h>
+#endif
 
 #include <global.h>
 #include <neutrino.h>

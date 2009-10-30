@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1000 2009/10/27 20:28:42 dbt Exp $
+	$Id: neutrino.cpp,v 1.1001 2009/10/30 22:06:04 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -65,7 +65,9 @@
 
 #include "global.h"
 #include "neutrino.h"
+#ifndef HAVE_TRIPLEDRAGON
 #include <dbox/fp.h>
+#endif
 
 #include <daemonc/remotecontrol.h>
 
@@ -365,14 +367,20 @@ int CNeutrinoApp::loadSetup()
 	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", false);
 
 	//misc
+#ifndef HAVE_TRIPLEDRAGON
 	g_settings.standby_save_power		= configfile.getBool("standby_save_power"        , false);
+#else
+	/* on TD this is REQUIRED for proper working standby etc. */
+	g_settings.standby_save_power		= true;
+#endif
 #ifdef HAVE_DBOX_HARDWARE
 	g_settings.shutdown_real		= configfile.getBool("shutdown_real"             , true );
+	g_settings.shutdown_real_rcdelay	= configfile.getBool("shutdown_real_rcdelay"     , true );
 #else
 	/* most dreamboxen and the TD cannot do a real shutdown */
 	g_settings.shutdown_real		= configfile.getBool("shutdown_real"             , false);
+	g_settings.shutdown_real_rcdelay	= configfile.getBool("shutdown_real_rcdelay"     , false);
 #endif
-	g_settings.shutdown_real_rcdelay	= configfile.getBool("shutdown_real_rcdelay"     , true );
 	g_settings.standby_off_with		= configfile.getInt32("standby_off_with" , 0 );
 	strcpy(g_settings.shutdown_count, configfile.getString("shutdown_count","0").c_str());
 	g_settings.volumebar_disp_pos		= configfile.getInt32("volumebar_disp_pos" , 4 );
@@ -402,7 +410,12 @@ int CNeutrinoApp::loadSetup()
 #else
 	// the dreambox 500 (and the TD) has 32 volume steps, so a stepwidth of 3 matches the hardware better
 	strcpy( g_settings.audio_step,		configfile.getString( "audio_step" , "3" ).c_str() );
+#ifdef HAVE_TRIPLEDRAGON
+	g_settings.audio_avs_Control 		= configfile.getInt32("audio_avs_Control", CControld::TYPE_AVS);
+#else
+	// dreambox
 	g_settings.audio_avs_Control 		= CControld::TYPE_OST;
+#endif
 #endif
 	strcpy( g_settings.audio_PCMOffset, configfile.getString( "audio_PCMOffset", "0" ).c_str() );
 
@@ -504,7 +517,24 @@ int CNeutrinoApp::loadSetup()
 
 	g_settings.personalize_tvmode = configfile.getInt32("personalize_tvmode", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_radiomode = configfile.getInt32("personalize_radiomode", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+#ifdef BOXMODEL_DM500
+	// the dm500 has no SCART in and cannot really shut down, so let's hide those entries
+	g_settings.personalize_scartmode = configfile.getInt32("personalize_scartmode", CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE);
+	g_settings.personalize_shutdown = configfile.getInt32("personalize_shutdown", CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE);
+	g_settings.personalize_lcd = configfile.getInt32("personalize_lcd", CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE);
+#else
 	g_settings.personalize_scartmode = configfile.getInt32("personalize_scartmode", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+#ifdef HAVE_TRIPLEDRAGON
+	// no real shutdown, so let's hide it
+	g_settings.personalize_shutdown = configfile.getInt32("personalize_shutdown", CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE);
+#else
+	g_settings.personalize_shutdown = configfile.getInt32("personalize_shutdown", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+#endif
+	g_settings.personalize_lcd = configfile.getInt32("personalize_lcd", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+#endif
+	g_settings.personalize_sleeptimer = configfile.getInt32("personalize_sleeptimer", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+	g_settings.personalize_reboot = configfile.getInt32("personalize_reboot", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
+
 	g_settings.personalize_games = configfile.getInt32("personalize_games", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_audioplayer = configfile.getInt32("personalize_audioplayer", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_inetradio = configfile.getInt32("personalize_inetradio", CPersonalizeGui::PERSONALIZE_MODE_NOTVISIBLE);
@@ -516,9 +546,6 @@ int CNeutrinoApp::loadSetup()
 #endif
 	g_settings.personalize_settings = configfile.getInt32("personalize_settings", CPersonalizeGui::PROTECT_MODE_NOT_PROTECTED);
 	g_settings.personalize_service = configfile.getInt32("personalize_service", CPersonalizeGui::PROTECT_MODE_NOT_PROTECTED);
-	g_settings.personalize_sleeptimer = configfile.getInt32("personalize_sleeptimer", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
-	g_settings.personalize_reboot = configfile.getInt32("personalize_reboot", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
-	g_settings.personalize_shutdown = configfile.getInt32("personalize_shutdown", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 
 	g_settings.personalize_bouqueteditor = configfile.getInt32("personalize_bouqueteditor", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);
 	g_settings.personalize_scants = configfile.getInt32("personalize_scants", CPersonalizeGui::PERSONALIZE_MODE_VISIBLE);

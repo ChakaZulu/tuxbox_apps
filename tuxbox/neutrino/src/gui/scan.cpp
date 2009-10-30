@@ -48,7 +48,8 @@
 #include <global.h>
 #include <neutrino.h>
 
-#if HAVE_DVB_API_VERSION >= 3
+#ifdef HAVE_TRIPLEDRAGON
+#elif HAVE_DVB_API_VERSION >= 3
 #else
 #include <ost/frontend.h>
 #include <ost/sec.h>
@@ -103,13 +104,14 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 	// manual TP scan
 	if(get_set.TP_scan == CScanTs::SCAN_ONE_TP)
 	{
-#if HAVE_DVB_API_VERSION < 3
+#ifdef HAVE_TRIPLEDRAGON
+		TP.feparams.frequency = atoi(get_set.TP_freq);
+		TP.feparams.symbolrate = atoi(get_set.TP_rate);
+		TP.feparams.fec = get_set.TP_fec;
+#elif HAVE_DVB_API_VERSION < 3
 		TP.feparams.Frequency = atoi(get_set.TP_freq);
 		TP.feparams.u.qpsk.SymbolRate = atoi(get_set.TP_rate);
 		TP.feparams.u.qpsk.FEC_inner = (CodeRate)get_set.TP_fec;
-		TP.polarization = get_set.TP_pol;
-		TP.diseqc = (uint8_t)get_set.TP_diseqc;
-//printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.Frequency, TP.feparams.u.qpsk.SymbolRate, TP.feparams.u.qpsk.FEC_inner, TP.polarization);
 #else
 		TP.feparams.frequency = atoi(get_set.TP_freq);
 		if(g_info.delivery_system == DVB_S) {
@@ -120,11 +122,11 @@ printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %
 			TP.feparams.u.qam.fec_inner = (fe_code_rate_t) get_set.TP_fec;
 			TP.feparams.u.qam.modulation = (fe_modulation_t) get_set.TP_mod;
 		}
+#endif
 		TP.polarization = get_set.TP_pol;
 		TP.diseqc = (uint8_t)get_set.TP_diseqc;
-
+// printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.Frequency, TP.feparams.u.qpsk.SymbolRate, TP.feparams.u.qpsk.FEC_inner, TP.polarization);
 // printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.frequency, TP.feparams.u.qpsk.symbol_rate, TP.feparams.u.qpsk.fec_inner, TP.polarization);
-#endif
 	//return menu_return::RETURN_REPAINT;
 	}
 	success = false;

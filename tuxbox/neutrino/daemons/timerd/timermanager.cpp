@@ -6,7 +6,7 @@
 
 	Copyright (C) 2009 Stefan Seyfried
 
-   $Id: timermanager.cpp,v 1.97 2009/10/12 07:35:37 rhabarber1848 Exp $
+   $Id: timermanager.cpp,v 1.98 2009/10/30 22:06:03 seife Exp $
 
 	License: GPL
 
@@ -30,7 +30,6 @@
 #include <errno.h>
 
 #include <sstream>
-
 // also includes config.h - for HAVE_xxx_HARDWARE etc...
 #include <timermanager.h>
 
@@ -78,6 +77,7 @@ CTimerManager::CTimerManager()
 		close(fd);
 	}
 #endif
+
 	//thread starten
 	if(pthread_create (&thrTimer, NULL, timerThread, (void *) this) != 0 )
 	{
@@ -737,6 +737,7 @@ bool CTimerManager::shutdown()
 		}
 	}
 
+#ifndef HAVE_TRIPLEDRAGON
 	if(nextAnnounceTime!=0)
 	{
 		int minutes=((nextAnnounceTime-time(NULL))/60)-3; //Wakeup 3 min befor next announce
@@ -757,6 +758,7 @@ bool CTimerManager::shutdown()
 		}
 #endif
 	}
+#endif
 	pthread_mutex_unlock(&tm_eventsMutex);
 	return status;
 }

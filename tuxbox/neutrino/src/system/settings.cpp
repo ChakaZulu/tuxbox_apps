@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.51 2009/04/02 07:58:13 seife Exp $
+        $Id: settings.cpp,v 1.52 2009/10/30 22:06:05 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -211,7 +211,9 @@ void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 	scanType	= CZapitClient::ST_ALL;
 	diseqcMode	= NO_DISEQC;
 	diseqcRepeat	= 0;
-#if HAVE_DVB_API_VERSION >= 3
+#ifdef HAVE_TRIPLEDRAGON
+	TP_mod		= 0;
+#elif HAVE_DVB_API_VERSION >= 3
 	TP_mod		= QAM_AUTO;
 #else
 	// i do not know how to do it correctly for old API -- seife
@@ -275,7 +277,9 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 	TP_scan = configfile.getInt32("TP_scan", 0);
 	TP_fec = configfile.getInt32("TP_fec", 1);
 	TP_pol = configfile.getInt32("TP_pol", 0);
-#if HAVE_DVB_API_VERSION >= 3
+#ifdef HAVE_TRIPLEDRAGON
+	TP_mod = configfile.getInt32("TP_mod", 0); // dummy
+#elif HAVE_DVB_API_VERSION >= 3
 	TP_mod = configfile.getInt32("TP_mod", QAM_AUTO); // default qam auto
 #else
 	// i do not know how to do it correctly for old API -- seife

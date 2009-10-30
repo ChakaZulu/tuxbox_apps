@@ -397,9 +397,11 @@ void CPlugins::startPlugin(int number,int param)
 	if (plugin_list[number].lcd)
 	{
 		CLCD::getInstance()->pause();
-
+#ifdef HAVE_TRIPLEDRAGON
+		lcd_fd = open("/dev/stb/tdlcd", O_RDWR);
+#else
 		lcd_fd = open("/dev/dbox/lcd0", O_RDWR);
-
+#endif
 		startparam = makeParam(P_ID_LCD      , lcd_fd                          , startparam);
 	}
 	if (plugin_list[number].vtxtpid)
