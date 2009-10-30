@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1002 2009/10/30 22:38:01 seife Exp $
+	$Id: neutrino.cpp,v 1.1003 2009/10/30 22:38:23 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3706,12 +3706,12 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 #endif
 
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+		g_Controld->videoPowerDown(false);
 		if (g_settings.standby_save_power)
 		{
 			g_Zapit->setStandby(false);
 			g_Sectionsd->setPauseScanning(false);
 		}
-		g_Controld->videoPowerDown(false);
 
 		execute_start_file(NEUTRINO_LEAVE_STANDBY_SCRIPT);
 
