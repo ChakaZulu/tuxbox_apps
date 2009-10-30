@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1004 2009/10/30 22:48:35 seife Exp $
+	$Id: neutrino.cpp,v 1.1005 2009/10/30 23:13:40 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2710,7 +2710,23 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t m, neutrino_msg_data_t data)
 			setVolume(msg, (mode != mode_scart));
 			return messages_return::handled;
 		}
-
+#ifdef HAVE_TRIPLEDRAGON
+		else if(msg == CRCInput::RC_zoomin)
+		{
+			g_Zapit->setZoom(g_Zapit->getZoom() + 2);
+			return messages_return::handled;
+		}
+		else if(msg == CRCInput::RC_zoomout)
+		{
+			g_Zapit->setZoom(g_Zapit->getZoom() - 2);
+			return messages_return::handled;
+		}
+		else if(msg == CRCInput::RC_zoomoff)
+		{
+			g_Zapit->setZoom(100);
+			return messages_return::handled;
+		}
+#endif
 		/* HACK: mark all key-repeat and key-release events as "handled" in order not to
 		   screw up all the menus and hintboxes that do not yet handle them correctly */
 		if (msg <= CRCInput::RC_MaxRC)
