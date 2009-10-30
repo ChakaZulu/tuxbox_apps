@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.32 2009/10/28 20:48:42 seife Exp $
+	$Id: moviebrowser.cpp,v 1.33 2009/10/30 21:05:49 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.33  2009/10/30 21:05:49  seife
+	moviebrowser: fix ignored NULL-check due to superfluous semicolon
+	
 	Revision 1.32  2009/10/28 20:48:42  seife
 	moviebrowser: fix segfault on "OK" with empty TS archive
 	
@@ -508,7 +511,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.32 2009/10/28 20:48:42 seife Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.33 2009/10/30 21:05:49 seife Exp $\r\n");
 	init();
 }
 
@@ -1943,7 +1946,7 @@ bool CMovieBrowser::onButtonPressMainFrame(neutrino_msg_t msg)
 	}
 	else if (msg == CRCInput::RC_setup) 
 	{
-		if(m_movieSelectionHandler != NULL);
+		if(m_movieSelectionHandler != NULL)
 			showMenu(m_movieSelectionHandler);
 	}
 #ifdef MOVEMANAGER	
