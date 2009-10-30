@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.283 2009/10/17 16:31:44 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.284 2009/10/30 07:46:36 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1676,7 +1676,7 @@ void CInfoViewer::showInfoFile()
 	xStart = BoxStartX + ChanWidth + 40;	// right of record icon
 	xEnd   = BoxEndX - 125;			// left of progressbar
 	height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getHeight() + 2;
-	r = height / 3;
+	r = RADIUS_SMALL;
 	// background
 	frameBuffer->paintBox(xStart, BoxStartY, xEnd, BoxStartY + height, COL_INFOBAR_PLUS_0, r);
 
