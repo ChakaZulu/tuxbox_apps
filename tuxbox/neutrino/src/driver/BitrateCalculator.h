@@ -39,6 +39,10 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
+#ifdef HAVE_TRIPLEDRAGON
+#include <zapit/td-demux-compat.h>
+#include <tddevices.h>
+#else
 #if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/dmx.h>
 #define DMXDEV	"/dev/dvb/adapter0/demux0"
@@ -47,6 +51,7 @@
 #include <ost/dmx.h>
 #define DMXDEV	"/dev/dvb/card0/demux0"
 #define DVRDEV	"/dev/dvb/card0/dvr0"
+#endif
 #endif
 
 /*
@@ -65,28 +70,34 @@ class BitrateCalculator
 {
 	protected:
 		int 				pid;
-		struct pollfd			pfd;
+#ifdef HAVE_TRIPLEDRAGON
+		demux_pes_para			flt;
+#else
 #if HAVE_DVB_API_VERSION >= 3
 		struct dmx_pes_filter_params	flt;
 #else
 		struct dmxPesFilterParams	flt;
 #endif
-		int 				dmxfd;
+		struct pollfd			pfd;
 		struct timeval 			tv,last_tv, first_tv;
 		long				b;
 		long				packets_bad;
+		u_char 	 			buf[TS_BUF_SIZE];
+#endif
+		int 				dmxfd;
 		unsigned int			buffer[AVERAGE_OVER_X_MEASUREMENTS];
 		unsigned int			buffer2[240];
 		int				counter;
 		int				counter2;
 		unsigned int			sum;
 		unsigned int			sum2;
-		u_char 	 			buf[TS_BUF_SIZE];
 		bool				first_round;
 		bool				first_round2;
 
 	public:
-#if HAVE_DVB_API_VERSION >= 3
+#ifdef HAVE_TRIPLEDRAGON
+		BitrateCalculator(int inPid);
+#elif HAVE_DVB_API_VERSION >= 3
 		BitrateCalculator(int inPid, dmx_output_t flt_output = DMX_OUT_TS_TAP);
 #else
 		BitrateCalculator(int inPid, dmxOutput_t flt_output = DMX_OUT_TS_TAP);
@@ -97,6 +108,7 @@ class BitrateCalculator
 		virtual ~BitrateCalculator();
 };
 
+#ifndef HAVE_TRIPLEDRAGON
 class BitrateCalculatorRadio : public BitrateCalculator
 {
 	public:
@@ -104,5 +116,9 @@ class BitrateCalculatorRadio : public BitrateCalculator
 		virtual ~BitrateCalculatorRadio();
 		virtual unsigned int calc(unsigned int &long_average);
 };
+#else
+/* lame hack */
+#define BitrateCalculatorRadio BitrateCalculator
+#endif
 
 #endif

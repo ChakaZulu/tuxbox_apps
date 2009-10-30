@@ -36,6 +36,7 @@
 
 */
 
+#ifndef HAVE_TRIPLEDRAGON
 static unsigned long timeval_to_ms(const struct timeval *tv)
 {
 	return (tv->tv_sec * 1000) + ((tv->tv_usec + 500) / 1000);
@@ -320,3 +321,111 @@ unsigned int BitrateCalculatorRadio::calc(unsigned int &long_average)
 
 	return short_average;
 }
+
+#else /* HAVE_TRIPLEDRAGON */
+BitrateCalculator::BitrateCalculator(int inPid)
+{
+	pid = inPid;
+
+	dmxfd = open("/dev/" DEVICE_NAME_DEMUX "1", O_RDWR|O_NONBLOCK);
+	if (dmxfd < 0)
+	{
+		perror("BitrateCalculator: /dev/" DEVICE_NAME_DEMUX "1");
+		return;
+	}
+	printf("PID: %u (0x%04x) dmxfd: %d\n", pid, pid, dmxfd);
+
+	memset (&flt, 0, sizeof (struct demux_pes_para));
+	struct UnloaderConfig_t u;
+	u.unloader_type = UNLOADER_TYPE_MEASURE_DUMMY;
+	u.threshold = 1;
+
+	flt.pid      = pid;
+	flt.output   = OUT_MEMORY;
+	flt.pesType  = DMX_PES_OTHER;
+	flt.unloader = u;
+	ioctl(dmxfd, DEMUX_SET_MEASURE_TIME, 150000);
+	ioctl(dmxfd, DEMUX_FILTER_PES_SET, &flt);
+	ioctl(dmxfd, DEMUX_START);
+
+	counter = 0;
+	counter2 = 0;
+	sum = 0;
+	sum2 = 0;
+	first_round = true;
+	first_round2 = true;
+	memset(&buffer, 0, sizeof(buffer));
+	memset(&buffer2, 0, sizeof(buffer2));
+}
+
+BitrateCalculator::~BitrateCalculator(void)
+{
+	if (ioctl(dmxfd, DMX_STOP) < 0)
+		fprintf(stderr, "~BitrateCalculator DMX_STOP fd: %d err: %m\n", dmxfd);
+	close(dmxfd);
+}
+
+unsigned int BitrateCalculator::calc(unsigned int &long_average)
+{
+	unsigned char dummy[12];
+	S_STREAM_MEASURE m;
+	int ret;
+	unsigned long long bit_s = 0;
+	static unsigned int old_short_average = 0;
+	unsigned int short_average = old_short_average;
+
+	ioctl(dmxfd, DEMUX_STOP);
+	ret = read(dmxfd, dummy, 12);
+	if (ret == 12)
+	{
+		ioctl(dmxfd, DEMUX_GET_MEASURE_TIMING, &m);
+		if (m.rx_bytes > 0 && m.rx_time_us > 0)
+		{
+			// -- current bandwidth in kbit/sec
+			// --- cast to unsigned long long so it doesn't overflow as
+			// --- early, add time / 2 before division for correct rounding
+			/* the correction factor is found out like that:
+			   - with 8000 (guessed), a 256 kbit radio stream shows as 262kbit...
+			   - 8000*256/262 = 7816.793131
+			   BUT! this is only true for some Radio stations (DRS3 for example), for
+			        others (DLF) 8000 does just fine.
+			bit_s = (m.rx_bytes * 7816793ULL + (m.rx_time_us / 2ULL)) / m.rx_time_us;
+			 */
+			bit_s = (m.rx_bytes * 8000000ULL + (m.rx_time_us / 2ULL)) / m.rx_time_us;
+
+			if (counter == AVERAGE_OVER_X_MEASUREMENTS)
+				counter = 0;
+			sum -= buffer[counter];
+			buffer[counter] = (unsigned int) (bit_s / 1000ULL);
+			sum += buffer[counter];
+			if (first_round) {
+				if (counter == AVERAGE_OVER_X_MEASUREMENTS - 1)
+					first_round = false;
+				short_average = sum / (counter + 1);
+			} else
+				short_average = sum / AVERAGE_OVER_X_MEASUREMENTS;
+			counter++;
+
+			//Average over complete graph window
+			if (counter2 == 240)
+				counter2 = 0;
+			sum2 -= buffer2[counter2];
+			buffer2[counter2] = (unsigned int) (bit_s / 1000ULL);
+			sum2 += buffer2[counter2];
+			if (first_round2) {
+				if (counter2 == 239)
+					first_round2 = false;
+				long_average = sum2 / (counter2 + 1);
+			} else
+				long_average = sum2 / 240;
+			counter2++;
+			old_short_average = short_average;
+		}
+	}
+	//else	// this just happens sometimes on some transponders, usually it's EAGAIN
+	//	fprintf(stderr, "read: %d errno: (%m)\n", ret);
+
+	ioctl(dmxfd, DEMUX_START);
+	return short_average;
+}
+#endif
