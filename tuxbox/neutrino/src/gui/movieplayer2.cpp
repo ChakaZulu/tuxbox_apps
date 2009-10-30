@@ -87,7 +87,11 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
-#if HAVE_DVB_API_VERSION >= 3
+#ifdef HAVE_TRIPLEDRAGON
+#include <zapit/td-demux-compat.h>
+#include <zapit/td-audio-compat.h>
+#include <zapit/td-video-compat.h>
+#elif HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/audio.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/video.h>
@@ -132,6 +136,13 @@ extern "C" {
 // define, if you don't that
 //#define AUDIO_STREAM_AUTOSELECT
 
+#ifdef HAVE_TRIPLEDRAGON
+#include <tddevices.h>
+#define DVR	"/dev/" DEVICE_NAME_PVR
+#define ADEC	"/dev/" DEVICE_NAME_AUDIO
+#define VDEC	"/dev/" DEVICE_NAME_VIDEO
+#define DMX	"/dev/"	DEVICE_NAME_DEMUX "0"
+#else /* TRIPLEDRAGON */
 #if HAVE_DVB_API_VERSION < 3
 #define ADAP	"/dev/dvb/card0"
 #define DVR	"/dev/pvr"
@@ -142,6 +153,7 @@ extern "C" {
 #define ADEC	ADAP "/audio0"
 #define VDEC	ADAP "/video0"
 #define DMX	ADAP "/demux0"
+#endif /* TRIPLEDRAGON */
 
 #define STREAMTYPE_DVD		1
 #define STREAMTYPE_SVCD		2
@@ -2067,11 +2079,19 @@ OutputThread(void *arg)
 	if((dmxa = open(DMX, O_RDWR | O_NONBLOCK)) < 0 ||
 	   (dmxv = open(DMX, O_RDWR | O_NONBLOCK)) < 0 ||
 	   (dvr  = open(DVR, O_WRONLY /* | O_NONBLOCK */)) < 0 ||
-	   (adec = open(ADEC, O_RDWR | O_NONBLOCK)) < 0 ||
-	   (vdec = open(VDEC, O_RDWR | O_NONBLOCK)) < 0)
+#ifndef HAVE_TRIPLEDRAGON
+	   (vdec = open(VDEC, O_RDWR | O_NONBLOCK)) < 0 ||
+#endif
+	   (adec = open(ADEC, O_RDWR | O_NONBLOCK)) < 0)
 	{
+		INFO("some device failed (%m) dmxa:%d dmxv:%d dvr:%d adec:%d vdec:%d\n",dmxa,dmxv,dvr,adec,vdec);
 		failed = true;
 	}
+
+#ifdef HAVE_TRIPLEDRAGON
+	if (ioctl(dmxa, DEMUX_SELECT_SOURCE, INPUT_FROM_PVR) < 0)
+		perror("DEMUX_SELECT_SOURCE INPUT_FROM_PVR");
+#endif
 
 	g_playstate = CMoviePlayerGui::SOFTRESET;
 	bool driverready = false;
@@ -2130,6 +2150,19 @@ OutputThread(void *arg)
 		switch (g_playstate)
 		{
 			case CMoviePlayerGui::PAUSE:
+#ifdef HAVE_TRIPLEDRAGON
+				ioctl(adec, AUDIO_STOP);
+				ioctl(dmxa, DMX_STOP);
+				g_Zapit->VdecIoctl(MPEG_VID_FREEZE, 0);
+				while (g_playstate == CMoviePlayerGui::PAUSE)
+					usleep(100000); // no busy wait
+				ioctl(dmxv, DMX_STOP);
+				ioctl(dmxv, DMX_START);
+				ioctl(dmxa, DMX_START);
+				ioctl(adec, AUDIO_PLAY);
+				g_Zapit->VdecIoctl(MPEG_VID_CONTINUE, 0);
+				g_Zapit->VdecIoctl(MPEG_VID_SYNC_ON, VID_SYNC_AUD);
+#else /* TD */
 				ioctl(vdec, VIDEO_FREEZE);
 #if HAVE_DVB_API_VERSION >= 3
 				ioctl(adec, AUDIO_STOP);
@@ -2155,6 +2188,7 @@ OutputThread(void *arg)
 					perror("AUDIO_SET_AV_SYNC");
 				if (ioctl(adec, AUDIO_SET_MUTE, 0))
 					perror("AUDIO_SET_MUTE");
+#endif
 #endif
 				break;
 			case CMoviePlayerGui::SKIP:
@@ -2277,15 +2311,32 @@ OutputThread(void *arg)
 			}
 			case CMoviePlayerGui::SOFTRESET:
 				INFO("CMoviePlayerGui::SOFTRESET\n");
+#ifdef HAVE_TRIPLEDRAGON
+				g_Zapit->VdecIoctl(VIDEO_STOP, 0);
+#else
 				ioctl(vdec, VIDEO_STOP);
+#endif
 				ioctl(adec, AUDIO_STOP);
 				ioctl(dmxv, DMX_STOP);
 				ioctl(dmxa, DMX_STOP);
+#ifdef HAVE_TRIPLEDRAGON
+#define pes_type pesType
+				if (g_currentac3 == 0)
+					ioctl(adec, MPEG_AUD_SET_MODE, AUD_MODE_MPEG);
+				else
+				{
+					ioctl(adec, MPEG_AUD_SET_MODE, AUD_MODE_DTS);
+					ioctl(adec, MPEG_AUD_SET_MODE, AUD_MODE_AC3);
+				}
+				g_Zapit->VdecIoctl(VIDEO_PLAY, 0);
+				g_Zapit->VdecIoctl(MPEG_VID_SYNC_ON, VID_SYNC_AUD);
+#else
 				ioctl(vdec, VIDEO_PLAY);
 				if (g_currentac3 == 1)
 					ioctl(adec, AUDIO_SET_BYPASS_MODE, 0UL);
 				else
 					ioctl(adec, AUDIO_SET_BYPASS_MODE, 1UL);
+#endif
 				ioctl(adec, AUDIO_PLAY);
 				p.pid = pida;
 				p.pes_type = DMX_PES_AUDIO;
@@ -2295,9 +2346,11 @@ OutputThread(void *arg)
 				ioctl(dmxv, DMX_SET_PES_FILTER, &p);
 				ioctl(dmxv, DMX_START);
 				ioctl(dmxa, DMX_START);
+#ifndef HAVE_TRIPLEDRAGON
 				// on the dbox2, the dmx must be started for SET_AV_SYNC
 				if (ioctl(adec, AUDIO_SET_AV_SYNC, 1UL))
 					perror("AUDIO_SET_AV_SYNC");
+#endif
 				if (g_playstate != CMoviePlayerGui::STOPPED) // might be changed now
 					g_playstate = CMoviePlayerGui::PLAY;
 				break;
@@ -2322,7 +2375,11 @@ OutputThread(void *arg)
 		}
 	}
 
+#ifdef HAVE_TRIPLEDRAGON
+	g_Zapit->VdecIoctl(VIDEO_STOP, 0);
+#else
 	ioctl(vdec, VIDEO_STOP);
+#endif
 	ioctl(adec, AUDIO_STOP);
 	ioctl(dmxv, DMX_STOP);
 	ioctl(dmxa, DMX_STOP);
@@ -3021,24 +3078,25 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 		if (msg == CRCInput::RC_green)
 			g_showaudioselectdialog = true;
-		else if (msg == CRCInput::RC_home)
+#ifndef HAVE_TRIPLEDRAGON
+		else if (msg == CRCInput::RC_home && g_playstate >= CMoviePlayerGui::PLAY)
+#else
+		else if (msg == CRCInput::RC_stop && g_playstate >= CMoviePlayerGui::PLAY)
+#endif
 		{
-			if (g_playstate >= CMoviePlayerGui::PLAY)
-			{
-				StreamTime.hide();
-				g_playstate = CMoviePlayerGui::STOPPED;
-				aborted = true;
-				if(cdDvd) {
-					cdDvd = false;
-					break;
-				}
-				else
-					open_filebrowser = true;
+			StreamTime.hide();
+			g_playstate = CMoviePlayerGui::STOPPED;
+			aborted = true;
+			if(cdDvd) {
+				cdDvd = false;
+				break;
 			}
 			else
-				break;
+				open_filebrowser = true;
 		}
-		else if (msg == CRCInput::RC_yellow)
+		else if (msg == CRCInput::RC_home && g_playstate < CMoviePlayerGui::PLAY)
+			break;
+		else if (msg == CRCInput::RC_yellow || msg == CRCInput::RC_playpause)
 		{
 			update_info = true;
 			g_playstate = (g_playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::PLAY : CMoviePlayerGui::PAUSE;
@@ -3086,19 +3144,19 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
 			}
 		}
-		else if (msg == CRCInput::RC_1)
+		else if (msg == CRCInput::RC_1 || msg == CRCInput::RC_prev)
 		{
 			skip(-60, stream, false);
 		}
-		else if (msg == CRCInput::RC_3)
+		else if (msg == CRCInput::RC_3 || msg == CRCInput::RC_next)
 		{
 			skip(60, stream, false);
 		}
-		else if (msg == CRCInput::RC_4)
+		else if (msg == CRCInput::RC_4 || msg == CRCInput::RC_back)
 		{
 			skip(-300, stream, false);
 		}
-		else if (msg == CRCInput::RC_6)
+		else if (msg == CRCInput::RC_6 || msg == CRCInput::RC_forward)
 		{
 			skip(300, stream, false);
 		}
@@ -3110,7 +3168,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		{
 			skip(600, stream, false);
 		}
-		else if (msg == CRCInput::RC_down)
+		else if (msg == CRCInput::RC_down || msg == CRCInput::RC_eject)
 		{
 			char tmp[10 + 1];
 			bool cancel;
@@ -3358,7 +3416,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.60 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.61 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
