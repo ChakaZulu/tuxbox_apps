@@ -75,6 +75,12 @@ void CLcdControler::setLcd()
 	CLCD::getInstance()->setContrast(contrast);
 }
 
+#ifdef HAVE_TRIPLEDRAGON
+#define NUM_LCD_SLIDERS 1
+#else
+#define NUM_LCD_SLIDERS 3
+#endif
+
 int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 {
 	neutrino_msg_t      msg;
@@ -116,17 +122,20 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 		switch (msg & ~CRCInput::RC_Repeat)
 		{
 		case CRCInput::RC_down:
-			if(selected < 3) // max entries
+			if(selected < NUM_LCD_SLIDERS) // max entries
 			{
 				paintSlider(x + 10, y + hheight              , contrast         , CONTRASTFACTOR  , LOCALE_LCDCONTROLER_CONTRAST         , false);
+#ifndef HAVE_TRIPLEDRAGON
 				paintSlider(x + 10, y + hheight + mheight    , brightness       , BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS       , false);
 				paintSlider(x + 10, y + hheight + mheight * 2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, false);
+#endif
 				selected++;
 				switch (selected)
 				{
 				case 0:
 					paintSlider(x+ 10, y+ hheight, contrast, CONTRASTFACTOR, LOCALE_LCDCONTROLER_CONTRAST, true);
 					break;
+#ifndef HAVE_TRIPLEDRAGON
 				case 1:
 					paintSlider(x+ 10, y+ hheight+ mheight, brightness, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS, true);
 					break;
@@ -134,7 +143,8 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 					paintSlider(x+ 10, y+ hheight+ mheight* 2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, true);
 					CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 					break;
-				case 3:
+#endif
+				default:
 					frameBuffer->paintBoxRel(x, y + hheight + mheight * 3 + mheight / 2, width, mheight, COL_MENUCONTENTSELECTED_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText(LOCALE_OPTIONS_DEFAULT), COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 					break;
@@ -146,14 +156,21 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 			if (selected > 0)
 			{
 				paintSlider(x + 10, y + hheight              , contrast         , CONTRASTFACTOR  , LOCALE_LCDCONTROLER_CONTRAST         , false);
+#ifndef HAVE_TRIPLEDRAGON
 				paintSlider(x + 10, y + hheight + mheight    , brightness       , BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS       , false);
 				paintSlider(x + 10, y + hheight + mheight * 2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, false);
+#endif
 				selected--;
 				switch (selected)
 				{
 				case 0:
 					paintSlider(x+ 10, y+ hheight, contrast, CONTRASTFACTOR, LOCALE_LCDCONTROLER_CONTRAST, true);
+#ifdef HAVE_TRIPLEDRAGON
+					frameBuffer->paintBoxRel(x, y + hheight + mheight * 3 + mheight / 2, width, mheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
+					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText(LOCALE_OPTIONS_DEFAULT), COL_MENUCONTENT, 0, true); // UTF-8
+#endif
 					break;
+#ifndef HAVE_TRIPLEDRAGON
 				case 1:
 					paintSlider(x+ 10, y+ hheight+ mheight, brightness, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS, true);
 					CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
@@ -164,7 +181,8 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 					frameBuffer->paintBoxRel(x, y + hheight + mheight * 3 + mheight / 2, width, mheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText(LOCALE_OPTIONS_DEFAULT), COL_MENUCONTENT, 0, true); // UTF-8
 					break;
-				case 3:
+#endif
+				default:
 					break;
 				}
 			}
@@ -181,6 +199,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 							setLcd();
 						}
 						break;
+#ifndef HAVE_TRIPLEDRAGON
 					case 1:
 						brightness += step;
 						if (brightness < step) // check for overflow.
@@ -195,6 +214,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 						paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, true);
 						setLcd();
 						break;
+#endif
 				}
 				break;
 
@@ -209,6 +229,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 							setLcd();
 						}
 						break;
+#ifndef HAVE_TRIPLEDRAGON
 					case 1:
 						brightness -= step;
 						if (brightness > 255 - step) // overflow
@@ -223,6 +244,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 						paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, true);
 						setLcd();
 						break;
+#endif
 				}
 				break;
 
@@ -242,7 +264,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 			case CRCInput::RC_ok:
 				if (msg != CRCInput::RC_ok) // do not react on repeat...
 					break;
-				if (selected==3)	// default Werte benutzen
+				if (selected == NUM_LCD_SLIDERS)	// default Werte benutzen
 				{
 					brightness		= DEFAULT_LCD_BRIGHTNESS;
 					brightnessstandby	= DEFAULT_LCD_STANDBYBRIGHTNESS;
@@ -290,8 +312,10 @@ void CLcdControler::paint()
 	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 
 	paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, LOCALE_LCDCONTROLER_CONTRAST, true);
+#ifndef HAVE_TRIPLEDRAGON
 	paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESS, false);
 	paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY, false);
+#endif
 
 	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT_PLUS_3);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText(LOCALE_OPTIONS_DEFAULT), COL_MENUCONTENT, 0, true); // UTF-8
