@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.156 2009/10/18 10:44:11 dbt Exp $
+	$Id: menue.cpp,v 1.157 2009/10/30 23:02:55 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -72,7 +72,10 @@ void CMenuItem::init(const int X, const int Y, const int DX, const int OFFX)
 void CMenuItem::setActive(const bool Active)
 {
 	active = Active;
-	if (x != -1)
+	/* used gets set by the addItem() function. This is for disabling
+	   machine-specific options by just not calling the addItem() function.
+	   Without this, the changeNotifiers would become machine-dependent. */
+	if (used && x != -1)
 		paint();
 }
 
@@ -131,6 +134,7 @@ void CMenuWidget::addItem(CMenuItem* menuItem, const bool defaultselected)
 {
 	if (defaultselected)
 		selected = items.size();
+	menuItem->isUsed();
 	items.push_back(menuItem);
 }
 
