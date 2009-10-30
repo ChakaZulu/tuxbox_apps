@@ -14,5 +14,5 @@ bin_PROGRAMS = sectionsdcontrol
 
 sectionsdcontrol_SOURCES = sectionsdcontrol.cpp
 sectionsdcontrol_LDADD = \
-	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
+	libsectionsdclient.la \
 	@CONNECTION_LIBS@
