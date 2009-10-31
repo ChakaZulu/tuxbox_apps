@@ -28,8 +28,6 @@
 #include <config.h>
 #endif
 
-#define DBOX
-
 #include <basedec.h>
 #include <cdrdec.h>
 #include <mp3dec.h>
@@ -42,18 +40,17 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <dbox/avs_core.h>
 #include <driver/audioplay.h> // for ShoutcastCallback()
+#ifndef HAVE_TRIPLEDRAGON
+#include <dbox/avs_core.h>
 #define AVS_DEVICE "/dev/dbox/avs0"
+#endif
 #include <driver/netfile.h>
 
 #include <global.h>
 #include <neutrino.h>
 #include <zapit/client/zapittools.h> 
 
-#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
-#undef DBOX
-#endif
 unsigned int CBaseDec::mSamplerate=0;
 
 void ShoutcastCallback(void *arg)
@@ -231,10 +228,10 @@ bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int
 		printf("setfmt failed\n");
 	if(::ioctl(soundfd, SNDCTL_DSP_CHANNELS, &channels))
 		printf("channel set failed\n");
-#ifdef	 DBOX
+#ifdef HAVE_DBOX_HARDWARE
 	if (dsp_speed != mSamplerate)
-#endif	
-   {
+#endif
+	{
 		// mute audio to reduce pops when changing samplerate (avia_reset)
 		bool was_muted = avs_mute(true);
 		if (::ioctl(soundfd, SNDCTL_DSP_SPEED, &dsp_speed))
@@ -245,7 +242,7 @@ bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int
 	 	else
 	 	{
 	 		mSamplerate = dsp_speed;
-#ifdef DBOX
+#ifdef HAVE_DBOX_HARDWARE
 			// disable iec aka digi out (avia reset enables it again)
 			g_Zapit->IecOff();
 #endif
@@ -259,6 +256,7 @@ bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int
 	return crit_error;
 }
 
+#ifndef HAVE_TRIPLEDRAGON
 bool CBaseDec::avs_mute(bool mute)
 {
 	int fd, a, b=AVS_UNMUTE;
@@ -278,6 +276,12 @@ bool CBaseDec::avs_mute(bool mute)
 	 }
 	 return (b==AVS_MUTE);
 }
+#else
+bool CBaseDec::avs_mute(bool)
+{
+	return false;
+}
+#endif
 
 void CBaseDec::Init()
 {
