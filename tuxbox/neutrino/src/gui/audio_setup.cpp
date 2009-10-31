@@ -1,5 +1,5 @@
 /*
-	$Id: audio_setup.cpp,v 1.2 2009/10/27 21:37:29 dbt Exp $
+	$Id: audio_setup.cpp,v 1.3 2009/10/31 10:55:50 seife Exp $
 
 	audio setup implementation - Neutrino-GUI
 
@@ -27,6 +27,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: audio_setup.cpp,v $
+	Revision 1.3  2009/10/31 10:55:50  seife
+	neutrino: add TD specific audio setup code
+	
 	Revision 1.2  2009/10/27 21:37:29  dbt
 	removed forgotten comment
 	
@@ -115,6 +118,14 @@ const CMenuOptionChooser::keyval AUDIOMENU_AVS_CONTROL_OPTIONS[AUDIOMENU_AVS_CON
 #endif
 };
 #endif
+#ifdef HAVE_TRIPLEDRAGON
+#define AUDIOMENU_AVS_CONTROL_OPTION_COUNT 2
+const CMenuOptionChooser::keyval AUDIOMENU_AVS_CONTROL_OPTIONS[AUDIOMENU_AVS_CONTROL_OPTION_COUNT] =
+{
+	{CControld::TYPE_OST, LOCALE_AUDIOMENU_OST},
+	{CControld::TYPE_AVS, LOCALE_AUDIOMENU_AVS}
+};
+#endif
 
 #define AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT 2
 const CMenuOptionChooser::keyval AUDIOMENU_LEFT_RIGHT_SELECTABEL_OPTIONS[AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT] =
@@ -160,9 +171,9 @@ void CAudioSetup::showAudioSetup()
 	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_DOLBYDIGITAL, &g_settings.audio_DolbyDigital, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, audioSetupNotifier);
 	audioSettings->addItem(oj);
 	
-#ifdef HAVE_DBOX_HARDWARE
 	audioSettings->addItem(GenericMenuSeparatorLine);
 
+#ifdef HAVE_DBOX_HARDWARE
 	CStringInput * audio_PCMOffset = new CStringInput(LOCALE_AUDIOMENU_PCMOFFSET, g_settings.audio_PCMOffset, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ", audioSetupNotifier);
 	CMenuForwarder *mf = new CMenuForwarder(LOCALE_AUDIOMENU_PCMOFFSET, (g_settings.audio_avs_Control == CControld::TYPE_LIRC), g_settings.audio_PCMOffset, audio_PCMOffset );
 	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(mf);
@@ -170,6 +181,11 @@ void CAudioSetup::showAudioSetup()
 	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AVS_CONTROL, &g_settings.audio_avs_Control, AUDIOMENU_AVS_CONTROL_OPTIONS, AUDIOMENU_AVS_CONTROL_OPTION_COUNT, true, audioSetupNotifier2);
 	audioSettings->addItem(oj);
 	audioSettings->addItem(mf);
+#endif
+#ifdef HAVE_TRIPLEDRAGON
+	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(NULL);
+	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AVS_CONTROL, &g_settings.audio_avs_Control, AUDIOMENU_AVS_CONTROL_OPTIONS, AUDIOMENU_AVS_CONTROL_OPTION_COUNT, true, audioSetupNotifier2);
+	audioSettings->addItem(oj);
 #endif
 	
 	// volume bar steps
