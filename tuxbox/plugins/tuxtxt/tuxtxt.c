@@ -145,7 +145,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.112 $";
+	char cvs_revision[] = "$Revision: 1.113 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -638,8 +638,7 @@ int GetTeletextPIDs()
 	int pat_scan, pmt_scan, sdt_scan, desc_scan, pid_test, byte, diff, first_sdt_sec;
 
 	unsigned char PAT[1024];
-	unsigned char SDT[1024];
-	unsigned char PMT[1024];
+	unsigned char buf[1024];
 	int dmx;
 
 
@@ -735,36 +734,36 @@ int GetTeletextPIDs()
 			continue;
 		}
 
-		if (read(dmx, PMT, sizeof(PMT)) == -1)
+		if (read(dmx, buf, sizeof(buf)) == -1)
 		{
 			perror("TuxTxt <read PMT>");
 			continue;
 		}
-		for (pmt_scan = 0x0C + ((PMT[0x0A]<<8 | PMT[0x0B]) & 0x0FFF);
-			  pmt_scan < (((PMT[0x01]<<8 | PMT[0x02]) & 0x0FFF) - 7);
-			  pmt_scan += 5 + PMT[pmt_scan + 4])
+		for (pmt_scan = 0x0C + ((buf[0x0A]<<8 | buf[0x0B]) & 0x0FFF);
+		     pmt_scan < (((buf[0x01]<<8 | buf[0x02]) & 0x0FFF) - 7);
+		     pmt_scan += 5 + buf[pmt_scan + 4])
 		{
-			if (PMT[pmt_scan] == 6)
+			if (buf[pmt_scan] == 6)
 			{
 				for (desc_scan = pmt_scan + 5;
-					  desc_scan < pmt_scan + ((PMT[pmt_scan + 3]<<8 | PMT[pmt_scan + 4]) & 0x0FFF) + 5;
-					  desc_scan += 2 + PMT[desc_scan + 1])
+				     desc_scan < pmt_scan + ((buf[pmt_scan + 3]<<8 | buf[pmt_scan + 4]) & 0x0FFF) + 5;
+				     desc_scan += 2 + buf[desc_scan + 1])
 				{
-					if (PMT[desc_scan] == 0x56)
+					if (buf[desc_scan] == 0x56)
 					{
 						char country_code[4];
 
 						for (pid_test = 0; pid_test < pids_found; pid_test++)
-							if (pid_table[pid_test].vtxt_pid == ((PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF))
+							if (pid_table[pid_test].vtxt_pid == ((buf[pmt_scan + 1]<<8 | buf[pmt_scan + 2]) & 0x1FFF))
 								goto skip_pid;
 
-						pid_table[pids_found].vtxt_pid     = (PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF;
-						pid_table[pids_found].service_id = PMT[0x03]<<8 | PMT[0x04];
-						if (PMT[desc_scan + 1] == 5)
+						pid_table[pids_found].vtxt_pid = (buf[pmt_scan + 1]<<8 | buf[pmt_scan + 2]) & 0x1FFF;
+						pid_table[pids_found].service_id = buf[0x03]<<8 | buf[0x04];
+						if (buf[desc_scan + 1] == 5)
 						{
-							country_code[0] = PMT[desc_scan + 2] | 0x20;
-							country_code[1] = PMT[desc_scan + 3] | 0x20;
-							country_code[2] = PMT[desc_scan + 4] | 0x20;
+							country_code[0] = buf[desc_scan + 2] | 0x20;
+							country_code[1] = buf[desc_scan + 3] | 0x20;
+							country_code[2] = buf[desc_scan + 4] | 0x20;
 							country_code[3] = 0;
 							pid_table[pids_found].national_subset = GetNationalSubset(country_code);
 						}
@@ -833,7 +832,7 @@ skip_pid:
 	first_sdt_sec = -1;
 	while (1)
 	{
-		if (read(dmx, SDT, sizeof(SDT)) == -1)
+		if (read(dmx, buf, sizeof(buf)) == -1)
 		{
 			perror("TuxTxt <read SDT>");
 
@@ -843,42 +842,42 @@ skip_pid:
 			return 1;
 		}
 
-		if (first_sdt_sec == SDT[6])
+		if (first_sdt_sec == buf[6])
 			break;
 
 		if (first_sdt_sec == -1)
-			first_sdt_sec = SDT[6];
+			first_sdt_sec = buf[6];
 
 		/* scan SDT to get servicenames */
-		for (sdt_scan = 0x0B; sdt_scan < ((SDT[1]<<8 | SDT[2]) & 0x0FFF) - 7; sdt_scan += 5 + ((SDT[sdt_scan + 3]<<8 | SDT[sdt_scan + 4]) & 0x0FFF))
+		for (sdt_scan = 0x0B; sdt_scan < ((buf[1]<<8 | buf[2]) & 0x0FFF) - 7; sdt_scan += 5 + ((buf[sdt_scan + 3]<<8 | buf[sdt_scan + 4]) & 0x0FFF))
 		{
 			for (pid_test = 0; pid_test < pids_found; pid_test++)
 			{
-				if ((SDT[sdt_scan]<<8 | SDT[sdt_scan + 1]) == pid_table[pid_test].service_id && SDT[sdt_scan + 5] == 0x48)
+				if ((buf[sdt_scan]<<8 | buf[sdt_scan + 1]) == pid_table[pid_test].service_id && buf[sdt_scan + 5] == 0x48)
 				{
 					diff = 0;
-					pid_table[pid_test].service_name_len = SDT[sdt_scan+9 + SDT[sdt_scan+8]];
+					pid_table[pid_test].service_name_len = buf[sdt_scan+9 + buf[sdt_scan+8]];
 
 					for (byte = 0; byte < pid_table[pid_test].service_name_len; byte++)
 					{
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'Ä')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5B;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ä')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7B;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'Ö')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5C;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ö')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7C;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'Ü')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5D;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ü')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7D;
-						if (SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == (unsigned char)'ß')
-							SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7E;
-						if (byte + diff >= 24 || SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] >= 0x80 && SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] <= 0x9F)
+						if (buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] == (unsigned char)'Ä')
+							buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] = 0x5B;
+						if (buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] == (unsigned char)'ä')
+							buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] = 0x7B;
+						if (buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] == (unsigned char)'Ö')
+							buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] = 0x5C;
+						if (buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] == (unsigned char)'ö')
+							buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] = 0x7C;
+						if (buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] == (unsigned char)'Ü')
+							buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] = 0x5D;
+						if (buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] == (unsigned char)'ü')
+							buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] = 0x7D;
+						if (buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] == (unsigned char)'ß')
+							buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] = 0x7E;
+						if (byte + diff >= 24 || buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] >= 0x80 && buf[sdt_scan+10 + buf[sdt_scan + 8] + byte] <= 0x9F)
 							diff--;
 						else
-							pid_table[pid_test].service_name[byte + diff] = SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte];
+							pid_table[pid_test].service_name[byte + diff] = buf[sdt_scan+10 + buf[sdt_scan + 8] + byte];
 					}
 
 					pid_table[pid_test].service_name_len += diff;
