@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: channellist.cpp,v 1.216 2009/10/02 13:14:22 dbt Exp $
+	$Id: channellist.cpp,v 1.217 2009/10/31 10:39:36 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -461,6 +461,13 @@ int CChannelList::show()
 		}
 		else
 		{
+			if (msg == NeutrinoMessages::EVT_SERVICES_UPD)
+			{
+				/* need to make sure that channel list is closed,
+				   because entries might not be valid anymore */
+				loop = false;
+				res = -2;
+			}
 			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;
