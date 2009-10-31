@@ -1,5 +1,5 @@
 /*
-	$Id: video_setup.cpp,v 1.3 2009/10/27 21:35:08 dbt Exp $
+	$Id: video_setup.cpp,v 1.4 2009/10/31 11:15:59 seife Exp $
 
 	video setup implementation - Neutrino-GUI
 
@@ -27,6 +27,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: video_setup.cpp,v $
+	Revision 1.4  2009/10/31 11:15:59  seife
+	neutrino: add support for TD to video_setup, improve non-dbox case
+	
+	The dbox is the only box that can set RGB sync position, so do not show
+	that setting on other boxes
+	
 	Revision 1.3  2009/10/27 21:35:08  dbt
 	removed unnecessary include
 	
@@ -105,16 +111,25 @@ void CVideoSetup::hide()
 }
 
 
-
+#ifdef HAVE_DBOX_HARDWARE
 #define VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT 5
+#elif defined HAVE_TRIPLEDRAGON
+#define VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT 3
+#else
+#define VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT 4
+#endif
 const CMenuOptionChooser::keyval VIDEOMENU_VIDEOSIGNAL_OPTIONS[VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT] =
 {
 	{ 0, LOCALE_VIDEOMENU_VIDEOSIGNAL_COMPOSITE },
 	{ 1, LOCALE_VIDEOMENU_VIDEOSIGNAL_RGB       },
+#ifndef HAVE_TRIPLEDRAGON
+	/* the tripledragon has a dedicated s-video output, so needs no option for it... */
 	{ 2, LOCALE_VIDEOMENU_VIDEOSIGNAL_SVIDEO    },
-	{ 3, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_V     },
-	{ 4, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_C     }
-
+#endif
+	{ 3, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_V     }
+#ifdef HAVE_DBOX_HARDWARE
+	, { 4, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_C   }
+#endif
 };
 
 #define VIDEOMENU_VCRSIGNAL_OPTION_COUNT 2
@@ -154,11 +169,12 @@ void CVideoSetup::showVideoSetup()
 	//video format background
 	CMenuOptionChooser * oj2 = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT_BG, &g_settings.video_backgroundFormat, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT-1, true, this);
 
+#ifdef HAVE_DBOX_HARDWARE
 	//rgb centering
 	CRGBCSyncControler * RGBCSyncControler = new CRGBCSyncControler(LOCALE_VIDEOMENU_RGB_CENTERING, &g_settings.video_csync);
 	bool sc_active = ((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal ==  CControldClient::VIDEOOUTPUT_YUV_CVBS));
 	SyncControlerForwarder = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, sc_active, NULL , RGBCSyncControler, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
-	
+#endif
 
 	if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
 	{
@@ -167,12 +183,14 @@ void CVideoSetup::showVideoSetup()
 	
 	videosetup->addItem(oj1);	//video format
 	videosetup->addItem(oj2);	//video format background
+#ifdef HAVE_DBOX_HARDWARE
+	/* only the dbox can change the RGB centering */
 	videosetup->addItem(SyncControlerForwarder);	//rgb centering
+#endif
+	videosetup->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_VIDEOMENU_VCR_SCART));
 
- 	videosetup->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_VIDEOMENU_VCR_SCART));
-
- 	// Switching VCR Output presently does not work on the Philips.
-	if (g_info.box_Type != CControld::TUXBOX_MAKER_PHILIPS)
+	// Switching VCR Output presently does not work on the Philips and on non-dboxes
+	if (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM || g_info.box_Type == CControld::TUXBOX_MAKER_NOKIA)
 	{
 		bool vo_active = ((video_out_signal == CControldClient::VIDEOOUTPUT_COMPOSITE) || (video_out_signal == CControldClient::VIDEOOUTPUT_SVIDEO));
 		VcrVideoOutSignalOptionChooser = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSIGNAL, &vcr_video_out_signal, VIDEOMENU_VCRSIGNAL_OPTIONS, VIDEOMENU_VCRSIGNAL_OPTION_COUNT, vo_active, this);
@@ -205,8 +223,10 @@ bool CVideoSetup::changeNotify(const neutrino_locale_t OptionName, void *)
 		g_Controld->setVideoOutput(video_out_signal);
 		if (VcrVideoOutSignalOptionChooser)
 			VcrVideoOutSignalOptionChooser->setActive((video_out_signal == CControldClient::VIDEOOUTPUT_COMPOSITE) || (video_out_signal == CControldClient::VIDEOOUTPUT_SVIDEO));
+#ifdef HAVE_DBOX_HARDWARE
 		SyncControlerForwarder->setActive((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_CVBS));
- 	}
+#endif
+	}
 	else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VCRSIGNAL))
 	{
 		g_Controld->setVCROutput(vcr_video_out_signal);
