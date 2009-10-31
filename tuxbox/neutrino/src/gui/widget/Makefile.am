@@ -15,9 +15,14 @@ libneutrino_gui_widget_a_SOURCES = \
 	colorchooser.cpp keychooser.cpp \
 	menue.cpp stringinput.cpp stringinput_ext.cpp \
 	messagebox.cpp hintbox.cpp listbox.cpp listbox_legacy.cpp \
-	lcdcontroler.cpp rgbcsynccontroler.cpp \
+	lcdcontroler.cpp \
 	drawable.cpp hintboxext.cpp helpbox.cpp mountchooser.cpp \
 	listframe.cpp dirchooser.cpp progressbar.cpp
+
+if BOXTYPE_DBOX2
+libneutrino_gui_widget_a_SOURCES += \
+	rgbcsynccontroler.cpp
+endif
 
 libneutrino_gui_widget2_a_SOURCES = \
 	progresswindow.cpp
