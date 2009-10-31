@@ -1,5 +1,5 @@
 /*
-	$Id: radiotext.h,v 1.3 2009/09/19 14:06:13 rhabarber1848 Exp $
+	$Id: radiotext.h,v 1.4 2009/10/31 10:11:02 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -45,17 +45,6 @@
 
 #ifndef __RADIO_AUDIO_H
 #define __RADIO_AUDIO_H
-
-
-#if HAVE_DVB_API_VERSION >= 3
-#include <linux/dvb/audio.h>
-#include <linux/dvb/dmx.h>
-#include <linux/dvb/video.h>
-#else
-#include <ost/audio.h>
-#include <ost/dmx.h>
-#include <ost/video.h>
-#endif
 
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
