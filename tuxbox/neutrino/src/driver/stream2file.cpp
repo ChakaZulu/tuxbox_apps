@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.34 2009/10/13 17:05:23 seife Exp $
+ * $Id: stream2file.cpp,v 1.35 2009/10/31 10:29:42 seife Exp $
  * 
  * streaming to file/disc
  * 
@@ -50,13 +50,21 @@
 #include <unistd.h>
 #include <gui/movieinfo.h>
 
-#if HAVE_DVB_API_VERSION < 3
+#ifdef HAVE_TRIPLEDRAGON
+#include <zapit/td-demux-compat.h>
+#include <tddevices.h>
+#define DMXDEV	"/dev/" DEVICE_NAME_DEMUX "1"
+#elif HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
 #define dmx_output_t		dmxOutput_t
 #define dmx_pes_filter_params	dmxPesFilterParams
 #define pes_type		pesType
+#define DMXDEV	"/dev/dvb/card0/demux0"
+#define DVRDEV	"/dev/dvb/card0/dvr0"
 #else
 #include <linux/dvb/dmx.h>
+#define DMXDEV	"/dev/dvb/adapter0/demux0"
+#define DVRDEV	"/dev/dvb/adapter0/dvr0"
 #endif
 
 // default file permissions: 0666, will be modified by umask anyway...
@@ -92,15 +100,6 @@ extern "C" {
 
 /* maximum number of pes pids */
 #define MAXPIDS		64
-
-/* devices */
-#if HAVE_DVB_API_VERSION < 3
-#define DMXDEV	"/dev/dvb/card0/demux0"
-#define DVRDEV	"/dev/dvb/card0/dvr0"
-#else
-#define DMXDEV	"/dev/dvb/adapter0/demux0"
-#define DVRDEV	"/dev/dvb/adapter0/dvr0"
-#endif
 
 #define FILENAMEBUFFERSIZE 512
 
@@ -147,11 +146,18 @@ static int setPesFilter(const unsigned short pid, const dmx_output_t dmx_output)
 	struct dmx_pes_filter_params flt; 
 
 	if ((fd = open(DMXDEV, O_RDWR|O_NONBLOCK)) < 0)
+	{
+		perror("[stream2file] setPesFilter open " DMXDEV);
 		return -1;
+	}
 	if (ioctl(fd, DMX_SET_BUFFER_SIZE, DMX_BUFFER_SIZE) < 0)
+	{
+		perror("[stream2file] setPesFilter DMX_SET_BUFFER_SIZE");
 		return -1;
+	}
 
 	flt.pid = pid;
+#ifndef HAVE_TRIPLEDRAGON
 	flt.input = DMX_IN_FRONTEND;
 	flt.output = dmx_output;
 	flt.pes_type = DMX_PES_OTHER;
@@ -159,6 +165,30 @@ static int setPesFilter(const unsigned short pid, const dmx_output_t dmx_output)
 
 	if (ioctl(fd, DMX_SET_PES_FILTER, &flt) < 0)
 		return -1;
+#else
+	flt.pesType = DMX_PES_OTHER;
+	flt.output = OUT_NOTHING;
+	flt.flags = 0;
+	flt.unloader.unloader_type = UNLOADER_TYPE_BUCKET;
+	flt.unloader.threshold     = 128; // one interrupt every 32kB? enough?
+
+	ioctl(fd, DEMUX_SELECT_SOURCE, INPUT_FROM_CHANNEL0);
+	if (ioctl(fd, DEMUX_SET_BUFFER_SIZE, 65535) < 0)
+		perror("setPesFilter DEMUX_SET_BUFFER_SIZE");
+	if (ioctl(fd, DEMUX_FILTER_PES_SET, &flt) < 0)
+	{
+		perror("setPesFilter DEMUX_FILTER_PES_SET");
+		close(fd);
+		return -1;
+	}
+	if (ioctl(fd, DEMUX_START) < 0)
+	{
+		perror("setPesFilter DEMUX_START");
+		close(fd);
+		return -1;
+	}
+	fprintf(stderr, "%s:%d fd = %d,pid = 0x%04x\n",__FUNCTION__,__LINE__, fd, pid);
+#endif
 
 	return fd;
 }
@@ -346,6 +376,14 @@ void * DMXThread(void * v_arg)
 					exit_flag = STREAM2FILE_STATUS_READ_FAILURE;
 				}
 				r = read(*(int *)v_arg, &(buf[0]), TS_SIZE);
+#ifdef HAVE_TRIPLEDRAGON
+				if (r < 0)
+				{
+					perror("stream2file read DMX");
+					exit_flag = STREAM2FILE_STATUS_READ_FAILURE;
+					break;
+				}
+#endif
 				if (r > 0)
 				{
 					offset = sync_byte_offset(&(buf[0]), r);
@@ -420,6 +458,12 @@ void * DMXThread(void * v_arg)
 						vec[0].buf += r;
 						todo -= r;
 					}
+				}
+				if (r < 0 && errno != EAGAIN)
+				{
+					perror("[stream2file] read DMX");
+					exit_flag = STREAM2FILE_STATUS_READ_FAILURE;
+					break;
 				}
 			}
 			else if (!pres){
@@ -532,7 +576,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		ringbuffersize = ((1 << 19) << 4);
 	else
 		ringbuffersize = ((1 << 19) << ringbuffers);
-	printf("[stream2file]: ringbuffersize %d\n", ringbuffersize);
+	printf("[stream2file]: ringbuffersize %d write_ts %d numpids %d\n", ringbuffersize, write_ts, numpids);
 
 	for (unsigned int i = 0; i < numpids; i++)
 	{
@@ -541,7 +585,12 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			DEC_BUSY_COUNT;
 			return STREAM2FILE_INVALID_PID;
 		}
-		if ((demuxfd[i] = setPesFilter(pids[i], write_ts ? DMX_OUT_TS_TAP : DMX_OUT_TAP)) < 0)
+#ifndef HAVE_TRIPLEDRAGON
+		demuxfd[i] = setPesFilter(pids[i], write_ts ? DMX_OUT_TS_TAP : DMX_OUT_TAP);
+#else
+		demuxfd[i] = setPesFilter(pids[i], OUT_MEMORY);
+#endif
+		if (demuxfd[i] < 0)
 		{
 			for (unsigned int j = 0; j < i; j++)
 				unsetPesFilter(demuxfd[j]);
@@ -555,7 +604,21 @@ stream2file_error_msg_t start_recording(const char * const filename,
 
 	if (write_ts)
 	{
+#ifdef HAVE_TRIPLEDRAGON
+		if ((dvrfd = open(DMXDEV, O_RDWR|O_NONBLOCK)) != -1)
+		{
+			ioctl(dvrfd, DEMUX_SELECT_SOURCE, INPUT_FROM_CHANNEL0);
+			ioctl(dvrfd, DEMUX_SET_BUFFER_SIZE, 230400);
+			struct demux_bucket_para dbp;
+			dbp.unloader.unloader_type = UNLOADER_TYPE_TRANSPORT;
+			dbp.unloader.threshold     = 128; // one interrupt per 32kB
+			if (ioctl(dvrfd, DEMUX_FILTER_BUCKET_SET, &dbp) < 0)
+				perror("start_recording DEMUX_FILTER_BUCKET_SET");
+		}
+		else
+#else
 		if ((dvrfd = open(DVRDEV, O_RDONLY|O_NONBLOCK)) < 0)
+#endif
 		{
 			while (demuxfd_count > 0)
 				unsetPesFilter(demuxfd[--demuxfd_count]);
@@ -570,8 +633,15 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			DEC_BUSY_COUNT;
 			exit_flag = STREAM2FILE_STATUS_RECORDING_THREADS_FAILED; 
 			puts("[stream2file]: error creating thread! (out of memory?)");
+			while (demuxfd_count > 0)
+				unsetPesFilter(demuxfd[--demuxfd_count]);
+			close(dvrfd);
 			return STREAM2FILE_RECORDING_THREADS_FAILED; 
 		}
+#ifdef HAVE_TRIPLEDRAGON
+		if (ioctl(dvrfd, DEMUX_START) < 0)
+			perror("start_recording DEMUX_START");
+#endif
 	}
 	else
 	{
