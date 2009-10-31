@@ -145,7 +145,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.110 $";
+	char cvs_revision[] = "$Revision: 1.111 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -982,13 +982,13 @@ int GetNationalSubset(char *cc)
 #if TUXTXT_DEBUG
 void charpage()
 {
-	PosY = StartY;
-	PosX = StartX;
+	renderinfo.PosY = renderinfo.StartY;
+	renderinfo.PosX = renderinfo.StartX;
 	char cachefill[100];
 	int fullsize =0,hexcount = 0, col, p,sp;
 	int escpage = 0;
 	tstCachedPage* pg;
-	ClearFB(black);
+	tuxtxt_ClearFB(&renderinfo, tuxtxt_color_black);
 
 	int zipsize = 0;
 	for (p = 0; p < 0x900; p++)
@@ -1017,45 +1017,45 @@ void charpage()
 	memcpy(&atr,&tuxtxt_atrtable[ATR_WB],sizeof(tstPageAttr));
 	int row;
 	atr.charset = C_G0P;
-	PosY = StartY+fontheight;
+	renderinfo.PosY = renderinfo.StartY + renderinfo.fontheight;
 	for (row = 0; row < 16; row++)
 	{
-		PosY+= fontheight;
-		SetPosX(1);
+		renderinfo.PosY += renderinfo.fontheight;
+		tuxtxt_SetPosX(&renderinfo, 1);
 		for (col=0; col < 6; col++)
 		{
 			tuxtxt_RenderCharFB(&renderinfo,col*16+row+0x20, &atr);
 		}
 	}
 	atr.setX26 = 1;
-	PosY = StartY+fontheight;
+	renderinfo.PosY = renderinfo.StartY + renderinfo.fontheight;
 	for (row = 0; row < 16; row++)
 	{
-		PosY+= fontheight;
-		SetPosX(10);
+		renderinfo.PosY += renderinfo.fontheight;
+		tuxtxt_SetPosX(&renderinfo, 10);
 		for (col=0; col < 6; col++)
 		{
 			tuxtxt_RenderCharFB(&renderinfo,col*16+row+0x20, &atr);
 		}
 	}
-	PosY = StartY+fontheight;
+	renderinfo.PosY = renderinfo.StartY + renderinfo.fontheight;
 	atr.charset = C_G2;
 	atr.setX26 = 0;
 	for (row = 0; row < 16; row++)
 	{
-		PosY+= fontheight;
-		SetPosX(20);
+		renderinfo.PosY += renderinfo.fontheight;
+		tuxtxt_SetPosX(&renderinfo, 20);
 		for (col=0; col < 6; col++)
 		{
 			tuxtxt_RenderCharFB(&renderinfo,col*16+row+0x20, &atr);
 		}
 	}
 	atr.charset = C_G3;
-	PosY = StartY+fontheight;
+	renderinfo.PosY = renderinfo.StartY + renderinfo.fontheight;
 	for (row = 0; row < 16; row++)
 	{
-		PosY+= fontheight;
-		SetPosX(30);
+		renderinfo.PosY += renderinfo.fontheight;
+		tuxtxt_SetPosX(&renderinfo, 30);
 		for (col=0; col < 6; col++)
 		{
 			tuxtxt_RenderCharFB(&renderinfo,col*16+row+0x20, &atr);
@@ -1654,7 +1654,7 @@ void ConfigMenu(int Init)
 #if TUXTXT_DEBUG
 				case M_LNG:
 					charpage();
-					ClearFB(transp);
+					tuxtxt_ClearFB(&renderinfo, tuxtxt_color_transp);
 					Menu_Init(menu, current_pid, menuitem, hotindex);
 				break;
 #endif
