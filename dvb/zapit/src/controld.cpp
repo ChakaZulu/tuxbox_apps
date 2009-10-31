@@ -806,7 +806,7 @@ void disableVideoOutput(bool disable)
 		//zapit.setStandby(false);
 		if (!settings.mute)
 			audioDecoder->unmute();
-#if HAVE_DVB_API_VERSION < 3
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		startPlayBack(cc);
 #endif
 		setvideooutput(settings.videooutput, false);
@@ -823,7 +823,7 @@ void disableVideoOutput(bool disable)
 		videoDecoder->setVideoFormat(-1);
 		//zapit.setStandby(true);
 		audioDecoder->mute();
-#if HAVE_DVB_API_VERSION < 3
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 		stopPlayBack();
 #endif
 	}
