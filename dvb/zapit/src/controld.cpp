@@ -719,11 +719,19 @@ void switch_vcr( bool vcr_on)
 		activeAspectRatio = settings.aspectRatio_vcr;
 		disableVideoOutput(false);
 		printf("[controld]: switch to scart-input... (%d)\n", settings.boxtype);
+#ifdef ENABLE_LIRC
+		CIRSend irs("scarton");
+		irs.Send();
+#endif
 	}
 	else
 	{	//turn to dvb...
 	 	activeAspectRatio = settings.aspectRatio_dvb;
 		printf("[controld]: switch to dvb-input... (%d)\n", settings.boxtype);
+#ifdef ENABLE_LIRC
+		CIRSend irs("scartoff");
+		irs.Send();
+#endif
 	}
 
 	routeVideo();
