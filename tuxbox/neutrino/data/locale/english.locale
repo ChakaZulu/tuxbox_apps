@@ -1352,4 +1352,7 @@ zapitconfig.save_audio_pid Save Audio-PIDs
 zapitconfig.save_last_channel save last channel
 zapitconfig.start_radio Radio start channel
 zapitconfig.start_tv TV start channel
+zapitconfig.uncommitted_switch Uncommitted Switch
+zapitconfig.uncommitted_switch_mode1 Mode 1
+zapitconfig.uncommitted_switch_mode2 Mode 2
 zaptotimer.announce Zapto timer in one minute

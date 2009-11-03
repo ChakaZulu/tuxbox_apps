@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.37 2009/09/30 17:34:20 seife Exp $
+ * $Id: frontend.h,v 1.38 2009/11/03 20:13:59 rhabarber1848 Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -89,7 +89,7 @@ class CFrontend
 
 
 	public:
-		CFrontend(int _uncomitted_switch_mode = 0, int extra_flags = 0); // extra flags might be implementation specific
+		CFrontend(int _uncommitted_switch_mode = 0, int extra_flags = 0); // extra flags might be implementation specific
 		~CFrontend(void);
 
 		static fe_code_rate_t		getCodeRate(const uint8_t fec_inner);
@@ -97,6 +97,8 @@ class CFrontend
 		uint8_t				getDiseqcRepeats(void) const		{ return diseqcRepeats; }
 		diseqc_t			getDiseqcType(void) const		{ return diseqcType; }
 		uint32_t			getFrequency(void) const;
+		void				setUncommittedSwitchMode(const int mode);
+		int				getUncommittedSwitchMode(void) const;
 #ifndef HAVE_TRIPLEDRAGON
 		// TD has no cable/terrestrial
 		static fe_modulation_t		getModulation(const uint8_t modulation);

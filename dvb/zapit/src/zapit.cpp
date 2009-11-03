@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.447 2009/10/12 07:22:55 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.448 2009/11/03 20:14:00 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -713,9 +713,18 @@ void saveSettings(bool write)
 		config.setBool("saveAudioPIDs", save_audioPIDs);
 		config.setBool("makeRemainingChannelsBouquet", bouquetManager->remainingChannelsBouquet);
 
-		config.setInt32("lastSatellitePosition", frontend->getCurrentSatellitePosition());
-		config.setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
-		config.setInt32("diseqcType", frontend->getDiseqcType());
+
+		switch (frontend->getInfo()->type) {
+			case FE_QPSK:
+				config.setInt32("lastSatellitePosition", frontend->getCurrentSatellitePosition());
+				config.setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
+				config.setInt32("diseqcType", frontend->getDiseqcType());
+				config.setInt32("uncommitted_switch_mode", frontend->getUncommittedSwitchMode());
+				break;
+
+			default:
+				break;
+		}
 
 		if (config.getModifiedFlag())
 			config.saveConfig(CONFIGFILE);
@@ -1813,6 +1822,22 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::commandBoolean msg;
 		msg.truefalse = bouquetManager->remainingChannelsBouquet;
 		CBasicServer::send_data(connfd, &msg, sizeof(msg));
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_UNCOMMITTED_SWITCH_MODE:
+	{
+		CZapitMessages::commandInt msg;
+		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
+		frontend->setUncommittedSwitchMode(msg.val);
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_UNCOMMITTED_SWITCH_MODE:
+	{
+		CZapitMessages::responseGeneralInteger responseInteger;
+		responseInteger.number = frontend->getUncommittedSwitchMode();
+		CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger));
 		break;
 	}
 
@@ -3067,7 +3092,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.447 2009/10/12 07:22:55 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.448 2009/11/03 20:14:00 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;

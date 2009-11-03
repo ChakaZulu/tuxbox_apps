@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.149 2009/10/17 16:31:51 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.150 2009/11/03 20:14:04 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1379,6 +1379,9 @@ const char * locale_real_names[] =
 	"zapitconfig.save_last_channel",
 	"zapitconfig.start_radio",
 	"zapitconfig.start_tv",
+	"zapitconfig.uncommitted_switch",
+	"zapitconfig.uncommitted_switch_mode1",
+	"zapitconfig.uncommitted_switch_mode2",
 	"zaptotimer.announce",
 };
 #endif

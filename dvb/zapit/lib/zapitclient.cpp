@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.126 2009/09/30 18:11:12 seife Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.127 2009/11/03 20:14:00 rhabarber1848 Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -216,6 +216,28 @@ bool CZapitClient::getRemainingChannelsBouquet(void)
 
 	close_connection();
 	return msg.truefalse;
+}
+
+void CZapitClient::setUncommittedSwitchMode(int mode)
+{
+	CZapitMessages::commandInt msg;
+
+	msg.val = mode;
+
+	send(CZapitMessages::CMD_SET_UNCOMMITTED_SWITCH_MODE, (const char *) & msg, sizeof(msg));
+
+	close_connection();
+}
+
+int CZapitClient::getUncommittedSwitchMode()
+{
+	send(CZapitMessages::CMD_GET_UNCOMMITTED_SWITCH_MODE);
+
+	CZapitMessages::responseGeneralInteger response;
+	CBasicClient::receive_data((char* )&response, sizeof(response));
+
+	close_connection();
+	return response.number;
 }
 
 int32_t CZapitClient::getCurrentSatellitePosition(void)

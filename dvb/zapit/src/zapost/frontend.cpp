@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.69 2009/07/10 12:34:55 seife Exp $
+ * $Id: frontend.cpp,v 1.70 2009/11/03 20:14:00 rhabarber1848 Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -239,6 +239,19 @@ uint32_t CFrontend::getFrequency(void) const
 	default:
 		return currentTransponder.feparams.frequency;
 	}
+}
+
+void CFrontend::setUncommittedSwitchMode(const int mode)
+{
+	uncommitted_switch_mode = mode;
+	if ((uncommitted_switch_mode<0) || (uncommitted_switch_mode>2))
+		uncommitted_switch_mode = 0;
+	printf("[frontend] uncommitted_switch_mode %d\n", uncommitted_switch_mode);
+}
+
+int CFrontend::getUncommittedSwitchMode(void) const
+{
+	return uncommitted_switch_mode;
 }
 
 uint8_t CFrontend::getPolarization(void) const

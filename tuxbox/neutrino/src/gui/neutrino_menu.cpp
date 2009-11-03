@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.91 2009/10/30 22:16:17 seife Exp $
+	$Id: neutrino_menu.cpp,v 1.92 2009/11/03 20:14:03 rhabarber1848 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -650,12 +650,21 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings,
 	miscSettingsFilebrowser.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE, &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
 }
 
+#define ZAPITSETTINGS_UNCOMMITTED_SWITCH_MODE_OPTION_COUNT 3
+const CMenuOptionChooser::keyval ZAPITSETTINGS_UNCOMMITTED_SWITCH_MODE_OPTIONS[ZAPITSETTINGS_UNCOMMITTED_SWITCH_MODE_OPTION_COUNT] =
+{
+	{ 0, LOCALE_OPTIONS_OFF                          },
+	{ 1, LOCALE_ZAPITCONFIG_UNCOMMITTED_SWITCH_MODE1 },
+	{ 2, LOCALE_ZAPITCONFIG_UNCOMMITTED_SWITCH_MODE2 }
+};
+
 /* These variables need to be defined outside InitZapitSettings,
    otherwise locale "INTERNAL ERROR - PLEASE REPORT" is displayed
    instead of the option values */
 int remainingChannelsBouquet = 0;
 int saveaudiopids = 0;
 int savelastchannel = 0;
+int uncommitted_switch = 0;
 char CstartChannelRadio[30]; /* zapitclient.h, responseChannels, char name[30]; */
 char CstartChannelTV[30];
 
@@ -679,6 +688,12 @@ void CNeutrinoApp::InitZapitSettings(CMenuWidget &miscSettingsZapitSettings)
 
 	remainingChannelsBouquet = g_Zapit->getRemainingChannelsBouquet() ? 1 : 0;
 	miscSettingsZapitSettings.addItem(new CMenuOptionChooser(LOCALE_ZAPITCONFIG_REMAINING_BOUQUET, &remainingChannelsBouquet, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, zapitSetupNotifier));
+
+	if(g_info.delivery_system == DVB_S)
+	{
+		uncommitted_switch = g_Zapit->getUncommittedSwitchMode();
+		miscSettingsZapitSettings.addItem(new CMenuOptionChooser(LOCALE_ZAPITCONFIG_UNCOMMITTED_SWITCH, &uncommitted_switch, ZAPITSETTINGS_UNCOMMITTED_SWITCH_MODE_OPTIONS, ZAPITSETTINGS_UNCOMMITTED_SWITCH_MODE_OPTION_COUNT, true, zapitSetupNotifier));
+	}
 }
 
 /* for driver and boot settings menu */

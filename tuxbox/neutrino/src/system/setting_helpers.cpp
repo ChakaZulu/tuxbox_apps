@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.180 2009/10/12 07:35:44 rhabarber1848 Exp $
+	$Id: setting_helpers.cpp,v 1.181 2009/11/03 20:14:04 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -482,6 +482,10 @@ bool CZapitSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void 
 	else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_ZAPITCONFIG_SAVE_AUDIO_PID))
 	{
 		g_Zapit->setSaveAudioPIDs((*((int *)data)) != 0);
+	}
+	else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_ZAPITCONFIG_UNCOMMITTED_SWITCH))
+	{
+		g_Zapit->setUncommittedSwitchMode(*(int *)data);
 	}
 	return true;
 }

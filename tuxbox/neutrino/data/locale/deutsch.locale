@@ -1352,4 +1352,7 @@ zapitconfig.save_audio_pid Audio-PIDs speichern
 zapitconfig.save_last_channel letzten Kanal speichern
 zapitconfig.start_radio Radio-Startkanal
 zapitconfig.start_tv TV-Startkanal
+zapitconfig.uncommitted_switch Uncommitted Switch
+zapitconfig.uncommitted_switch_mode1 Mode 1
+zapitconfig.uncommitted_switch_mode2 Mode 2
 zaptotimer.announce In einer Minute wird umgeschaltet.

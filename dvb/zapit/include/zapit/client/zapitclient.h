@@ -419,6 +419,10 @@ class CZapitClient:public CBasicClient
 	/* get FrontEnd Signal Params */ 
 	void getFESignal (struct responseFESignal& f);
 
+	/* uncommitted switch mode */
+	void setUncommittedSwitchMode(int mode);
+	int getUncommittedSwitchMode(void);
+
 	/****************************************/
 	/*					*/
 	/* Bouquet editing functions		*/
