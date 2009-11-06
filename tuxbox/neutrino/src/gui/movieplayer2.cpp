@@ -3144,6 +3144,14 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
 			}
 		}
+		else if (msg == CRCInput::RC_left)
+		{
+			skip(-15, stream, false);
+		}
+		else if (msg == CRCInput::RC_right)
+		{
+			skip(15, stream, false);
+		}
 		else if (msg == CRCInput::RC_1 || msg == CRCInput::RC_prev)
 		{
 			skip(-60, stream, false);
@@ -3416,7 +3424,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.61 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.62 $");
 }
 
 void CMoviePlayerGui::showHelpVLC()
