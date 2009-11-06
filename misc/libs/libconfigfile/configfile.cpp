@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.22 2009/10/12 07:22:59 rhabarber1848 Exp $
+ * $Id: configfile.cpp,v 1.23 2009/11/06 22:33:00 rhabarber1848 Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -182,7 +182,8 @@ int32_t CConfigFile::getInt32(const char * const key, const int32_t defaultVal)
 
 int32_t CConfigFile::getInt32(const std::string & key, const int32_t defaultVal)
 {
-	if (configData.find(key) == configData.end())
+	//an empty string returns always 0. in this case return the default value!
+	if (configData.find(key) == configData.end() || configData[key].empty())
 	{
 		unknownKeyQueryedFlag = true;
 		if (saveDefaults) {
@@ -203,7 +204,8 @@ int64_t CConfigFile::getInt64(const char * const key, const int64_t defaultVal)
 
 int64_t CConfigFile::getInt64(const std::string & key, const int64_t defaultVal)
 {
-	if (configData.find(key) == configData.end())
+	//an empty string returns always 0. in this case return the default value!
+	if (configData.find(key) == configData.end() || configData[key].empty())
 	{
 		unknownKeyQueryedFlag = true;
 		if (saveDefaults) {
