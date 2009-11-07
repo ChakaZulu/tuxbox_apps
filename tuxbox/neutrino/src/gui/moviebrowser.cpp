@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.33 2009/10/30 21:05:49 seife Exp $
+	$Id: moviebrowser.cpp,v 1.34 2009/11/07 09:51:30 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.34  2009/11/07 09:51:30  rhabarber1848
+	Movieplayer2: Change more buttons to make navigation more mp1-like, update helptext: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=372010#p372010
+	
 	Revision 1.33  2009/10/30 21:05:49  seife
 	moviebrowser: fix ignored NULL-check due to superfluous semicolon
 	
@@ -205,6 +208,7 @@
 
 #include "stdlib.h"
 #include <gui/moviebrowser.h>
+#include <gui/movieplayer.h>
 #include <gui/filebrowser.h>
 #include <gui/imageinfo.h>
 #include <gui/widget/hintbox.h>
@@ -511,7 +515,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.33 2009/10/30 21:05:49 seife Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.34 2009/11/07 09:51:30 rhabarber1848 Exp $\r\n");
 	init();
 }
 
@@ -4000,4 +4004,50 @@ void CDirMenu::show(void)
     dirMenu.exec(NULL," ");
   return;
 
+}
+
+/************************************************************************/
+void CMovieBrowser::showHelpVLC()
+/************************************************************************/
+{
+	static CMoviePlayerGui mp;
+	std::string version = "Version: " + mp.getMoviePlayerVersion();
+	Helpbox helpbox;
+#ifdef ENABLE_MOVIEPLAYER2
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP17));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_GREEN, g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES));
+#else
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP1));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_GREEN, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP2));
+#endif
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_YELLOW, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP3));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP4));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_DBOX, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP5));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_1, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP6));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_3, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP7));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_4, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP8));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_6, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP9));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
+#ifdef ENABLE_MOVIEPLAYER2
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_5, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP13));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP2));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_RIGHT, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP18));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP19));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_TOP, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP15));
+#else
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP13));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_RIGHT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP15));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
+#endif
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP1));
+	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
+	helpbox.addLine(version);
+#ifndef ENABLE_MOVIEPLAYER2
+	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
+#endif
+	hide();
+	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 }

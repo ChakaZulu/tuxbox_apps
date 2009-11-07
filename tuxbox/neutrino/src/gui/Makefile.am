@@ -77,7 +77,7 @@ if ENABLE_MOVIEPLAYER2
 libneutrino_gui_a_SOURCES += movieplayer2.cpp
 else
 libneutrino_gui_a_SOURCES += \
-	movieviewer.cpp movieplayer.cpp movieplayer_setup.cpp
+	movieviewer.cpp movieplayer.cpp
 endif
 endif
 

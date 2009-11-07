@@ -1,5 +1,5 @@
 /*
-	$Id: movieplayer_setup.cpp,v 1.1 2009/10/13 19:19:01 dbt Exp $
+	$Id: movieplayer_setup.cpp,v 1.2 2009/11/07 09:51:30 rhabarber1848 Exp $
 
 	movieplayer setup implementation - Neutrino-GUI
 
@@ -28,6 +28,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: movieplayer_setup.cpp,v $
+	Revision 1.2  2009/11/07 09:51:30  rhabarber1848
+	Movieplayer2: Change more buttons to make navigation more mp1-like, update helptext: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=372010#p372010
+	
 	Revision 1.1  2009/10/13 19:19:01  dbt
 	init movieplayer_setup for it's own file
 	
@@ -166,9 +169,7 @@ void CMoviePlayerSetup::showMoviePlayerSetup()
 	CDirChooser* startdir = new CDirChooser(&g_settings.streaming_moviedir);	
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.streaming_moviedir, startdir);
 
-#ifndef ENABLE_MOVIEPLAYER2
 	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFPLUGIN, true, g_settings.movieplayer_plugin,this,"movieplugin");
-#endif
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_AUDIO      , &g_settings.streaming_transcode_audio      , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
 
 	CMenuOptionChooser* oj2 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_AVI_RAWAUDIO   , &g_settings.streaming_force_avi_rawaudio   , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
@@ -212,8 +213,8 @@ void CMoviePlayerSetup::showMoviePlayerSetup()
 	mp_setup->addItem( oj2);				//ac3 on avi
 	mp_setup->addItem(GenericMenuSeparatorLine);	//separator
 	mp_setup->addItem( mf7);				//default startdir
-#ifndef ENABLE_MOVIEPLAYER2
 	mp_setup->addItem( mf8);				//default movieplugin
+#ifndef ENABLE_MOVIEPLAYER2
 	mp_setup->addItem(GenericMenuSeparatorLine);	//separator
 	mp_setup->addItem( oj6 );				//used buffer
 	mp_setup->addItem( mf9 );				//buffer segment size

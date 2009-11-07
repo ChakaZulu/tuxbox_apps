@@ -100,7 +100,6 @@ class CMoviePlayerGui : public CMenuTarget
     CFileFilter tsfilefilter;
     CFileFilter vlcfilefilter;
     void showHelpTS(void);
-    void showHelpVLC(void);
     void showFileInfoVLC(void);
     void showMovieViewer(void);
 

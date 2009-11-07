@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.h,v 1.11 2009/09/15 08:05:47 rhabarber1848 Exp $
+	$Id: moviebrowser.h,v 1.12 2009/11/07 09:51:30 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -42,6 +42,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.h,v $
+	Revision 1.12  2009/11/07 09:51:30  rhabarber1848
+	Movieplayer2: Change more buttons to make navigation more mp1-like, update helptext: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=372010#p372010
+	
 	Revision 1.11  2009/09/15 08:05:47  rhabarber1848
 	Fix broken umlauts in comments since last commit: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=370233#p370233
 	
@@ -358,6 +361,7 @@ class CMovieBrowser : public CMenuTarget
 		bool delFile_vlc(CFile& file);
 #endif
 		bool delFile_std(CFile& file);
+		void showHelpVLC(void);
 		
 		std::string getMovieBrowserVersion(void);
 		

@@ -115,6 +115,7 @@ extern "C" {
 #include <xmltree/xmlinterface.h>
 
 #include <gui/movieplayer.h>
+#include "gui/moviebrowser.h"
 #include <gui/timeosd.h>
 #include <gui/movieinfo.h>
 #include <gui/imageinfo.h>
@@ -3077,7 +3078,13 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		}
 
 		if (msg == CRCInput::RC_green)
+		{
 			g_showaudioselectdialog = true;
+		}
+		else if (msg == CRCInput::RC_red)
+		{
+			g_PluginList->start_plugin_by_name(g_settings.movieplayer_plugin.c_str(),pidt);
+		}
 #ifndef HAVE_TRIPLEDRAGON
 		else if (msg == CRCInput::RC_home && g_playstate >= CMoviePlayerGui::PLAY)
 #else
@@ -3104,7 +3111,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 				StreamTime.hide();
 			g_RCInput->postMsg(NeutrinoMessages::SHOW_INFOBAR, data);
 		}
-		else if (msg == CRCInput::RC_red)
+		else if (msg == CRCInput::RC_0)
 		{
 			if (g_playstate == CMoviePlayerGui::PLAY)
 				g_playstate = CMoviePlayerGui::SOFTRESET;
@@ -3176,7 +3183,26 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		{
 			skip(600, stream, false);
 		}
-		else if (msg == CRCInput::RC_down || msg == CRCInput::RC_eject)
+		else if (msg == CRCInput::RC_2)
+		{
+			skip(0, stream, true);
+		}
+		else if (msg == CRCInput::RC_8)
+		{
+			int elapsed_time, remaining_time;
+			if (stream)
+			{
+				elapsed_time = VlcGetStreamTime() - buffer_time;
+				remaining_time = VlcGetStreamLength() - elapsed_time;
+			}
+			else
+			{
+				elapsed_time = get_filetime();
+				remaining_time = get_filetime(true);
+			}
+			skip(elapsed_time + remaining_time - 10, stream, true);
+		}
+		else if (msg == CRCInput::RC_5 || msg == CRCInput::RC_eject)
 		{
 			char tmp[10 + 1];
 			bool cancel;
@@ -3281,18 +3307,21 @@ CMoviePlayerGui::PlayStream(int streamtype)
 					g_percent, elapsed_time, remaining_time,
 					ac3state, g_numpida > 1,
 					g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES),
-					g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP16));
+					g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP17));
 		}
 		else if (msg == CRCInput::RC_ok)
 		{
 			if (bufferfilled)
-				showHelpVLC();
+			{
+				static CMovieBrowser mb;
+				mb.showHelpVLC();
+			}
 		}
-		else if (msg == CRCInput::RC_left || msg == CRCInput::RC_right)
+		else if (msg == CRCInput::RC_up || msg == CRCInput::RC_down)
 		{
 			if (!autoplaylist)
 			{
-				if (msg == CRCInput::RC_left)
+				if (msg == CRCInput::RC_up)
 					selected--;
 				else
 					selected++;
@@ -3424,32 +3453,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.62 $");
-}
-
-void CMoviePlayerGui::showHelpVLC()
-{
-	std::string version = "Version: " + getMoviePlayerVersion();
-	Helpbox helpbox;
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP1));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP2));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_GREEN, g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_YELLOW, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP3));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP4));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_DBOX, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP5));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_1, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP6));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_3, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP7));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_4, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP8));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_6, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP9));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP13));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_RIGHT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP15));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_DBOX, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
-	helpbox.addLine(version);
-	hide();
-	helpbox.show(LOCALE_MESSAGEBOX_INFO);
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.63 $");
 }
 
 void CMoviePlayerGui::showFileInfoVLC()
