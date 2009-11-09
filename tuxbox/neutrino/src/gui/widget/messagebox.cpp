@@ -76,7 +76,7 @@ void CMessageBox::paintButtons()
 	int c_rad_mid = RADIUS_MID;
 	m_window->paintBoxRel(0, m_height - (m_fheight << 1), m_width, (m_fheight << 1), (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0, c_rad_mid, CORNER_BOTTOM);
 
-	//irgendwann alle vergleichen - aber cancel ist sicher der längste
+	//irgendwann alle vergleichen - aber cancel ist sicher der lÃ¤ngste
 	int MaxButtonTextWidth = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(g_Locale->getText(LOCALE_MESSAGEBOX_CANCEL), true); // UTF-8
 
 	int ButtonWidth = 20 + 33 + MaxButtonTextWidth;

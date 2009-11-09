@@ -245,7 +245,7 @@ int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const 
 			if (res & messages_return::unhandled)
 			{
 
-				// raus hier und darüber behandeln...
+				// raus hier und darÃ¼ber behandeln...
 				g_RCInput->postMsg(msg, data);
 				res = messages_return::cancel_info;
 			}
