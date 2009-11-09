@@ -110,7 +110,7 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 
 	int page = 0;
 	int line = 0;
-	int maxWidth = 0;
+	int maxWidth = m_width > 0 ? m_width : 0;
 	int maxOverallHeight = 0;
 	m_startEntryOfPage.push_back(0);
 	for (ContentLines::iterator it = m_lines.begin(); it!=m_lines.end(); it++)
