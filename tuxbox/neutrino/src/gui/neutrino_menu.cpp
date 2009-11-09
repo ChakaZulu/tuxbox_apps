@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.92 2009/11/03 20:14:03 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.93 2009/11/09 13:05:09 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -54,6 +54,7 @@
 #include "gui/widget/icons.h"
 #include "gui/widget/keychooser.h"
 #include "gui/widget/lcdcontroler.h"
+#include "gui/movieplayer_setup.h"
 #include "gui/widget/rgbcsynccontroler.h"
 #include "gui/widget/stringinput.h"
 #include "gui/widget/stringinput_ext.h"
@@ -76,12 +77,16 @@
 #include "gui/mediaplayer_setup.h"
 #endif
 #ifdef ENABLE_MOVIEPLAYER
+#include "gui/movieplayer.h"
+#include "gui/movieplayer_menu.h"
 #include "gui/movieplayer_setup.h"
 #endif
 #include "gui/motorcontrol.h"
+#include "gui/network_setup.h"
 #ifdef ENABLE_GUI_MOUNT
 #include "gui/nfs.h"
 #endif
+#include "gui/parentallock_setup.h"
 #include "gui/personalize.h"
 #ifdef ENABLE_PICTUREVIEWER
 #include "gui/pictureviewer.h"
@@ -114,8 +119,6 @@ static CTimingSettingsNotifier timingsettingsnotifier;
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &mainSettings,
-								CMenuWidget &parentallockSettings,
-								CMenuWidget &networkSettings,
 								CMenuWidget &recordingSettings,
 								CMenuWidget &colorSettings,
 								CMenuWidget &lcdSettings,
@@ -123,9 +126,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &languageSettings,
 								CMenuWidget &miscSettings,
 								CMenuWidget &driverSettings,
-#ifdef ENABLE_MOVIEPLAYER
-								CMenuWidget &moviePlayer,
-#endif
 								CMenuWidget &service)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
@@ -182,31 +182,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 
 #ifdef ENABLE_MOVIEPLAYER
 	// movieplayer
-	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, g_settings.personalize_movieplayer);
-
-	addMenueIntroItems(moviePlayer);
-
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK_PC, true, NULL, moviePlayerGui, "tsplayback_pc", CRCInput::RC_1));
-#ifdef ENABLE_MOVIEBROWSER
-#ifndef ENABLE_MOVIEPLAYER2
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, moviePlayerGui, "tsmoviebrowser", CRCInput::RC_2));
-#else
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, movieBrowser, "run", CRCInput::RC_2));
-#endif /* ENABLE_MOVIEPLAYER2 */
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_BOOKMARK, true, NULL, moviePlayerGui, "bookmarkplayback", CRCInput::RC_3));
-#else
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_BOOKMARK, true, NULL, moviePlayerGui, "bookmarkplayback", CRCInput::RC_2));
-#endif /* ENABLE_MOVIEBROWSER */
-	moviePlayer.addItem(GenericMenuSeparatorLine);
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_FILEPLAYBACK, true, NULL, moviePlayerGui, "fileplayback", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_DVDPLAYBACK, true, NULL, moviePlayerGui, "dvdplayback", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_VCDPLAYBACK, true, NULL, moviePlayerGui, "vcdplayback", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-	moviePlayer.addItem(GenericMenuSeparatorLine);
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, new CMoviePlayerSetup(), NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
-#ifdef ENABLE_GUI_MOUNT
-	moviePlayer.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_MOUNT, true, NULL, new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
-#endif
+	shortcut += personalize->addItem(mainMenu, LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, new CMoviePlayerMenue(), NULL, CRCInput::convertDigitToKey(shortcut), NULL, false, g_settings.personalize_movieplayer);
 #endif
 
 #ifdef ENABLE_PICTUREVIEWER
@@ -274,15 +250,15 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	// parental lock
 	if (g_settings.personalize_youth == CPersonalizeGui::PERSONALIZE_MODE_VISIBLE) {
 		if(g_settings.parentallock_prompt)
-			mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+			mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.parentallock_pincode, true, true, NULL, new CParentalSetup(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
 		else
-			mainSettings.addItem(new CMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, true, NULL, &parentallockSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
-	}
+			mainSettings.addItem(new CMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, true, NULL, new CParentalSetup(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
+ 	}
 	else if (g_settings.personalize_youth == CPersonalizeGui::PERSONALIZE_MODE_PIN)
-		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.personalize_pincode, true, true, NULL, &parentallockSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.personalize_pincode, true, true, NULL, new CParentalSetup(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
 
 	// network
-	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_NETWORK, true, NULL, &networkSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_network);
+	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_NETWORK, true, NULL, this, "show_network_dialog", CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_network);
 
 	// record settings
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_RECORDING, true, NULL, &recordingSettings, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false,g_settings.personalize_recording);
@@ -823,112 +799,6 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	}
 }
 
-
-/* for parental lock settings menu */
-#if 1
-#define PARENTALLOCK_PROMPT_OPTION_COUNT 3
-#else
-#define PARENTALLOCK_PROMPT_OPTION_COUNT 4
-#endif
-const CMenuOptionChooser::keyval PARENTALLOCK_PROMPT_OPTIONS[PARENTALLOCK_PROMPT_OPTION_COUNT] =
-{
-	{ PARENTALLOCK_PROMPT_NEVER         , LOCALE_PARENTALLOCK_NEVER          },
-#if 0
-	{ PARENTALLOCK_PROMPT_ONSTART       , LOCALE_PARENTALLOCK_ONSTART        },
-#endif
-	{ PARENTALLOCK_PROMPT_CHANGETOLOCKED, LOCALE_PARENTALLOCK_CHANGETOLOCKED },
-	{ PARENTALLOCK_PROMPT_ONSIGNAL      , LOCALE_PARENTALLOCK_ONSIGNAL       }
-};
-
-#define PARENTALLOCK_LOCKAGE_OPTION_COUNT 3
-const CMenuOptionChooser::keyval PARENTALLOCK_LOCKAGE_OPTIONS[PARENTALLOCK_LOCKAGE_OPTION_COUNT] =
-{
-	{ 12, LOCALE_PARENTALLOCK_LOCKAGE12 },
-	{ 16, LOCALE_PARENTALLOCK_LOCKAGE16 },
-	{ 18, LOCALE_PARENTALLOCK_LOCKAGE18 }
-};
-
-/* parental lock settings menu */
-void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
-{
-	addMenueIntroItems(parentallockSettings);
-
-	parentallockSettings.addItem(new CMenuOptionChooser(LOCALE_PARENTALLOCK_PROMPT , &g_settings.parentallock_prompt , PARENTALLOCK_PROMPT_OPTIONS , PARENTALLOCK_PROMPT_OPTION_COUNT , !parentallocked));
-
-	parentallockSettings.addItem(new CMenuOptionChooser(LOCALE_PARENTALLOCK_LOCKAGE, &g_settings.parentallock_lockage, PARENTALLOCK_LOCKAGE_OPTIONS, PARENTALLOCK_LOCKAGE_OPTION_COUNT, !parentallocked));
-
-	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget(LOCALE_PARENTALLOCK_CHANGEPIN, g_settings.parentallock_pincode, 4, LOCALE_PARENTALLOCK_CHANGEPIN_HINT1);
-	parentallockSettings.addItem( new CMenuForwarder(LOCALE_PARENTALLOCK_CHANGEPIN, true, g_settings.parentallock_pincode, pinChangeWidget));
-}
-
-/* for network settings menu */
-#define OPTIONS_NTPENABLE_OPTION_COUNT 2
-const CMenuOptionChooser::keyval OPTIONS_NTPENABLE_OPTIONS[OPTIONS_NTPENABLE_OPTION_COUNT] =
-{
-	{ 0, LOCALE_OPTIONS_NTP_OFF },
-	{ 1, LOCALE_OPTIONS_NTP_ON }
-};
-
-/* network settings menu */
-void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
-{
-	CIPInput * networkSettings_NetworkIP  = new CIPInput(LOCALE_NETWORKMENU_IPADDRESS , networkConfig.address   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, MyIPChanger);
-	CIPInput * networkSettings_NetMask    = new CIPInput(LOCALE_NETWORKMENU_NETMASK   , networkConfig.netmask   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CIPInput * networkSettings_Broadcast  = new CIPInput(LOCALE_NETWORKMENU_BROADCAST , networkConfig.broadcast , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CIPInput * networkSettings_Gateway    = new CIPInput(LOCALE_NETWORKMENU_GATEWAY   , networkConfig.gateway   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CIPInput * networkSettings_NameServer = new CIPInput(LOCALE_NETWORKMENU_NAMESERVER, networkConfig.nameserver, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-
-	CSectionsdConfigNotifier* sectionsdConfigNotifier = new CSectionsdConfigNotifier;
-	CStringInputSMS * networkSettings_NtpServer = new CStringInputSMS(LOCALE_NETWORKMENU_NTPSERVER, &g_settings.network_ntpserver, 30, LOCALE_NETWORKMENU_NTPSERVER_HINT1, LOCALE_NETWORKMENU_NTPSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-. ", sectionsdConfigNotifier);
-	CStringInput * networkSettings_NtpRefresh = new CStringInput(LOCALE_NETWORKMENU_NTPREFRESH, &g_settings.network_ntprefresh, 3,LOCALE_NETWORKMENU_NTPREFRESH_HINT1, LOCALE_NETWORKMENU_NTPREFRESH_HINT2 , "0123456789 ", sectionsdConfigNotifier);
-
-	CMenuForwarder *m0 = new CMenuForwarder(LOCALE_NETWORKMENU_SETUPNOW, true, NULL, this, "network", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
-	CMenuForwarder *m1 = new CMenuForwarder(LOCALE_NETWORKMENU_IPADDRESS , networkConfig.inet_static, networkConfig.address   , networkSettings_NetworkIP );
-	CMenuForwarder *m2 = new CMenuForwarder(LOCALE_NETWORKMENU_NETMASK   , networkConfig.inet_static, networkConfig.netmask   , networkSettings_NetMask   );
-	CMenuForwarder *m3 = new CMenuForwarder(LOCALE_NETWORKMENU_BROADCAST , networkConfig.inet_static, networkConfig.broadcast , networkSettings_Broadcast );
-	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_NETWORKMENU_GATEWAY   , networkConfig.inet_static, networkConfig.gateway   , networkSettings_Gateway   );
-	CMenuForwarder *m5 = new CMenuForwarder(LOCALE_NETWORKMENU_NAMESERVER, networkConfig.inet_static, networkConfig.nameserver, networkSettings_NameServer);
-	CMenuForwarder *m6 = new CMenuForwarder( LOCALE_NETWORKMENU_NTPSERVER, true , g_settings.network_ntpserver, networkSettings_NtpServer );
-	CMenuForwarder *m7 = new CMenuForwarder( LOCALE_NETWORKMENU_NTPREFRESH, true , g_settings.network_ntprefresh, networkSettings_NtpRefresh );
-
-	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5);
-
-	network_automatic_start = networkConfig.automatic_start ? 1 : 0;
-	CMenuOptionChooser* o1 = new CMenuOptionChooser(LOCALE_NETWORKMENU_SETUPONSTARTUP, &network_automatic_start, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
-
-	network_dhcp = networkConfig.inet_static ? 0 : 1;
-	CMenuOptionChooser* o2 = new CMenuOptionChooser(LOCALE_NETWORKMENU_DHCP, &network_dhcp, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, dhcpNotifier);
-
-	/* add menu items */
-	addMenueIntroItems(networkSettings);
-	networkSettings.addItem( m0 );
-
-	networkSettings.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_TEST, true, NULL, this, "networktest", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-	networkSettings.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_SHOW, true, NULL, this, "networkshow", CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
-	networkSettings.addItem(GenericMenuSeparatorLine);
-
-	networkSettings.addItem(o1);
-	networkSettings.addItem(GenericMenuSeparatorLine);
-	networkSettings.addItem(o2);
-	networkSettings.addItem(GenericMenuSeparatorLine);
-
-	networkSettings.addItem( m1);
-	networkSettings.addItem( m2);
-	networkSettings.addItem( m3);
-
-	networkSettings.addItem(GenericMenuSeparatorLine);
-	networkSettings.addItem( m4);
-	networkSettings.addItem( m5);
-	networkSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_NETWORKMENU_NTPTITLE));
-	networkSettings.addItem(new CMenuOptionChooser(LOCALE_NETWORKMENU_NTPENABLE, &g_settings.network_ntpenable, OPTIONS_NTPENABLE_OPTIONS, OPTIONS_NTPENABLE_OPTION_COUNT, true, sectionsdConfigNotifier));
-	networkSettings.addItem( m6);
-	networkSettings.addItem( m7);
-#ifdef ENABLE_GUI_MOUNT
-	networkSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_NETWORKMENU_MOUNT));
-	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_MOUNT , true, NULL, new CNFSMountGui(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_UMOUNT, true, NULL, new CNFSUmountGui(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-#endif
-}
 
 /* for record settings menu */
 #define RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT 4
@@ -1725,7 +1595,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 				menu_items++;
 				menu_prev = SNeutrinoSettings::ITEM_MOVIEPLAYER_TS;
 				keyhelper.get(&key,&icon,CRCInput::RC_green);
-				menu_item = new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, this->moviePlayerGui, "tsplayback", key, icon);
+				menu_item = new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, new CMoviePlayerGui()/*this->moviePlayerGui*/, "tsplayback", key, icon);
 				menu->addItem(menu_item, false);
 				break;
 
@@ -1734,9 +1604,9 @@ bool CNeutrinoApp::showUserMenu(int button)
 				menu_prev = SNeutrinoSettings::ITEM_MOVIEPLAYER_MB;
 				keyhelper.get(&key,&icon,CRCInput::RC_green);
 #ifndef ENABLE_MOVIEPLAYER2
-				menu_item = new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, this->moviePlayerGui, "tsmoviebrowser", key, icon);
+				menu_item = new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, new CMoviePlayerGui(), "tsmoviebrowser", key, icon);
 #else
-				menu_item = new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, movieBrowser, "run", key, icon);
+				menu_item = new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, new CMovieBrowser(), "run", key, icon);
 #endif
 				menu->addItem(menu_item, false);
 				break;
@@ -1941,7 +1811,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 #ifdef ENABLE_MOVIEPLAYER
 	// -- Add TS Playback to blue button
-	StreamFeatureSelector->addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, this->moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
+	StreamFeatureSelector->addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, new CMoviePlayerGui(), "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
 #endif
 
 	// -- Timer-Liste

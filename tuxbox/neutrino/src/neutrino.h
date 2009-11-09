@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.228 2009/10/27 20:28:42 dbt Exp $
+	$Id: neutrino.h,v 1.229 2009/11/09 13:05:11 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -40,8 +40,8 @@
 #include <neutrinoMessages.h>
 #include <driver/framebuffer.h>
 #include <system/setting_helpers.h>
-#include <system/configure_network.h>
 #include <gui/timerlist.h>
+#include <gui/network_setup.h>
 #include <timerdclient/timerdtypes.h>
 #include <gui/channellist.h>          /* CChannelList */
 #include <gui/rc_lock.h>
@@ -155,8 +155,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 
 		CConfigFile			configfile;
 		CScanSettings			scanSettings;
-		int				network_dhcp;
-		int				network_automatic_start;
 
 		neutrino_font_descr_struct	font;
 
@@ -185,24 +183,17 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 
 		CKeySetupNotifier       	*keySetupNotifier;
 		CShutdownCountNotifier		*shutdownCountNotifier;
-
+		CNetworkSetup 			*networksetup;
 		CNVODChangeExec         	*NVODChanger;
 #ifdef HAVE_DBOX_HARDWARE
 		CUCodeCheckExec			*UCodeChecker;
 #endif
 		CDVBInfoExec			*DVBInfo;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
-		CIPChangeNotifier		*MyIPChanger;
 //		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 		CFdxChangeNotifier		*FdxSettingsChanger;
 		CRCLock				*rcLock;
-#ifdef ENABLE_MOVIEPLAYER
-		CMenuTarget* 			moviePlayerGui;
-#ifdef ENABLE_MOVIEBROWSER
-		CMenuTarget*			movieBrowser;
-#endif
-#endif
 		bool 				parentallocked;
 		CFontSizeNotifier 		*fontsizenotifier;
 		bool 				waitforshutdown;
@@ -248,7 +239,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors);
 		void InitColorSettingsTiming(CMenuWidget &colorSettings_timing);
 		void InitLcdSettings(CMenuWidget &lcdSettings);
-		void InitNetworkSettings(CMenuWidget &networkSettings);
 		void AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONT_TYPES number_of_fontsize_entry);
 		void InitFontSettings(CMenuWidget &fontSettings);
 		void InitRecordingSettings(CMenuWidget &recordingSettings);
@@ -266,12 +256,10 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 								CMenuWidget &miscSettingsZapitSettings,
 								CMenuWidget &miscSettingsRemoteControl,
 								CMenuWidget &miscSettingsFilebrowser);
-		void InitScanSettings(CMenuWidget &);
+
 		void InitParentalLockSettings(CMenuWidget &);
 		void InitMainMenu(CMenuWidget &mainMenu,
 				  CMenuWidget &mainSettings,
-				  CMenuWidget &parentallockSettings,
-				  CMenuWidget &networkSettings,
 				  CMenuWidget &recordingSettings,
 				  CMenuWidget &colorSettings,
 				  CMenuWidget &lcdSettings,
@@ -279,10 +267,8 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 				  CMenuWidget &languageSettings,
 				  CMenuWidget &miscSettings,
 				  CMenuWidget &driverSettings,
-#ifdef ENABLE_MOVIEPLAYER
-				  CMenuWidget &moviePlayer,
-#endif
 				  CMenuWidget &service);
+
 		void addMenueIntroItems(CMenuWidget &item);
 
 		void SetupTiming();
@@ -306,7 +292,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CChannelList			*channelListTV;
 		CChannelList			*channelListRADIO;
 		CChannelList			*channelListRecord;
-		CNetworkConfig                  networkConfig;
 
 		static CNeutrinoApp* getInstance();
 
@@ -324,6 +309,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		int getMode() {return mode;}
 		int getLastMode() {return lastMode;}
 		bool isMuted() {return current_muted;}
+		bool isParentallocked() {return parentallocked;};
 		int recordingstatus;
 		bool zapto_tv_on_init_done;
 		bool zapto_radio_on_init_done;

@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.218 2009/10/17 16:31:51 rhabarber1848 Exp $
+  $Id: settings.h,v 1.219 2009/11/09 13:05:12 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -83,6 +83,8 @@ struct SNeutrinoSettings
 	std::string epg_old_events;
 	std::string epg_max_events;
 	std::string epg_dir;
+
+	// network
 	std::string network_ntpserver;
 	std::string network_ntprefresh;
 	int network_ntpenable;

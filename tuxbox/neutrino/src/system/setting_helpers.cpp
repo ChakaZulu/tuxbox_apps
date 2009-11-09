@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.181 2009/11/03 20:14:04 rhabarber1848 Exp $
+	$Id: setting_helpers.cpp,v 1.182 2009/11/09 13:05:12 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,7 +32,7 @@
 */
 
 #include <system/setting_helpers.h>
-
+#include <system/configure_network.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -147,9 +147,10 @@ CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwa
 
 bool CDHCPNotifier::changeNotify(const neutrino_locale_t, void * data)
 {
-	CNeutrinoApp::getInstance()->networkConfig.inet_static = ((*(int*)(data)) == 0);
+	CNetworkConfig networkConfig;
+	networkConfig.inet_static = ((*(int*)(data)) == 0);
 	for(int x=0;x<5;x++)
-		toDisable[x]->setActive(CNeutrinoApp::getInstance()->networkConfig.inet_static);
+		toDisable[x]->setActive(networkConfig.inet_static);
 	return true;
 }
 
@@ -610,14 +611,15 @@ bool CShutdownCountNotifier::changeNotify(const neutrino_locale_t, void *)
 
 bool CIPChangeNotifier::changeNotify(const neutrino_locale_t, void * Data)
 {
+	CNetworkConfig networkConfig;
 	char ip[16];
 	unsigned char _ip[4];
 	sscanf((char*) Data, "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
 
 	sprintf(ip, "%hhu.%hhu.%hhu.255", _ip[0], _ip[1], _ip[2]);
-	CNeutrinoApp::getInstance()->networkConfig.broadcast = ip;
+	networkConfig.broadcast = ip;
 
-	CNeutrinoApp::getInstance()->networkConfig.netmask = (_ip[0] == 10) ? "255.0.0.0" : "255.255.255.0";
+	networkConfig.netmask = (_ip[0] == 10) ? "255.0.0.0" : "255.255.255.0";
 
 	return true;
 }
@@ -875,7 +877,7 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	}
 	
 	printf("testNw IP: %s\n", our_ip);
-	printf("testNw MAC-address%s\n", ethID.c_str());
+	printf("testNw MAC-address: %s\n", ethID.c_str());
 	printf("testNw Netmask: %s\n", our_mask);
 	printf("testNw Broadcast: %s\n", our_broadcast);
 	printf("testNw Gateway: %s\n", our_gateway);
@@ -910,12 +912,16 @@ void showCurrentNetworkSettings()
 	
 	netGetIP("eth0", ip, mask, broadcast);
 	if (ip[0] == 0) {
-		text = "Network inactive\n";
+		text = g_Locale->getText(LOCALE_NETWORKMENU_INACTIVE);
 	}
 	else {
 		netGetNameserver(nameserver);
 		netGetDefaultRoute(router);
-		text = (std::string)g_Locale->getText(LOCALE_NETWORKMENU_IPADDRESS ) + ": " + ip + '\n'
+		CNetworkConfig  networkConfig;
+		std::string dhcp = networkConfig.inet_static ? g_Locale->getText(LOCALE_OPTIONS_OFF) : g_Locale->getText(LOCALE_OPTIONS_ON);
+
+		text = (std::string)g_Locale->getText(LOCALE_NETWORKMENU_DHCP) + ": " + dhcp + '\n'
+				  + g_Locale->getText(LOCALE_NETWORKMENU_IPADDRESS ) + ": " + ip + '\n'
 				  + g_Locale->getText(LOCALE_NETWORKMENU_NETMASK   ) + ": " + mask + '\n'
 				  + g_Locale->getText(LOCALE_NETWORKMENU_BROADCAST ) + ": " + broadcast + '\n'
 				  + g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER) + ": " + nameserver + '\n'

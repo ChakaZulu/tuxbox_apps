@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1006 2009/10/31 20:17:04 seife Exp $
+	$Id: neutrino.cpp,v 1.1007 2009/11/09 13:05:10 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -107,7 +107,7 @@
 #ifdef ENABLE_GUI_MOUNT
 #include <system/fsmounter.h>
 #endif
-
+#include <system/configure_network.h>
 #include <timerdclient/timerdmsg.h>
 
 #include <string.h>
@@ -229,6 +229,7 @@ CNeutrinoApp::CNeutrinoApp()
 	channelListRecord = NULL;
 	bouquetListRecord = NULL;
 	nextRecordingInfo = NULL;
+	networksetup      = NULL;
 	skipShutdownTimer = false;
 	parentallocked    = false;
 	waitforshutdown   = false;
@@ -238,6 +239,8 @@ CNeutrinoApp::CNeutrinoApp()
 	zapto_tv_on_init_done = false;
 	zapto_radio_on_init_done = false;
 	obeyStartMode   = true;
+
+
 }
 
 /*-------------------------------------------------------------------------------------
@@ -364,7 +367,7 @@ int CNeutrinoApp::loadSetup()
 	// NTP-Server for sectionsd
 	g_settings.network_ntpserver	= configfile.getString("network_ntpserver", "130.60.7.42");
 	g_settings.network_ntprefresh	= configfile.getString("network_ntprefresh", "30" );
-	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", false);
+	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", CNetworkSetup::NETWORK_NTP_OFF);
 
 	//misc
 #ifndef HAVE_TRIPLEDRAGON
@@ -2060,22 +2063,12 @@ int CNeutrinoApp::run(int argc, char **argv)
 	DVBInfo				= new CDVBInfoExec;
 	NVODChanger			= new CNVODChangeExec;
 	StreamFeaturesChanger		= new CStreamFeaturesChangeExec;
-// 	MoviePluginChanger		= new CMoviePluginChangeExec;
-	MyIPChanger			= new CIPChangeNotifier;
 	ConsoleDestinationChanger	= new CConsoleDestChangeNotifier;
 	FdxSettingsChanger		= new CFdxChangeNotifier;
 	fontsizenotifier		= new CFontSizeNotifier;
 
 	rcLock				= new CRCLock();
-#ifdef ENABLE_MOVIEPLAYER
-	moviePlayerGui			= new CMoviePlayerGui();
-#endif
-#ifdef ENABLE_MOVIEPLAYER2
-#ifdef ENABLE_MOVIEBROWSER
-	movieBrowser			= new CMovieBrowser();
-#endif
-#endif
-
+	networksetup			= new CNetworkSetup();
 	//USERMENU
 	Timerlist			= new CTimerList;
 
@@ -2090,7 +2083,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    mainMenu            (LOCALE_MAINMENU_HEAD                 , "mainmenue.raw"       );
 	CMenuWidget    mainSettings        (LOCALE_MAINSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    languageSettings    (LOCALE_LANGUAGESETUP_HEAD            , "language.raw"        );
-	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK     , "lock.raw"            , 500);
 	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD              , "network.raw"         , 430);
 	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD            , "recording.raw"       );
 	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD                , "colors.raw"          );
@@ -2101,7 +2093,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    scanSettingsMenu    (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD              , "streaming.raw"       );
 	
 
 	// needs to run before initMainMenu()
@@ -2109,8 +2100,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	InitMainMenu(	mainMenu,
 					mainSettings,
-					parentallockSettings,
-					networkSettings,
 					recordingSettings,
 					colorSettings,
 					lcdSettings,
@@ -2118,9 +2107,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 					languageSettings,
 					miscSettings,
 					driverSettings,
-#ifdef ENABLE_MOVIEPLAYER
-					moviePlayer,
-#endif
 					service);
 
 	//service
@@ -2151,9 +2137,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 							miscSettingsZapitSettings,
 							miscSettingsRemoteControl,
 							miscSettingsFilebrowser);	
-
-	// Parentallock settings
-	InitParentalLockSettings(parentallockSettings);
 
 	// zapit settings
 	InitZapitSettings(miscSettingsZapitSettings);
@@ -2220,7 +2203,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	if (display_language_selection)
 		languageSettings.exec(NULL, "");
 
-	InitNetworkSettings(networkSettings);
 
 #ifdef HAVE_DBOX_HARDWARE
 	if (!ucodes_available())
@@ -2229,7 +2211,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 		DisplayErrorMessage(g_Locale->getText(LOCALE_UCODES_FAILURE));
 
 		/* show network settings dialog */
-		networkSettings.exec(NULL, "");
+		networksetup->exec(NULL, "");
 	}
 #endif
 
@@ -3288,8 +3270,6 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 			frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
 			frameBuffer->loadPal("shutdown.pal");
 
-			networkConfig.automatic_start = (network_automatic_start == 1);
-			networkConfig.commitConfig();
 			saveSetup();
 
 			if (!g_settings.epg_dir.empty()) {
@@ -3954,36 +3934,23 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
 		returnval = menu_return::RETURN_EXIT_ALL;
 	}
-	else if(actionKey=="network")
-	{
-		networkConfig.automatic_start = (network_automatic_start == 1);
-		networkConfig.stopNetwork();
-		networkConfig.commitConfig();
-		networkConfig.startNetwork();
-	}
-	else if(actionKey=="networktest")
-	{
-		dprintf(DEBUG_INFO, "doing network test...\n");
-		testNetworkSettings(networkConfig.address.c_str(), networkConfig.netmask.c_str(), networkConfig.broadcast.c_str(), networkConfig.gateway.c_str(), networkConfig.nameserver.c_str(), networkConfig.inet_static);
-	}
-	else if(actionKey=="networkshow")
-	{
-		dprintf(DEBUG_INFO, "showing current network settings...\n");
-		showCurrentNetworkSettings();
-	}
 	else if (actionKey=="theme_neutrino")
 	{
 		setupColors_neutrino();
 		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
+	else if (actionKey=="show_network_dialog")
+	{
+		networksetup->showNetworkSetup();
+	}
+	
 	else if(actionKey=="savesettings")
 	{
 		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MAINSETTINGS_SAVESETTINGSNOW_HINT)); // UTF-8
 		hintBox->paint();
 
  		g_Controld->saveSettings();
- 		networkConfig.automatic_start = (network_automatic_start == 1);
- 		networkConfig.commitConfig();
+		networksetup->saveNetworkSettings();
  		saveSetup();
 
 		/* send motor position list to zapit */
@@ -4122,7 +4089,9 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 #ifdef ENABLE_MOVIEPLAYER2
 	else if (actionKey.find("mb.file://") == 0)
 	{
-		moviePlayerGui->exec(NULL, actionKey.substr(3));
+		CMenuTarget* mp = new CMoviePlayerGui();
+		mp->exec(NULL, actionKey.substr(3));
+		delete mp;
 	}
 #endif
 	return returnval;

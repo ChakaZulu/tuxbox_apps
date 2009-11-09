@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.150 2009/11/03 20:14:04 rhabarber1848 Exp $
+ * $Id: locals_intern.h,v 1.151 2009/11/09 13:05:12 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -893,10 +893,14 @@ const char * locale_real_names[] =
 	"movieplayer.vlchelp8",
 	"movieplayer.vlchelp9",
 	"movieplayer.wrongvlcversion",
+	"networkmenu.apply_settings",
+	"networkmenu.apply_settings_now",
 	"networkmenu.broadcast",
 	"networkmenu.dhcp",
+	"networkmenu.error_no_address",
 	"networkmenu.gateway",
 	"networkmenu.head",
+	"networkmenu.inactive",
 	"networkmenu.ipaddress",
 	"networkmenu.mount",
 	"networkmenu.nameserver",
@@ -909,8 +913,10 @@ const char * locale_real_names[] =
 	"networkmenu.ntpserver_hint1",
 	"networkmenu.ntpserver_hint2",
 	"networkmenu.ntptitle",
+	"networkmenu.reset_settings_now",
 	"networkmenu.setupnow",
 	"networkmenu.setuponstartup",
+	"networkmenu.setupsaved",
 	"networkmenu.show",
 	"networkmenu.test",
 	"nfs.alreadymounted",

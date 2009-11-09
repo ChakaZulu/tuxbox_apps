@@ -866,12 +866,16 @@ movieplayer.vlchelp7 skip approx. 1 minute
 movieplayer.vlchelp8 approx. 5 minutes back
 movieplayer.vlchelp9 skip approx. 5 minutes
 movieplayer.wrongvlcversion This feature is not support by your current version of VLC
+networkmenu.apply_settings Changes are applied...
+networkmenu.apply_settings_now Do you want to apply settings now or\nselect "No" to save onlyy?
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
+networkmenu.error_no_address No IP-address definied!
 networkmenu.gateway Default Gateway
 networkmenu.head Network Settings
+networkmenu.inactive Network inactive!
 networkmenu.ipaddress IP Address
-networkmenu.mount Mount network shares
+networkmenu.mount Mount Edit network shares
 networkmenu.nameserver DNS Server
 networkmenu.netmask Subnet Mask
 networkmenu.ntpenable Syncronisation via
@@ -882,8 +886,10 @@ networkmenu.ntpserver NTP-Server
 networkmenu.ntpserver_hint1 NTP-Server example: ntp1.ptb.de
 networkmenu.ntpserver_hint2 need reboot or epg-reset
 networkmenu.ntptitle Time-Syncronisation
+networkmenu.reset_settings_now Do you want restore the previous settings?
 networkmenu.setupnow Start/Restart Network Now
 networkmenu.setuponstartup Start Network on Boot
+networkmenu.setupsaved Changes were already saved, but not yet applied\n.Reboot is required!
 networkmenu.show Show Active Network Settings
 networkmenu.test Test Network Now
 nfs.alreadymounted Directory already mounted

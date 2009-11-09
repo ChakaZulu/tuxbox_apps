@@ -866,12 +866,16 @@ movieplayer.vlchelp7 ca. 1 Minute vor
 movieplayer.vlchelp8 ca. 5 Minuten zurück
 movieplayer.vlchelp9 ca. 5 Minuten vor
 movieplayer.wrongvlcversion Funktion ist mit der benutzten Version des VLC nicht möglich
+networkmenu.apply_settings Änderungen werden übernommen...
+networkmenu.apply_settings_now Änderungen jetzt zuweisen oder\n"Nein" wählen, um nur zu speichern?
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
+networkmenu.error_no_address Es wurde keine IP-Adresse festgelegt!
 networkmenu.gateway Standard Gateway
 networkmenu.head Netzwerk Einstellungen
+networkmenu.inactive Netzwerk ist nicht aktiviert!
 networkmenu.ipaddress IP-Adresse
-networkmenu.mount Netzwerkfreigaben einhängen
+networkmenu.mount Netzwerkfreigaben bearbeiten
 networkmenu.nameserver Nameserver
 networkmenu.netmask Netzmaske
 networkmenu.ntpenable Syncronisation via
@@ -882,8 +886,10 @@ networkmenu.ntpserver NTP-Server
 networkmenu.ntpserver_hint1 NTP-Server z.b: ntp1.ptb.de
 networkmenu.ntpserver_hint2 Neustart / EPG-Reset erforderlich
 networkmenu.ntptitle Zeitsynchronisation
+networkmenu.reset_settings_now Sollen die vorherigen Einstellungen \nwieder hergestellt werden?
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
 networkmenu.setuponstartup Beim Starten Netzwerk setzen
+networkmenu.setupsaved Änderungen wurden bereits gespeichert, aber\nnoch nicht zugewiesen.\nNeustart ist erforderlich!
 networkmenu.show aktive Netzwerkeinstellungen zeigen
 networkmenu.test Netzwerk testen
 nfs.alreadymounted Verzeichnis bereits gemountet.

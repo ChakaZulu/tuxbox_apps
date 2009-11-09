@@ -34,7 +34,9 @@ libneutrino_gui_a_SOURCES = \
 	imageinfo.cpp \
 	infoviewer.cpp \
 	neutrino_menu.cpp \
+	network_setup.cpp \
 	nfs.cpp \
+	parentallock_setup.cpp \
 	personalize.cpp \
 	pluginlist.cpp \
 	plugins.cpp \
@@ -72,7 +74,7 @@ libneutrino_gui_a_SOURCES += \
 endif
 
 if ENABLE_MOVIEPLAYER
-libneutrino_gui_a_SOURCES += moviebrowser.cpp movieplayer_setup.cpp mediaplayer_setup.cpp
+libneutrino_gui_a_SOURCES += moviebrowser.cpp movieplayer_setup.cpp mediaplayer_setup.cpp movieplayer_menu.cpp
 if ENABLE_MOVIEPLAYER2
 libneutrino_gui_a_SOURCES += movieplayer2.cpp
 else
