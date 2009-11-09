@@ -1,5 +1,5 @@
 /*
-	$Id: network_setup.cpp,v 1.1 2009/11/09 13:05:09 dbt Exp $
+	$Id: network_setup.cpp,v 1.2 2009/11/09 20:21:55 dbt Exp $
 
 	network setup implementation - Neutrino-GUI
 
@@ -27,6 +27,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: network_setup.cpp,v $
+	Revision 1.2  2009/11/09 20:21:55  dbt
+	compiler warning removed
+	
 	Revision 1.1  2009/11/09 13:05:09  dbt
 	menue cleanup:
 	parentallock, movieplayer_menue and network-setup for it's own modules
@@ -384,7 +387,7 @@ int CNetworkSetup::saveChangesDialog()
 void CNetworkSetup::restoreNetworkSettings(bool show_message)
 {
 	bool show_msg = show_message;
-	int result;
+	int result = 1;
 
 	if (show_msg)
 	{
