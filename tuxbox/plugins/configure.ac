@@ -64,6 +64,7 @@ fx2/lcdcirc/Makefile
 fx2/satfind/Makefile
 fx2/vierg/Makefile
 fx2/sol/Makefile
+fx2/c64emu/Makefile
 tuxmail/Makefile
 tuxmail/daemon/Makefile
 tuxcal/Makefile

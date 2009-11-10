@@ -18,12 +18,10 @@ char AppDirPath[1024];	// Path of application directory
 char d64image[512];	// Path of application directory
 char kbdname[512];	// Path of application directory
 
-
-#define BASIC_ROM_FILE	"Basic ROM"
-#define KERNAL_ROM_FILE	"Kernal ROM"
-#define CHAR_ROM_FILE	"Char ROM"
-#define FLOPPY_ROM_FILE	"1541 ROM"
-
+#define BASIC_ROM_FILE	"/lib/tuxbox/plugins/c64emu/basic.rom"
+#define KERNAL_ROM_FILE	"/lib/tuxbox/plugins/c64emu/kernal.rom"
+#define CHAR_ROM_FILE	"/lib/tuxbox/plugins/c64emu/char.rom"
+#define FLOPPY_ROM_FILE	"/lib/tuxbox/plugins/c64emu/1541.rom"
 
 /*
  *  Load C64 ROM files
