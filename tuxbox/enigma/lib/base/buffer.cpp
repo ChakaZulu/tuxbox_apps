@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 void eIOBuffer::removeblock()
 {

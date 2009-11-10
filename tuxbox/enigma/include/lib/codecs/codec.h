@@ -5,6 +5,8 @@
 
 #include <libsig_comp.h>
 #include <set>
+#include <unistd.h>
+
 class eIOBuffer;
 
 class eAudioDecoder

@@ -43,6 +43,7 @@
 #endif
 
 #include <sys/poll.h>
+#include <string.h>
 
 #include "eventwatchdog.h"
 

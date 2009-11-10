@@ -2,6 +2,8 @@
 #include <ctype.h>
 #include <limits.h>
 #include <lib/system/elock.h>
+#include <cstdlib>
+#include <string.h>
 
 ///////////////////////////////////////// eString sprintf /////////////////////////////////////////////////
 eString& eString::sprintf(char *fmt, ...)
@@ -11,7 +13,7 @@ eString& eString::sprintf(char *fmt, ...)
 	char buf[1024];
 	va_list ap;
 	va_start(ap, fmt);
-	std::vsnprintf(buf, 1024, fmt, ap);
+	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
 	assign(buf);
 	return *this;
@@ -25,9 +27,9 @@ eString& eString::setNum(int val, int sys)
 	char buf[12];
 
 	if (sys == 10)
-		std::snprintf(buf, 12, "%i", val);
+		snprintf(buf, 12, "%i", val);
 	else if (sys == 16)
-		std::snprintf(buf, 12, "%X", val);		
+		snprintf(buf, 12, "%X", val);
 	
 	assign(buf);
 	return *this;

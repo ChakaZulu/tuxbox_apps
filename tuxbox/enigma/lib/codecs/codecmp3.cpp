@@ -4,6 +4,7 @@
 #include <lib/base/eerror.h>
 #include <lib/base/buffer.h>
 #include <linux/soundcard.h>
+#include <string.h>
 
 static inline unsigned short MadFixedToUshort(mad_fixed_t Fixed)
 {

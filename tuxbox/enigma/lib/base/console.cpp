@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.17 2009/02/03 18:52:52 dbluelle Exp $
+ * $Id: console.cpp,v 1.18 2009/11/10 11:36:57 rhabarber1848 Exp $
  */
 
 #include <lib/base/console.h>
@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <string.h>
 
 int bidirpipe(int pfd[], char *cmd , char *argv[])
 {

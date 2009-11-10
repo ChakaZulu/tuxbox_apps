@@ -9,6 +9,7 @@
 
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 #include <stack>
 #include <list>
 
@@ -216,7 +217,7 @@ public:
 	
 	void clear();
 	
-	void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip=eRect(), int flags=0)
+	void blit(gPixmap &pixmap, ePoint pos, eRect clip=eRect(), int flags=0)
 	{
 		if ( dc.islocked() )
 			return;

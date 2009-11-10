@@ -8,6 +8,8 @@
 #include <sys/ioctl.h>
 #include <lib/base/eerror.h>
 #include <lib/system/econfig.h>
+#include <string.h>
+#include <stdlib.h>
 
 unsigned long eDemux::getLong()
 {

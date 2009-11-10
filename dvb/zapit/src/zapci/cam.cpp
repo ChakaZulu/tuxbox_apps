@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.35 2009/03/21 13:01:38 rhabarber1848 Exp $
+ * $Id: cam.cpp,v 1.36 2009/11/10 11:36:53 rhabarber1848 Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -24,6 +24,8 @@
 #include <zapit/cam.h>
 #include <zapit/settings.h> /* CAMD_UDS_NAME         */
 #include <messagetools.h>   /* get_length_field_size */
+#include <stdio.h>
+#include <string.h>
 
 CCam::~CCam(void)
 {

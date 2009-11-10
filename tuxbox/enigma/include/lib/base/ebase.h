@@ -7,6 +7,7 @@
 #include <sys/time.h>
 #include <asm/types.h>
 #include <time.h>
+#include <pthread.h>
 
 #include <lib/base/eptrlist.h>
 #include <libsig_comp.h>

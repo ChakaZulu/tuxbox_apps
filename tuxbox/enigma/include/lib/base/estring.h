@@ -11,9 +11,9 @@
 class eString : public std::string
 {
 public:
-	static std::map<eString, int> eString::CountryCodeDefaultMapping;
-	static std::map<int, int> eString::TransponderDefaultMapping; // more priority as country..
-	static std::set<int> eString::TransponderUseTwoCharMapping;
+	static std::map<eString, int> CountryCodeDefaultMapping;
+	static std::map<int, int> TransponderDefaultMapping; // more priority as country..
+	static std::set<int> TransponderUseTwoCharMapping;
 	static int readEncodingFile();
 public:
 // constructors

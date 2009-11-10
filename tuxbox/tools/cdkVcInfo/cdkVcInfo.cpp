@@ -1,7 +1,7 @@
 /*
  * Tool for printing some image information during bootup.
  *
- * $Id: cdkVcInfo.cpp,v 1.3 2007/03/31 13:46:24 feynman Exp $
+ * $Id: cdkVcInfo.cpp,v 1.4 2009/11/10 11:36:59 rhabarber1848 Exp $
  *
  * Copyright (C) 2006 the Tuxbox project http://www.tuxbox.org.
  *
@@ -23,6 +23,8 @@
 
 #include <stdio.h>
 #include <string>
+#include <string.h>
+#include <stdlib.h>
 
 #define CONSOLE "/dev/vc/0"
 #define VERSION_FILE "/.version"

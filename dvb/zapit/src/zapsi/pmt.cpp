@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.58 2009/09/30 17:34:21 seife Exp $
+ * $Id: pmt.cpp,v 1.59 2009/11/10 11:36:53 rhabarber1848 Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 /* zapit */
 #include <zapit/settings.h>
