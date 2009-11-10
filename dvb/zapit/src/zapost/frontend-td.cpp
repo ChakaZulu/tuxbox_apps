@@ -158,6 +158,19 @@ uint32_t CFrontend::getFrequency(void) const
 		return currentTransponder.feparams.frequency + lnbOffsetsHigh[currentTransponder.diseqc];
 }
 
+void CFrontend::setUncommittedSwitchMode(const int mode)
+{
+	uncommitted_switch_mode = mode;
+	if ((uncommitted_switch_mode<0) || (uncommitted_switch_mode>2))
+		uncommitted_switch_mode = 0;
+	printf("[frontend] uncommitted_switch_mode %d\n", uncommitted_switch_mode);
+}
+
+int CFrontend::getUncommittedSwitchMode(void) const
+{
+	return uncommitted_switch_mode;
+}
+
 uint8_t CFrontend::getPolarization(void) const
 {
 	return currentTransponder.polarization;
