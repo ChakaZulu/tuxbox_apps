@@ -464,8 +464,8 @@ infoviewer.channellogo_off nein
 infoviewer.channellogo_show_as_channelname anstelle Sendername
 infoviewer.channellogo_show_beside_channelname neben Sendername
 infoviewer.channellogo_show_in_numberbox anstelle Kanalnummer
-infoviewer.epginfo_expensive_message aufwändig
-infoviewer.epginfo_simple_message einfach
+infoviewer.epginfo_expensive_message Infobar einblenden
+infoviewer.epginfo_simple_message Popup
 infoviewer.epgnotload Informationen noch nicht geladen...
 infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.eventlist EPG/Info

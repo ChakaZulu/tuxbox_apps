@@ -464,8 +464,8 @@ infoviewer.channellogo_off do without
 infoviewer.channellogo_show_as_channelname in place of channelname
 infoviewer.channellogo_show_beside_channelname beside channelname
 infoviewer.channellogo_show_in_numberbox in place of channelnumber
-infoviewer.epginfo_expensive_message Expanded
-infoviewer.epginfo_simple_message Short
+infoviewer.epginfo_expensive_message show infobar
+infoviewer.epginfo_simple_message popup
 infoviewer.epgnotload EPG not loaded....
 infoviewer.epgwait waiting for EPG...
 infoviewer.eventlist Event-List
