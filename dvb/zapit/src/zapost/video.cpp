@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.18 2009/09/30 17:54:44 seife Exp $
+ * $Id: video.cpp,v 1.19 2009/11/10 21:17:59 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -503,6 +503,15 @@ int CVideo::setZoom(int zoom)
 		{
 			s.src.hori_size = 720;
 			s.des.hori_size = 720 * 3/4 * zoom / 100;
+			if (s.des.hori_size > 720)
+			{
+				/* the destination exceeds the screen size.
+				   TODO: decrease source size to allow higher
+				   zoom factors (is this useful ?) */
+				s.des.hori_size = 720;
+				zoom = 133; // (720*4*100)/(720*3)
+				*zoomvalue = zoom;
+			}
 		}
 		else
 		{
