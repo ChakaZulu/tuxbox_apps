@@ -889,7 +889,7 @@ networkmenu.ntptitle Zeitsynchronisation
 networkmenu.reset_settings_now Sollen die vorherigen Einstellungen \nwieder hergestellt werden?
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
 networkmenu.setuponstartup Beim Starten Netzwerk setzen
-networkmenu.setupsaved Änderungen wurden bereits gespeichert, aber\nnoch nicht zugewiesen.\nNeustart ist erforderlich!
+networkmenu.setupsaved Änderungen wurden gespeichert, aber\nnoch nicht zugewiesen.\nDiese werden erst nach \neinem Neustart wirksam!
 networkmenu.show aktive Netzwerkeinstellungen zeigen
 networkmenu.test Netzwerk testen
 nfs.alreadymounted Verzeichnis bereits gemountet.

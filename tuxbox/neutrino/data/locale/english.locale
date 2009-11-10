@@ -889,7 +889,7 @@ networkmenu.ntptitle Time-Syncronisation
 networkmenu.reset_settings_now Do you want restore the previous settings?
 networkmenu.setupnow Start/Restart Network Now
 networkmenu.setuponstartup Start Network on Boot
-networkmenu.setupsaved Changes were already saved, but not yet applied\n.Reboot is required!
+networkmenu.setupsaved Changes were already saved, but not yet applied\n.This will take effect only after reboot!
 networkmenu.show Show Active Network Settings
 networkmenu.test Test Network Now
 nfs.alreadymounted Directory already mounted
