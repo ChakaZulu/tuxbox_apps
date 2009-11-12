@@ -1,5 +1,5 @@
 /*
-	$Id: scan_setup.cpp,v 1.2 2009/10/21 10:41:36 rhabarber1848 Exp $
+	$Id: scan_setup.cpp,v 1.3 2009/11/12 23:21:56 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -29,6 +29,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: scan_setup.cpp,v $
+	Revision 1.3  2009/11/12 23:21:56  dbt
+	redundant definition of menu width removed
+	
 	Revision 1.2  2009/10/21 10:41:36  rhabarber1848
 	Neutrino: Fix scan provider list, patch by dbt: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=371611#p371611
 	
@@ -68,11 +71,10 @@ CScanSetup::CScanSetup()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 
-	width = w_max (710, 100);
+	width = w_max (500, 100);;
 	hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	height = hheight+13*mheight+ 10;
-	menue_width = 550;
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 
@@ -211,7 +213,7 @@ void CScanSetup::showScanService()
 	initScanSettings();
 	
 	//menue init
-	CMenuWidget* scansetup = new CMenuWidget(LOCALE_SERVICEMENU_HEAD, NEUTRINO_ICON_SETTINGS, menue_width);
+	CMenuWidget* scansetup = new CMenuWidget(LOCALE_SERVICEMENU_HEAD, NEUTRINO_ICON_SETTINGS, width);
 
 	//subhead
 	scansetup->addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_SERVICEMENU_SCANTS));
@@ -340,7 +342,7 @@ void CScanSetup::showScanService()
 	}
 
 	//sub menue scanmode
-	CMenuWidget* extscanmode = new CMenuWidget(LOCALE_SERVICEMENU_SCANTS, NEUTRINO_ICON_SETTINGS, menue_width);
+	CMenuWidget* extscanmode = new CMenuWidget(LOCALE_SERVICEMENU_SCANTS, NEUTRINO_ICON_SETTINGS, width);
 	CMenuForwarder* fwextscanmode = new CMenuForwarder(LOCALE_SERVICEMENU_SCANMODES, true, NULL, extscanmode, NULL, (g_info.delivery_system == DVB_S) ? CRCInput::RC_3 : CRCInput::RC_1);
 	scansetup->addItem(fwextscanmode);
 
