@@ -1,5 +1,5 @@
 /*
-	$Id: scan_setup.cpp,v 1.3 2009/11/12 23:21:56 dbt Exp $
+	$Id: scan_setup.cpp,v 1.4 2009/11/13 11:24:10 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -29,6 +29,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: scan_setup.cpp,v $
+	Revision 1.4  2009/11/13 11:24:10  rhabarber1848
+	fix typo
+	
 	Revision 1.3  2009/11/12 23:21:56  dbt
 	redundant definition of menu width removed
 	
@@ -71,7 +74,7 @@ CScanSetup::CScanSetup()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 
-	width = w_max (500, 100);;
+	width = w_max (500, 100);
 	hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	height = hheight+13*mheight+ 10;
