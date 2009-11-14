@@ -15,6 +15,7 @@
 #include <lib/base/i18n.h>
 #include <dirent.h>
 
+
 class eListBoxEntryKeyboardMapping: public eListBoxEntryText
 {
 	eString mapping_file;
@@ -27,43 +28,18 @@ public:
 };
 
 eZapKeyboardSetup::eZapKeyboardSetup()
-	:eWindow(0)
+	:eWindow()
 {
 	init_eZapKeyboardSetup();
 }
 void eZapKeyboardSetup::init_eZapKeyboardSetup()
 {
-	setText(_("Keyboard Setup"));
-	cmove(ePoint(140, 170));
-	cresize(eSize(470, 210));
+	mappings=CreateSkinnedComboBox("mapping",4);
 
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
+	CONNECT(CreateSkinnedButton("save")->selected, eZapKeyboardSetup::okPressed);
 
-	eLabel *l=new eLabel(this);
-	l->setText(_("Keyboard Mapping:"));
-	l->move(ePoint(20, 20));
-	l->resize(eSize(300, fd+4));
+	BuildSkin("KeyboardSetup");
 
-	mappings=new eComboBox(this, 4, l);
-	mappings->move(ePoint(20, 60));
-	mappings->resize(eSize(350, 35));
-	mappings->setHelpText(_("select your keyboard mapping (ok)"));
-	mappings->loadDeco();
-
-	ok=new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, clientrect.height()-100));
-	ok->resize(eSize(220, 40));
-	ok->setHelpText(_("save changes and return"));
-	ok->loadDeco();
-	CONNECT(ok->selected, eZapKeyboardSetup::okPressed);
-
-	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-50 ) );
-	statusbar->resize( eSize( clientrect.width(), 50) );
-	statusbar->loadDeco();
 	loadMappings();
 }
 

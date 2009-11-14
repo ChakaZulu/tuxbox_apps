@@ -7,13 +7,11 @@
 #include <lib/gui/elabel.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/echeckbox.h>
-#include <lib/gui/statusbar.h>
 
 
 class eEPGSetup: public eWindow
 {
-	eButton *bt_clear, *bt_seldir, *bt_store;
-	eStatusBar *statusbar;
+	eButton *bt_seldir;
 	eCheckbox *cb_cachebouquets, *cb_infobarcache;
 	eTextInputField *tb_path, *tb_file;
 

@@ -3,50 +3,30 @@
 #include <setup_epg.h>
 #include <sselect.h>
 
-eEPGSetup::eEPGSetup(): eWindow(0)
+
+eEPGSetup::eEPGSetup(): eWindow()
 {
 	init_eEPGSetup();
 }
 void eEPGSetup::init_eEPGSetup()
 {
-	eString path = eString("/hdd/");
-	char* p = 0;
-	eConfig::getInstance()->getKey("/extras/epgcachepath", p);
-	if (p) path = eString(p);
-	tb_path=new eTextInputField(this);tb_path->setName("path");
-	tb_path->setText(path);
+	tb_path=CreateSkinnedTextInputField("path","/hdd/","/extras/epgcachepath" );
 
-	bt_seldir=new eButton(this); bt_seldir->setName("seldir");
+	bt_seldir=CreateSkinnedButton("seldir");
 
-	eString file = eString("epg.dat");
-	p = 0;
-	eConfig::getInstance()->getKey("/extras/epgfile", p);
-	if (p) file = eString(p);
-	tb_file=new eTextInputField(this);tb_file->setName("file");
-	tb_file->setText(file);
+	tb_file = CreateSkinnedTextInputField("file","epg.dat","/extras/epgfile" );
 
-	int cachebouquets = 1;
-	eConfig::getInstance()->getKey("/extras/cachebouquets", cachebouquets );
-	cb_cachebouquets=new eCheckbox(this);cb_cachebouquets->setName("cachebouquets");
-	cb_cachebouquets->setCheck(cachebouquets);
+	cb_cachebouquets=CreateSkinnedCheckbox("cachebouquets",1,"/extras/cachebouquets");
 
-	int infobarchache = 0;
-	eConfig::getInstance()->getKey("/ezap/osd/useEPGCache", infobarchache );
-	cb_infobarcache=new eCheckbox(this);cb_infobarcache->setName("infobarcache");
-	cb_infobarcache->setCheck(infobarchache);
+	cb_infobarcache=CreateSkinnedCheckbox("infobarcache",0,"/ezap/osd/useEPGCache");
 
-	bt_clear = new eButton(this);bt_clear->setName("clear");
-	bt_store=new eButton(this); bt_store->setName("store");
+	CONNECT(CreateSkinnedButton("clear")->selected, eEPGSetup::clearCache);
+	CONNECT(CreateSkinnedButton("store")->selected, eEPGSetup::storePressed);
 
 
-	statusbar = new eStatusBar(this); statusbar->setName("statusbar");
-
-	if (eSkin::getActive()->build(this, "EPGSetup"))
-		eFatal("skin load of \"EPGSetup\" failed");
+	BuildSkin("EPGSetup");
 
 	CONNECT(bt_seldir->selected, eEPGSetup::selectDir);
-	CONNECT(bt_clear->selected, eEPGSetup::clearCache);
-	CONNECT(bt_store->selected, eEPGSetup::storePressed);
 
 }
 void eEPGSetup::selectDir()

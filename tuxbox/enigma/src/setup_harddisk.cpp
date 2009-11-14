@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.29 2009/04/28 06:43:06 rhabarber1848 Exp $
+ * $Id: setup_harddisk.cpp,v 1.30 2009/11/14 16:53:18 dbluelle Exp $
  */
 
 #include <setup_harddisk.h>
@@ -501,35 +501,34 @@ eHarddiskMenu::eHarddiskMenu(int dev): dev(dev), restartNet(false)
 void eHarddiskMenu::init_eHarddiskMenu()
 {
 	visible=0;
-	status=new eLabel(this); status->setName("status");
-	model=new eLabel(this); model->setName("model");
-	capacity=new eLabel(this); capacity->setName("capacity");
-	bus=new eLabel(this); bus->setName("bus");
+	status=CreateSkinnedLabel("status");
+	model=CreateSkinnedLabel("model");
+	capacity=CreateSkinnedLabel("capacity");
+	bus=CreateSkinnedLabel("bus");
 	
-	standby=new eButton(this); standby->setName("standby");
-	format=new eButton(this); format->setName("format");
-	bcheck=new eButton(this); bcheck->setName("check");
-	ext=new eButton(this); ext->setName("ext");
+	CONNECT(CreateSkinnedButton("standby")->selected, eHarddiskMenu::hddstandby);
+	CONNECT(CreateSkinnedButton("format")->selected, eHarddiskMenu::s_format);
+	CONNECT(CreateSkinnedButton("check")->selected, eHarddiskMenu::check);
+	ext=CreateSkinnedButton("ext");
 
-	fs=new eComboBox(this,2); fs->setName("fs"); fs->hide();
+	fs=CreateSkinnedComboBox("fs",2); fs->hide();
 
-	lbltimeout=new eLabel(this); lbltimeout->setName("lbltimeout");lbltimeout->hide();
-	lblacoustic=new eLabel(this); lblacoustic->setName("lblacoustic");lblacoustic->hide();
-	timeout=new eNumber(this,1,0, 20, 3, 0, 0); timeout->setName("timeout");timeout->hide();
-	acoustic=new eNumber(this,1,0,254, 3, 0, 0); acoustic->setName("acoustic");acoustic->hide();
-	store=new eButton(this); store->setName("store");store->hide();
+	lbltimeout=CreateSkinnedLabel("lbltimeout"); lbltimeout->hide();
+	lblacoustic=CreateSkinnedLabel("lblacoustic"); lblacoustic->hide();
+	timeout=CreateSkinnedNumber("timeout",0,1,0, 20, 3, 0, 0); timeout->hide();
+	acoustic=CreateSkinnedNumber("acoustic",0,1,0,254, 3, 0, 0); acoustic->hide();
+	store=CreateSkinnedButton("store");store->hide();
 
 
-	sbar = new eStatusBar(this); sbar->setName("statusbar");
 
 	new eListBoxEntryText( *fs, ("ext3"), (void*) 1 );
 #ifdef ENABLE_REISERFS
 	new eListBoxEntryText( *fs, ("reiserfs"), (void*) 0 );
 #endif
 	fs->setCurrent((void*)1);
-  
-	if (eSkin::getActive()->build(this, "eHarddiskMenu"))
-		eFatal("skin load of \"eHarddiskMenu\" failed");
+	sbar = new eStatusBar(this);
+	sbar->setName("statusbar");
+	BuildSkin("eHarddiskMenu");
 
 	gPixmap *pm = eSkin::getActive()->queryImage("arrow_down");
 	if (pm)
@@ -546,7 +545,6 @@ void eHarddiskMenu::init_eHarddiskMenu()
 		timeout->setNumber(hddstandby/12);
 	else
 		timeout->setNumber(hddstandby/12);
-
 	int hddacoustic=128;
 	if( (eConfig::getInstance()->getKey("/extras/hdparm-m", hddacoustic)) )
 		acoustic->setNumber(hddacoustic);
@@ -554,9 +552,6 @@ void eHarddiskMenu::init_eHarddiskMenu()
 		acoustic->setNumber(hddacoustic);
 
 	CONNECT(ext->selected, eHarddiskMenu::extPressed);
-	CONNECT(format->selected, eHarddiskMenu::s_format);
-	CONNECT(bcheck->selected, eHarddiskMenu::check);
-	CONNECT(standby->selected, eHarddiskMenu::hddstandby);
 	CONNECT(store->selected, eHarddiskMenu::storevalues);
 }
 
@@ -567,13 +562,10 @@ ePartitionCheck::ePartitionCheck( int dev )
 }
 void ePartitionCheck::init_ePartitionCheck()
 {
-	lState = new eLabel(this);
-	lState->setName("state");
-	bClose = new eButton(this);
-	bClose->setName("close");
+	lState = CreateSkinnedLabel("state");
+	bClose = CreateSkinnedButton("close");
 	CONNECT( bClose->selected, ePartitionCheck::accept );
-	if (eSkin::getActive()->build(this, "ePartitionCheck"))
-		eFatal("skin load of \"ePartitionCheck\" failed");
+	BuildSkin("ePartitionCheck");
 	bClose->hide();
 }
 

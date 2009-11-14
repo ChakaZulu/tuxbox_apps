@@ -15,14 +15,12 @@ class eZapLCDSetup: public eWindow
 {
 	eSlider *p_brightness, *p_contrast, *p_standby;
 	eLabel *bbrightness, *bcontrast, *bstandby;
-	eStatusBar* statusbar;
-	eCheckbox* inverted, *shortnames;
+	eCheckbox* inverted;
 	
 	int lcdbrightness;
 	int lcdcontrast;
 	int lcdstandby;
 
-	eButton *ok;
 	void okPressed();
 	int eventHandler( const eWidgetEvent&);
 	void brightnessChanged( int );

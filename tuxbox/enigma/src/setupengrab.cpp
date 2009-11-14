@@ -26,57 +26,27 @@ ENgrabSetup::ENgrabSetup():
 }
 void ENgrabSetup::init_ENgrabSetup()
 {
-	setText(_("Ngrab Server"));
-	cmove(ePoint(170, 146));
-	cresize(eSize(390, 310));
 
 	struct in_addr sinet_address;
 	int nsrvport;
 	int de[4];
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	if ( eConfig::getInstance()->getKey("/elitedvb/network/nserver", sinet_address.s_addr) )
 		sinet_address.s_addr = 0xC0A80028; // 192.168.0.40
 	if ( eConfig::getInstance()->getKey("/elitedvb/network/nservport", nsrvport ) )
 		nsrvport = 4000;
 
-	eLabel *l=new eLabel(this);
-	l->setText("Srv IP:");
-	l->move(ePoint(20, 20));
-	l->resize(eSize(140, fd+4));
 
 	eNumber::unpack(sinet_address.s_addr, de);
-	inet_address=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	inet_address->move(ePoint(160, 20));
-	inet_address->resize(eSize(200, fd+10));
+	inet_address=CreateSkinnedNumberWithLabel("inet_address",0, 4, 0, 255, 3, de, 0, "lsrvip");
 	inet_address->setFlags(eNumber::flagDrawPoints);
-	inet_address->setHelpText(_("enter IP Adress of the Ngrab Server (0..9, left, right)"));
-	inet_address->loadDeco();
 
-	l=new eLabel(this);
-	l->setText("Srv Port:");
-	l->move(ePoint(20, 60));
-	l->resize(eSize(140, fd+4));
-
-	srvport=new eNumber(this, 1, 0, 9999, 4, &nsrvport, 0, l);
-	srvport->move(ePoint(160, 60));
-	srvport->resize(eSize(200, fd+10));
+	srvport=CreateSkinnedNumberWithLabel("srvport",0, 1, 0, 9999, 4, &nsrvport, 0, "lsrvport");
 	srvport->setFlags(eNumber::flagDrawPoints);
-	srvport->setHelpText(_("enter ngrab server port (standard is 4000)"));
-	srvport->loadDeco();
 
-	l=new eLabel(this);
-	l->setText("Srv MAC:");
-	l->move(ePoint(20,100));
-	l->resize(eSize(140, fd+4));
-
-	serverMAC=new eTextInputField(this);
-	serverMAC->move(ePoint(160,100));
-	serverMAC->resize(eSize(200, fd+10));
-	serverMAC->setHelpText(_("enter MAC address of server (for wake on lan)"));
+	serverMAC=CreateSkinnedTextInputField("serverMAC",0,0,"lsrvmac");
 	serverMAC->setUseableChars("01234567890abcdefABCDEF:");
 	serverMAC->setMaxChars(17);
-	serverMAC->loadDeco();
 
 	char* sMAC=0;
 	if ( eConfig::getInstance()->getKey("/elitedvb/network/hwaddress", sMAC ) )
@@ -87,30 +57,11 @@ void ENgrabSetup::init_ENgrabSetup()
 		free(sMAC);
 	}
 
-	bServerMAC=new eButton(this);
-	bServerMAC->move(ePoint(20,150));
-	bServerMAC->resize(eSize(340,40));
-	bServerMAC->setShortcut("blue");
-	bServerMAC->setShortcutPixmap("blue");
-	bServerMAC->setText(_("detect MAC Adress"));
-	bServerMAC->setHelpText(_("try to autodetect server MAC address"));
-	bServerMAC->loadDeco();
-	CONNECT( bServerMAC->selected, ENgrabSetup::detectMAC );
+	CONNECT(CreateSkinnedButton("bServerMAC")->selected, ENgrabSetup::detectMAC );
 
-	ok=new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 210));
-	ok->resize(eSize(220, 40));
-	ok->setHelpText(_("save changes and return"));
-	ok->loadDeco();
-	CONNECT(ok->selected, ENgrabSetup::okPressed);
+	CONNECT(CreateSkinnedButton("ok")->selected, ENgrabSetup::okPressed);
 
-	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-50 ) );
-	statusbar->resize( eSize( clientrect.width(), 50) );
-	statusbar->loadDeco();
+	BuildSkin("ENgrabSetup");
 	
 	setHelpID(91);
 }

@@ -25,11 +25,11 @@ public:
 
 class eHarddiskMenu: public eWindow
 {
-	eButton *ext, *format, *bcheck;
+	eButton *ext;
 	eLabel *status, *model, *capacity, *bus, *lfs;
 	eLabel *lbltimeout, *lblacoustic;
 	eNumber *timeout, *acoustic;
-	eButton *store, *standby;
+	eButton *store;
 	eComboBox *fs;
 	eStatusBar *sbar;
 	int dev;
@@ -56,7 +56,7 @@ public:
 class ePartitionCheck: public eWindow
 {
 	eLabel *lState;
-	eButton *bCancel, *bClose;
+	eButton *bClose;
 	int dev;
 	void onCancel();
 	void fsckClosed(int);

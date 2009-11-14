@@ -12,8 +12,6 @@ class eStatusBar;
 class eZapKeyboardSetup: public eWindow
 {
 	eComboBox* mappings;
-	eButton *ok;
-	eStatusBar *statusbar;
 	void okPressed();
 	void loadMappings();
 	void init_eZapKeyboardSetup();

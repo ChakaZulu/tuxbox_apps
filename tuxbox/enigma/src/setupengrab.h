@@ -15,8 +15,6 @@ class ENgrabSetup: public eWindow
 {
 	eButton *type;
 	eNumber *inet_address, *srvport;
-	eButton *ok, *bServerMAC;
-	eStatusBar *statusbar;
 	eTextInputField *serverMAC;
 private:
 	void fieldSelected(int *number);
