@@ -22,8 +22,6 @@ void eTimeCorrectionEditWindow::init_eTimeCorrectionEditWindow( tsref tp )
 
 	nTime = CreateSkinnedNumber("nTime",0, 2, 0, 59, 2, 0, 0);
 	nTime->setFlags( eNumber::flagTime|eNumber::flagFillWithZeros );
-	nTime->setNumber(0, tmp.tm_hour );
-	nTime->setNumber(1, tmp.tm_min );
 	CONNECT( nTime->selected, eTimeCorrectionEditWindow::fieldSelected );
 
 	cday = CreateSkinnedComboBox("cday");
@@ -36,9 +34,6 @@ void eTimeCorrectionEditWindow::init_eTimeCorrectionEditWindow( tsref tp )
 	for ( int i = -1; i < 4; i++ )
 		new eListBoxEntryText( *cyear, eString().sprintf("%d",tmp.tm_year+(1900+i)), (void*)(tmp.tm_year+i) );
 
-	cyear->setCurrent( (void*) tmp.tm_year );
-	cmonth->setCurrent( (void*) tmp.tm_mon, true );
-	cday->setCurrent( (void*) tmp.tm_mday );
 	CONNECT( cyear->selchanged, eTimeCorrectionEditWindow::yearChanged );
 
 	bSet=CreateSkinnedButton("set");
@@ -46,6 +41,11 @@ void eTimeCorrectionEditWindow::init_eTimeCorrectionEditWindow( tsref tp )
 
 	BuildSkin("timecorrection");
 	CONNECT( updateTimer.timeout, eTimeCorrectionEditWindow::updateTimeDate );
+	nTime->setNumber(0, tmp.tm_hour );
+	nTime->setNumber(1, tmp.tm_min );
+	cyear->setCurrent( (void*) tmp.tm_year );
+	cmonth->setCurrent( (void*) tmp.tm_mon, true );
+	cday->setCurrent( (void*) tmp.tm_mday );
 }
 
 void eTimeCorrectionEditWindow::savePressed()
