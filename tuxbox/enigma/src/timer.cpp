@@ -2048,20 +2048,11 @@ void eTimerListView::init_eTimerListView()
 	CONNECT(events->selected, eTimerListView::entrySelected );
 	events->setFlags(eListBoxBase::flagLostFocusOnFirst|eListBoxBase::flagLostFocusOnLast);
 
-	erase = new eButton( this );
-	erase->setName("remove");
-	CONNECT( erase->selected, eTimerListView::erasePressed );
+	CONNECT( CreateSkinnedButton("remove")->selected, eTimerListView::erasePressed );
+	CONNECT( CreateSkinnedButton("add")->selected, eTimerListView::addPressed );
+	CONNECT( CreateSkinnedButton("cleanup")->selected, eTimerListView::cleanupPressed );
 
-	add = new eButton( this );
-	add->setName("add");
-	CONNECT( add->selected, eTimerListView::addPressed );
-
-	cleanup = new eButton( this );
-	cleanup->setName("cleanup");
-	CONNECT( cleanup->selected, eTimerListView::cleanupPressed );
-
-	if (eSkin::getActive()->build(this, "eTimerListView"))
-		eWarning("Timer view widget build failed!");
+	BuildSkin("eTimerListView");
 
 	setText(_("Timer list"));
 
@@ -2190,15 +2181,12 @@ void eTimerEditView::createWidgets()
 	int takefocus = !(curEntry && curEntry->type&ePlaylistEntry::stateRunning);
 	event_name->setActive(takefocus);
 
-	multiple = new eCheckbox(this, 0, takefocus);
-	multiple->setName("multiple");
+	multiple = CreateSkinnedCheckbox("multiple",0, 0, takefocus);
 	CONNECT(multiple->checked, eTimerEditView::multipleChanged);
 
-	cMo = new eCheckbox(this, 0, takefocus);
-	cMo->setName("Mo");
+	cMo = CreateSkinnedCheckbox("Mo",0, 0, takefocus);
 
-	after_event = new eComboBox( this, 3, 0 );
-	after_event->setName("after_event");
+	after_event = CreateSkinnedComboBox( "after_event", 3 );
 	new eListBoxEntryText( *after_event, _("Nothing"), (void*) 0, 0, _("do nothing") );
 	new eListBoxEntryText( *after_event, _("Standby"), (void*) ePlaylistEntry::doGoSleep, 0, _("put box into standby") );
 	if ( eSystemInfo::getInstance()->canShutdown() )
@@ -2210,72 +2198,42 @@ void eTimerEditView::createWidgets()
 			new eListBoxEntryText( *after_event, _("Shutdown"), (void*) ePlaylistEntry::doShutdown, 0, _("put box into deep standby") );
 	}
 
-	cTue = new eCheckbox(this, 0, takefocus);
-	cTue->setName("Tue");
+	cTue = CreateSkinnedCheckbox("Tue",0, 0, takefocus);
+	cWed = CreateSkinnedCheckbox("Wed",0, 0, takefocus);
+	cThu = CreateSkinnedCheckbox("Thu",0, 0, takefocus);
 
-	cWed = new eCheckbox(this, 0, takefocus);
-	cWed->setName("Wed");
+	byear = CreateSkinnedComboBox("b_year", 5, 0, takefocus);
+	bmonth = CreateSkinnedComboBox("b_month", 5, 0, takefocus);
+	bday = CreateSkinnedComboBox("b_day", 5, 0, takefocus);
 
-	cThu = new eCheckbox(this, 0, takefocus);
-	cThu->setName("Thu");
+	lBegin = CreateSkinnedLabel("lBegin");
 
-	byear = new eComboBox(this, 5, 0, takefocus);
-	byear->setName("b_year");
-
-	bmonth = new eComboBox(this, 5, 0, takefocus);
-	bmonth->setName("b_month");
-
-	bday = new eComboBox(this, 5, 0, takefocus);
-	bday->setName("b_day");
-
-	lBegin = new eLabel(this);
-	lBegin->setName("lBegin");
-
-	btime = new eNumber( this, 2, 0, 59, 2, 0, 0, lBegin, takefocus );
-	btime->setName("b_time");
+	btime = CreateSkinnedNumber( "b_time",0, 2, 0, 59, 2, 0, 0, lBegin, takefocus );
 	btime->setFlags( eNumber::flagDrawPoints|eNumber::flagFillWithZeros|eNumber::flagTime );
 	CONNECT( btime->selected, eTimerEditView::focusNext );
 
-	cFr = new eCheckbox(this, 0, takefocus);
-	cFr->setName("Fr");
+	cFr = CreateSkinnedCheckbox("Fr",0, 0, takefocus);
+	cSa = CreateSkinnedCheckbox("Sa",0, 0, takefocus);
+	cSu = CreateSkinnedCheckbox("Su",0, 0, takefocus);
 
-	cSa = new eCheckbox(this, 0, takefocus);
-	cSa->setName("Sa");
+	eyear = CreateSkinnedComboBox("e_year", 5, 0, takefocus);
+	emonth = CreateSkinnedComboBox("e_month", 5, 0, takefocus);
+	eday = CreateSkinnedComboBox("e_day", 5, 0, takefocus);
 
-	cSu = new eCheckbox(this, 0, takefocus);
-	cSu->setName("Su");
+	lEnd = CreateSkinnedLabel("lEnd");
 
-	eyear = new eComboBox(this, 5, 0, takefocus);
-	eyear->setName("e_year");
-
-	emonth = new eComboBox(this, 5, 0, takefocus);
-	emonth->setName("e_month");
-
-	eday = new eComboBox(this, 5, 0, takefocus);
-	eday->setName("e_day");
-
-	lEnd = new eLabel(this);
-	lEnd->setName("lEnd");
-
-	etime = new eNumber( this, 2, 0, 59, 2, 0, 0, lEnd );
-	etime->setName("e_time");
+	etime = CreateSkinnedNumber( "e_time",0, 2, 0, 59, 2, 0, 0, lEnd );
 	etime->setFlags( eNumber::flagDrawPoints|eNumber::flagFillWithZeros|eNumber::flagTime );
 	CONNECT( etime->selected, eTimerEditView::focusNext );
 
-	type = new eComboBox( this, 5, 0, takefocus );
-	type->setName("type");
+	type = CreateSkinnedComboBox( "type", 5, 0, takefocus );
 
-	bSelectService = new eButton( this, 0, takefocus );
-	bSelectService->setName("select_service");
+	bSelectService = CreateSkinnedButton( "select_service", 0, takefocus );
 	CONNECT( bSelectService->selected, eTimerEditView::showServiceSelector );
 
-	bApply = new eButton( this );
-	bApply->setName("apply");
-	CONNECT( bApply->selected, eTimerEditView::applyPressed );
+	CONNECT( CreateSkinnedButton("apply")->selected, eTimerEditView::applyPressed );
 
-	bScanEPG = new eButton(this, 0, takefocus );
-	bScanEPG->setName("scanEPG");
-	CONNECT( bScanEPG->selected, eTimerEditView::scanEPGPressed);
+	CONNECT( CreateSkinnedButton("scanEPG")->selected, eTimerEditView::scanEPGPressed);
 
 	CONNECT(byear->selchanged_id, eTimerEditView::comboBoxClosed);
 	CONNECT(bmonth->selchanged_id, eTimerEditView::comboBoxClosed);
@@ -2284,8 +2242,7 @@ void eTimerEditView::createWidgets()
 	CONNECT(emonth->selchanged_id, eTimerEditView::comboBoxClosed);
 	CONNECT(eday->selchanged_id, eTimerEditView::comboBoxClosed);
 
-	if (eSkin::getActive()->build(this, "eTimerEditView"))
-		eWarning("Timer view widget build failed!");
+	BuildSkin("eTimerEditView");
 
 	time_t tmp = time(0)+eDVB::getInstance()->time_difference;
 	tm now = *localtime( &tmp );

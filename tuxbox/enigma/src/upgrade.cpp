@@ -155,28 +155,22 @@ void eUpgrade::init_eUpgrade(bool manual)
 	CONNECT(images->selected, eUpgrade::imageSelected);
 	CONNECT(images->selchanged, eUpgrade::imageSelchanged);
 	
-	imagehelp=new eLabel(this);
-	imagehelp->setName("imagehelp");
-	imagehelp->setText(_("Please select the software version to upgrade to:"));
+	imagehelp=CreateSkinnedLabel("imagehelp",_("Please select the software version to upgrade to:"));
 
-	progress=new eProgress(this);
-	progress->setName("progress");
+	progress=CreateSkinnedProgress("progress");
 	progress->hide();
 	
-	progresstext=new eLabel(this);
-	progresstext->setName("progresstext");
+	progresstext=CreateSkinnedLabel("progresstext");
 	progresstext->hide();
 	
 	changes=new eLabel(this, RS_WRAP);
 	changes->setName("changes");
 	
-	abort=new eButton(this);
-	abort->setName("abort");
+	abort=CreateSkinnedButton("abort");
 	CONNECT(abort->selected, eUpgrade::abortDownload);
 	abort->hide();
 
-	if (eSkin::getActive()->build(this, "eUpgrade"))
-		eFatal("skin load of \"eUpgrade\" failed");
+	BuildSkin("eUpgrade");
 
 	catalog=0;
 	changelog=0;

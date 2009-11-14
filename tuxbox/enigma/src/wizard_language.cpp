@@ -113,17 +113,14 @@ void eWizardLanguage::init_eWizardLanguage()
 	list=new eListBox<eLanguageEntry>(this);
 	list->setName("list");
 	
-	head=new eLabel(this);
-	head->setName("head");
+	head=CreateSkinnedLabel("head");
 	
-	help=new eLabel(this);
-	help->setName("help");
+	help=CreateSkinnedLabel("help");
 	
 	CONNECT(list->selchanged, eWizardLanguage::selchanged);
 	CONNECT(list->selected, eWizardLanguage::selected);
 
-	if (eSkin::getActive()->build(this, "eWizardLanguage"))
-		eFatal("skin load of \"eWizardLanguage\" failed");
+	BuildSkin("eWizardLanguage");
 
 	FILE *f=fopen(LOCALEDIR "/locale.alias", "rt");
 	if (!f)

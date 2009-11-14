@@ -1758,22 +1758,17 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 		if ( showButtons )
 		{
 			styleName+="_buttons";
-			key[0] = new eLabel(this);
-			key[0]->setName("key_red");
-			key[1] = new eLabel(this);
-			key[1]->setName("key_green");
-			key[2] = new eLabel(this);
-			key[2]->setName("key_yellow");
-			key[3] = new eLabel(this);
-			key[3]->setName("key_blue");
+			key[0] = CreateSkinnedLabel("key_red");
+			key[1] = CreateSkinnedLabel("key_green");
+			key[2] = CreateSkinnedLabel("key_yellow");
+			key[3] = CreateSkinnedLabel("key_blue");
 			for (int i=0; i < 4; i++)
 				key[i]->show();
 		}
 		else
 			key[0] = key[1] = key[2] = key[3] = 0;
 
-		if (eSkin::getActive()->build(this, styleName.c_str()))
-			eFatal("Service selector widget \"%s\" build failed!",styleName.c_str());
+		BuildSkin(styleName.c_str());
 
 		style = newStyle;
 		CONNECT(services->selected, eServiceSelector::serviceSelected);

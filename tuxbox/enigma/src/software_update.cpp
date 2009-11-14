@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: software_update.cpp,v 1.7 2009/02/07 10:06:31 dbluelle Exp $
+ * $Id: software_update.cpp,v 1.8 2009/11/14 17:07:28 dbluelle Exp $
  */
 
 #include <software_update.h>
@@ -62,7 +62,7 @@ void eSoftwareUpdate::manual_update()
 	hide();
 	int ret = eMessageBox::ShowBox(_("Upload your Image via FTP or Samba to the '/tmp' folder."
 										"Then rename it to 'root.cramfs' and press ok."
-										"In the upcomming list select 'manual update' and follow the instructions."), _("Manual update"), eMessageBox::iconInfo|eMessageBox::btOK );
+										"In the following list select 'manual update' and follow the instructions."), _("Manual update"), eMessageBox::iconInfo|eMessageBox::btOK );
 	if ( ret == eMessageBox::btOK )
 	{
 		eUpgrade up(true);

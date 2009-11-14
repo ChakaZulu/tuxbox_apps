@@ -226,7 +226,6 @@ void siTags::willShow()
 
 class siPID: public eWidget
 {
-	eLabel *service_name[2], *service_provider[2], *apid[2], *vpid[2], *pcrpid[2], *pmtpid[2], *tpid[2], *vform[2], *tsid[2], *onid[2], *sid[2];
 	void init_siPID(decoderParameters parms, const eService *service, eWidget *parent);
 public:
 	siPID(decoderParameters parms, const eService *service, eWidget *parent);
@@ -310,153 +309,20 @@ void siPID::init_siPID(decoderParameters parms, const eService *cservice, eWidge
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return;
-	
-	int yOffs=10;
-	int fs=24;
-	gFont fontfixed=eSkin::getActive()->queryFont("global.fixed");
-	
-	service_name[0]=new eLabel(this);
-	service_name[0]->setText("Name:");
-	service_name[0]->move(ePoint(10, yOffs));
-	service_name[0]->resize(eSize(140, fs+5));
 
-	service_name[1]=new eLabel(this);
-	service_name[1]->setText(cservice?(cservice->service_name.c_str()):"--");
-	service_name[1]->setFont(fontfixed);
-	service_name[1]->move(ePoint(240, yOffs+2));
-	service_name[1]->resize(eSize(260, fs+5));
-	yOffs+=fs+5;
-
-	service_provider[0]=new eLabel(this);
-	service_provider[0]->setText("Provider:");
-	service_provider[0]->move(ePoint(10, yOffs));
-	service_provider[0]->resize(eSize(140, fs+5));
-	
-	service_provider[1]=new eLabel(this);
-	service_provider[1]->setText((cservice && cservice->dvb)?cservice->dvb->service_provider.c_str():"--");
-	service_provider[1]->setFont(fontfixed);
-	service_provider[1]->move(ePoint(240, yOffs+2));
-	service_provider[1]->resize(eSize(260, fs+5));
-	yOffs+=fs+5;
-
-	vpid[0]=new eLabel(this);
-	vpid[0]->setText("Video PID:");
-	vpid[0]->move(ePoint(10, yOffs));
-	vpid[0]->resize(eSize(140, fs+5));
-	
-	vpid[1]=new eLabel(this);
-	vpid[1]->setFont(fontfixed);
-	vpid[1]->setText((Decoder::current.vpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.vpid, Decoder::current.vpid));
-	vpid[1]->move(ePoint(240, yOffs+2));
-	vpid[1]->resize(eSize(260, fs+5));
-	yOffs+=fs+5;
-
-	apid[0]=new eLabel(this);
-	apid[0]->setText("Audio PID:");
-	apid[0]->move(ePoint(10, yOffs));
-	apid[0]->resize(eSize(140, fs+5));
-	
-	apid[1]=new eLabel(this);
-	apid[1]->setText((Decoder::current.apid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.apid, Decoder::current.apid));
-	apid[1]->move(ePoint(240, yOffs+2));
-	apid[1]->resize(eSize(260, fs+5));
-	apid[1]->setFont(fontfixed);
-	yOffs+=fs+5;
-
-	pcrpid[0]=new eLabel(this);
-	pcrpid[0]->setText("PCR PID:");
-	pcrpid[0]->move(ePoint(10, yOffs));
-	pcrpid[0]->resize(eSize(140, fs+5));
-	
-	pcrpid[1]=new eLabel(this);
-	pcrpid[1]->setText((Decoder::current.pcrpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid));
-	pcrpid[1]->move(ePoint(240, yOffs+2));
-	pcrpid[1]->resize(eSize(260, fs+5));
-	pcrpid[1]->setFont(fontfixed);
-	yOffs+=fs+5;
-
-	pmtpid[0]=new eLabel(this);
-	pmtpid[0]->setText("PMT PID:");
-	pmtpid[0]->move(ePoint(10, yOffs));
-	pmtpid[0]->resize(eSize(140, fs+5));
-
-	pmtpid[1]=new eLabel(this);
-	pmtpid[1]->setText((Decoder::current.pmtpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.pmtpid, Decoder::current.pmtpid));
-	pmtpid[1]->move(ePoint(240, yOffs+2));
-	pmtpid[1]->resize(eSize(260, fs+5));
-	pmtpid[1]->setFont(fontfixed);
-	yOffs+=fs+5;
-
-	tpid[0]=new eLabel(this);
-	tpid[0]->setText("Teletext PID:");
-	tpid[0]->move(ePoint(10, yOffs));
-	tpid[0]->resize(eSize(140, fs+5));
-	
-	tpid[1]=new eLabel(this);
-	tpid[1]->setText((Decoder::current.tpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.tpid, Decoder::current.tpid));
-	tpid[1]->move(ePoint(240, yOffs+2));
-	tpid[1]->resize(eSize(260, fs+5));
-	tpid[1]->setFont(fontfixed);
-	yOffs+=fs+5;
-	
-	vform[0]=new eLabel(this);
-	vform[0]->setText(_("Video format:"));
-	vform[0]->move(ePoint(10, yOffs));
-	vform[0]->resize(eSize(150, fs+5));
-	
-	vform[1]=new eLabel(this);
-	vform[1]->setText(getVidFormat());
-	vform[1]->move(ePoint(240, yOffs));
-	vform[1]->resize(eSize(260, fs));
-	vform[1]->setFont(fontfixed);
-	yOffs+=fs+5;
-
-	tsid[0]=new eLabel(this);
-	tsid[0]->setText("Transport Stream ID:");
-	tsid[0]->move(ePoint(10, yOffs));
-	tsid[0]->resize(eSize(230, fs+5));
-
-	tsid[1]=new eLabel(this);
-	tsid[1]->setText(eString().sprintf("%04xh", sapi->service.getTransportStreamID().get()));
-	tsid[1]->move(ePoint(240, yOffs));
-	tsid[1]->resize(eSize(130, fs+5));
-	tsid[1]->setFont(fontfixed);
-	yOffs+=fs+5;
-
-	onid[0]=new eLabel(this);
-	onid[0]->setText("Original Network ID:");
-	onid[0]->move(ePoint(10, yOffs));
-	onid[0]->resize(eSize(210, fs+5));
-
-	onid[1]=new eLabel(this);
-	onid[1]->setText(eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get()));
-	onid[1]->move(ePoint(240, yOffs));
-	onid[1]->resize(eSize(130, fs+5));
-	onid[1]->setFont(fontfixed);
-	yOffs+=fs+5;
-
-	sid[0]=new eLabel(this);
-	sid[0]->setText("Service ID:");
-	sid[0]->move(ePoint(10, yOffs));
-	sid[0]->resize(eSize(185, fs+5));
-
-	sid[1]=new eLabel(this);
-	sid[1]->setText(eString().sprintf("%04xh", sapi->service.getServiceID().get()));
-	sid[1]->move(ePoint(240, yOffs));
-	sid[1]->resize(eSize(130, fs+5));
-	sid[1]->setFont(fontfixed);
-	yOffs+=fs+5;
-	
-	eLabel *l=new eLabel(this);
-	l->setText("Namespace:");
-	l->move(ePoint(10, yOffs));
-	l->resize(eSize(185, fs+5));
-	
-	l=new eLabel(this);
-	l->setText(eString().sprintf("%04xh", sapi->service.getDVBNamespace().get()));
-	l->move(ePoint(240, yOffs));
-	l->resize(eSize(130, fs+5));
-	l->setFont(fontfixed);
+	CreateSkinnedLabel("service_name",cservice?(cservice->service_name.c_str()):"--");
+	CreateSkinnedLabel("service_provider",((cservice && cservice->dvb)?cservice->dvb->service_provider.c_str():"--"));
+	CreateSkinnedLabel("vpid",((Decoder::current.vpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.vpid, Decoder::current.vpid)).c_str());
+	CreateSkinnedLabel("apid",((Decoder::current.apid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.apid, Decoder::current.apid)).c_str());
+	CreateSkinnedLabel("pcrpid",((Decoder::current.pcrpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid)).c_str());
+	CreateSkinnedLabel("pmtpid",((Decoder::current.pmtpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.pmtpid, Decoder::current.pmtpid)).c_str());
+	CreateSkinnedLabel("tpid",((Decoder::current.tpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.tpid, Decoder::current.tpid)).c_str());
+	CreateSkinnedLabel("vform",getVidFormat().c_str());
+	CreateSkinnedLabel("tsid",eString().sprintf("%04xh", sapi->service.getTransportStreamID().get()).c_str());
+	CreateSkinnedLabel("onid",eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get()).c_str());
+	CreateSkinnedLabel("sid",eString().sprintf("%04xh", sapi->service.getServiceID().get()).c_str());
+	CreateSkinnedLabel("nspace",eString().sprintf("%04xh", sapi->service.getDVBNamespace().get()).c_str());
+	BuildSkin("streaminfoPID");
 }
 
 void siPID::redrawWidget()

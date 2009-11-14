@@ -78,11 +78,9 @@ void eWizardSelectDiseqc::init_eWizardSelectDiseqc()
 	diseqclist->setName("choices");
 	diseqclist->setColumns(3);
 	
-	description=new eLabel(this);
-	description->setName("description");
+	description=CreateSkinnedLabel("description");
 
-	if (eSkin::getActive()->build(this, "eWizardDiseqc"))
-		eFatal("skin load of \"eWizardDiseqc\" failed");
+	BuildSkin("eWizardDiseqc");
 		
 	eDiseqcChoice *current;
 	current=new eDiseqcChoice(diseqclist, eDiseqcChoice::none);

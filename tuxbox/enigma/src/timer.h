@@ -113,7 +113,7 @@ public:
 class eTimerListView:public eWindow
 {
 	eListBox<eListBoxEntryTimer>* events;
-	eButton *add, *erase, *cleanup;
+	eButton *cleanup;
 	void init_eTimerListView();
 public:
 	eTimerListView();
@@ -131,7 +131,7 @@ class eTimerEditView: public eWindow
 	eTextInputField *event_name;
 	eLabel *lBegin, *lEnd;
 	eNumber *btime, *etime;
-	eButton *bSelectService, *bApply, *bScanEPG;
+	eButton *bSelectService;
 	tm beginTime, endTime;
 	eServiceReference tmpService;
 	ePlaylistEntry *curEntry;

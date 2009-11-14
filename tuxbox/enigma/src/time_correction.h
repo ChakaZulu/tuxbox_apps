@@ -9,10 +9,9 @@ class eTimeCorrectionEditWindow: public eWindow
 {
 	eTimer updateTimer;
 	eLabel *lCurTime, *lCurDate, *lTpTime, *lTpDate;
+	eButton* bSet;
 	eComboBox *cday, *cmonth, *cyear;
-	eButton *bSet, *bReject;
 	eNumber *nTime;
-	eStatusBar *sbar;
 	tsref transponder;
 	int eventHandler( const eWidgetEvent &e );
 	void savePressed();

@@ -10,81 +10,29 @@ eTimeCorrectionEditWindow::eTimeCorrectionEditWindow( tsref tp )
 
 void eTimeCorrectionEditWindow::init_eTimeCorrectionEditWindow( tsref tp )
 {
-	setText(_("Time Correction"));
-	move( ePoint(100,100) );
-	cresize( eSize(440,290 ) );
 
-	eLabel *l = new eLabel(this);
-	l->move( ePoint(10,10) );
-	l->resize( eSize(200,30));
-	l->setText(_("Receiver Time:"));
+	lCurTime= CreateSkinnedLabel("curtime");
+	lCurDate = CreateSkinnedLabel("curdate");
 
-	lCurTime = new eLabel(this);
-	lCurTime->move( ePoint(210,10) );
-	lCurTime->resize( eSize(90,30) );
-
-	lCurDate = new eLabel(this);
-	lCurDate->move( ePoint(320,10) );
-	lCurDate->resize( eSize(120,30) );
-
-	l = new eLabel(this);
-	l->move( ePoint(10,50) );
-	l->resize( eSize(200,30));
-	l->setText(_("Transponder Time:"));
-
-	lTpTime = new eLabel(this);
-	lTpTime->move( ePoint(210,50) );
-	lTpTime->resize( eSize(90,30) );
-
-	lTpDate = new eLabel(this);
-	lTpDate->move( ePoint(320,50) );
-	lTpDate->resize( eSize(120,30) );
-
-	l = new eLabel(this);
-	l->setText(_("New Time:"));
-	l->setFlags( eLabel::flagVCenter );
-	l->move( ePoint(10,90) );
-	l->resize( eSize(150,35) );
+	lTpTime = CreateSkinnedLabel("tptime");
+	lTpDate = CreateSkinnedLabel("tpdate");
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm tmp = *localtime( &now );
 
-	nTime = new eNumber(this, 2, 0, 59, 2, 0, 0, l);
-	nTime->resize(eSize(75,35));
-	nTime->move(ePoint(210,90));
+	nTime = CreateSkinnedNumber("nTime",0, 2, 0, 59, 2, 0, 0);
 	nTime->setFlags( eNumber::flagTime|eNumber::flagFillWithZeros );
-	nTime->loadDeco();
-	nTime->setHelpText(_("enter correct time here"));
 	nTime->setNumber(0, tmp.tm_hour );
 	nTime->setNumber(1, tmp.tm_min );
 	CONNECT( nTime->selected, eTimeCorrectionEditWindow::fieldSelected );
 
-	l = new eLabel(this);
-	l->setText(_("New Date:"));
-	l->setFlags( eLabel::flagVCenter );
-	l->move( ePoint(10,140) );
-	l->resize( eSize(150,35) );
-
-	cday = new eComboBox(this);
-	cday->move(ePoint(210,140));
-	cday->resize(eSize(60,35));
-	cday->loadDeco();
-	cday->setHelpText(_("press ok to select another day"));
-
-	cmonth = new eComboBox( this );
-	cmonth->move(ePoint(280,140));
-	cmonth->resize(eSize(60,35));
-	cmonth->loadDeco();
-	cmonth->setHelpText(_("press ok to select another month"));
+	cday = CreateSkinnedComboBox("cday");
+	cmonth = CreateSkinnedComboBox("cmonth");
 	for ( int i = 0; i < 12; i++ )
 		new eListBoxEntryText( *cmonth, eString().sprintf("%02d",i+1), (void*)i );
 	CONNECT( cmonth->selchanged, eTimeCorrectionEditWindow::monthChanged );
 
-	cyear = new eComboBox(this);
-	cyear->move(ePoint(350,140));
-	cyear->resize(eSize(80,35));
-	cyear->loadDeco();
-	cyear->setHelpText(_("press ok to select another year"));
+	cyear = CreateSkinnedComboBox("cyear");
 	for ( int i = -1; i < 4; i++ )
 		new eListBoxEntryText( *cyear, eString().sprintf("%d",tmp.tm_year+(1900+i)), (void*)(tmp.tm_year+i) );
 
@@ -93,21 +41,10 @@ void eTimeCorrectionEditWindow::init_eTimeCorrectionEditWindow( tsref tp )
 	cday->setCurrent( (void*) tmp.tm_mday );
 	CONNECT( cyear->selchanged, eTimeCorrectionEditWindow::yearChanged );
 
-	bSet=new eButton(this);
-	bSet->setText(_("set"));
-	bSet->setShortcut("green");
-	bSet->setShortcutPixmap("green");
-
-	bSet->move(ePoint(10, clientrect.height()-100));
-	bSet->resize(eSize(220,40));
-	bSet->setHelpText(_("set new time and close window"));
-	bSet->loadDeco();
+	bSet=CreateSkinnedButton("set");
 	CONNECT(bSet->selected, eTimeCorrectionEditWindow::savePressed);
 
-	sbar = new eStatusBar(this);
-	sbar->move( ePoint(0, clientrect.height()-50) );
-	sbar->resize( eSize( clientrect.width(), 50) );
-	sbar->loadDeco();
+	BuildSkin("timecorrection");
 	CONNECT( updateTimer.timeout, eTimeCorrectionEditWindow::updateTimeDate );
 }
 

@@ -27,12 +27,6 @@ eZapVideoSetup::eZapVideoSetup()
 
 void eZapVideoSetup::init_eZapVideoSetup()
 {
-/*	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "setup.video"))
-		qFatal("skin load of \"setup.video\" failed");*/
-
-/*	cresize( eSize(height(), width()) );
-	cmove( ePoint(0,0) );*/
 
 	if (eConfig::getInstance()->getKey("/elitedvb/video/colorformat", v_colorformat))
 		v_colorformat = 1;
@@ -52,64 +46,34 @@ void eZapVideoSetup::init_eZapVideoSetup()
 	if (eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", v_VCRSwitching ))
 		v_VCRSwitching=1;
 
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
-	setText(_("A/V Settings"));
-	move(ePoint(160, 90));
-	cresize(eSize(390, 350));
-
-	eLabel *l=new eLabel(this);
-	l->setText(_("Color Format:"));
-	l->move(ePoint(20, 20));
-	l->resize(eSize(150, fd+4));
-
-	colorformat=new eListBox<eListBoxEntryText>(this, l);
-	colorformat->loadDeco();
+	colorformat=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("lcolorformat"));
+	colorformat->setName("colorformat");
 	colorformat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	colorformat->move(ePoint(180, 20));
-	colorformat->resize(eSize(120, 35));
 	eListBoxEntryText* entrys[4];
 	entrys[0]=new eListBoxEntryText(colorformat, _("CVBS"), (void*)1);
 	entrys[1]=new eListBoxEntryText(colorformat, _("RGB"), (void*)2);
 	entrys[2]=new eListBoxEntryText(colorformat, _("SVideo"), (void*)3);
 	entrys[3]=new eListBoxEntryText(colorformat, _("YPbPr"), (void*)4);
 
-/*	http://forum.tuxbox.org/forum/viewtopic.php?t=34005
-	if( eSystemInfo::getInstance()->getHwType() > eSystemInfo::dbox2Philips  )
-		entrys[3]=new eListBoxEntryText(colorformat, _("YPbPr"), (void*)4);*/
-
-	colorformat->setCurrent(entrys[v_colorformat-1]);
-	colorformat->setHelpText(_("choose color format ( left, right )"));
+	eListBoxEntryText* selcolorformat = entrys[v_colorformat-1];
 	CONNECT( colorformat->selchanged, eZapVideoSetup::CFormatChanged );
 
-  l=new eLabel(this);
-	l->setText(_("Aspect Ratio:"));
-	l->move(ePoint(20, 60));
-	l->resize(eSize(150, fd+4));
 	
-	pin8=new eListBox<eListBoxEntryText>(this, l);
-	pin8->loadDeco();	
+	pin8=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("lpin8"));
+	pin8->setName("pin8");
 	pin8->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	
-	pin8->move(ePoint(180, 60));
-	pin8->resize(eSize(170, 35));
-	pin8->setHelpText(_("choose aspect ratio ( left, right )"));
 	entrys[0]=new eListBoxEntryText(pin8, _("4:3 letterbox"), (void*)0);
 	entrys[1]=new eListBoxEntryText(pin8, _("4:3 panscan"), (void*)1);
 	entrys[2]=new eListBoxEntryText(pin8, _("16:9"), (void*)2);
 	/* dbox, dm700, dm7020 can do black bars left and right of 4:3 video */
 	if ( eSystemInfo::getInstance()->getHwType() <= eSystemInfo::DM7020 )
 		entrys[3]=new eListBoxEntryText(pin8, _("always 16:9"), (void*)3);
-	pin8->setCurrent(entrys[v_pin8]);
+	eListBoxEntryText* selpin8 = entrys[v_pin8];
 	CONNECT( pin8->selchanged, eZapVideoSetup::VPin8Changed );
 
-	l=new eLabel(this);
-	l->setText(_("TV System:"));
-	l->move(ePoint(20, 100));
-	l->resize(eSize(150, fd+4));
-	
-	tvsystem=new eListBox<eListBoxEntryText>(this, l);
-	tvsystem->loadDeco();	
+	tvsystem=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("ltvsystem"));
+	tvsystem->setName("tvsystem");
 	tvsystem->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	
 	// our bitmask is:
@@ -125,9 +89,6 @@ void eZapVideoSetup::init_eZapVideoSetup()
 	//  3    multinorm
 	//  5    pal, pal60
 	
-	tvsystem->move(ePoint(180, 100));
-	tvsystem->resize(eSize(170, 35));
-	tvsystem->setHelpText(_("choose TV system ( left, right )"));
 	entrys[0]=new eListBoxEntryText(tvsystem, "PAL", (void*)1);
 	entrys[1]=new eListBoxEntryText(tvsystem, "PAL + PAL60", (void*)5);
 	entrys[2]=new eListBoxEntryText(tvsystem, "Multinorm", (void*)3);
@@ -141,69 +102,42 @@ void eZapVideoSetup::init_eZapVideoSetup()
 	case 3: i = 2; break;
 	case 2: i = 3; break;
 	}
-	tvsystem->setCurrent(entrys[i]);
+	eListBoxEntryText* seltvsystem = entrys[i];
 	CONNECT( tvsystem->selchanged, eZapVideoSetup::TVSystemChanged );
 
-	c_disableWSS = new eCheckbox(this, v_disableWSS, 1);
-	c_disableWSS->move(ePoint(20,140));
-	c_disableWSS->resize(eSize(350,30));
-	c_disableWSS->setText(_("Disable WSS on 4:3"));
-	c_disableWSS->setHelpText(_("don't send WSS signal when A-ratio is 4:3"));
-	CONNECT( c_disableWSS->checked, eZapVideoSetup::DisableWSSChanged );
+	CONNECT( CreateSkinnedCheckbox("c_disableWSS",v_disableWSS)->checked, eZapVideoSetup::DisableWSSChanged );
 
 	int sac3default = 0;
 	sac3default=eAudio::getInstance()->getAC3default();
 
-	ac3default=new eCheckbox(this, sac3default, 1);
-	ac3default->setText(_("AC3 default output"));
-	ac3default->move(ePoint(20, 175));
-	ac3default->resize(eSize(350, 30));
-	ac3default->setHelpText(_("enable/disable ac3 default output (ok)"));
-	CONNECT( ac3default->checked, eZapVideoSetup::ac3defaultChanged );
+	CONNECT( CreateSkinnedCheckbox("ac3default",sac3default)->checked, eZapVideoSetup::ac3defaultChanged );
 
 	if ( eSystemInfo::getInstance()->hasScartSwitch() )
 	{
-		VCRSwitching=new eCheckbox(this, v_VCRSwitching, 1);
-		VCRSwitching->setText(_("Auto VCR switching"));
-		VCRSwitching->move(ePoint(20, 205));
-		VCRSwitching->resize(eSize(350, 30));
-		VCRSwitching->setHelpText(_("auto switch to VCR connector"));
-		CONNECT( VCRSwitching->checked, eZapVideoSetup::VCRChanged );
+		CONNECT( CreateSkinnedCheckbox("VCRSwitching",v_VCRSwitching)->checked, eZapVideoSetup::VCRChanged );
 	}
 
-	ok=new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 250));
-	ok->resize(eSize(220, 40));
-	ok->setHelpText(_("save changes and return"));
-	ok->loadDeco();
 
-	CONNECT(ok->selected, eZapVideoSetup::okPressed);		
+	CONNECT(CreateSkinnedButton("ok")->selected, eZapVideoSetup::okPressed);
 
-	testpicture=new eButton(this);
-	testpicture->setText(_("test"));
-	testpicture->setShortcut("blue");
-	testpicture->setShortcutPixmap("blue");
-	testpicture->move(ePoint(260, 250));
-	testpicture->resize(eSize(100, 40));
-	testpicture->setHelpText(_("show testpicture"));
-	testpicture->loadDeco();
+	CONNECT(CreateSkinnedButton("testpicture")->selected, eZapVideoSetup::showTestpicture);
 
-	CONNECT(testpicture->selected, eZapVideoSetup::showTestpicture);		
+	BuildSkin("eZapVideoSetup");
 
-	status = new eStatusBar(this);	
-	status->move( ePoint(0, clientrect.height()-50) );
-	status->resize( eSize( clientrect.width(), 50) );
-	status->loadDeco();
+	if (!eSystemInfo::getInstance()->hasScartSwitch() )
+	{
+		CreateSkinnedCheckbox("VCRSwitching",v_VCRSwitching)->hide();
+	}
+	tvsystem->setCurrent(seltvsystem);
+	colorformat->setCurrent(selcolorformat);
+	pin8->setCurrent(selpin8);
+
+
 	setHelpID(86);
 }
 
 eZapVideoSetup::~eZapVideoSetup()
 {
-	if (status)
-		delete status;
 }
 
 void eZapVideoSetup::showTestpicture()
@@ -314,7 +248,6 @@ void eZapVideoSetup::ac3defaultChanged( int i )
 
 class eWizardTVSystem: public eWindow
 {
-	eButton *ok;
 	eListBox<eListBoxEntryText> *tvsystem;
 	unsigned int v_tvsystem;
 	void TVSystemChanged( eListBoxEntryText * );
@@ -361,19 +294,8 @@ eWizardTVSystem::eWizardTVSystem(): eWindow(0)
 	v_tvsystem=1;
 	eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", v_tvsystem );
 
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
-
-	setText(_("TV System Wizard"));
-	move(ePoint(160, 120));
-	cresize(eSize(390, 170));
-
-	eLabel *l=new eLabel(this);
-	l->setText(_("TV System:"));
-	l->move(ePoint(20, 10));
-	l->resize(eSize(150, fd+4));
-
-	tvsystem=new eListBox<eListBoxEntryText>(this, l);
-	tvsystem->loadDeco();
+	tvsystem=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("ltvsystem"));
+	tvsystem->setName("tvsystem");
 	tvsystem->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 
 	// our bitmask is:
@@ -390,9 +312,6 @@ eWizardTVSystem::eWizardTVSystem(): eWindow(0)
 	//  5    pal, pal60
 
 	eListBoxEntryText *entrys[4];
-	tvsystem->move(ePoint(180, 10));
-	tvsystem->resize(eSize(170, 35));
-	tvsystem->setHelpText(_("choose TV system ( left, right )"));
 	entrys[0]=new eListBoxEntryText(tvsystem, "PAL", (void*)1);
 	entrys[1]=new eListBoxEntryText(tvsystem, "PAL + PAL60", (void*)5);
 	entrys[2]=new eListBoxEntryText(tvsystem, "Multinorm", (void*)3);
@@ -409,20 +328,9 @@ eWizardTVSystem::eWizardTVSystem(): eWindow(0)
 	tvsystem->setCurrent(entrys[i]);
 	CONNECT( tvsystem->selchanged, eWizardTVSystem::TVSystemChanged );
 
-	ok=new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 65));
-	ok->resize(eSize(220, 40));
-	ok->setHelpText(_("save changes and return"));
-	ok->loadDeco();
-	CONNECT(ok->selected, eWizardTVSystem::okPressed);
+	CONNECT(CreateSkinnedButton("ok")->selected, eWizardTVSystem::okPressed);
 
-	eStatusBar *status = new eStatusBar(this);
-	status->move( ePoint(0, clientrect.height()-50) );
-	status->resize( eSize( clientrect.width(), 50) );
-	status->loadDeco();
+	BuildSkin("eWizardTVSystem");
 }
 
 void eWizardTVSystem::okPressed()

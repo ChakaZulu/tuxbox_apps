@@ -51,7 +51,7 @@ void eSwapManager::init_eSwapManager()
 	path = eString().sprintf("%susb/", mntbase.c_str() );
 	eConfig::getInstance()->getKey("/extras/swapfilename", swap);
 
-	cb_file=new eComboBox(this,4);cb_file->setName("file");
+	cb_file=CreateSkinnedComboBox("file",4);
 
 	new eListBoxEntryText( *cb_file, "swap", (void*)0, 0, eString().sprintf("%s%s", _("Filename: "), "swap"));
 	new eListBoxEntryText( *cb_file, "swapfile", (void*)1, 0, eString().sprintf("%s%s", _("Filename: "), "swapfile"));
@@ -82,39 +82,21 @@ void eSwapManager::init_eSwapManager()
 		path = s.substr(0, pos+1);
 	}
 
-	
-	tb_path=new eTextInputField(this);tb_path->setName("path");
-	tb_path->setText(path);
-	bt_seldir=new eButton(this); bt_seldir->setName("seldir");
+	tb_path=CreateSkinnedTextInputField("path",path.c_str() );
+	bt_seldir=CreateSkinnedButton("seldir");
 
-	cb_size=new eComboBox(this, 4);cb_size->setName("filesize");
+	cb_size=CreateSkinnedComboBox("filesize", 4);
+	for (int i = 0; i < 9; i++)
+		new eListBoxEntryText( *cb_size, eString().sprintf("%d MB",(4<<i)&0xf8).c_str(), (void*)((4<<i)&0xf8), 0, eString().sprintf(_("Filesize: %d MB"),(4<<i)&0xf8).c_str());
 
-	new eListBoxEntryText( *cb_size, "0 MB", (void*)0, 0, eString().sprintf(_("Filesize: %d MB"),0).c_str());
-	new eListBoxEntryText( *cb_size, "8 MB", (void*)8, 0, eString().sprintf(_("Filesize: %d MB"),8).c_str());
-	new eListBoxEntryText( *cb_size, "16 MB", (void*)16, 0, eString().sprintf(_("Filesize: %d MB"),16).c_str());
-	new eListBoxEntryText( *cb_size, "32 MB", (void*)32, 0, eString().sprintf(_("Filesize: %d MB"),32).c_str());
-	new eListBoxEntryText( *cb_size, "64 MB", (void*)64, 0, eString().sprintf(_("Filesize: %d MB"),64).c_str());
-	new eListBoxEntryText( *cb_size, "128 MB", (void*)128, 0, eString().sprintf(_("Filesize: %d MB"),128).c_str());
-	new eListBoxEntryText( *cb_size, "256 MB", (void*)256, 0, eString().sprintf(_("Filesize: %d MB"),256).c_str());
-	new eListBoxEntryText( *cb_size, "512 MB", (void*)512, 0, eString().sprintf(_("Filesize: %d MB"),512).c_str());
-	new eListBoxEntryText( *cb_size, "1024 MB", (void*)1024, 0, eString().sprintf(_("Filesize: %d MB"),1024).c_str());
+	bt_delswap = CreateSkinnedButton("delete");
+	bt_stswap = CreateSkinnedButton("stop");
+	bt_crswap = CreateSkinnedButton("create");
+	bt_acswap = CreateSkinnedButton("start");
+	lb_found= CreateSkinnedLabel("found");
+	lb_status= CreateSkinnedLabel("status");
 
-	bt_delswap = new eButton(this);bt_delswap->setName("delete");
-
-	bt_stswap = new eButton(this);bt_stswap->setName("stop");
-
-	bt_crswap = new eButton(this);bt_crswap->setName("create");
-
-	bt_acswap = new eButton(this);bt_acswap->setName("start");
-
-	lb_found= new eLabel(this);lb_found->setName("found");
-
-	lb_status= new eLabel(this);lb_status->setName("status");
-
-	statusbar = new eStatusBar(this); statusbar->setName("statusbar");
-
-	if (eSkin::getActive()->build(this, "SwapManager"))
-		eFatal("skin load of \"SwapManager\" failed");
+	BuildSkin("SwapManager");
 
 	bt_delswap->hide();
 	bt_stswap->hide();
