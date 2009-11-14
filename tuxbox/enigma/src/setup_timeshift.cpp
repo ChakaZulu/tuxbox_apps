@@ -24,44 +24,23 @@ eZapTimeshiftSetup::eZapTimeshiftSetup()
 }
 void eZapTimeshiftSetup::init_eZapTimeshiftSetup()
 {
-	delay=new eNumber(this,1,1, 60, 3, 0, 0); delay->setName("delay");
-	minutes=new eNumber(this,1,1, MAX_PERMANENT_TIMESHIFT_MINUTES, 3, 0, 0); minutes->setName("minutes");
-	active=new eCheckbox(this);active->setName("active");
-	pause=new eCheckbox(this);pause->setName("pause");
-	path=new eTextInputField(this);path->setName("path");
-	seldir=new eButton(this); seldir->setName("seldir");
-	store=new eButton(this); store->setName("store");
-
-	int tmp = 0;
-	eConfig::getInstance()->getKey("/enigma/timeshift/permanent", tmp );
-	unsigned char permactive = (unsigned char) tmp;
-	active->setCheck(permactive);
-
-	int tmp2 = 0;
-	eConfig::getInstance()->getKey("/enigma/timeshift/activatepausebutton", tmp2 );
-	unsigned char permpause = (unsigned char) tmp2;
-	pause->setCheck(permpause);
-
 	int permdelay = 30;
 	eConfig::getInstance()->getKey("/enigma/timeshift/permanentdelay", permdelay );
-	delay->setNumber(permdelay);
+	delay=CreateSkinnedNumber("delay",permdelay,1,1, 60, 3, 0);
 
 	int permbuffersize = 30;
 	eConfig::getInstance()->getKey("/enigma/timeshift/permanentminutes", permbuffersize );
-	minutes->setNumber(permbuffersize);
+	minutes=CreateSkinnedNumber("minutes",permbuffersize,1,1, MAX_PERMANENT_TIMESHIFT_MINUTES, 3, 0);
 
-	eString strPath = MOVIEDIR;
-	char* selpath;
-	if (!eConfig::getInstance()->getKey("/enigma/timeshift/storagedir", selpath ))
-		strPath = selpath;
-	path->setText(strPath);
+	active=CreateSkinnedCheckbox("active",0,"/enigma/timeshift/permanent");
 
-	sbar = new eStatusBar(this); sbar->setName("statusbar");
+	pause=CreateSkinnedCheckbox("pause",0,"/enigma/timeshift/activatepausebutton");
 
-	if (eSkin::getActive()->build(this, "SetupTimeshift"))
-		eFatal("skin load of \"SetupTimeshift\" failed");
+	path=CreateSkinnedTextInputField("path",MOVIEDIR,"/enigma/timeshift/storagedir");
+	seldir=CreateSkinnedButton("seldir");
+	CONNECT(CreateSkinnedButton("store")->selected, eZapTimeshiftSetup::storePressed);
 
-	CONNECT(store->selected, eZapTimeshiftSetup::storePressed);
+	BuildSkin("SetupTimeshift");
 	CONNECT(seldir->selected, eZapTimeshiftSetup::selectDir);
 
 }

@@ -192,106 +192,36 @@ eZapOsdSetup::eZapOsdSetup()
 
 void eZapOsdSetup::init_eZapOsdSetup()
 {
-	setText(_("OSD Settings"));
-	cmove(ePoint(140, 125));
-	cresize(eSize(460, 350));
-
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
-
 	alpha = gFBDC::getInstance()->getAlpha();
-	eLabel* l = new eLabel(this);
-	l->setText(_("Alpha:"));
-	l->move(ePoint(20, 20));
-	l->resize(eSize(110, fd+4));
-	sAlpha = new eSlider( this, l, 0, 512 );
+	sAlpha = CreateSkinnedSlider("alpha","lalpha", 0, 512 );
 	sAlpha->setIncrement( eSystemInfo::getInstance()->getAlphaIncrement() ); // Percent !
-
-	sAlpha->move( ePoint( 150, 20 ) );
-	sAlpha->resize(eSize( 290, fd+4 ) );
-	sAlpha->setHelpText(_("change the transparency correction"));
 	sAlpha->setValue( alpha);
 	CONNECT( sAlpha->changed, eZapOsdSetup::alphaChanged );
 
 	brightness = gFBDC::getInstance()->getBrightness();
-	l = new eLabel(this);
-	l->setText(_("Brightness:"));
-	l->move(ePoint(20, 60));
-	l->resize(eSize(120, fd+4));
-	sBrightness = new eSlider( this, l, 0, 255 );
+	sBrightness = CreateSkinnedSlider("brightness","lbrightness", 0, 255 );
 	sBrightness->setIncrement( 5 ); // Percent !
-	sBrightness->move( ePoint( 150, 60 ) );
-	sBrightness->resize(eSize( 290, fd+4 ) );
-	sBrightness->setHelpText(_("change the brightness correction"));
 	sBrightness->setValue( brightness);
 	CONNECT( sBrightness->changed, eZapOsdSetup::brightnessChanged );
 
 	gamma = gFBDC::getInstance()->getGamma();
-	l = new eLabel(this);
-	l->setText(_("Contrast:"));
-	l->move(ePoint(20, 100));
-	l->resize(eSize(120, fd+4));
-	sGamma = new eSlider( this, l, 0, 255 );
+	sGamma = CreateSkinnedSlider("contrast","lcontast", 0, 255 );
 	sGamma->setIncrement( 5 ); // Percent !
-	sGamma->move( ePoint( 150, 100 ) );
-	sGamma->resize(eSize( 290, fd+4 ) );
-	sGamma->setHelpText(_("change the contrast"));
 	sGamma->setValue( gamma);
 	CONNECT( sGamma->changed, eZapOsdSetup::gammaChanged );
 
-	simpleMainMenu=new eCheckbox(this);
-	simpleMainMenu->setText(_("Show Mainmenu like Listbox"));
-	simpleMainMenu->setHelpText(_("show the Mainmenu in normal listbox style"));
-	simpleMainMenu->move(ePoint(20,140));
-	simpleMainMenu->resize(eSize(420,35));
-	int bla=0;
-	eConfig::getInstance()->getKey("/ezap/osd/simpleMainMenu", bla);
-	simpleMainMenu->setCheck(bla);
+	simpleMainMenu=CreateSkinnedCheckbox("simpleMainMenu",0,"/ezap/osd/simpleMainMenu");
 
-	skin=new eButton(this);
-	skin->setText(_("Change skin"));
-	skin->setShortcut("blue");
-	skin->setShortcutPixmap("blue");
-	skin->move(ePoint(20, 190));
-	skin->resize(eSize(205, 40));
-	skin->loadDeco();
-	skin->setHelpText(_("press ok to open skin selector"));
-	CONNECT( skin->selected, eZapOsdSetup::skinPressed );
+	CONNECT( CreateSkinnedButton("skin")->selected, eZapOsdSetup::skinPressed );
 
-	pluginoffs=new eButton(this);
-	pluginoffs->setText(_("TuxText position"));
-	pluginoffs->setHelpText(_("here you can center the Tuxtxt (builtin videotext)"));
-	pluginoffs->setShortcut("yellow");
-	pluginoffs->setShortcutPixmap("yellow");
-	pluginoffs->move(ePoint(235, 190));
-	pluginoffs->resize(eSize(205, 40));
-	pluginoffs->loadDeco();
-	CONNECT( pluginoffs->selected, eZapOsdSetup::pluginPositionPressed );
+	CONNECT( CreateSkinnedButton("pluginoffs")->selected, eZapOsdSetup::pluginPositionPressed );
 
-	ok=new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 245));
-	ok->resize(eSize(205, 40));
-	ok->setHelpText(_("save changes and return"));
-	ok->loadDeco();
+	CONNECT(CreateSkinnedButton("ok")->selected, eZapOsdSetup::okPressed);
 
-	CONNECT(ok->selected, eZapOsdSetup::okPressed);
+	CONNECT( CreateSkinnedButton("expert")->selected, eZapOsdSetup::expertPressed );
 
-	expert=new eButton(this);
-	expert->setText(_("additional settings"));
-	expert->setShortcut("red");
-	expert->setShortcutPixmap("red");
-	expert->move(ePoint(235, 245));
-	expert->resize(eSize(205, 40));
-	expert->loadDeco();
-	expert->setHelpText(_("open additional settings"));
-	CONNECT( expert->selected, eZapOsdSetup::expertPressed );
+	BuildSkin("eZapOsdSetup");
 
-	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-50 ) );
-	statusbar->resize( eSize( clientrect.width(), 50) );
-	statusbar->loadDeco();
 	setHelpID(83);
 }
 

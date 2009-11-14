@@ -3,6 +3,7 @@
 
 #include <lib/gui/listbox.h>
 #include <lib/gui/statusbar.h>
+#include <lib/gdi/gfbdc.h>
 
 class eButton;
 
@@ -24,10 +25,9 @@ protected:
 
 class eSkinSetup: public eWindow
 {
-	eButton *baccept;
-	eLabel  *lb3;
+	gPixmap* img;
+	eLabel  *preview;
 	eListBox<eListBoxEntrySkin> *lskins;
-	eStatusBar* statusbar;
 	void loadSkins();
 	void accept();
 	void skinSelected(eListBoxEntrySkin *l);

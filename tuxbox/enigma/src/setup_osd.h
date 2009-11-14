@@ -11,9 +11,7 @@ class eSlider;
 class eZapOsdSetup: public eWindow
 {
 	eSlider *sAlpha, *sBrightness, *sGamma;
-	eStatusBar *statusbar;
 
-	eButton *pluginoffs, *skin, *ok, *expert;
 	eCheckbox *simpleMainMenu;
 	int alpha, brightness, gamma;
 private:

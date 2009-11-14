@@ -15,7 +15,6 @@ class eNumber;
 class eZapRCSetup: public eWindow
 {
 	eSlider *srrate, *srdelay;
-	eLabel *lrrate, *lrdelay, *lrcStyle, *lNextCharTimeout;
 	eNumber *NextCharTimeout;
 	eStatusBar* statusbar;
 	eComboBox* rcStyle;

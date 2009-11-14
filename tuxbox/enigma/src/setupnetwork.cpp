@@ -44,7 +44,6 @@ class eTOnlineDialog: public eWindow
 	eTextInputField *Kennung, *tOnlineNummer, *Mitbenutzer;
 	eButton *ok;
 	eStatusBar *sbar;
-	void init_eTOnlineDialog(eString Login);
 public:
 	eTOnlineDialog( eString Login )
 	{
@@ -387,10 +386,6 @@ eZapNetworkSetup::eZapNetworkSetup()
 
 void eZapNetworkSetup::init_eZapNetworkSetup()
 {
-	setText(_("Communication setup"));
-	cmove(ePoint(130, 110));
-	cresize(eSize(450, 400));
-
 	__u32 sip=ntohl(0x0a000061),
 				snetmask=ntohl(0xFF000000),
 				sdns=ntohl(0x7f000001),
@@ -398,7 +393,6 @@ void eZapNetworkSetup::init_eZapNetworkSetup()
 
 	int de[4];
 	int sdosetup=0;
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 	int connectionType=0;
 	int webifport=80;
 	int useDHCP=0;
@@ -448,53 +442,21 @@ void eZapNetworkSetup::init_eZapNetworkSetup()
 	eConfig::getInstance()->getKey("/elitedvb/network/connectionType", connectionType);
 	eConfig::getInstance()->getKey("/elitedvb/network/webifport", webifport);
 
-	eLabel *l=new eLabel(this);
-	l->setText("IP:");
-	l->move(ePoint(20, 10));
-	l->resize(eSize(150, fd+4));
-
 	eNumber::unpack(sip, de);
-	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l, !useDHCP);
-	ip->move(ePoint(160, 10));
-	ip->resize(eSize(170, fd+10));
+	ip=CreateSkinnedNumberWithLabel("ip",0, 4, 0, 255, 3, de, 0, "lip", !useDHCP);
 	ip->setFlags(eNumber::flagDrawPoints);
-	ip->setHelpText(_("enter IP Address of the box (0..9, left, right)"));
-	ip->loadDeco();
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
-	dhcp = new eCheckbox(this, useDHCP, 1);
-	dhcp->setText("DHCP");
-	dhcp->move(ePoint(340, 10));
-	dhcp->resize(eSize(100,fd+4));
-	dhcp->setHelpText(_("get Network data from a DHCP Server in the local Network"));
+	dhcp = CreateSkinnedCheckbox("dhcp", useDHCP);
 	CONNECT(dhcp->checked, eZapNetworkSetup::dhcpStateChanged);
 
-	l=new eLabel(this);
-	l->setText("Netmask:");
-	l->move(ePoint(20, 50));
-	l->resize(eSize(150, fd+4));
-
 	eNumber::unpack(snetmask, de);
-	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l, !useDHCP);
-	netmask->move(ePoint(160, 50));
-	netmask->resize(eSize(170, fd+10));
+	netmask=CreateSkinnedNumberWithLabel("netmask",0, 4, 0, 255, 3, de, 0, "lnetmask", !useDHCP);
 	netmask->setFlags(eNumber::flagDrawPoints);
-	netmask->setHelpText(_("enter netmask of your network (0..9, left, right)"));
-	netmask->loadDeco();
 	CONNECT(netmask->selected, eZapNetworkSetup::fieldSelected);
 
-	l=new eLabel(this);
-	l->setText("Type:");
-	l->move(ePoint(20, 90));
-	l->resize(eSize(140, fd+4));
-
 	eListBoxEntryText *sel=0;
-	combo_type=new eComboBox(this, 3, l);
-	combo_type->move(ePoint(160,90));
-	combo_type->resize(eSize(170, fd+10));
-	combo_type->loadDeco();
-	combo_type->setHelpText(_("press ok to change connection type"));
-	((eZapNetworkSetup*)combo_type)->setProperty("showEntryHelp", "");
+	combo_type=CreateSkinnedComboBoxWithLabel("combo_type", 3, "lcombo_type");
 #ifdef ENABLE_PPPOE
 	if ( !connectionType )
 #endif
@@ -521,18 +483,9 @@ void eZapNetworkSetup::init_eZapNetworkSetup()
 	CONNECT( tdsl->selected, eZapNetworkSetup::tdslPressed );
 #endif
 
-	lNameserver=new eLabel(this, 0);
-	lNameserver->setText("Nameserver:");
-	lNameserver->move(ePoint(20, 130));
-	lNameserver->resize(eSize(140, fd+4));
-
 	eNumber::unpack(sdns, de);
-	dns=new eNumber(this, 4, 0, 255, 3, de, 0, lNameserver, !useDHCP);
-	dns->move(ePoint(160, 130));
-	dns->resize(eSize(170, fd+10));
+	dns=CreateSkinnedNumberWithLabel("dns",0, 4, 0, 255, 3, de, 0, "lNameserver", !useDHCP);
 	dns->setFlags(eNumber::flagDrawPoints);
-	dns->setHelpText(_("enter your domain name server (0..9, left, right)"));
-	dns->loadDeco();
 	CONNECT(dns->selected, eZapNetworkSetup::fieldSelected);
 
 #ifdef ENABLE_PPPOE
@@ -556,18 +509,9 @@ void eZapNetworkSetup::init_eZapNetworkSetup()
 	CONNECT(login->selected, eZapNetworkSetup::loginSelected );
 #endif
 
-	lGateway=new eLabel(this);
-	lGateway->setText("Gateway:");
-	lGateway->move(ePoint(20, 170));
-	lGateway->resize(eSize(140, fd+4));
-
 	eNumber::unpack(sgateway, de);
-	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l, !useDHCP);
-	gateway->move(ePoint(160, 170));
-	gateway->resize(eSize(170, fd+10));
+	gateway=CreateSkinnedNumberWithLabel("gateway",0, 4, 0, 255, 3, de, 0, "lgateway", !useDHCP);
 	gateway->setFlags(eNumber::flagDrawPoints);
-	gateway->setHelpText(_("enter your gateways IP Address (0..9, left, right)"));
-	gateway->loadDeco();
 	CONNECT(gateway->selected, eZapNetworkSetup::fieldSelected);
 
 #ifdef ENABLE_PPPOE
@@ -586,24 +530,10 @@ void eZapNetworkSetup::init_eZapNetworkSetup()
 	CONNECT(password->selected, eZapNetworkSetup::passwordSelected);
 #endif
 
-	dosetup=new eCheckbox(this, sdosetup, 1);
-	dosetup->setText(_("Enable Network"));
-	dosetup->move(ePoint(20, 215));
-	dosetup->resize(eSize(fd+4+240, fd+4));
-	dosetup->setHelpText(_("enable/disable network (ok)"));
+	dosetup=CreateSkinnedCheckbox("dosetup", sdosetup);
 
-	l = new eLabel(this);
-	l->setText("Port:");
-	l->move(ePoint(280+fd+4, 215));
-	l->resize(eSize(80, fd+4));
-
-	port=new eNumber(this, 1, 0, 65536, 5, 0, 0, l);
-	port->move(ePoint(370, 213));
-	port->resize(eSize(70, fd+10));
+	port=CreateSkinnedNumberWithLabel("port",webifport, 1, 0, 65536, 5, 0, 0, "lport");
 	port->setFlags(eNumber::flagDrawPoints);
-	port->setHelpText(_("enter port of the Web Interface (0..9, left, right)"));
-	port->setNumber(webifport);
-	port->loadDeco();
 	CONNECT(port->selected, eZapNetworkSetup::fieldSelected);
 
 #ifdef ENABLE_PPPOE
@@ -644,35 +574,16 @@ void eZapNetworkSetup::init_eZapNetworkSetup()
 	rejectFTP->hide();
 #endif
 
-	ok=new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 295));
-	ok->resize(eSize(200, 40));
-	ok->setHelpText(_("save changes and return"));
-	ok->loadDeco();
-	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
+	CONNECT(CreateSkinnedButton("ok")->selected, eZapNetworkSetup::okPressed);
 
 #ifndef DISABLE_NFS
-	nfs = new eButton(this);
-	nfs->move(ePoint(230,295));
-	nfs->resize(eSize(clientrect.width()-250, 40));
-	nfs->setText(_("mounts"));
-	nfs->setShortcut("blue");
-	nfs->setShortcutPixmap("blue");
-	nfs->loadDeco();
-	nfs->show();
-	eString hlptext = _("here you can setup nfs/cifs mounts");
-	hlptext.strReplace("nfs/cifs", "nfs/cifs/smbfs");
-	nfs->setHelpText(hlptext);
-	CONNECT( nfs->selected, eZapNetworkSetup::nfsPressed );
+	nfs = CreateSkinnedButton("nfs");
+	CONNECT(nfs->selected, eZapNetworkSetup::nfsPressed );
+#else
+	CreateSkinnedButton("nfs")->hide();
 #endif
 
-	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-50 ) );
-	statusbar->resize( eSize( clientrect.width(), 50) );
-	statusbar->loadDeco();
+	BuildSkin("eZapNetworkSetup");
 	setHelpID(82);
 
 	combo_type->setCurrent(sel,true);
@@ -970,34 +881,18 @@ void eNFSSetup::init_eNFSSetup()
 	}
 
 	CONNECT(timeout.timeout, eNFSSetup::mountTimeout);
-	cur_entry=0;
-	headline.sprintf("Mount Manager(%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
-
-	setText(headline);
-	cmove(ePoint(140,90));
-	cresize(eSize(450,400));
-
 	__u32 sip=ntohl(0x0a000061);
     
 	int de[4];
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
-	lip = new eLabel(this);
-	lip->resize(eSize(120,fd+4));
-	lip->setText("IP:");
+	lip = CreateSkinnedLabel("lip");
 
 	eNumber::unpack(sip, de);
-	ip=new eNumber(this, 4, 0, 255, 3, de, 0, lip);
-	ip->resize(eSize(200, fd+10));
+	ip=CreateSkinnedNumber("ip",0, 4, 0, 255, 3, de, 0, lip);
 	ip->setFlags(eNumber::flagDrawPoints);
-	ip->setHelpText(_("enter IP Address (0..9, left, right)"));
-	ip->loadDeco();
 	CONNECT(ip->selected, eNFSSetup::fieldSelected);
 
-	combo_fstype=new eComboBox(this, 2);
-	combo_fstype->resize(eSize(100, fd+10));
-	combo_fstype->loadDeco();
-	combo_fstype->setHelpText(_("press ok to change mount type"));
+	combo_fstype=CreateSkinnedComboBox("combo_fstype", 2);
 	new eListBoxEntryText( *combo_fstype, "NFS", (void*)0, 0, "Network File System");
 	if (have_cifs)
 		new eListBoxEntryText( *combo_fstype, "CIFS", (void*)1, 0, "Common Internet File System");
@@ -1006,33 +901,19 @@ void eNFSSetup::init_eNFSSetup()
 	combo_fstype->setCurrent(0,true);
 	CONNECT(combo_fstype->selchanged, eNFSSetup::fstypeChanged);
 
-	lsdir = new eLabel(this);
-	lsdir->resize(eSize(120, fd+4));
-	lsdir->setText("Dir:");
+	lsdir = CreateSkinnedLabel("lsdir");
 
-	sdir = new eTextInputField(this,lsdir);
-	sdir->resize(eSize(320, fd+10));
+	sdir = CreateSkinnedTextInputField("sdir",0);
 	sdir->setUseableChars("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/");
-	sdir->loadDeco();
 
-	lldir = new eLabel(this);
-	lldir->resize(eSize(120, fd+4));
-	lldir->setText("LocalDir:");
+	lldir = CreateSkinnedLabel("lldir");
 
-	ldir = new eTextInputField(this,lldir);
-	ldir->resize(eSize(320, fd+10));
+	ldir = CreateSkinnedTextInputField("ldir",0);
 	ldir->setUseableChars("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/");
-	ldir->loadDeco();
-	ldir->setHelpText(_("enter name of the local mount point with trailing slash"));
 
-	loptions = new eLabel(this);
-	loptions->resize(eSize(120, fd+4));
-	loptions->setText("Options:");
+	loptions = CreateSkinnedLabel("lcombo_options");
 
-	combo_options=new eComboBox(this, 3, loptions);
-	combo_options->resize(eSize(320, fd+10));
-	combo_options->loadDeco();
-	combo_options->setHelpText(_("press ok to change mount options"));
+	combo_options=CreateSkinnedComboBox("combo_options", 3, loptions);
 	new eListBoxEntryText( *combo_options, "", (void*)0, 0);
 	new eListBoxEntryText( *combo_options, "ro", (void*)1, 0);
 	new eListBoxEntryText( *combo_options, "rw", (void*)2, 0);
@@ -1050,95 +931,43 @@ void eNFSSetup::init_eNFSSetup()
 	new eListBoxEntryText( *combo_options, "rw,soft,udp,nolock", (void*)14, 0);
 	combo_options->setCurrent(0,true);
 
-	lextras = new eLabel(this);
-	lextras->resize(eSize(120, fd+4));
-	lextras->setText("Extra:");
+	lextras = CreateSkinnedLabel("lextraoptions");
 
-	extraoptions=new eTextInputField(this, lextras);
-	extraoptions->resize(eSize(320, fd+10));
+	extraoptions=CreateSkinnedTextInputField("extraoptions",0);
 	extraoptions->setMaxChars(100);
-	extraoptions->loadDeco();
-	extraoptions->setHelpText(_("press ok to edit extra options"));
 
-	luser = new eLabel(this);
-	luser->resize(eSize(120, fd+4));
-	luser->setText("User:");
+	luser = CreateSkinnedLabel("luser");
 
-	user=new eTextInputField(this, luser);
-	user->resize(eSize(320, fd+10));
+	user=CreateSkinnedTextInputField("user",0);
 	user->setMaxChars(100);
-	user->loadDeco();
-	user->setHelpText(_("press ok to edit username"));
 
-	lpass = new eLabel(this);
-	lpass->resize(eSize(120, fd+4));
-	lpass->setText("Pass:");
+	lpass = CreateSkinnedLabel("lpass");
 
-	pass=new eTextInputField(this, lpass);
-	pass->resize(eSize(320, fd+10));
+	pass=CreateSkinnedTextInputField("pass",0);
 	pass->setMaxChars(100);
-	pass->loadDeco();
-	pass->setHelpText(_("press ok to edit password"));
 
-	doamount=new eCheckbox(this, 0, 1);
-	doamount->resize(eSize(140, fd+4));
-	doamount->setText("Automount");
-	doamount->setHelpText(_("enable/disable automount (ok)"));
-
-	load_config();
+	doamount=CreateSkinnedCheckbox("doamount");
 
 	//buttons
-	prev = new eButton(this);
-	prev->move(ePoint(10, clientrect.height() - (80+fd) ));
-	prev->resize(eSize(30, 40));
-	prev->setText("<");
-	prev->setHelpText(_("go to previous share"));
-	prev->loadDeco();
+	prev = CreateSkinnedButton("prev");
 	CONNECT(prev->selected, eNFSSetup::prevPressed);
 
-	umount = new eButton(this);
-	umount->move(ePoint(45, clientrect.height() - (80+fd) ));
-	umount->resize(eSize(109, 40));
-	umount->setText("umount");
-	umount->setHelpText(_("press ok to unmount this share"));
-	umount->setShortcut("red");
-	umount->setShortcutPixmap("red");
-	umount->loadDeco();
-	CONNECT(umount->selected, eNFSSetup::umountPressed);
+	CONNECT(CreateSkinnedButton("umount")->selected, eNFSSetup::umountPressed);
 
-	mount = new eButton(this);
-	mount->move(ePoint(159, clientrect.height() - (80+fd) ));
-	mount->resize(eSize(107, 40));
-	mount->setText("mount");
-	mount->setHelpText(_("press ok to mount this share"));
-	mount->loadDeco();
-	mount->setShortcut("green");
-	mount->setShortcutPixmap("green");
-	CONNECT(mount->selected, eNFSSetup::mountPressed);
+	CONNECT(CreateSkinnedButton("mount")->selected, eNFSSetup::mountPressed);
 
-	ok = new eButton(this);
-	ok->move(ePoint(271, clientrect.height() - (80+fd) ));
-	ok->resize(eSize(137, 40));
-	ok->setText(_("save"));
-	ok->setHelpText(_("press ok to save this share"));
-	ok->loadDeco();
-	ok->setShortcut("yellow");
-	ok->setShortcutPixmap("yellow");
-	CONNECT(ok->selected, eNFSSetup::okPressed);
+	CONNECT(CreateSkinnedButton("ok")->selected, eNFSSetup::okPressed);
 
-	next = new eButton(this);
-	next->move(ePoint(414, clientrect.height() - (80+fd) ));
-	next->resize(eSize(30, 40));
-	next->setText(">");
-	next->loadDeco();
-	next->setHelpText(_("go to next share"));
+	next = CreateSkinnedButton("next");
 	CONNECT(next->selected, eNFSSetup::nextPressed);
 
-	//statusbar
-	sbar = new eStatusBar(this);
-	sbar->move( ePoint(0, clientrect.height()-50) );
-	sbar->resize( eSize( clientrect.width(), 50) );
-	sbar->loadDeco();
+	BuildSkin("eNFSSetup");
+
+	cur_entry=0;
+	headline.sprintf("Mount Manager(%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
+	setText(headline);
+
+	load_config();
 }
 
 void eNFSSetup::changeWidgets(int fstype)

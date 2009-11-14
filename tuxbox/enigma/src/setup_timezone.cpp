@@ -16,46 +16,21 @@
 #define ZONEINFODIR DATADIR "/zoneinfo"
 #endif
 
+
 eZapTimeZoneSetup::eZapTimeZoneSetup(bool showHint)
-	:eWindow(0), showHint(showHint)
+	:eWindow(), showHint(showHint)
 {
 	init_eZapTimeZoneSetup();
 }
 void eZapTimeZoneSetup::init_eZapTimeZoneSetup()
 {
-	setText(_("Time Zone Setup"));
-	cmove(ePoint(110, 146));
-	cresize(eSize(530, 270));
 
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
-
-	ltimeZone=new eLabel(this);
-	ltimeZone->move(ePoint(20, 20));
-	ltimeZone->resize(eSize(220, fd+4));
-	ltimeZone->setText(_("Time Zone:"));
-		
-	timeZone=new eComboBox(this, 8, ltimeZone);
-	timeZone->move(ePoint(20, 60));
-	timeZone->resize(eSize(clientrect.width()-40, 35));
-	timeZone->setHelpText(_("select your time zone (ok)"));
-	timeZone->loadDeco();
+	timeZone=CreateSkinnedComboBox("timezone", 8);
 	
+	CONNECT(CreateSkinnedButton("save")->selected, eZapTimeZoneSetup::okPressed);
+	BuildSkin("TimezoneSetup");
+
 	errLoadTimeZone = loadTimeZones();
-
-	ok=new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, clientrect.height()-100));
-	ok->resize(eSize(220, 40));
-	ok->setHelpText(_("save changes and return"));
-	ok->loadDeco();
-	CONNECT(ok->selected, eZapTimeZoneSetup::okPressed);
-
-	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-50 ) );
-	statusbar->resize( eSize( clientrect.width(), 50) );
-	statusbar->loadDeco();
 
 	setHelpID(90);
 }

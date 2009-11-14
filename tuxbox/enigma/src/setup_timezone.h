@@ -14,10 +14,7 @@ class eZapTimeZoneSetup: public eWindow
 {
 	int errLoadTimeZone;
 	
-	eLabel *ltimeZone;
-	eStatusBar* statusbar;
 	eComboBox* timeZone;
-	eButton *ok;
 	bool showHint;
 	void init_eZapTimeZoneSetup();
 private:

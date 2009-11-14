@@ -5,7 +5,6 @@
 #define __lib_apps_enigma_setup_timeshift_h
 
 #include <lib/gui/ewindow.h>
-#include <lib/gui/statusbar.h>
 
 class eButton;
 class eCheckbox;
@@ -21,8 +20,6 @@ class eZapTimeshiftSetup: public eWindow
 	eCheckbox* pause;
 	eTextInputField* path;
 	eButton *seldir;
-	eButton *store;
-	eStatusBar* sbar;
 	void init_eZapTimeshiftSetup();
 private:
 	void storePressed();

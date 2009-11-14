@@ -18,7 +18,7 @@ class eConsoleAppContainer;
 class eNFSSetup: public eWindow
 {
 	eTimer timeout;
-	eButton *ok, *mount, *umount, *prev, *next;
+	eButton *prev, *next;
 	eCheckbox *doamount;
 	eComboBox *combo_fstype, *combo_options;
 	eLabel *lpass , *luser, *loptions, *lextras, *lip, *lldir, *lsdir;
@@ -55,7 +55,6 @@ public:
 class eZapNetworkSetup: public eWindow
 {
 	eNumber *ip, *netmask, *dns, *gateway, *port;
-	eButton *ok, *abort;
 	eCheckbox *dosetup, *dhcp;
 	eLabel *lNameserver, *lGateway;
 	eComboBox *combo_type;
