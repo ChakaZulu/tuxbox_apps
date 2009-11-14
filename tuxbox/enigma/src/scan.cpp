@@ -32,9 +32,7 @@ void tsSelectType::init_tsSelectType()
 {
 	list=new eListBox<eListBoxEntryMenu>(this);
 	list->setName("menu");
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "tsSelectType"))
-		eFatal("skin load of \"tsSelectType\" failed");
+	BuildSkin("tsSelectType");
 
 	list->setFlags(eListBox<eListBoxEntryText>::flagShowEntryHelp);
 
@@ -108,33 +106,22 @@ void tsManual::init_tsManual( eWidget *LCDTitle, eWidget *LCDElement)
 	festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());
 	festatus_widget->setName("festatus");
 
-	c_useonit=new eCheckbox(this);
-	c_useonit->setName("useonit");
+	c_useonit=CreateSkinnedCheckbox("useonit");
 	
-	c_usebat=new eCheckbox(this);
-	c_usebat->setName("usebat");
+	c_usebat=CreateSkinnedCheckbox("usebat");
 	
-	c_onlyFree=new eCheckbox(this);
-	c_onlyFree->setName("onlyFree");
+	c_onlyFree=CreateSkinnedCheckbox("onlyFree");
 
-	c_searchnit=new eCheckbox(this);
-	c_searchnit->setName("searchnit");
+	c_searchnit=CreateSkinnedCheckbox("searchnit");
 
-	b_start=new eButton(this);
-	b_start->setName("start");
+	CONNECT(CreateSkinnedButton("start")->selected, tsManual::start);
+	CONNECT(CreateSkinnedButton("manual_pids")->selected, tsManual::manual_pids);
 
-	b_manual_pids=new eButton(this);
-	b_manual_pids->setName("manual_pids");
-
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "tsManual"))
-		eFatal("skin load of \"tsManual\" failed");
+	BuildSkin("tsManual");
 
 	transponder_widget->load();
 	transponder_widget->setTransponder(&transponder);
 
-	CONNECT(b_start->selected, tsManual::start);
-	CONNECT(b_manual_pids->selected, tsManual::manual_pids);
 	CONNECT(transponder_widget->updated, tsManual::retune);
 	setHelpID(62);
 }
@@ -187,19 +174,14 @@ tsTryLock::tsTryLock(eWidget *parent, tpPacket *packet, eString ttext)
 }
 void tsTryLock::init_tsTryLock(eWidget *parent, tpPacket *packet, eString ttext)
 {
-	l_status=new eLabel(this, RS_WRAP);
-	l_status->setName("lStatus");
+	l_status=CreateSkinnedLabel("lStatus",0, RS_WRAP);
 
 	eFEStatusWidget *festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());
 	festatus_widget->setName("festatus");
 
-	b_abort=new eButton(this);
-	b_abort->setName("bAbort");
+	b_abort=CreateSkinnedButton("bAbort");
 
-	eSkin *skin=eSkin::getActive();
-
-	if ( skin->build(this, "tsTryLock") )
-		eFatal("skin load of \"tsTryLock\" failed");
+	BuildSkin("tsTryLock");
 
 	eLabel *l = (eLabel*)search("lNet");
 	if (l)
@@ -310,36 +292,26 @@ tsAutomatic::tsAutomatic(eWidget *parent)
 }
 void tsAutomatic::init_tsAutomatic()
 {
-	eLabel* l = new eLabel(this);
-	l->setName("lNet");
-	l_network=new eComboBox(this, 3, l);
-	l_network->setName("network");
+	l_network=CreateSkinnedComboBoxWithLabel("network", 3, "lNet");
 
 	eFEStatusWidget *festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());
 	festatus_widget->setName("festatus");
 	
-	l_status=new eLabel(this, RS_WRAP);
-	l_status->setName("status");
+	l_status=CreateSkinnedLabel("status",0, RS_WRAP);
 
-	c_onlyFree = new eCheckbox(this,0);
-	c_onlyFree->setName("onlyFree");
+	c_onlyFree = CreateSkinnedCheckbox("onlyFree",0);
 	c_onlyFree->hide();
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 	{
-		int snocircular=0;
-		eConfig::getInstance()->getKey("/elitedvb/DVB/config/nocircular",snocircular);
-		c_nocircular=new eCheckbox(this,snocircular);
-		c_nocircular->setName("nocircular");
+		CreateSkinnedCheckbox("nocircular",0,"/elitedvb/DVB/config/nocircular");
 		c_nocircular->hide();
 	}
 	else
 		c_nocircular=0;
 
-	b_start=new eButton(this);
-	b_start->setName("start");
+	b_start=CreateSkinnedButton("start");
 	b_start->hide();
 
-	eSkin *skin=eSkin::getActive();
 
 	eString tmp = "tsAutomatic";
 
@@ -348,8 +320,7 @@ void tsAutomatic::init_tsAutomatic()
 	else
 		tmp+="_cable";
 
-	if (skin->build(this, tmp.c_str()))
-		eFatal("skin load of \"%s\" failed", tmp.c_str());
+	BuildSkin(tmp.c_str());
 
 	eDebug("build %s", tmp.c_str() );
 //	l_network->setCurrent(new eListBoxEntryText(*l_network, _("automatic"), (void*)0, eTextPara::dirCenter) );
@@ -654,33 +625,23 @@ tsScan::tsScan(eWidget *parent, eString sattext)
 }
 void tsScan::init_tsScan(eString sattext)
 {
-	services_scanned = new eLabel(this);
-	services_scanned->setName("services_scanned");
+	services_scanned = CreateSkinnedLabel("services_scanned");
 
-	transponder_scanned = new eLabel (this);
-	transponder_scanned->setName("transponder_scanned");
+	transponder_scanned = CreateSkinnedLabel("transponder_scanned");
 
-	timeleft = new eLabel(this);
-	timeleft->setName("time_left");
+	timeleft = CreateSkinnedLabel("time_left");
 
-	service_name = new eLabel(this);
-	service_name->setName("service_name");
+	service_name = CreateSkinnedLabel("service_name");
 
-	service_provider = new eLabel(this);
-	service_provider->setName("service_provider");
+	service_provider = CreateSkinnedLabel("service_provider");
 
-	transponder_data = new eLabel(this);
-	transponder_data->setName("transponder_data");
+	transponder_data = CreateSkinnedLabel("transponder_data");
 
-	progress = new eProgress(this);
-	progress->setName("scan_progress");
+	progress = CreateSkinnedProgress("scan_progress");
 
-	status = new eLabel(this);
-	status->setName("state");
+	status = CreateSkinnedLabel("state");
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "tsScan"))
-		eFatal("skin load of \"tsScan\" failed");
+	BuildSkin("tsScan");
 
 	if ( sattext )
 	{
@@ -897,16 +858,13 @@ tsMultiSatScan::tsMultiSatScan(eWidget *parent)
 }
 void tsMultiSatScan::init_tsMultiSatScan()
 {
-	start = new eButton(this);
-	start->setName("start");
+	CONNECT( CreateSkinnedButton("start")->selected, eWidget::accept );
 
 	satellites = new eListBox<eListBoxEntrySat>(this);
 	satellites->setName("satellites");
 	satellites->setFlags(eListBoxBase::flagLostFocusOnFirst|eListBoxBase::flagLostFocusOnLast);
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "tsMultiSat"))
-		eFatal("skin load of \"tsMultiSat\" failed");
+	BuildSkin("tsMultiSat");
 
 	int err;
 
@@ -923,7 +881,6 @@ void tsMultiSatScan::init_tsMultiSatScan()
 			new eListBoxEntrySat(satellites, &*i );
 
 	CONNECT( satellites->selected, tsMultiSatScan::entrySelected );
-	CONNECT( start->selected, eWidget::accept );
 }
 
 struct copyNetwork
@@ -1545,226 +1502,50 @@ void ManualPIDWindow::init_ManualPIDWindow(eTransponder *tp, const eServiceRefer
 {
 	if ( tp )
 		transponder = *tp;
-	setText(_("Manual PIDs"));
-	cmove(ePoint(140, 98));
-	cresize(eSize(470, 425));
 
-	eSize s(clientrect.size());
-	s.setHeight( s.height() - 50 );
-
-	int yOffs=10;
-	int fs=24;
-	gFont fontfixed=eSkin::getActive()->queryFont("global.fixed");
-
-	eLabel *l = new eLabel(this);
-	l->move(ePoint(10, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setFlags(eLabel::flagVCenter);
-	l->setText("Name:");
-
-	name = new eTextInputField(this, l);
-	name->setFont(fontfixed);
-	name->move(ePoint(140, yOffs));
-	name->resize(eSize(s.width()-160, fs+10));
-	name->loadDeco();
-	name->setHelpText(_("to enter service name press OK"));
+	name = CreateSkinnedTextInputField("name",0,0, "lname");
 	name->setEditHelpText(_("enter service name"));
 
-	yOffs += 40;
-
-	l = new eLabel(this);
-	l->move(ePoint(10, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setText("Provider:");
-	l->setFlags(eLabel::flagVCenter);
-
-	provider = new eTextInputField(this, l);
-	provider->setFont(fontfixed);
-	provider->move(ePoint(140, yOffs));
-	provider->resize(eSize(s.width()-160, fs+10));
-	provider->loadDeco();
-	provider->setHelpText(_("to enter provider name press OK"));
+	provider =CreateSkinnedTextInputField("provider",0,0, "lprovider");
 	provider->setEditHelpText(_("enter provider name"));
 
-	yOffs += 40;
-
-	l = new eLabel(this);
-	l->move(ePoint(10, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setText("Video PID:");
-	l->setFlags(eLabel::flagVCenter);
-
-	vpid = new eTextInputField(this, l);
-	vpid->setFont(fontfixed);
-	vpid->move(ePoint(140, yOffs));
-	vpid->resize(eSize(75, fs+10));
-	vpid->loadDeco();
-	vpid->setHelpText(_("to enter video pid press OK"));
+	vpid =CreateSkinnedTextInputField("vpid",0,0, "lvpid");
 	vpid->setEditHelpText(_("enter video pid"));
 
-	l = new eLabel(this);
-	l->move(ePoint(245, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setText("PCR PID:");
-	l->setFlags(eLabel::flagVCenter);
-
-	pcrpid = new eTextInputField(this, l);
-	pcrpid->move(ePoint(375, yOffs));
-	pcrpid->resize(eSize(75, fs+10));
-	pcrpid->setFont(fontfixed);
-	pcrpid->loadDeco();
-	pcrpid->setHelpText(_("to enter pcr pid press OK"));
+	pcrpid =CreateSkinnedTextInputField("pcrpid",0,0, "lpcrpid");
 	pcrpid->setEditHelpText(_("enter pcr pid (in most case the same pid as the video pid)"));
 
-	yOffs += 40;
-
-	l = new eLabel(this);
-	l->move(ePoint(10, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setText("Audio PID:");
-	l->setFlags(eLabel::flagVCenter);
-
-	apid = new eTextInputField(this, l);
-	apid->setFont(fontfixed);
-	apid->move(ePoint(140, yOffs));
-	apid->resize(eSize(75, fs+10));
-	apid->loadDeco();
-	apid->setHelpText(_("to enter audio pid press OK"));
+	apid =CreateSkinnedTextInputField("apid",0,0, "lapid");
 	apid->setEditHelpText(_("enter audio pid"));
 
-	isAC3Pid = new eCheckbox(this, 0, 1);
-	isAC3Pid->move(ePoint(245, yOffs));
-	isAC3Pid->resize(eSize(140, fs+8));
-	isAC3Pid->loadDeco();
-	isAC3Pid->setText(_("is AC3 Pid"));
-	isAC3Pid->setHelpText(_("set this check when the entered audio pid is a ac3 audio pid"));
+	isAC3Pid = CreateSkinnedCheckbox("isAC3Pid");
 
-	yOffs += 40;
-
-	l = new eLabel(this);
-	l->move(ePoint(10, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setText("Text PID:");
-	l->setFlags(eLabel::flagVCenter);
-
-	tpid = new eTextInputField(this, l);
-	tpid->setFont(fontfixed);
-	tpid->move(ePoint(140, yOffs));
-	tpid->resize(eSize(75, fs+10));
-	tpid->loadDeco();
-	tpid->setHelpText(_("to enter (video) text pid press OK"));
+	tpid =CreateSkinnedTextInputField("tpid",0,0, "ltpid");
 	tpid->setEditHelpText(_("enter (video) text pid"));
 
-	l = new eLabel(this);
-	l->move(ePoint(245, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setText("Service ID:");
-	l->setFlags(eLabel::flagVCenter);
-
-	sid = new eTextInputField(this, l);
-	sid->setFont(fontfixed);
-	sid->move(ePoint(375, yOffs));
-	sid->resize(eSize(75, fs+10));
-	sid->loadDeco();
-	sid->setHelpText(_("to enter service id press OK"));
+	sid =CreateSkinnedTextInputField("sid",0,0, "lsid");
 	sid->setEditHelpText(_("enter service id"));
 
-	yOffs += 40;
-
-	l = new eLabel(this);
-	l->move(ePoint(10, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setText("TSID:");
-	l->setFlags(eLabel::flagVCenter);
-
-	tsid = new eTextInputField(this, l);
-	tsid->setFont(fontfixed);
-	tsid->move(ePoint(140, yOffs));
-	tsid->resize(eSize(75, fs+10));
-	tsid->loadDeco();
-	tsid->setHelpText(_("to enter tsid (transport stream id) press OK"));
+	tsid =CreateSkinnedTextInputField("tsid",0,0, "ltsid");
 	tsid->setEditHelpText(_("enter tsid (transport stream id)"));
 
-	l = new eLabel(this);
-	l->move(ePoint(245, yOffs));
-	l->resize(eSize(120, fs+10));
-	l->setText("ONID:");
-	l->setFlags(eLabel::flagVCenter);
-
-	onid = new eTextInputField(this, l);
-	onid->setFont(fontfixed);
-	onid->move(ePoint(375, yOffs));
-	onid->resize(eSize(75, fs+10));
-	onid->loadDeco();
-	onid->setHelpText(_("to enter onid (original network id) press OK"));
+	onid =CreateSkinnedTextInputField("onid",0,0, "lonid");
 	onid->setEditHelpText(_("enter onid (original network id)"));
 
-	yOffs += 40;
+	cNoDVB = CreateSkinnedCheckbox("cNoDVB");
+	cUseSDT = CreateSkinnedCheckbox("cUseSDT");
+	cHoldName = CreateSkinnedCheckbox("cHoldName");
 
-	cNoDVB = new eCheckbox(this, 0, 1);
-	cNoDVB->move(ePoint(10, yOffs));
-	cNoDVB->resize(eSize(125, fs+8));
-	cNoDVB->loadDeco();
-	cNoDVB->setText(_("no DVB"));
-	cNoDVB->setHelpText(_("don't read PAT/PMT/SDT for this service (only use cached pids)"));
-
-	cUseSDT = new eCheckbox(this, 0, 1);
-	cUseSDT->move(ePoint(150, yOffs));
-	cUseSDT->resize(eSize(130, fs+8));
-	cUseSDT->loadDeco();
-	cUseSDT->setText(_("use sdt"));
-	cUseSDT->setHelpText(_("update name/provider/service type with content of the sdt (and auto remove service)"));
-
-	cHoldName = new eCheckbox(this, 0, 1);
-	cHoldName->move(ePoint(295, yOffs));
-	cHoldName->resize(eSize(160, fs+8));
-	cHoldName->loadDeco();
-	cHoldName->setText(_("hold name"));
-	cHoldName->setHelpText(_("don't update the service name with content of the sdt"));
-
-	bHexDec = new eButton(this);
-	bHexDec->move(ePoint(10, clientrect.height()-40-10-80));
-	bHexDec->resize(eSize((clientrect.width()-40)/2, 35));
-	bHexDec->setShortcut("red");
-	bHexDec->setShortcutPixmap("red");
-	bHexDec->loadDeco();
+	bHexDec = CreateSkinnedButton("bHexDec");
 	CONNECT(bHexDec->selected, ManualPIDWindow::hexdec);
 
-	bReadNIT = new eButton(this);
-	bReadNIT->move(ePoint(10+(clientrect.width()-40)/2+10, clientrect.height()-40-10-80));
-	bReadNIT->resize(eSize((clientrect.width()-40)/2, 35));
-	bReadNIT->setText(_("read NIT"));
-	bReadNIT->setHelpText(_("read tsid and onid from the nit (this can take up to 10 seconds)"));
-	bReadNIT->setShortcut("green");
-	bReadNIT->setShortcutPixmap("green");
-	bReadNIT->loadDeco();
-	CONNECT(bReadNIT->selected, ManualPIDWindow::startNIT);
+	CONNECT(CreateSkinnedButton("bReadNIT")->selected, ManualPIDWindow::startNIT);
 
-	bSetPIDs = new eButton(this);
-	bSetPIDs->move(ePoint(10, clientrect.height()-40-10-35));
-	bSetPIDs->resize(eSize((clientrect.width()-40)/2, 35));
-	bSetPIDs->setText(_("test values"));
-	bSetPIDs->setHelpText(_("test entered values"));
-	bSetPIDs->setShortcut("yellow");
-	bSetPIDs->setShortcutPixmap("yellow");
-	bSetPIDs->loadDeco();
-	CONNECT(bSetPIDs->selected, ManualPIDWindow::setPIDs);
+	CONNECT(CreateSkinnedButton("bSetPIDs")->selected, ManualPIDWindow::setPIDs);
 
-	bStore = new eButton(this);
-	bStore->move(ePoint(10+(clientrect.width()-40)/2+10, clientrect.height()-40-10-35));
-	bStore->resize(eSize((clientrect.width()-40)/2, 35));
-	bStore->setText(_("save"));
-	bStore->setHelpText(_("save data and close window (the new channel could be found in the all services list)"));
-	bStore->setShortcut("blue");
-	bStore->setShortcutPixmap("blue");
-	bStore->loadDeco();
-	CONNECT(bStore->selected, ManualPIDWindow::store);
+	CONNECT(CreateSkinnedButton("bStore")->selected, ManualPIDWindow::store);
 
-	eStatusBar *statusbar = new eStatusBar(this);
-	statusbar->loadDeco();
-	statusbar->move( ePoint(0, clientrect.height()-45) );
-	statusbar->resize( eSize(clientrect.width(), 45) );
-
+	BuildSkin("ManualPIDWindow");
 	int bla=1;
 	eConfig::getInstance()->getKey("/elitedvb/scan/manualpids/hexdec", bla);
 	while (bla--)
@@ -1844,7 +1625,7 @@ void ManualPIDWindow::init_ManualPIDWindow(eTransponder *tp, const eServiceRefer
 		eString service_provider;
 		if ( transponder.satellite.isValid() )
 		{
-			service_provider.sprintf("%d %d.%°%c",
+			service_provider.sprintf("%d %d.%d°%c",
 				transponder.satellite.frequency/1000,
 				abs(transponder.satellite.orbital_position)/10,
 				abs(transponder.satellite.orbital_position)%10,
@@ -1861,8 +1642,8 @@ void ManualPIDWindow::init_ManualPIDWindow(eTransponder *tp, const eServiceRefer
 	tsid->setText(tmp);
 	sprintf(tmp, hex?"%04x":"%d", transponder.original_network_id.get());
 	onid->setText(tmp);
+	eWindow::globalCancel(eWindow::ON);
 }
-
 ManualPIDWindow::~ManualPIDWindow()
 {
 	delete nit;

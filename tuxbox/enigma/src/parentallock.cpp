@@ -19,21 +19,11 @@ ParentalLockWindow::ParentalLockWindow( const char* windowText, int curNum )
 }
 void ParentalLockWindow::init_ParentalLockWindow(const char* windowText, int curNum )
 {
-	resize( eSize( 380, 150 ) );
-	move( ePoint( 200, 200 ) );
 	setText(windowText);
 
-	lPin = new eLabel(this);
-	lPin->move( ePoint( 10, 10 ) );
-	lPin->resize( eSize( width()-20, 30 ) );
-	lPin->setText(_("please enter pin:"));
-	lPin->loadDeco();
+	lPin = CreateSkinnedLabel("lPin");
 
-	nPin=new eNumber(this, 4, 0, 9, 1, 0, 0, lPin, 1);
-	nPin->move( ePoint( 10, 50 ) );
-	nPin->resize( eSize( 100, 30 ) );
-	nPin->loadDeco();
-	nPin->setNumber(curNum);
+	nPin=CreateSkinnedNumber("nPin",curNum, 4, 0, 9, 1, 0, 0, lPin, 1);
 	nPin->setFlags( eNumber::flagHideInput );
 	CONNECT( nPin->selected, ParentalLockWindow::numEntered );
 }
@@ -50,71 +40,33 @@ eParentalSetup::eParentalSetup():
 }
 void eParentalSetup::init_eParentalSetup()
 {
-	setText(_("Parental setup"));
-	cmove(ePoint(170, 136));
-	cresize(eSize(400, 280));
 
 	loadSettings();
 
-	parentallock=new eCheckbox(this, sparentallock, 1);
-	parentallock->setText(_("Parental lock"));
-	parentallock->move(ePoint(20, 20));
-	parentallock->resize(eSize(200, 30));
-	parentallock->setHelpText(_("enable/disable parental lock"));
+	parentallock =CreateSkinnedCheckbox("parentallock",sparentallock);
 	CONNECT(parentallock->checked, eParentalSetup::plockChecked );
 
-	changeParentalPin = new eButton(this);
-	changeParentalPin->setText(_("change PIN"));
-	changeParentalPin->move( ePoint( 230, 15 ) );
-	changeParentalPin->resize( eSize(160, 40) );
-	changeParentalPin->setHelpText(_("change Parental PIN (ok)"));
-	changeParentalPin->loadDeco();
+	changeParentalPin = CreateSkinnedButton("changeParentalPin");
 	CONNECT(changeParentalPin->selected_id, eParentalSetup::changePin );
 	if ( !sparentallock )
 		changeParentalPin->hide();
-  
-	setuplock=new eCheckbox(this, ssetuplock, 1);
-	setuplock->setText(_("Setup lock"));
-	setuplock->move(ePoint(20, 70));
-	setuplock->resize(eSize(200, 30));
-	setuplock->setHelpText(_("enable/disable setup lock"));
+
+	setuplock =CreateSkinnedCheckbox("setuplock",ssetuplock);
 	CONNECT(setuplock->checked, eParentalSetup::slockChecked );
 
-	changeSetupPin = new eButton(this);
-	changeSetupPin->setText(_("change PIN"));
-	changeSetupPin->move( ePoint( 230, 65 ) );
-	changeSetupPin->resize( eSize(160, 40) );
-	changeSetupPin->setHelpText(_("change Setup PIN (ok)"));
-	changeSetupPin->loadDeco();
+	changeSetupPin = CreateSkinnedButton("changeSetupPin");
 	CONNECT(changeSetupPin->selected_id, eParentalSetup::changePin );
 	if ( !ssetuplock )
 		changeSetupPin->hide();
 
-	hidelocked=new eCheckbox(this, shidelocked, 1);
-	hidelocked->setText(_("Hide locked services"));
-	hidelocked->move(ePoint(20, 120));
-	hidelocked->resize(eSize(370, 30));
-	hidelocked->setHelpText(_("don't show locked services in any list"));
-	hidelocked->loadDeco();
+	hidelocked =CreateSkinnedCheckbox("hidelocked",shidelocked);
 	CONNECT(hidelocked->checked, eParentalSetup::hidelockChecked );
 	if ( !sparentallock )
 		hidelocked->hide();
 
-	ok=new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 175));
-	ok->resize(eSize(220, 40));
-	ok->setHelpText(_("save changes and return"));
-	ok->loadDeco();
+	CONNECT(CreateSkinnedButton("store")->selected, eParentalSetup::okPressed);
 
-	CONNECT(ok->selected, eParentalSetup::okPressed);
-
-	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-50 ) );
-	statusbar->resize( eSize( clientrect.width(), 50) );
-	statusbar->loadDeco();
+	BuildSkin("eParentalSetup");
 
 	setHelpID(93);
 }

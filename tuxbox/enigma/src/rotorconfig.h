@@ -40,11 +40,11 @@ public:
 
 class eRotorManual: public eWindow
 {
-	eLabel *lSat, *lTransponder, *lDirection, *lMode, *lCounter
+	eLabel *lSat, *lTransponder, *lDirection, *lCounter
 							, *Counter, *lRecaclParams;
 	eButton *Direction;
 	eComboBox *Sat, *Transponder, *Mode;
-	eButton *Exit, *Save, *Search;
+	eButton *Save;
 	eNumber *num, *num1, *num2, *num3;
 	eFEStatusWidget *status;
 	eLNB *lnb;
@@ -68,9 +68,7 @@ public:
 
 class eStoreWindow: public eWindow
 {
-	eLabel *lStorageLoc;
 	eNumber *StorageLoc;
-	eButton *Store, *Cancel;
 	eLNB *lnb;
 	int orbital_pos;
 	void onStorePressed();

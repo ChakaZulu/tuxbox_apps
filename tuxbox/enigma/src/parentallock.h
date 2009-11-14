@@ -12,7 +12,6 @@ bool checkPin( int pin, const char * text );
 
 class eParentalSetup: public eWindow
 {
-	eButton *ok;
 	eCheckbox *parentallock, *setuplock, *hidelocked;
 	eButton *changeParentalPin, *changeSetupPin;
 	eStatusBar *statusbar;

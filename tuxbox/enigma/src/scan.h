@@ -44,7 +44,6 @@ public:
 class tsManual: public eWidget
 {
 	eTransponder transponder;
-	eButton *b_start, *b_manual_pids;
 	eTransponderWidget *transponder_widget;
 	eFEStatusWidget *festatus_widget;
 	eCheckbox *c_onlyFree, *c_searchnit, *c_useonit, *c_usebat;
@@ -145,7 +144,6 @@ public:
 
 class tsMultiSatScan: public eWidget
 {
-	eButton *start;
 	eListBox<eListBoxEntrySat> *satellites;
 	void entrySelected( eListBoxEntrySat * );
 	void init_tsMultiSatScan();
@@ -201,7 +199,7 @@ class ManualPIDWindow: public eWindow
 					*vpid, *apid, *pcrpid, *tpid,
 					*tsid, *onid, *sid;
 	eCheckbox *cNoDVB, *cUseSDT, *cHoldName, *isAC3Pid;
-	eButton *bReadNIT, *bSetPIDs, *bStore, *bHexDec;
+	eButton *bStore, *bHexDec;
 	PAT *pat;
 	NIT *nit;
 	void gotPAT(int);

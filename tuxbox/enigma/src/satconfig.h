@@ -26,7 +26,7 @@ class eSatelliteConfigurationManager: public eWindow
 	eTimer* refresh;
 	eWidget *buttonWidget;
 	eWidget *w_buttons;
-	eButton *button_close, *button_new, *button_erase;
+	eButton *button_new, *button_erase;
 	eLabel *lSatPos, *lLNB, *l22Khz, *lVoltage;
 	eProgress *scrollbar;
 	eComboBox *combo_type;
@@ -129,7 +129,6 @@ class eDiSEqCPage : public eWidget
 	eCheckbox *SeqRepeat, *SwapCmds,
 						*FastDiSEqC; // sends no DiSEqC when only hi/lo or H/V Changed
 	eLabel *lDiSEqCRepeats, *lDiSEqCParam, *lucInput;
-	eStatusBar *statusbar;
          
 	void lnbChanged( eListBoxEntryText* );
 	void DiSEqCModeChanged( eListBoxEntryText* );

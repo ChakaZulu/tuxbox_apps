@@ -20,44 +20,32 @@ eSatfind::eSatfind(eFrontend *fe)
 }
 void eSatfind::init_eSatfind()
 {
-	p_snr=new eProgress(this);
-	p_snr->setName("snr");
+	p_snr=CreateSkinnedProgress("snr");
 
-	p_agc=new eProgress(this);
-	p_agc->setName("agc");
+	p_agc=CreateSkinnedProgress("agc");
 
-	p_ber=new eProgress(this);
-	p_ber->setName("ber");
+	p_ber=CreateSkinnedProgress("ber");
 
-	c_sync=new eCheckbox(this, 0, 0);
-	c_sync->setName("sync");
+	c_sync=CreateSkinnedCheckbox("sync", 0,0, 0);
 
-	c_lock=new eCheckbox(this, 0, 0);
-	c_lock->setName("lock");
+	c_lock=CreateSkinnedCheckbox("lock", 0,0, 0);
 
-	lsnr_num=new eLabel(this);
-	lsnr_num->setName("snr_num");
+	lsnr_num=CreateSkinnedLabel("snr_num");
 
-	lsync_num=new eLabel(this);
-	lsync_num->setName("agc_num");
+	lsync_num=CreateSkinnedLabel("agc_num");
 
-	lber_num=new eLabel(this);
-	lber_num->setName("ber_num");
+	lber_num=CreateSkinnedLabel("ber_num");
 
-	sat = new eComboBox(this, 3);
-	sat->setName("sat");
+	sat = CreateSkinnedComboBox("sat", 3);
 	CONNECT(sat->selchanged, eSatfind::satChanged );
 
-	transponder = new eComboBox(this, 5);
-	transponder->setName("transponder");
+	transponder = CreateSkinnedComboBox("transponder");
 
 	CONNECT(updateTimer.timeout, eSatfind::update);
 
-	eLabel *l = new eLabel(this);
-	l->setName("lSat");
+	eLabel *l = CreateSkinnedLabel("lSat");
 
-	if (eSkin::getActive()->build(this, "eSatfind"))
-		return;
+	BuildSkin("eSatfind");
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 

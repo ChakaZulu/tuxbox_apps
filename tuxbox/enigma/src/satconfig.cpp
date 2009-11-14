@@ -21,45 +21,32 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 
 void eSatelliteConfigurationManager::init_eSatelliteConfigurationManager()
 {
-	lSatPos = new eLabel(this);
-	lSatPos->setName("lSatPos");
+	lSatPos = CreateSkinnedLabel("lSatPos");
 
-	lLNB = new eLabel(this);
-	lLNB->setName("lLnb");
+	lLNB = CreateSkinnedLabel("lLnb");
 	lLNB->hide();
 
-	l22Khz = new eLabel(this);
-	l22Khz->setName("l22khz");
+	l22Khz = CreateSkinnedLabel("l22khz");
 	l22Khz->hide();
 
-	lVoltage = new eLabel(this);
-	lVoltage->setName("lVoltage");
+	lVoltage = CreateSkinnedLabel("lVoltage");
 	lVoltage->hide();
 	
-	scrollbar = new eProgress(this);
-	scrollbar->setName("scrollbar");
-	scrollbar->setStart(0);
-	scrollbar->setPerc(100);
+	scrollbar = CreateSkinnedProgress("scrollbar",0,100);
 
-	button_close=new eButton(this);
-	button_close->setName("close");
-	CONNECT(button_close->selected, eSatelliteConfigurationManager::closePressed);
+	CONNECT(CreateSkinnedButton("close")->selected, eSatelliteConfigurationManager::closePressed);
 
-	button_new=new eButton(this);
-	button_new->setName("new");
+	button_new=CreateSkinnedButton("new");
 	button_new->hide();
 	CONNECT(button_new->selected, eSatelliteConfigurationManager::newPressed);
 
-	button_erase=new eButton(this,0,0);
-	button_erase->setName("erase");
+	button_erase=CreateSkinnedButton("erase",0,0);
 	button_erase->hide();
 	CONNECT(button_erase->selected, eSatelliteConfigurationManager::erasePressed);
 
-	buttonWidget=new eWidget(this);
-	buttonWidget->setName("buttons");	
+	buttonWidget=CreateSkinnedButton("buttons");
 
-	combo_type=new eComboBox(this, 7);
-	combo_type->setName("type");
+	combo_type=CreateSkinnedComboBox("type", 7);
 	CONNECT(combo_type->selchanged, eSatelliteConfigurationManager::typeChanged);
 	new eListBoxEntryText( *combo_type, _("one single satellite"), (void*)0, 0, _("one directly connected LNB"));
 	new eListBoxEntryText( *combo_type, _("2 satellites via Toneburst"), (void*)5, 0, _("2 LNBs via Toneburst Signal"));
@@ -69,9 +56,7 @@ void eSatelliteConfigurationManager::init_eSatelliteConfigurationManager()
 	new eListBoxEntryText( *combo_type, _("many satellites via DiSEqC Rotor"), (void*)3, 0, _("1 LNB with DiSEqC Rotor"));
 	new eListBoxEntryText( *combo_type, _("non-standard user defined configuration..."), (void*)4, 0, _("special"));
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "eSatelliteConfigurationManager"))
-		eFatal("skin load of \"eSatelliteConfigurationManager\" failed");
+	BuildSkin("eSatelliteConfigurationManager");
 
 	eSize s = buttonWidget->getSize();
 	s.setHeight( s.height()*16 );
@@ -921,9 +906,7 @@ eLNBSetup::eLNBSetup( eSatellite* sat, eWidget* lcdTitle, eWidget* lcdElement )
 }
 void eLNBSetup::init_eLNBSetup(eWidget* lcdTitle, eWidget* lcdElement )
 {
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "eLNBSetup"))
-		eFatal("skin load of \"eLNBSetup\" failed");
+	BuildSkin("eLNBSetup");
 	LNBPage = new eLNBPage( this, sat );
 	DiSEqCPage = new eDiSEqCPage( this, sat );
 #ifndef DISABLE_LCD
@@ -1054,39 +1037,23 @@ void eLNBPage::init_eLNBPage( eWidget *parent)
 	LCDTitle=parent->LCDTitle;
 	LCDElement=parent->LCDElement;
 #endif  
-	lnb_list = new eComboBox(this,8);
-	lnb_list->setName("lnblist");
+	lnb_list = CreateSkinnedComboBox("lnblist",8);
 
-	eLabel *l = new eLabel(this);
-	l->setName("lLofL");
-	lofL = new eNumber(this, 5, 0, 9, 1, 0, 0, l);  // todo descr label im skin mit name versehen für lcd anzeige
-	lofL->setName("lofL");
+	lofL = CreateSkinnedNumberWithLabel("lofL", 0, 5, 0, 9, 1, 0, 0, "lLofL");  // todo descr label im skin mit name versehen für lcd anzeige
 
-	l = new eLabel(this);
-	l->setName("lLofH");
-	lofH = new eNumber(this, 5, 0, 9, 1, 0, 0, l);  // todo descr label im skin mit name versehen für lcd anzeige
-	lofH->setName("lofH");
+	lofH = CreateSkinnedNumberWithLabel("lofH", 0, 5, 0, 9, 1, 0, 0, "lLofH");  // todo descr label im skin mit name versehen für lcd anzeige
 
-	l = new eLabel(this);
-	l->setName("lThreshold");
-	threshold = new eNumber(this, 5, 0 ,9, 1, 0, 0, l);
-	threshold->setName("threshold");
+	threshold = CreateSkinnedNumberWithLabel("threshold",0, 5, 0 ,9, 1, 0, 0, "lThreshold");
 
-	increased_voltage = new eCheckbox( this );
-	increased_voltage->setName("increased_voltage");
+	increased_voltage = CreateSkinnedCheckbox("increased_voltage");
 
-	relais_12V_out = new eCheckbox( this );
-	relais_12V_out->setName("relais_12V_out");
-                                       
-	save = new eButton(this);
-	save->setName("save");
+	relais_12V_out = CreateSkinnedCheckbox("relais_12V_out");
 
-	next = new eButton(this);
-	next->setName("next");
+	save = CreateSkinnedButton("save");
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "eLNBPage"))
-		eFatal("skin load of \"eLNBPage\" failed");
+	next = CreateSkinnedButton("next");
+
+	BuildSkin("eLNBPage");
 
 	// add all LNBs
 
@@ -1144,22 +1111,17 @@ eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
 
 void eDiSEqCPage::init_eDiSEqCPage( eWidget *parent, eSatellite *sat)
 {
+	int i;
 #ifndef DISABLE_LCD
 	LCDTitle=parent->LCDTitle;
 	LCDElement=parent->LCDElement;
 #endif
-	eLabel *l = new eLabel(this);
-	l->setName("lMiniDiSEqCPara");
-	MiniDiSEqCParam = new eComboBox( this, 4, l );
-	MiniDiSEqCParam->setName("MiniDiSEqCParam");
+	MiniDiSEqCParam = CreateSkinnedComboBoxWithLabel("MiniDiSEqCParam", 4, "lMiniDiSEqCPara");
 	new eListBoxEntryText( *MiniDiSEqCParam, _("None"), (void*)eDiSEqC::NO, 0, _("sends no tone burst") );
 	new eListBoxEntryText( *MiniDiSEqCParam, "A", (void*)eDiSEqC::A, 0, _("sends modulated tone burst") );
 	new eListBoxEntryText( *MiniDiSEqCParam, "B", (void*)eDiSEqC::B, 0, _("sends unmodulated tone burst") );
 
-	l = new eLabel(this);
-	l->setName("lDiSEqCMode");
-	DiSEqCMode = new eComboBox( this, 4, l );
-	DiSEqCMode->setName("DiSEqCMode");
+	DiSEqCMode = CreateSkinnedComboBoxWithLabel("DiSEqCMode", 4, "lDiSEqCMode" );
 	// *DiSEqCMode... here we use the operator eListBox* from eComboBox !
 	new eListBoxEntryText( *DiSEqCMode, "None", (void*)eDiSEqC::NONE, 0, _("Disable DiSEqC") );
 	new eListBoxEntryText( *DiSEqCMode, "Version 1.0", (void*)eDiSEqC::V1_0, 0, _("Use DiSEqC Version 1.0") );
@@ -1168,85 +1130,47 @@ void eDiSEqCPage::init_eDiSEqCPage( eWidget *parent, eSatellite *sat)
 	// no SMATV at the moment... we can do this when anyone ask...
 	// 	new eListBoxEntryText( *DiSEqCMode, "SMATV", (void*)eDiSEqC::SMATV, 0, _("Use SMATV Remote Tuning") );
 
-	lDiSEqCParam = new eLabel(this);
-	lDiSEqCParam->setName("lDiSEqCParam");
-	DiSEqCParam = new eComboBox( this, 4, lDiSEqCParam );
-	DiSEqCParam->setName("DiSEqCParam");
+	lDiSEqCParam = CreateSkinnedLabel("lDiSEqCParam");
+	DiSEqCParam = CreateSkinnedComboBox("DiSEqCParam", 4, lDiSEqCParam );
 	new eListBoxEntryText( *DiSEqCParam, "A/A", (void*)eDiSEqC::AA, 0, _("sends DiSEqC cmd A/A") );
 	new eListBoxEntryText( *DiSEqCParam, "A/B", (void*)eDiSEqC::AB, 0, _("sends DiSEqC cmd A/B") );
 	new eListBoxEntryText( *DiSEqCParam, "B/A", (void*)eDiSEqC::BA, 0, _("sends DiSEqC cmd B/A") );
 	new eListBoxEntryText( *DiSEqCParam, "B/B", (void*)eDiSEqC::BB, 0, _("sends DiSEqC cmd B/B") );
 	new eListBoxEntryText( *DiSEqCParam, "None", (void*)eDiSEqC::SENDNO, 0, _("sends no committed DiSEqC cmd") );
-	new eListBoxEntryText( *DiSEqCParam, "1", (void*)0xF0, 0, _("sends switch cmd 1") );
-	new eListBoxEntryText( *DiSEqCParam, "2", (void*)0xF1, 0, _("sends switch cmd 2") );
-	new eListBoxEntryText( *DiSEqCParam, "3", (void*)0xF2, 0, _("sends switch cmd 3") );
-	new eListBoxEntryText( *DiSEqCParam, "4", (void*)0xF3, 0, _("sends switch cmd 4") );
-	new eListBoxEntryText( *DiSEqCParam, "5", (void*)0xF4, 0, _("sends switch cmd 5") );
-	new eListBoxEntryText( *DiSEqCParam, "6", (void*)0xF5, 0, _("sends switch cmd 6") );
-	new eListBoxEntryText( *DiSEqCParam, "7", (void*)0xF6, 0, _("sends switch cmd 7") );
-	new eListBoxEntryText( *DiSEqCParam, "8", (void*)0xF7, 0, _("sends switch cmd 8") );
-	new eListBoxEntryText( *DiSEqCParam, "9", (void*)0xF8, 0, _("sends switch cmd 9") );
-	new eListBoxEntryText( *DiSEqCParam, "10", (void*)0xF9, 0, _("sends switch cmd 10") );
-	new eListBoxEntryText( *DiSEqCParam, "11", (void*)0xFA, 0, _("sends switch cmd 11") );
-	new eListBoxEntryText( *DiSEqCParam, "12", (void*)0xFB, 0, _("sends switch cmd 12") );
-	new eListBoxEntryText( *DiSEqCParam, "13", (void*)0xFC, 0, _("sends switch cmd 13") );
-	new eListBoxEntryText( *DiSEqCParam, "14", (void*)0xFD, 0, _("sends switch cmd 14") );
-	new eListBoxEntryText( *DiSEqCParam, "15", (void*)0xFE, 0, _("sends switch cmd 15") );
-	new eListBoxEntryText( *DiSEqCParam, "16", (void*)0xFF, 0, _("sends switch cmd 16") );
+	i = 0;
+	while (i < 16)
+		new eListBoxEntryText( *DiSEqCParam, eString().sprintf(_("%d"),i+1), (void*)(0xF0+i), 0, eString().sprintf(_("sends switch cmd %d"),++i) );
 
-	lDiSEqCRepeats = new eLabel(this);
-	lDiSEqCRepeats->setName("lDiSEqCRepeats");
-	DiSEqCRepeats = new eComboBox( this, 4, lDiSEqCRepeats );
-	DiSEqCRepeats->setName("DiSEqCRepeats");
+	lDiSEqCRepeats = CreateSkinnedLabel("lDiSEqCRepeats");
+	DiSEqCRepeats = CreateSkinnedComboBox("DiSEqCRepeats", 4, lDiSEqCRepeats );
 	new eListBoxEntryText( *DiSEqCRepeats, _("None"), (void*)0, 0, _("sends no DiSEqC repeats") );
 	new eListBoxEntryText( *DiSEqCRepeats, _("One"), (void*)1, 0, _("sends one repeat") );
 	new eListBoxEntryText( *DiSEqCRepeats, _("Two"), (void*)2, 0, _("sends two repeats") );
 	new eListBoxEntryText( *DiSEqCRepeats, _("Three"), (void*)3, 0, _("sends three repeats") );
 
-	lucInput = new eLabel(this);
-	lucInput->setName("lucInput");
+	lucInput = CreateSkinnedLabel("lucInput");
 
-	ucInput = new eComboBox( this, 8, lucInput );
-	ucInput->setName("ucInput");
+	ucInput = CreateSkinnedComboBox("ucInput", 8, lucInput );
 	new eListBoxEntryText( *ucInput, _("None"), (void*)0, 0, _("sends no uncommitted switch command") );
-	new eListBoxEntryText( *ucInput, _("Input 1"), (void*)240, 0, _("select uncommitted switch Input 1") );
-	new eListBoxEntryText( *ucInput, _("Input 2"), (void*)241, 0, _("select uncommitted switch Input 2") );
-	new eListBoxEntryText( *ucInput, _("Input 3"), (void*)242, 0, _("select uncommitted switch Input 3") );
-	new eListBoxEntryText( *ucInput, _("Input 4"), (void*)243, 0, _("select uncommitted switch Input 4") );
-	new eListBoxEntryText( *ucInput, _("Input 5"), (void*)244, 0, _("select uncommitted switch Input 5") );
-	new eListBoxEntryText( *ucInput, _("Input 6"), (void*)245, 0, _("select uncommitted switch Input 6") );
-	new eListBoxEntryText( *ucInput, _("Input 7"), (void*)246, 0, _("select uncommitted switch Input 7") );
-	new eListBoxEntryText( *ucInput, _("Input 8"), (void*)247, 0, _("select uncommitted switch Input 8") );
-	new eListBoxEntryText( *ucInput, _("Input 9"), (void*)248, 0, _("select uncommitted switch Input 9") );
-	new eListBoxEntryText( *ucInput, _("Input 10"), (void*)249, 0, _("select uncommitted switch Input 10") );
-	new eListBoxEntryText( *ucInput, _("Input 11"), (void*)250, 0, _("select uncommitted switch Input 11") );
-	new eListBoxEntryText( *ucInput, _("Input 12"), (void*)251, 0, _("select uncommitted switch Input 12") );
-	new eListBoxEntryText( *ucInput, _("Input 13"), (void*)252, 0, _("select uncommitted switch Input 13") );
-	new eListBoxEntryText( *ucInput, _("Input 14"), (void*)253, 0, _("select uncommitted switch Input 14") );
-	new eListBoxEntryText( *ucInput, _("Input 15"), (void*)254, 0, _("select uncommitted switch Input 15") );
-	new eListBoxEntryText( *ucInput, _("Input 16"), (void*)255, 0, _("select uncommitted switch Input 16") );
-    
-	SeqRepeat = new eCheckbox(this);
-	SeqRepeat->setName("SeqRepeat");
+	i = 0;
+	while (i < 16)
+		new eListBoxEntryText( *ucInput, eString().sprintf(_("Input %d"),i+1), (void*)(240+i), 0, eString().sprintf(_("select uncommitted switch Input %d"),++i) );
 
-	FastDiSEqC = new eCheckbox(this);
-	FastDiSEqC->setName("FastDiSEqC");
+	SeqRepeat = CreateSkinnedCheckbox("SeqRepeat");
 
-	SwapCmds = new eCheckbox(this);
-	SwapCmds->setName("SwapCmds");
+	FastDiSEqC = CreateSkinnedCheckbox("FastDiSEqC");
+
+	SwapCmds = CreateSkinnedCheckbox("SwapCmds");
 
 /*	next = new eButton(this);
 	next->setName("next");*/
           
-	prev = new eButton(this);
-	prev->setName("prev");
+	prev = CreateSkinnedButton("prev");
   
-	save = new eButton(this);
-	save->setName("save");
+	save = CreateSkinnedButton("save");
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "eDiSEqCPage"))
-		eFatal("skin load of \"eDiSEqCPage\" failed");
+	BuildSkin("eDiSEqCPage");
+
 
 	CONNECT( DiSEqCMode->selchanged, eDiSEqCPage::DiSEqCModeChanged );
 	addActionMap(&i_focusActions->map);

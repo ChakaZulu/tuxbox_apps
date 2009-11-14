@@ -36,17 +36,12 @@ void eHelpWindow::init_eHelpWindow(ePtrList<eAction> &parseActionHelpList, int h
 {
 	int xpos=60, ypos=0, labelheight, imgheight;
 
-	scrollbar = new eProgress(this);
-	scrollbar->setName("scrollbar");
-	scrollbar->setStart(0);
-	scrollbar->setPerc(100);
+	scrollbar = CreateSkinnedProgress("scrollbar",0,100);
 
 	visible = new eWidget(this);
 	visible->setName("visible");
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "eHelpWindow"))
-		eFatal("skin load of \"eHelpWindow\" failed");
+	BuildSkin("eHelpWindow");
 
 	scrollbox = new eWidget(visible);
 	scrollbox->move(ePoint(0, 0));

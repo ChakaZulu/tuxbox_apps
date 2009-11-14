@@ -26,45 +26,35 @@ void RotorConfig::init_RotorConfig(eLNB *lnb )
 	LCDTitle=parent->LCDTitle;
 	LCDElement=parent->LCDElement;
 #endif
-	useRotorInPower = new eCheckbox(this);
-	useRotorInPower->setName("useRotorInPower");
+	useRotorInPower = CreateSkinnedCheckbox("useRotorInPower");
 
-	lDeltaA = new eLabel(this);
-	lDeltaA->setName("lDeltaA");
+	lDeltaA = CreateSkinnedLabel("lDeltaA");
 	lDeltaA->hide();
-	DeltaA = new eNumber( this, 1, 0, 200, 3, 0, 0, lDeltaA);
-	DeltaA->setName("DeltaA");
+	DeltaA = CreateSkinnedNumber("DeltaA",0, 1, 0, 200, 3, 0, 0, lDeltaA);
 	DeltaA->hide();
 
-	useGotoXX = new eCheckbox(this);
-	useGotoXX->setName("useGotoXX");
+	useGotoXX = CreateSkinnedCheckbox("useGotoXX");
 
-	lLongitude = new eLabel(this);
-	lLongitude->setName("lLongitude");
+	lLongitude = CreateSkinnedLabel("lLongitude");
 	lLongitude->hide();
 
-	Longitude = new eNumber(this, 2, 0, 360, 3, 0, 0, lLongitude );
+	Longitude = CreateSkinnedNumber("Longitude",0, 2, 0, 360, 3, 0, 0, lLongitude );
 	Longitude->setFlags( eNumber::flagFixedNum );
-	Longitude->setName("Longitude");
 	Longitude->hide();
 
-	LoDirection = new eComboBox( this, 2 );
-	LoDirection->setName("LoDirection");
+	LoDirection = CreateSkinnedComboBox("LoDirection", 2 );
 	LoDirection->hide();
 	new eListBoxEntryText( *LoDirection, _("East"), (void*)eDiSEqC::EAST, 0, _("East") );
 	new eListBoxEntryText( *LoDirection, _("West"), (void*)eDiSEqC::WEST, 0, _("West") );
 
-	lLatitude = new eLabel(this);
-	lLatitude->setName("lLatitude");
+	lLatitude = CreateSkinnedLabel("lLatitude");
 	lLatitude->hide();
 
-	Latitude = new eNumber(this, 2, 0, 360, 3, 0, 0, lLatitude );
+	Latitude = CreateSkinnedNumber("Latitude",0, 2, 0, 360, 3, 0, 0, lLatitude );
 	Latitude->setFlags( eNumber::flagFixedNum );
-	Latitude->setName("Latitude");
 	Latitude->hide();
 
-	LaDirection = new eComboBox( this, 2 );
-	LaDirection->setName("LaDirection");
+	LaDirection = CreateSkinnedComboBox("LaDirection", 2 );
 	LaDirection->hide();
 	new eListBoxEntryText( *LaDirection, _("North"), (void*)eDiSEqC::NORTH, 0, _("North") );
 	new eListBoxEntryText( *LaDirection, _("South"), (void*)eDiSEqC::SOUTH, 0, _("South") );
@@ -74,47 +64,34 @@ void RotorConfig::init_RotorConfig(eLNB *lnb )
 	positions->setName("positions");
 	positions->hide();
 
-	lStoredRotorNo = new eLabel(this);
-	lStoredRotorNo->setName("lStoredRotorNo");
+	lStoredRotorNo = CreateSkinnedLabel("lStoredRotorNo");
 	lStoredRotorNo->hide();
-	number = new eNumber( this, 1, 0, 255, 3, 0, 0, lStoredRotorNo);
-	number->setName("StoredRotorNo");
+	number = CreateSkinnedNumber("StoredRotorNo",0, 1, 0, 255, 3, 0, 0, lStoredRotorNo);
 	number->hide();
 
-	lOrbitalPosition = new eLabel(this);
-	lOrbitalPosition->setName("lOrbitalPosition");
+	lOrbitalPosition = CreateSkinnedLabel("lOrbitalPosition");
 	lOrbitalPosition->hide();
-	orbital_position = new eNumber( this, 1, 0, 3600, 4, 0, 0, lOrbitalPosition);
-
-	orbital_position->setName("OrbitalPosition");
+	orbital_position = CreateSkinnedNumber("OrbitalPosition",0, 1, 0, 3600, 4, 0, 0, lOrbitalPosition);
 	orbital_position->hide();
 
-	lDirection = new eLabel(this);
-	lDirection->setName("lDirection");
+	lDirection = CreateSkinnedLabel("lDirection");
 	lDirection->hide();
-	direction = new eComboBox( this, 2, lDirection );
-	direction->setName("Direction");
+	direction = CreateSkinnedComboBox("Direction", 2, lDirection );
 	direction->hide();
 	new eListBoxEntryText( *direction, _("East"), (void*)0, 0, _("East") );
 	new eListBoxEntryText( *direction, _("West"), (void*)1, 0, _("West") );
 
-	add = new eButton( this );
-	add->setName("add");
+	add = CreateSkinnedButton("add");
 	add->hide();
 
-	remove = new eButton ( this, 0, 0 );
-	remove->setName("remove");
+	remove = CreateSkinnedButton("remove", 0, 0 );
 	remove->hide();
 
-	save = new eButton(this);
-	save->setName("save");
+	save = CreateSkinnedButton("save");
 
-	next = new eButton(this);
-	next->setName("next");
+	next = CreateSkinnedButton("next");
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "RotorConfig"))
-		eFatal("skin load of \"RotorConfig\" failed");
+	BuildSkin("RotorConfig");
 
 	orbital_position->setHelpText(_("enter orbital position without dot (19.2\xC2\xB0 = 192)"));
 	CONNECT( orbital_position->selected, RotorConfig::numSelected );
@@ -398,62 +375,43 @@ eRotorManual::eRotorManual(eLNB *lnb)
 
 void eRotorManual::init_eRotorManual(eLNB *lnb)
 {
-	lMode = new eLabel(this);
-	lMode->setName("lMode");
+	lSat = CreateSkinnedLabel("lSat");
 
-	lSat = new eLabel(this);
-	lSat->setName("lSat");
+	lTransponder = CreateSkinnedLabel("lTransponder");
 
-	lTransponder = new eLabel(this);
-	lTransponder->setName("lTransponder");
+	lDirection = CreateSkinnedLabel("lDirection");
 
-	lDirection = new eLabel(this);
-	lDirection->setName("lDirection");
-
-	lCounter = new eLabel(this);
-	lCounter->setName("lCounter");
+	lCounter = CreateSkinnedLabel("lCounter");
 
 	running=false;
 
-	Mode = new eComboBox(this, 4, lMode );
-	Mode->setName("Mode");
+	Mode = CreateSkinnedComboBoxWithLabel("Mode", 4, "lMode" );
 	CONNECT(Mode->selchanged, eRotorManual::modeChanged);
 
-	num = new eNumber( this, 1, 1, 80, 2, 0, 0, lSat );
-	num->setName("num");
-	num->setNumber(1);
+	num = CreateSkinnedNumber("num",1, 1, 1, 80, 2, 0, 0, lSat );
 
 	// send no more DiSEqC Commands on transponder::tune to Rotor
 	eFrontend::getInstance()->disableRotor();
 
-	Sat = new eComboBox( this, 7, lSat );
-	Sat->setName("Sat");
+	Sat = CreateSkinnedComboBox("Sat", 7, lSat );
 	CONNECT(Sat->selchanged, eRotorManual::satChanged );
 
-	Transponder = new eComboBox(this, 5 );
-	Transponder->setName("Transponder");
+	Transponder = CreateSkinnedComboBox("Transponder", 5, lTransponder );
 	CONNECT(Transponder->selchanged, eRotorManual::tpChanged);
 
-	Direction = new eButton(this);
-	Direction->setName("Direction");
+	Direction = CreateSkinnedButton("Direction");
 
-	Exit = new eButton(this);
-	Exit->setName("Exit");
-	CONNECT( Exit->selected, eRotorManual::reject );
+	CONNECT( CreateSkinnedButton("Exit")->selected, eRotorManual::reject );
 
-	Save = new eButton(this);
-	Save->setName("Save");
+	Save = CreateSkinnedButton("Save");
 	CONNECT(Save->selected, eRotorManual::onButtonPressed );
 
-	Search = new eButton(this);
-	Search->setName("Search");
-	CONNECT( Search->selected, eRotorManual::onScanPressed );
+	CONNECT( CreateSkinnedButton("Search")->selected, eRotorManual::onScanPressed );
 
 	status = new eFEStatusWidget( this, eFrontend::getInstance() );
 	status->setName("Status");
 
-	if ( eSkin::getActive()->build(this, "RotorManual"))
-		eFatal("skin load of \"RotorManual\" failed");
+	BuildSkin("RotorManual");
 
 	Direction->setText("<    Stop    >");
 
@@ -836,31 +794,11 @@ eStoreWindow::eStoreWindow(eLNB *lnb, int orbital_pos)
 }
 void eStoreWindow::init_eStoreWindow()
 {
-	cresize(eSize(360,140));
-	cmove(ePoint(150,150));
-	setText("Store Satellite");
-	lStorageLoc = new eLabel(this);
-	lStorageLoc->resize(eSize(250, 35));
-	lStorageLoc->move(ePoint(10,10));
-	lStorageLoc->setText(_("Storage Location:"));
-	StorageLoc = new eNumber( this, 1, 1, 80, 2, 0, 0, lStorageLoc );
-	StorageLoc->setHelpText(_("change storage Location or store"));
-	StorageLoc->resize(eSize(80, 35));
-	StorageLoc->move(ePoint(270, 10));
-	StorageLoc->loadDeco();
+
+	StorageLoc = CreateSkinnedNumberWithLabel("StorageLoc",0, 1, 1, 80, 2, 0, 0, "lStorageLoc" );
 	CONNECT(StorageLoc->selected, eStoreWindow::nextfield );
-	Store = new eButton(this);
-	Store->setShortcut("green");
-	Store->setShortcutPixmap("green");
-	Store->move(ePoint(10,60));
-	Store->resize(eSize(220,40));
-	Store->setText(_("store"));
-	Store->loadDeco();
-	CONNECT( Store->selected, eStoreWindow::onStorePressed );
-	eStatusBar *sbar = new eStatusBar(this);
-	sbar->move( ePoint(0, getClientSize().height()-30) );
-	sbar->resize( eSize( getClientSize().width(), 30) );
-	sbar->loadDeco();
+	CONNECT( CreateSkinnedButton("store")->selected, eStoreWindow::onStorePressed );
+	BuildSkin("eStoreWindow");
 	int i = 0;
 	while (1)
 	{
