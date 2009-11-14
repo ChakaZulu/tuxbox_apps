@@ -45,9 +45,7 @@ class eTuxtxtSetup: public eWindow
 {
 	tstRenderInfo* renderinfo;
 	eComboBox* favourites;
-	eButton* removepage;
 	eNumber* pagenumber;
-	eButton* addpage;
 	eComboBox* language;
 	eCheckbox* normal169;
 	eCheckbox* split169;
@@ -55,7 +53,6 @@ class eTuxtxtSetup: public eWindow
 	eSlider* sTransparency;
 	eCheckbox* truetype;
 	eComboBox* service;
-	eStatusBar*  sbar;
 	std::vector<int>* hotlist;
 
 
@@ -95,34 +92,31 @@ eTuxtxtSetup::~eTuxtxtSetup()
 void eTuxtxtSetup::init_eTuxtxtSetup()
 {
 	memset(pid_table,0,128*sizeof(struct _pid_table));
-	favourites=new eComboBox(this,5);favourites->setName("favourites");
+	favourites=CreateSkinnedComboBox("favourites");
 	for (std::vector<int>::iterator x(hotlist->begin()); x != hotlist->end(); ++x)
 	{
 		addhotlistpage(*x);
 	}
 
-	removepage=new eButton(this); removepage->setName("removepage");
+	CONNECT(CreateSkinnedButton("removepage")->selected, eTuxtxtSetup::removepagePressed);
 
-	pagenumber=new eNumber(this,1,1, 899, 3, 0, 0); pagenumber->setName("pagenumber");
-	pagenumber->setNumber((tuxtxt_cache.page & 0xf) +(tuxtxt_cache.page>>4 & 0xf)*10 + (tuxtxt_cache.page>>8 & 0x0f)*100);
+	pagenumber=CreateSkinnedNumber("pagenumber",(tuxtxt_cache.page & 0xf) +(tuxtxt_cache.page>>4 & 0xf)*10 + (tuxtxt_cache.page>>8 & 0x0f)*100,1,1, 899, 3, 0);
 
-	addpage=new eButton(this); addpage->setName("addpage");
+	CONNECT(CreateSkinnedButton("addpage")->selected, eTuxtxtSetup::addpagePressed);
 
-	service=new eComboBox(this,5); service->setName("service");
+	service=CreateSkinnedComboBox("service");
 	service->setCurrent(new eListBoxEntryText( *service,_("search"), (void*) -1 ));
 
-	normal169=new eCheckbox(this);normal169->setName("normal169");
-	normal169->setCheck((unsigned char)renderinfo->screen_mode1);
+	normal169=CreateSkinnedCheckbox("normal169",renderinfo->screen_mode1);
 
-	split169=new eCheckbox(this);split169->setName("split169");
-	split169->setCheck((unsigned char)renderinfo->screen_mode2);
+	split169=CreateSkinnedCheckbox("split169",renderinfo->screen_mode2);
 
-	sBrightness = new eSlider( this, 0, 1, 24 );sBrightness->setName("sBrightness");
+	sBrightness = CreateSkinnedSlider("sBrightness", 0, 1, 24 );
 
-	sTransparency = new eSlider( this, 0, 1, 24 );sTransparency->setName("sTransparency");
+	sTransparency = CreateSkinnedSlider("sTransparency", 0, 1, 24 );
 
 
-	language=new eComboBox(this,5); language->setName("language");
+	language=CreateSkinnedComboBox("language");
 	new eListBoxEntryText( *language,_("automatic"), (void*) 0 );
 	new eListBoxEntryText( *language,_("Czech/Slovak"), (void*) 1 );
 	new eListBoxEntryText( *language,_("English"), (void*) 2 );
@@ -144,21 +138,14 @@ void eTuxtxtSetup::init_eTuxtxtSetup()
 	new eListBoxEntryText( *language,_("Hebrew"), (void*)18 );
 	new eListBoxEntryText( *language,_("Arabic"), (void*)19 );
 
-	truetype=new eCheckbox(this);truetype->setName("truetype");
-	truetype->setCheck((unsigned char)renderinfo->usettf);
+	truetype=CreateSkinnedCheckbox("truetype",renderinfo->usettf);
 
-	sbar = new eStatusBar(this); sbar->setName("statusbar");
-
-	if (eSkin::getActive()->build(this, "SetupTuxtxt"))
-		eFatal("skin load of \"SetupTuxtxt\" failed");
-
+	BuildSkin("SetupTuxtxt");
 	language->setCurrent((void*)(renderinfo->auto_national ? 0 : tuxtxt_cache.national_subset));
 	favourites->setCurrent(0);
 	sBrightness->setValue( renderinfo->color_mode);
 	sTransparency->setValue( renderinfo->trans_mode);
 
-	CONNECT(removepage->selected, eTuxtxtSetup::removepagePressed);
-	CONNECT(addpage->selected, eTuxtxtSetup::addpagePressed);
 	CONNECT(service->selected, eTuxtxtSetup::ServiceSelected);
 }
 

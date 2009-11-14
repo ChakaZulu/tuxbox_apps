@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_picmanager.h,v 1.6 2009/02/03 18:54:33 dbluelle Exp $
+ * $Id: enigma_picmanager.h,v 1.7 2009/11/14 16:27:47 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -30,9 +30,6 @@
 class ePicViewerSettings: public eWindow
 {
 private:
-
-	eButton *ok, *abort;
-	eStatusBar *statusbar;
 	eCheckbox *subdirs, *busy, *format_169;
 	eListBox<eListBoxEntryText> *timeout;
 

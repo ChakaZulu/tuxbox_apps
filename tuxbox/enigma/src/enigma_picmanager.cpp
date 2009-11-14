@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_picmanager.cpp,v 1.11 2009/02/03 18:54:33 dbluelle Exp $
+ * $Id: enigma_picmanager.cpp,v 1.12 2009/11/14 16:27:47 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -40,93 +40,26 @@ void ePicViewerSettings::init_ePicViewerSettings()
 {
 	int slideshowtimeout = 5;
 	eConfig::getInstance()->getKey("/picviewer/slideshowtimeout", slideshowtimeout);
-	int includesubdirs = 0;
-	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
-	int showbusysign = 0;
-	eConfig::getInstance()->getKey("/picviewer/showbusysign", showbusysign);
-	int format169 = 0;
-	eConfig::getInstance()->getKey("/picviewer/format169", format169);
 
-	int fd = eSkin::getActive()->queryValue("fontsize", 20);
-
-	setText(_("Slide Viewer (1.6)"));
-	cmove(ePoint(100, 80));
-
-	int y = 10, dy = 35, h = fd + 6;
-
-
-	eLabel *l = new eLabel(this);
-	l->setText(_("Timeout"));
-	l->move(ePoint(10, y));
-	l->resize(eSize(100, h));
-
-	timeout = new eListBox<eListBoxEntryText>(this, l);
-	timeout->loadDeco();
+	timeout = new eListBox<eListBoxEntryText>(this);timeout->setName("timeout");
 	timeout->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	timeout->move(ePoint(110, y));
-	timeout->resize(eSize(35, 34));
 	eListBoxEntryText* entries[30];
 	for (int i = 0; i < 30; i++)
 	{
 		eString num = eString().sprintf("%d", i + 1);
 		entries[i] = new eListBoxEntryText(timeout, num.c_str(), (void *)new eString(num.c_str()));
 	}
+
+	subdirs =CreateSkinnedCheckbox("subdirs",0,"/picviewer/includesubdirs");
+	busy =CreateSkinnedCheckbox("busy",0,"/picviewer/showbusysign");
+	format_169 =CreateSkinnedCheckbox("format_169",0,"/picviewer/format169");
+
+	CONNECT(CreateSkinnedButton("store")->selected, ePicViewerSettings::okPressed);
+
+	BuildSkin("picmanager");
+
 	timeout->setCurrent(entries[slideshowtimeout - 1]);
-	timeout->setHelpText(_("Select slideshow timeout (left, right)"));
 
-	y += dy;
-
-	subdirs = new eCheckbox(this, includesubdirs, 1);
-	subdirs->setText(_("Include subdirectories"));
-	subdirs->move(ePoint(10, y));
-	subdirs->resize(eSize(300, h));
-	subdirs->setHelpText(_("Include slides of subdirectories in slideshow"));
-
-	y += dy;
-
-	busy = new eCheckbox(this, showbusysign, 1);
-	busy->setText(_("Show busy sign"));
-	busy->move(ePoint(10, y));
-	busy->resize(eSize(300, h));
-	busy->setHelpText(_("Show busy sign while preprocessing slide"));
-
-	y += dy;
-
-	format_169 = new eCheckbox(this, format169, 1);
-	format_169->setText(_("Show in 16:9 format"));
-	format_169->move(ePoint(10, y));
-	format_169->resize(eSize(300, h));
-	format_169->setHelpText(_("Always show slides in 16:9 format"));
-
-	y += dy + 20;
-
-	ok = new eButton(this);
-	ok->setText(_("save"));
-	ok->setShortcut("green");
-	ok->setShortcutPixmap("green");
-	ok->move(ePoint(10, y));
-	ok->resize(eSize(130, h));
-	ok->setHelpText(_("Close window and save entries"));
-	ok->loadDeco();
-	CONNECT(ok->selected, ePicViewerSettings::okPressed);
-
-	abort = new eButton(this);
-	abort->loadDeco();
-	abort->setText(_("abort"));
-	abort->setShortcut("red");
-	abort->setShortcutPixmap("red");
-	abort->move(ePoint(130 + 10 + 10, y));
-	abort->resize(eSize(130, h));
-	abort->setHelpText(_("Close window (no changes are saved)"));
-	CONNECT(abort->selected, ePicViewerSettings::abortPressed);
-
-	y = y + 40 + 2 * h;
-	cresize(eSize(350, y));
-
-	statusbar = new eStatusBar(this);
-	statusbar->move(ePoint(0, clientrect.height() - 2 * h));
-	statusbar->resize(eSize( clientrect.width(), 2 * h));
-	statusbar->loadDeco();
 }
 
 ePicViewerSettings::~ePicViewerSettings()

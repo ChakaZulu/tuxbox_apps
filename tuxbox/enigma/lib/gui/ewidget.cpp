@@ -11,6 +11,16 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
+#include <lib/gui/echeckbox.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/textinput.h>
+#include <lib/gui/statusbar.h>
+#include <lib/gui/enumber.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/combobox.h>
+#include <lib/gui/eprogress.h>
+#include <lib/gui/slider.h>
+
 extern eWidget *currentFocus;
 
 eWidget *eWidget::root;
@@ -1174,6 +1184,86 @@ void eWidget::setShortcutFocus(eWidget *focus)
 	if (!focus)
 		eFatal("setShortcutFocus with unknown widget!");
 }
+
+eProgress* eWidget::CreateSkinnedProgress(const char* name, int start, int perc, int takefocus )
+{
+	eProgress* prg = new eProgress(this, takefocus);
+	prg->setName(name);
+	prg->setParams( start, perc );
+	return prg;
+}
+eSlider* eWidget::CreateSkinnedSlider(const char* name, const char *descr, int min, int max )
+{
+	eSlider* s = new eSlider(this,(descr ? CreateSkinnedLabel(descr) : 0), min, max);
+	s->setName(name);
+	return s;
+
+}
+eLabel* eWidget::CreateSkinnedLabel(const char* name,const char* text, int flags)
+{
+	eLabel* l = new eLabel(this,flags);
+	l->setName(name);
+	if (text)
+		l->setText(text);
+	return l;
+}
+eComboBox* eWidget::CreateSkinnedComboBoxWithLabel(const char* name, int OpenEntries, const char* lbldescr, int takefocus)
+{
+	return  CreateSkinnedComboBox(name, OpenEntries, (lbldescr ? CreateSkinnedLabel(lbldescr) : 0), takefocus);
+}
+eComboBox* eWidget::CreateSkinnedComboBox(const char* name, int OpenEntries, eLabel* descr, int takefocus)
+{
+	eComboBox* cbo = new eComboBox(this, OpenEntries, descr, takefocus );
+	cbo->setName(name);
+	return cbo;
+}
+
+eCheckbox* eWidget::CreateSkinnedCheckbox(const char* name,int defaultvalue, const char* configkey,int takefocus)
+{
+	if (configkey)
+		eConfig::getInstance()->getKey(configkey, defaultvalue );
+	eCheckbox* chk =new eCheckbox(this,defaultvalue,takefocus);
+	chk->setName(name);
+	return chk;
+}
+eNumber* eWidget::CreateSkinnedNumberWithLabel(const char* name, int defaultvalue, int len, int min, int max, int maxdigits, int *init, int isactive, const char* lbldescr, int grabfocus)
+{
+	return CreateSkinnedNumber(name, defaultvalue, len, min, max, maxdigits, init, isactive, (lbldescr ? CreateSkinnedLabel(lbldescr) : 0), grabfocus);
+}
+eNumber* eWidget::CreateSkinnedNumber(const char* name, int defaultvalue, int len, int min, int max, int maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
+{
+	eNumber* n = new eNumber(this, len, min, max, maxdigits, init, isactive, descr, grabfocus);
+	n->setName(name);
+	if (!init)
+		n->setNumber(defaultvalue);
+	return n;
+}
+eTextInputField* eWidget::CreateSkinnedTextInputField(const char* name, const char* defaultvalue, const char* configkey, const char* lblname,eTextInputFieldHelpWidget *hlp)
+{
+	eTextInputField* tb=new eTextInputField(this,lblname ? CreateSkinnedLabel(lblname) : 0,hlp);
+	tb->setName(name);
+	if (defaultvalue)
+	{
+		eString val = eString(defaultvalue);
+		char* p = 0;
+		if (configkey)
+			eConfig::getInstance()->getKey(configkey, p);
+		if (p) val = eString(p);
+		tb->setText(val);
+	}
+	return tb;
+}
+eButton* eWidget::CreateSkinnedButton(const char* name, eLabel* descr, int takefocus)
+{
+	eButton* btn =new eButton(this, descr, takefocus);
+	btn->setName(name);
+	return btn;
+}
+void eWidget::BuildSkin(const char* name)
+{
+	if (eSkin::getActive()->build(this, name))
+		eFatal("skin load of \"%s\" failed",name);
+};
 
 static eWidget *create_eWidget(eWidget *parent)
 {

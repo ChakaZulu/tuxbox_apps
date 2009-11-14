@@ -648,20 +648,19 @@ void eTextInputFieldHelpWidget::redrawWidget(gPainter *target, const eRect & are
 eTextInputFieldHelpWidget::eTextInputFieldHelpWidget(eWidget *parent)
 	:eWidget(parent, 0)
 {
-	keys[0] = new eLabel(this); keys[0]->setName("zero");
-	keys[1] = new eLabel(this); keys[1]->setName("one");
-	keys[2] = new eLabel(this); keys[2]->setName("two");
-	keys[3] = new eLabel(this); keys[3]->setName("three");
-	keys[4] = new eLabel(this); keys[4]->setName("four");
-	keys[5] = new eLabel(this); keys[5]->setName("five");
-	keys[6] = new eLabel(this); keys[6]->setName("six");
-	keys[7] = new eLabel(this); keys[7]->setName("seven");
-	keys[8] = new eLabel(this); keys[8]->setName("eight");
-	keys[9] = new eLabel(this); keys[9]->setName("nine");
-	keys[10] = new eLabel(this); keys[10]->setName("special_one");
-	keys[11] = new eLabel(this); keys[11]->setName("special_two");
-	if (eSkin::getActive()->build(this, "eTextInputFieldHelpWidget"))
-		eWarning("TextInputFieldHelpWidget build failed!");
+	keys[0] = CreateSkinnedLabel("zero");
+	keys[1] = CreateSkinnedLabel("one");
+	keys[2] = CreateSkinnedLabel("two");
+	keys[3] = CreateSkinnedLabel("three");
+	keys[4] = CreateSkinnedLabel("four");
+	keys[5] = CreateSkinnedLabel("five");
+	keys[6] = CreateSkinnedLabel("six");
+	keys[7] = CreateSkinnedLabel("seven");
+	keys[8] = CreateSkinnedLabel("eight");
+	keys[9] = CreateSkinnedLabel("nine");
+	keys[10] = CreateSkinnedLabel("special_one");
+	keys[11] = CreateSkinnedLabel("special_two");
+	BuildSkin("eTextInputFieldHelpWidget");
 }
 
 int eTextInputField::keyDown(int rc)

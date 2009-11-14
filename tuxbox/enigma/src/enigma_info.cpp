@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.33 2006/07/15 13:22:48 ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.34 2009/11/14 16:22:48 dbluelle Exp $
  */
 
 #include <enigma_info.h>
@@ -49,7 +49,7 @@ eZapInfo::~eZapInfo()
 
 void eZapInfo::sel_streaminfo()
 {
-	hide();	
+	hide();
 	eStreaminfo si(0, eServiceInterface::getInstance()->service);
 #ifndef DISABLE_LCD
 	si.setLCD(LCDTitle, LCDElement);
@@ -88,46 +88,33 @@ static eString getVersionInfo(const char *info)
 
 class eAboutScreen: public eWindow
 {
-	eLabel *machine, *processor, *frontend, *harddisks, *vendor, *logo, *version, *dreamlogo, *triaxlogo, *fpversion;
-	eButton *okButton;
-
 public:
 	eAboutScreen()
 	{
+		init_eAboutScreen();
+	}
+private:
+	void init_eAboutScreen()
+	{
 		setHelpID(43);
 
-		machine=new eLabel(this);
-		machine->setName("machine");
+		eLabel *frontend, *harddisks, *version, *dreamlogo, *triaxlogo, *fpversion;
 
-		vendor=new eLabel(this);
-		vendor->setName("vendor");
+		CreateSkinnedLabel("machine",eSystemInfo::getInstance()->getModel());
+		CreateSkinnedLabel("vendor",eSystemInfo::getInstance()->getManufacturer());
+		CreateSkinnedLabel("processor",eString().sprintf("%s %s",_("Processor:"), eSystemInfo::getInstance()->getCPUInfo()).c_str());
 
-		processor=new eLabel(this);
-		processor->setName("processor");
+		frontend = CreateSkinnedLabel("frontend");
+		harddisks= CreateSkinnedLabel("harddisks");
 
-		frontend=new eLabel(this);
-		frontend->setName("frontend");
+		CONNECT(CreateSkinnedButton("okButton")->selected, eWidget::accept);
 
-		harddisks=new eLabel(this);
-		harddisks->setName("harddisks");
+		dreamlogo= CreateSkinnedLabel("dreamlogo");
+		triaxlogo= CreateSkinnedLabel("triaxlogo");
+		version= CreateSkinnedLabel("version");
+		fpversion= CreateSkinnedLabel("fp_version");
 
-		okButton=new eButton(this);
-		okButton->setName("okButton");
-
-		dreamlogo=new eLabel(this);
-		dreamlogo->setName("dreamlogo");
-
-		triaxlogo=new eLabel(this);
-		triaxlogo->setName("triaxlogo");
-
-		version=new eLabel(this);
-		version->setName("version");
-
-		fpversion=new eLabel(this);
-		fpversion->setName("fp_version");
-
-		if (eSkin::getActive()->build(this, "eAboutScreen"))
-			eFatal("skin load of \"eAboutScreen\" failed");
+		BuildSkin("eAboutScreen");
 
 		dreamlogo->hide();
 		triaxlogo->hide();
@@ -140,9 +127,6 @@ public:
 				h->hide();
 		}
 
-		machine->setText(eSystemInfo::getInstance()->getModel());
-		vendor->setText(eSystemInfo::getInstance()->getManufacturer());
-		processor->setText(eString().sprintf("Processor: %s", eSystemInfo::getInstance()->getCPUInfo()));
 
 		switch (eSystemInfo::getInstance()->getFEType())
 		{
@@ -252,7 +236,6 @@ public:
 		else
 			fpversion->hide();
 
-		CONNECT(okButton->selected, eWidget::accept);
 	}
 };
 

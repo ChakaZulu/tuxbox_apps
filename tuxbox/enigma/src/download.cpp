@@ -50,8 +50,7 @@ void eDownloadWindow::httpDone()
 eDownloadWindow::eDownloadWindow(const char *url): eWindow(), url(url)
 {
 	c=0;
-	if (eSkin::getActive()->build(this, "eDownloadWindow"))
-		eFatal("skin load of \"eDownloadWindow\" failed");
+	BuildSkin("eDownloadWindow");
 }
 
 eDownloadWindow::~eDownloadWindow()

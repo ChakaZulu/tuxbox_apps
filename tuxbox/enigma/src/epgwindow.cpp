@@ -335,8 +335,7 @@ void eEPGSelector::init_eEPGSelector(eString* pSearchString)
 	events->setName("events");
 	events->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 
-	if (eSkin::getActive()->build(this, "eEPGSelector"))
-		eWarning("EPG selector widget build failed!");
+	BuildSkin("eEPGSelector");
 
 	CONNECT(events->selected, eEPGSelector::entrySelected);
 	myEPGSearch = 0;

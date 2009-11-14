@@ -311,7 +311,6 @@ public:
 class SkipEditWindow: public eWidget
 {
 	eTextInputField *input;
-	eLabel *description;
 	int eventHandler( const eWidgetEvent &e );
 public:
 	SkipEditWindow( const char *InputFieldDescr);

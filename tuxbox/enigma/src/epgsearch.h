@@ -66,7 +66,6 @@ class eEPGSearch: public eWindow
 	
 	
 	eTextInputField *InputName;
-	eStatusBar *status;
 	eCheckbox *chkAllServices, *chkCurrentService, *chkExactMatch, *chkCaseSensitive;
 	eComboBox *cboGenre;
 	
@@ -78,7 +77,6 @@ class eEPGSearch: public eWindow
 	int intAllServices;
 	int intExactMatch;
 	int intCaseSensitive;
-	eButton *bt_abort, *bt_seach;
 	
 	void Search();
 	eString Titel;

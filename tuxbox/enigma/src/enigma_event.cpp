@@ -221,29 +221,20 @@ void eEventDisplay::init_eEventDisplay(const ePtrList<EITEvent>* e)
 	eventlist=0;
 	events=0;
 
-	scrollbar = new eProgress(this);
-	scrollbar->setName("scrollbar");
-	scrollbar->setStart(0);
-	scrollbar->setPerc(100);
+	scrollbar = CreateSkinnedProgress("scrollbar",0,100);
 
 	descr = new eWidget(this);
 	descr->setName("epg_description");
 
-	eventTime = new eLabel(this);
-	eventTime->setName("time");
+	eventTime = CreateSkinnedLabel("time");
 
-	eventDate = new eLabel(this);
-	eventDate->setName("date");
+	eventDate = CreateSkinnedLabel("date");
 
-	channel = new eLabel(this);
-	channel->setName("channel");
+	channel = CreateSkinnedLabel("channel");
 
-	timer_icon = new eLabel(this);
-	timer_icon->setName("timer_icon");
+	timer_icon = CreateSkinnedLabel("timer_icon");
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "eventview"))
-		eFatal("skin load of \"eventview\" failed");
+	BuildSkin("eventview");
 
 	long_description=new eLabel(descr);
 	long_description->setFlags(RS_WRAP);

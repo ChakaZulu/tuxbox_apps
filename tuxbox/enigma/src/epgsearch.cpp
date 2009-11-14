@@ -1,5 +1,5 @@
 /*
- * $Id: epgsearch.cpp,v 1.2 2009/03/05 17:32:39 dbluelle Exp $
+ * $Id: epgsearch.cpp,v 1.3 2009/11/14 16:27:47 dbluelle Exp $
  *
  * (C) 2008 by Dr. Best  <dr.best@dreambox-tools.info>
  *
@@ -114,7 +114,6 @@ void eEPGSearch::init_eEPGSearch(eServiceReference& ref, const eString& CurrentE
 		}
 	}
 	Titel = descr;
-	status  = new eStatusBar(this); status->setName("statusbar");
 	
 	sServiceReference = ref2string(ref);
 	eString AnzeigeCheckBox = _("unknown");
@@ -128,25 +127,25 @@ void eEPGSearch::init_eEPGSearch(eServiceReference& ref, const eString& CurrentE
 	}
 	sServiceReferenceSearch = AnzeigeCheckBox;
 	
-	InputName=new eTextInputField(this,0); InputName->setName("searchtext");
+	InputName= CreateSkinnedTextInputField("searchtext", Titel.c_str());
 	InputName->setMaxChars(50); 
 	
 	intAllServices = 0;
 	intExactMatch = 0;
 	intCaseSensitive = 0;
 	
-	chkCurrentService = new eCheckbox(this, 0, 1);chkCurrentService->setName("CurrentService");
+	chkCurrentService = CreateSkinnedCheckbox("CurrentService");
 	CONNECT(chkCurrentService->checked, eEPGSearch::chkCurrentServiceStateChanged);
 	
-	chkAllServices = new eCheckbox(this, 1, 1);chkAllServices->setName("AllServices");
+	chkAllServices = CreateSkinnedCheckbox("AllServices");
 	CONNECT(chkAllServices->checked, eEPGSearch::chkAllServicesStateChanged);
 	
-	chkExactMatch = new eCheckbox(this, 0, 1);chkExactMatch->setName("ExactMatch");
+	chkExactMatch = CreateSkinnedCheckbox("ExactMatch");
 	
-	chkCaseSensitive = new eCheckbox(this, 0, 1);chkCaseSensitive->setName("CaseSensitive");
+	chkCaseSensitive = CreateSkinnedCheckbox("CaseSensitive");
 
 
-	cboGenre = new eComboBox(this);cboGenre->setName("Genre");
+	cboGenre = CreateSkinnedComboBox("Genre");
 	new eListBoxEntryText(*cboGenre, "", (void *) (0));
 	// Movies lasse ich in Einzelkategorien, des Rest fasse ich in Gruppen zusammen...
 	new eListBoxEntryText(*cboGenre, _("Movie"), (void *) (16));
@@ -172,17 +171,13 @@ void eEPGSearch::init_eEPGSearch(eServiceReference& ref, const eString& CurrentE
 	cboGenre->setCurrent(0);
 	CONNECT(cboGenre->selchanged, eEPGSearch::cboGenreChanged);
 	
-	bt_abort=new eButton(this);bt_abort->setName("Close");
-        CONNECT(bt_abort->selected, eWidget::reject);
+        CONNECT(CreateSkinnedButton("Close")->selected, eWidget::reject);
 	
-	bt_seach=new eButton(this);bt_seach->setName("Start");
-	CONNECT(bt_seach->selected, eEPGSearch::Search);
+	CONNECT(CreateSkinnedButton("Start")->selected, eEPGSearch::Search);
 
-	if (eSkin::getActive()->build(this, "eEPGSearch"))
-		eFatal("skin load of \"eEPGSearch\" failed");
+	BuildSkin("eEPGSearch");
 
 	chkCurrentService->setText(AnzeigeCheckBox);
-	InputName->setText(Titel);
 	setFocus(InputName);
 	canCheck = 1;
 }

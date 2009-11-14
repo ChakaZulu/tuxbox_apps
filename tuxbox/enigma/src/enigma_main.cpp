@@ -1735,12 +1735,10 @@ void eZapMain::init_main()
 	subtitle = new eSubtitleWidget();
 	subtitle->show();
 
-	dvrInfoBar=new eLabel(this);
-	dvrInfoBar->setName("dvrInfoBar");
+	dvrInfoBar=CreateSkinnedLabel("dvrInfoBar");
 	dvrInfoBar->hide();
 
-	DVRSpaceLeft=new eLabel(dvrInfoBar);
-	DVRSpaceLeft->setName("TimeLeft");
+	DVRSpaceLeft=dvrInfoBar->CreateSkinnedLabel("TimeLeft");
 
 	dvbInfoBar=new eWidget(this);
 	dvbInfoBar->setName("dvbInfoBar");
@@ -1750,14 +1748,12 @@ void eZapMain::init_main()
 	fileInfoBar->setName("fileInfoBar");
 	fileInfoBar->hide();
 
-	fileinfos=new eLabel(fileInfoBar);
-	fileinfos->setName("fileinfos");
+	fileinfos=fileInfoBar->CreateSkinnedLabel("fileinfos");
 
 	dvrfunctions=0;
 	stateOSD=0;
 
-	recstatus=new eLabel(this);
-	recstatus->setName("recStatus");
+	recstatus=CreateSkinnedLabel("recStatus");
 	recstatus->hide();
 
 #ifndef DISABLE_FILE
@@ -1766,14 +1762,11 @@ void eZapMain::init_main()
 	Progress->setIndices(&indices);
 	indices_enabled = 0;
 #else
-	Progress=new eProgress(this);
-	Progress->setName("progress_bar");
+	Progress=CreateSkinnedProgress("progress_bar");
 #endif
 
 	isVT=0;
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "ezap_main"))
-		eFatal("skin load of \"ezap_main\" failed");
+	BuildSkin("ezap_main");
 
 #ifndef DISABLE_LCD
 	lcdmain.show();
@@ -8054,12 +8047,9 @@ void eSleepTimerContextMenu::entrySelected( eListBoxEntryText *sel )
 eShutdownStandbySelWindow::eShutdownStandbySelWindow(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive, eWidget* descr, int grabfocus, const char* deco )
 {
 	num = new eNumber( parent, len, min, max, maxdigits, init, isactive, descr, grabfocus, deco );
-	Shutdown = new eCheckbox(this);
-	Shutdown->setName("shutdown");
-	Standby = new eCheckbox(this);
-	Standby->setName("standby");
-	set = new eButton(this);
-	set->setName("set");
+	Shutdown = CreateSkinnedCheckbox("shutdown");
+	Standby = CreateSkinnedCheckbox("standby");
+	set = CreateSkinnedButton("set");
 	CONNECT( num->selected, eShutdownStandbySelWindow::fieldSelected );
 	CONNECT( Shutdown->checked, eShutdownStandbySelWindow::ShutdownChanged );
 	CONNECT( Standby->checked, eShutdownStandbySelWindow::StandbyChanged );
@@ -8085,13 +8075,10 @@ int eShutdownStandbySelWindow::getCheckboxState()
 eSleepTimer::eSleepTimer()
 :eShutdownStandbySelWindow( this, 1, 1, 999, 3, 0, 0 )
 {
-	eLabel *l = new eLabel(this);
-	l->setName("l_duration");
-	num->setDescr(l);
+	num->setDescr(CreateSkinnedLabel("l_duration"));
 	num->setName("duration");
 	num->setNumber(10);
-	if (eSkin::getActive()->build(this, "sleeptimer"))
-		eFatal("skin load of \"sleeptimer\" failed");
+	BuildSkin("sleeptimer");
 	CONNECT( set->selected, eSleepTimer::setPressed );
 
 	if ( !eSystemInfo::getInstance()->canShutdown() )
@@ -8116,9 +8103,7 @@ void eSleepTimer::setPressed()
 eTimerInput::eTimerInput()
 :eShutdownStandbySelWindow( this, 1, 1, 999, 3, 0, 0 )
 {
-	eLabel *l = new eLabel(this);
-	l->setName("lrec_duration");
-	num->setDescr(l);
+	num->setDescr(CreateSkinnedLabel("lrec_duration"));
 	num->setName("rec_duration");
 
 	int min=10;
@@ -8141,8 +8126,7 @@ eTimerInput::eTimerInput()
 	}
 
 	num->setNumber(min);
-	if (eSkin::getActive()->build(this, "recording_duration"))
-		eFatal("skin load of \"recording_duration\" failed");
+	BuildSkin("recording_duration");
 	CONNECT( set->selected, eTimerInput::setPressed );
 }
 
@@ -8200,9 +8184,7 @@ eRecTimeInput::eRecTimeInput()
 }
 void eRecTimeInput::init_eRecTimeInput()
 {
-	eLabel *l = new eLabel(this);
-	l->setName("lrec_end_time");
-	num->setDescr(l);
+	num->setDescr(CreateSkinnedLabel("lrec_end_time"));
 	num->setName("rec_end_time");
 	num->setFlags( eNumber::flagFillWithZeros|eNumber::flagTime );
 
@@ -8230,8 +8212,7 @@ void eRecTimeInput::init_eRecTimeInput()
 	num->setNumber(0, t->tm_hour);
 	num->setNumber(1, t->tm_min);
 
-	if (eSkin::getActive()->build(this, "recording_end_time"))
-		eFatal("skin load of \"recording_end_time\" failed");
+	BuildSkin("recording_end_time");
 
 	CONNECT( set->selected, eRecTimeInput::setPressed );
 }
@@ -8282,23 +8263,15 @@ void TextEditWindow::init_TextEditWindow( const char *InputFieldDescr, const cha
 	eTextInputFieldHelpWidget *image=new eTextInputFieldHelpWidget(this);
 	image->setName("image");
 
-	input = new eTextInputField(this,0,image);
-	input->setName("inputfield");
-	input->setHelpText(_("press ok to start edit mode"));
+	input = CreateSkinnedTextInputField("inputfield",0,0,0,image);
 	input->setFlags(eTextInputField::flagCloseParent);
 	if (useableChars)
 		input->setUseableChars( useableChars );
 	CONNECT( input->selected, TextEditWindow::accept );
 
-	descr = new eLabel(this);
-	descr->setName("descr");
-	descr->setText(InputFieldDescr);
+	descr = CreateSkinnedLabel("descr",InputFieldDescr);
 
-	eStatusBar *n = new eStatusBar(this);
-	n->setName("statusbar");
-
-	if (eSkin::getActive()->build(this, "TextEditWindow"))
-		eWarning("TextEditWindow build failed!");
+	BuildSkin("TextEditWindow");
 }
 
 int TextEditWindow::eventHandler( const eWidgetEvent &e )
@@ -8346,23 +8319,15 @@ void UserBouquetSelector::selected( eListBoxEntryText *sel )
 
 SkipEditWindow::SkipEditWindow( const char *InputFieldDescr)
 {
-	int fsize=eSkin::getActive()->queryValue("fontsize", 20)+4;
-	
-	cmove(ePoint(20, 160));
-	cresize(eSize(160, fsize+8));
-
-	description=new eLabel(this);
+	eLabel* description=CreateSkinnedLabel("description");
 	description->setText(InputFieldDescr);
-	description->move(ePoint(20, 4));
-	description->resize(eSize(80,fsize));
 
-	input = new eTextInputField(this);
-	input->move(ePoint(100, 4));
-	input->resize(eSize(50,fsize));
+	input = CreateSkinnedTextInputField("input",0);
 	input->setMaxChars(3);
 	input->setFlags(eTextInputField::flagCloseParent|eTextInputField::flagGoAlwaysNext);
 	input->setUseableChars("0123456789");
 	CONNECT( input->selected, TextEditWindow::accept );
+	BuildSkin("SkipEditWindow");
 }
 
 int SkipEditWindow::eventHandler( const eWidgetEvent &e )

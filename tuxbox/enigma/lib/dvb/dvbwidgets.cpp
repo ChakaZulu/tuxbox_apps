@@ -21,15 +21,11 @@ void eTransponderWidget::init_eTransponderWidget(eWidget *parent, int edit, int 
 	LCDElement=parent->LCDElement;
 #endif
 
-	eLabel *l = 0;
-
 	if ( type & deliverySatellite )
-	{          
-		lsat = new eLabel(this);
-		lsat->setName( "lSat" );
+	{
+		lsat =CreateSkinnedLabel("lSat");
 
-		sat=new eComboBox(this, 4, l, edit);
-		sat->setName("sat");
+		sat=CreateSkinnedComboBox("sat", 4, 0, edit);
 
 		std::map<int,eSatellite*> sats;
 		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
@@ -41,25 +37,14 @@ void eTransponderWidget::init_eTransponderWidget(eWidget *parent, int edit, int 
 		CONNECT(sat->selchanged, eTransponderWidget::updated1);
 	}
 
-	l = new eLabel(this);
-	l->setName( "lFreq" );
 
 	int init[5]={0,0,0,0,0};
 
-	if ( type & deliveryTerrestrial )
-	    frequency=new eNumber(this, 6, 0, 9, 1, init, 0, l, edit);
-	else
-	    frequency=new eNumber(this, 5, 0, 9, 1, init, 0, l, edit);
-	
-	frequency->setName("frequency");
+	frequency=CreateSkinnedNumberWithLabel("frequency",0,type & deliveryTerrestrial ? 6 : 5, 0, 9, 1, init, 0, "lFreq", edit);
 
-	inversion=new eCheckbox(this);
-	inversion->setName("inversion");
+	inversion=CreateSkinnedCheckbox("inversion");
 
-	l = new eLabel(this);
-	l->setName( "lPol" );
-
-	polarity=new eListBox<eListBoxEntryText>(this, l, edit);
+	polarity=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("lPol"), edit);
 	polarity->setName("polarity");
 	if ( type & deliverySatellite )
 	{
@@ -83,9 +68,7 @@ void eTransponderWidget::init_eTransponderWidget(eWidget *parent, int edit, int 
 		polarityEntry[3]=new eListBoxEntryText(polarity, _("64-QAM"), (void*)2);
 	}
 
-	l = new eLabel(this);
-	l->setName( "lFec" );
-	fec=new eListBox<eListBoxEntryText>(this, l, edit);
+	fec=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("lFec"), edit);
 	fec->setName("fec");
 	if ( type & (deliverySatellite|deliveryCable) )
 	{
@@ -110,25 +93,19 @@ void eTransponderWidget::init_eTransponderWidget(eWidget *parent, int edit, int 
 
 	if ( type & deliveryTerrestrial )
 	{
-		l = new eLabel(this);
-		l->setName("lBandwidth");
-		bandwidth=new eListBox<eListBoxEntryText>(this, l, edit);
+		bandwidth=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("lBandwidth"), edit);
 		bandwidth->setName("Bandwidth");
 		bandwidthEntry[0]=new eListBoxEntryText(bandwidth, "8 MHz", (void*)0);
 		bandwidthEntry[1]=new eListBoxEntryText(bandwidth, "7 MHz", (void*)1);
 		bandwidthEntry[2]=new eListBoxEntryText(bandwidth, "6 MHz", (void*)2);
 		CONNECT(bandwidth->selchanged, eTransponderWidget::updated1);
-		l = new eLabel(this);
-		l->setName("ltmMode");
-		tmMode=new eListBox<eListBoxEntryText>(this, l, edit);
+		tmMode=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("ltmMode"), edit);
 		tmMode->setName("tmMode");
 		tmModeEntry[0]=new eListBoxEntryText(tmMode, "Auto", (void*)-1);
 		tmModeEntry[1]=new eListBoxEntryText(tmMode, "2k", (void*)0);
 		tmModeEntry[2]=new eListBoxEntryText(tmMode, "8k", (void*)1);
 		CONNECT(tmMode->selchanged, eTransponderWidget::updated1);
-		l = new eLabel(this);
-		l->setName("lCodeRateLP");
-		codeRateLP=new eListBox<eListBoxEntryText>(this, l, edit);
+		codeRateLP=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("lCodeRateLP"), edit);
 		codeRateLP->setName("codeRateLP");
 		codeRateLPEntry[0]=new eListBoxEntryText(codeRateLP, "Auto", (void*)-1);
 		codeRateLPEntry[1]=new eListBoxEntryText(codeRateLP, "1/2", (void*)0);
@@ -137,9 +114,7 @@ void eTransponderWidget::init_eTransponderWidget(eWidget *parent, int edit, int 
 		codeRateLPEntry[4]=new eListBoxEntryText(codeRateLP, "5/6", (void*)3);
 		codeRateLPEntry[5]=new eListBoxEntryText(codeRateLP, "7/8", (void*)4);
 		CONNECT(codeRateLP->selchanged, eTransponderWidget::updated1);
-		l = new eLabel(this);
-		l->setName("lCodeRateHP");
-		codeRateHP=new eListBox<eListBoxEntryText>(this, l, edit);
+		codeRateHP=new eListBox<eListBoxEntryText>(this, CreateSkinnedLabel("lCodeRateHP"), edit);
 		codeRateHP->setName("codeRateHP");
 		codeRateHPEntry[0]=new eListBoxEntryText(codeRateHP, "Auto", (void*)-1);
 		codeRateHPEntry[1]=new eListBoxEntryText(codeRateHP, "1/2", (void*)0);
@@ -151,10 +126,7 @@ void eTransponderWidget::init_eTransponderWidget(eWidget *parent, int edit, int 
 	}
 	else
 	{
-		l = new eLabel(this);
-		l->setName( "lSymb" );
-		symbolrate=new eNumber(this, 5, 0, 9, 1, init, 0, l, edit);
-		symbolrate->setName("symbolrate");
+		symbolrate=CreateSkinnedNumberWithLabel("symbolrate",0, 5, 0, 9, 1, init, 0, "lSymb", edit);
 		CONNECT_1_0(symbolrate->numberChanged, eTransponderWidget::updated2, 0);	
 		CONNECT(symbolrate->selected, eTransponderWidget::nextField0);
 	}
@@ -196,8 +168,7 @@ int eTransponderWidget::load()
 	default:
 		return -2;
 	}
-	if (eSkin::getActive()->build(this, name.c_str()))
-		return -1;
+	BuildSkin(name.c_str());
 	if ( type & flagNoSat )
 	{
 		lsat->hide();
@@ -380,35 +351,16 @@ eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent
 }
 void eFEStatusWidget::init_eFEStatusWidget()
 {
-	p_snr=new eProgress(this);
-	p_snr->setName("snr");
-
-	p_agc=new eProgress(this);
-	p_agc->setName("agc");
-
-	p_ber=new eProgress(this);
-	p_ber->setName("ber");
-
-	c_sync=new eCheckbox(this, 0, 0);
-	c_sync->setName("sync");
-
-	c_lock=new eCheckbox(this, 0, 0);
-	c_lock->setName("lock");
-
-	lsnr_num=new eLabel(this);
-	lsnr_num->setName("snr_num");
-	
-	lsync_num=new eLabel(this);
-	lsync_num->setName("agc_num");
-
-	lber_num=new eLabel(this);
-	lber_num->setName("ber_num");
-
-
+	p_snr=CreateSkinnedProgress("snr");
+	p_agc=CreateSkinnedProgress("agc");
+	p_ber=CreateSkinnedProgress("ber");
+	c_sync=CreateSkinnedCheckbox("sync",0, 0, 0);
+	c_lock=CreateSkinnedCheckbox("lock",0, 0, 0);
+	lsnr_num=CreateSkinnedLabel("snr_num");
+	lsync_num=CreateSkinnedLabel("agc_num");
+	lber_num=CreateSkinnedLabel("ber_num");
 	CONNECT(updatetimer.timeout, eFEStatusWidget::update);
-
-	if (eSkin::getActive()->build(this, "eFEStatusWidget"))
-		return;
+	BuildSkin("eFEStatusWidget");
 }
 
 void eFEStatusWidget::update()

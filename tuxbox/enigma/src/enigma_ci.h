@@ -14,11 +14,8 @@ class eStatusBar;
 
 class enigmaCI: public eWindow
 {
-	eButton *ok,*reset,*init,*app;
-	eButton *reset2,*init2,*app2;
-	eCheckbox *twoServices;
+	eButton *app,*app2;
 
-	eStatusBar *status;
 	eDVBCI *DVBCI;
 	eDVBCI *DVBCI2;
 	eFixedMessagePump<const char*> ci_messages;

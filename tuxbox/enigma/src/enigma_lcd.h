@@ -40,6 +40,7 @@ class eZapLCDMain: public eWidget
 private:
 	void volumeUpdate(int mute_state, int vol);
 	void leaveService(const eServiceReferenceDVB &service);
+	void init_eZapLCDMain();
 public:
 	eLabel *Clock;
 	eProgress *Progress;

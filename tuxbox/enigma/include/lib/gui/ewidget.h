@@ -14,6 +14,19 @@
 #include <lib/gui/decoration.h>
 #include <lib/system/econfig.h>
 
+class eProgress;
+class eLabel;
+class eNumber;
+class eTextInputField;
+class eTextInputFieldHelpWidget;
+class eCheckbox;
+class eButton;
+class eLabel;
+class eStatusBar;
+class eComboBox;
+class eProgress;
+class eSlider;
+
 class eWidgetEvent
 {
 public:
@@ -195,8 +208,19 @@ protected:
 	gPixmap *pixmap;
 
 	eString descr;
-
+	
+	void		BuildSkin(const char* name);
 public:
+	eProgress*	CreateSkinnedProgress(const char* name, int start=0, int perc=0, int takefocus=0 );
+	eSlider*	CreateSkinnedSlider(const char* name, const char *descr=0, int min=0, int max=99 );
+	eLabel* 	CreateSkinnedLabel(const char* name,const char* text = 0, int flags = 0);
+	eComboBox* 	CreateSkinnedComboBoxWithLabel(const char* name, int OpenEntries=5, const char* lbldescr=0, int takefocus=1 );
+	eComboBox* 	CreateSkinnedComboBox(const char* name, int OpenEntries=5, eLabel* desc=0, int takefocus=1);
+	eCheckbox*	CreateSkinnedCheckbox(const char* name,int defaultvalue = 0, const char* configkey = 0 ,int takefocus=1);
+	eNumber*	CreateSkinnedNumberWithLabel(const char* name, int value, int len, int min, int max, int maxdigits, int *init, int isactive=0, const char* lbldescr=0, int grabfocus=1);
+	eNumber*	CreateSkinnedNumber(const char* name, int value,int len, int min, int max, int maxdigits, int *init, int isactive=0, eLabel* descr=0, int grabfocus=1);
+	eTextInputField* CreateSkinnedTextInputField(const char* name, const char* defaultvalue , const char* configkey = 0, const char* lblname = 0,eTextInputFieldHelpWidget *hlp = 0);
+	eButton*         CreateSkinnedButton(const char* name, eLabel* descr=0, int takefocus=1);
 	virtual int eventHandler(const eWidgetEvent &event);
 	static void addGlobalActionMap(eActionMap *map);
 	static void removeGlobalActionMap(eActionMap *map);

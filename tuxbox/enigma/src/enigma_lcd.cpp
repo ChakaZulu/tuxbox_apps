@@ -55,26 +55,18 @@ eZapLCD::~eZapLCD()
 eZapLCDMain::eZapLCDMain(eWidget *parent)
 	:eWidget(parent, 0)
 {
-	Volume = new eProgress(this);
-	Volume->setName("volume_bar");
+	init_eZapLCDMain();
+}
+void eZapLCDMain::init_eZapLCDMain()
+{
+	Volume = CreateSkinnedProgress("volume_bar");
+	Progress = CreateSkinnedProgress("progress_bar");
+	ServiceName = CreateSkinnedLabel("service_name");
+	LcdEpgNow = CreateSkinnedLabel("lcd_now");
+	LcdEpgNext = CreateSkinnedLabel("lcd_next");
+	Clock = CreateSkinnedLabel("clock");
 	
-	Progress = new eProgress(this);
-	Progress->setName("progress_bar");
-	
-	ServiceName = new eLabel(this);
-	ServiceName->setName("service_name");
-	
-	LcdEpgNow = new eLabel(this);
-	LcdEpgNow->setName("lcd_now");
-	
-	LcdEpgNext = new eLabel(this);
-	LcdEpgNext->setName("lcd_next");
-	
-	Clock = new eLabel(this);
-	Clock->setName("clock");
-	
-	if (eSkin::getActive()->build(this, "enigma_lcd_main"))
-		eFatal("skin load of \"enigma_lcd\" failed");
+	BuildSkin("enigma_lcd_main");
 
 	cur_start = cur_duration = -1;
 	
@@ -182,8 +174,7 @@ void eZapLCDMain::gotRDSText(eString text)
 eZapLCDMenu::eZapLCDMenu(eWidget *parent)
 	:eWidget(parent, 0)
 {	
-	if (eSkin::getActive()->build(this, "enigma_lcd_menu"))
-		eFatal("skin load of \"enigma_lcd_menu\" failed");
+	BuildSkin("enigma_lcd_menu");
 
 	ASSIGN(Title, eLabel, "title");
 	ASSIGN(Element, eLabel, "element");
@@ -198,13 +189,11 @@ void eZapLCDScart::volumeUpdate(int mute_state, int vol)
 eZapLCDScart::eZapLCDScart(eWidget *parent)
 	:eWidget(parent, 0)
 {	
-	volume = new eProgress(this);
-	volume->setName("volume_bar");
+	volume = CreateSkinnedProgress("volume_bar");
 
 	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapLCDScart::volumeUpdate);
 
-	if (eSkin::getActive()->build(this, "enigma_lcd_scart"))
-		eFatal("skin load of \"enigma_lcd_scart\" failed");
+	BuildSkin("enigma_lcd_scart");
 
 	volume->zOrderRaise();	
 }
@@ -212,29 +201,22 @@ eZapLCDScart::eZapLCDScart(eWidget *parent)
 eZapLCDStandby::eZapLCDStandby(eWidget *parent)
 	:eWidget(parent, 0)
 {
-	Clock = new eLabel(this);
-	Clock->setName("clock");
+	Clock = CreateSkinnedLabel("clock");
 	Clock->show();
 
-	if (eSkin::getActive()->build(this, "enigma_lcd_standby"))
-		eFatal("skin load of \"enigma_lcd_standby\" failed");
+	BuildSkin("enigma_lcd_standby");
 }
 
 eZapLCDSatfind::eZapLCDSatfind(eWidget *parent)
 	:eWidget(parent, 0)
 {
-	snrtext = new eLabel(this);
-	snrtext->setName("snrtext");
-	snr = new eProgress(this);
-	snr->setName("snr");
+	snrtext = CreateSkinnedLabel("snrtext");
+	snr = CreateSkinnedProgress("snr");
 
-	agctext = new eLabel(this);
-	agctext->setName("agctext");
-	agc = new eProgress(this);
-	agc->setName("agc");
+	agctext = CreateSkinnedLabel("agctext");
+	agc = CreateSkinnedProgress("agc");
 
-	if (eSkin::getActive()->build(this, "enigma_lcd_satfind"))
-		eFatal("skin load of \"enigma_lcd_satfind\" failed");
+	BuildSkin("enigma_lcd_satfind");
 }
 
 void eZapLCDSatfind::update(int snr, int agc)
@@ -252,8 +234,7 @@ void eZapLCDSatfind::update(int snr, int agc)
 
 eZapLCDShutdown::eZapLCDShutdown(eWidget *parent): eWidget(parent, 0)
 {	
-	if (eSkin::getActive()->build(this, "enigma_lcd_shutdown"))
-		eFatal("skin load of \"enigma_lcd_shutdown\" failed");
+	BuildSkin("enigma_lcd_shutdown");
 }
 
 #endif // DISABLE_LCD

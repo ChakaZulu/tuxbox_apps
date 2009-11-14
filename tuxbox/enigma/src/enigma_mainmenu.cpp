@@ -124,29 +124,19 @@ void eMainMenu::init_eMainMenu()
 		addActionMap(&i_mainmenuActions->map);
 		addActionMap(&i_cursorActions->map);
 		addActionMap(&i_shortcutActions->map);
-		eLabel *background=new eLabel(this);
-		background->setName("background");
+		CreateSkinnedLabel("background");
 
-		label[0]=new eLabel(this);
-		label[0]->setName("l3");
-		label[1]=new eLabel(this);
-		label[1]->setName("l2");
-		label[2]=new eLabel(this);
-		label[2]->setName("l1");
-		label[3]=new eLabel(this);
-		label[3]->setName("m");
-		label[4]=new eLabel(this);
-		label[4]->setName("r1");
-		label[5]=new eLabel(this);
-		label[5]->setName("r2");
-		label[6]=new eLabel(this);
-		label[6]->setName("r3");
+		label[0]=CreateSkinnedLabel("l3");
+		label[1]=CreateSkinnedLabel("l2");
+		label[2]=CreateSkinnedLabel("l1");
+		label[3]=CreateSkinnedLabel("m");
+		label[4]=CreateSkinnedLabel("r1");
+		label[5]=CreateSkinnedLabel("r2");
+		label[6]=CreateSkinnedLabel("r3");
 
-		description=new eLabel(this);
-		description->setName("description");
+		description=CreateSkinnedLabel("description");
 
-		if (eSkin::getActive()->build(this, "eZapMainMenu"))
-			eFatal("unable to load main menu");
+		BuildSkin("eZapMainMenu");
 
 			char *pixmap_name[]={
 		"tv",

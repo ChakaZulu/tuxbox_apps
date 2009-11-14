@@ -803,7 +803,7 @@
 		<eAboutScreen text="About..." cposition="125:105" csize="450:410">
 			<eLabel name="vendor" position="10:0" csize="e:25"/>
 			<eLabel name="machine" position="30:25" font="eAboutScreen.machine" csize="e:50"/>
-			<eLabel name="processor" text="processor: " position="10:80" csize="e:30" />
+			<eLabel name="processor" position="10:80" csize="e:30" />
 			<eLabel name="frontend" text="frontend: " position="10:110" csize="e:30" />
 			<eLabel name="harddisk_label" text="harddisk: " position="10:140" csize="e:30" />
 			<eLabel name="harddisks" position="10:170" csize="e:60" />
@@ -935,9 +935,9 @@
 	<object name="TextEditWindow">
 		<TextEditWindow cposition="120:100" csize="450:410" >
 			<eLabel name="descr" position="10:10" size="e-10:30" />
-			<eTextInputField name="inputfield" position="10:50" size="e-10:40" loadDeco="eNumber" helptext="press ok to enter the name" />
+			<eTextInputField name="inputfield" position="10:50" size="e-10:40" loadDeco="eNumber" helptext="press ok to start edit mode" />
 			<eTextInputFieldHelpWidget name="image" pixmap="textinput_white" position="10:104" size="e-10:255" />
-			<eStatusbar name="statusbar" position="0:e-35" size="e:e" loadDeco="" />
+			<eStatusBar name="statusbar" position="0:e-35" size="e:e" loadDeco="" />
 		</TextEditWindow>
 	</object>
 
@@ -1051,12 +1051,334 @@
 			<eButton name="seldir" align="center" vcenter="on" position="e-50:30" size="40:40" loadDeco="" pixmap="sselect_folder" helptext="Push OK to select directory" />
 			<eLabel text="Filename:" position="20:80" size="200:30" />
 			<eTextInputField name="file" position="220:80" size="230:40" loadDeco="" helptext="press ok to enter the name" />
-			<eCheckbox name="cachebouquets" text="only cache EPG data from bouquets" position="20:120" size="e-10:30" helptext="uncheck to cache all available data" vcenter="on" />
-			<eCheckbox name="infobarcache" text="Use EPG cache for Infobar" position="20:160" size="e-10:30" helptext="use the EPG cache for the infobar if the EIT is unavailable" vcenter="on" />
-			<eButton name="clear" text="clear EPG cache" position="20:200" size="240:40" loadDeco="" helptext="remove all entries from EPG cache" shortcut="yellow" />
+			<eCheckbox name="cachebouquets" text="only cache EPG data from bouquets" position="20:130" size="e-10:30" helptext="uncheck to cache all available data" vcenter="on" />
+			<eCheckbox name="infobarcache" text="Use EPG cache for Infobar" position="20:170" size="e-10:30" helptext="use the EPG cache for the infobar if the EIT is unavailable" vcenter="on" />
+			<eButton name="clear" text="clear EPG cache" position="20:210" size="240:40" loadDeco="" helptext="remove all entries from EPG cache" shortcut="yellow" />
 			<eButton name="store" text="store" position="20:e-100" size="150:40" loadDeco="" helptext="store settings and leave" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</EPGSetup>
 	</object>
 
+	<object name="KeyboardSetup">
+		<KeyboardSetup text="Keyboard Setup" cposition="140:170" csize="470:210">
+			<eLabel text="Keyboard Mapping:" position="20:20" size="300:30" />
+			<eComboBox name="mapping" openEntries="4" position="20:60" size="350:35" loadDeco="" helptext="select your keyboard mapping (ok)" />
+			<eButton name="save" text="save" position="20:e-100" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</KeyboardSetup>
+	</object>
+
+	<object name="TimezoneSetup">
+		<TimezoneSetup text="Time Zone Setup" cposition="110:146" csize="530:270">
+			<eLabel text="Time Zone:" position="20:20" size="220:30" />
+			<eComboBox name="timezone" openEntries="8" position="20:60" size="e-40:35" loadDeco="" helptext="select your time zone (ok)" />
+			<eButton name="save" text="save" position="20:e-100" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</TimezoneSetup>
+	</object>
+
+	<object name="timecorrection">
+		<timecorrection text="Time Correction" cposition="100:100" csize="440:290">
+			<eLabel text="Receiver Time:" position="10:10" size="200:30" />
+			<eLabel name="curtime" position="210:10" size="90:30" />
+			<eLabel name="curdate" position="320:10" size="120:30" />
+			<eLabel text="Transponder Time:" position="10:50" size="200:30" />
+			<eLabel name="tptime" position="210:50" size="90:30" />
+			<eLabel name="tpdate" position="320:50" size="120:30" />
+			<eLabel text="New Time:" position="10:90" size="150:30" vcenter="on"/>
+			<eNumber name="nTime" position="210:90" size="75:35" helptext="enter correct time here" loadDeco="" />
+			<eLabel text="New Date:" position="10:140" size="150:30" vcenter="on"/>
+			<eComboBox name="cday" position="210:140" size="60:35" loadDeco="" helptext="press ok to select another day" />
+			<eComboBox name="cmonth" position="280:140" size="60:35" loadDeco="" helptext="press ok to select another month" />
+			<eComboBox name="cyear" position="350:140" size="80:35" loadDeco="" helptext="press ok to select another year" />
+			<eButton name="set" text="set" position="10:e-100" size="220:40" loadDeco="" helptext="set new time and close window" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</timecorrection>
+	</object>
+
+	<object name="picmanager">
+		<picmanager text="Slide Viewer" cposition="100:80" csize="350:250">
+			<eLabel text="Timeout" position="10:10" size="100:30" />
+			<eListbox name="timeout" position="110:10" size="35:34" helptext="Select slideshow timeout (left, right)" loadDeco="" />
+			<eCheckbox name="subdirs" text="Include subdirectories" position="10:45" size="300:30" helptext="Include slides of subdirectories in slideshow" />
+			<eCheckbox name="busy" text="Show busy sign" position="10:80" size="300:30" helptext="Show busy sign while preprocessing slide" />
+			<eCheckbox name="format_169" text="Show in 16:9 format" position="10:115" size="300:30" helptext="Always show slides in 16:9 format" />
+			<eButton name="store" text="save" position="10:e-100" size="130:40" loadDeco="" helptext="store settings and close window" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</picmanager>
+	</object>
+
+	<object name="eParentalSetup">
+		<eParentalSetup text="Parental setup" cposition="170:136" csize="400:280">
+			<eCheckbox name="parentallock" text="Parental lock" position="20:20" size="200:30" helptext="enable/disable parental lock" />
+			<eButton name="changeParentalPin" text="change PIN" position="230:15" size="160:40" loadDeco="" helptext="change Parental PIN (ok)" />
+			<eCheckbox name="setuplock" text="Setup lock" position="20:70" size="200:30" helptext="enable/disable setup lock" />
+			<eButton name="changeSetupPin" text="change PIN" position="230:65" size="160:40" loadDeco="" helptext="change Setup PIN (ok)" />
+			<eCheckbox name="hidelocked" text="Hide locked services" position="20:120" size="370:30" helptext="don't show locked services in any list" />
+			<eButton name="store" text="save" position="20:175" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eParentalSetup>
+	</object>
+
+	<object name="eStoreWindow">
+		<eStoreWindow text="Store Satellite" cposition="150:150" csize="360:140">
+			<eLabel name="lStorageLoc" text="Storage Location:" position="10:10" size="250:35" />
+			<eNumber name="StorageLoc" position="270:10" size="80:35" helptext="change storage Location or store" loadDeco="" />
+			<eLabel text="New Date:" position="10:140" size="150:30" vcenter="on"/>
+			<eCheckbox name="parentallock" text="Parental lock" position="20:20" size="200:30" helptext="enable/disable parental lock" />
+			<eButton name="changeParentalPin" text="change PIN" position="230:15" size="160:40" loadDeco="" helptext="change Parental PIN (ok)" />
+			<eCheckbox name="setuplock" text="Setup lock" position="20:70" size="200:30" helptext="enable/disable setup lock" />
+			<eButton name="changeSetupPin" text="change PIN" position="230:65" size="160:40" loadDeco="" helptext="change Setup PIN (ok)" />
+			<eCheckbox name="hidelocked" text="Hide locked services" position="20:120" size="370:30" helptext="don't show locked services in any list" />
+			<eButton name="store" text="store" position="10:60" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+		</eStoreWindow>
+	</object>
+
+
+	<object name="ParentalLockWindow">
+		<ParentalLockWindow text="" cposition="200:200" csize="380:150">
+			<eLabel name="lPin" text="please enter pin:" position="10:10" size="e-20:30" />
+			<eNumber name="nPin" position="10:50" size="100:30" helptext="" loadDeco="" />
+		</ParentalLockWindow>
+	</object>
+
+	<object name="ManualPIDWindow">
+		<ManualPIDWindow text="Manual PIDs" cposition="140:98" csize="470:425">
+			<eLabel name="lName" text="Name:" position="10:10" size="120:35" vcenter="on"/>
+			<eTextInputField name="name" position="140:10" size="310:35" loadDeco="eNumber" helptext="to enter service name press OK" font="global.fixed"/>
+			<eLabel name="lprovider" text="Provider:" position="10:50" size="120:35" vcenter="on"/>
+			<eTextInputField name="provider" position="140:50" size="310:35" loadDeco="" helptext="to enter provider name press OK" font="global.fixed"/>
+			<eLabel name="lvpid" text="Video PID:" position="10:90" size="120:35" vcenter="on"/>
+			<eTextInputField name="vpid" position="140:90" size="75:35" loadDeco="" helptext="to enter video pid press OK" font="global.fixed"/>
+			<eLabel name="lpcrpid" text="PCR PID:" position="245:90" size="120:35" vcenter="on"/>
+			<eTextInputField name="pcrpid" position="375:90" size="75:35" loadDeco="" helptext="to enter pcr pid press OK" font="global.fixed"/>
+			<eLabel name="lapid" text="Audio PID:" position="10:130" size="120:35" vcenter="on"/>
+			<eTextInputField name="apid" position="140:130" size="75:35" loadDeco="" helptext="to enter audio pid press OK" font="global.fixed"/>
+			<eCheckbox name="isAC3Pid" text="is AC3 Pid" position="245:130" size="140:35" helptext="set this check when the entered audio pid is a ac3 audio pid" />
+			<eLabel name="ltpid" text="Text PID:" position="10:170" size="120:35" vcenter="on"/>
+			<eTextInputField name="tpid" position="140:170" size="75:35" loadDeco="" helptext="to enter (video) text pid press OK" font="global.fixed"/>
+			<eLabel name="lsid" text="Service ID:" position="245:170" size="120:35" vcenter="on"/>
+			<eTextInputField name="sid" position="375:170" size="75:35" loadDeco="" helptext="to enter service id press OK" font="global.fixed"/>
+			<eLabel name="ltsid" text="TSID:" position="10:210" size="120:35" vcenter="on"/>
+			<eTextInputField name="tsid" position="140:210" size="75:35" loadDeco="" helptext="to enter tsid (transport stream id) press OK" font="global.fixed"/>
+			<eLabel name="lonid" text="ONID:" position="245:210" size="120:35" vcenter="on"/>
+			<eTextInputField name="onid" position="375:210" size="75:35" loadDeco="" helptext="to enter onid (original network id) press OK" font="global.fixed"/>
+			<eCheckbox name="cNoDVB" text="no DVB" position="10:250" size="125:35" helptext="don't read PAT/PMT/SDT for this service (only use cached pids)" />
+			<eCheckbox name="cUseSDT" text="use sdt" position="150:250" size="130:35" helptext="update name/provider/service type with content of the sdt (and auto remove service)" />
+			<eCheckbox name="cHoldName" text="hold name" position="295:250" size="160:35" helptext="don't update the service name with content of the sdt" />
+			<eButton name="bHexDec" text="DEC" position="10:e-130" size="215:35" loadDeco="" helptext="" shortcut="red" />
+			<eButton name="bReadNIT" text="read NIT" position="235:e-130" size="215:35" loadDeco="" helptext="read tsid and onid from the nit (this can take up to 10 seconds)" shortcut="green" />
+			<eButton name="bSetPIDs" text="test values" position="10:e-85" size="215:35" loadDeco="" helptext="test entered values" shortcut="yellow" />
+			<eButton name="bStore" text="save" position="235:e-85" size="215:35" loadDeco="" helptext="save data and close window (the new channel could be found in the all services list)" shortcut="blue" />
+			<eStatusBar name="statusbar" position="0:e-45" size="e:e" loadDeco="" />
+		</ManualPIDWindow>
+	</object>
+
+	<object name="ENgrabSetup">
+		<ENgrabSetup text="Ngrab Server" cposition="170:146" csize="390:310">
+			<eLabel name="lsrvip" text="Srv IP:" position="20:20" size="140:30" />
+			<eNumber name="inet_address" position="160:20" size="200:30" helptext="enter IP Adress of the Ngrab Server (0..9, left, right)" loadDeco="" />
+			<eLabel name="lsrvport" text="Srv Port:" position="20:60" size="140:30" />
+			<eNumber name="srvport" position="160:60" size="200:30" helptext="enter ngrab server port (standard is 4000)" loadDeco="" />
+			<eLabel name="lsrvmac" text="Srv MAC:" position="20:100" size="140:30" />
+			<eTextInputField name="serverMAC" position="160:100" size="200:30" helptext="enter MAC address of server (for wake on lan)" loadDeco="" />
+			<eButton name="bServerMAC" text="detect MAC Adress" position="20:150" size="340:40" loadDeco="" helptext="try to autodetect server MAC address" shortcut="blue" />
+			<eButton name="ok" text="save" position="20:210" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</ENgrabSetup>
+	</object>
+
+	<object name="eZapLCDSetup">
+		<eZapLCDSetup text="LC-Display Setup" cposition="150:126" csize="400:290">
+			<eLabel name="lbrightness" text="Brightness:" position="20:20" size="110:30" />
+			<eSlider name="brightness" position="140:20" size="240:30" helptext="set LCD brightness ( left / right )" />
+			<eLabel name="lcontrast" text="Contrast:" position="20:60" size="110:30" />
+			<eSlider name="contrast" position="140:60" size="240:30" helptext="set LCD contrast ( left / right )" />
+			<eLabel name="lstandby" text="Standby:" position="20:100" size="110:30" />
+			<eSlider name="standby" position="140:100" size="240:30" helptext="set LCD brightness for Standby Mode ( left / right )" />
+			<eCheckbox name="inverted" text="Inverted:" position="20:140" size="150:30" helptext="enable/disable inverted LCD (ok)" />
+			<eButton name="ok" text="save" position="20:210" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eZapLCDSetup>
+	</object>
+
+	<object name="eZapNetworkSetup">
+		<eZapNetworkSetup text="Communication setup" cposition="130:110" csize="450:400">
+			<eLabel name="lip" text="IP:" position="20:10" size="150:30" />
+			<eNumber name="ip" position="160:10" size="170:30" helptext="enter IP Address of the box (0..9, left, right)" loadDeco="" />
+			<eCheckbox name="dhcp" text="DHCP" position="340:10" size="100:30" helptext="get Network data from a DHCP Server in the local Network" />
+			<eLabel name="lnetmask" text="Netmask:" position="20:50" size="150:30" />
+			<eNumber name="netmask" position="160:50" size="170:30" helptext="enter netmask of your network (0..9, left, right)" loadDeco="" />
+			<eLabel name="lcombo_type" text="Type:" position="20:90" size="140:30" />
+			<eTextInputField name="combo_type" position="160:90" size="170:30" helptext="press ok to change connection type" loadDeco="" />
+			<eLabel name="lNameserver" text="Nameserver:" position="20:130" size="140:30" />
+			<eNumber name="dns" position="160:130" size="170:30" helptext="enter your domain name server (0..9, left, right)" loadDeco="" />
+			<eLabel name="lgateway" text="Gateway:" position="20:170" size="140:30" />
+			<eNumber name="gateway" position="160:170" size="170:30" helptext="enter your gateways IP Address (0..9, left, right)" loadDeco="" />
+			<eCheckbox name="dosetup" text="Enable Network" position="20:215" size="270:30" helptext="enable/disable network (ok)" />
+			<eLabel name="lport" text="Port:" position="310:215" size="80:30" />
+			<eNumber name="port" position="370:213" size="70:30" helptext="enter port of the Web Interface (0..9, left, right)" loadDeco="" />
+			<eButton name="ok" text="save" position="20:295" size="200:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eButton name="nfs" text="mounts" position="230:295" size="200:40" loadDeco="" helptext="here you can setup nfs/cifs mounts" shortcut="blue" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eZapNetworkSetup>
+	</object>
+
+	<object name="eNFSSetup">
+		<eNFSSetup text="" cposition="140:90" csize="450:400">
+			<eLabel name="lip" text="IP:" position="20:10" size="120:30" />
+			<eNumber name="ip" position="160:10" size="200:30" helptext="enter IP Address (0..9, left, right)" loadDeco="" />
+			<eComboBox name="combo_fstype" position="350:140" size="100:30" loadDeco="" helptext="press ok to change mount type" />
+			<eLabel name="lsdir" text="Dir:" position="20:90" size="120:30" />
+			<eTextInputField name="sdir" position="160:90" size="320:30" helptext="" loadDeco="" />
+			<eLabel name="lldir" text="LocalDir:" position="20:90" size="120:30" />
+			<eTextInputField name="ldir" position="160:90" size="320:30" helptext="enter name of the local mount point with trailing slash" loadDeco="" />
+			<eLabel name="lcombo_options" text="Options:" position="20:140" size="120:30" />
+			<eComboBox name="combo_options" position="350:140" size="320:30" loadDeco="" helptext="press ok to change mount options" />
+			<eLabel name="lextraoptions" text="Extra:" position="20:90" size="120:30" />
+			<eTextInputField name="extraoptions" position="160:90" size="320:30" helptext="press ok to edit extra options" loadDeco="" />
+			<eLabel name="luser" text="User:" position="20:90" size="120:30" />
+			<eTextInputField name="user" position="160:90" size="320:30" helptext="press ok to edit username" loadDeco="" />
+			<eLabel name="lpass" text="Pass:" position="20:90" size="120:30" />
+			<eTextInputField name="pass" position="160:90" size="320:30" helptext="press ok to edit password" loadDeco="" />
+			<eCheckbox name="doamount" text="Automount" position="340:10" size="140:30" helptext="enable/disable automount (ok)" />
+			<eButton name="prev" text="&lt;" position="10:e-110" size="30:40" loadDeco="" helptext="go to previous share" />
+			<eButton name="umount" text="umount" position="45:e-110" size="109:40" loadDeco="" helptext="press ok to unmount this share" shortcut="red" />
+			<eButton name="mount" text="mount" position="159:e-110" size="107:40" loadDeco="" helptext="press ok to mount this share" shortcut="green" />
+			<eButton name="ok" text="save" position="271:e-110" size="137:40" loadDeco="" helptext="press ok to save this share" shortcut="yellow" />
+			<eButton name="next" text="&gt;" position="414:e-110" size="30:40" loadDeco="" helptext="go to next share" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eNFSSetup>
+	</object>
+
+	<object name="eZapOsdSetup">
+		<eZapOsdSetup text="OSD Settings" cposition="140:125" csize="460:350">
+			<eLabel name="lalpha" text="Alpha:" position="20:20" size="110:30" />
+			<eSlider name="alpha" position="150:20" size="290:30" helptext="change the transparency correction" />
+			<eLabel name="lbrightness" text="Brightness:" position="20:60" size="120:30" />
+			<eSlider name="brightness" position="150:60" size="290:30" helptext="change the brightness correction" />
+			<eLabel name="lcontrast" text="Contrast:" position="20:100" size="120:30" />
+			<eSlider name="contrast" position="150:100" size="290:30" helptext="change the contrast" />
+			<eCheckbox name="simpleMainMenu" text="Show Mainmenu like Listbox" position="20:140" size="420:35" helptext="show the Mainmenu in normal listbox style" />
+			<eButton name="skin" text="Change skin" position="20:190" size="205:40" loadDeco="" helptext="press ok to open skin selector" shortcut="blue" />
+			<eButton name="pluginoffs" text="TuxText position" position="235:190" size="205:40" loadDeco="" helptext="here you can center the Tuxtxt (builtin videotext)" shortcut="yellow" />
+			<eButton name="ok" text="save" position="20:245" size="205:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eButton name="expert" text="additional settings" position="235:245" size="205:40" loadDeco="" helptext="open additional settings" shortcut="red" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eZapOsdSetup>
+	</object>
+
+	<object name="eZapRCSetup">
+		<eZapRCSetup text="Remotecontrol Setup" cposition="140:136" csize="470:335">
+			<eLabel name="lrrate" text="Repeat Rate:" position="20:20" size="170:30" />
+			<eSlider name="srrate" position="200:20" size="220:30" helptext="change remote control repeat rate\nleft => less, right => more (... repeats)" />
+			<eLabel name="lrdelay" text="Repeat Delay:" position="20:60" size="170:30" />
+			<eSlider name="srdelay" position="200:60" size="220:30" helptext="change remote control repeat delay\nleft => shorter, right => longer (...delay)" />
+			<eLabel name="lrcStyle" text="Remotecontrol Style:" position="20:100" size="220:30" />
+			<eComboBox name="rcStyle" position="20:140" size="220:35" loadDeco="" helptext="select your favourite RC style (ok)" />
+			<eLabel name="lNextCharTimeout" text="Next Char Timeout:" position="20:185" size="300:35" />
+			<eNumber name="NextCharTimeout" position="335:180" size="65:35" helptext="cursor to next char timeout(msek) in textinputfields" loadDeco="" />
+			<eButton name="ok" text="save" position="20:e-100" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eZapRCSetup>
+	</object>
+
+	<object name="eSkinSetup">
+		<eSkinSetup text="Skin Selector" cposition="50:50" csize="590:376">
+			<eListbox name="skins" position="10:10" size="e-300:e-60" loadDeco="" />
+			<eLabel name="preview" text=" " position="e-290:15" size="256:200" align="center" />
+			<eButton name="accept" text="save" position="10:320" size="250:40" loadDeco=""  shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eSkinSetup>
+	</object>
+
+	<object name="eZapVideoSetup">
+		<eZapVideoSetup text="A/V Settings" cposition="160:90" csize="390:350">
+			<eLabel name="lcolorformat" text="Color Format:" position="20:20" size="150:30" />
+			<eListbox name="colorformat" position="180:20" size="120:35" loadDeco="" helptext="choose color format ( left, right )"/>
+			<eLabel name="lpin8" text="Aspect Ratio:" position="20:60" size="150:30" />
+			<eListbox name="pin8" position="180:60" size="170:35" loadDeco="" helptext="choose aspect ratio ( left, right )"/>
+			<eLabel name="ltvsystem" text="TV System:" position="20:100" size="150:30" />
+			<eListbox name="tvsystem" position="180:100" size="170:35" loadDeco="" helptext="choose TV system ( left, right )"/>
+			<eCheckbox name="c_disableWSS" text="Disable WSS on 4:3" position="20:140" size="350:30" helptext="don't send WSS signal when A-ratio is 4:3" />
+			<eCheckbox name="ac3default" text="AC3 default output" position="20:175" size="350:30" helptext="enable/disable ac3 default output (ok)" />
+			<eCheckbox name="VCRSwitching" text="Auto VCR switching" position="20:205" size="350:30" helptext="auto switch to VCR connector" />
+			<eButton name="ok" text="save" position="20:250" size="220:40" loadDeco=""  shortcut="green" helptext="save changes and return" />
+			<eButton name="testpicture" text="test" position="260:250" size="100:40" loadDeco=""  shortcut="blue" helptext="show testpicture" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eZapVideoSetup>
+	</object>
+
+	<object name="eWizardTVSystem">
+		<eWizardTVSystem text="TV System Wizard" cposition="160:120" csize="390:170">
+			<eLabel name="ltvsystem" text="TV System:" position="20:10" size="150:30" />
+			<eListbox name="tvsystem" position="180:10" size="170:35" loadDeco="" helptext="choose TV system ( left, right )"/>
+			<eButton name="ok" text="save" position="20:65" size="220:40" loadDeco=""  shortcut="green" helptext="save changes and return" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eWizardTVSystem>
+	</object>
+
+	<object name="streaminfoPID">
+		<streaminfoPID>
+			<eLabel text="Name:" position="10:10" size="140:30"  />
+			<eLabel name="service_name" position="240:10" size="260:30" font="global.fixed"/>
+			<eLabel text="Provider:" position="10:40" size="140:30"  />
+			<eLabel name="service_provider" position="240:40" size="260:30" font="global.fixed"/>
+			<eLabel text="Video PID:" position="10:70" size="140:30"  />
+			<eLabel name="vpid" position="240:70" size="260:30" font="global.fixed"/>
+			<eLabel text="Audio PID:" position="10:100" size="140:30"  />
+			<eLabel name="apid" position="240:100" size="260:30" font="global.fixed"/>
+			<eLabel text="PCR PID:" position="10:130" size="140:30"  />
+			<eLabel name="pcrpid" position="240:130" size="260:30" font="global.fixed"/>
+			<eLabel text="PMT PID:" position="10:160" size="140:30"  />
+			<eLabel name="pmtpid" position="240:160" size="260:30" font="global.fixed"/>
+			<eLabel text="Teletext PID:" position="10:190" size="140:30"  />
+			<eLabel name="tpid" position="240:190" size="260:30" font="global.fixed"/>
+			<eLabel text="Video format:" position="10:220" size="140:30"  />
+			<eLabel name="vform" position="240:220" size="260:30" font="global.fixed"/>
+			<eLabel text="Transport Stream ID:" position="10:250" size="220:30"  />
+			<eLabel name="tsid" position="240:250" size="260:30" font="global.fixed"/>
+			<eLabel text="Original Network ID:" position="10:280" size="140:30"  />
+			<eLabel name="onid" position="240:280" size="260:30" font="global.fixed"/>
+			<eLabel text="Service ID:" position="10:310" size="140:30"  />
+			<eLabel name="sid" position="240:310" size="260:30" font="global.fixed"/>
+			<eLabel text="Namespace:" position="10:340" size="140:30"  />
+			<eLabel name="nspace" position="240:340" size="260:30" font="global.fixed"/>
+		</streaminfoPID>
+	</object>
+
+	<object name="eSatEditDialog">
+		<eSatEditDialog text="Satellite Edit" cposition="100:100" csize="470:360">
+			<eTextInputField name="name" position="10:10" size="e-20:35" helptext="press ok to change satellite name" loadDeco="" />
+			<eLabel name="lOrbitalPos" text="Orbital Position:" position="10:55" size="250:35" />
+			<eNumber name="OrbitalPos" position="270:55" size="70:35" helptext="enter orbital position without dot (19.2&#176; = 192)" loadDeco="" />
+			<eComboBox name="direction" position="350:55" size="110:35" loadDeco="" helptext="press ok to change direction" />
+			<eCheckbox name="doNetworkSearch" text="Network search" position="10:95" size="e-20:30" helptext="scan Network Information Table(s)\nthis is recommend" />
+			<eCheckbox name="useONIT" text="Extended networks search" position="10:135" size="e-20:30" helptext="scan NITs of other transponders\nthis is slower, but sometimes needed)" />
+			<eCheckbox name="useBAT" text="Use BAT" position="10:175" size="e-20:30" helptext="use Provider DVB Bouquet Tables if exist" />
+			<eButton name="save" text="save" position="10:255" size="200:40" loadDeco=""  shortcut="green" helptext="save changes and return" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</eSatEditDialog>
+	</object>
+
+	<object name="enigmaCI">
+		<enigmaCI  text="Common Interface Module" cposition="160:120" csize="350:250">
+			<eButton name="reset" text="Reset" position="10:13" size="330:30" helptext="reset the Common Interface module" />
+			<eButton name="init" text="Init" position="10:53" size="330:30" helptext="send the ca-pmt to CI" />
+			<eButton name="app" text="waiting for module" position="10:53" size="330:30" helptext="enter Common Interface menu (mmi)" />
+			<eButton name="reset2" text="Reset" position="10:143" size="330:30" helptext="reset the Common Interface module" />
+			<eButton name="init2" text="Init" position="10:183" size="330:30" helptext="send the ca-pmt to CI" />
+			<eButton name="app2" text="waiting for module" position="10:223" size="330:30" helptext="enter Common Interface menu (mmi)" />
+			<eCheckbox name="twoServices" text="can handle two services" position="10:128" size="330:60" helptext="can your CI descramble two services at the same time?" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</enigmaCI>
+	</object>
+
+	<object name="SkipEditWindow">
+		<SkipEditWindow cposition="20:160" csize="160:40">
+			<eLabel name="description" position="20:4" size="80:34"  />
+			<eTextInputField name="input" position="100:4" size="50:34"/>
+		</SkipEditWindow>
+	</object>
 </eskin>
