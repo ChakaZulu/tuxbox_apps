@@ -306,6 +306,7 @@ void *CEventWatchDog::watchdogThread(void *arg)
 #else	/* old API -> dreambox */
 void *CEventWatchDog::watchdogThread(void *arg)
 {
+#if defined HAVE_DBOX_HARDWARE || defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
 	char *verb_aratio[] = { "4:3", "16:9", "2.21:1" };
 
 	CEventWatchDog *WatchDog = (CEventWatchDog *)arg;
@@ -385,6 +386,8 @@ void *CEventWatchDog::watchdogThread(void *arg)
 		sleep(1);
 	}
 	pthread_exit(NULL);
+#endif
+	return NULL;
 }
 #endif
 #else /* TRIPLEDRAGON */

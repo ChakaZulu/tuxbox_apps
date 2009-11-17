@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.448 2009/11/03 20:14:00 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.449 2009/11/17 11:55:24 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2898,9 +2898,11 @@ void setFastZap(int mode)
 	int mpeg_fd = open("/dev/video", O_WRONLY);
 	if (mpeg_fd > -1) {
 		printf("[zapit] set VIDEO_SET_FASTZAP %d\n", mode);
+#ifndef HAVE_COOL_HARDWARE
 		if (ioctl(mpeg_fd, VIDEO_SET_FASTZAP, mode) < 0)
 			perror("zapit: VIDEO_SET_FASTZAP");
 		close(mpeg_fd);
+#endif
 	} else
 		perror("zapit: open /dev/video");
 
@@ -3092,7 +3094,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.448 2009/11/03 20:14:00 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.449 2009/11/17 11:55:24 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;

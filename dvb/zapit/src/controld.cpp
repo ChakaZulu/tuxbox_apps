@@ -472,7 +472,7 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings)
 }
 #endif
 
-#ifdef HAVE_GENERIC_HARDWARE
+#if defined HAVE_GENERIC_HARDWARE || defined HAVE_COOL_HARDWARE
 /* not implemented yet */
 void setvideooutput(CControld::video_format, bool)
 {
@@ -707,8 +707,7 @@ void routeVideo()
 }
 #endif
 
-#ifndef HAVE_GENERIC_HARDWARE
-/* if dbox || dreambox || ipbox || tripled */
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_DBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE || defined HAVE_TRIPLEDRAGON
 void switch_vcr( bool vcr_on)
 {
 	int activeAspectRatio;
