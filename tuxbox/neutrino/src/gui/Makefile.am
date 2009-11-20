@@ -40,6 +40,7 @@ libneutrino_gui_a_SOURCES = \
 	personalize.cpp \
 	pluginlist.cpp \
 	plugins.cpp \
+	record_setup.cpp \
 	rc_lock.cpp \
 	scan.cpp \
 	scan_setup.cpp \
