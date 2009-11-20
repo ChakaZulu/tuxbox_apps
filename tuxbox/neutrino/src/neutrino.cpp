@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1007 2009/11/09 13:05:10 dbt Exp $
+	$Id: neutrino.cpp,v 1.1009 2009/11/20 22:40:08 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -229,7 +229,6 @@ CNeutrinoApp::CNeutrinoApp()
 	channelListRecord = NULL;
 	bouquetListRecord = NULL;
 	nextRecordingInfo = NULL;
-	networksetup      = NULL;
 	skipShutdownTimer = false;
 	parentallocked    = false;
 	waitforshutdown   = false;
@@ -2068,7 +2067,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	fontsizenotifier		= new CFontSizeNotifier;
 
 	rcLock				= new CRCLock();
-	networksetup			= new CNetworkSetup();
 	//USERMENU
 	Timerlist			= new CTimerList;
 
@@ -2083,12 +2081,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    mainMenu            (LOCALE_MAINMENU_HEAD                 , "mainmenue.raw"       );
 	CMenuWidget    mainSettings        (LOCALE_MAINSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    languageSettings    (LOCALE_LANGUAGESETUP_HEAD            , "language.raw"        );
-	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD              , "network.raw"         , 430);
-	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD            , "recording.raw"       );
-	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD                , "colors.raw"          );
-	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
+	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD                , NEUTRINO_ICON_COLORS  );
+	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , NEUTRINO_ICON_COLORS  );
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 500);
-	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 450);
+	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , NEUTRINO_ICON_KEYBINDING, 450);
 	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD           , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    scanSettingsMenu    (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
@@ -2100,7 +2096,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	InitMainMenu(	mainMenu,
 					mainSettings,
-					recordingSettings,
 					colorSettings,
 					lcdSettings,
 					keySettings,
@@ -2237,9 +2232,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//init programm
 	InitZapper();
-
-	//Recording Setup
-	InitRecordingSettings(recordingSettings);
 
 	//font Setup
 	InitFontSettings(fontSettings);
@@ -3783,7 +3775,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 		g_Controld->setVideoFormat(g_settings.video_backgroundFormat);
 
 	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	frameBuffer->useBackground(frameBuffer->loadBackground("radiomode.raw"));// set useBackground true or false
+	frameBuffer->useBackground(frameBuffer->loadBackground(NEUTRINO_ICON_RADIOMODE));// set useBackground true or false
 	frameBuffer->paintBackground();
 
 	g_RemoteControl->radioMode();
@@ -3903,11 +3895,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	//	printf("ac: %s\n", actionKey.c_str());
 	int returnval = menu_return::RETURN_REPAINT;
 
-	if(actionKey == "help_recording")
-	{
-		ShowLocalizedMessage(LOCALE_SETTINGS_HELP, LOCALE_RECORDINGMENU_HELP, CMessageBox::mbrBack, CMessageBox::mbBack);
-	}
-	else if(actionKey=="shutdown")
+	if(actionKey=="shutdown")
 	{
 		ExitRun(true);
 		returnval = menu_return::RETURN_NONE;
@@ -3939,18 +3927,13 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		setupColors_neutrino();
 		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
-	else if (actionKey=="show_network_dialog")
-	{
-		networksetup->showNetworkSetup();
-	}
-	
 	else if(actionKey=="savesettings")
 	{
 		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MAINSETTINGS_SAVESETTINGSNOW_HINT)); // UTF-8
 		hintBox->paint();
 
  		g_Controld->saveSettings();
-		networksetup->saveNetworkSettings();
+
  		saveSetup();
 
 		/* send motor position list to zapit */
@@ -3970,10 +3953,6 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 
 		hintBox->hide();
 		delete hintBox;
-	}
-	else if(actionKey=="recording")
-	{
-		setupRecordingDevice();
 	}
 	else if(actionKey=="reloadchannels")
 	{

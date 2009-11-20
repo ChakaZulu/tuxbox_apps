@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.229 2009/11/09 13:05:11 dbt Exp $
+	$Id: neutrino.h,v 1.230 2009/11/20 22:40:08 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -212,7 +212,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void setupColors_neutrino();
 		void setupNetwork( bool force= false );
 		void setupNFS();
-		void setupRecordingDevice(void);
 
 		void startNextRecording();
 
@@ -241,10 +240,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitLcdSettings(CMenuWidget &lcdSettings);
 		void AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONT_TYPES number_of_fontsize_entry);
 		void InitFontSettings(CMenuWidget &fontSettings);
-		void InitRecordingSettings(CMenuWidget &recordingSettings);
-		void InitStreamingSettings(CMenuWidget &streamingSettings);
-		void InitScreenSettings(CMenuWidget &);
-		void InitAudioplPicSettings(CMenuWidget &);
 		void InitDriverSettings(CMenuWidget &);
 		void InitZapitSettings(CMenuWidget &miscSettingsZapitSettings);
 		void InitMiscSettings(CMenuWidget &miscSettings,
@@ -260,7 +255,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitParentalLockSettings(CMenuWidget &);
 		void InitMainMenu(CMenuWidget &mainMenu,
 				  CMenuWidget &mainSettings,
-				  CMenuWidget &recordingSettings,
 				  CMenuWidget &colorSettings,
 				  CMenuWidget &lcdSettings,
 				  CMenuWidget &keySettings,
@@ -314,6 +308,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		bool zapto_tv_on_init_done;
 		bool zapto_radio_on_init_done;
 		void SendSectionsdConfig(void);
+		void setupRecordingDevice(void);
 
 		bool execute_start_file(const char *filename, const bool blocking = true, const bool verbose = false);
 		int execute_sys_command(const char *command);
