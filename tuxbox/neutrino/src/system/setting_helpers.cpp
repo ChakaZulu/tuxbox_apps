@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.182 2009/11/09 13:05:12 dbt Exp $
+	$Id: setting_helpers.cpp,v 1.184 2009/11/20 22:44:19 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -147,10 +147,9 @@ CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwa
 
 bool CDHCPNotifier::changeNotify(const neutrino_locale_t, void * data)
 {
-	CNetworkConfig networkConfig;
-	networkConfig.inet_static = ((*(int*)(data)) == 0);
+	CNetworkConfig::getInstance()->inet_static = ((*(int*)(data)) == 0);
 	for(int x=0;x<5;x++)
-		toDisable[x]->setActive(networkConfig.inet_static);
+		toDisable[x]->setActive(CNetworkConfig::getInstance()->inet_static);	
 	return true;
 }
 
@@ -609,21 +608,6 @@ bool CShutdownCountNotifier::changeNotify(const neutrino_locale_t, void *)
 	return true;
 }
 
-bool CIPChangeNotifier::changeNotify(const neutrino_locale_t, void * Data)
-{
-	CNetworkConfig networkConfig;
-	char ip[16];
-	unsigned char _ip[4];
-	sscanf((char*) Data, "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
-
-	sprintf(ip, "%hhu.%hhu.%hhu.255", _ip[0], _ip[1], _ip[2]);
-	networkConfig.broadcast = ip;
-
-	networkConfig.netmask = (_ip[0] == 10) ? "255.0.0.0" : "255.255.255.0";
-
-	return true;
-}
-
 bool CConsoleDestChangeNotifier::changeNotify(const neutrino_locale_t, void * Data)
 {
 	g_settings.uboot_console = *(int *)Data;
@@ -965,7 +949,7 @@ int CUserMenuMenu::exec(CMenuTarget* parent, const std::string &)
 	if(parent != NULL)
 		parent->hide();
 
-	CMenuWidget menu (local , "keybinding.raw");
+	CMenuWidget menu (local , NEUTRINO_ICON_KEYBINDING);
 	menu.addItem(GenericMenuSeparator);
 	menu.addItem(GenericMenuBack);
 	menu.addItem(GenericMenuSeparatorLine);

@@ -2,7 +2,7 @@
 #define __configure_network_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.h,v 1.3 2003/03/10 21:22:41 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.h,v 1.4 2009/11/20 22:44:19 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -36,7 +36,6 @@ class CNetworkConfig
 	bool        orig_inet_static;
 
 	void copy_to_orig(void);
-	bool modified_from_orig(void);
 
  public:
 	bool        automatic_start;
@@ -47,7 +46,11 @@ class CNetworkConfig
 	std::string nameserver;
 	bool        inet_static;
 
-	CNetworkConfig(void);
+	CNetworkConfig();
+	~CNetworkConfig();
+
+	static CNetworkConfig* getInstance();
+	bool modified_from_orig(void);
 
 	void commitConfig(void);
 

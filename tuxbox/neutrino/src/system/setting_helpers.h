@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.97 2009/10/12 07:35:44 rhabarber1848 Exp $
+	$Id: setting_helpers.h,v 1.98 2009/11/20 22:44:19 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -243,12 +243,6 @@ class CShutdownCountNotifier : public CChangeObserver
 {
 	public:
 		bool changeNotify(const neutrino_locale_t, void *);
-};
-
-class CIPChangeNotifier : public CChangeObserver
-{
-	public:
-		bool changeNotify(const neutrino_locale_t, void * Data);
 };
 
 class CConsoleDestChangeNotifier : public CChangeObserver

@@ -1,5 +1,5 @@
 /*
-	$Id: network_setup.cpp,v 1.2 2009/11/09 20:21:55 dbt Exp $
+	$Id: network_setup.cpp,v 1.3 2009/11/20 22:44:19 dbt Exp $
 
 	network setup implementation - Neutrino-GUI
 
@@ -27,6 +27,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	$Log: network_setup.cpp,v $
+	Revision 1.3  2009/11/20 22:44:19  dbt
+	reworked network_setup
+	fix: netmask and broadcoast menue entries
+	
 	Revision 1.2  2009/11/09 20:21:55  dbt
 	compiler warning removed
 	
@@ -62,8 +66,7 @@
 CNetworkSetup::CNetworkSetup()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-
-	MyIPChanger = NULL;
+	networkConfig = CNetworkConfig::getInstance();
 
 	width = w_max (500, 100);
 	hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
@@ -72,27 +75,27 @@ CNetworkSetup::CNetworkSetup()
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 
-	network_automatic_start = networkConfig.automatic_start;
-	network_dhcp 		= networkConfig.inet_static ? NETWORK_DHCP_OFF : NETWORK_DHCP_ON;
-	network_address		= networkConfig.address;
-	network_netmask		= networkConfig.netmask;
-	network_broadcast	= networkConfig.broadcast;
-	network_nameserver	= networkConfig.nameserver;
-	network_gateway		= networkConfig.gateway;
+	network_automatic_start = networkConfig->automatic_start;
+	network_dhcp 		= networkConfig->inet_static ? NETWORK_DHCP_OFF : NETWORK_DHCP_ON;
+	network_address		= networkConfig->address;
+	network_netmask		= networkConfig->netmask;
+	network_broadcast	= networkConfig->broadcast;
+	network_nameserver	= networkConfig->nameserver;
+	network_gateway		= networkConfig->gateway;
 
-	old_network_automatic_start 	= networkConfig.automatic_start;
-	old_network_dhcp 		= networkConfig.inet_static ? NETWORK_DHCP_OFF : NETWORK_DHCP_ON;
-	old_network_address		= networkConfig.address;
-	old_network_netmask		= networkConfig.netmask;
-	old_network_broadcast		= networkConfig.broadcast;
-	old_network_nameserver		= networkConfig.nameserver;
-	old_network_gateway		= networkConfig.gateway;
+	old_network_automatic_start 	= networkConfig->automatic_start;
+	old_network_dhcp 		= networkConfig->inet_static ? NETWORK_DHCP_OFF : NETWORK_DHCP_ON;
+	old_network_address		= networkConfig->address;
+	old_network_netmask		= networkConfig->netmask;
+	old_network_broadcast		= networkConfig->broadcast;
+	old_network_nameserver		= networkConfig->nameserver;
+	old_network_gateway		= networkConfig->gateway;
 
 }
 
 CNetworkSetup::~CNetworkSetup()
 {
-	delete MyIPChanger;
+	delete networkConfig;
 }
 
 
@@ -113,12 +116,12 @@ int CNetworkSetup::exec(CMenuTarget* parent, const std::string &actionKey)
 	else if(actionKey=="networktest")
 	{
 		printf("[network setup] doing network test...\n");
-		testNetworkSettings(	networkConfig.address.c_str(), 
-					networkConfig.netmask.c_str(), 
-					networkConfig.broadcast.c_str(), 
-					networkConfig.gateway.c_str(), 
-					networkConfig.nameserver.c_str(), 
-					networkConfig.inet_static);
+		testNetworkSettings(	networkConfig->address.c_str(), 
+					networkConfig->netmask.c_str(), 
+					networkConfig->broadcast.c_str(), 
+					networkConfig->gateway.c_str(), 
+					networkConfig->nameserver.c_str(), 
+					networkConfig->inet_static);
 		return res;
 	}
 	else if(actionKey=="networkshow")
@@ -158,45 +161,39 @@ void CNetworkSetup::showNetworkSetup()
 	bool loop = true;
 
 	while (loop)
-	{
-		MyIPChanger = new CIPChangeNotifier;
-		
+	{		
 		//menue init
 		CMenuWidget* networkSettings = new CMenuWidget(LOCALE_MAINSETTINGS_HEAD, NEUTRINO_ICON_SETTINGS, width);
 
 		//subhead
 		networkSettings->addItem( new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_MAINSETTINGS_NETWORK));
+
+		//apply button
+		CMenuForwarder *m0 = new CMenuForwarder(LOCALE_NETWORKMENU_SETUPNOW, true, NULL, this, "networkapply", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
 	
 		//prepare input entries
-		CIPInput * networkSettings_NetworkIP  = new CIPInput(LOCALE_NETWORKMENU_IPADDRESS , network_address   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, MyIPChanger);
+		CIPInput * networkSettings_NetworkIP  = new CIPInput(LOCALE_NETWORKMENU_IPADDRESS , network_address   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, this);
 		CIPInput * networkSettings_NetMask    = new CIPInput(LOCALE_NETWORKMENU_NETMASK   , network_netmask   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 		CIPInput * networkSettings_Broadcast  = new CIPInput(LOCALE_NETWORKMENU_BROADCAST , network_broadcast , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 		CIPInput * networkSettings_Gateway    = new CIPInput(LOCALE_NETWORKMENU_GATEWAY   , network_gateway   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 		CIPInput * networkSettings_NameServer = new CIPInput(LOCALE_NETWORKMENU_NAMESERVER, network_nameserver, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	
-		CSectionsdConfigNotifier* sectionsdConfigNotifier = new CSectionsdConfigNotifier;
-		CStringInputSMS * networkSettings_NtpServer = new CStringInputSMS(LOCALE_NETWORKMENU_NTPSERVER, &g_settings.network_ntpserver, 30, LOCALE_NETWORKMENU_NTPSERVER_HINT1, LOCALE_NETWORKMENU_NTPSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-. ", sectionsdConfigNotifier);
-	
-		CStringInput * networkSettings_NtpRefresh = new CStringInput(LOCALE_NETWORKMENU_NTPREFRESH, &g_settings.network_ntprefresh, 3,LOCALE_NETWORKMENU_NTPREFRESH_HINT1, LOCALE_NETWORKMENU_NTPREFRESH_HINT2 , "0123456789 ", sectionsdConfigNotifier);
-	
-		CMenuForwarder *m0 = new CMenuForwarder(LOCALE_NETWORKMENU_SETUPNOW, true, NULL, this, "networkapply", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
-	
+
 		//auto start
 		CMenuOptionChooser* o1 = new CMenuOptionChooser(LOCALE_NETWORKMENU_SETUPONSTARTUP, &network_automatic_start, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
-	
+
 		//dhcp
-		bool ip_entry_onoff = (network_dhcp ? false : true); //for first view
+		network_dhcp 	= networkConfig->inet_static ? NETWORK_DHCP_OFF : NETWORK_DHCP_ON;
+	
+		CMenuForwarder *m1 = new CMenuForwarder(LOCALE_NETWORKMENU_IPADDRESS , networkConfig->inet_static, network_address   , networkSettings_NetworkIP );
+		CMenuForwarder *m2 = new CMenuForwarder(LOCALE_NETWORKMENU_NETMASK   , networkConfig->inet_static, network_netmask   , networkSettings_NetMask   );
+		CMenuForwarder *m3 = new CMenuForwarder(LOCALE_NETWORKMENU_BROADCAST , networkConfig->inet_static, network_broadcast , networkSettings_Broadcast );
+		CMenuForwarder *m4 = new CMenuForwarder(LOCALE_NETWORKMENU_GATEWAY   , networkConfig->inet_static, network_gateway   , networkSettings_Gateway   );
+		CMenuForwarder *m5 = new CMenuForwarder(LOCALE_NETWORKMENU_NAMESERVER, networkConfig->inet_static, network_nameserver, networkSettings_NameServer);
 		
-		CMenuForwarder *m1 = new CMenuForwarder(LOCALE_NETWORKMENU_IPADDRESS , ip_entry_onoff, network_address   , networkSettings_NetworkIP );
-		CMenuForwarder *m2 = new CMenuForwarder(LOCALE_NETWORKMENU_NETMASK   , ip_entry_onoff, network_netmask   , networkSettings_NetMask   );
-		CMenuForwarder *m3 = new CMenuForwarder(LOCALE_NETWORKMENU_BROADCAST , ip_entry_onoff, network_broadcast , networkSettings_Broadcast );
-		CMenuForwarder *m4 = new CMenuForwarder(LOCALE_NETWORKMENU_GATEWAY   , ip_entry_onoff, network_gateway   , networkSettings_Gateway   );
-		CMenuForwarder *m5 = new CMenuForwarder(LOCALE_NETWORKMENU_NAMESERVER, ip_entry_onoff, network_nameserver, networkSettings_NameServer);
-	
 		CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5);
-	
-		CMenuOptionChooser* o2 = new CMenuOptionChooser(LOCALE_NETWORKMENU_DHCP, &network_dhcp, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, dhcpNotifier);
-	
+		CMenuOptionChooser* o2 = new CMenuOptionChooser(LOCALE_NETWORKMENU_DHCP, &network_dhcp, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, dhcpNotifier);		
+		
 		//paint menu items
 		//intros
 		networkSettings->addItem(GenericMenuSeparator);
@@ -223,6 +220,11 @@ void CNetworkSetup::showNetworkSetup()
 		networkSettings->addItem( m5);
 	
 		//ntp
+		//prepare ntp input
+		CSectionsdConfigNotifier* sectionsdConfigNotifier = new CSectionsdConfigNotifier;
+		CStringInputSMS * networkSettings_NtpServer = new CStringInputSMS(LOCALE_NETWORKMENU_NTPSERVER, &g_settings.network_ntpserver, 30, LOCALE_NETWORKMENU_NTPSERVER_HINT1, LOCALE_NETWORKMENU_NTPSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-. ", sectionsdConfigNotifier);
+	
+		CStringInput * networkSettings_NtpRefresh = new CStringInput(LOCALE_NETWORKMENU_NTPREFRESH, &g_settings.network_ntprefresh, 3,LOCALE_NETWORKMENU_NTPREFRESH_HINT1, LOCALE_NETWORKMENU_NTPREFRESH_HINT2 , "0123456789 ", sectionsdConfigNotifier);
 		networkSettings->addItem(GenericMenuSeparatorLine);
 		CMenuWidget* ntp = new CMenuWidget(LOCALE_MAINSETTINGS_NETWORK, NEUTRINO_ICON_SETTINGS, width);
 		networkSettings->addItem(new CMenuForwarder(LOCALE_NETWORKMENU_NTPTITLE, true, NULL, ntp, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
@@ -248,11 +250,10 @@ void CNetworkSetup::showNetworkSetup()
 		networkmounts->addItem(new CMenuForwarder(LOCALE_NFS_MOUNT , true, NULL, new CNFSMountGui(), NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 		networkmounts->addItem(new CMenuForwarder(LOCALE_NFS_UMOUNT, true, NULL, new CNFSUmountGui(), NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	#endif
-	
 		networkSettings->exec(NULL, "");
 		networkSettings->hide();
 		delete networkSettings;
-
+					
 		// Check for changes
  		loop = settingsChanged();
  	}
@@ -264,15 +265,7 @@ bool CNetworkSetup::settingsChanged()
 {
 	bool ret = false;
 
-	int intet_static = networkConfig.inet_static ? NETWORK_DHCP_OFF : NETWORK_DHCP_ON;
-
-	if (	old_network_dhcp		!= network_dhcp 		|| network_dhcp 		!= intet_static 			|| old_network_dhcp		!= intet_static			||
-		old_network_automatic_start	!= network_automatic_start 	|| network_automatic_start	!= networkConfig.automatic_start	|| old_network_automatic_start	!= networkConfig.automatic_start ||
-		old_network_address		!= network_address 		|| network_address		!= networkConfig.address		|| old_network_address		!= networkConfig.address	||
-		old_network_netmask		!= network_netmask 		|| network_netmask		!= networkConfig.netmask		|| old_network_netmask		!= networkConfig.netmask	||
-		old_network_broadcast		!= network_broadcast 		|| network_broadcast		!= networkConfig.broadcast		|| old_network_broadcast	!= networkConfig.broadcast	||
-		old_network_gateway		!= network_gateway		|| network_gateway		!= networkConfig.gateway		|| old_network_gateway		!= networkConfig.gateway	||
-		old_network_nameserver		!= network_nameserver		|| network_nameserver		!= networkConfig.nameserver		|| old_network_nameserver	!= networkConfig.nameserver) 
+	if (networkConfig->modified_from_orig())
 	{
 		//open message box
 		ret =  saveChangesDialog();
@@ -288,29 +281,30 @@ bool CNetworkSetup::settingsChanged()
 //prepares internal settings before commit
 void CNetworkSetup::prepareSettings()
 {
-	networkConfig.automatic_start 	= network_automatic_start;
-	networkConfig.inet_static 	= (network_dhcp ? false : true);
-	networkConfig.address 		= network_address;
-	networkConfig.netmask 		= network_netmask;
-	networkConfig.broadcast 	= network_broadcast;
-	networkConfig.gateway 		= network_gateway;
-	networkConfig.nameserver 	= network_nameserver;
+	networkConfig->automatic_start 	= network_automatic_start;
+	networkConfig->inet_static 	= (network_dhcp ? false : true);
+	networkConfig->address 		= network_address;
+	networkConfig->netmask 		= network_netmask;
+	networkConfig->broadcast 	= network_broadcast;
+	networkConfig->gateway 		= network_gateway;
+	networkConfig->nameserver 	= network_nameserver;
 }
 
-//check for ip-address if dhcp disabled, returns false if no address definied
+//check for ip-address, if dhcp disabled, returns false if no address definied and show message
 bool CNetworkSetup::checkForIP()
 {
+	bool ret = true;
+
 	if (!network_dhcp && network_address.empty()) //no ip definied
 	{
-		//ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_NETWORKMENU_ERROR_NO_ADDRESS), width , 10, NEUTRINO_ICON_ERROR); // UTF-8
 		ShowMsgUTF(LOCALE_MAINSETTINGS_NETWORK, g_Locale->getText(LOCALE_NETWORKMENU_ERROR_NO_ADDRESS), CMessageBox::mbrBack, 
 				CMessageBox::mbBack, 
 				NEUTRINO_ICON_ERROR, 
 				width);
-		return false;
+		ret = false;
 	}
 
-	return true;
+	return ret;
 }
 
 //saves settings without apply, reboot is required 
@@ -322,10 +316,10 @@ void CNetworkSetup::saveNetworkSettings(bool show_message)
 
 	prepareSettings();
 
-  	networkConfig.commitConfig();
+  	networkConfig->commitConfig();
 
 	if (show_msg)
-		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_NETWORKMENU_SETUPSAVED), width , 5, NEUTRINO_ICON_INFO); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_NETWORKMENU_SETUPSAVED), width , g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR], NEUTRINO_ICON_INFO); // UTF-8
 
 }
 
@@ -339,9 +333,9 @@ void CNetworkSetup::applyNetworkSettings()
 
 	prepareSettings();
 
-	networkConfig.stopNetwork();
-	networkConfig.commitConfig();
-	networkConfig.startNetwork();
+	networkConfig->stopNetwork();
+	networkConfig->commitConfig();
+	networkConfig->startNetwork();
 
 	hintBox->hide();
 	delete hintBox;
@@ -408,15 +402,30 @@ void CNetworkSetup::restoreNetworkSettings(bool show_message)
 		network_nameserver	= old_network_nameserver;
 		network_gateway		= old_network_gateway;
 
-		networkConfig.automatic_start 	= network_automatic_start;
-		networkConfig.inet_static 	= (network_dhcp ? false : true);
-		networkConfig.address 		= network_address;
-		networkConfig.netmask 		= network_netmask;
-		networkConfig.broadcast 	= network_broadcast;
-		networkConfig.gateway 		= network_gateway;
-		networkConfig.nameserver 	= network_nameserver;
+		networkConfig->automatic_start 	= network_automatic_start;
+		networkConfig->inet_static 	= (network_dhcp ? false : true);
+		networkConfig->address 		= network_address;
+		networkConfig->netmask 		= network_netmask;
+		networkConfig->broadcast 	= network_broadcast;
+		networkConfig->gateway 		= network_gateway;
+		networkConfig->nameserver 	= network_nameserver;
 
-		networkConfig.commitConfig();
+		networkConfig->commitConfig();
 	}
 
+}
+
+bool CNetworkSetup::changeNotify(const neutrino_locale_t, void * Data)
+{
+	char ip[16];
+	unsigned char _ip[4];
+	sscanf((char*) Data, "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
+
+	sprintf(ip, "%hhu.%hhu.%hhu.255", _ip[0], _ip[1], _ip[2]);
+	networkConfig->broadcast = ip;
+	network_broadcast = networkConfig->broadcast;
+
+	networkConfig->netmask = (_ip[0] == 10) ? "255.0.0.0" : "255.255.255.0";
+	network_netmask = networkConfig->netmask;
+	return true;
 }

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.cpp,v 1.6 2003/03/26 17:53:12 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.cpp,v 1.7 2009/11/20 22:44:19 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -31,6 +31,23 @@ CNetworkConfig::CNetworkConfig(void)
 	nameserver = our_nameserver;
 	inet_static = getInetAttributes("eth0", automatic_start, address, netmask, broadcast, gateway);
 	copy_to_orig();
+}
+
+CNetworkConfig* CNetworkConfig::getInstance()
+{
+	static CNetworkConfig* network_config = NULL;
+
+	if(!network_config)
+	{
+		network_config = new CNetworkConfig();
+		printf("[network config] Instance created\n");
+	}
+	return network_config;
+}
+
+CNetworkConfig::~CNetworkConfig()
+{
+
 }
 
 void CNetworkConfig::copy_to_orig(void)
@@ -88,3 +105,4 @@ void CNetworkConfig::stopNetwork(void)
 {
 	system("ifdown eth0");
 }
+
