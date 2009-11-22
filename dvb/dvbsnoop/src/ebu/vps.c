@@ -1,5 +1,5 @@
 /*
-$Id: vps.c,v 1.5 2007/10/18 20:49:50 rasc Exp $
+$Id: vps.c,v 1.6 2009/11/22 15:36:10 rhabarber1848 Exp $
 
 
 
@@ -16,27 +16,6 @@ $Id: vps.c,v 1.5 2007/10/18 20:49:50 rasc Exp $
  -- EN 300 231  8.2.2 
  -- TS 101 231
  -- add. info: SAA4700 datasheet (Philips VPS dataline Processor)
-
-
-
-$Log: vps.c,v $
-Revision 1.5  2007/10/18 20:49:50  rasc
-Mpeg NTP descriptor bugfix, minor changes
-
-Revision 1.4  2006/01/02 18:24:03  rasc
-just update copyright and prepare for a new public tar ball
-
-Revision 1.3  2004/03/10 21:05:53  rasc
-WSS (Wide Screen Signalling)  data decoding
-
-Revision 1.2  2004/03/09 21:57:58  rasc
-VPS decoding (fix NPP)
-
-Revision 1.1  2004/03/09 20:59:22  rasc
-VPS decoding (someone check the NPP & PTY code output please...)
-
-
-
 
 */
 

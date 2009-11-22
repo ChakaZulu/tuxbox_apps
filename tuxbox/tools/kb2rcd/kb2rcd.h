@@ -1,69 +1,6 @@
 /******************************************************************************
  *                        <<< Keyboard 2 RemoteControl daemon >>>
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
- *-----------------------------------------------------------------------------
- * $Log: kb2rcd.h,v $
- * Revision 0.19  2009/03/11 20:42:30  rhabarber1848
- * remove SuSv3 legacy functions: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=364177#p364177
- *
- * Revision 0.18  2009/02/03 19:07:49  rhabarber1848
- * Links webbrowser, text- and graphics mode, thx to amiga23 for kb2rcd patch: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=27&t=48280
- *
- * Revision 0.17  2006/03/21 19:08:54  robspr1
- * - add time-delayed keys
- *
- * Revision 0.16  2006/03/15 22:09:56  robspr1
- * - start plugins with SCRIPTxx=Plugin:myplugin
- *
- * Revision 0.15  2006/03/11 10:21:58  robspr1
- * - remove zlib.h
- *
- * Revision 0.14  2006/03/09 18:50:01  robspr1
- * - add scripts
- *
- * Revision 0.13  2006/03/07 21:25:53  robspr1
- * - fixme for kernel 2.6
- *
- * Revision 0.12  2006/03/07 19:58:24  robspr1
- * - add timeout between keys
- *
- * Revision 0.11  2006/03/06 21:09:46  robspr1
- * - change to kb2rcd.conf and change mouse behaviour
- *
- * Revision 0.10  2006/03/05 22:39:03  robspr1
- * - add to cvs
- *
- * Revision 0.9  2006/03/05 22:50:00  robspr1
- * - change mouse-cursor behavior
- * - add debug-output switch
- *
- * Revision 0.8  2006/03/05 17:50:00  robspr1
- * - add delay between keystrokes
- *
- * Revision 0.7  2006/03/05 16:30:00  robspr1
- * - add debug_output with key_names
- *
- * Revision 0.6  2006/03/05 16:00:00  robspr1
- * - add config for mouse-cursor
- * - release button before sending a new button
- *
- * Revision 0.5  2006/03/05 15:00:00  robspr1
- * - add mouse-cursor
- *
- * Revision 0.4  2006/03/05 12:00:00  robspr1
- * - add lock-file for conversion
- *
- * Revision 0.3  2006/03/05 10:00:00  robspr1
- * - default .conf file is generated
- *
- * Revision 0.2  2006/03/03 22:00:00  robspr1
- * - change rc-read from NON-BLOCKING to BLOCKING
- * - fix writing ALT_ and SHIFT_ keys
- * - fix signal -HUP
- *
- * Revision 0.1  2006/03/03 20:00:00  robspr1
- * - first version
- *
  ******************************************************************************/
 
 #include "config.h"

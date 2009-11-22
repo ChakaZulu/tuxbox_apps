@@ -1,5 +1,5 @@
 /*
- * $Id: rcinput.cpp,v 1.5 2003/05/21 17:22:49 thegoodguy Exp $
+ * $Id: rcinput.cpp,v 1.6 2009/11/22 15:36:43 rhabarber1848 Exp $
  * 
  * Remote Control Handling Class
  *
@@ -22,22 +22,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Log: rcinput.cpp,v $
- * Revision 1.5  2003/05/21 17:22:49  thegoodguy
- * Fix handling (conversion, duplicates) of events
- *
- * Revision 1.4  2002/12/26 09:14:03  Jolt
- * Ported to Input dev api
- *
- * Revision 1.3  2002/01/03 17:18:59  obi
- * some reorganization.
- * removed buffer classes.
- * removed threading from rcinput.
- * moved timer from rc-class to menu-class.
- * manually add fonts to fontRendererClass.
- * fixed small bugs that noone would ever find and added new ones.
- *
  *
  */
 

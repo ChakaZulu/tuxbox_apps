@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.15 2005/11/03 21:08:52 mogway Exp $
+// $Id: SIutils.cpp,v 1.16 2009/11/22 15:36:48 rhabarber1848 Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -20,64 +20,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-//
-// $Log: SIutils.cpp,v $
-// Revision 1.15  2005/11/03 21:08:52  mogway
-// sectionsd update by Houdini
-//
-// Changes:
-// - EIT und SDT DMX buffer verändert
-// -> keine(weniger) POLLER, kostet Speicher beim EITDMX, spart Speicher beim SDTDMX
-//
-// - vor dem Parsen der Sections werden die Buffer nicht mehr (unnötig) ein zweites mal allokiert und umkopiert -> mehr Performance, weniger Speicherfragmentierung
-//
-// - unnötige/unbenutze Funktionen auskommentiert -> das gestrippte sectionsd binary wird 23kB kleiner, Test-/Beispielprogramme wie sdt, epg, nit, ... können dann nicht mehr kompiliert werden.
-//
-// Revision 1.14  2003/03/03 13:38:33  obi
-// - cleaned up changeUTCtoCtime a bit
-// - finish pthreads using pthread_exit(NULL) instead of return 0
-// - use settimeofday() instead of stime()
-//
-// Revision 1.13  2002/11/03 22:26:54  thegoodguy
-// Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
-//
-// Revision 1.12  2001/07/17 14:15:52  fnbrd
-// Kleine Aenderung damit auch static geht.
-//
-// Revision 1.11  2001/07/14 16:38:46  fnbrd
-// Mit workaround fuer defektes mktime der glibc
-//
-// Revision 1.10  2001/07/12 22:55:51  fnbrd
-// Fehler behoben
-//
-// Revision 1.9  2001/07/12 22:51:25  fnbrd
-// Time-Thread im sectionsd (noch disabled, da prob mit mktime)
-//
-// Revision 1.8  2001/07/06 11:09:56  fnbrd
-// Noch ne Kleinigkeit gefixt.
-//
-// Revision 1.7  2001/07/06 09:46:01  fnbrd
-// Kleiner Fehler behoben
-//
-// Revision 1.6  2001/07/06 09:27:40  fnbrd
-// Kleine Anpassung
-//
-// Revision 1.5  2001/06/10 14:55:51  fnbrd
-// Kleiner Aenderungen und Ergaenzungen (epgMini).
-//
-// Revision 1.4  2001/05/19 22:46:50  fnbrd
-// Jetzt wellformed xml.
-//
-// Revision 1.3  2001/05/18 13:11:46  fnbrd
-// Fast komplett, fehlt nur noch die Auswertung der time-shifted events
-// (Startzeit und Dauer der Cinedoms).
-//
-// Revision 1.2  2001/05/17 01:53:35  fnbrd
-// Jetzt mit lokaler Zeit.
-//
-// Revision 1.1  2001/05/16 15:23:47  fnbrd
-// Alles neu macht der Mai.
-//
 //
 
 #include <stdio.h>

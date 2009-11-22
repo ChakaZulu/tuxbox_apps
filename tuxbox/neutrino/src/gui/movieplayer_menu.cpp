@@ -1,5 +1,5 @@
 /*
-	$Id: movieplayer_menu.cpp,v 1.1 2009/11/09 13:05:09 dbt Exp $
+	$Id: movieplayer_menu.cpp,v 1.2 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	Movieplayer menue - Neutrino-GUI
 
@@ -26,11 +26,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: movieplayer_menu.cpp,v $
-	Revision 1.1  2009/11/09 13:05:09  dbt
-	menue cleanup:
-	parentallock, movieplayer_menue and network-setup for it's own modules
-	
 */
 
 #ifdef HAVE_CONFIG_H

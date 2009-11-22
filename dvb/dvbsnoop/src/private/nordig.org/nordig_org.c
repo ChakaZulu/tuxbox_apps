@@ -1,5 +1,5 @@
 /*
-$Id: nordig_org.c,v 1.2 2008/09/01 08:06:07 mws Exp $
+$Id: nordig_org.c,v 1.3 2009/11/22 15:36:18 rhabarber1848 Exp $
 
 
  DVBSNOOP
@@ -12,34 +12,6 @@ $Id: nordig_org.c,v 1.2 2008/09/01 08:06:07 mws Exp $
 
   -- Private Data Structures for:
   -- nordig.org
-
-$Log: nordig_org.c,v $
-Revision 1.2  2008/09/01 08:06:07  mws
-decode NorDig content protection descriptor
-
-Revision 1.1  2008/08/29 20:00:06  obi
-decode NorDig logic(al) channel descriptor (e.g. used by unitymedia)
-
-Revision 1.5  2006/04/04 17:16:54  rasc
-finally fix typo in premiere descriptor name
-
-Revision 1.4  2006/01/02 18:24:16  rasc
-just update copyright and prepare for a new public tar ball
-
-Revision 1.3  2005/08/10 21:28:19  rasc
-New: Program Stream handling  (-s ps)
-
-Revision 1.2  2005/06/29 17:30:38  rasc
-some legal notes...
-
-Revision 1.1  2004/11/03 21:01:02  rasc
- - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
- - New: cmd option "-privateprovider <provider name>"
- - New: Private provider sections and descriptors decoding
- - Changed: complete restructuring of private descriptors and sections
-
-
-
 
 */
 

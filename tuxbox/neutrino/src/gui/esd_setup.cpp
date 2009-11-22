@@ -1,5 +1,5 @@
 /*
-	$Id: esd_setup.cpp,v 1.1 2009/10/13 19:17:46 dbt Exp $
+	$Id: esd_setup.cpp,v 1.2 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	esound setup implementation - Neutrino-GUI
 
@@ -27,10 +27,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: esd_setup.cpp,v $
-	Revision 1.1  2009/10/13 19:17:46  dbt
-	init esd_setup for it's own file
-	
 */
 
 #ifdef HAVE_CONFIG_H

@@ -1,5 +1,5 @@
 /*
-	$Id: audio_setup.cpp,v 1.3 2009/10/31 10:55:50 seife Exp $
+	$Id: audio_setup.cpp,v 1.4 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	audio setup implementation - Neutrino-GUI
 
@@ -26,16 +26,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: audio_setup.cpp,v $
-	Revision 1.3  2009/10/31 10:55:50  seife
-	neutrino: add TD specific audio setup code
-	
-	Revision 1.2  2009/10/27 21:37:29  dbt
-	removed forgotten comment
-	
-	Revision 1.1  2009/10/17 11:38:37  dbt
-	init audio_setup for it's own modules
-	
 */
 
 #ifdef HAVE_CONFIG_H

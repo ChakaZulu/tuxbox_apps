@@ -1,34 +1,6 @@
 /******************************************************************************
  *                        <<< TuxCal - Calendar Plugin >>>
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
- *-----------------------------------------------------------------------------
- * $Log: tuxcal.h,v $
- * Revision 1.08  2009/03/11 20:42:21  rhabarber1848
- * remove SuSv3 legacy functions: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=364177#p364177
- *
- * Revision 1.07  2007/05/17 16:19:47  dbluelle
- * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
- *
- * Revision 1.06  2006/03/05 15:59:37  robspr1
- * - use /tmp/keyboard.lck to signal decoding of the keyboard
- *
- * Revision 1.05  2006/02/23 23:07:25  robspr1
- * - change SKIN2, signal up to 5 days, toggle clock-display file
- *
- * Revision 1.04  2006/02/18 14:57:13  robspr1
- * add signaling at fixed times, some small fixes
- *
- * Revision 1.03  2006/02/17 21:29:36  robspr1
- * -add command to switch/hide the clock
- *
- * Revision 1.02  2006/02/15 19:12:30  robspr1
- * first version in CVS
- *
- * Revision 1.01  2006/02/12 23:10:00  robspr1
- * - bugfix reading params POS_X and POS_Y (needed by the daemon)
- *
- * Revision 1.00  2006/01/31 14:37:48  robspr1
- * - first version
  ******************************************************************************/
 // lots of code is from the tuxmail-project
 

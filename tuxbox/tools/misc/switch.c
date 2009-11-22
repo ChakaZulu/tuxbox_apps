@@ -19,50 +19,6 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *
- *   $Log: switch.c,v $
- *   Revision 1.13  2002/08/21 08:39:35  obi
- *   no more compile warnings
- *
- *   Revision 1.12  2002/07/25 00:17:38  woglinde
- *
- *
- *
- *   fixing some compiler warnings
- *
- *   Revision 1.11  2002/02/23 20:22:29  woglinde
- *   fixing compiler warnings mulitple-literal strings
- *
- *   Revision 1.10  2001/07/23 16:19:56  gillem
- *   - add get type
- *
- *   Revision 1.9  2001/04/25 08:03:59  fnbrd
- *   Kleinigkeiten.
- *
- *   Revision 1.7  2001/04/01 10:30:15  gillem
- *   - fix volume
- *
- *   Revision 1.6  2001/03/25 13:57:24  gillem
- *   - update includes
- *
- *   Revision 1.5  2001/03/14 17:04:53  gillem
- *   - fix mute/unmute
- *
- *   Revision 1.4  2001/03/03 17:50:19  gillem
- *   - fix dev filename
- *
- *   Revision 1.3  2001/03/03 17:08:37  gillem
- *   - devfs support
- *
- *   Revision 1.2  2001/03/03 11:17:03  gillem
- *   - bugfix
- *
- *   Revision 1.1.1.1  2001/03/03 00:11:15  gillem
- *
- *
- *
- *   $Revision: 1.13 $
- *
  */
 
 #include <fcntl.h>

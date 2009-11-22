@@ -1,5 +1,5 @@
 /*
-$Id: userdefs.c,v 1.6 2008/08/30 19:23:40 obi Exp $
+$Id: userdefs.c,v 1.7 2009/11/22 15:36:17 rhabarber1848 Exp $
 
 
  DVBSNOOP
@@ -13,31 +13,6 @@ $Id: userdefs.c,v 1.6 2008/08/30 19:23:40 obi Exp $
   Private Sections & Descriptors
   -- will branch to default user section table or descriptor
   -- or to known specific private data structurs
- 
-
-$Log: userdefs.c,v $
-Revision 1.6  2008/08/30 19:23:40  obi
-eicta (eacem) private descriptors
-
-Revision 1.5  2008/08/29 20:00:05  obi
-decode NorDig logic(al) channel descriptor (e.g. used by unitymedia)
-
-Revision 1.4  2005/12/29 02:43:38  rasc
-gcc fixes, man page update
-
-Revision 1.3  2005/12/22 16:21:51  rasc
-Update and new descriptors EN 300 468 v1.7.1
-
-Revision 1.2  2005/08/10 21:28:18  rasc
-New: Program Stream handling  (-s ps)
-
-Revision 1.1  2004/11/03 21:01:00  rasc
- - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
- - New: cmd option "-privateprovider <provider name>"
- - New: Private provider sections and descriptors decoding
- - Changed: complete restructuring of private descriptors and sections
-
-
 
 */
 

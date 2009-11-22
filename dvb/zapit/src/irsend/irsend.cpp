@@ -4,10 +4,9 @@
 	Copyright (C) 2002 Sven Traenkle 'Zwen'
 	License: GPL
 
-	$Id: irsend.cpp,v 1.6 2009/11/22 15:36:51 rhabarber1848 Exp $
 */
 
-#include <irsend/irsend.h>
+#include "irsend.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -53,7 +52,7 @@ bool CIRSend::Send()
 					else
 					{
 						int duration=0;
-						std::string::size_type space_pos1=line.find(' ');
+						unsigned int space_pos1=line.find(' ');
 						if(space_pos1==std::string::npos)
 						{
 							printf("[neutrino] IRSend syntax error in file %s line %d\n",m_configFile.c_str(),linenr);
@@ -62,7 +61,7 @@ bool CIRSend::Send()
 						else
 						{
 							std::string deviceName=line.substr(0,space_pos1);
-							std::string::size_type space_pos2=line.find(' ',space_pos1+1);
+							unsigned int space_pos2=line.find(' ',space_pos1+1);
 							if(space_pos2!=std::string::npos)
 							{
 								sscanf(line.substr(space_pos2+1).c_str(),"%d",&duration);

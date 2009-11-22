@@ -19,24 +19,6 @@ Contributor(s):
 
   Fabian Giesen    - converted this monster to C++ (at least the core)
 
-ChangeLog:
-
-  $Log: xmlparse.cpp,v $
-  Revision 1.3  2003/03/14 05:13:04  obi
-  compileable with -W -Werror
-
-  Revision 1.2  2003/02/26 22:21:24  obi
-  Mismatched free() / delete / delete []
-
-  Revision 1.1  2002/01/18 20:22:39  tmbinc
-  initial checkin
-
-  Revision 1.1.1.1  2001/10/07 13:01:18  tmbinc
-  Import of ezap2-200110070
-
-  Revision 1.1  1999/01/11 23:01:59  cvs
-  Another try to commit this.
-
 */
 
 #include <stdlib.h>

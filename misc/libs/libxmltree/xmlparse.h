@@ -19,24 +19,6 @@ Contributor(s):
 
   Fabian Giesen    - converted this monster to C++ (at least the core)
 
-ChangeLog:
-
-  $Log: xmlparse.h,v $
-  Revision 1.2  2003/03/14 05:13:04  obi
-  compileable with -W -Werror
-
-  Revision 1.1  2002/01/18 20:22:39  tmbinc
-  initial checkin
-
-  Revision 1.1.1.1  2001/10/07 13:01:16  tmbinc
-  Import of ezap2-200110070
-
-  Revision 1.2  1999/01/24 16:00:05  cvs
-  First release of the XMLTree API (ryg)
-
-  Revision 1.1  1999/01/11 23:01:58  cvs
-  Another try to commit this.
-
 */
 
 #ifndef XmlParse_INCLUDED

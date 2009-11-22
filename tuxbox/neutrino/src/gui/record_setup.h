@@ -1,5 +1,5 @@
 /*
-	$Id: record_setup.h,v 1.1 2009/11/20 22:21:13 dbt Exp $
+	$Id: record_setup.h,v 1.2 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	record setup implementation - Neutrino-GUI
 
@@ -27,10 +27,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: record_setup.h,v $
-	Revision 1.1  2009/11/20 22:21:13  dbt
-	init recordig setup for it's own modul
-	
 */
 
 #ifndef __record_setup__

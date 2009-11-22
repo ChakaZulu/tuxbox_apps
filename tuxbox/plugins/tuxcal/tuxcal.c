@@ -16,34 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- *-----------------------------------------------------------------------------
- * $Log: tuxcal.c,v $
- * Revision 1.08  2007/05/17 16:19:47  dbluelle
- * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
- *
- * Revision 1.07  2006/03/05 15:59:37  robspr1
- * - use /tmp/keyboard.lck to signal decoding of the keyboard
- *
- * Revision 1.06  2006/02/24 08:13:29  robspr1
- * - bugfix Editor background
- *
- * Revision 1.05  2006/02/23 23:07:25  robspr1
- * - change SKIN2, signal up to 5 days, toggle clock-display file
- *
- * Revision 1.04  2006/02/18 14:57:13  robspr1
- * add signaling at fixed times, some small fixes
- *
- * Revision 1.03  2006/02/17 21:29:36  robspr1
- * -add command to switch/hide the clock
- *
- * Revision 1.02  2006/02/15 19:11:33  robspr1
- * first version in CVS
- *
- * Revision 1.01  2006/02/12 23:10:00  robspr1
- * - bugfix reading params POS_X and POS_Y (needed by the daemon)
- *
- * Revision 1.00  2006/02/06 20:00:00  robspr1
- * - first version
  ******************************************************************************/
 // lots of code is from the tuxmail-project
 
@@ -2633,7 +2605,7 @@ void SaveDatabase(void)
 */
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.08 $";
+	char cvs_revision[] = "$Revision: 1.09 $";
 	FILE *fd_run;
 	FT_Error error;
 

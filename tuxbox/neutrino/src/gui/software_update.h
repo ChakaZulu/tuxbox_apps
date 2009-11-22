@@ -1,5 +1,5 @@
 /*
-	$Id: software_update.h,v 1.2 2009/11/20 22:33:55 dbt Exp $
+	$Id: software_update.h,v 1.3 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -26,13 +26,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: software_update.h,v $
-	Revision 1.2  2009/11/20 22:33:55  dbt
-	useless variable removed
-	
-	Revision 1.1  2009/10/09 05:04:06  dbt
-	init stand alone module for neutrino software update
-	
 */
 
 #ifndef __software_update__

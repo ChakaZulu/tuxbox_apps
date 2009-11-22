@@ -1,5 +1,5 @@
 /*
-	$Id: network_setup.h,v 1.2 2009/11/20 22:44:19 dbt Exp $
+	$Id: network_setup.h,v 1.3 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	network setup implementation - Neutrino-GUI
 
@@ -26,15 +26,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: network_setup.h,v $
-	Revision 1.2  2009/11/20 22:44:19  dbt
-	reworked network_setup
-	fix: netmask and broadcoast menue entries
-	
-	Revision 1.1  2009/11/09 13:05:09  dbt
-	menue cleanup:
-	parentallock, movieplayer_menue and network-setup for it's own modules
-		
 */
 
 #ifndef __network_setup__

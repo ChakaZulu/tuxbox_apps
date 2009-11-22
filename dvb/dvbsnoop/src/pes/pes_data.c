@@ -1,5 +1,5 @@
 /*
-$Id: pes_data.c,v 1.5 2007/10/22 19:37:08 rasc Exp $
+$Id: pes_data.c,v 1.6 2009/11/22 15:36:13 rhabarber1848 Exp $
 
 
  DVBSNOOP
@@ -13,28 +13,6 @@ $Id: pes_data.c,v 1.5 2007/10/22 19:37:08 rasc Exp $
 
  -- PES Data   Privat_stream_1
  -- Data Packet Synchronous and synchronized data streaming
-
-
-
-
-$Log: pes_data.c,v $
-Revision 1.5  2007/10/22 19:37:08  rasc
-revert unfinished code... (sorry)
-
-Revision 1.4  2007/10/18 20:49:50  rasc
-Mpeg NTP descriptor bugfix, minor changes
-
-Revision 1.3  2006/01/02 18:24:12  rasc
-just update copyright and prepare for a new public tar ball
-
-Revision 1.2  2004/02/02 23:34:08  rasc
-- output indent changed to avoid \r  (which sucks on logged output)
-- EBU PES data started (teletext, vps, wss, ...)
-- bugfix: PES synch. data stream
-- some other stuff
-
-
-
 
 */
 

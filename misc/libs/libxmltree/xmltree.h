@@ -2,43 +2,7 @@
  *
  * XMLTree API header
  *
- * $Id: xmltree.h,v 1.2 2009/02/18 17:51:55 seife Exp $
- *
- * Changelog:
- * $Log: xmltree.h,v $
- * Revision 1.2  2009/02/18 17:51:55  seife
- * fix char* vs const char* compiler warnings
- *
- * Newer compilers are more pedantic to not allow string constants for
- * functions with char* arguments, but only for const char*. Make libxmltree
- * functions const char* where appropriate and adopt the usage inside zapit.
- * There are probably more occurences throughout the source tree, but zapit
- * is compiled with "-Werror", so those fixes are needed here ;)
- *
- * Revision 1.1  2002/01/18 20:22:39  tmbinc
- * initial checkin
- *
- * Revision 1.1.1.1  2001/10/07 13:01:15  tmbinc
- * Import of ezap2-200110070
- *
- * Revision 1.4  1999/02/26 13:17:22  cvs
- * - thousands of bugs fixed (really)
- * - modifications in the XML part
- * - added a new object for testing, cpiwButton (usable already, see
- *   win32/ts.cpp)
- * - modified ts.cpp to create a pseudo-GUI again (for testing the
- *   buttons)
- * - ts now exits on a click in the windows
- * - ts has no titlebar anymore (will soon by replace by a special
- *   widget)
- *
- * (ryg)
- *
- * Revision 1.3  1999/01/25 18:05:27  cvs
- * ARG! tmb, next time you look bevor you say shit, okay? (ryg)
- *
- * Revision 1.1  1999/01/24 16:01:15  cvs
- * First release of the XMLTree API (ryg)
+ * $Id: xmltree.h,v 1.3 2009/11/22 15:36:38 rhabarber1848 Exp $
  *
  */
 

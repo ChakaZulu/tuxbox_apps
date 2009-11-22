@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.36 2009/11/20 22:31:25 dbt Exp $
+	$Id: moviebrowser.cpp,v 1.37 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -41,161 +41,6 @@
 
 	Author: Guenther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
-
-	$Log: moviebrowser.cpp,v $
-	Revision 1.36  2009/11/20 22:31:25  dbt
-	stdlib.h as system file
-	
-	Revision 1.35  2009/11/09 21:38:24  rhabarber1848
-	Remove unused Neutrino icons, use defines instead of strings for icon filenames: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=372058#p372058
-	
-	Revision 1.34  2009/11/07 09:51:30  rhabarber1848
-	Movieplayer2: Change more buttons to make navigation more mp1-like, update helptext: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=372010#p372010
-	
-	Revision 1.33  2009/10/30 21:05:49  seife
-	moviebrowser: fix ignored NULL-check due to superfluous semicolon
-	
-	Revision 1.32  2009/10/28 20:48:42  seife
-	moviebrowser: fix segfault on "OK" with empty TS archive
-	
-	reported and debugged by GetAway, see
-	http://forum.tuxbox.org/forum/viewtopic.php?p=371817#p371817
-	
-	Revision 1.31  2009/10/13 19:40:01  dbt
-	datatype and names for some settings variables matching for purpose changed, nfs* was not very matching
-	
-	Revision 1.30  2009/10/10 20:16:08  seife
-	neutrino: add moviebrowser support to movieplayer2
-	
-	Implement moviebrowser / mp2 integration. The mp2 gets called from
-	moviebrowser and gets a special URL to point to the file to play.
-	Might still have rough edges and probably still needs some work.
-	
-	Based on an idea and prototype by "Tahtu", see
-	http://forum.tuxbox.org/forum/viewtopic.php?p=370973#p370973
-	
-	Revision 1.29  2009/09/26 09:18:37  rhabarber1848
-	New cdk/configure option --disable-gui-mount to disable GUI mount functionality, to be used in automount-only- or HDD/network-less images, currently only active in Neutrino, GUI mount is enabled by default, thanks to barf: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=18&t=41744
-	
-	Revision 1.28  2009/09/11 18:36:40  dbt
-	fix segfault in help window
-	see: http://www.dreambox-fan.de/forum/viewtopic.php?p=370192#p370192
-	
-	Revision 1.27  2009/09/11 07:33:52  rhabarber1848
-	Neutrino: Use locales instead of hard-coded text in moviebrowser´s help window
-	
-	Revision 1.26  2009/09/03 19:57:57  dbt
-	removed compiler warnings
-	
-	Revision 1.25  2009/08/18 11:51:59  rhabarber1848
-	Neutrino: new configure option --disable-movieplayer: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=369382#p369382
-	
-	Revision 1.24  2009/05/06 19:48:20  houdini
-	fixed some warnings about shadowed variables
-	
-	Revision 1.23  2009/02/18 17:48:41  seife
-	Add missing includes for newer compilers
-	
-	Newer gcc versions (> 4.x IIRC) are more picky wrt. explicitly including
-	header which were included implicitly before. Add those header so that we
-	can compile with gcc 4.3 (note that this commit is not enough for that goal)
-	
-	Revision 1.22  2009/01/30 23:05:27  dbt
-	removed last useless patch
-	
-	Revision 1.21  2009/01/24 17:12:47  dbt
-	fix broken statusbar in lcd, hope it works now correct see: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?f=2&t=48312&start=0
-	
-	Revision 1.20  2008/12/05 22:06:19  seife
-	Rework neutrino's RC input routines, making it possible to use "key repeat"
-	and "key release" flags in the future.
-	Probably some fallout which will have to be fixed later will happen.
-	Might break the dreambox.
-	
-	Revision 1.19  2008/11/16 21:46:40  seife
-	improve the readability of the rounded corners code with a few macros
-	
-	Revision 1.18  2008/08/01 21:07:19  houdini
-	increased ping timeout to 500ms for nfs mount during record directory select
-	
-	Revision 1.17  2008/05/01 00:08:24  dbt
-	- add optional rounded corners in menues and most other windows, configurable in color menue, saved with themes
-	- revised buttonbars with uniformed background colors and more accurate captions
-	- revised image informations with more version informations about some modules
-	- comment lines for image infos, usefull stuff for image makers (get from ./version)
-	- motorsetup revised
-	- channel logos in infobar now possible
-	- record, swtch, epg load buttons now default activated in epglist
-	- message if is no record directory definied when using record button in epglist and epgview
-	- add more icons for user menue
-	
-	- optional abgerundete Ecken in Menues und den meisten Fenstern, schaltbar im Farbmenue, mit Themes speichebar
-	- Buttonleisten vereinhetlicht mit gleichen Hintergrundfarben und besser angepasste Beschriftungen
-	- mehr Versionsinformationen in Image Informationen
-	- Kommentarzeilen fuer Zusatzinfos bei Image Image-Informationen (geholt aus ./version)
-	- Motorsetup ueberarbeitet
-	- Senderlogos im Infobar moeglich
-	- Aufnahme-, Umschalt- und aktualisierungs-Buttons jetzt standardmaessig in der EPG-Vorschau aktiviert
-	- Warnmeldung, falls kein Aufnahmeverzeichnis angegeben wurde, wenn  Aufnahme vorgemerkt werden soll
-	- weitere Icons fuer das Usermnue jetzt nutzbar
-	
-	special THX to Ingrid and PaulFoul for some inputs ;-)
-	
-	Revision 1.16  2007/11/16 16:54:55  ecosys
-	changed cursor focus, thx to ingrid
-	http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=346678#346678
-	
-	Revision 1.15  2007/08/16 20:25:29  guenther
-	update some locals
-	
-	Revision 1.14  2007/08/04 21:54:59  guenther
-	- Increase number of  chars to 30 for info1 and channel name
-	- Clear RC buffer when entering MB. Avoid starting of first movie if OK button is pressed to long.
-	
-	Revision 1.13  2007/02/24 15:21:38  guenther
-	Allow all directories as movie dir, use root for non selection
-	
-	Revision 1.12  2007/01/24 02:20:56  guenther
-	update recording directory menu to support IDE and NFS
-	
-	Revision 1.11  2006/12/28 21:40:32  houdini
-	whitespace cleanup, removed warnings
-	
-	Revision 1.10  2006/09/11 21:11:35  guenther
-	General menu clean up
-	Dir menu updated
-	Add options menu
-	In movie info menu  "update all" added
-	Serie option added (hide serie, auto serie)
-	Update movie info on delete movie
-	Delete Background when menu is entered
-	Timeout updated (MB does not exit after options menu is left)
-	
-	Revision 1.9  2006/09/02 21:34:27  guenther
-	Movie info is now updated after movie is erased
-	
-	Revision 1.8  2006/02/20 01:10:34  guenther
-	- temporary parental lock updated - remove 1s debug prints in movieplayer- Delete file without rescan of movies- Crash if try to scroll in list with 2 movies only- UTF8XML to UTF8 conversion in preview- Last file selection recovered- use of standard folders adjustable in config- reload and remount option in config
-	
-	Revision 1.7  2006/01/05 03:58:49  Arzka
-	Hopefully fixed a memory leak
-	  fb_window.cpp:61: warning: deleting `void*' is undefined
-	
-	Removed few minor compilation warnings about used data types with printf formatters in moviebrowser.cpp and movieinfo.cpp
-	
-	Revision 1.6  2005/12/23 18:45:42  metallica
-	Günther moviebrowser.cpp update
-	
-	Revision 1.5  2005/12/18 09:23:53  metallica
-	fix compil warnings
-	
-	Revision 1.4  2005/12/12 07:58:02  guenther
-	- fix bug on deleting CMovieBrowser 
-	- speed up parse time (20 ms per .ts file now)
-	- update stale function
-	- refresh directories on reload
-	- print scan time in debug console
-	
 
 ****************************************************************************/
 
@@ -521,7 +366,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.36 2009/11/20 22:31:25 dbt Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.37 2009/11/22 15:36:52 rhabarber1848 Exp $\r\n");
 	init();
 }
 

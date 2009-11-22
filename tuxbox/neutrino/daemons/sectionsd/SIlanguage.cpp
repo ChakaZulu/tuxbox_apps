@@ -1,5 +1,5 @@
 //
-// $Id: SIlanguage.cpp,v 1.4 2006/04/21 20:40:13 houdini Exp $
+// $Id: SIlanguage.cpp,v 1.5 2009/11/22 15:36:48 rhabarber1848 Exp $
 //
 // Class for filtering preferred language
 //
@@ -18,24 +18,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-//
-// $Log: SIlanguage.cpp,v $
-// Revision 1.4  2006/04/21 20:40:13  houdini
-// improvments when not using the MultiLanguageEPG feature
-//
-// Revision 1.3  2006/04/13 19:10:54  mws
-// bugfix returned wrong value for error while saving;
-// preincrement iterators;
-//
-// Revision 1.2  2006/04/12 21:23:58  Arzka
-// Optimization.
-// Removed unnecessary copying of std:map and
-// removed few avoidable std::string creation
-//
-// Revision 1.1  2006/03/26 20:13:49  Arzka
-// Added support for selecting EPG language
-//
-//
 //
 
 #include "SIlanguage.hpp"

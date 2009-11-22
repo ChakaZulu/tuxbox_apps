@@ -1,5 +1,5 @@
 //
-// $Id: epgMini.cpp,v 1.3 2004/02/13 14:40:00 thegoodguy Exp $
+// $Id: epgMini.cpp,v 1.4 2009/11/22 15:36:48 rhabarber1848 Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -20,17 +20,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-//
-// $Log: epgMini.cpp,v $
-// Revision 1.3  2004/02/13 14:40:00  thegoodguy
-// further usage of event_id_t, t_service_id and friends (hopefully without breaking anything
-//
-// Revision 1.2  2001/06/10 15:21:22  fnbrd
-// mit XML-Ausgabe
-//
-// Revision 1.1  2001/06/10 14:55:51  fnbrd
-// Kleiner Aenderungen und Ergaenzungen (epgMini).
-//
 //
 
 #include <stdio.h>

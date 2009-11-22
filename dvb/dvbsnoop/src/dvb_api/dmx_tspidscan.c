@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.25 2008/01/24 05:07:25 obi Exp $
+$Id: dmx_tspidscan.c,v 1.26 2009/11/22 15:36:07 rhabarber1848 Exp $
 
 
  DVBSNOOP
@@ -12,108 +12,13 @@ $Id: dmx_tspidscan.c,v 1.25 2008/01/24 05:07:25 obi Exp $
  -- Brute force scan all pids on a transponder
  -- scanpids principle is based on the sourcefile getpids.c from 'obi'
 
-
-
-$Log: dmx_tspidscan.c,v $
-Revision 1.25  2008/01/24 05:07:25  obi
-Implemented "-tsraw" option in combination with "-s pidscan". Reads full TS for 10 seconds.
-
-Revision 1.24  2007/10/18 20:49:49  rasc
-Mpeg NTP descriptor bugfix, minor changes
-
-Revision 1.23  2006/01/02 18:23:59  rasc
-just update copyright and prepare for a new public tar ball
-
-Revision 1.22  2005/11/08 23:15:25  rasc
- - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
- - Bugfix: PES packet stuffing
- - New:  PS/PES read redesign and some code changes
-
-Revision 1.21  2005/09/06 23:13:51  rasc
-catch OS signals (kill ...) for smooth program termination
-
-Revision 1.20  2005/08/22 22:37:59  rasc
-ATSC frontend info
-
-Revision 1.19  2005/08/17 21:18:18  rasc
-improvements on pidscan
-
-Revision 1.18  2004/10/12 20:37:47  rasc
- - Changed: TS pid filtering from file, behavior changed
- - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
- - misc. changes
-
-Revision 1.17  2004/09/01 20:20:34  rasc
-new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
-
-Revision 1.16  2004/04/05 17:32:13  rasc
-mass typo fix adaption --> adaptation
-
-Revision 1.15  2004/01/31 01:24:26  rasc
-PIDSCAN  redesign,
-try to show pid content  (PES streamID, SECTION tableID)
-
-Revision 1.14  2004/01/13 21:04:20  rasc
-BUGFIX: getbits overflow fixed...
-
-Revision 1.13  2004/01/11 21:01:32  rasc
-PES stream directory, PES restructured
-
-Revision 1.12  2004/01/02 00:00:37  rasc
-error output for buffer overflow
-
-Revision 1.11  2004/01/01 20:09:23  rasc
-DSM-CC INT/UNT descriptors
-PES-sync changed, TS sync changed,
-descriptor scope
-other changes
-
-Revision 1.10  2003/12/28 14:00:26  rasc
-bugfix: section read from input file
-some changes on packet header output
-
-Revision 1.9  2003/12/15 22:41:28  rasc
-pidscan improved, problems with max filters on demux
-
-Revision 1.8  2003/12/15 22:29:27  rasc
-pidscan improved, problems with max filters on demux
-
-Revision 1.7  2003/12/15 20:09:48  rasc
-no message
-
-Revision 1.6  2003/12/14 18:29:56  rasc
-no message
-
-Revision 1.5  2003/12/10 23:18:10  rasc
-improve pidscan
-
-Revision 1.4  2003/12/10 20:07:15  rasc
-minor stuff
-
-Revision 1.3  2003/12/09 20:34:23  rasc
-transponder pid-scan improved (should be sufficient now)
-
-Revision 1.2  2003/12/09 18:27:48  rasc
-pidscan on transponder
-
-Revision 1.1  2003/12/07 23:36:13  rasc
-pidscan on transponder
-- experimental(!)
-
-
 */
-
-
-
-
 
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <unistd.h>
-
-
 
 #include "dvbsnoop.h"
 #include "strings/dvb_str.h"
@@ -125,8 +30,6 @@ pidscan on transponder
 #include "dvb_api.h"
 #include "dmx_error.h"
 #include "dmx_tspidscan.h"
-
-
 
 
 /*

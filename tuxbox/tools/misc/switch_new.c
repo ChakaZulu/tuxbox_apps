@@ -19,29 +19,6 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *
- *   $Log: switch_new.c,v $
- *   Revision 1.6  2001/04/25 08:03:59  fnbrd
- *   Kleinigkeiten.
- *
- *   Revision 1.5  2001/04/25 07:36:58  fnbrd
- *   Fixed mute/unmute.
- *
- *   Revision 1.4  2001/04/01 10:30:15  gillem
- *   - fix volume
- *
- *   Revision 1.3  2001/03/25 16:47:42  gillem
- *   - add options
- *
- *   Revision 1.2  2001/03/25 13:57:24  gillem
- *   - update includes
- *
- *   Revision 1.1  2001/03/20 21:16:00  gillem
- *   - switch rewrite
- *
- *
- *   $Revision: 1.6 $
- *
  */
 
 /* ---------------------------------------------------------------------- */

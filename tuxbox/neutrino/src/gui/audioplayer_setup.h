@@ -1,5 +1,5 @@
 /*
-	$Id: audioplayer_setup.h,v 1.1 2009/10/13 19:17:10 dbt Exp $
+	$Id: audioplayer_setup.h,v 1.2 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	audioplayer setup implementation - Neutrino-GUI
 
@@ -26,10 +26,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: audioplayer_setup.h,v $
-	Revision 1.1  2009/10/13 19:17:10  dbt
-	init audioplayer_setup for it's own file
-	
 */
 
 #ifndef __audioplayer_setup__

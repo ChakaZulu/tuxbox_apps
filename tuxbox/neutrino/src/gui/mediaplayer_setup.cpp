@@ -1,5 +1,5 @@
 /*
-	$Id: mediaplayer_setup.cpp,v 1.1 2009/10/13 19:18:41 dbt Exp $
+	$Id: mediaplayer_setup.cpp,v 1.2 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -28,10 +28,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: mediaplayer_setup.cpp,v $
-	Revision 1.1  2009/10/13 19:18:41  dbt
-	init sub menue modul mediaplayer_setup for it's own file
-	
 */
 
 #ifdef HAVE_CONFIG_H

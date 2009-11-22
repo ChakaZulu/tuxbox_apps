@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.15 2006/02/12 23:17:13 rasc Exp $
+$Id: ts2secpes.c,v 1.16 2009/11/22 15:36:34 rhabarber1848 Exp $
 
 
  DVBSNOOP
@@ -12,66 +12,6 @@ $Id: ts2secpes.c,v 1.15 2006/02/12 23:17:13 rasc Exp $
 
 
  -- Transport Stream Sub-Decode  PES / SECTION
-
-   
-
-
-$Log: ts2secpes.c,v $
-Revision 1.15  2006/02/12 23:17:13  rasc
-TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
-
-Revision 1.14  2006/01/02 18:24:34  rasc
-just update copyright and prepare for a new public tar ball
-
-Revision 1.13  2005/11/08 23:15:27  rasc
- - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
- - Bugfix: PES packet stuffing
- - New:  PS/PES read redesign and some code changes
-
-Revision 1.12  2005/10/25 18:41:41  rasc
-minor code rewrite
-
-Revision 1.11  2005/10/23 22:50:28  rasc
- - New:  started ISO 13818-2 StreamIDs
- - New:  decode multiple PS/PES packets within TS packets (-tssubdecode)
-
-Revision 1.10  2005/10/23 20:58:15  rasc
-subdecode multiple SI packets with TS packet using -tssubdecode
-
-Revision 1.9  2005/10/20 22:25:31  rasc
- - Bugfix: tssubdecode check for PUSI and SI pointer offset
-   still losing packets, when multiple sections in one TS packet.
- - Changed: some Code rewrite
- - Changed: obsolete option -nosync, do always packet sync
-
-Revision 1.8  2005/09/09 14:20:31  rasc
-TS continuity sequence check (cc verbose output)
-
-Revision 1.7  2005/09/06 23:13:52  rasc
-catch OS signals (kill ...) for smooth program termination
-
-Revision 1.6  2004/04/18 19:30:32  rasc
-Transport Stream payload sub-decoding (Section, PES data) improved
-
-Revision 1.5  2004/04/15 23:22:58  rasc
-no message
-
-Revision 1.4  2004/04/15 22:29:23  rasc
-PMT: some brainded section check
-TS: filter single pids from multi-pid ts-input-file
-minor enhancements
-
-Revision 1.3  2004/04/15 10:53:22  rasc
-minor changes
-
-Revision 1.2  2004/04/15 04:08:49  rasc
-no message
-
-Revision 1.1  2004/04/15 03:40:39  rasc
-new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
-checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
-
-
 
 */
 

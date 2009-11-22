@@ -1,5 +1,5 @@
 /*
-	$Id: movieplayer_setup.h,v 1.1 2009/10/13 19:19:01 dbt Exp $
+	$Id: movieplayer_setup.h,v 1.2 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	movieplaye setup implementation - Neutrino-GUI
 
@@ -26,10 +26,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: movieplayer_setup.h,v $
-	Revision 1.1  2009/10/13 19:19:01  dbt
-	init movieplayer_setup for it's own file
-	
 */
 
 #ifndef __movieplayer_setup__

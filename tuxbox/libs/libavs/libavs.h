@@ -19,22 +19,6 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *
- *   $Log: libavs.h,v $
- *   Revision 1.3  2002/03/06 14:00:35  gillem
- *   - more work on avslib
- *
- *   Revision 1.2  2002/03/06 08:53:55  gillem
- *   - some fixes
- *   - add testavs
- *
- *   Revision 1.1  2002/03/04 16:10:11  gillem
- *   - initial release
- *
- *
- *
- *   $Revision: 1.3 $
- *
  */
 
 #ifndef _LIBAVS_H_

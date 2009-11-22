@@ -1,5 +1,5 @@
 /*
-	$Id: video_setup.h,v 1.3 2009/10/31 11:15:59 seife Exp $
+	$Id: video_setup.h,v 1.4 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	video setup implementation - Neutrino-GUI
 
@@ -26,19 +26,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: video_setup.h,v $
-	Revision 1.3  2009/10/31 11:15:59  seife
-	neutrino: add support for TD to video_setup, improve non-dbox case
-	
-	The dbox is the only box that can set RGB sync position, so do not show
-	that setting on other boxes
-	
-	Revision 1.2  2009/10/27 21:49:04  dbt
-	changed modul text to video
-	
-	Revision 1.1  2009/10/27 20:28:42  dbt
-	init video setup for it's own modul
-	
 */
 
 #ifndef __video_setup__

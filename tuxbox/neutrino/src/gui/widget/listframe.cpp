@@ -4,7 +4,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: listframe.cpp,v 1.4 2009/03/29 16:23:11 seife Exp $
+	$Id: listframe.cpp,v 1.5 2009/11/22 15:36:58 rhabarber1848 Exp $
 
 	Kommentar:
 
@@ -41,18 +41,6 @@
 
 	Author: Günther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
-
-	$Log: listframe.cpp,v $
-	Revision 1.4  2009/03/29 16:23:11  seife
-	widgets: fix shadow warnings
-	
-	Revision 1.3  2007/11/07 15:31:10  seife
-	fix fileselector colors in moviebrowser
-	(http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?t=46718)
-	
-	Revision 1.2  2006/02/20 01:10:36  guenther
-	- temporary parental lock updated - remove 1s debug prints in movieplayer- Delete file without rescan of movies- Crash if try to scroll in list with 2 movies only- UTF8XML to UTF8 conversion in preview- Last file selection recovered- use of standard folders adjustable in config- reload and remount option in config
-	
 
 ****************************************************************************/
 

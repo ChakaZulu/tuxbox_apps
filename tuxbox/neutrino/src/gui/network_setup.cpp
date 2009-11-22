@@ -1,5 +1,5 @@
 /*
-	$Id: network_setup.cpp,v 1.4 2009/11/21 19:37:03 rhabarber1848 Exp $
+	$Id: network_setup.cpp,v 1.5 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	network setup implementation - Neutrino-GUI
 
@@ -26,21 +26,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: network_setup.cpp,v $
-	Revision 1.4  2009/11/21 19:37:03  rhabarber1848
-	Neutrino: beautify log message, requested by mb405: http://www.dbox2-tuning.net/forum/viewtopic.php?p=372377#p372377
-	
-	Revision 1.3  2009/11/20 22:44:19  dbt
-	reworked network_setup
-	fix: netmask and broadcoast menue entries
-	
-	Revision 1.2  2009/11/09 20:21:55  dbt
-	compiler warning removed
-	
-	Revision 1.1  2009/11/09 13:05:09  dbt
-	menue cleanup:
-	parentallock, movieplayer_menue and network-setup for it's own modules
-		
 */
 
 #ifdef HAVE_CONFIG_H

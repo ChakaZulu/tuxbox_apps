@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.h,v 1.12 2009/11/07 09:51:30 rhabarber1848 Exp $
+	$Id: moviebrowser.h,v 1.13 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -40,68 +40,6 @@
 
 	Author: Günther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
-
-	$Log: moviebrowser.h,v $
-	Revision 1.12  2009/11/07 09:51:30  rhabarber1848
-	Movieplayer2: Change more buttons to make navigation more mp1-like, update helptext: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=372010#p372010
-	
-	Revision 1.11  2009/09/15 08:05:47  rhabarber1848
-	Fix broken umlauts in comments since last commit: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=370233#p370233
-	
-	Revision 1.10  2009/09/11 06:37:08  dbt
-	removed compiler warnings
-	
-	Revision 1.9  2009/08/18 11:51:59  rhabarber1848
-	Neutrino: new configure option --disable-movieplayer: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=369382#p369382
-	
-	Revision 1.8  2008/05/01 00:08:24  dbt
-	- add optional rounded corners in menues and most other windows, configurable in color menue, saved with themes
-	- revised buttonbars with uniformed background colors and more accurate captions
-	- revised image informations with more version informations about some modules
-	- comment lines for image infos, usefull stuff for image makers (get from ./version)
-	- motorsetup revised
-	- channel logos in infobar now possible
-	- record, swtch, epg load buttons now default activated in epglist
-	- message if is no record directory definied when using record button in epglist and epgview
-	- add more icons for user menue
-	
-	- optional abgerundete Ecken in Menues und den meisten Fenstern, schaltbar im Farbmenue, mit Themes speichebar
-	- Buttonleisten vereinhetlicht mit gleichen Hintergrundfarben und besser angepasste Beschriftungen
-	- mehr Versionsinformationen in Image Informationen
-	- Kommentarzeilen fuer Zusatzinfos bei Image Image-Informationen (geholt aus ./version)
-	- Motorsetup ueberarbeitet
-	- Senderlogos im Infobar moeglich
-	- Aufnahme-, Umschalt- und aktualisierungs-Buttons jetzt standardmaessig in der EPG-Vorschau aktiviert
-	- Warnmeldung, falls kein Aufnahmeverzeichnis angegeben wurde, wenn  Aufnahme vorgemerkt werden soll
-	- weitere Icons fuer das Usermenue jetzt nutzbar
-	
-	special THX to Ingrid and PaulFoul for some inputs ;-)
-	
-	Revision 1.7  2007/01/24 02:22:22  guenther
-	update recording directory menu to support IDE and NFS
-	
-	Revision 1.6  2006/12/28 21:40:32  houdini
-	whitespace cleanup, removed warnings
-	
-	Revision 1.5  2006/09/11 21:11:35  guenther
-	General menu clean up
-	Dir menu updated
-	Add options menu
-	In movie info menu  "update all" added
-	Serie option added (hide serie, auto serie)
-	Update movie info on delete movie
-	Delete Background when menu is entered
-	Timeout updated (MB does not exit after options menu is left)
-	
-	Revision 1.4  2006/02/20 01:10:34  guenther
-	- temporary parental lock updated - remove 1s debug prints in movieplayer- Delete file without rescan of movies- Crash if try to scroll in list with 2 movies only- UTF8XML to UTF8 conversion in preview- Last file selection recovered- use of standard folders adjustable in config- reload and remount option in config
-	
-	Revision 1.3  2005/12/18 09:23:53  metallica
-	fix compil warnings
-	
-	Revision 1.2  2005/12/12 07:58:02  guenther
-	- fix bug on deleting CMovieBrowser - speed up parse time (20 ms per .ts file now)- update stale function- refresh directories on reload- print scan time in debug console
-	
 
 ****************************************************************************/
 #ifndef MOVIEBROWSER_H_

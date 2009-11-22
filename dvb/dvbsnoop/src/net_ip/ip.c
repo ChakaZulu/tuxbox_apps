@@ -1,5 +1,5 @@
 /*
-$Id: ip.c,v 1.4 2006/09/08 16:04:04 rasc Exp $
+$Id: ip.c,v 1.5 2009/11/22 15:36:13 rhabarber1848 Exp $
 
 
  DVBSNOOP
@@ -17,22 +17,6 @@ $Id: ip.c,v 1.4 2006/09/08 16:04:04 rasc Exp $
  --  RFC 768    UDP
 
  IP & UDP header code provided by Stéphane Esté-Gracias
-
-
-
-$Log: ip.c,v $
-Revision 1.4  2006/09/08 16:04:04  rasc
-remember for next time: do commit last version.
-
-Revision 1.3  2006/09/07 13:39:12  rasc
-net string module
-
-Revision 1.2  2006/09/04 20:25:18  rasc
-no message
-
-Revision 1.1  2006/09/04 15:26:48  rasc
-New: DVB-Net  IP, UDP decoding (RFC791, RFC2460)  (Stéphane Esté-Gracias)
-
 
 */
 

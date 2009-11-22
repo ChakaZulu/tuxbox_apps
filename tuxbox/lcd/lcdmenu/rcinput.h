@@ -1,5 +1,5 @@
 /*
- * $Id: rcinput.h,v 1.4 2002/12/26 09:14:03 Jolt Exp $
+ * $Id: rcinput.h,v 1.5 2009/11/22 15:36:43 rhabarber1848 Exp $
  *
  * RemoteControle Handling Class
  *
@@ -22,19 +22,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Log: rcinput.h,v $
- * Revision 1.4  2002/12/26 09:14:03  Jolt
- * Ported to Input dev api
- *
- * Revision 1.3  2002/01/03 17:18:59  obi
- * some reorganization.
- * removed buffer classes.
- * removed threading from rcinput.
- * moved timer from rc-class to menu-class.
- * manually add fonts to fontRendererClass.
- * fixed small bugs that noone would ever find and added new ones.
- *
  *
  */
 

@@ -1,5 +1,5 @@
 /*
-	$Id: movieplayer_setup.cpp,v 1.3 2009/11/07 12:23:16 dbt Exp $
+	$Id: movieplayer_setup.cpp,v 1.4 2009/11/22 15:36:52 rhabarber1848 Exp $
 
 	movieplayer setup implementation - Neutrino-GUI
 
@@ -27,16 +27,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Log: movieplayer_setup.cpp,v $
-	Revision 1.3  2009/11/07 12:23:16  dbt
-	fix: disable menue entries on disabled streamingserver
-	
-	Revision 1.2  2009/11/07 09:51:30  rhabarber1848
-	Movieplayer2: Change more buttons to make navigation more mp1-like, update helptext: http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=372010#p372010
-	
-	Revision 1.1  2009/10/13 19:19:01  dbt
-	init movieplayer_setup for it's own file
-	
 */
 
 #ifdef HAVE_CONFIG_H

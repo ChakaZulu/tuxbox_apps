@@ -16,47 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- *-----------------------------------------------------------------------------
- * $Log: tuxcald.c,v $
- * Revision 1.12  2007/05/17 16:19:46  dbluelle
- * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
- *
- * Revision 1.11  2007/02/11 11:01:37  robspr1
- * - bugfix for showing/hiding the clock
- *
- * Revision 1.10  2007/01/07 11:51:22  robspr1
- * - execute tuxcal.notify on new events
- *
- * Revision 1.09  2007/01/06 16:38:59  robspr1
- * - accept unknown chunks in wave header
- *
- * Revision 1.08  2007/01/01 19:28:06  robspr1
- * -bugfix showing actual event, hiding mail-clock
- *
- * Revision 1.07  2006/02/24 08:14:49  robspr1
- * - hide clock if file-controlled
- *
- * Revision 1.06  2006/02/23 23:08:41  robspr1
- * - signal up to 5 days, toggle clock-display file
- *
- * Revision 1.05  2006/02/18 14:57:46  robspr1
- * add signaling at fixed times, some small fixes
- *
- * Revision 1.04  2006/02/17 21:30:22  robspr1
- * -add command to switch/hide the clock, move the startdelay-command
- *
- * Revision 1.03  2006/02/15 22:05:26  robspr1
- * bugfix: showed today for all days
- *
- * Revision 1.02  2006/02/15 19:17:28  robspr1
- * first version in CVS
- *
- * Revision 1.01  2006/02/12 23:10:00  robspr1
- * - bugfix reading params POS_X and POS_Y
- *
- * Revision 1.00  2006/02/06 20:00:00  robspr1
- * - first version
- *
  ******************************************************************************/
 // lots of code is from the tuxmail-project
 
@@ -2148,7 +2107,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.12 $";
+	char cvs_revision[] = "$Revision: 1.13 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
