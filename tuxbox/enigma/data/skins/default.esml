@@ -821,8 +821,8 @@
 			<eLabel name="lrec_duration" text="recording duration:" position="10:10" size="200:35" vcenter="on"/>
 			<eNumber name="rec_duration" position="210:10" size="46:35" loadDeco="" helptext="enter recording end time (0..9, left, right, ok)" />
 			<eLabel text="min" position="266:10" size="e-10:35" vcenter="on"/>
-			<eCheckbox name="shutdown" text="shutdown  " position="10:55" size="170:35" helptext="shutdown the box after recording (ok)" swaptxtpixmap="on" vcenter="on" />
-			<eCheckbox name="standby" text="standby  " position="210:55" size="170:35" helptext="goto standby after recording (ok)"  swaptxtpixmap="on" vcenter="on" />
+			<eCheckbox name="shutdown" text="Shutdown" position="10:55" size="170:35" helptext="shutdown the box after recording (ok)" swaptxtpixmap="on" vcenter="on" />
+			<eCheckbox name="standby" text="Standby" position="210:55" size="170:35" helptext="goto standby after recording (ok)"  swaptxtpixmap="on" vcenter="on" />
 			<eButton text="set" name="set" position="10:95" size="220:40" helptext="set recording end time and close window (ok)" loadDeco="" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</recording_duration>
@@ -833,8 +833,8 @@
 			<eLabel name="l_duration" text="duration:" position="10:10" size="200:35" vcenter="on"/>
 			<eNumber name="duration" position="210:10" size="46:35" loadDeco="" helptext="(0..9, left, right, ok)" />
 			<eLabel text="min" position="266:10" size="e-10:35" vcenter="on"/>
-			<eCheckbox name="shutdown" text="shutdown  " position="10:55" size="170:35" helptext="shutdown the box to deepstandby (ok)" swaptxtpixmap="on" vcenter="on" />
-			<eCheckbox name="standby" text="standby  " position="210:55" size="170:35" helptext="goto standby (ok)"  swaptxtpixmap="on" vcenter="on" />
+			<eCheckbox name="shutdown" text="Shutdown" position="10:55" size="170:35" helptext="shutdown the box to deepstandby (ok)" swaptxtpixmap="on" vcenter="on" />
+			<eCheckbox name="standby" text="Standby" position="210:55" size="170:35" helptext="goto standby (ok)"  swaptxtpixmap="on" vcenter="on" />
 			<eButton text="set" name="set" position="10:95" size="220:40" helptext="set sleeptimer and close window (ok)" loadDeco="" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</sleeptimer>
@@ -845,8 +845,8 @@
 			<eLabel name="lrec_end_time" text="recording end time:" position="10:10" size="200:35" vcenter="on"/>
 			<eNumber name="rec_end_time" position="210:10" size="70:35" loadDeco="" helptext="enter recording end time (0..9, left, right, ok)" />
 			<eLabel text="o'clock" position="290:10" size="e-10:35" vcenter="on"/>
-			<eCheckbox name="shutdown" text="shutdown  " position="10:55" size="170:35" helptext="shutdown the box after recording (ok)" swaptxtpixmap="on" vcenter="on" />
-			<eCheckbox name="standby" text="standby  " position="210:55" size="170:35" helptext="goto standby after recording (ok)"  swaptxtpixmap="on" vcenter="on" />
+			<eCheckbox name="shutdown" text="Shutdown" position="10:55" size="170:35" helptext="shutdown the box after recording (ok)" swaptxtpixmap="on" vcenter="on" />
+			<eCheckbox name="standby" text="Standby" position="210:55" size="170:35" helptext="goto standby after recording (ok)"  swaptxtpixmap="on" vcenter="on" />
 			<eButton name="set" text="set" position="10:95" size="220:40" helptext="set recording end time and close window (ok)" loadDeco="" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</recording_end_time>
@@ -1285,10 +1285,10 @@
 	</object>
 
 	<object name="eSkinSetup">
-		<eSkinSetup text="Skin Selector" cposition="50:50" csize="590:376">
+		<eSkinSetup text="Skin Selector" cposition="50:50" csize="590:426">
 			<eListbox name="skins" position="10:10" size="e-300:e-60" loadDeco="" />
 			<eLabel name="preview" text=" " position="e-290:15" size="256:200" align="center" />
-			<eButton name="accept" text="save" position="10:320" size="250:40" loadDeco=""  shortcut="green" />
+			<eButton name="accept" text="save" position="e-290:320" size="250:40" loadDeco=""  shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</eSkinSetup>
 	</object>
@@ -1364,12 +1364,12 @@
 
 	<object name="enigmaCI">
 		<enigmaCI  text="Common Interface Module" cposition="160:120" csize="350:250">
-			<eButton name="reset" text="Reset" position="10:13" size="330:30" helptext="reset the Common Interface module" />
-			<eButton name="init" text="Init" position="10:53" size="330:30" helptext="send the ca-pmt to CI" />
-			<eButton name="app" text="waiting for module" position="10:53" size="330:30" helptext="enter Common Interface menu (mmi)" />
-			<eButton name="reset2" text="Reset" position="10:143" size="330:30" helptext="reset the Common Interface module" />
-			<eButton name="init2" text="Init" position="10:183" size="330:30" helptext="send the ca-pmt to CI" />
-			<eButton name="app2" text="waiting for module" position="10:223" size="330:30" helptext="enter Common Interface menu (mmi)" />
+			<eButton name="reset" text="Reset" position="10:13" size="330:30" loadDeco="" helptext="reset the Common Interface module" />
+			<eButton name="init" text="Init" position="10:53" size="330:30" loadDeco="" helptext="send the ca-pmt to CI" />
+			<eButton name="app" text="waiting for module" position="10:93" size="330:30" loadDeco="" helptext="enter Common Interface menu (mmi)" />
+			<eButton name="reset2" text="Reset" position="10:143" size="330:30" loadDeco="" helptext="reset the Common Interface module" />
+			<eButton name="init2" text="Init" position="10:183" size="330:30" loadDeco="" helptext="send the ca-pmt to CI" />
+			<eButton name="app2" text="waiting for module" position="10:223" size="330:30" loadDeco="" helptext="enter Common Interface menu (mmi)" />
 			<eCheckbox name="twoServices" text="can handle two services" position="10:128" size="330:60" helptext="can your CI descramble two services at the same time?" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</enigmaCI>

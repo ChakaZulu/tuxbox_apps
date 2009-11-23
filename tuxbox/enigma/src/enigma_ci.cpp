@@ -28,15 +28,6 @@ void enigmaCI::init_enigmaCI()
 
 	DVBCI=eDVB::getInstance()->DVBCI;
 
-	if( eSystemInfo::getInstance()->hasCI() > 1 )
-	{
-		setText(_("Common Interface Modules"));
-		move(ePoint(160, 90));
-		cresize(eSize(350, 330));
-		DVBCI2=eDVB::getInstance()->DVBCI2;
-		CONNECT(ci2_messages.recv_msg, enigmaCI::updateCI2info );
-	}
-
 	CONNECT(CreateSkinnedButton("reset")->selected, enigmaCI::resetPressed);
 	CONNECT(CreateSkinnedButton("init")->selected, enigmaCI::initPressed);
 
@@ -47,20 +38,23 @@ void enigmaCI::init_enigmaCI()
 	twoServices = CreateSkinnedCheckbox("twoServices",0,"/ezap/ci/handleTwoServices");
 	twoServices->setFlags(RS_WRAP|eLabel::flagVCenter);
 	CONNECT(twoServices->checked, enigmaCI::handleTwoServicesChecked);
+	eButton* reset2 = CreateSkinnedButton("reset2");
+	eButton* init2 = CreateSkinnedButton("init2");
+	eButton* app2 = CreateSkinnedButton("app2");
+	BuildSkin("enigmaCI");
 
 	if( eSystemInfo::getInstance()->hasCI() > 1 )
 	{
-		CONNECT(CreateSkinnedButton("reset2")->selected, enigmaCI::reset2Pressed);
-		CONNECT(CreateSkinnedButton("init2")->selected, enigmaCI::init2Pressed);
-		app2=CreateSkinnedButton("app2");
+		CONNECT(reset2->selected, enigmaCI::reset2Pressed);
+		CONNECT(init2->selected, enigmaCI::init2Pressed);
 		CONNECT(app2->selected, enigmaCI::app2Pressed);
 		twoServices ->hide();
 	}
 	else
 	{
-		CreateSkinnedButton("reset2")->hide();
-		CreateSkinnedButton("init2")->hide();
-		CreateSkinnedButton("app2")->hide();
+		reset2->hide();
+		init2->hide();
+		app2->hide();
 	}
 
 	CONNECT(DVBCI->ci_progress, enigmaCI::gotCIinfoText);
@@ -68,6 +62,12 @@ void enigmaCI::init_enigmaCI()
 
 	if( eSystemInfo::getInstance()->hasCI() > 1 )
 	{
+		setText(_("Common Interface Modules"));
+		move(ePoint(160, 90));
+		cresize(eSize(350, 330));
+		DVBCI2=eDVB::getInstance()->DVBCI2;
+		CONNECT(ci2_messages.recv_msg, enigmaCI::updateCI2info );
+
 		CONNECT(DVBCI2->ci_progress, enigmaCI::gotCI2infoText);
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getAppName));
 	}
