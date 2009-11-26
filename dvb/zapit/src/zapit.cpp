@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.449 2009/11/17 11:55:24 rhabarber1848 Exp $
+ * $Id: zapit.cpp,v 1.450 2009/11/26 20:58:21 rhabarber1848 Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2940,7 +2940,7 @@ void enterStandby(void)
 		delete videoDemux;
 		videoDemux = NULL;
 	}
-#ifndef HAVE_DREAMBOX_HARDWARE
+#ifdef HAVE_DBOX_HARDWARE
 	/* on the dreambox (dm500 tested) we need the audio device for setting
 	   the volume and it can be opened multiple times. Other drivers (dbox)
 	   do not allow multiple open() of the audio device */
@@ -3094,7 +3094,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.449 2009/11/17 11:55:24 rhabarber1848 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.450 2009/11/26 20:58:21 rhabarber1848 Exp $\n");
 
 	bool check_lock = true;
 	int opt;
