@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1009 2009/11/20 22:40:08 dbt Exp $
+	$Id: neutrino.cpp,v 1.1010 2009/11/27 19:15:44 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -229,6 +229,7 @@ CNeutrinoApp::CNeutrinoApp()
 	channelListRecord = NULL;
 	bouquetListRecord = NULL;
 	nextRecordingInfo = NULL;
+	networksetup      = NULL;
 	skipShutdownTimer = false;
 	parentallocked    = false;
 	waitforshutdown   = false;
@@ -2205,7 +2206,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 		/* display error message */
 		DisplayErrorMessage(g_Locale->getText(LOCALE_UCODES_FAILURE));
 
-		/* show network settings dialog */
+		/* show network settings dialog while first booting without ucodes*/
 		networksetup->exec(NULL, "");
 	}
 #endif

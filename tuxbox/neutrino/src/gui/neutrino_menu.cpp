@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.95 2009/11/20 22:35:37 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.96 2009/11/27 19:15:39 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -258,7 +258,9 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.personalize_pincode, true, true, NULL, new CParentalSetup(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
 
 	// network
-	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_NETWORK, true, NULL, new CNetworkSetup(), NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_network);
+	if(networksetup == NULL)
+		networksetup = new CNetworkSetup();
+	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_NETWORK, true, NULL, networksetup, NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false, g_settings.personalize_network);
 
 	// record settings
 	shortcut2 += personalize->addItem(mainSettings, LOCALE_MAINSETTINGS_RECORDING, true, NULL, new CRecordSetup(), NULL, CRCInput::convertDigitToKey(shortcut2), NULL, false,g_settings.personalize_recording);
