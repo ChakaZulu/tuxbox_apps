@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <cables>
-	<cable name="Primacom" flags="9">
-		<transponder frequency="386000000" symbol_rate="6956000" fec_inner="0" modulation="3"/>
-		<transponder frequency="802000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
-	</cable>
 	<cable name="Kabel Deutschland" flags="9">
 		<transponder frequency="73000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 		<transponder frequency="113000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
@@ -26,6 +22,7 @@
 		<transponder frequency="450000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 		<transponder frequency="458000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 		<transponder frequency="466000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
+		<transponder frequency="506000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 		<transponder frequency="522000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 		<transponder frequency="530000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 		<transponder frequency="538000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
@@ -33,6 +30,10 @@
 		<transponder frequency="618000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 		<transponder frequency="626000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 		<transponder frequency="642000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
+	</cable>
+	<cable name="Primacom" flags="9">
+		<transponder frequency="386000000" symbol_rate="6956000" fec_inner="0" modulation="3"/>
+		<transponder frequency="802000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
 	</cable>
 	<cable name="Kabel Vienna" flags="9">
 		<transponder frequency="377750000" symbol_rate="6900000" fec_inner="0" modulation="5"/>
