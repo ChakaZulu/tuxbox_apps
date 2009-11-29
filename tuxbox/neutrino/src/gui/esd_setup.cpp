@@ -1,5 +1,5 @@
 /*
-	$Id: esd_setup.cpp,v 1.2 2009/11/22 15:36:52 rhabarber1848 Exp $
+	$Id: esd_setup.cpp,v 1.3 2009/11/29 21:57:05 dbt Exp $
 
 	esound setup implementation - Neutrino-GUI
 
@@ -67,7 +67,7 @@ CEsdSetup::~CEsdSetup()
 
 }
 
-int CEsdSetup::exec(CMenuTarget* parent, const std::string &actionKey)
+int CEsdSetup::exec(CMenuTarget* parent, const std::string &/*actionKey*/)
 {
 	dprintf(DEBUG_DEBUG, "init esd setup\n");
 	int   res = menu_return::RETURN_REPAINT;
