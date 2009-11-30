@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.314 2009/10/22 20:48:22 seife Exp $
+//  $Id: sectionsd.cpp,v 1.315 2009/11/30 21:50:26 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2553,7 +2553,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.314 2009/10/22 20:48:22 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.315 2009/11/30 21:50:26 seife Exp $\n"
 		"%sCurrent time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6909,7 +6909,9 @@ int eit_set_update_filter(int *fd)
 		close(*fd);
 		return -1;
 	}
-#if defined(HAVE_DREAMBOX_HARDWARE) && HAVE_DVB_API_VERSION < 3
+#if HAVE_DVB_API_VERSION < 3
+	/* only the dreambox drivers have this ioctl, but apparently it does
+	   not hurt on IPbox, and we certainly need to start the DMX */
 #define DMX_SET_NEGFILTER_MASK   _IOW('o',48,uint8_t *)
 	if (ioctl(*fd, DMX_SET_NEGFILTER_MASK, mode) < 0)
 		perror("DMX_SET_NEGFILTER_MASK");
@@ -8473,7 +8475,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.314 2009/10/22 20:48:22 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.315 2009/11/30 21:50:26 seife Exp $\n");
 #ifdef ENABLE_FREESATEPG
 	printf("[sectionsd] FreeSat enabled\n");
 #endif
