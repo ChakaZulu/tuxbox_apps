@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.151 2009/11/09 13:05:12 dbt Exp $
+ * $Id: locals_intern.h,v 1.152 2009/12/05 19:34:54 rhabarber1848 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -315,6 +315,7 @@ const char * locale_real_names[] =
 	"driversettings.noenxwatchdog",
 	"driversettings.philipsrcpatch",
 	"driversettings.pmtupdate",
+	"driversettings.rtc",
 	"driversettings.sptsfix",
 	"driversettings.sptsmode",
 	"driversettings.startbhdriver",

@@ -288,6 +288,7 @@ driversettings.noaviawatchdog AVIA-Watchdog aktivieren
 driversettings.noenxwatchdog eNX-Watchdog aktivieren
 driversettings.philipsrcpatch Philips/Sagem FB Workaround
 driversettings.pmtupdate PMT Update verwenden
+driversettings.rtc RTC aktivieren
 driversettings.sptsfix SPTS-Fix AVIA500 aktivieren
 driversettings.sptsmode SPTS-Mode Treiber laden
 driversettings.startbhdriver BH-Mode Treiber laden
