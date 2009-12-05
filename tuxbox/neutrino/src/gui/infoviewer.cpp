@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.285 2009/10/30 22:06:05 seife Exp $
+	$Id: infoviewer.cpp,v 1.287 2009/12/05 17:39:33 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -301,9 +301,9 @@ void CInfoViewer::showMovieTitle(const int playstate, const std::string &title, 
 	//paint play state icon
 	const char *icon;
 	if (playstate == 4) // CMoviePlayerGui::PAUSE
-		icon = "pause.raw";
+		icon = NEUTRINO_ICON_PAUSE;
 	else 
-		icon = "play.raw";
+		icon = NEUTRINO_ICON_PLAY;
 	/* calculate play state icon position, useful for using customized icons with other sizes */
 	int icon_h = frameBuffer->getIconHeight(icon);
 	int icon_w = frameBuffer->getIconWidth(icon);
@@ -846,7 +846,7 @@ void CInfoViewer::showSubchan()
 	if (!(subChannelName.empty()))
 	{
 		char text[100];
-		if(subchannel == 0 && g_RemoteControl->are_subchannels)
+		if(subchannel == 0 && !g_RemoteControl->subChannels.empty())
 			sprintf( text, "%s - %s", "  ", subChannelName.c_str() );
 		else
 			sprintf( text, "%d - %s", subchannel, subChannelName.c_str() );
@@ -909,7 +909,7 @@ void CInfoViewer::showSubchan()
 			{			
 			// show default small infobar for subchannel
 			frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0, RADIUS_SMALL);
-			if (subchannel == 0 && g_RemoteControl->are_subchannels)
+			if (subchannel == 0 && !g_RemoteControl->subChannels.empty())
 				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+ 8, y+ 8 );
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT, 0, subChannelNameIsUTF); // UTF-8
 			
@@ -993,7 +993,7 @@ void CInfoViewer::showIcon_16_9() const
 #ifdef ENABLE_RADIOTEXT
 	if (g_Zapit->getMode() !=2)
 #endif
-	frameBuffer->paintIcon((aspectRatio != 0) ? "16_9.raw" : "16_9_gray.raw",
+	frameBuffer->paintIcon((aspectRatio != 0) ? NEUTRINO_ICON_16_9 : NEUTRINO_ICON_16_9_GREY,
 				BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 }
@@ -1001,7 +1001,7 @@ void CInfoViewer::showIcon_16_9() const
 void CInfoViewer::showIcon_VTXT() const
 {
 	int vtpid=g_RemoteControl->current_PIDs.PIDs.vtxtpid;
-	frameBuffer->paintIcon((vtpid != 0) ? "vtxt.raw" : "vtxt_gray.raw",
+	frameBuffer->paintIcon((vtpid != 0) ? NEUTRINO_ICON_VTXT : NEUTRINO_ICON_VTXT_GREY,
 				BoxEndX - (ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
 				BoxEndY + (InfoHeightY_Info - ICON_HEIGHT) / 2);
 #ifndef TUXTXT_CFG_STANDALONE
@@ -1042,14 +1042,14 @@ void CInfoViewer::showIcon_Audio(const int ac3state) const
 	switch (ac3state)
 	{
 		case AC3_ACTIVE:
-			dd_icon = "dd.raw";
+			dd_icon = NEUTRINO_ICON_DD;
 			break;
 		case AC3_AVAILABLE:
-			dd_icon = "dd_avail.raw";
+			dd_icon = NEUTRINO_ICON_DD_AVAIL;
 			break;
 		case NO_AC3:
 		default:
-			dd_icon = "dd_gray.raw";
+			dd_icon = NEUTRINO_ICON_DD_GREY;
 			break;
 	}
 
