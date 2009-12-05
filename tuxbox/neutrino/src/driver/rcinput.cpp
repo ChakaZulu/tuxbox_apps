@@ -2183,7 +2183,75 @@ int CRCInput::translate(int code)
 	}
 	return RC_nokey;
 #endif
-#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_IPBOX_HARDWARE
+#ifdef HAVE_IPBOX_HARDWARE
+	switch (code&0xFF)
+	{
+		case 0x00: return RC_0;
+		case 0x01: return RC_1;
+		case 0x02: return RC_2;
+		case 0x03: return RC_3;
+		case 0x04: return RC_4;
+		case 0x05: return RC_5;
+		case 0x06: return RC_6;
+		case 0x07: return RC_7;
+		case 0x08: return RC_8;
+		case 0x09: return RC_9;
+		case 0x0a: return RC_plus;
+		case 0x0b: return RC_minus;
+#ifndef BOXMODEL_IP200
+		case 0x0c: return RC_stop;
+#endif
+		case 0x0d: return RC_page_up;
+		case 0x0e: return RC_page_down;
+		case 0x0f: return RC_standby;
+#ifndef BOXMODEL_IP200
+		case 0x12: return RC_fav;
+		case 0x17: return RC_recordings;
+		case 0x19: return RC_option;
+#endif
+		case 0x20: return RC_setup;
+		case 0x21: return RC_up;
+		case 0x22: return RC_down;
+		case 0x23: return RC_left;
+		case 0x24: return RC_right;
+		case 0x25: return RC_ok;
+		case 0x26: return RC_audio;
+		case 0x27: return RC_video;
+		case 0x28: return RC_help;
+#ifndef BOXMODEL_IP200
+		case 0x30: return RC_rewind;
+		case 0x31: return RC_play;
+		case 0x32: return RC_pause;
+		case 0x36: return RC_stop;
+		case 0x33: return RC_forward;
+		case 0x35: return RC_record;
+		case 0x37: return RC_playpause;
+#endif
+		case 0x40: return RC_red;
+		case 0x41: return RC_green;
+		case 0x42: return RC_yellow;
+		case 0x43: return RC_blue;
+		case 0x45: return RC_text;
+		case 0x53: return RC_radio;
+#ifdef BOXMODEL_IP200
+		case 0x0c: return RC_spkr;   // MUTE key
+		case 0x44: return RC_tv;   // TV   key
+		case 0x50: return RC_back;   // ">"   key
+		case 0x51: return RC_epg;   // "<"  key
+		case 0x52: return RC_help;   // HELP key 
+		case 0x54: return RC_home;   // EXIT key
+#else
+		case 0x44: return RC_spkr;
+		case 0x50: return RC_back;
+		case 0x51: return RC_epg;
+		case 0x52: return RC_home;
+		case 0x53: return RC_tvradio;
+		case 0x54: return RC_help;
+#endif
+	}
+	return RC_nokey;
+#endif
+#ifdef HAVE_DREAMBOX_HARDWARE
 	switch (code&0xFF)
 	{
 		case 0x00: return RC_0;

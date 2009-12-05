@@ -225,6 +225,12 @@ class CRCInput
 			RC_tttv		= KEY_FN_F1,
 			RC_ttzoom	= KEY_FN_F2,
 			RC_ttreveal	= KEY_FN_F3,
+			// definitions for additional buttons on IPbox remote
+			RC_tvradio	= KEY_TV2,
+			RC_option	= KEY_OPTION,
+			RC_rewind	= KEY_REWIND,
+			RC_recordings	= KEY_CAMERA,
+			RC_play		= KEY_PLAY,
 			// PVR / media player keys
 			RC_playpause	= KEY_PLAYPAUSE,
 			RC_stop		= KEY_STOP,
