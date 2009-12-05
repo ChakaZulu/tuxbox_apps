@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.85 2009/07/19 13:14:46 dbluelle Exp $
+ * $Id: setup_extra.cpp,v 1.86 2009/12/05 16:48:22 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -30,6 +30,10 @@
 #include <lib/dvb/decoder.h>
 #include <lib/gui/emessage.h>
 #include <lib/system/info.h>
+
+#ifdef ENABLE_IPKG
+#include <enigma_ipkg.h>
+#endif
 
 #ifndef TUXTXT_CFG_STANDALONE
 extern "C" int  tuxtxt_stop();
@@ -86,6 +90,10 @@ void eExpertSetup::init_eExpertSetup()
 		CONNECT((new eListBoxEntryMenu(&list, _("Factory reset"), eString().sprintf("(%d) %s", ++entry, _("all settings will set to factory defaults")) ))->selected, eExpertSetup::factory_reset);
 	CONNECT((new eListBoxEntryMenu(&list, _("EPG settings"), eString().sprintf("(%d) %s", ++entry, _("open EPG settings")) ))->selected, eExpertSetup::setup_epgcache);
 	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+#ifdef ENABLE_IPKG
+	CONNECT((new eListBoxEntryMenu(&list, _("package manager"), eString().sprintf("(%d) %s", ++entry, _("open package manager")) ))->selected, eExpertSetup::setup_ipkg);
+	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+#endif
 	list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
 #ifndef DISABLE_FILE
 	if ( eSystemInfo::getInstance()->canRecordTS() && !eDVB::getInstance()->recorder )
@@ -109,17 +117,8 @@ void eExpertSetup::init_eExpertSetup()
 
 	// Timeroffset (Anfang)
 	timeroffsetstart = new eListBoxEntryMulti( &list, (_("Change timer offset [start] (left, right)")));
-	timeroffsetstart->add( (eString)"  " + eString().sprintf(_("Timer offset [start] %d min"), 0) + (eString)" >", 0);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 1) + (eString)" >", 1);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 2) + (eString)" >", 2);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 3) + (eString)" >", 3);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 4) + (eString)" >", 4);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 5) + (eString)" >", 5);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 6) + (eString)" >", 6);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 7) + (eString)" >", 7);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 8) + (eString)" >", 8);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 9) + (eString)" >", 9);
-	timeroffsetstart->add( (eString)"< " + eString().sprintf(_("Timer offset [start] %d min"), 10) + (eString)"  ", 10);
+	for (int i = 0; i <= 10; i++)
+	  timeroffsetstart->add( (eString)(i ? "  ":"< ") + eString().sprintf(_("Timer offset [start] %d min"), i) + (eString)(i < 10 ? " >":"  "), i);
 	int offsetstart=0;
 	if (eConfig::getInstance()->getKey("/enigma/timeroffset", offsetstart) )
 		offsetstart=0; // 0 Minutes
@@ -129,17 +128,8 @@ void eExpertSetup::init_eExpertSetup()
 
 	// Timeroffset (Ende)
 	timeroffsetend = new eListBoxEntryMulti( &list, (_("Change timer offset [end] (left, right)")));
-	timeroffsetend->add( (eString)"  " + eString().sprintf(_("Timer offset [end] %d min"), 0) + (eString)" >", 0);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 1) + (eString)" >", 1);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 2) + (eString)" >", 2);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 3) + (eString)" >", 3);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 4) + (eString)" >", 4);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 5) + (eString)" >", 5);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 6) + (eString)" >", 6);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 7) + (eString)" >", 7);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 8) + (eString)" >", 8);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 9) + (eString)" >", 9);
-	timeroffsetend->add( (eString)"< " + eString().sprintf(_("Timer offset [end] %d min"), 10) + (eString)"  ", 10);
+	for (int i = 0; i <= 10; i++)
+	  timeroffsetend->add( (eString)(i ? "  ":"< ") + eString().sprintf(_("Timer offset [end] %d min"), i) + (eString)(i < 10 ? " >":"  "), i);
 	int offsetend=0;
 	if (eConfig::getInstance()->getKey("/enigma/timeroffset2", offsetend) )
 		offsetend=0; // 0 Minutes
@@ -458,3 +448,18 @@ void eExpertSetup::factory_reset()
 	}
 	show();
 }
+
+#ifdef ENABLE_IPKG
+void eExpertSetup::setup_ipkg()
+{
+	hide();
+	eMainmenuPackageManager setup;
+#ifndef DISABLE_LCD
+	setup.setLCD(LCDTitle, LCDElement);
+#endif
+	setup.show();
+	setup.exec();
+	setup.hide();
+	show();
+}
+#endif

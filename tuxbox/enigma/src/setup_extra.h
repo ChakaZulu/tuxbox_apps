@@ -36,6 +36,9 @@ class eExpertSetup: public eSetupWindow
 	void fastZappingChanged(bool b);
 	void init_eExpertSetup();
 	void fileToggle(bool newState, const char* filename);
+#ifdef ENABLE_IPKG
+	void setup_ipkg();
+#endif
 public:
 	eExpertSetup();
 };

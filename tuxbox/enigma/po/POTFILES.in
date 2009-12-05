@@ -98,6 +98,7 @@
 ./src/enigma_epg.cpp
 ./src/enigma_event.cpp
 ./src/enigma_info.cpp
+./src/enigma_ipkg.cpp
 ./src/enigma_lcd.cpp
 ./src/enigma_main.cpp
 ./src/enigma_mainmenu.cpp
@@ -147,3 +148,4 @@
 ./src/wizard_timezone.cpp
 ./src/system_settings.cpp
 ./src/time_settings.cpp
+

@@ -1381,4 +1381,39 @@
 			<eTextInputField name="input" position="100:4" size="50:34"/>
 		</SkipEditWindow>
 	</object>
+
+	<object name="ePackageManagerRunApp">
+		<ePackageManagerRunApp text="package manager" cposition="100:100" csize="510:395">
+			<eWidget position="5:10" size="e-40:e-100" name="visible" font="eventview.description" />
+			<eProgress name="scrollbar" position="e-20:0" size="20:e-100" direction="1" />
+			<eButton name="bCancel" text="abort" position="5:310" size="175:30" shortcut="red" loadDeco="" helptext="abort" />
+			<eButton name="bClose" text="close" position="325:310" size="180:30" shortcut="green" loadDeco="" helptext="close" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</ePackageManagerRunApp>
+	</object>
+
+	<object name="ePackageSettings">
+		<ePackageSettings text="Package Settings" cposition="100:100" csize="520:215">
+			<eLabel text="IPKG Install Option:" position="5:5" size="340:30"  />
+			<eComboBox name="IPKGInstallOption" position="230:5" size="285:30" loadDeco="" helptext="select option used for installation" />
+			<eLabel text="Directory:" position="5:45" size="340:30"  />
+			<eTextInputField name="path" position="155:45" size="315:40" helptext="set directory where target Package files will be stored" loadDeco="" />
+			<eButton name="seldir" align="center" vcenter="on" position="475:45" size="40:40" loadDeco="" pixmap="sselect_folder" helptext="set directory where target Package files will be stored" />
+			<eLabel text="IPKG Server:" position="5:90" size="150:30"  />
+			<eTextInputField name="lServer" position="155:90" size="360:30" helptext="set HTTP/FTP-Server where packages are hosted" loadDeco="" />
+			<eButton name="bClose" text="close" position="395:130" size="120:30" shortcut="red" loadDeco="" helptext="close" />
+			<eButton name="bSave" text="save" position="5:130" size="140:30" shortcut="green" loadDeco="" helptext="save settings" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</ePackageSettings>
+	</object>
+
+	<object name="ePackageHandler">
+		<ePackageHandler text=" " cposition="100:100" csize="510:370">
+			<eListbox name="items" position="10:5" size="495:290" loadDeco="" helptext=""/>
+			<eLabel text="space used:" position="10:290" size="170:35" vcenter="on" />
+			<eProgress name="varSpace" position="185:300" size="210:15"/>
+			<eLabel name="lVarPercent" position="455:290" size="50:35" vcenter="on" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</ePackageHandler>
+	</object>
 </eskin>
