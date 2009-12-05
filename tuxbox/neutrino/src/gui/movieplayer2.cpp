@@ -2956,7 +2956,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 
 		if (g_showaudioselectdialog)
 		{
-			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 400);
+			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, NEUTRINO_ICON_AUDIO, 400);
 			APIDSelector.addItem(GenericMenuSeparator);
 			g_apidchanged = false;
 			pidt = 0;
@@ -3085,7 +3085,7 @@ CMoviePlayerGui::PlayStream(int streamtype)
 		{
 			g_PluginList->start_plugin_by_name(g_settings.movieplayer_plugin.c_str(),pidt);
 		}
-#ifndef HAVE_TRIPLEDRAGON
+#if defined HAVE_DREAMBOX_HARDWARE || defined HAVE_DBOX_HARDWARE || defined BOXMODEL_IP200
 		else if (msg == CRCInput::RC_home && g_playstate >= CMoviePlayerGui::PLAY)
 #else
 		else if (msg == CRCInput::RC_stop && g_playstate >= CMoviePlayerGui::PLAY)
@@ -3453,7 +3453,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.63 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.65 $");
 }
 
 void CMoviePlayerGui::showFileInfoVLC()
