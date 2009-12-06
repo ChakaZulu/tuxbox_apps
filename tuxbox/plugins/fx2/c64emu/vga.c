@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
-#include <stropts.h>
 #include <linux/fb.h>
 #include <sys/mman.h>
 
