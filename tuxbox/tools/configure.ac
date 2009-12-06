@@ -13,6 +13,7 @@ TUXBOX_BOXTYPE
 
 # TUXBOX_APPS_LIB_PKGCONFIG(PLUGINS,tuxbox-plugins)
 TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
+TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
 
 # needed by aformat
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
@@ -30,4 +31,5 @@ tuxinfo/Makefile
 graphics/Makefile
 kb2rcd/Makefile
 cdkVcInfo/Makefile
+msgbox/Makefile
 ])

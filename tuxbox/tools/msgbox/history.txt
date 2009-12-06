@@ -1,0 +1,164 @@
+Revisionshistory MessageBox
+
+03.11.2008 13:00	MsgBox 1.68a.rar SnowHead
+Eckenrundung in Standard-Images gefixt
+
+29.10.2008 13:30	MsgBox_1.68.rar SnowHead
+Verwendung der Neutrino-Farbpalette
+Eckenrundung wird jetzt auch in Stadard-Images ausgewertet
+
+29.03.2008 04:05	MsgBox_1.66.rar SnowHead
+mit "timeout=-1" bleibt die Messagebox unbegrenzt offen
+
+23.02.2008 14:30	MsgBox_1.64.rar SnowHead
+Outfit den Neutrino-Menüs angepasst
+Eckenrundung übernommen
+
+17.03.2007 10:30	MsgBox_1.62.rar SnowHead
+zyklisches Update abschaltbar gemacht, neuer Parameter 
+cyclic
+
+17.11.2006 18:00	MsgBox_1.60.rar SnowHead
+zyklisches Update des Bildschirms auch ohne Inhalts-
+änderung eingeführt (1s) um gelöschte Inhalte wieder-
+herzustellen
+
+16.11.2006 20:00	MsgBox_1.58.rar SnowHead
+Bugfix Sinnfälligkeitsüberprüfung
+
+04.11.2006 13:00	MsgBox_1.56.rar SnowHead
+Blinkfrequenz runtergesetzt und Prozessorlast von
+80% auf 2% gesenkt
+
+26.10.2006 21:30	MsgBox_1.54.rar SnowHead
+Bugfix in der Defaulttastenbelegung
+
+01.01.2006 07:00	MsgBox_1.52.rar SnowHead
+Bufferoverflow bei überlangen Textzeilen gefixt
+
+03.10.2005 18:30	MsgBox_1.50.rar SnowHead
+Stringlängenberechnung bei Tabulatoren modifiziert
+
+27.09.2005 20:30	MsgBox_1.48.rar SnowHead
+Text wird nun bis maximal eine Zeile vor dem Bildschirmende
+geschrieben
+
+26.09.2005 21:30	MsgBox_1.46.rar SnowHead
+Prozessorbelastung von 90% auf 25% reduziert
+
+20.09.2005 23:00	MsgBox_1.44.rar SnowHead
+Ausblenden der Titelzeile über "title=none" möglich
+beim Ausblenden über Mute wird die Datei für Scripter
+/tmp/.msgbox_hidden angelegt
+readme.txt angepaßt
+
+18.09.2005 11:30	MsgBox_1.42.rar SnowHead
+nicht darstellbare Zeichen werden vor Anzeige gefiltert
+dadurch Unterdrückung von Fehlerausschriften (schneller)
+
+16.09.2005 13:00	MsgBox_1.40.rar SnowHead
+Tastensperre bei Mute überarbeitet
+
+16.09.2005 12:30	MsgBox_1.38.rar SnowHead
+eigener Kommandozeilenparameter für Mute-Steuerung
+readme.txt angepaßt
+
+15.09.2005 22:30	MsgBox_1.36.rar SnowHead
+beim Ausblenden über Mute wird jetzt die gleiche Option
+von refresh verwendet, wie beim Beenden (ist flexibler)
+
+15.09.2005 21:30	MsgBox_1.34.rar SnowHead
+Bugfix für Parameter "refresh" nach neu Einlesen
+
+15.09.2005 19:30	MsgBox_1.32.rar SnowHead
+zeitweiliges Ausblenden über Mute-Taste nachgerüstet
+readme.txt angepaßt
+
+14.09.2005 20:30	MsgBox_1.30.rar SnowHead
+zusätzliches Tabulatorzeichen "~T" für absolute Positio-
+nierung eingeführt
+readme.txt angepaßt
+
+04.08.2005 12:15	MsgBox_1.28.rar SnowHead
+Blinken wieder eingebaut 
+
+04.08.2005 12:00	MsgBox_1.26.rar SnowHead
+Tastenentprellung überarbeitet
+
+27.07.2005 23:00	MsgBox_1.24.rar SnowHead
+Bugfix für Parameter "default=" (früher Abbruch bei > 3)
+
+28.04.2005 21:00	MsgBox_1.22.rar SnowHead
+Timeout wird jetzt bei jedem Tastendruck neu gestartet
+
+24.04.2005 17:00	MsgBox_1.20.rar SnowHead
+Transparenzbug gefixt
+Schwarze Balken bei Philips und Sagems gefixt
+
+25.03.2005 21:30   MsgBox_1.12.rar SnowHead
+Bugfix: Messagefile wurde beim Beenden gelöscht
+neuer Parameter "absolute=" zur Berücksichtigung von Leer-
+einträgen im Parameter "select="
+readme.txt angepaßt
+
+24.03.2005 18:00   MsgBox_1.10.rar SnowHead
+neuer Parameter "echo=" (Buttonlabel auf Konsole ausgeben)
+Ignorieren von Mehrfachkommas im select-Parameter
+readme.txt angepaßt
+
+19.03.2005 16:30   MsgBox_1.04.rar SnowHead
+vertikale Zentrierung überarbeitet
+">>" bei überlangen Texten entfernt
+"X" von Stringlängenberechnung maskiert
+
+05.03.2005 15:00   MsgBox_1.02.rar SnowHead
+Bugfix Tastengrößenberechnung bei kleinerem Textfont
+
+04.03.2005 17:30   MsgBox_1.00.rar SnowHead
+Erweiterung auf 16 Tasten
+neuer Parameter "order=" (Tasten pro Zeile)
+readme.txt angepaßt
+
+06.02.2005 20:30   MsgBox_0.22.rar SnowHead
+Rückgabewert 0 bei Home-Taste gefixt
+
+31.01.2005 19:00	MsgBox_0.21_Beta.rar SnowHead
+Bis zu 3 Tasten über Kommandozeile vorgebbar
+gedrückte Taste als Rückgabeparameter
+readme.txt angepaßt
+
+05.01.2005 23:00	MsgBox_0.18.rar SnowHead
+Transparenzbug gefixt
+Bug bei Stringlängenberechnung bei Umlauten gefixt
+neue Textformatierung "Blinkend"
+readme.txt angepaßt
+
+31.12.2004 14:00	MsgBox_0.13_Beta.rar SnowHead
+neuer Parameter "refresh=" zur Steuerung des Framebuffer-Inhaltes
+zu Beginn und Ende des Plugins
+readme.txt angepaßt
+
+28.12.2004 18:00	MsgBox_0.11_Beta.rar SnowHead
+Verzögerung des Schließens nach Tastendruck gefix
+Zentrierung auf dem Bildschirm überarbeitet
+
+27.12.2004 05:00	MsgBox_0.09_Beta.rar SnowHead
+Unterstützung von Sonderzeichen aus Datei nachgerüstet
+Bugfix Neutrino-Farbpalette
+readme.txt angepaßt
+
+27.12.2004 02:00	MsgBox_0.07_Beta.rar SnowHead
+Unterstützung von Sonderzeichen über Kommandozeile eingeführt
+Neutrino-Farbpalette wird nun auch zur Laufzeit von msgbox nicht
+mehr gestört
+readme.txt angepaßt
+
+26.12.2004 00:30	MsgBox_0.05_Beta.rar SnowHead
+Bugfix: OK-Button wurde auch bei Popup dagestellt
+Wiederherstellen der Neutrino-Originalpalette verbessert
+neue Textfarbe "blau"
+Schlafzyklen wären der Timeout-Zeit eingeführt (Prozessorentlastung)
+readme.txt angepaßt
+
+25.12.2004 09:30	MsgBox_0.03_Beta.rar SnowHead
+erste Beta-Version erstellt
