@@ -8,9 +8,11 @@ AC_PROG_CC
 AC_PROG_CXX
 
 TUXBOX_APPS_DRIVER
+TUXBOX_BOXTYPE
 
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
+TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 TUXBOX_APPS_LIB_PKGCONFIG(LCDDISPLAY,tuxbox-lcddisplay)
 
 AC_OUTPUT([
@@ -18,4 +20,5 @@ Makefile
 lcdip/Makefile
 lcdcmd/Makefile
 lcdmenu/Makefile
+lcshot/Makefile
 ])
