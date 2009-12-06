@@ -1,5 +1,5 @@
 /*
- * $Id: lcshot.c,v 1.1 2009/12/06 13:40:32 rhabarber1848 Exp $
+ * $Id: lcshot.c,v 1.2 2009/12/06 19:36:41 rhabarber1848 Exp $
  *
  * lcshot - d-box2 linux project
  *
@@ -41,11 +41,11 @@
 #include "lcd.h"
 
 #define PACKAGE 	"lcshot"
-#define VERSION 	"1.3"
+#define VERSION 	"1.5"
 #define MAINTAINER_NAME "SnowHead"
 #define MAINTAINER_ADDR "SnowHead@gmx.net"
 
-#define X_RES 121
+#define X_RES 120
 #define Y_RES 64
 
 //#define DEBUG
