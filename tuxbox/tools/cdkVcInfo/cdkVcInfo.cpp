@@ -1,7 +1,7 @@
 /*
  * Tool for printing some image information during bootup.
  *
- * $Id: cdkVcInfo.cpp,v 1.4 2009/11/10 11:36:59 rhabarber1848 Exp $
+ * $Id: cdkVcInfo.cpp,v 1.5 2009/12/07 13:41:48 striper Exp $
  *
  * Copyright (C) 2006 the Tuxbox project http://www.tuxbox.org.
  *
@@ -84,7 +84,7 @@ int main()
 	  "\t\t\t  Creation Date     : %d-%02d-%02d\n"
 	  "\t\t\t  Creation Time     : %d:%02d\n"
 	  "\t\t\t  Creator           : %s\n"
-	  "\t\t\t  Image name        : %s\n"
+	  "\t\t\t  Image Name        : %s\n"
 	  "\n\n\t\t\t\tLoading....\n",
 	  imageversion, imagesubver, 
 	  release_type == 0    ? "Release" 
