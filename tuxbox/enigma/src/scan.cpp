@@ -303,7 +303,7 @@ void tsAutomatic::init_tsAutomatic()
 	c_onlyFree->hide();
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 	{
-		CreateSkinnedCheckbox("nocircular",0,"/elitedvb/DVB/config/nocircular");
+		c_nocircular = CreateSkinnedCheckbox("nocircular",0,"/elitedvb/DVB/config/nocircular");
 		c_nocircular->hide();
 	}
 	else
