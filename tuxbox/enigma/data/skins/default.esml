@@ -1124,12 +1124,6 @@
 		<eStoreWindow text="Store Satellite" cposition="150:150" csize="360:140">
 			<eLabel name="lStorageLoc" text="Storage Location:" position="10:10" size="250:35" />
 			<eNumber name="StorageLoc" position="270:10" size="80:35" helptext="change storage Location or store" loadDeco="" />
-			<eLabel text="New Date:" position="10:140" size="150:30" vcenter="on"/>
-			<eCheckbox name="parentallock" text="Parental lock" position="20:20" size="200:30" helptext="enable/disable parental lock" />
-			<eButton name="changeParentalPin" text="change PIN" position="230:15" size="160:40" loadDeco="" helptext="change Parental PIN (ok)" />
-			<eCheckbox name="setuplock" text="Setup lock" position="20:70" size="200:30" helptext="enable/disable setup lock" />
-			<eButton name="changeSetupPin" text="change PIN" position="230:65" size="160:40" loadDeco="" helptext="change Setup PIN (ok)" />
-			<eCheckbox name="hidelocked" text="Hide locked services" position="20:120" size="370:30" helptext="don't show locked services in any list" />
 			<eButton name="store" text="store" position="10:60" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eStoreWindow>
