@@ -77,6 +77,7 @@ tuxclock/daemon/Makefile
 vncviewer/Makefile
 vncviewer/rfb/Makefile
 dvbsub/Makefile
+shellexec/Makefile
 pip/Makefile
 mosaic/Makefile
 enigma/Makefile
