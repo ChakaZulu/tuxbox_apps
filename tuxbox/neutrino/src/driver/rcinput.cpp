@@ -2232,7 +2232,6 @@ int CRCInput::translate(int code)
 		case 0x42: return RC_yellow;
 		case 0x43: return RC_blue;
 		case 0x45: return RC_text;
-		case 0x53: return RC_radio;
 #ifdef BOXMODEL_IP200
 		case 0x0c: return RC_spkr;   // MUTE key
 		case 0x44: return RC_tv;   // TV   key
