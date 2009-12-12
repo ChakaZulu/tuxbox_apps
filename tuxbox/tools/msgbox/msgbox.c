@@ -1,5 +1,5 @@
 /*
- * $Id: msgbox.c,v 1.1 2009/12/06 21:58:11 rhabarber1848 Exp $
+ * $Id: msgbox.c,v 1.2 2009/12/12 09:49:18 rhabarber1848 Exp $
  *
  * msgbox - d-box2 linux project
  *
@@ -760,13 +760,10 @@ return 0;*/
 		if(((ey=Read_Neutrino_Cfg("screen_EndY"))<0)&&((ey=Read_Neutrino_Cfg("/enigma/plugins/needoffsets/bottom"))<0))
 			ey=505;
 	
-		if((radius=Read_Neutrino_Cfg("menu_kw_smooth"))<0)
-		{
-			if(Read_Neutrino_Cfg("rounded_corners")>0)
-				radius=9;
-			else
-				radius=0;
-		}
+		if(Read_Neutrino_Cfg("rounded_corners")>0)
+			radius=9;
+		else
+			radius=0;
 
 		if((trstr=malloc(BUFSIZE))==NULL)
 		{
