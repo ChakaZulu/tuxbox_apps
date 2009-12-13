@@ -1,5 +1,5 @@
 /*
- * $Id: msgbox.h,v 1.1 2009/12/06 21:58:11 rhabarber1848 Exp $
+ * $Id: msgbox.h,v 1.2 2009/12/13 14:23:18 rhabarber1848 Exp $
  *
  * msgbox - d-box2 linux project
  *
@@ -33,9 +33,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <linux/fb.h>
-#if HAVE_DVB_API_VERSION == 3
 #include <linux/input.h>
-#endif
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
