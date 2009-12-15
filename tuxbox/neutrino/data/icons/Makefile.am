@@ -4,7 +4,7 @@ install_DATA = \
 	0.raw 1.raw 2.raw 3.raw 4.raw 5.raw 6.raw 7.raw 8.raw 9.raw \
 	16_9_gray.raw 16_9.raw \
 	audio.raw \
-	blau.raw bookmarkmanager.raw border_lr.raw border_ul.raw \
+	blau.raw border_lr.raw border_ul.raw \
 	ca.raw colors.raw conflict.raw \
 	dd_avail.raw dd_gray.raw dd.raw down.raw down_small.raw \
 	epginfo.raw error.raw \
@@ -14,10 +14,11 @@ install_DATA = \
 	info.raw \
 	keybinding.raw \
 	language.raw lcd.raw left.raw lock.raw \
-	mainmenue.raw minus.raw	mounted.raw movie.raw mp3.raw mute.raw mute_small.raw \
-	network.raw not_mounted.raw numericpad.raw \
+	mainmenue.raw minus.raw	mounted.raw mp3.raw mute.raw mute_small.raw \
+	not_mounted.raw numericpad.raw \
 	ok.raw ok_small.raw \
 	pause.raw play.raw plus.raw power.raw protecting.raw \
+	question.raw \
 	radar0.raw radar1.raw radar2.raw radar3.raw radar4.raw radar5.raw radar6.raw radar7.raw	radar8.raw radar9.raw radar.pal \
 	radiomode.pal radiomode.raw record_conflict.raw recording.raw record.raw right.raw rot.raw \
 	scan.pal scan.raw settings.raw shell.raw shutdown.pal shutdown.raw softupdate.raw streaming.raw \
