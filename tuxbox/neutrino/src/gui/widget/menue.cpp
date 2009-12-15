@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.157 2009/10/30 23:02:55 seife Exp $
+	$Id: menue.cpp,v 1.158 2009/12/15 09:47:30 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -58,6 +58,7 @@ CMenuForwarder CGenericMenuBack(LOCALE_MENU_BACK);
 CMenuSeparator * const GenericMenuSeparator = &CGenericMenuSeparator;
 CMenuSeparator * const GenericMenuSeparatorLine = &CGenericMenuSeparatorLine;
 CMenuForwarder * const GenericMenuBack = &CGenericMenuBack;
+
 
 
 
@@ -828,6 +829,26 @@ int CMenuForwarder::getHeight(void) const
 	return g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 }
 
+// used gets set by the addItem() function. This is for set to paint Option string by just not calling the addItem() function.
+// Without this, the changeNotifiers would become machine-dependent.
+void CMenuForwarder::setOption(const std::string &Option)
+{
+	option = Option.c_str();
+
+	if (used && x != -1)
+		paint();
+}
+
+// used gets set by the addItem() function. This is for set to paint Text from locales by just not calling the addItem() function.
+// Without this, the changeNotifiers would become machine-dependent.
+void CMenuForwarder::setTextLocale(const neutrino_locale_t Text)
+{
+	text=Text;
+
+	if (used && x != -1)
+		paint();
+}
+
 int CMenuForwarder::exec(CMenuTarget* parent)
 {
 	if(jumpTarget)
@@ -931,6 +952,16 @@ CMenuForwarderNonLocalized::CMenuForwarderNonLocalized(const char * const Text, 
     the_text = Text;
 }
 
+// used gets set by the addItem() function. This is for set to paint non localized Text by just not calling the addItem() function.
+// Without this, the changeNotifiers would become machine-dependent.
+void CMenuForwarderNonLocalized::setText(const char * const Text)
+{
+	the_text = Text;
+
+	if (used && x != -1)
+		paint();
+}
+
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(const int Type, const neutrino_locale_t Text)
 {
@@ -940,16 +971,27 @@ CMenuSeparator::CMenuSeparator(const int Type, const neutrino_locale_t Text)
 	text     = Text;
 }
 
-
 int CMenuSeparator::getHeight(void) const
 {
-	return (text == NONEXISTANT_LOCALE) ? 10 : g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	if (separator_text.empty() && text == NONEXISTANT_LOCALE)
+		return 10;
+	else
+		return  g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 }
 
 const char * CMenuSeparator::getString(void)
 {
-	return g_Locale->getText(text);
+	if (!separator_text.empty())
+		return separator_text.c_str();
+	else	
+		return g_Locale->getText(text);
 }
+
+void CMenuSeparator::setString(const std::string& text)
+{
+	separator_text = text;
+}
+
 
 int CMenuSeparator::paint(bool selected)
 {
@@ -979,12 +1021,13 @@ int CMenuSeparator::paint(bool selected)
 	}
 	if ((type & STRING))
 	{
-
-		if (text != NONEXISTANT_LOCALE)
+		const char * l_text;
+		l_text = getString();
+	
+		if (text != NONEXISTANT_LOCALE || strlen(l_text) != 0)
 		{
 			int stringstartposX;
-
-			const char * l_text = getString();
+			
 			int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_text, true); // UTF-8
 
 			/* if no alignment is specified, align centered */

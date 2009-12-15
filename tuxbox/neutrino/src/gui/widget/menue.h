@@ -1,5 +1,5 @@
 /*
-	$Id: menue.h,v 1.78 2009/10/30 23:02:56 seife Exp $
+	$Id: menue.h,v 1.79 2009/12/15 09:47:30 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -118,18 +118,19 @@ class CMenuItem
 class CMenuSeparator : public CMenuItem
 {
 		int               type;
+		std::string	  separator_text;
 
 	public:
 		neutrino_locale_t text;
 
 		enum
 		{
-		    EMPTY =	0,
-		    LINE =	1,
-		    STRING =	2,
-		    ALIGN_CENTER = 4,
-		    ALIGN_LEFT =   8,
-		    ALIGN_RIGHT = 16,
+			EMPTY =	0,
+			LINE =	1,
+			STRING =	2,
+			ALIGN_CENTER = 4,
+			ALIGN_LEFT =   8,
+			ALIGN_RIGHT = 16,
 			SUB_HEAD = 32
 		};
 
@@ -141,6 +142,7 @@ class CMenuSeparator : public CMenuItem
 		int getHeight(void) const;
 
 		virtual const char * getString(void);
+		virtual void setString(const std::string& text);
 };
 
 class CMenuForwarder : public CMenuItem
@@ -164,6 +166,8 @@ class CMenuForwarder : public CMenuItem
 
 	int paint(bool selected=false);
 	int getHeight(void) const;
+	void setOption(const std::string &Option);
+	void setTextLocale(const neutrino_locale_t Text);
 	int exec(CMenuTarget* parent);
 	bool isSelectable(void) const
 		{
@@ -181,6 +185,8 @@ class CMenuForwarderNonLocalized : public CMenuForwarder
 	CMenuForwarderNonLocalized(const char * const Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, const char * const ActionKey = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const char * const IconName = NULL);
 	CMenuForwarderNonLocalized(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target=NULL, const char * const ActionKey = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const char * const IconName = NULL);
 	virtual ~CMenuForwarderNonLocalized(){}
+	
+	void setText(const char * const Text);
 };
 
 class CAbstractMenuOptionChooser : public CMenuItem
