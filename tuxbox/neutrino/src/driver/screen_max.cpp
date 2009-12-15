@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/screen_max.cpp,v 1.3 2004/03/17 22:56:08 rasc Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/screen_max.cpp,v 1.4 2009/12/15 09:42:59 dbt Exp $
  *
  * -- some odd module to calc max. screen usage of an menue
  * -- this should be somewhere else (neutrino needs redesign)
@@ -55,6 +55,21 @@ int h_max (int h_size, int h_add)
 	 if (dh <= (h_size + h_add) ) ret = dh - h_add;
 
 	 return ret;
+}
+
+//some helpers to get x and y screen values vor menus and windows
+int getScreenStartX (int width)
+{
+	int w = width;
+	return (((g_settings.screen_EndX- g_settings.screen_StartX)-w) / 2) + g_settings.screen_StartX;
+	
+}
+
+int getScreenStartY (int height)
+{
+	int y = height;
+	return (((g_settings.screen_EndY- g_settings.screen_StartY)-y) / 2) + g_settings.screen_StartY;
+	
 }
 
 
