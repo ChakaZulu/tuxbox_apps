@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.34 2009/09/04 06:15:48 rhabarber1848 Exp $
+	$Id: imageinfo.cpp,v 1.35 2009/12/15 09:51:23 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -33,6 +33,12 @@
 #include "movieplayer.h"
 #include "pictureviewer.h"
 #include "streaminfo2.h"
+#ifndef ENABLE_KERNEL26 //TODO: k26 support
+#ifdef ENABLE_DRIVE_GUI
+#include "drive_setup.h"
+#endif /* ENABLE_DRIVE_GUI */
+#endif /*ENABLE_KERNEL26*/
+
 
 #include <gui/widget/icons.h>
 #include <gui/widget/buttons.h>
@@ -91,7 +97,7 @@ CImageInfo::CImageInfo()
 	x = endX - pigw -16;
 	y = startY + hheight +16;
 	
-	x_offset_large	= 135;
+	x_offset_large	= 140;
 	x_offset_small	= 7;
 
 	// read partition info
@@ -312,7 +318,7 @@ void CImageInfo::paintRevisionInfos(int y_startposition)
 	
 	y_startposition += iheight;
 	paintContent(font_info, xpos, y_startposition, "Imageinfo:", COL_MENUCONTENTINACTIVE );
-	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.34 $").c_str());
+	paintContent(font_info, xpos+x_offset_large, y_startposition, getModulVersion("","$Revision: 1.35 $").c_str());
 	
 #ifdef ENABLE_MOVIEBROWSER
 	y_startposition += iheight;
@@ -335,6 +341,15 @@ void CImageInfo::paintRevisionInfos(int y_startposition)
 	paintContent(font_info, xpos, y_startposition, "Pictureviewer:", COL_MENUCONTENTINACTIVE );
 	paintContent(font_info, xpos+x_offset_large, y_startposition, pv.getPictureViewerVersion().c_str());
 #endif
+
+#ifndef ENABLE_KERNEL26 //TODO: k26 support
+#ifdef ENABLE_DRIVE_GUI
+	y_startposition += iheight;
+	static CDriveSetup ide;
+	paintContent(font_info, xpos, y_startposition, "IDE/MMC:", COL_MENUCONTENTINACTIVE );
+	paintContent(font_info, xpos+x_offset_large, y_startposition, ide.getDriveSetupVersion().c_str());
+#endif /*ENABLE_DRIVE_GUI*/
+#endif /*ENABLE_KERNEL26*/
 	
 	y_startposition += iheight;
 	static CStreamInfo2Misc si;
@@ -613,16 +628,16 @@ void CImageInfo::paint()
 
 /* 	usefull stuff for version informations * getModulVersion()
  * 	returns a numeric version string for better version handling from any module without 	
- * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.34 $" becomes "1.xx", 
+ * 	special characters like "$" or the complete string "Revision" ->> eg: "$Revision: 1.35 $" becomes "1.xx", 
  * 	argument prefix can be empty or a replacement for "Revision"-string eg. "Version: " or "v." as required,
  * 	argument ID_string must be a CVS-keyword like "$ Revision $", used and changed by 
  * 	cvs-committs or a version data string eg: "1.xxx" by yourself
  * 	Note for imagemakers: Keywords will working only with CVS without local -kx options,
  *	if you are using an other CMS like Git or so..., you must change these entries manually
  * 	some examples:
- * 	getModulVersion("Version: ","$Revision: 1.34 $")	 returns "Version: 1.x"	
- * 	getModulVersion("v.","$Revision: 1.34 $")			 returns "v.1.x"
- *  	getModulVersion("","$Revision: 1.34 $")		 		 returns "1.x"
+ * 	getModulVersion("Version: ","$Revision: 1.35 $")	 returns "Version: 1.x"	
+ * 	getModulVersion("v.","$Revision: 1.35 $")			 returns "v.1.x"
+ *  	getModulVersion("","$Revision: 1.35 $")		 		 returns "1.x"
  */
 std::string CImageInfo::getModulVersion(const std::string &prefix_string, std::string ID_string)
 {

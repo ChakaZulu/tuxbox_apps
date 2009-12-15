@@ -84,6 +84,12 @@ libneutrino_gui_a_SOURCES += \
 endif
 endif
 
+if !ENABLE_KERNEL26
+if ENABLE_DRIVE_GUI
+libneutrino_gui_a_SOURCES += drive_setup.cpp
+endif
+endif
+
 #	experimental_menu.cpp
 #	ch_mosaic.cpp
 

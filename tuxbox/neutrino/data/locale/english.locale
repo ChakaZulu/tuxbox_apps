@@ -277,6 +277,74 @@ date.Sun  Sun
 date.Thu  Thu
 date.Tue  Tue
 date.Wed  Wed
+drive_setup.advanced_settings Advanced settings
+drive_setup.fstab fstab
+drive_setup.fstab_use use fstab
+drive_setup.hdd_add_partition Add partition
+drive_setup.hdd_add_swap_partition Add swap partition
+drive_setup.hdd_cache Writecache
+drive_setup.hdd_capacity Capacity
+drive_setup.hdd_delete_partition Delete
+drive_setup.hdd_edit_partition Edit Partition
+drive_setup.hdd_format_partition Apply and format partition
+drive_setup.hdd_format_set_partition ...apply partitions
+drive_setup.hdd_format_start Start format, please wait...
+drive_setup.hdd_free_gb free diskpace
+drive_setup.hdd_free_hours free time
+drive_setup.hdd_master hda (Master)
+drive_setup.hdd_not_found not found
+drive_setup.hdd_slave hdb (Slave)
+drive_setup.hdd_sleep Spindown timeout (seconds))
+drive_setup.hdd_sleep_help Values as seconds
+drive_setup.hdd_sleep_std 0 = no Timeout (default)
+drive_setup.hdd_temp Temperatur
+drive_setup.head IDE-Interface / HDD / MMC
+drive_setup.ide_activate IDE-Interface
+drive_setup.ide_activate_irq6 activ with IRQ6
+drive_setup.ide_activate_on activ with default IRQ
+drive_setup.mmc MMC
+drive_setup.model_unknown unknown model
+drive_setup.mount_mtdblock_partitions mount including mtd partitions
+drive_setup.msg_error_disctool_not_found not found!\nCan't execute setup.
+drive_setup.msg_error_save_failed Error while saving settings!
+drive_setup.msg_partition_check Start fs-check? This may take some time.
+drive_setup.msg_partition_check_failed Check was failed!
+drive_setup.msg_partition_check_ok Check was successfully!
+drive_setup.msg_partition_create All data will be lost! Partition now create and format!
+drive_setup.msg_partition_create_failed Error while creating partition! 
+drive_setup.msg_partition_create_failed_no_fs_definied No filesystem definied!
+drive_setup.msg_partition_create_success Partition was successfully created!
+drive_setup.msg_partition_delete All data of this partition will be lost!\nDelete partition!
+drive_setup.msg_partition_delete_failed Error while deleting partition!
+drive_setup.msg_partition_delete_ok Partition deleted.
+drive_setup.msg_partition_not_mounted_please_activate Partition was created, but is not mounted yet.\nPlease enable before!
+drive_setup.msg_reboot_requiered This action is expected after a reboot of your\nreceiver effectively.\nNow reboot?
+drive_setup.msg_saved Settings sucessfully applied!
+drive_setup.msg_saved_disabled Interface disabled
+drive_setup.partition_activate Partition enable
+drive_setup.partition_activate_no no
+drive_setup.partition_activate_yes yes
+drive_setup.partition_check Check
+drive_setup.partition_create Partition create and format
+drive_setup.partition_current_size Current size of partition
+drive_setup.partition_delete delete!
+drive_setup.partition_end_cylinder End cylinder
+drive_setup.partition_free_size Still available disk space 
+drive_setup.partition_fs Filesystem
+drive_setup.partition_mount_error Errors occurred during the mount/unmount operations!
+drive_setup.partition_mount_no_mountpoint Missing or not allowed mountpoint!
+drive_setup.partition_mount_now mount/unmount now
+drive_setup.partition_mount_now_device Partitions now mount/unmount
+drive_setup.partition_mountpoint Mountpoint
+drive_setup.partition_not_active partition not mounted
+drive_setup.partition_not_created not created
+drive_setup.partition_number Number of partition:
+drive_setup.partition_size Assigned partition size in MB
+drive_setup.partition_size_help Please enter size of partition in MB!
+drive_setup.partition_size_std No input or 0 = complete size or alvailable size
+drive_setup.partition_start_cylinder Start cylinder
+drive_setup.savesettings Apply
+drive_setup.select Select drive
 driversettings.bootinfo Show Boot Info
 driversettings.driver_boot Driver & Boot Options
 driversettings.fb_destination Expert! Boot-Console

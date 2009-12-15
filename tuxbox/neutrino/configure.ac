@@ -29,6 +29,11 @@ TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
 
+AC_ARG_ENABLE(kernel26,
+	AS_HELP_STRING(--enable-kernel26,include kernel 2.6.x support),
+	,[enable_kernel26=no])
+AM_CONDITIONAL(ENABLE_KERNEL26,test "$enable_kernel26" = "yes")
+
 AC_ARG_ENABLE(16-bit-mode,
          [  --enable-16-bit-mode                enable 16 bit graphics mode],
          [],
@@ -99,6 +104,14 @@ AC_ARG_ENABLE(pictureviewer,
 	,[enable_pictureviewer=yes])
 AM_CONDITIONAL(ENABLE_PICTUREVIEWER,test "$enable_pictureviewer" = "yes")
 
+#### ide/hdd/mmc stuff###
+AC_ARG_ENABLE(drive-gui,
+	AS_HELP_STRING(--enable-drive-gui, enable neutrino drive gui),
+	,[enable_drive_gui=no])
+AM_CONDITIONAL(ENABLE_DRIVE_GUI,test "$enable_drive_gui" = "yes")
+
+########################
+
 AC_ARG_ENABLE(use-libxml2,
    [  --enable-use-libxml2    use libxml2 instead of libxmltree],
       [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
@@ -114,6 +127,10 @@ AC_ARG_ENABLE(gui-mount,
 	AS_HELP_STRING(--disable-gui-mount,disable GUI mount functionality),
 	,[enable_gui_mount=yes])
 AM_CONDITIONAL(ENABLE_GUI_MOUNT,test "$enable_gui_mount" = "yes")
+
+if test "$enable_kernel26" = "yes"; then
+AC_DEFINE(ENABLE_KERNEL26,1,[include kernel 2.6.x support])
+fi
 
 if test "$enable_upnp" = "yes"; then
 TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
@@ -147,6 +164,10 @@ fi
 
 if test "$enable_radiotext" = "yes"; then
 AC_DEFINE(ENABLE_RADIOTEXT,1,[include Radiotext support])
+fi
+
+if test "$enable_drive_gui" = "yes"; then
+AC_DEFINE(ENABLE_DRIVE_GUI,1,[enable neutrino drive-setup])
 fi
 
 if test "$enable_internal_tuxtxt" = "yes"; then

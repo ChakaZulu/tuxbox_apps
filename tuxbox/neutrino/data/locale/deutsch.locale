@@ -277,6 +277,74 @@ date.Sun  So
 date.Thu  Do
 date.Tue  Di
 date.Wed  Mi
+drive_setup.advanced_settings Erweiterte Einstellungen
+drive_setup.fstab fstab
+drive_setup.fstab_use verwende fstab
+drive_setup.hdd_add_partition Partition hinzufügen
+drive_setup.hdd_add_swap_partition Swap-Partition anlegen
+drive_setup.hdd_cache Schreib-Cache
+drive_setup.hdd_capacity Kapazität
+drive_setup.hdd_delete_partition Löschen
+drive_setup.hdd_edit_partition Partition bearbeiten
+drive_setup.hdd_format_partition Partition erstellen u. formatieren
+drive_setup.hdd_format_set_partition ...richte Partitionen ein
+drive_setup.hdd_format_start Starte Formatierung, bitte warten...
+drive_setup.hdd_free_gb Freier Speicher
+drive_setup.hdd_free_hours Verbleibende Zeit
+drive_setup.hdd_master hda (Master)
+drive_setup.hdd_not_found nicht vorhanden
+drive_setup.hdd_slave hdb (Slave)
+drive_setup.hdd_sleep Ausschalten nach (Sekunden)
+drive_setup.hdd_sleep_help Angaben in Sekunden
+drive_setup.hdd_sleep_std 0 = kein Timeout (standard)
+drive_setup.hdd_temp Temperatur
+drive_setup.head IDE-Interface / HDD / MMC
+drive_setup.ide_activate IDE-Interface
+drive_setup.ide_activate_irq6 aktiv mit IRQ6
+drive_setup.ide_activate_on aktiv mit standard IRQ
+drive_setup.mmc MMC
+drive_setup.model_unknown Modell unbekannt
+drive_setup.mount_mtdblock_partitions mtd Partitionen einbeziehen
+drive_setup.msg_error_disctool_not_found wurde nicht gefunden!\nSetup kann nicht ausgeführt werden.
+drive_setup.msg_error_save_failed Beim Speichern der Einstellungen sind\nFehler aufgetreten!
+drive_setup.msg_partition_check Soll die Partition jetzt geprüft werden?\nDies kann einige Zeit in Anspruch nehmen.
+drive_setup.msg_partition_check_failed Die Prüfung ist fehlgeschlagen.
+drive_setup.msg_partition_check_ok Die Prüfung wurde erfolgreich durchgeführt.
+drive_setup.msg_partition_create Alle Daten gehen verloren!\nPartition jetzt anlegen und formatieren!
+drive_setup.msg_partition_create_failed Beim Einrichten der Partition sind Fehler aufgetreten! 
+drive_setup.msg_partition_create_failed_no_fs_definied Kein Dateisystem festgelegt!
+drive_setup.msg_partition_create_success Partition wurde erfolgreich erzeugt!
+drive_setup.msg_partition_delete Alle Daten dieser Partition gehen verloren!\nPartion jetzt löschen!
+drive_setup.msg_partition_delete_failed Löschen der Partition fehlgeschlagen!
+drive_setup.msg_partition_delete_ok Partition wurde erfolgreich gelöscht.
+drive_setup.msg_partition_not_mounted_please_activate Partition wurde angelegt, aber nicht eingehängt.\nPartition muss dafür vorher aktiviert werden!
+drive_setup.msg_reboot_requiered Diese Aktion wird erst nach einem Neustart Ihres\nReceivers wirksam.\nJetzt neu booten?
+drive_setup.msg_saved Einstellungen wurden erfolgreich\nübernommen!
+drive_setup.msg_saved_disabled Gerät(e) wurden deaktiviert.
+drive_setup.partition_activate Partition aktivieren
+drive_setup.partition_activate_no nein
+drive_setup.partition_activate_yes ja
+drive_setup.partition_check Prüfen
+drive_setup.partition_create Partition anlegen und formatieren
+drive_setup.partition_current_size Aktuelle Partitionsgröße
+drive_setup.partition_delete Löschen
+drive_setup.partition_end_cylinder End-Zylinder
+drive_setup.partition_free_size Noch paritionierbarer Speicherplatz
+drive_setup.partition_fs Dateisystem
+drive_setup.partition_mount_error Während des Mount/Unmount-Vorgangs sind\nFehler aufgetreten!
+drive_setup.partition_mount_no_mountpoint Kein korrektes Einhängeverzeichnis angegeben!
+drive_setup.partition_mount_now jetzt einhängen/aushängen
+drive_setup.partition_mount_now_device Partitionen jetzt einhängen/aushängen
+drive_setup.partition_mountpoint Einhängen nach
+drive_setup.partition_not_active Partition nicht eingehängt
+drive_setup.partition_not_created nicht angelegt
+drive_setup.partition_number Partitions-Nr.:
+drive_setup.partition_size Zugewiesene Partitionsgröße in MB
+drive_setup.partition_size_help Bitte Partitionsgröße in MB angeben!
+drive_setup.partition_size_std Keine Eingabe oder 0 = Gesamtgröße oder verfügbare Größe
+drive_setup.partition_start_cylinder Start-Zylinder
+drive_setup.savesettings Übernehmen
+drive_setup.select Laufwerk auswählen
 driversettings.bootinfo Infos beim Booten anzeigen
 driversettings.driver_boot Treiber- und Bootoptionen
 driversettings.fb_destination EXPERT! Boot-Konsole

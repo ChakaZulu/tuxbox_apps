@@ -2,7 +2,7 @@
 #define __gui_widget_icons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.19 2009/11/09 13:00:49 dbt Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.21 2009/12/15 09:51:23 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -62,22 +62,47 @@
 #define NEUTRINO_ICON_BUTTON_PLUS	"plus.raw"
 #define NEUTRINO_ICON_BUTTON_MINUS	"minus.raw"
 
+#define NEUTRINO_ICON_16_9		"16_9.raw"
+#define NEUTRINO_ICON_16_9_GREY		"16_9_gray.raw"
+#define NEUTRINO_ICON_AUDIO		"audio.raw"
+#define NEUTRINO_ICON_COLORS		"colors.raw"
+#define NEUTRINO_ICON_DD		"dd.raw"
+#define NEUTRINO_ICON_DD_AVAIL		"dd_avail.raw"
+#define NEUTRINO_ICON_DD_GREY		"dd_gray.raw"
+#define NEUTRINO_ICON_EPGINFO		"epginfo.raw"
 #define NEUTRINO_ICON_ERROR		"error.raw"
+#define NEUTRINO_ICON_FEATURES		"features.raw"
 #define NEUTRINO_ICON_FILE		"file.raw"
+#define NEUTRINO_ICON_FOLDER		"folder.raw"
 #define NEUTRINO_ICON_GAMES		"games.raw"
 #define NEUTRINO_ICON_INFO		"info.raw"
+#define NEUTRINO_ICON_KEYBINDING	"keybinding.raw"
+#define NEUTRINO_ICON_LOCK		"lock.raw"
 #define NEUTRINO_ICON_MOUNTED		"mounted.raw"
+#define NEUTRINO_ICON_MP3		"mp3.raw"
 #define NEUTRINO_ICON_NOT_MOUNTED	"not_mounted.raw"
+#define NEUTRINO_ICON_PAUSE		"pause.raw"
+#define NEUTRINO_ICON_PLAY		"play.raw"
+#define NEUTRINO_ICON_PROTECTING	"protecting.raw"
+#define NEUTRINO_ICON_QUESTION		"question.raw"
+#define NEUTRINO_ICON_RADIOMODE		"radiomode.raw"
 #define NEUTRINO_ICON_RECORDING		"recording.raw"
 #define NEUTRINO_ICON_SETTINGS		"settings.raw"
 #define NEUTRINO_ICON_SHELL		"shell.raw"
-#define NEUTRINO_ICON_UPNP		"upnp.raw"
-#define NEUTRINO_ICON_PROTECTING	"protecting.raw"
-#define NEUTRINO_ICON_EPGINFO		"epginfo.raw"
+#define NEUTRINO_ICON_STREAMING		"streaming.raw"
+#define NEUTRINO_ICON_TIMER		"timer.raw"
 #define NEUTRINO_ICON_UPDATE		"softupdate.raw"
-#define NEUTRINO_ICON_FEATURES		"features.raw"
-#define NEUTRINO_ICON_LOCK		"lock.raw"
-#define NEUTRINO_ICON_QUESTION		"question.raw"
+#define NEUTRINO_ICON_UPNP		"upnp.raw"
+#define NEUTRINO_ICON_VIDEO		"video.raw"
+#define NEUTRINO_ICON_VOLUMEBODY	"volumebody.raw"
+#define NEUTRINO_ICON_VOLUMESLIDER2	"volumeslider2.raw"
+#define NEUTRINO_ICON_VOLUMESLIDER2ALPHA	"volumeslider2alpha.raw"
+#define NEUTRINO_ICON_VOLUMESLIDER2BLUE		"volumeslider2blue.raw"
+#define NEUTRINO_ICON_VOLUMESLIDER2GREEN	"volumeslider2green.raw"
+#define NEUTRINO_ICON_VOLUMESLIDER2RED		"volumeslider2red.raw"
+#define NEUTRINO_ICON_VTXT		"vtxt.raw"
+#define NEUTRINO_ICON_VTXT_GREY		"vtxt_gray.raw"
+#define NEUTRINO_ICON_PARTITION		"partition.raw"
 
 #define DUMMY_ICON			"dummy.raw"
 

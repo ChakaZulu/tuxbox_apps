@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.97 2009/12/05 19:34:54 rhabarber1848 Exp $
+	$Id: neutrino_menu.cpp,v 1.98 2009/12/15 09:51:23 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -109,6 +109,12 @@
 #ifdef _EXPERIMENTAL_SETTINGS_
 #include "gui/experimental_menu.h"
 #endif
+
+#ifndef ENABLE_KERNEL26 //TODO: k26 support
+#if ENABLE_DRIVE_GUI
+#include "gui/drive_setup.h"
+#endif /*ENABLE_DRIVE_GUI*/
+#endif /*ENABLE_KERNEL26*/
 
 static CTimingSettingsNotifier timingsettingsnotifier;
 
@@ -343,6 +349,13 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	// ucode check
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_ucodecheck);
 #endif
+
+//TODO it's not ready yet, replacing to settings menue, support for K26
+#ifndef ENABLE_KERNEL26
+#ifdef ENABLE_DRIVE_GUI 
+ 	service.addItem(new CMenuForwarder(LOCALE_DRIVE_SETUP_HEAD, true, NULL, new CDriveSetup(), NULL, CRCInput::convertDigitToKey(shortcut3++)));
+#endif /*ENABLE_DRIVE_GUI*/
+#endif /*ENABLE_KERNEL26*/
 
 	// epg status
 	shortcut3 += personalize->addItem(service, LOCALE_SERVICEMENU_CHAN_EPG_STAT, true, NULL, DVBInfo, NULL, CRCInput::convertDigitToKey(shortcut3), NULL, false, g_settings.personalize_chan_epg_stat);
