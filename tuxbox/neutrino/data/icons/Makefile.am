@@ -18,7 +18,6 @@ install_DATA = \
 	network.raw not_mounted.raw numericpad.raw \
 	ok.raw ok_small.raw \
 	pause.raw play.raw plus.raw power.raw protecting.raw \
-	question.raw \
 	radar0.raw radar1.raw radar2.raw radar3.raw radar4.raw radar5.raw radar6.raw radar7.raw	radar8.raw radar9.raw radar.pal \
 	radiomode.pal radiomode.raw record_conflict.raw recording.raw record.raw right.raw rot.raw \
 	scan.pal scan.raw settings.raw shell.raw shutdown.pal shutdown.raw softupdate.raw streaming.raw \
