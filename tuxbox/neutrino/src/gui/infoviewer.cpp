@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.287 2009/12/05 17:39:33 rhabarber1848 Exp $
+	$Id: infoviewer.cpp,v 1.288 2009/12/15 09:49:31 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -975,7 +975,7 @@ void CInfoViewer::showIcon_RadioText(bool rt_available) const
 {
 	if (showButtonBar)
 	{
-		int mode = g_Zapit->getMode();
+		int mode = CNeutrinoApp::getInstance()->getMode();
 		std::string rt_icon = "radiotextoff.raw";
 		if ((!virtual_zap_mode) && (!recordModeActive) && (mode == NeutrinoMessages::mode_radio))
 		{
@@ -991,7 +991,7 @@ void CInfoViewer::showIcon_RadioText(bool rt_available) const
 void CInfoViewer::showIcon_16_9() const
 {
 #ifdef ENABLE_RADIOTEXT
-	if (g_Zapit->getMode() !=2)
+	if (CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_radio)
 #endif
 	frameBuffer->paintIcon((aspectRatio != 0) ? NEUTRINO_ICON_16_9 : NEUTRINO_ICON_16_9_GREY,
 				BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2 + ICON_SMALL_WIDTH + 6),
@@ -1998,12 +1998,12 @@ No need to poll for EPG, we are getting events from sectionsd!
 void CInfoViewer::showEpgInfo()   //message on event change
 {
 	char nextStart[10];
-	int mode = g_Zapit->getMode();
+	int mode = CNeutrinoApp::getInstance()->getMode();
 	struct tm *pnStartZeit = localtime(&info_CurrentNext.next_zeit.startzeit);
 	sprintf((char*)&nextStart, "%02d:%02d", pnStartZeit->tm_hour, pnStartZeit->tm_min);
 
 	/* show epg info only if we in TV- or Radio mode and current event is not the same like before */
-	if ((eventname != info_CurrentNext.current_name) && (mode !=0))
+	if ((eventname != info_CurrentNext.current_name) && (mode != 0))
 	{
 		eventname = info_CurrentNext.current_name;
 		if (g_settings.infobar_show == 1)
