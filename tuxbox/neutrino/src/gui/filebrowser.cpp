@@ -772,14 +772,25 @@ and add to neutrino playlist
 bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 {
 //	printf("readDir_std %s\n",dirname.c_str());
+	std::string dir = dirname;
+
+	//check dir
+	DIR   *dirCheck;
+      	dirCheck = opendir(dir.c_str());
+	if ( dirCheck == NULL )
+		dir = "/"; // sets default path to root, if dir is not available
+	else 
+		closedir( dirCheck );
+	//end check
+	
 	stat_struct statbuf;
 	dirent_struct **namelist;
 	int n;
 
-	n = my_scandir(dirname.c_str(), &namelist, 0, my_alphasort);
+	n = my_scandir(dir.c_str(), &namelist, 0, my_alphasort);
 	if (n < 0)
 	{
-		perror(("Filebrowser scandir: "+dirname).c_str());
+		perror(("Filebrowser scandir: "+dir).c_str());
 		return false;
 	}
 	for(int i = 0; i < n;i++)
@@ -787,7 +798,7 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 		CFile file;
 		if(strcmp(namelist[i]->d_name,".") != 0)
 		{
-			file.Name = dirname + namelist[i]->d_name;
+			file.Name = dir + namelist[i]->d_name;
 
 //			printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
 			if(my_stat((file.Name).c_str(),&statbuf) != 0)
@@ -1261,18 +1272,18 @@ void CFileBrowser::paintItem(unsigned int pos)
 #ifdef ENABLE_FLAC
 			case CFile::FILE_FLAC:
 #endif
-				fileicon = "mp3.raw";
+				fileicon = NEUTRINO_ICON_MP3;
 //				color = COL_MENUCONTENT;
 				break;
 
 			case CFile::FILE_DIR:
-				fileicon = "folder.raw";
+				fileicon = NEUTRINO_ICON_FOLDER;
 				break;
 
 			case CFile::FILE_PICTURE:
 			case CFile::FILE_TEXT:
 			default:
-				fileicon = "file.raw";
+				fileicon = NEUTRINO_ICON_FILE;
 			}
 			frameBuffer->paintIcon(fileicon, x+5 , ypos + (fheight-16) / 2 );
 
