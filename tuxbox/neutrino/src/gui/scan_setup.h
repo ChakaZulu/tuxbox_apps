@@ -1,5 +1,5 @@
 /*
-	$Id: scan_setup.h,v 1.3 2009/11/22 15:36:52 rhabarber1848 Exp $
+	$Id: scan_setup.h,v 1.4 2009/12/15 09:44:33 dbt Exp $
 
 	Copyright (C) 2009 Thilo Graf (dbt)
 	http://www.dbox2-tuning.de
@@ -52,6 +52,7 @@ class CScanSetup : public CMenuTarget
 		~CScanSetup();
 		int exec(CMenuTarget* parent, const std::string & actionKey);
 		void initScanSettings();
+		std::string getScanModeString(const int& scan_type);
 };
 
 

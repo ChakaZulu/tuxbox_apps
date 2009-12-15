@@ -1,5 +1,5 @@
 /*
-	$Id: scan_setup.cpp,v 1.5 2009/11/22 15:36:52 rhabarber1848 Exp $
+	$Id: scan_setup.cpp,v 1.6 2009/12/15 09:44:33 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -188,6 +188,7 @@ const CMenuOptionChooser::keyval SCANTS_SCAN_OPTIONS[SCANTS_SCAN_OPTION_COUNT] =
 	{ CScanTs::SCAN_ONE_SAT,	LOCALE_SCANTP_SCAN_ONE_SAT }
 };
 
+
 #define SCANTS_CABLESCAN_OPTION_COUNT	2
 const CMenuOptionChooser::keyval SCANTS_CABLESCAN_OPTIONS[SCANTS_CABLESCAN_OPTION_COUNT] =
 {
@@ -331,8 +332,9 @@ void CScanSetup::showScanService()
 
 	//sub menue scanmode
 	CMenuWidget* extscanmode = new CMenuWidget(LOCALE_SERVICEMENU_SCANTS, NEUTRINO_ICON_SETTINGS, width);
-	CMenuForwarder* fwextscanmode = new CMenuForwarder(LOCALE_SERVICEMENU_SCANMODES, true, NULL, extscanmode, NULL, (g_info.delivery_system == DVB_S) ? CRCInput::RC_3 : CRCInput::RC_1);
-	scansetup->addItem(fwextscanmode);
+	static std::string scan_mode = getScanModeString(scanSettings.TP_scan);
+	CMenuForwarder* fwextscanmode = new CMenuForwarder(LOCALE_SERVICEMENU_SCANMODES, true, scan_mode/*NULL*/, extscanmode, NULL, (g_info.delivery_system == DVB_S) ? CRCInput::RC_3 : CRCInput::RC_1);
+	scansetup->addItem(fwextscanmode); 
 
 	//show scan mode (fast->on/off)
 	scansetup->addItem(onoff_mode);
@@ -404,10 +406,10 @@ void CScanSetup::showScanService()
 	CTP_scanNotifier *TP_scanNotifier;
 	CMenuOptionChooser* scan;
 	if(g_info.delivery_system == DVB_S) {
-		TP_scanNotifier= new CTP_scanNotifier(fec, pol_mod, Freq, Rate, scanSettings.TP_SatSelectMenu);
+		TP_scanNotifier= new CTP_scanNotifier(fec, pol_mod, Freq, Rate, scanSettings.TP_SatSelectMenu, fwextscanmode);
 		scan = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, SCANTS_SCAN_OPTIONS, SCANTS_SCAN_OPTION_COUNT, true/*(g_info.delivery_system == DVB_S)*/, TP_scanNotifier));
 	} else {
-		TP_scanNotifier= new CTP_scanNotifier(fec, pol_mod, Freq, Rate, 0);
+		TP_scanNotifier= new CTP_scanNotifier(fec, pol_mod, Freq, Rate, 0, fwextscanmode);
 		scan = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, SCANTS_CABLESCAN_OPTIONS, SCANTS_CABLESCAN_OPTION_COUNT, true/*(g_info.delivery_system == DVB_S)*/, TP_scanNotifier));
 	}
 
@@ -477,3 +479,22 @@ void CScanSetup::initScanSettings()
 	
 }
 
+typedef struct scan_mode_t
+{
+	const int scan_type;
+	const neutrino_locale_t locale;
+} scan_mode_struct_t;
+
+const scan_mode_struct_t scan_mode[SCANTS_SCAN_OPTION_COUNT] =
+{
+	{CScanTs::SCAN_COMPLETE	, LOCALE_SCANTP_SCAN_ALL_SATS},
+	{CScanTs::SCAN_ONE_TP	, LOCALE_SCANTP_SCAN_ONE_TP},
+ 	{CScanTs::SCAN_ONE_SAT	, LOCALE_SCANTP_SCAN_ONE_SAT},
+};
+
+std::string CScanSetup::getScanModeString(const int& scan_type)
+{
+	int st = scan_type;
+	return g_Locale->getText(scan_mode[st].locale);
+
+}
