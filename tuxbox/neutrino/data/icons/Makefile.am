@@ -44,6 +44,11 @@ install_DATA += \
 	movieplayer.raw
 endif
 
+if ENABLE_DRIVE_GUI
+install_DATA += \
+	partition.raw
+endif
+
 if BOXTYPE_TRIPLE
 install-data-local:
 	$(INSTALL) -m 755 -d $(installdir)
