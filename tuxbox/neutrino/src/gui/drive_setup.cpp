@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.1 2009/12/15 09:51:23 dbt Exp $
+	$Id: drive_setup.cpp,v 1.2 2009/12/16 22:33:32 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2154,7 +2154,7 @@ bool CDriveSetup::mkFstab(bool write_defaults_only)
 	}
 	str_fstab.close();
 
-	cout<<"[drive setup] "<<__FUNCTION__ <<": wrtiing "<<fstab<< "...ok"<<endl;
+	cout<<"[drive setup] "<<__FUNCTION__ <<": writing "<<fstab<< "...ok"<<endl;
 
 	return true;
 }
@@ -3517,7 +3517,7 @@ string CDriveSetup::getErrMsg(neutrino_locale_t locale)
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.1 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.2 $");
 }
 
 // returns text for initfile headers
