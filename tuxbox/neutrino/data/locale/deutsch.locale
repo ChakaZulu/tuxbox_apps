@@ -329,7 +329,7 @@ drive_setup.partition_create Partition anlegen und formatieren
 drive_setup.partition_current_size Aktuelle Partitionsgröße
 drive_setup.partition_delete Löschen
 drive_setup.partition_end_cylinder End-Zylinder
-drive_setup.partition_free_size Noch paritionierbarer Speicherplatz
+drive_setup.partition_free_size Noch partitionierbarer Speicherplatz
 drive_setup.partition_fs Dateisystem
 drive_setup.partition_mount_error Während des Mount/Unmount-Vorgangs sind\nFehler aufgetreten!
 drive_setup.partition_mount_no_mountpoint Kein korrektes Einhängeverzeichnis angegeben!
