@@ -63,6 +63,46 @@
 		url="http://streams.br-online.de/jugend-radio_2.m3u"
 		name="Bayern on3radio"
 		/>
+		
+	<station
+		url="http://4broadcast.de/radioin.m3u"
+		name="Radio Ingolstadt"
+		/>
+
+	<station
+		url="http://9011.live.mp3.mdn.newmedia.nacamar.net:8000/9011/90elf_basis_noxon.mp3"
+		name="90elf-Konferenz"
+		/>
+
+	<station
+		url="http://9011.live.mp3.mdn.newmedia.nacamar.net:8000/9011/90elf_rp01_noxon.mp3"
+		name="90elf-Livespiel 1"
+		/>
+
+	<station
+		url="http://9011.live.mp3.mdn.newmedia.nacamar.net:8000/9011/90elf_rp02_noxon.mp3"
+		name="90elf-Livespiel 2"
+		/>
+
+	<station
+		url="http://9011.live.mp3.mdn.newmedia.nacamar.net:8000/9011/90elf_rp03_noxon.mp3"
+		name="90elf-Livespiel 3"
+		/>
+
+	<station
+		url="http://9011.live.mp3.mdn.newmedia.nacamar.net:8000/9011/90elf_rp04_noxon.mp3"
+		name="90elf-Livespiel 4"
+		/>
+
+	<station
+		url="http://9011.live.mp3.mdn.newmedia.nacamar.net:8000/9011/90elf_rp05_noxon.mp3"
+		name="90elf-Livespiel 5"
+		/>
+
+	<station
+		url="http://9011.live.mp3.mdn.newmedia.nacamar.net:8000/9011/90elf_rp06_noxon.mp3"
+		name="90elf-Livespiel 6"
+		/>
 
 	<station
 		url="http://metafiles.gl-systemhaus.de/hr/hr1_2.m3u"
