@@ -218,10 +218,17 @@ void convert8to32(struct picture *pict){
   for (i=0; i<pict->xres*pict->yres; i++)
   {
     c = ((__u8*)(pict->buffer))[i];
+#ifdef HAVE_IPBOX_HARDWARE
+    out[j++]=(char)(pict->colormap->red[c]/256);
+    out[j++]=(char)(pict->colormap->green[c]/256);
+    out[j++]=(char)(pict->colormap->blue[c]/256);
+    out[j++]=(char)(pict->colormap->transp[c]/256);
+#else
     out[j++]=(char)(pict->colormap->red[c]);
     out[j++]=(char)(pict->colormap->green[c]);
     out[j++]=(char)(pict->colormap->blue[c]);
     out[j++]=(char)(pict->colormap->transp[c]);
+#endif
   }
   free(pict->buffer);
   pict->buffer=out;
