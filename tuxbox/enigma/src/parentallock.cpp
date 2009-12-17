@@ -26,6 +26,8 @@ void ParentalLockWindow::init_ParentalLockWindow(const char* windowText, int cur
 	nPin=CreateSkinnedNumber("nPin",curNum, 4, 0, 9, 1, 0, 0, lPin, 1);
 	nPin->setFlags( eNumber::flagHideInput );
 	CONNECT( nPin->selected, ParentalLockWindow::numEntered );
+
+	BuildSkin("ParentalLockWindow");
 }
 
 void ParentalLockWindow::numEntered(int *i)

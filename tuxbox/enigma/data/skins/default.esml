@@ -1131,7 +1131,7 @@
 
 
 	<object name="ParentalLockWindow">
-		<ParentalLockWindow text="" cposition="200:200" csize="380:150">
+		<ParentalLockWindow cposition="200:200" csize="380:150">
 			<eLabel name="lPin" text="please enter pin:" position="10:10" size="e-20:30" />
 			<eNumber name="nPin" position="10:50" size="100:30" helptext="" loadDeco="" />
 		</ParentalLockWindow>
