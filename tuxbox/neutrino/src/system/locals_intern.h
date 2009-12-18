@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.153 2009/12/15 12:58:37 dbt Exp $
+ * $Id: locals_intern.h,v 1.154 2009/12/18 12:16:55 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -370,6 +370,8 @@ const char * locale_real_names[] =
 	"drive_setup.partition_size_help",
 	"drive_setup.partition_size_std",
 	"drive_setup.partition_start_cylinder",
+	"drive_setup.partition_unmount_now",
+	"drive_setup.partition_unmount_now_device",
 	"drive_setup.savesettings",
 	"drive_setup.select",
 	"driversettings.bootinfo",

@@ -343,6 +343,8 @@ drive_setup.partition_size Assigned partition size in MB
 drive_setup.partition_size_help Please enter size of partition in MB!
 drive_setup.partition_size_std No input or 0 = complete size or alvailable size
 drive_setup.partition_start_cylinder Start cylinder
+drive_setup.partition_unmount_now Unmount
+drive_setup.partition_unmount_now_device Unmount all
 drive_setup.savesettings Apply
 drive_setup.select Select drive
 driversettings.bootinfo Show Boot Info
