@@ -1,5 +1,5 @@
 /*
- * $Id: start.c,v 1.2 2009/12/14 21:57:37 rhabarber1848 Exp $
+ * $Id: start.c,v 1.3 2009/12/18 20:30:23 rhabarber1848 Exp $
  *
  * shellexec - d-box2 linux project
  *
@@ -24,31 +24,30 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <plugin.h>
-#define SCRIPT "/bin/shellexec"
-#define SONAME "shellexec"
+#define SCRIPT "shellexec"
 
 void plugin_exec()
 {
 	int ret, pid, status;
 	pid=fork();
 	if (pid == -1) {
-		fprintf(stderr, "[%s.so] fork\n", SONAME);
+		fprintf(stderr, "[%s.so] fork\n", SCRIPT);
 		return;
 	} else
 	if (pid == 0) {
-		fprintf(stderr, "[%s.so] forked, executing %s\n", SONAME, SCRIPT);
+		fprintf(stderr, "[%s.so] forked, executing %s\n", SCRIPT, SCRIPT);
 		for (ret=3 ; ret < 255; ret++)
 			close (ret);
 			ret = system(SCRIPT);
 			if (ret)
-				fprintf(stderr, "[%s.so] script return code: %d (%m)\n", SONAME, ret);
+				fprintf(stderr, "[%s.so] script return code: %d (%m)\n", SCRIPT, ret);
 			else
-				fprintf(stderr, "[%s.so] script return code: %d\n", SONAME, ret);
+				fprintf(stderr, "[%s.so] script return code: %d\n", SCRIPT, ret);
 		_exit(ret);
 	}
-	fprintf(stderr, "[%s.so] parent, waiting for child with pid %d...\n", SONAME, pid);
+	fprintf(stderr, "[%s.so] parent, waiting for child with pid %d...\n", SCRIPT, pid);
 	waitpid(pid, &status, 0);
-	fprintf(stderr, "[%s.so] parent, waitpid() returned..\n", SONAME);
+	fprintf(stderr, "[%s.so] parent, waitpid() returned..\n", SCRIPT);
 	if (WIFEXITED(status))
-		fprintf(stderr, "[%s.so] child returned with status %d\n", SONAME, WEXITSTATUS(status));
+		fprintf(stderr, "[%s.so] child returned with status %d\n", SCRIPT, WEXITSTATUS(status));
 }
