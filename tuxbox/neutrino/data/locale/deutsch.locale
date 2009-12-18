@@ -333,8 +333,8 @@ drive_setup.partition_free_size Noch partitionierbarer Speicherplatz
 drive_setup.partition_fs Dateisystem
 drive_setup.partition_mount_error Während des Mount/Unmount-Vorgangs sind\nFehler aufgetreten!
 drive_setup.partition_mount_no_mountpoint Kein korrektes Einhängeverzeichnis angegeben!
-drive_setup.partition_mount_now jetzt einhängen/aushängen
-drive_setup.partition_mount_now_device Partitionen jetzt einhängen/aushängen
+drive_setup.partition_mount_now Einhängen
+drive_setup.partition_mount_now_device Alle einhängen
 drive_setup.partition_mountpoint Einhängen nach
 drive_setup.partition_not_active Partition nicht eingehängt
 drive_setup.partition_not_created nicht angelegt

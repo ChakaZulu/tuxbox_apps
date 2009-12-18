@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.h,v 1.1 2009/12/15 09:51:23 dbt Exp $
+	$Id: drive_setup.h,v 1.2 2009/12/18 08:14:08 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -198,7 +198,8 @@ class CDriveSetup : public CMenuTarget
 		const char* msg_icon; 	// icon for all hdd setup windows
 		char part_num_actionkey[MAXCOUNT_PARTS][17];
 		std::string make_part_actionkey[MAXCOUNT_PARTS]; //action key strings for make_partition_$
-		std::string mount_unmount_partition[MAXCOUNT_PARTS]; //action key strings for mount_partition_$
+		std::string mount_partition[MAXCOUNT_PARTS]; //action key strings for mount_partition_$
+		std::string unmount_partition[MAXCOUNT_PARTS]; //action key strings for unmount_partition_$
 		std::string delete_partition[MAXCOUNT_PARTS]; //action key strings for delete_partition_$
 		std::string check_partition[MAXCOUNT_PARTS]; //action key strings for check_partition_$
 		std::string sel_device_num_actionkey[MAXCOUNT_DRIVE]; //"sel_device_0 ... sel_device_n""
@@ -257,7 +258,6 @@ class CDriveSetup : public CMenuTarget
 		bool unmountPartition(const int& device_num /*MASTER || SLAVE || MMCARD*/, const int& part_number);
 		bool unmountDevice(const int& device_num);
 		bool unmountAll();
-		bool mountUmountPartition(const int& device_num, const int& part_number);
 		bool saveHddSetup();
 		bool unloadFsDrivers();
 		bool unloadMmcDrivers();
@@ -270,8 +270,9 @@ class CDriveSetup : public CMenuTarget
 		bool isMmcActive();
 		bool isIdeInterfaceActive();
 		bool linkInitFiles();
+		bool haveActiveParts(const int& device_num);
+		bool haveMounts(const int& device_num);
 		
-
 		bool mkPartition(const int& device_num /*MASTER || SLAVE || MMCARD*/, const int& action, const int& part_number, const unsigned long long& start_cyl = 0, const unsigned long long& size = 0);
 		bool mkFs(const int& device_num /*MASTER || SLAVE || MMCARD*/, const int& part_number,  const std::string& fs_name);
 		bool chkFs(const int& device_num /*MASTER || SLAVE || MMCARD*/, const int& part_number,  const std::string& fs_name);

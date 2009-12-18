@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.2 2009/12/16 22:33:32 dbt Exp $
+	$Id: drive_setup.cpp,v 1.3 2009/12/18 08:14:08 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -152,7 +152,8 @@ TODO:
 
 // actionkey patterns
 #define MAKE_PARTITION 		"make_partition_"
-#define MOUNT_UMOUNT_PARTITION 	"mount_unmount_partition_"
+#define MOUNT_PARTITION 	"mount_partition_"
+#define UNMOUNT_PARTITION 	"unmount_partition_"
 #define DELETE_PARTITION 	"delete_partition_"
 #define CHECK_PARTITION 	"check_partition_"
 
@@ -203,7 +204,8 @@ CDriveSetup::CDriveSetup():configfile('\t')
 	for (int i = 0; i<MAXCOUNT_PARTS; i++)
 	{ 
 		make_part_actionkey[i]		= MAKE_PARTITION + iToString(i);
-		mount_unmount_partition[i] 	= MOUNT_UMOUNT_PARTITION + iToString(i);
+		mount_partition[i] 		= MOUNT_PARTITION + iToString(i);
+		unmount_partition[i] 		= UNMOUNT_PARTITION + iToString(i);
 		delete_partition[i]		= DELETE_PARTITION + iToString(i);
 		check_partition[i]		= CHECK_PARTITION + iToString(i);
 		
@@ -235,19 +237,23 @@ int CDriveSetup::exec(CMenuTarget* parent, const string &actionKey)
 		}
 		return res;
 	}
-	else if (actionKey == "mount_unmount_device_partitions")
+	else if (actionKey == "mount_device_partitions")
  	{
-		bool have_errors = false;
 
-		for (int i = 0; i < MAXCOUNT_PARTS; i++) 
+		if (mountDevice(current_device)) 
 		{
-			if (!mountUmountPartition(current_device, i)) 
-			{
-				have_errors = true;
-			}
+			showHddSetupSub();
+			return menu_return::RETURN_EXIT;
 		}
-
-		if (!have_errors) 
+		else 
+		{
+			ShowLocalizedHint(LOCALE_MESSAGEBOX_ERROR, LOCALE_DRIVE_SETUP_PARTITION_MOUNT_ERROR, width, msg_timeout, NEUTRINO_ICON_ERROR);
+			return res;
+		}
+ 	}
+	else if (actionKey == "unmount_device_partitions")
+ 	{
+		if (unmountDevice(current_device)) 
 		{
 			showHddSetupSub();
 			return menu_return::RETURN_EXIT;
@@ -312,9 +318,21 @@ int CDriveSetup::exec(CMenuTarget* parent, const string &actionKey)
 				}
 				return res;
 			}
-			else if (actionKey == mount_unmount_partition[ii]) //...mount/unmount partition
+			else if (actionKey == mount_partition[ii]) //...mount partition
 			{
-				if (mountUmountPartition(current_device, ii)) 
+				if (mountPartition(current_device, ii, d_settings.drive_partition_fstype[current_device][ii], d_settings.drive_partition_mountpoint[current_device][ii])) 
+				{
+					return menu_return::RETURN_EXIT_ALL;
+				}
+				else 
+				{
+					ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, getErrMsg(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_ERROR).c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
+					return menu_return::RETURN_EXIT_ALL; 
+				}
+			}
+			else if (actionKey == unmount_partition[ii]) //...unmount partition
+			{
+				if (unmountPartition(current_device, ii)) 
 				{
 					return menu_return::RETURN_EXIT_ALL;
 				}
@@ -665,7 +683,7 @@ void CDriveSetup::showHddSetupSub()
 	if ((part_count[current_device] < MAXCOUNT_PARTS) && (ll_free_part_size > 0xA00000)) 
 	{ // disable entry if we have no free partition or not enough size
 		add_activate = true;
-		add_icon = NEUTRINO_ICON_BUTTON_GREEN;
+		add_icon = NEUTRINO_ICON_BUTTON_RED;
 	}
 	else 
 	{
@@ -673,7 +691,7 @@ void CDriveSetup::showHddSetupSub()
 		add_icon = NULL;
 	}
 	next_part_number = getFirstUnusedPart(current_device); //also used from swap_add
- 	CMenuForwarder *part_add = new CMenuForwarder(LOCALE_DRIVE_SETUP_HDD_ADD_PARTITION, add_activate, NULL, sub_add, NULL/*"add_partition"*/, CRCInput::RC_green, add_icon);
+ 	CMenuForwarder *part_add = new CMenuForwarder(LOCALE_DRIVE_SETUP_HDD_ADD_PARTITION, add_activate, NULL, sub_add, NULL/*"add_partition"*/, CRCInput::RC_red, add_icon);
 
 	//menue sub: prepare item: add swap
 	bool add_swap_active;
@@ -681,14 +699,14 @@ void CDriveSetup::showHddSetupSub()
 	if ((!haveSwap()) && (add_activate)) 
 	{ // disable item if we have already a swap or no free partition or not enough size
 		add_swap_active = true;
-		add_swap_icon = NEUTRINO_ICON_BUTTON_YELLOW;
+		add_swap_icon = NEUTRINO_ICON_BUTTON_GREEN;
 	}
 	else 
 	{
 		add_swap_active = false;
 		add_swap_icon = NULL;
 	}
-	CMenuForwarder *swap_add = new CMenuForwarder(LOCALE_DRIVE_SETUP_HDD_ADD_SWAP_PARTITION, add_swap_active, NULL, sub_add_swap, NULL/*"add_swap_partition"*/, CRCInput::RC_yellow, add_swap_icon);
+	CMenuForwarder *swap_add = new CMenuForwarder(LOCALE_DRIVE_SETUP_HDD_ADD_SWAP_PARTITION, add_swap_active, NULL, sub_add_swap, NULL/*"add_swap_partition"*/, CRCInput::RC_green, add_swap_icon);
 
 	//menue add: prepare subhead: add part
 	string add_subhead_txt = dev_name + " >> " + iToString(next_part_number+1) + ". " + g_Locale->getText(LOCALE_DRIVE_SETUP_HDD_ADD_PARTITION);
@@ -707,8 +725,15 @@ void CDriveSetup::showHddSetupSub()
 	string s_add_start_cyl = iToString(start_cylinder);
 	CMenuForwarder *fw_add_start_cyl = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_START_CYLINDER, false, s_add_start_cyl.c_str());
 	
-	//menue sub: prepare item: mount/unmount all partitions
- 	CMenuForwarder *mount =  new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_NOW_DEVICE, true, NULL, this, "mount_unmount_device_partitions", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE);
+	//menue sub: set mountstatus of devices for enable/disable menue items
+	bool have_mounts = haveMounts(current_device);
+	bool have_parts = haveActiveParts(current_device);
+
+	//menue sub: prepare item: mount all partitions
+ 	CMenuForwarder *mount_all =  new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_NOW_DEVICE, (!have_mounts ? have_parts:false), NULL, this, "mount_device_partitions", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
+
+	//menue sub: prepare item: unmount all partitions
+ 	CMenuForwarder *ummount_all =  new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_UNMOUNT_NOW_DEVICE, (have_mounts ? true:false), NULL, this, "unmount_device_partitions", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE);
 
 	//menue sub: prepare separator: partlist
 	CMenuSeparator *separator = new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_DRIVE_SETUP_HDD_EDIT_PARTITION);
@@ -743,7 +768,8 @@ void CDriveSetup::showHddSetupSub()
 	//------------------------
 	sub->addItem(part_add); 	//add partition
 	sub->addItem(swap_add); 	//add swap
-	sub->addItem(mount); 		//mount - unmount
+	sub->addItem(mount_all); 	//mount
+	sub->addItem(ummount_all); 	//unmount
 	//------------------------
 	sub->addItem(separator); 	//separator partlist
 	//------------------------
@@ -789,8 +815,11 @@ void CDriveSetup::showHddSetupSub()
 	//make partition
 	CMenuForwarder * mkpart[MAXCOUNT_PARTS];
 
-	//mount/unmount partitions
-	CMenuForwarder * mount_umount[MAXCOUNT_PARTS];
+	//mount partition
+	CMenuForwarder * mount[MAXCOUNT_PARTS];
+
+	//unmount partitions
+	CMenuForwarder * unmount[MAXCOUNT_PARTS];
 
 	//delete partition
 	CMenuForwarder * delete_part[MAXCOUNT_PARTS];
@@ -801,12 +830,16 @@ void CDriveSetup::showHddSetupSub()
 	//action key strings
 	string ak_make_partition[MAXCOUNT_PARTS];
 	string ak_mount_partition[MAXCOUNT_PARTS];
+	string ak_unmount_partition[MAXCOUNT_PARTS];
 	string ak_delete_partition[MAXCOUNT_PARTS];
 	string ak_check_partition[MAXCOUNT_PARTS];
 
 	//count of cylinders in edit view
  	string ed_start_cyl[MAXCOUNT_PARTS];
 	string ed_end_cyl[MAXCOUNT_PARTS];
+
+	//stat of partition
+	bool is_mounted[MAXCOUNT_PARTS];
 	
 	//menue partitions: edit mode
 	for (int i = 0; i<MAXCOUNT_PARTS; i++)
@@ -868,9 +901,19 @@ void CDriveSetup::showHddSetupSub()
 		ak_make_partition[i] = MAKE_PARTITION + iToString(i);
 		mkpart[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_HDD_FORMAT_PARTITION, true, NULL, this, ak_make_partition[i].c_str(), CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
 
-		//prepare mount/umount partition
-		ak_mount_partition[i] = MOUNT_UMOUNT_PARTITION + iToString(i);
-		mount_umount[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_NOW, true, NULL, this, ak_mount_partition[i].c_str(), CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN);
+		//set mountstatus for enable/disable menue items
+		if (isMountedPartition(partname[i]) || isSwapPartition(partname[i]))
+			is_mounted[i] = true;
+		else
+			is_mounted[i] = false ;
+
+		//prepare mount partition
+		ak_mount_partition[i] = MOUNT_PARTITION + iToString(i);
+		mount[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_NOW, (is_mounted[i] ? false : true), NULL, this, ak_mount_partition[i].c_str(), CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
+
+		//prepare unmount partition
+		ak_unmount_partition[i] = UNMOUNT_PARTITION + iToString(i);
+		unmount[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_UNMOUNT_NOW, (is_mounted[i] ? true : false), NULL, this, ak_unmount_partition[i].c_str(), CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN);
 
 		//prepare delete partition
 		ak_delete_partition[i] = DELETE_PARTITION + iToString(i);
@@ -901,8 +944,9 @@ void CDriveSetup::showHddSetupSub()
 		//------------------------
 		part[i]->addItem(GenericMenuSeparatorLine);	//separator
 		//------------------------
-		part[i]->addItem(mkpart[i]);			//make partition
-		part[i]->addItem(mount_umount[i]);		//mount umount partition
+// 		part[i]->addItem(mkpart[i]);			//make partition
+		part[i]->addItem(mount[i]);			//mount partition
+		part[i]->addItem(unmount[i]);			//unmount partition
 		part[i]->addItem(delete_part[i]);		//delete partition
 		part[i]->addItem(check_part[i]);		//check partition
 		
@@ -1185,7 +1229,7 @@ bool CDriveSetup::unmountAll()
 
 	for (unsigned int i=0; i < MAXCOUNT_DRIVE; i++) 
 	{
-		if(unmountDevice(i /*MASTER||SLAVE||MMCARD*/))
+		if(!unmountDevice(i /*MASTER||SLAVE||MMCARD*/))
 			ret = false;
 	}
 
@@ -1200,7 +1244,7 @@ bool CDriveSetup::unmountDevice(const int& device_num)
 
 	for (unsigned int ii=0; ii < MAXCOUNT_PARTS; ii++) 
 	{
-		if(unmountPartition(i, ii))
+		if(!unmountPartition(i, ii))
 			ret = false;
 	}
 
@@ -3173,29 +3217,6 @@ bool CDriveSetup::chkFs(const int& device_num /*MASTER||SLAVE*/, const int& part
 	return ret;
 }
 
-// swapping mount and unmount, used for mount/unmount in menue
-bool CDriveSetup::mountUmountPartition(const int& device_num, const int& part_number)
-{
-	string partname = getPartName(device_num, part_number);
-	bool ret = true;
-	writeDriveSettings();
-
-	if ((!isMountedPartition(partname)) && (!isSwapPartition(partname)))
-	{
-		if (!mountPartition(device_num, part_number,  d_settings.drive_partition_fstype[device_num][part_number], d_settings.drive_partition_mountpoint[device_num][part_number])) {
-			ret = false;
-		}
-	}
-	else 
-	{
-		if (!unmountPartition(device_num, part_number))
-		{
-			ret = false;
-		}
-	}
-	return ret;
-}
-
 // mounts all available partitions for all devices 
 bool CDriveSetup::mountAll()
 {
@@ -3517,7 +3538,7 @@ string CDriveSetup::getErrMsg(neutrino_locale_t locale)
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.2 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.3 $");
 }
 
 // returns text for initfile headers
@@ -3724,6 +3745,40 @@ bool CDriveSetup::linkInitFiles()
 	}
 	
 	return true;
+}
+
+//returns true if any partition is available at device
+bool CDriveSetup::haveActiveParts(const int& device_num)
+{
+	int i = device_num;
+
+	for (unsigned int ii = 0; ii < MAXCOUNT_PARTS; ii++) 
+	{
+		string partname = getPartName(i,ii);
+		if (isActivePartition(partname)) 
+		{
+			return true;
+		}				
+	}			
+	
+	return false;
+}
+
+//returns true if any partition is mounted at device
+bool CDriveSetup::haveMounts(const int& device_num)
+{
+	int i = device_num;
+
+	for (unsigned int ii = 0; ii < MAXCOUNT_PARTS; ii++) 
+	{
+		string partname = getPartName(i,ii);
+		if (isMountedPartition(partname) || isSwapPartition(partname)) 
+		{
+			return true;
+		}					
+	}			
+	
+	return false;
 }
 
 

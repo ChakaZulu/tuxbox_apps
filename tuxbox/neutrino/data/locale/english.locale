@@ -333,8 +333,8 @@ drive_setup.partition_free_size Still available disk space
 drive_setup.partition_fs Filesystem
 drive_setup.partition_mount_error Errors occurred during the mount/unmount operations!
 drive_setup.partition_mount_no_mountpoint Missing or not allowed mountpoint!
-drive_setup.partition_mount_now mount/unmount now
-drive_setup.partition_mount_now_device Partitions now mount/unmount
+drive_setup.partition_mount_now Mount
+drive_setup.partition_mount_now_device Mount all
 drive_setup.partition_mountpoint Mountpoint
 drive_setup.partition_not_active partition not mounted
 drive_setup.partition_not_created not created
