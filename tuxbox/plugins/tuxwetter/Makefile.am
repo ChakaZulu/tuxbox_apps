@@ -47,4 +47,3 @@ install-exec-local:
 	install -m 0644 $(srcdir)/tuxwetter.cfg $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/tuxwetter.conf $(DESTDIR)$(CONFIGDIR)/tuxwetter
 	install -m 0644 $(srcdir)/convert.list $(DESTDIR)$(CONFIGDIR)/tuxwetter
-	install -m 0644 $(srcdir)/missing_translations.txt $(DESTDIR)$(CONFIGDIR)/tuxwetter

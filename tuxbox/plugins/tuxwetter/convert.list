@@ -107,6 +107,7 @@ PM SHOWERS|nachmittags Schauer
 PM SHOWERS / WIND|nachmitags Schauer, windig
 PM SNOW SHOWERS|nachmittags Schneeschauer
 PM SNOW SHOWERS / WIND|nachmittags Schneeschauer / windig
+PM T-SHOWERS|nachmittags Gewitter
 PM T-STORMS|nachmittags Gewitter
 PM|nachmittags
 RAIN|Regen
@@ -147,6 +148,7 @@ SHOWERS|Schauer
 SNOW|Schnee
 SNOW AND WINDY|Schnee, stürmisch
 SNOW EARLY|anfangs Schneefall
+SNOW GRAINS|Schneegriesel
 SNOW SHOWERS|Schneeschauer
 SNOW SHOWER|Schneeschauer
 SNOW SHOWERS EARLY|anfangs Schneeschauer
