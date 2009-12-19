@@ -23,7 +23,7 @@ TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 
 # needed by tuxmail
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
-#TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
+TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 
 # needed by enigma-demo
 TUXBOX_APPS_LIB_PKGCONFIG(SIGC,sigc++-1.2)
@@ -78,6 +78,8 @@ vncviewer/Makefile
 vncviewer/rfb/Makefile
 dvbsub/Makefile
 shellexec/Makefile
+tuxwetter/Makefile
+tuxwetter/bitmap/Makefile
 pip/Makefile
 mosaic/Makefile
 enigma/Makefile
@@ -100,4 +102,3 @@ enigma/scummvm/Makefile
 pluginx/Makefile
 tuxbox-plugins.pc
 ])
-
