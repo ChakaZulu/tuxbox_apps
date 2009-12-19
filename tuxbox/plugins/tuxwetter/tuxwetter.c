@@ -1,5 +1,5 @@
 /*
- * $Id: tuxwetter.c,v 1.1 2009/12/19 19:42:49 rhabarber1848 Exp $
+ * $Id: tuxwetter.c,v 1.2 2009/12/19 21:52:01 rhabarber1848 Exp $
  *
  * tuxwetter - d-box2 linux project
  *
@@ -1215,8 +1215,7 @@ char tun[2]="C",sun[5]="km/h",dun[3]="km",pun[5]="mbar",cun[20];
 	if(index==-99)
 	{
 		int i;
-		unsigned char grstr[XL+1]={'G'^XX,'r'^XX,'\xFC'^XX,'\xDF'^XX,'e'^XX,' '^XX,'v'^XX,'o'^XX,'m'^XX,' '^XX,'N'^XX,'e'^XX,'w'^XX,'-'^XX,'T'^XX,'u'^XX,'x'^XX,'w'^XX,'e'^XX,'t'^XX,'t'^XX,'e'^XX,'r'^XX,'-'^XX,'T'^XX,'e'^XX,'a'^XX,'m'^XX,'!'^XX,' '^XX,' '^XX,';'^XX,'-'^XX,')'^XX,' '^XX,' '^XX,'w'^XX,'w'^XX,'w'^XX,'.'^XX,'k'^XX,'e'^XX,'y'^XX,'w'^XX,'e'^XX,'l'^XX,'t'^XX,'-'^XX,'b'^XX,'o'^XX,'a'^XX,'r'^XX,'d'^XX,'.'^XX,'c'^XX,'o'^XX,'m'^XX,0};
-	
+
 		col1=40; col2=340; dy=22;
 		
 		sprintf(rstr,"New-Tuxwetter    Version %.2f",P_VERSION);
@@ -1325,12 +1324,7 @@ char tun[2]="C",sun[5]="km/h",dun[3]="km",pun[5]="mbar",cun[20];
 		sprintf(rstr,"%s",prs_translate("Aktuelle Anzeige schlieﬂen",CONVERT_LIST));
 		RenderString(rstr, col2, sy, 619-col2, LEFT, HMED, CMCT);
 		sy+=(1.5*(double)dy);
-		
-		for(i=0; i<(XL-1); i++)
-			{
-				grstr[i]^=XX;
-			}
-		RenderString(grstr, 0, sy, 619, CENTER, HMED, CMHT);
+
 		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 		rcd=GetRCCode();
 		while((rcd != RC_OK) && (rcd != RC_HOME))
