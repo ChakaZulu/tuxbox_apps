@@ -37,6 +37,10 @@ TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
 # needed by vncviewer
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 
+# needed by sysinfo
+TUXBOX_APPS_LIB_PKGCONFIG(MD5SUM,tuxbox-md5sum)
+TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
+
 # needed by tuxtxt
 TUXBOX_APPS_LIB_PKGCONFIG(TUXTXT,tuxbox-tuxtxt)
 
@@ -80,6 +84,7 @@ dvbsub/Makefile
 shellexec/Makefile
 tuxwetter/Makefile
 tuxwetter/bitmap/Makefile
+sysinfo/Makefile
 pip/Makefile
 mosaic/Makefile
 enigma/Makefile
