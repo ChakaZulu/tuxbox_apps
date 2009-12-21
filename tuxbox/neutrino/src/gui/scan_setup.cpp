@@ -1,5 +1,5 @@
 /*
-	$Id: scan_setup.cpp,v 1.6 2009/12/15 09:44:33 dbt Exp $
+	$Id: scan_setup.cpp,v 1.7 2009/12/21 14:24:21 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -63,8 +63,8 @@ CScanSetup::CScanSetup()
 	hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	height = hheight+13*mheight+ 10;
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	x = getScreenStartX (width);
+	y = getScreenStartY (height);
 
 	sat_list_size = 0;
 	provider_list_size = 0;
@@ -87,7 +87,8 @@ int CScanSetup::exec(CMenuTarget* parent, const std::string &actionKey)
 
 	if(actionKey == "save_action") {
 		CNeutrinoApp::getInstance()->exec(NULL, "savesettings");
-		return res;
+		showScanService();
+		return menu_return::RETURN_EXIT;
 	}
 
 	showScanService();
@@ -332,7 +333,7 @@ void CScanSetup::showScanService()
 
 	//sub menue scanmode
 	CMenuWidget* extscanmode = new CMenuWidget(LOCALE_SERVICEMENU_SCANTS, NEUTRINO_ICON_SETTINGS, width);
-	static std::string scan_mode = getScanModeString(scanSettings.TP_scan);
+	std::string scan_mode = getScanModeString(scanSettings.TP_scan);
 	CMenuForwarder* fwextscanmode = new CMenuForwarder(LOCALE_SERVICEMENU_SCANMODES, true, scan_mode/*NULL*/, extscanmode, NULL, (g_info.delivery_system == DVB_S) ? CRCInput::RC_3 : CRCInput::RC_1);
 	scansetup->addItem(fwextscanmode); 
 
