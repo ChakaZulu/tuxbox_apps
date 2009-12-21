@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.4 2009/12/18 18:51:48 dbt Exp $
+	$Id: drive_setup.cpp,v 1.5 2009/12/21 00:08:38 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -79,7 +79,7 @@ TODO:
 #include <sys/swap.h>
 #include <errno.h>
 
-// Paths and init files
+// Paths of system and init files
 #define ETC_DIR				"/etc"
 #define VAR_ETC_DIR 			"/var/etc"
 #define INIT_D_DIR 			ETC_DIR "/init.d"
@@ -90,6 +90,12 @@ TODO:
 #define INIT_MOUNT_SCRIPT_NAME 		"07mounts"
 #define INIT_MOUNT_SCRIPT_FILE 		INIT_D_DIR  "/"  INIT_MOUNT_SCRIPT_NAME
 #define INIT_MOUNT_VAR_SCRIPT_FILE 	INIT_D_VAR_DIR "/" INIT_MOUNT_SCRIPT_NAME
+#ifdef ENABLE_NFSSERVER
+#define EXPORTS 			ETC_DIR "/exports"
+#define EXPORTS_VAR 			VAR_ETC_DIR "/exports"
+#define NFS_START_SCRIPT		INIT_D_DIR "/S31nfsserver"
+#define NFS_STOP_SCRIPT			INIT_D_DIR "/K31nfsserver"
+#endif /*ENABLE_NFSSERVER*/
 
 #define TEMP_SCRIPT			"/tmp/drive_setup"
 #define PREPARE_SCRIPT_FILE		"/tmp/prepare_opt"
@@ -322,6 +328,7 @@ int CDriveSetup::exec(CMenuTarget* parent, const string &actionKey)
 			{
 				if (mountPartition(current_device, ii, d_settings.drive_partition_fstype[current_device][ii], d_settings.drive_partition_mountpoint[current_device][ii])) 
 				{
+					showHddSetupSub();
 					return menu_return::RETURN_EXIT_ALL;
 				}
 				else 
@@ -334,6 +341,7 @@ int CDriveSetup::exec(CMenuTarget* parent, const string &actionKey)
 			{
 				if (unmountPartition(current_device, ii)) 
 				{
+					showHddSetupSub();
 					return menu_return::RETURN_EXIT_ALL;
 				}
 				else 
@@ -362,6 +370,7 @@ int CDriveSetup::exec(CMenuTarget* parent, const string &actionKey)
 						msg_locale = 	LOCALE_DRIVE_SETUP_MSG_PARTITION_DELETE_OK;
 						del_msg_icon =	NEUTRINO_ICON_INFO;
 						ShowLocalizedHint(LOCALE_MESSAGEBOX_INFO, msg_locale, width, msg_timeout, del_msg_icon);
+						showHddSetupSub();
 						return menu_return::RETURN_EXIT_ALL;
 					}
 				}
@@ -677,8 +686,6 @@ void CDriveSetup::showHddSetupSub()
 
 	//menue sub: prepare item: add partition
 	bool add_activate;
-	const char* add_icon;
-
 	unsigned long long ll_free_part_size = getUnpartedDeviceSize(current_device);
 	if ((part_count[current_device] < MAXCOUNT_PARTS) && (ll_free_part_size > 0xA00000)) 
 	{ // disable entry if we have no free partition or not enough size
@@ -693,7 +700,6 @@ void CDriveSetup::showHddSetupSub()
 
 	//menue sub: prepare item: add swap
 	bool add_swap_active;
-	const char* add_swap_icon;
 	if ((!haveSwap()) && (add_activate)) // disable add item if we have already a swap, no free partition or not enough size
 		add_swap_active = true;
 	else 
@@ -784,17 +790,12 @@ void CDriveSetup::showHddSetupSub()
 	CDirChooser * mountdir[MAXCOUNT_PARTS];
 	bool entry_activ[MAXCOUNT_PARTS];
 
+	//disable item for add swap if we have already a swap or no free partition or not enough size
 	if ((!haveSwap()) && (add_activate)) 
-	{ // disable item if we have already a swap or no free partition or not enough size
 		add_swap_active = true;
-		add_swap_icon = NEUTRINO_ICON_BUTTON_YELLOW;
-	}
 	else 
-	{
 		add_swap_active = false;
-		add_swap_icon = NULL;
-	}
-
+	
 	//choose filesystem
 	CMenuOptionStringChooser * fs_chooser[MAXCOUNT_PARTS];
 	
@@ -804,6 +805,16 @@ void CDriveSetup::showHddSetupSub()
 	//size input
 	CStringInput * input_part_size[MAXCOUNT_PARTS];
 	CMenuForwarder * input_size[MAXCOUNT_PARTS];
+
+#ifdef ENABLE_NFSSERVER
+	//choose nfs mode
+	CDriveSetupNFSHostNotifier * nfsHostNotifier[MAXCOUNT_PARTS];
+	CMenuOptionChooser * nfs_chooser[MAXCOUNT_PARTS];
+
+	//menue partitions: host ip input for nfs exports
+	CIPInput * nfs_host_ip[MAXCOUNT_PARTS];
+	CMenuForwarder * nfs_host_ip_fw[MAXCOUNT_PARTS]; 
+#endif
 
 	//make partition
 	CMenuForwarder * mkpart[MAXCOUNT_PARTS];
@@ -890,6 +901,18 @@ void CDriveSetup::showHddSetupSub()
 		input_part_size[i] = new CStringInput(LOCALE_DRIVE_SETUP_PARTITION_SIZE, d_settings.drive_partition_size[current_device][i], 8, LOCALE_DRIVE_SETUP_PARTITION_SIZE_HELP, LOCALE_DRIVE_SETUP_PARTITION_SIZE_STD, "0123456789 ");
 		input_size[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_SIZE, entry_activ[i], d_settings.drive_partition_size[current_device][i], input_part_size[i] );
 
+#ifdef ENABLE_NFSSERVER
+		//prepare option host input
+		nfs_host_ip[i] = new CIPInput(LOCALE_DRIVE_SETUP_PARTITION_NFS_HOST_IP , d_settings.drive_partition_nfs_host_ip[current_device][i]   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+
+		//prepare option nfs	
+		nfs_host_ip_fw[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_NFS_HOST_IP, d_settings.drive_partition_nfs[current_device][i], d_settings.drive_partition_nfs_host_ip[current_device][i], nfs_host_ip[i] );
+		//prepare option nfs chooser
+
+		nfsHostNotifier[i] = new CDriveSetupNFSHostNotifier (nfs_host_ip_fw[i]);
+		nfs_chooser[i] = new CMenuOptionChooser(LOCALE_DRIVE_SETUP_PARTITION_NFS, &d_settings.drive_partition_nfs[current_device][i], OPTIONS_YES_NO_OPTIONS, OPTIONS_YES_NO_OPTION_COUNT, entry_activ[i], nfsHostNotifier[i] );		
+#endif
+
 		//prepare make partition
 		ak_make_partition[i] = MAKE_PARTITION + iToString(i);
 		mkpart[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_HDD_FORMAT_PARTITION, true, NULL, this, ak_make_partition[i].c_str(), CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
@@ -935,9 +958,14 @@ void CDriveSetup::showHddSetupSub()
 		part[i]->addItem(mp_chooser[i]);		//select mountpoint
 		part[i]->addItem(input_size[i]);		//input part size
 		//------------------------
+#ifdef ENABLE_NFSSERVER
+		part[i]->addItem(GenericMenuSeparatorLine);	//separator
+		part[i]->addItem(nfs_chooser[i]);		//nfs
+		part[i]->addItem(nfs_host_ip_fw[i]);		//nfs host ip input
+		//------------------------
+#endif
 		part[i]->addItem(GenericMenuSeparatorLine);	//separator
 		//------------------------
-// 		part[i]->addItem(mkpart[i]);			//make partition
 		part[i]->addItem(mount[i]);			//mount partition
 		part[i]->addItem(unmount[i]);			//unmount partition
 		part[i]->addItem(delete_part[i]);		//delete partition
@@ -1767,8 +1795,21 @@ bool CDriveSetup::saveHddSetup()
 	}
 	else
 		mkMounts();
-	
 
+#ifdef ENABLE_NFSSERVER
+	// exports
+	if (CNeutrinoApp::getInstance()->execute_sys_command(NFS_STOP_SCRIPT) == 0) //first stop server
+	{
+		if (mkExports())
+		{
+			if (CNeutrinoApp::getInstance()->execute_sys_command(NFS_START_SCRIPT) != 0)//start server
+				cerr << "[drive setup] "<<__FUNCTION__ <<": error while executing "<<NFS_START_SCRIPT<<"..."<< strerror(errno)<<endl;
+		}		
+	}
+	else
+		cerr << "[drive setup] "<<__FUNCTION__ <<":  error while executing "<<NFS_STOP_SCRIPT<<"..."<< strerror(errno)<<endl;			
+#endif
+	
 	// write and linking init files
 	if ((res) && (writeInitFile(ide_disabled)) && (linkInitFiles())) 
 	{
@@ -2142,7 +2183,7 @@ bool CDriveSetup::mkFstab(bool write_defaults_only)
 	string timestamp = getTimeStamp();
 
 	vector<string> v_fstab_entries;
-	v_fstab_entries.push_back("# " + fstab + " generated from neutrino ide/mmc/hdd drive-setup\n" +  getDriveSetupVersion() + " " +  timestamp );
+	v_fstab_entries.push_back("# " + fstab + " generated from neutrino ide/mmc/hdd drive-setup\n #" +  getDriveSetupVersion() + " " +  timestamp );
 
 	if ((fstab == FSTAB) || (write_defaults_only))
 		v_fstab_entries.push_back(getDefaultFstabEntries()); // set default fstab entries
@@ -3124,6 +3165,79 @@ bool CDriveSetup::mkFs(const int& device_num /*MASTER||SLAVE*/, const int& part_
 	return true;
 }
 
+
+#ifdef ENABLE_NFSSERVER
+// gets the path of exports file
+string CDriveSetup::getExportsFilePath()
+{
+	long int fsnum = getDeviceInfo(ETC_DIR, FILESYSTEM);
+	if ((fsnum != 0x28cd3d45 /*cramfs*/) && (fsnum != 0x073717368 /*squashfs*/))
+		return EXPORTS ;// we have a writeable etc dir
+	else
+		return EXPORTS_VAR ;
+}
+
+// generate exports file, returns true on success
+bool CDriveSetup::mkExports()
+{
+	// set exports path
+	string exports = getExportsFilePath();
+	string timestamp = getTimeStamp();
+	vector<string> v_export_entries;
+	string head = "# " + exports + " generated from neutrino ide/mmc/hdd drive-setup\n#" +  getDriveSetupVersion() + " " +  timestamp;
+
+	// collecting export entries
+	for (unsigned int i = 0; i < MAXCOUNT_DRIVE; i++) 
+	{
+		for (unsigned int ii = 0; ii < MAXCOUNT_PARTS; ii++) 
+		{
+			string partname = getPartName(i,ii);
+			string export_entry;
+			//collects all mountpoints but not swap
+			if (d_settings.drive_partition_nfs[i][ii] && !isSwapPartition(partname)) 
+			{
+				string mp = getMountInfo(partname, MOUNTPOINT);
+				export_entry = mp;
+				export_entry += " ";
+				export_entry += d_settings.drive_partition_nfs_host_ip[i][ii];
+				export_entry += "(rw,sync,no_subtree_check)";
+				v_export_entries.push_back(export_entry);
+			}
+		}
+	}
+
+	// write exports
+	if (v_export_entries.size() != 0)
+	{
+		ofstream str_exports(exports.c_str());
+		if (!str_exports) 
+		{ // Error while open
+			cerr << "[drive setup] "<<__FUNCTION__ <<": write error "<<exports<<", please check permissions..." << strerror(errno)<<endl;
+			return false;
+		}
+		else 
+		{
+			str_exports << head <<endl;
+
+			for (unsigned int i = 0; i < v_export_entries.size(); i++) 
+			{
+				str_exports << v_export_entries[i] <<endl;
+			}
+		}
+		str_exports.close();
+		cout<<"[drive setup] "<<__FUNCTION__ <<": writing "<<exports<< "...ok"<<endl;
+	}
+
+	else
+	{
+		if (unlink(exports.c_str()) != 0)
+			cerr << "[drive setup] "<<__FUNCTION__ <<": delete "<<exports<<" ..." << strerror(errno)<<endl;
+	}
+
+	return true;
+}
+#endif	
+
 // check fs of a partition, 1st parameter "device_num" is MASTER, SLAVE..., 3rd parameter "filesystem" means a name of filesystem as string eg, ext3...
 bool CDriveSetup::chkFs(const int& device_num /*MASTER||SLAVE*/, const int& part_number,  const std::string& fs_name)
 {
@@ -3411,6 +3525,8 @@ void CDriveSetup::loadDriveSettings()
 	char fstype_opt[24];
 	char write_cache_opt[17];
 	char partition_activ_opt[23];
+	char partition_nfs_opt[23];
+	char partition_nfs_host_ip_opt[31];
 	for(unsigned int i = 0; i < MAXCOUNT_DRIVE; i++) 
 	{
 		// d_settings.drive_spindown
@@ -3438,6 +3554,14 @@ void CDriveSetup::loadDriveSettings()
 			// d_settings.drive_partition_activ
 			sprintf(partition_activ_opt, "drive_%d_partition_%d_activ", i, ii);
 			d_settings.drive_partition_activ[i][ii] = configfile.getBool(partition_activ_opt, true);
+
+			// d_settings.drive_partition_nfs
+			sprintf(partition_nfs_opt, "drive_%d_partition_%d_nfs", i, ii);
+			d_settings.drive_partition_nfs[i][ii] = configfile.getBool(partition_nfs_opt, false);
+
+			// d_settings.drive_partition_nfs_host_ip
+			sprintf(partition_nfs_host_ip_opt, "drive_%d_partition_%d_nfs_host_ip", i, ii);
+			d_settings.drive_partition_nfs_host_ip[i][ii] = (string)configfile.getString(partition_nfs_host_ip_opt, "");
 		}
 	}
 
@@ -3465,6 +3589,8 @@ bool CDriveSetup::writeDriveSettings()
 	char fstype_opt[24];
 	char write_cache_opt[17];
 	char partition_activ_opt[23];
+	char partition_nfs_opt[23];
+	char partition_nfs_host_ip[31];
 	for(int i = 0; i < MAXCOUNT_DRIVE; i++) 
 	{
 		// d_settings.drive_spindown
@@ -3492,6 +3618,14 @@ bool CDriveSetup::writeDriveSettings()
 			// d_settings.drive_partition_activ
 			sprintf(partition_activ_opt, "drive_%d_partition_%d_activ", i, ii);
 			configfile.setBool(partition_activ_opt, d_settings.drive_partition_activ[i/*MASTER||SLAVE*/][ii]);
+
+			// d_settings.drive_partition_nfs
+			sprintf(partition_nfs_opt, "drive_%d_partition_%d_nfs", i, ii);
+			configfile.setBool(partition_nfs_opt, d_settings.drive_partition_nfs[i/*MASTER||SLAVE*/][ii]);
+
+			// d_settings.drive_partition_nfs_host_ip
+			sprintf(partition_nfs_host_ip, "drive_%d_partition_%d_nfs_host_ip", i, ii);
+			configfile.setString( partition_nfs_host_ip, d_settings.drive_partition_nfs_host_ip[i/*MASTER||SLAVE*/][ii]);
 		}
 	}
 	
@@ -3531,7 +3665,7 @@ string CDriveSetup::getErrMsg(neutrino_locale_t locale)
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.4 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.5 $");
 }
 
 // returns text for initfile headers
@@ -3758,17 +3892,18 @@ bool CDriveSetup::haveActiveParts(const int& device_num)
 }
 
 //returns true if any partition is mounted at device
-bool CDriveSetup::haveMounts(const int& device_num)
+bool CDriveSetup::haveMounts(const int& device_num, bool without_swaps)
 {
 	int i = device_num;
 
 	for (unsigned int ii = 0; ii < MAXCOUNT_PARTS; ii++) 
 	{
 		string partname = getPartName(i,ii);
-		if (isMountedPartition(partname) || isSwapPartition(partname)) 
-		{
-			return true;
-		}					
+		if (!without_swaps)
+			if (isMountedPartition(partname) || isSwapPartition(partname)) 
+				return true;
+			else 
+				return isMountedPartition(partname);								
 	}			
 	
 	return false;
@@ -3801,5 +3936,23 @@ bool CDriveSetupFsNotifier::changeNotify(const neutrino_locale_t, void * Data)
 
 	return true;
 }
+
+#ifdef ENABLE_NFSSERVER
+// class CDriveSetupNFSHostNotifier
+//enable disable entry for input nfs host ip 
+CDriveSetupNFSHostNotifier::CDriveSetupNFSHostNotifier( CMenuForwarder* f)
+{
+	toDisable = f;
+}
+bool CDriveSetupNFSHostNotifier::changeNotify(const neutrino_locale_t, void * Data)
+{
+	if (*((int *)Data) == 0)
+		toDisable->setActive(false);
+	else
+		toDisable->setActive(true);
+
+	return true;
+}
+#endif
 
 

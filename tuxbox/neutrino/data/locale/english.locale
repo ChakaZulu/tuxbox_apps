@@ -336,6 +336,8 @@ drive_setup.partition_mount_no_mountpoint Missing or not allowed mountpoint!
 drive_setup.partition_mount_now Mount
 drive_setup.partition_mount_now_device Mount all
 drive_setup.partition_mountpoint Mountpoint
+drive_setup.partition_nfs Use for NFS-server
+drive_setup.partition_nfs_host_ip NFS-client host-ip
 drive_setup.partition_not_active partition not mounted
 drive_setup.partition_not_created not created
 drive_setup.partition_number Number of partition:

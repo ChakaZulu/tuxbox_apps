@@ -336,6 +336,8 @@ drive_setup.partition_mount_no_mountpoint Kein korrektes Einhängeverzeichnis an
 drive_setup.partition_mount_now Einhängen
 drive_setup.partition_mount_now_device Alle einhängen
 drive_setup.partition_mountpoint Einhängen nach
+drive_setup.partition_nfs Für NFS-Server freigeben
+drive_setup.partition_nfs_host_ip NFS-Client Host-IP
 drive_setup.partition_not_active Partition nicht eingehängt
 drive_setup.partition_not_created nicht angelegt
 drive_setup.partition_number Partitions-Nr.:

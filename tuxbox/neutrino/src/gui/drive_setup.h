@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.h,v 1.2 2009/12/18 08:14:08 dbt Exp $
+	$Id: drive_setup.h,v 1.3 2009/12/21 00:08:38 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -53,6 +53,7 @@
 struct SDriveSettings
 {
 	std::string 	drive_partition_mountpoint[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
+	std::string 	drive_partition_nfs_host_ip[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
 
 	int 	drive_use_fstab;
 	int	drive_mount_mtdblock_partitions;
@@ -60,6 +61,7 @@ struct SDriveSettings
 	int 	drive_activate_ide;
 	int 	drive_write_cache[MAXCOUNT_DRIVE];
 	int 	drive_partition_activ[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
+	int 	drive_partition_nfs[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
 	char	drive_partition_fstype[MAXCOUNT_DRIVE][MAXCOUNT_PARTS][8/*chars*/];
 	char 	drive_spindown[MAXCOUNT_DRIVE][3/*chars*/];
 	char 	drive_partition_size[MAXCOUNT_DRIVE][MAXCOUNT_PARTS][8/*chars*/];
@@ -266,12 +268,15 @@ class CDriveSetup : public CMenuTarget
 		bool unloadModul(const std::string& modulname);
 		bool writeInitFile(const bool clear = false);
 		bool mkFstab(bool write_defaults_only = false);
+#ifdef ENABLE_NFSSERVER
+		bool mkExports();
+#endif
 		bool haveSwap();
 		bool isMmcActive();
 		bool isIdeInterfaceActive();
 		bool linkInitFiles();
 		bool haveActiveParts(const int& device_num);
-		bool haveMounts(const int& device_num);
+		bool haveMounts(const int& device_num, bool without_swaps = false);
 		
 		bool mkPartition(const int& device_num /*MASTER || SLAVE || MMCARD*/, const int& action, const int& part_number, const unsigned long long& start_cyl = 0, const unsigned long long& size = 0);
 		bool mkFs(const int& device_num /*MASTER || SLAVE || MMCARD*/, const int& part_number,  const std::string& fs_name);
@@ -329,6 +334,9 @@ class CDriveSetup : public CMenuTarget
 		std::string getInitIdeFilePath();
 		std::string getInitMountFilePath();
 		std::string getFstabFilePath();
+#ifdef ENABLE_NFSSERVER
+		std::string getExportsFilePath();
+#endif
 		std::string getDefaultSysMounts();
 		std::string getDefaultFstabEntries();
 		std::string getTimeStamp();
@@ -386,5 +394,16 @@ class CDriveSetupFsNotifier : public CChangeObserver
 		CDriveSetupFsNotifier( CMenuForwarder* );
 		bool changeNotify(const neutrino_locale_t, void * Data);
 };
+
+#ifdef ENABLE_NFSSERVER
+class CDriveSetupNFSHostNotifier : public CChangeObserver
+{
+	private:
+		CMenuForwarder* toDisable;
+	public:
+		CDriveSetupNFSHostNotifier( CMenuForwarder* );
+		bool changeNotify(const neutrino_locale_t, void * Data);
+};
+#endif /*ENABLE_NFSSERVER*/
 
 #endif

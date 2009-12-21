@@ -110,6 +110,11 @@ AC_ARG_ENABLE(drive-gui,
 	,[enable_drive_gui=no])
 AM_CONDITIONAL(ENABLE_DRIVE_GUI,test "$enable_drive_gui" = "yes")
 
+AC_ARG_ENABLE(nfsserver,
+	AS_HELP_STRING(--enable-nfsserver,include nfsserver support),
+	,[enable_nfsserver=yes])
+AM_CONDITIONAL(ENABLE_NFSSERVER,test "$enable_nfsserver" = "yes")
+
 ########################
 
 AC_ARG_ENABLE(use-libxml2,
@@ -168,6 +173,10 @@ fi
 
 if test "$enable_drive_gui" = "yes"; then
 AC_DEFINE(ENABLE_DRIVE_GUI,1,[enable neutrino drive-setup])
+fi
+
+if test "$enable_nfsserver" = "yes"; then
+AC_DEFINE(ENABLE_NFSSERVER,1,[enable nfsserver support])
 fi
 
 if test "$enable_internal_tuxtxt" = "yes"; then
