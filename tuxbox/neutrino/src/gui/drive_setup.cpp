@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.5 2009/12/21 00:08:38 dbt Exp $
+	$Id: drive_setup.cpp,v 1.6 2009/12/22 22:35:26 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -147,6 +147,11 @@ TODO:
 #define HDA 		"/dev/ide/host0/bus0/target0/lun0/disc"
 #define HDB 		"/dev/ide/host0/bus0/target1/lun0/disc"
 #define MMCA 		"/dev/mmc/disc0/disc"
+
+// partitions templates
+#define HDA_PARTS 	"/dev/ide/host0/bus0/target0/lun0/part"
+#define HDB_PARTS 	"/dev/ide/host0/bus0/target1/lun0/part"
+#define MMC_PARTS 	"/dev/mmc/disc0/part"
 
 #define NO_REFRESH	0 /*false*/
 
@@ -525,6 +530,7 @@ void CDriveSetup::showHddSetupMain()
 		// show mmc options
 		m->addItem (m7);
 	}
+
 	m->addItem(GenericMenuSeparatorLine);
 
 	// extended settings
@@ -543,7 +549,7 @@ void CDriveSetup::showHddSetupMain()
 
 
 	// show select separator, only visible if any device activ
-	if (hdd_count>0) 
+	if (hdd_count>0 || foundMmc()) 
 	{	
 		m->addItem(m4);
 	}
@@ -1202,9 +1208,9 @@ typedef struct part_patterns_t
 
 const part_patterns_struct_t part_pattern[MAXCOUNT_DRIVE] =
 {
-	{"/dev/ide/host0/bus0/target0/lun0/part"},	//MASTER
-	{"/dev/ide/host0/bus0/target1/lun0/part"},	//SLAVE
- 	{"/dev/mmc/disc0/part"},			//MMCARD	
+	{HDA_PARTS},//MASTER
+	{HDB_PARTS},//SLAVE
+ 	{MMC_PARTS},//MMCARD	
 };
 
 // writes partition names to vector collection v_partname
@@ -1798,18 +1804,24 @@ bool CDriveSetup::saveHddSetup()
 
 #ifdef ENABLE_NFSSERVER
 	// exports
-	if (CNeutrinoApp::getInstance()->execute_sys_command(NFS_STOP_SCRIPT) == 0) //first stop server
+	cout << "[drive setup] "<<__FUNCTION__ <<":  preparing exports..."<<endl;
+	if (!CNeutrinoApp::getInstance()->execute_start_file(NFS_STOP_SCRIPT, true ,true)) //first stop server
+	{
+		cerr << "[drive setup] "<<__FUNCTION__ <<":  error while executing "<<NFS_STOP_SCRIPT<<"..."<<endl;
+	}
+	else
 	{
 		if (mkExports())
 		{
-			if (CNeutrinoApp::getInstance()->execute_sys_command(NFS_START_SCRIPT) != 0)//start server
-				cerr << "[drive setup] "<<__FUNCTION__ <<": error while executing "<<NFS_START_SCRIPT<<"..."<< strerror(errno)<<endl;
-		}		
+			if (!CNeutrinoApp::getInstance()->execute_start_file(NFS_START_SCRIPT, true ,true))//start server
+				cerr << "[drive setup] "<<__FUNCTION__ <<":  error while executing "<<NFS_START_SCRIPT<<"..."<<endl;
+		}
+		else
+			res = false;		
 	}
-	else
-		cerr << "[drive setup] "<<__FUNCTION__ <<":  error while executing "<<NFS_STOP_SCRIPT<<"..."<< strerror(errno)<<endl;			
+					
 #endif
-	
+
 	// write and linking init files
 	if ((res) && (writeInitFile(ide_disabled)) && (linkInitFiles())) 
 	{
@@ -1860,13 +1872,13 @@ bool CDriveSetup::writeInitFile(const bool clear)
 		initfile[i] << getInitFileHeader(init_file[i]) <<endl;
 	}	
 
+	bool mmc_enabled = (string)d_settings.drive_mmc_module_name != g_Locale->getText(LOCALE_OPTIONS_OFF) ? true : false;
 
-	if (clear) 
+	if (clear && !mmc_enabled) 
 	{ // interface is disabled 
-		initfile[INIT_FILE_MODULES] << "echo "<<char(34)<<"ide-interface disabled"<<char(34)<<endl; // write disable tag
-		if (d_settings.drive_use_fstab)
-			initfile[INIT_FILE_MOUNTS] <<("mount -a")<<endl;
-		else
+		initfile[INIT_FILE_MODULES] << "echo "<<char(34)<<"ide-interface/mmc disabled"<<char(34)<<endl; // write disable tag
+
+ 		if (!d_settings.drive_use_fstab)
 			initfile[INIT_FILE_MOUNTS] <<(sys_mounts)<<endl;
 	}
 	else 
@@ -1928,6 +1940,15 @@ bool CDriveSetup::foundHdd(const string& disc)
 {
 	string hdd = disc/* + "/model"*/;
 	if(access(hdd.c_str(), R_OK) == 0)
+		return true;
+	else
+		return false;
+}
+
+// returns true if found mmc
+bool CDriveSetup::foundMmc()
+{
+	if(access(MMCA, R_OK) == 0)
 		return true;
 	else
 		return false;
@@ -2382,7 +2403,13 @@ void CDriveSetup::loadMmcModulList()
 	}
 	closedir(mdir);
 
-	v_mmc_modules.push_back(g_Locale->getText(LOCALE_OPTIONS_OFF));
+	string def_opt = g_Locale->getText(LOCALE_OPTIONS_OFF);
+	v_mmc_modules.push_back(def_opt);
+	
+	//set mmc modul name setting to off, if no modul available
+	if (v_mmc_modules.size() == 1) 
+		strcpy(d_settings.drive_mmc_module_name, def_opt.c_str()); 
+
 
 ////	for debugging, show available filesystem moduls
 // 	unsigned int i = 0;
@@ -2969,7 +2996,7 @@ bool CDriveSetup::mkPartition(const int& device_num /*MASTER||SLAVE*/, const int
 			unsigned long long end_cyl = (cyl == cyl_max) ? cyl_max : start_cyl + cyl;
 			prepare <<"n"<<endl;
 			prepare <<"p"<<endl;
-			prepare <<part_number+1<<endl;
+			prepare <<part_n<<endl;
 			prepare <<start_cyl<<endl;
 			prepare <<end_cyl<<endl;
 			break;
@@ -3184,7 +3211,7 @@ bool CDriveSetup::mkExports()
 	string exports = getExportsFilePath();
 	string timestamp = getTimeStamp();
 	vector<string> v_export_entries;
-	string head = "# " + exports + " generated from neutrino ide/mmc/hdd drive-setup\n#" +  getDriveSetupVersion() + " " +  timestamp;
+	string head = "# " + exports + " generated from neutrino ide/mmc/hdd drive-setup\n# " +  getDriveSetupVersion() + " " +  timestamp + "\n";
 
 	// collecting export entries
 	for (unsigned int i = 0; i < MAXCOUNT_DRIVE; i++) 
@@ -3665,7 +3692,7 @@ string CDriveSetup::getErrMsg(neutrino_locale_t locale)
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.5 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.6 $");
 }
 
 // returns text for initfile headers
@@ -3794,7 +3821,6 @@ string CDriveSetup::getInitFileModulEntries(bool with_unload_entries)
 		}
 	
 		//add unload mmc command
-
 		unload_entries += UNLOAD + getUsedMmcModulName();
 		unload_entries += "\n\t\t";
 	
@@ -3819,10 +3845,10 @@ string CDriveSetup::getInitFileModulEntries(bool with_unload_entries)
 	string 	e_txt =  "case $1 in\n";
 		e_txt += "\tstart)\n\t\t";
 		e_txt += load_entries;
-		e_txt += "\t\t;;\n";
+		e_txt += ";;\n";
 		e_txt += "\tstop)\n";
 		e_txt += unload_entries; //optional
-		e_txt += "\t\t;;\n";
+		e_txt += ";;\n";
 		e_txt += "esac\n";
 		e_txt += "exit 0";
 

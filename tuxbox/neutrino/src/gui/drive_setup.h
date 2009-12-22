@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.h,v 1.3 2009/12/21 00:08:38 dbt Exp $
+	$Id: drive_setup.h,v 1.4 2009/12/22 22:35:26 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -190,7 +190,7 @@ class CDriveSetup : public CMenuTarget
 
 		CFrameBuffer 	*frameBuffer;
 		CConfigFile	configfile;
-		SDriveSettings	d_settings; 
+		SDriveSettings	d_settings;
 
 		int x, y, width, height, hheight, mheight;
 		int pb_x, pb_y, pb_w, pb_h;
@@ -245,6 +245,7 @@ class CDriveSetup : public CMenuTarget
 		const char *getFsTypeStr(long &fs_type_const);
 
 		bool foundHdd(const std::string& mountpoint);
+		bool foundMmc();
 		bool loadFdiskPartTable(const int& device_num /*MASTER || SLAVE || MMCARD*/, bool use_extra = false /*using extra funtionality table*/);
 		bool isActivePartition(const std::string& partname);
 		bool isModulLoaded(const std::string& modulname);
