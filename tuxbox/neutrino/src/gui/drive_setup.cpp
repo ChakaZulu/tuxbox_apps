@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.7 2009/12/22 22:54:54 dbt Exp $
+	$Id: drive_setup.cpp,v 1.8 2009/12/23 19:59:39 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1420,6 +1420,7 @@ bool CDriveSetup::initIdeDrivers(const bool irq6)
 		printf("[drive setup] ide modules unloaded...\n");
 
 	CProgressBar 	pb;
+	bool ret = true;
 
 	fb_pixel_t * pixbuf = new fb_pixel_t[pb_w * pb_h];
 	if (pixbuf != NULL)
@@ -1451,7 +1452,7 @@ bool CDriveSetup::initIdeDrivers(const bool irq6)
 		if (!isModulLoaded(modulname)) 
 		{ 
 			cerr<<"[drive setup] "<<__FUNCTION__ <<": modul "<< modulname<< " not loaded, loading...failed"<<endl;
-			return false;
+			ret = false;
 		}
 			// show load progress on screen
 			frameBuffer->paintBoxRel(pb_x, pb_y, pb_w, pb_h, COL_MENUCONTENT_PLUS_0, RADIUS_MID);
@@ -1467,7 +1468,7 @@ bool CDriveSetup::initIdeDrivers(const bool irq6)
 		delete[] pixbuf;
 	}
 
-	return true;
+	return ret;
 }
 
 // load/apply/testing modules and returns true on sucess
@@ -1524,7 +1525,7 @@ bool CDriveSetup::initFsDrivers(bool do_unload_first)
 		delete[] pixbuf;
 	}
 
-	return true;
+	return ret;
 }
 
 // unload mmc modul and returns true on success
@@ -1612,6 +1613,8 @@ bool CDriveSetup::unloadIdeDrivers()
 {
 	CProgressBar pb;
 
+	bool ret = true;
+
 	fb_pixel_t * pixbuf = new fb_pixel_t[pb_w * pb_h];
 	if (pixbuf != NULL)
 		frameBuffer->SaveScreen(pb_x, pb_y, pb_w, pb_h, pixbuf);
@@ -1621,7 +1624,10 @@ bool CDriveSetup::unloadIdeDrivers()
 	while (i > -1)
 	{
 		if (!unloadModul(ide_modules[i].modul))
-			return false;
+		{
+			ret = false;
+			i = -1; // exit while
+		}
 		// painting load progress on screen
 		frameBuffer->paintBoxRel(pb_x, pb_y, pb_w, pb_h, COL_MENUCONTENT_PLUS_0, RADIUS_MID);
 		pb.paintProgressBar(pb_x+10, pb_y+pb_h-20-SHADOW_OFFSET, pb_w-20, 16, i, IDE_MODULES_COUNT-1, 0, 0, COL_SILVER, COL_INFOBAR_SHADOW, ide_modules[i].modul.c_str(), COL_MENUCONTENT);
@@ -1634,7 +1640,7 @@ bool CDriveSetup::unloadIdeDrivers()
 		delete[] pixbuf;
 	}
 
-	return true;
+	return ret;
 }
 
 #define DEP_MODULES_COUNT 2
@@ -2972,7 +2978,6 @@ unsigned long long CDriveSetup::getFileEntryLong(const char* filename, const str
 bool CDriveSetup::mkPartition(const int& device_num /*MASTER||SLAVE*/, const int& action, const int& part_number, const unsigned long long& start_cyl, const unsigned long long& size)
 {
 	string device = drives[device_num].device; 	/*HDA||HDB||MMC*/
-	bool ret = true;
 
 	// get partition name (dev/hda1...4)
 	string partname = getPartName(device_num, part_number);
@@ -3034,7 +3039,7 @@ bool CDriveSetup::mkPartition(const int& device_num /*MASTER||SLAVE*/, const int
 		if (CNeutrinoApp::getInstance()->execute_sys_command(PREPARE_SCRIPT_FILE)!=0) 
 		{
 			cerr<<"[drive setup] "<<__FUNCTION__ <<": error while executing "<<PREPARE_SCRIPT_FILE<<endl;
-			ret = false;
+			return false;
 		}
 
 		if ((isActivePartition(partname)) && (action==DELETE) || (action==DELETE_CLEAN)) 
@@ -3692,7 +3697,7 @@ string CDriveSetup::getErrMsg(neutrino_locale_t locale)
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.7 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.8 $");
 }
 
 // returns text for initfile headers
