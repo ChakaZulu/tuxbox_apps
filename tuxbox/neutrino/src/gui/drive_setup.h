@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.h,v 1.4 2009/12/22 22:35:26 dbt Exp $
+	$Id: drive_setup.h,v 1.5 2009/12/24 00:05:22 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -206,8 +206,6 @@ class CDriveSetup : public CMenuTarget
 		std::string check_partition[MAXCOUNT_PARTS]; //action key strings for check_partition_$
 		std::string sel_device_num_actionkey[MAXCOUNT_DRIVE]; //"sel_device_0 ... sel_device_n""
 		std::string s_init_mmc_cmd; // system load command for mmc modul
-		std::string s_err;
-		std::string getErrMsg(neutrino_locale_t locale);
 
 		int current_device; 	//MASTER || SLAVE || MMCARD, current edit device
 		int hdd_count; 		// count of hdd drives

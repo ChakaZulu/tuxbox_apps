@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.8 2009/12/23 19:59:39 dbt Exp $
+	$Id: drive_setup.cpp,v 1.9 2009/12/24 00:05:22 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -259,7 +259,8 @@ int CDriveSetup::exec(CMenuTarget* parent, const string &actionKey)
 		else 
 		{
 			ShowLocalizedHint(LOCALE_MESSAGEBOX_ERROR, LOCALE_DRIVE_SETUP_PARTITION_MOUNT_ERROR, width, msg_timeout, NEUTRINO_ICON_ERROR);
-			return res;
+			showHddSetupSub();
+			return menu_return::RETURN_EXIT;
 		}
  	}
 	else if (actionKey == "unmount_device_partitions")
@@ -338,7 +339,7 @@ int CDriveSetup::exec(CMenuTarget* parent, const string &actionKey)
 				}
 				else 
 				{
-					ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, getErrMsg(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_ERROR).c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
+					ShowLocalizedHint(LOCALE_MESSAGEBOX_ERROR, LOCALE_DRIVE_SETUP_PARTITION_MOUNT_ERROR, width, msg_timeout, NEUTRINO_ICON_ERROR);
 					return menu_return::RETURN_EXIT_ALL; 
 				}
 			}
@@ -351,7 +352,7 @@ int CDriveSetup::exec(CMenuTarget* parent, const string &actionKey)
 				}
 				else 
 				{
-					ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, getErrMsg(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_ERROR).c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
+					ShowLocalizedHint(LOCALE_MESSAGEBOX_ERROR, LOCALE_DRIVE_SETUP_PARTITION_MOUNT_ERROR, width, msg_timeout, NEUTRINO_ICON_ERROR);
 					return menu_return::RETURN_EXIT_ALL; 
 				}
 			}
@@ -1281,53 +1282,38 @@ bool CDriveSetup::unmountDevice(const int& device_num)
 // unmount single mounted partition or swap
 bool CDriveSetup::unmountPartition(const int& device_num /*MASTER||SLAVE||MMCARD*/, const int& part_number)
 {
-	int ret_val = 0;
-
 	string partname = getPartName(device_num, part_number);
 
-	if((access(partname.c_str(), R_OK) !=0) || (!isActivePartition(partname))) 
-	{ // exit if no available
+	if((access(partname.c_str(), R_OK) !=0) || (!isActivePartition(partname))) // exit if no available
+	{ 
 // 		cout<<"[drive setup] unmount "<<partname<< ", nothing to do...ok"<< endl;
  		return true;
 	}
 	else 
 	{
-
 		string swapoff_cmd = SWAPOFF + partname;
 
 		if (isSwapPartition(partname)) 
 		{ // unmount swap
-			ret_val = swapoff(partname.c_str());
-			if (ret_val !=0) 
+			if (swapoff(partname.c_str()) !=0) 
 			{
-				s_err += "unmountPartition (swapoff): ";
-				s_err += strerror(errno);
-				s_err += "\n";
-				s_err += partname;
-				cerr<<"[drive setup] "<<s_err<<endl<<endl;
+				cerr<<"[drive setup] "<<__FUNCTION__ <<": error while swapoff "<<partname<<" "<< strerror(errno)<< endl;
 				return false;
 			}
 			else 
 			{
-// 				cout<<"[drive setup] unmount swap "<<partname<< "...ok"<< endl;
 				return true;
 			}
 		}
 		if (isMountedPartition(partname)) 
-		{ // umount mounts
-			ret_val = umount(getMountInfo(partname, MOUNTPOINT).c_str());
-			if (ret_val !=0) 
+		{ // unmount partition
+			if (umount(getMountInfo(partname, MOUNTPOINT).c_str()) !=0) 
 			{
-				s_err += "unmountPartition: ";
-				s_err += strerror(errno);
-				s_err += "\n";
-				s_err += partname;
-				cerr<<"[drive setup] "<<s_err<<endl<<endl;
+				cerr<<"[drive setup] "<<__FUNCTION__ <<": error while unmount "<<partname<<" "<< strerror(errno)<< endl;
 				return false;
 			}
 			else 
 			{
-// 				cout<<"[drive setup] unmount "<<partname<< "...ok"<< endl;
 				return true;
 			}
 		}
@@ -2978,6 +2964,7 @@ unsigned long long CDriveSetup::getFileEntryLong(const char* filename, const str
 bool CDriveSetup::mkPartition(const int& device_num /*MASTER||SLAVE*/, const int& action, const int& part_number, const unsigned long long& start_cyl, const unsigned long long& size)
 {
 	string device = drives[device_num].device; 	/*HDA||HDB||MMC*/
+	bool ret = true;
 
 	// get partition name (dev/hda1...4)
 	string partname = getPartName(device_num, part_number);
@@ -3035,31 +3022,36 @@ bool CDriveSetup::mkPartition(const int& device_num /*MASTER||SLAVE*/, const int
 		return false;
 	}
 
-	if (unmountPartition(device_num, part_number)) { // unmount first !!
+	if (unmountPartition(device_num, part_number)) // unmount first !!
+	{ 
 		if (CNeutrinoApp::getInstance()->execute_sys_command(PREPARE_SCRIPT_FILE)!=0) 
 		{
 			cerr<<"[drive setup] "<<__FUNCTION__ <<": error while executing "<<PREPARE_SCRIPT_FILE<<endl;
-			return false;
+			ret = false;
 		}
 
-		if ((isActivePartition(partname)) && (action==DELETE) || (action==DELETE_CLEAN)) 
-		{ // partition was deleted but part table is not current, reboot is requiered
-			bool reboot = (ShowLocalizedMessage(LOCALE_DRIVE_SETUP_HDD_EDIT_PARTITION, LOCALE_DRIVE_SETUP_MSG_REBOOT_REQUIERED, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NEUTRINO_ICON_INFO, width, 5) == CMessageBox::mbrYes);
-			if (reboot) 
-			{	
-				writeDriveSettings();
-				CNeutrinoApp::getInstance()->exec(NULL, "reboot");
+		if ((action==DELETE) || (action==DELETE_CLEAN))
+		{
+			if (isActivePartition(partname)) 
+			{ // partition was deleted but part table is not current, reboot is requiered
+				bool reboot = (ShowLocalizedMessage(LOCALE_DRIVE_SETUP_HDD_EDIT_PARTITION, LOCALE_DRIVE_SETUP_MSG_REBOOT_REQUIERED, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NEUTRINO_ICON_INFO, width, 5) == CMessageBox::mbrYes);
+				if (reboot) 
+				{	
+					writeDriveSettings();
+					CNeutrinoApp::getInstance()->exec(NULL, "reboot");
+				}
+				ret = true; //return success
 			}
 		}
 	}
 	else 
 	{
 		cerr<<"[drive setup] "<<__FUNCTION__ <<": error while unmounting " <<partname<<endl;
-		return false;
+		ret = false;
 	}
 
 	unlink(PREPARE_SCRIPT_FILE);
-	return true;
+	return ret;
 }
 
 // gets the path of initfile for loading modules and other hdd stuff
@@ -3401,32 +3393,43 @@ bool CDriveSetup::mountPartition(const int& device_num /*MASTER||SLAVE*/, const 
 	// get partition name (dev/hda1...4)
 	string partname = getPartName(device_num, part_number);
 
-	//TODO: check user input for mountpoint, cancel if not allowed or no mointpoint is definied
+	//genarate usefull details for error messages 
+	string 	details = "\nDevice: ";
+		details += g_Locale->getText(mn_data[device_num].entry_locale);
+		details += "\nPartition: " + iToString(part_number+1);
+
+	// check user input for mountpoint and filesystem
 	if (isActivePartition(partname))
-	{	
+	{
+
+		//invalid or no mountpoint definied
 		if (mountpoint.empty() || mountpoint == "/" || mountpoint == "/root")
 		{
 			string  msg = g_Locale->getText(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_NO_MOUNTPOINT);
-				msg += "\nmountpoint: " + mountpoint;
+				msg += details;
 			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
 			return false;
 		}
+		//no filesystem definied
 		if (fs_name.empty())
 		{
 			string  msg = g_Locale->getText(LOCALE_DRIVE_SETUP_MSG_PARTITION_CREATE_FAILED_NO_FS_DEFINIED);
+				msg += details;
 			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
 			return false;
 		}
 	}
 
+	// exit if no available or not set to activ
 	if((access(partname.c_str(), R_OK) !=0) || (!d_settings.drive_partition_activ[device_num][part_number])) 	
-	{// exit if no available or not set to activ
+	{
 		cout<<"[drive setup] "<<__FUNCTION__ <<":  "<<partname<< " partition not activ, nothing to do...ok"<< endl;
  		return ret;
 	}
 	
+	// mounting
 	if (fs_name != "swap")
-	{ // mounting
+	{ 
 		if (isMountedPartition(partname)) 
 		{
 // 			cout<<"[drive setup] mount "<<partname<< " allready mounted...ok"<< endl;
@@ -3434,21 +3437,14 @@ bool CDriveSetup::mountPartition(const int& device_num /*MASTER||SLAVE*/, const 
 		}
 		else 
 		{ 
-			if (initModul(fs_name, false)) 
-			{ //load first fs modul
-				ret_num = mount(partname.c_str(),  mountpoint.c_str() , fs_name.c_str(), 16 , NULL);
-				if (ret_num!=0) 
+			if (initModul(fs_name, false)) //load first the fs modul
+			{ 
+				if (mount(partname.c_str(),  mountpoint.c_str() , fs_name.c_str(), 16 , NULL)!=0) //mount partition
 				{
-					s_err += "mountPartition: "; 
-					s_err += strerror(errno);
-					s_err += "\n";
-					s_err += partname;
-					s_err += "\nto ";
-					s_err += mountpoint;
-					cerr<<"[drive setup] "<<s_err<<endl;
+					cerr<<"[drive setup] "<<__FUNCTION__ <<":  error while mount: " << partname<<" "<<strerror(errno)<<endl;
 					ret = false;
 				}
-			// TODO Message on error
+			// TODO screen message on error
 			}
 		}
 
@@ -3680,24 +3676,11 @@ string CDriveSetup::getTimeStamp()
 	return (string)ret;
 }
 
-// returns a error message with locale
-string CDriveSetup::getErrMsg(neutrino_locale_t locale)
-{
-	string 	ret =  g_Locale->getText(locale);
-		ret += "\n\n" + s_err;
-		ret += "\n\n";
-		ret += "Please show serial log for more details!";
-		
-	s_err = "";
-
-	return ret;
-}
-
 // returns a revision string
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.8 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.9 $");
 }
 
 // returns text for initfile headers
