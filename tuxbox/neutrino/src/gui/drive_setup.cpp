@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.9 2009/12/24 00:05:22 dbt Exp $
+	$Id: drive_setup.cpp,v 1.10 2009/12/24 01:13:11 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -895,19 +895,6 @@ void CDriveSetup::showHddSetupSub()
 		mountdir[i] 	= new CDirChooser(&d_settings.drive_partition_mountpoint[current_device][i]);
 		mp_chooser[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_MOUNTPOINT, entry_activ[i], d_settings.drive_partition_mountpoint[current_device][i], mountdir[i]);
 
-		//select filesystem
-		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i]);
-	 	fs_chooser[i] = new CMenuOptionStringChooser(LOCALE_DRIVE_SETUP_PARTITION_FS, d_settings.drive_partition_fstype[current_device][i], entry_activ[i], fsNotifier[i]);
-		for (uint n=0; n < v_fs_modules.size(); n++) 
-		{
-			if ((v_fs_modules[n] != "jbd") && (v_fs_modules[n] != "fat")) 
-				fs_chooser[i]->addOption(v_fs_modules[n].c_str());
-		}
-
-		//prepare size input, show size // TODO show real current partsize
-		input_part_size[i] = new CStringInput(LOCALE_DRIVE_SETUP_PARTITION_SIZE, d_settings.drive_partition_size[current_device][i], 8, LOCALE_DRIVE_SETUP_PARTITION_SIZE_HELP, LOCALE_DRIVE_SETUP_PARTITION_SIZE_STD, "0123456789 ");
-		input_size[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_SIZE, entry_activ[i], d_settings.drive_partition_size[current_device][i], input_part_size[i] );
-
 #ifdef ENABLE_NFSSERVER
 		//prepare option host input
 		nfs_host_ip[i] = new CIPInput(LOCALE_DRIVE_SETUP_PARTITION_NFS_HOST_IP , d_settings.drive_partition_nfs_host_ip[current_device][i]   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
@@ -919,6 +906,23 @@ void CDriveSetup::showHddSetupSub()
 		nfsHostNotifier[i] = new CDriveSetupNFSHostNotifier (nfs_host_ip_fw[i]);
 		nfs_chooser[i] = new CMenuOptionChooser(LOCALE_DRIVE_SETUP_PARTITION_NFS, &d_settings.drive_partition_nfs[current_device][i], OPTIONS_YES_NO_OPTIONS, OPTIONS_YES_NO_OPTION_COUNT, entry_activ[i], nfsHostNotifier[i] );		
 #endif
+
+		//prepare size input, show size // TODO show real current partsize
+		input_part_size[i] = new CStringInput(LOCALE_DRIVE_SETUP_PARTITION_SIZE, d_settings.drive_partition_size[current_device][i], 8, LOCALE_DRIVE_SETUP_PARTITION_SIZE_HELP, LOCALE_DRIVE_SETUP_PARTITION_SIZE_STD, "0123456789 ");
+		input_size[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_SIZE, entry_activ[i], d_settings.drive_partition_size[current_device][i], input_part_size[i] );
+
+		//select filesystem
+#ifndef ENABLE_NFSSERVER
+		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i], input_size[i]);
+#else
+		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i], input_size[i], nfs_chooser[i]);
+#endif
+	 	fs_chooser[i] = new CMenuOptionStringChooser(LOCALE_DRIVE_SETUP_PARTITION_FS, d_settings.drive_partition_fstype[current_device][i], entry_activ[i], fsNotifier[i]);
+		for (uint n=0; n < v_fs_modules.size(); n++) 
+		{
+			if ((v_fs_modules[n] != "jbd") && (v_fs_modules[n] != "fat")) 
+				fs_chooser[i]->addOption(v_fs_modules[n].c_str());
+		}
 
 		//prepare make partition
 		ak_make_partition[i] = MAKE_PARTITION + iToString(i);
@@ -1017,9 +1021,6 @@ void CDriveSetup::showHddSetupSub()
 	sub_add_swap->addItem(GenericMenuSeparatorLine);	//separator
 	//------------------------
 	sub_add_swap->addItem(make_swap);			//make swap partition
-
-
-
 
 
 
@@ -2338,6 +2339,9 @@ void CDriveSetup::loadFsModulList()
 		} while (entry);
 	}
 	closedir(mdir);
+
+	// last fs must be swap
+	v_fs_modules.push_back("swap");
 
 // 	// for log, show available filesystem moduls
 // 	unsigned int i = 0;
@@ -3680,7 +3684,7 @@ string CDriveSetup::getTimeStamp()
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.9 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.10 $");
 }
 
 // returns text for initfile headers
@@ -3937,17 +3941,42 @@ string CDriveSetup::iToString(int int_val)
 
 // class CDriveSetupFsNotifier
 //enable disable entry for selecting mountpoint
-CDriveSetupFsNotifier::CDriveSetupFsNotifier( CMenuForwarder* f)
+#ifdef ENABLE_NFSSERVER
+CDriveSetupFsNotifier::CDriveSetupFsNotifier( CMenuForwarder* f1, CMenuForwarder* f2, CMenuOptionChooser* o3)
 {
-	toDisable = f;
+	toDisable[0] = f1;
+	toDisable[1] = f2;
+	toDisableOj = o3;
 }
+#else
+CDriveSetupFsNotifier::CDriveSetupFsNotifier( CMenuForwarder* f1, CMenuForwarder* f2)
+{
+	toDisable[0] = f1;
+	toDisable[1] = f2;
+}
+#endif
 bool CDriveSetupFsNotifier::changeNotify(const neutrino_locale_t, void * Data)
 {
 	if (*((int *)Data) == 0x73776170 /*swap*/)
-		toDisable->setActive(false);
+	{
+		for (uint i = 0; i < 2; i++) 
+		{
+			toDisable[i]->setActive(false);
+		}
+#ifdef ENABLE_NFSSERVER
+		toDisableOj->setActive(false);
+#endif
+	}
 	else
-		toDisable->setActive(true);
-
+	{
+		for (uint i = 0; i < 2; i++) 
+		{
+			toDisable[i]->setActive(true);
+		}
+#ifdef ENABLE_NFSSERVER
+		toDisableOj->setActive(true);
+#endif
+	}
 	return true;
 }
 
