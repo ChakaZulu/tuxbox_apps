@@ -1192,7 +1192,7 @@
 			<eLabel name="lstandby" text="Standby:" position="20:100" size="110:30" />
 			<eSlider name="standby" position="140:100" size="240:30" helptext="set LCD brightness for Standby Mode ( left / right )" />
 			<eCheckbox name="inverted" text="Inverted:" position="20:140" size="150:30" helptext="enable/disable inverted LCD (ok)" />
-			<eButton name="ok" text="save" position="20:210" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
+			<eButton name="ok" text="save" position="20:190" size="220:40" loadDeco="" helptext="save changes and return" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</eZapLCDSetup>
 	</object>
