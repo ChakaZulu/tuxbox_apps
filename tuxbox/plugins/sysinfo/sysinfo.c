@@ -1,5 +1,5 @@
 /*
- * $Id: sysinfo.c,v 1.1 2009/12/20 16:22:58 rhabarber1848 Exp $
+ * $Id: sysinfo.c,v 1.2 2009/12/26 19:53:30 rhabarber1848 Exp $
  *
  * sysinfo - d-box2 linux project
  *
@@ -1018,10 +1018,11 @@ void hauptseite (void)
 			sprintf(tuner,"Sat");
 		}
 	}
+#ifdef HAVE_DBOX_HARDWARE
 	if (y< 10000) sprintf(temp_string,"%s  %s  2x%s %s",tuxbox_get_vendor_str (),tuxbox_get_model_str (), fstring, tuner);
 	else sprintf(temp_string,"%s  %s  1x%s %s",tuxbox_get_vendor_str (),tuxbox_get_model_str (), fstring, tuner);
-	
-	
+#endif
+
 	RenderString("Modell:", (stx+40), (linie_oben+40), maxwidth, LEFT, size, CMHT);
 	RenderString(temp_string, (abs_links+hoffs), (linie_oben+40), maxwidth, LEFT, size, CMCT);
 
