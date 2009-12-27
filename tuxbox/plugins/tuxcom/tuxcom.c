@@ -666,11 +666,16 @@ void plugin_exec(PluginParam *par)
 		return;
 	}
 
-	if((error = FTC_Manager_LookupFace(manager, FONT, &face)))
+#ifdef FT_NEW_CACHE_API
+/* New freetype can be built to include old FTC_Manager_Lookup_Face compat function, but
+   we don't want that. Let the preprocessor handle it. */
+#define FTC_Manager_Lookup_Face FTC_Manager_LookupFace
+#endif
+	if ((error = FTC_Manager_Lookup_Face(manager, FONT, &face)))
 	{
-		if((error = FTC_Manager_LookupFace(manager, FONT2, &face)))
+		if ((error = FTC_Manager_Lookup_Face(manager, FONT2, &face)))
 		{
-			printf("TuxCom <FTC_Manager_LookupFace failed with Errorcode 0x%.2X>\n", error);
+			printf("TuxCom <FTC_Manager_Lookup_Face failed with Errorcode 0x%.2X>\n", error);
 			FTC_Manager_Done(manager);
 			FT_Done_FreeType(library);
 			munmap(lfb, fix_screeninfo.smem_len);
