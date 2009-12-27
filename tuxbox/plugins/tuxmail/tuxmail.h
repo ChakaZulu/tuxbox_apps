@@ -303,6 +303,10 @@ void SaveAndReloadDB(int iSave);
 enum {LEFT, CENTER, RIGHT};
 enum {SMALL, NORMAL, BIG};
 
+#if (FREETYPE_MAJOR > 2 || (FREETYPE_MAJOR == 2 && (FREETYPE_MINOR > 1 || (FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 8))))
+#define FT_NEW_CACHE_API
+#endif
+
 FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache		cache;

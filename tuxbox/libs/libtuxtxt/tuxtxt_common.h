@@ -5363,7 +5363,7 @@ int tuxtxt_InitRendering(tstRenderInfo* renderinfo,int setTVFormat)
 	if ((error = FTC_Manager_LookupFace(renderinfo->manager, renderinfo->typettf.face_id, &renderinfo->face)))
 	{
 		renderinfo->typettf.face_id = (renderinfo->usettf ? (FTC_FaceID) TUXTXTTTF : TUXTXTOTB);
-		if ((error = FTC_Manager_Lookup_Face(renderinfo->manager, renderinfo->typettf.face_id, &renderinfo->face)))
+		if ((error = FTC_Manager_LookupFace(renderinfo->manager, renderinfo->typettf.face_id, &renderinfo->face)))
 		{
 #else
 	renderinfo->typettf.image_type = ftc_image_mono;

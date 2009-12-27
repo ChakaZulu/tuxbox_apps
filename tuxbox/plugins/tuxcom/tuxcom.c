@@ -435,9 +435,15 @@ int GetStringLen(const char *string, int size)
 
 		switch (size)
 		{
+#ifdef FT_NEW_CACHE_API
+			case VERY_SMALL: desc.width = desc.height = FONTHEIGHT_VERY_SMALL; break;
+			case SMALL     : desc.width = desc.height = FONTHEIGHT_SMALL     ; break;
+			case BIG       : desc.width = desc.height = FONTHEIGHT_BIG       ; break;
+#else
 			case VERY_SMALL: desc.font.pix_width = desc.font.pix_height = FONTHEIGHT_VERY_SMALL; break;
 			case SMALL     : desc.font.pix_width = desc.font.pix_height = FONTHEIGHT_SMALL     ; break;
 		    case BIG       : desc.font.pix_width = desc.font.pix_height = FONTHEIGHT_BIG       ; break;
+#endif
 	 	}
 
 	//reset kerning
@@ -467,9 +473,15 @@ void RenderString(const char *string, int sx, int sy, int maxwidth, int layout, 
 
 		switch (size)
 		{
+#ifdef FT_NEW_CACHE_API
+			case VERY_SMALL: desc.width = desc.height = FONTHEIGHT_VERY_SMALL; break;
+			case SMALL     : desc.width = desc.height = FONTHEIGHT_SMALL     ; break;
+			case BIG       : desc.width = desc.height = FONTHEIGHT_BIG       ; break;
+#else
 			case VERY_SMALL: desc.font.pix_width = desc.font.pix_height = FONTHEIGHT_VERY_SMALL; break;
 			case SMALL     : desc.font.pix_width = desc.font.pix_height = FONTHEIGHT_SMALL     ; break;
 		    case BIG       : desc.font.pix_width = desc.font.pix_height = FONTHEIGHT_BIG       ; break;
+#endif
 	 	}
 
 	//set alignment
@@ -654,22 +666,29 @@ void plugin_exec(PluginParam *par)
 		return;
 	}
 
-	if((error = FTC_Manager_Lookup_Face(manager, FONT, &face)))
+	if((error = FTC_Manager_LookupFace(manager, FONT, &face)))
 	{
-		if((error = FTC_Manager_Lookup_Face(manager, FONT2, &face)))
+		if((error = FTC_Manager_LookupFace(manager, FONT2, &face)))
 		{
-			printf("TuxCom <FTC_Manager_Lookup_Face failed with Errorcode 0x%.2X>\n", error);
+			printf("TuxCom <FTC_Manager_LookupFace failed with Errorcode 0x%.2X>\n", error);
 			FTC_Manager_Done(manager);
 			FT_Done_FreeType(library);
 			munmap(lfb, fix_screeninfo.smem_len);
 			return;
 		}
 		else
+#ifdef FT_NEW_CACHE_API
+			desc.face_id = FONT2;
+#else
 			desc.font.face_id = FONT2;
+#endif
 	}
 	else
+#ifdef FT_NEW_CACHE_API
+		desc.face_id = FONT;
+#else
 		desc.font.face_id = FONT;
-
+#endif
 
 	use_kerning = FT_HAS_KERNING(face);
 

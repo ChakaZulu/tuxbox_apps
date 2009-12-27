@@ -394,7 +394,11 @@ int OpenFB(void)
 
 	use_kerning = FT_HAS_KERNING(face);
 
+#ifdef FT_NEW_CACHE_API
+	desc.face_id = FONT;
+#else
 	desc.font.face_id = FONT;
+#endif
 
 #if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 		desc.type = ftc_image_mono;
@@ -610,15 +614,27 @@ void RenderString(unsigned char *string, int sx, int sy, int maxwidth, int layou
 	// set size
 	if(size == SMALL)
 	{
+#ifdef FT_NEW_CACHE_API
+		desc.width = desc.height = FONTSIZE_SMALL;
+#else
 		desc.font.pix_width = desc.font.pix_height = FONTSIZE_SMALL;
+#endif
 	}
 	else if (size == NORMAL)
 	{
+#ifdef FT_NEW_CACHE_API
+		desc.width = desc.height = FONTSIZE_NORMAL;
+#else
 		desc.font.pix_width = desc.font.pix_height = FONTSIZE_NORMAL;
+#endif
 	}
 	else
 	{
+#ifdef FT_NEW_CACHE_API
+		desc.width = desc.height = FONTSIZE_BIG;
+#else
 		desc.font.pix_width = desc.font.pix_height = FONTSIZE_BIG;
+#endif
 	}
 
 	// set alignment
@@ -629,7 +645,12 @@ void RenderString(unsigned char *string, int sx, int sy, int maxwidth, int layou
 		switch(layout)
 		{
 			case FIXEDCENTER:
+#ifdef FT_NEW_CACHE_API
+				stringlen = (desc.width/2) * strlen(string);
+#else
 				stringlen = (desc.font.pix_width/2) * strlen(string);
+#endif
+
 			case CENTER:
 			{
 				if(stringlen < maxwidth)
@@ -639,7 +660,11 @@ void RenderString(unsigned char *string, int sx, int sy, int maxwidth, int layou
 			} break;
 
 			case FIXEDRIGHT:
+#ifdef FT_NEW_CACHE_API
+				stringlen = (desc.width/2) * strlen(string);
+#else
 				stringlen = (desc.font.pix_width/2) * strlen(string);
+#endif
 			case RIGHT:
 			{
 				if(stringlen < maxwidth)
@@ -661,7 +686,11 @@ void RenderString(unsigned char *string, int sx, int sy, int maxwidth, int layou
 		if ((charwidth = RenderChar(*string, sx, sy, ex, color)) == -1)  return; // string > maxwidth 
 
 		if ((layout == FIXEDLEFT) || (layout == FIXEDCENTER) || (layout == FIXEDRIGHT))
+#ifdef FT_NEW_CACHE_API
+			sx += (desc.width/2);
+#else
 			sx += (desc.font.pix_width/2);
+#endif
 		else 
 			sx += charwidth;
 		string++;
@@ -2107,7 +2136,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.13 $";
+	char cvs_revision[] = "$Revision: 1.14 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;

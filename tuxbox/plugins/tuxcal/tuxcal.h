@@ -421,6 +421,10 @@ FT_Face			face;
 FT_UInt			prev_glyphindex;
 FT_Bool			use_kerning;
 
+#if (FREETYPE_MAJOR > 2 || (FREETYPE_MAJOR == 2 && (FREETYPE_MINOR > 1 || (FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 8))))
+#  define FT_NEW_CACHE_API
+#endif
+
 //----------------------------------------------------
 // config
 char osd = 'G';														//! OSD language

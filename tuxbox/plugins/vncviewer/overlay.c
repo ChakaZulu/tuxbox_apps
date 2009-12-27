@@ -22,13 +22,12 @@ Pixel* ico_keybd_shifted = NULL;
 static	FT_Library		library = NULL;
 static	FTC_Manager		manager = NULL;
 static	FTC_SBitCache		cache;
-#ifdef HAVE_DREAMBOX_HARDWARE
-static	FTC_Image_Desc		desc;
-#else
 static	FTC_ImageTypeRec	desc;
-#endif
 static	FT_Face			face;
 
+#if (FREETYPE_MAJOR > 2 || (FREETYPE_MAJOR == 2 && (FREETYPE_MINOR > 1 || (FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 8))))
+#  define FT_NEW_CACHE_API
+#endif
 
 extern int sx,ex;
 void
@@ -239,8 +238,7 @@ int RenderChar(Pixel *dest,FT_ULong currentchar, int sx, int sy, int ex, int col
 		return 0;
 	}
 
-
-#ifdef HAVE_DREAMBOX_HARDWARE
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 	if((error = FTC_SBit_Cache_Lookup(cache, &desc, glyphindex, &sbit)))
 #else
 	FTC_Node anode;
@@ -311,8 +309,11 @@ void RenderString(int ovwidth,Pixel *dest,const char *string, int sx, int sy, in
 {
 	if (strlen(string) == 0) return;
 	int stringlen, ex, charwidth,i,j;
+#ifdef FT_NEW_CACHE_API
+	desc.width = desc.height = ROW_HEIGHT;
+#else
 	desc.font.pix_width = desc.font.pix_height = ROW_HEIGHT;
-
+#endif
 	//set alignment
 
 	stringlen = GetStringLen(string);
@@ -1273,11 +1274,20 @@ selectServer(char* szServerNr, int rc_fd)
 			return 0;
 		}
 		else
+#ifdef FT_NEW_CACHE_API
+			desc.face_id = FONT2;
+#else
 			desc.font.face_id = FONT2;
+#endif
 }
 	else
+#ifdef FT_NEW_CACHE_API
+		desc.face_id = FONT;
+#else
 		desc.font.face_id = FONT;
-#ifdef HAVE_DREAMBOX_HARDWARE
+#endif
+
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 	desc.image_type = ftc_image_mono;
 #else
 	desc.flags = FT_LOAD_MONOCHROME;

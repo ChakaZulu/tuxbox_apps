@@ -280,6 +280,10 @@ int rcaltgrtable[] =
 // if font is not in usual place, we look here:
 #define FONT2 "/var/tuxbox/config/enigma/fonts/pakenham.ttf"
 
+#if (FREETYPE_MAJOR > 2 || (FREETYPE_MAJOR == 2 && (FREETYPE_MINOR > 1 || (FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 8))))
+#define FT_NEW_CACHE_API
+#endif
+
 enum {LANG_INT,LANG_DE, LANG_IT, LANG_SV, LANG_PT};
 enum {RC_NORMAL,RC_EDIT};
 enum {LEFT, CENTER, RIGHT};
