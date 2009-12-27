@@ -1,5 +1,5 @@
 /*
- * $Id: shellexec.c,v 1.2 2009/12/12 21:34:08 rhabarber1848 Exp $
+ * $Id: shellexec.c,v 1.3 2009/12/27 12:08:02 rhabarber1848 Exp $
  *
  * shellexec - d-box2 linux project
  *
@@ -1760,7 +1760,11 @@ unsigned int alpha;
 		}
 
 		use_kerning = FT_HAS_KERNING(face);
+#ifdef FT_NEW_CACHE_API
+		desc.face_id = FONT;
+#else
 		desc.font.face_id = FONT;
+#endif
 
 #if FREETYPE_MAJOR == 2 && FREETYPE_MINOR == 0
 		desc.image_type = ftc_image_mono;

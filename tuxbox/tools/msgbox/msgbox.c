@@ -1,5 +1,5 @@
 /*
- * $Id: msgbox.c,v 1.2 2009/12/12 09:49:18 rhabarber1848 Exp $
+ * $Id: msgbox.c,v 1.3 2009/12/27 12:08:03 rhabarber1848 Exp $
  *
  * msgbox - d-box2 linux project
  *
@@ -896,7 +896,11 @@ return 0;
 
 		use_kerning = FT_HAS_KERNING(face);
 
+#ifdef FT_NEW_CACHE_API
+		desc.face_id = FONT;
+#else
 		desc.font.face_id = FONT;
+#endif
 
 #if FREETYPE_MAJOR == 2 && FREETYPE_MINOR == 0
 		desc.image_type = ftc_image_mono;

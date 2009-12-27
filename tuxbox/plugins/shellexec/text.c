@@ -1,5 +1,5 @@
 /*
- * $Id: text.c,v 1.1 2009/12/12 18:42:44 rhabarber1848 Exp $
+ * $Id: text.c,v 1.2 2009/12/27 12:08:02 rhabarber1848 Exp $
  *
  * shellexec - d-box2 linux project
  *
@@ -200,7 +200,11 @@ int stringlen = 0;
 				string++;
 				if(*string=='t')
 				{
+#ifdef FT_NEW_CACHE_API
+					stringlen=desc.width+TABULATOR*((int)(stringlen/TABULATOR)+1);
+#else
 					stringlen=desc.font.pix_width+TABULATOR*((int)(stringlen/TABULATOR)+1);
+#endif
 				}
 				else
 				{
@@ -213,7 +217,11 @@ int stringlen = 0;
 						}
 						else
 						{
+#ifdef FT_NEW_CACHE_API
+							stringlen=desc.width+TABULATOR*((int)(stringlen/TABULATOR)+1);
+#else
 							stringlen=desc.font.pix_width+TABULATOR*((int)(stringlen/TABULATOR)+1);
+#endif
 						}
 					}
 					else
@@ -252,10 +260,17 @@ void RenderString(char *string, int sx, int sy, int maxwidth, int layout, int si
 
 		switch (size)
 		{
+#ifdef FT_NEW_CACHE_API
+			case SMALL: desc.width = desc.height = FSIZE_SMALL; break;
+			case MED:   desc.width = desc.height = FSIZE_MED; break;
+			case BIG:   desc.width = desc.height = FSIZE_BIG; break;
+			default:    desc.width = desc.height = size; break;
+#else
 			case SMALL: desc.font.pix_width = desc.font.pix_height = FSIZE_SMALL; break;
 			case MED:   desc.font.pix_width = desc.font.pix_height = FSIZE_MED; break;
 			case BIG:   desc.font.pix_width = desc.font.pix_height = FSIZE_BIG; break;
 			default:    desc.font.pix_width = desc.font.pix_height = size; break;
+#endif
 		}
 		
 	//set alignment

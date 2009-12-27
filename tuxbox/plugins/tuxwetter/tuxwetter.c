@@ -1,5 +1,5 @@
 /*
- * $Id: tuxwetter.c,v 1.2 2009/12/19 21:52:01 rhabarber1848 Exp $
+ * $Id: tuxwetter.c,v 1.3 2009/12/27 12:08:02 rhabarber1848 Exp $
  *
  * tuxwetter - d-box2 linux project
  *
@@ -2709,7 +2709,11 @@ PLISTENTRY pl=&epl;
 
 		use_kerning = FT_HAS_KERNING(face);
 
+#ifdef FT_NEW_CACHE_API
+		desc.face_id = FONT;
+#else
 		desc.font.face_id = FONT;
+#endif
 
 #if FREETYPE_MAJOR == 2 && FREETYPE_MINOR == 0
 		desc.image_type = ftc_image_mono;

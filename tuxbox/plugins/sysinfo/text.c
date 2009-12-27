@@ -1,5 +1,5 @@
 /*
- * $Id: text.c,v 1.1 2009/12/20 16:22:58 rhabarber1848 Exp $
+ * $Id: text.c,v 1.2 2009/12/27 12:08:02 rhabarber1848 Exp $
  *
  * sysinfo - d-box2 linux project
  *
@@ -49,8 +49,11 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color, int size
 	FT_UInt glyphindex;
 	FT_Vector kerning;
 	FTC_Node anode;
+#ifdef FT_NEW_CACHE_API
+	if (size !=0) desc.width = desc.height = size; 
+#else
 	if (size !=0) desc.font.pix_width = desc.font.pix_height = size; 
-
+#endif
 
 	//load char
 
@@ -141,10 +144,17 @@ void RenderString(char *string, int sx, int sy, int maxwidth, int layout, int si
 
 		switch (size)
 		{
+#ifdef FT_NEW_CACHE_API
+			case SMALL: desc.width = desc.height = FSIZE_SMALL; break;
+			case MED:   desc.width = desc.height = FSIZE_MED; break;
+			case BIG:   desc.width = desc.height = FSIZE_BIG; break;
+			default:    desc.width = desc.height = size; break;
+#else
 			case SMALL: desc.font.pix_width = desc.font.pix_height = FSIZE_SMALL; break;
 			case MED:   desc.font.pix_width = desc.font.pix_height = FSIZE_MED; break;
 			case BIG:   desc.font.pix_width = desc.font.pix_height = FSIZE_BIG; break;
 			default:    desc.font.pix_width = desc.font.pix_height = size; break;
+#endif
 		}
 		
 	//set alignment

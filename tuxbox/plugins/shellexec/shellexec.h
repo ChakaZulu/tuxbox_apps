@@ -1,5 +1,5 @@
 /*
- * $Id: shellexec.h,v 1.2 2009/12/18 19:08:38 rhabarber1848 Exp $
+ * $Id: shellexec.h,v 1.3 2009/12/27 12:08:02 rhabarber1848 Exp $
  *
  * shellexec - d-box2 linux project
  *
@@ -43,6 +43,11 @@
 #include FT_FREETYPE_H
 #include FT_CACHE_H
 #include FT_CACHE_SMALL_BITMAPS_H
+
+/* tested with freetype 2.3.9, and 2.1.4 */
+#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 3
+#define FT_NEW_CACHE_API
+#endif
 
 #define NCF_FILE "/var/tuxbox/config/neutrino.conf"
 #define ECF_FILE "/var/tuxbox/config/enigma/config"

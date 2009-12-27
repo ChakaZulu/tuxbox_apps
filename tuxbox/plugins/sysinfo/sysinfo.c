@@ -1,5 +1,5 @@
 /*
- * $Id: sysinfo.c,v 1.2 2009/12/26 19:53:30 rhabarber1848 Exp $
+ * $Id: sysinfo.c,v 1.3 2009/12/27 12:08:02 rhabarber1848 Exp $
  *
  * sysinfo - d-box2 linux project
  *
@@ -282,7 +282,11 @@ int init_fb (void)
 
 		use_kerning = FT_HAS_KERNING(face);
 
+#ifdef FT_NEW_CACHE_API
+		desc.face_id = FONT;
+#else
 		desc.font.face_id = FONT;
+#endif
 		desc.flags = FT_LOAD_MONOCHROME;
 
 		if(!(lbb = malloc(var_screeninfo.xres*var_screeninfo.yres)))
