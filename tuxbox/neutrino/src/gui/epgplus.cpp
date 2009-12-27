@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.54 2009/10/12 07:35:39 rhabarber1848 Exp $
+	$Id: epgplus.cpp,v 1.56 2009/12/27 22:23:31 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -618,8 +618,8 @@ EpgPlus::~EpgPlus()
 
 void EpgPlus::createChannelEntries(int selectedChannelEntryIndex)
 {
-	// TODO: is this correct?
-	for (TChannelEntries::iterator It = displayedChannelEntries.begin(); It != displayedChannelEntries.begin() ; ++It)
+	for (TChannelEntries::iterator It = displayedChannelEntries.begin();
+	     It != displayedChannelEntries.end(); ++It)
 		delete *It;
 
 	displayedChannelEntries.clear();
@@ -1068,7 +1068,7 @@ int EpgPlus::exec(CChannelList* _channelList, int selectedChannelIndex, CBouquet
 				fb_pixel_t savedScreen[usableScreenWidth * usableScreenHeight * sizeof(fb_pixel_t)];
 				frameBuffer->SaveScreen(usableScreenX, usableScreenY, usableScreenWidth, usableScreenHeight, savedScreen);
 
-				CMenuWidget menuWidgetActions(LOCALE_EPGPLUS_ACTIONS, "features.raw", 400);
+				CMenuWidget menuWidgetActions(LOCALE_EPGPLUS_ACTIONS, NEUTRINO_ICON_FEATURES, 400);
 				menuWidgetActions.addItem(new CMenuForwarder(LOCALE_EPGPLUS_RECORD     , true, NULL, new MenuTargetAddRecordTimer(this), NULL, CRCInput::RC_red   , NEUTRINO_ICON_BUTTON_RED   ), false);
 				menuWidgetActions.addItem(new CMenuForwarder(LOCALE_EPGPLUS_REFRESH_EPG, true, NULL, new MenuTargetRefreshEpg    (this), NULL, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ), false);
 				menuWidgetActions.addItem(new CMenuForwarder(LOCALE_EPGPLUS_REMIND     , true, NULL, new MenuTargetAddReminder   (this), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
@@ -1082,7 +1082,7 @@ int EpgPlus::exec(CChannelList* _channelList, int selectedChannelIndex, CBouquet
 				fb_pixel_t savedScreen[usableScreenWidth * usableScreenHeight * sizeof(fb_pixel_t)];
 				frameBuffer->SaveScreen(usableScreenX, usableScreenY, usableScreenWidth, usableScreenHeight, savedScreen);
 
-				CMenuWidget menuWidgetOptions(LOCALE_EPGPLUS_OPTIONS, "features.raw", 500);
+				CMenuWidget menuWidgetOptions(LOCALE_EPGPLUS_OPTIONS, NEUTRINO_ICON_FEATURES, 500);
 				menuWidgetOptions.addItem(new MenuOptionChooserSwitchSwapMode(this));
 				menuWidgetOptions.addItem(new MenuOptionChooserSwitchViewMode(this));
 
@@ -1397,12 +1397,13 @@ int EpgPlus::exec(CChannelList* _channelList, int selectedChannelIndex, CBouquet
 
 		hide();
 
-		// TODO: is this correct?
-		for (TChannelEntries::iterator It = displayedChannelEntries.begin();
-		     It != displayedChannelEntries.begin(); ++It)
-			delete *It;
 	}
 	while (refreshAll);
+
+	for (TChannelEntries::iterator It = displayedChannelEntries.begin();
+	     It != displayedChannelEntries.end(); ++It)
+		delete *It;
+	displayedChannelEntries.clear();
 
 	return res;
 }
@@ -1636,7 +1637,7 @@ int EpgPlus::MenuTargetAddReminder::exec(CMenuTarget*, const std::string&)
 							(*It)->channelEvent.eventID,
 							(*It)->channelEvent.startTime,
 							0, true);
-			ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+			ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO);
 		}
 		else
 			printf("timerd not available\n");
@@ -1696,10 +1697,10 @@ int EpgPlus::MenuTargetAddRecordTimer::exec(CMenuTarget*, const std::string&)
 										 (*It)->channelEvent.startTime,
 										 (*It)->channelEvent.startTime - (ANNOUNCETIME + 120),
 										 TIMERD_APIDS_CONF, true, recDir, true);
-						ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+						ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO);
 					}
 				} else {
-					ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+					ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO);
 				}
 			}
 		}
@@ -1897,7 +1898,7 @@ int EpgPlus::MenuWidgetSettings::MenuTargetSizeSettings::exec
 EpgPlus::MenuWidgetSettings::MenuWidgetSettings
   ( EpgPlus* epgPlus
   )
-  : CMenuWidget(LOCALE_EPGPLUS_SETTINGS, "features.raw", 400)
+  : CMenuWidget(LOCALE_EPGPLUS_SETTINGS, NEUTRINO_ICON_FEATURES, 400)
 {
 	this->epgPlus = epgPlus;
 }
@@ -2063,7 +2064,7 @@ EpgPlus::MenuWidgetFontSetting::MenuWidgetFontSetting
   ( EpgPlus* epgPlus
   , FontSetting* fontSetting
   )
-  : CMenuWidget(LOCALE_EPGPLUS_EDIT_FONTS, "features.raw", 400)
+  : CMenuWidget(LOCALE_EPGPLUS_EDIT_FONTS, NEUTRINO_ICON_FEATURES, 400)
 {
   this->epgPlus     = epgPlus;
   this->fontSetting = fontSetting;
@@ -2084,7 +2085,7 @@ EpgPlus::MenuWidgetFontSettings::MenuWidgetFontSettings
   ( EpgPlus*      epgPlus
   , FontSettings* fontSettings
   )
-  : CMenuWidget(LOCALE_EPGPLUS_EDIT_FONTS, "features.raw", 400)
+  : CMenuWidget(LOCALE_EPGPLUS_EDIT_FONTS, NEUTRINO_ICON_FEATURES, 400)
 {
   this->epgPlus      = epgPlus;
   this->fontSettings = fontSettings;
@@ -2132,7 +2133,7 @@ EpgPlus::MenuWidgetSizeSettings::MenuWidgetSizeSettings
   ( EpgPlus*      epgPlus
   , SizeSettings* sizeSettings
   )
-  : CMenuWidget(LOCALE_EPGPLUS_EDIT_SIZES, "features.raw", 400)
+  : CMenuWidget(LOCALE_EPGPLUS_EDIT_SIZES, NEUTRINO_ICON_FEATURES, 400)
 {
   this->epgPlus      = epgPlus;
   this->sizeSettings = sizeSettings;
