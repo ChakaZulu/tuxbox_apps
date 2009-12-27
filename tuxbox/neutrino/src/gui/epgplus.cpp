@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.56 2009/12/27 22:23:31 seife Exp $
+	$Id: epgplus.cpp,v 1.57 2009/12/27 22:25:35 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1285,8 +1285,6 @@ int EpgPlus::exec(CChannelList* _channelList, int selectedChannelIndex, CBouquet
 							std::cout << "this->startTime += this->duration" << std::endl;
 #endif
 							startTime += duration;
-							createChannelEntries(selectedChannelEntry->index);
-
 							selectedTime = startTime;
 							createChannelEntries(selectedChannelEntry->index);
 
