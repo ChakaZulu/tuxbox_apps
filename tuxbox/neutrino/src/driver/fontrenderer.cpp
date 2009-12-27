@@ -235,6 +235,7 @@ FT_Error Font::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
 
 int Font::setSize(int isize)
 {
+	FT_Error err;
 #ifdef FT_NEW_CACHE_API
 	FTC_ScalerRec scaler;
 
@@ -245,15 +246,16 @@ int Font::setSize(int isize)
 	scaler.height  = font.height;
 	scaler.pixel   = true;
 
-	if (FTC_Manager_LookupSize(renderer->cacheManager, &scaler, &size) < 0)
+	err = FTC_Manager_LookupSize(renderer->cacheManager, &scaler, &size);
 #else
 	int temp = font.font.pix_width; 
 	font.font.pix_width = font.font.pix_height = isize; 
 
-	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
+	err = FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size);
 #endif
+	if (err != 0)
 	{
-		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
+		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed! (0x%x)\n", err);
 		return 0;
 	}
 	// hack begin (this is a hack to get correct font metrics, didn't find any other way which gave correct values)
@@ -347,6 +349,8 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 	if (!frameBuffer->getActive())
 		return;
 
+	FT_Error err;
+
 	pthread_mutex_lock( &renderer->render_mutex );
 #ifdef FT_NEW_CACHE_API
 	FTC_ScalerRec scaler;
@@ -356,12 +360,12 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 	scaler.height  = font.height;
 	scaler.pixel   = true;
 
-	if (FTC_Manager_LookupSize(renderer->cacheManager, &scaler, &size) < 0)
+	err = FTC_Manager_LookupSize(renderer->cacheManager, &scaler, &size);
 #else
-	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
+	err = FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size);
 #endif
 	{
-		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
+		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed! (0x%x)\n", err);
 		pthread_mutex_unlock(&renderer->render_mutex);
 		return;
 	}
@@ -586,6 +590,7 @@ void Font::RenderString(int x, int y, const int width, const std::string & text,
 int Font::getRenderWidth(const char *text, const bool utf8_encoded)
 {
 	pthread_mutex_lock( &renderer->render_mutex );
+	FT_Error err;
 #ifdef FT_NEW_CACHE_API
 	FTC_ScalerRec scaler;
 
@@ -594,12 +599,13 @@ int Font::getRenderWidth(const char *text, const bool utf8_encoded)
 	scaler.height  = font.height;
 	scaler.pixel   = true;
 
-	if (FTC_Manager_LookupSize(renderer->cacheManager, &scaler, &size) < 0)
+	err = FTC_Manager_LookupSize(renderer->cacheManager, &scaler, &size);
 #else
-	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
+	err = FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size);
 #endif
+	if (err != 0)
 	{
-		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
+		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed! (0x%x)\n", err);
 		pthread_mutex_unlock(&renderer->render_mutex);
 		return -1;
 	}

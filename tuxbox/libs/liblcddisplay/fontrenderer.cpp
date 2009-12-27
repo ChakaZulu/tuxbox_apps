@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.15 2009/12/27 12:10:19 rhabarber1848 Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.16 2009/12/27 23:56:46 seife Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -332,6 +332,7 @@ void LcdFont::RenderString(int x, int y, const int width, const char * text, con
 int LcdFont::getRenderWidth(const char * text, const bool utf8_encoded)
 {
 	pthread_mutex_lock(&renderer->render_mutex);
+	FT_Error err;
 #ifdef FT_NEW_CACHE_API
 	FTC_ScalerRec scaler;
 	scaler.face_id = font.face_id;
@@ -339,12 +340,13 @@ int LcdFont::getRenderWidth(const char * text, const bool utf8_encoded)
 	scaler.height  = font.height;
 	scaler.pixel   = true;
 
-	if (FTC_Manager_LookupSize(renderer->cacheManager, &scaler, &size) < 0)
+	err = FTC_Manager_LookupSize(renderer->cacheManager, &scaler, &size);
 #else
-	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
+	err = FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size);
 #endif
+	if (err != 0)
 	{ 
-		printf("FTC_Manager_Lookup_Size failed!\n");
+		printf("FTC_Manager_Lookup_Size failed! (0x%x)\n", err);
 		pthread_mutex_unlock(&renderer->render_mutex);
 		return -1;
 	}
