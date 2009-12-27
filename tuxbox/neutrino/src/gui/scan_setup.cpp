@@ -1,5 +1,5 @@
 /*
-	$Id: scan_setup.cpp,v 1.7 2009/12/21 14:24:21 dbt Exp $
+	$Id: scan_setup.cpp,v 1.8 2009/12/27 12:06:38 rhabarber1848 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
