@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.h,v 1.6 2009/12/24 01:13:11 dbt Exp $
+	$Id: drive_setup.h,v 1.7 2009/12/27 16:41:40 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -53,7 +53,6 @@
 struct SDriveSettings
 {
 	std::string 	drive_partition_mountpoint[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
-	std::string 	drive_partition_nfs_host_ip[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
 
 	int 	drive_use_fstab;
 	int	drive_mount_mtdblock_partitions;
@@ -61,11 +60,15 @@ struct SDriveSettings
 	int 	drive_activate_ide;
 	int 	drive_write_cache[MAXCOUNT_DRIVE];
 	int 	drive_partition_activ[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
-	int 	drive_partition_nfs[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
 	char	drive_partition_fstype[MAXCOUNT_DRIVE][MAXCOUNT_PARTS][8/*chars*/];
 	char 	drive_spindown[MAXCOUNT_DRIVE][3/*chars*/];
 	char 	drive_partition_size[MAXCOUNT_DRIVE][MAXCOUNT_PARTS][8/*chars*/];
 	char 	drive_mmc_module_name[10];
+
+#ifdef ENABLE_NFSSERVER
+	std::string 	drive_partition_nfs_host_ip[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
+	int 	drive_partition_nfs[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
+#endif /*ENABLE_NFSSERVER*/
 };
 
 
@@ -117,12 +120,6 @@ const CMenuOptionChooser::keyval OPTIONS_IDE_ACTIVATE_OPTIONS[OPTIONS_IDE_ACTIVA
 class CDriveSetup : public CMenuTarget
 {
 	private:
-		enum EDIT_PARTITION_MODE_NUM	
-		{
-			ADD_MODE,
-			EDIT_MODE,
-			SWAP_MODE
-		};
 		
 		enum PREPARE_PARTITION_MODE_NUM	
 		{
@@ -389,16 +386,24 @@ class CDriveSetupFsNotifier : public CChangeObserver
 {
 	private:
 
-		CMenuForwarder* toDisable[2];
 #ifdef ENABLE_NFSSERVER
+		CMenuForwarder* toDisable[3];
 		CMenuOptionChooser* toDisableOj;
+#else
+		CMenuForwarder* toDisable[2];
 #endif
 	public:
-#ifdef ENABLE_NFSSERVER
-		CDriveSetupFsNotifier( CMenuForwarder*, CMenuForwarder*, CMenuOptionChooser* );
-#else
-		CDriveSetupFsNotifier( CMenuForwarder*, CMenuForwarder*);
-#endif
+		CDriveSetupFsNotifier( 	
+					#ifdef ENABLE_NFSSERVER
+						CMenuForwarder*, 
+						CMenuForwarder*, 
+						CMenuOptionChooser*,
+						CMenuForwarder*);
+					#else
+						
+						CMenuForwarder*, 
+						CMenuForwarder*);
+					#endif
 		bool changeNotify(const neutrino_locale_t, void * Data);
 };
 
@@ -408,7 +413,7 @@ class CDriveSetupNFSHostNotifier : public CChangeObserver
 	private:
 		CMenuForwarder* toDisable;
 	public:
-		CDriveSetupNFSHostNotifier( CMenuForwarder* );
+		CDriveSetupNFSHostNotifier( CMenuForwarder*);
 		bool changeNotify(const neutrino_locale_t, void * Data);
 };
 #endif /*ENABLE_NFSSERVER*/

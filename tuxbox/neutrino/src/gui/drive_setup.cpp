@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.10 2009/12/24 01:13:11 dbt Exp $
+	$Id: drive_setup.cpp,v 1.11 2009/12/27 16:41:40 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -762,6 +762,7 @@ void CDriveSetup::showHddSetupSub()
 	//sub menue main
 	sub->addItem(subhead);		//subhead
 	//------------------------
+	sub->addItem(GenericMenuSeparator);
 	sub->addItem(GenericMenuBack);	//back
 	sub->addItem(GenericMenuSeparatorLine);
 	//------------------------
@@ -901,8 +902,8 @@ void CDriveSetup::showHddSetupSub()
 
 		//prepare option nfs	
 		nfs_host_ip_fw[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_NFS_HOST_IP, d_settings.drive_partition_nfs[current_device][i], d_settings.drive_partition_nfs_host_ip[current_device][i], nfs_host_ip[i] );
-		//prepare option nfs chooser
 
+		//prepare option nfs chooser
 		nfsHostNotifier[i] = new CDriveSetupNFSHostNotifier (nfs_host_ip_fw[i]);
 		nfs_chooser[i] = new CMenuOptionChooser(LOCALE_DRIVE_SETUP_PARTITION_NFS, &d_settings.drive_partition_nfs[current_device][i], OPTIONS_YES_NO_OPTIONS, OPTIONS_YES_NO_OPTION_COUNT, entry_activ[i], nfsHostNotifier[i] );		
 #endif
@@ -912,10 +913,10 @@ void CDriveSetup::showHddSetupSub()
 		input_size[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_SIZE, entry_activ[i], d_settings.drive_partition_size[current_device][i], input_part_size[i] );
 
 		//select filesystem
-#ifndef ENABLE_NFSSERVER
-		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i], input_size[i]);
+#ifdef ENABLE_NFSSERVER
+		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i], input_size[i], nfs_chooser[i], nfs_host_ip_fw[i]);
 #else
-		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i], input_size[i], nfs_chooser[i]);
+		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i], input_size[i]);
 #endif
 	 	fs_chooser[i] = new CMenuOptionStringChooser(LOCALE_DRIVE_SETUP_PARTITION_FS, d_settings.drive_partition_fstype[current_device][i], entry_activ[i], fsNotifier[i]);
 		for (uint n=0; n < v_fs_modules.size(); n++) 
@@ -1000,6 +1001,12 @@ void CDriveSetup::showHddSetupSub()
 	sub_add->addItem(mp_chooser[next_part_number]);	//select mountpoint
 	sub_add->addItem(input_size[next_part_number]);	//input part size
 	//------------------------
+#ifdef ENABLE_NFSSERVER
+	sub_add->addItem(GenericMenuSeparatorLine);	//separator
+	sub_add->addItem(nfs_chooser[next_part_number]);//nfs
+	sub_add->addItem(nfs_host_ip_fw[next_part_number]);//nfs host ip input
+	//------------------------
+#endif
 	sub_add->addItem(GenericMenuSeparatorLine);	//separator
 	//------------------------
 	sub_add->addItem(mkpart[next_part_number]);	//make partition
@@ -2294,7 +2301,7 @@ void CDriveSetup::mkMounts()
 		cerr<<"[drive setup] "<<__FUNCTION__ <<": generating default mount entries in fstab failed..."<<endl;
 }
 
-// collects spported and available filsystem modules, writes to vector v_fs_modules, return true on success
+// collects spported and available filsystem modules, writes to vector v_fs_modules
 void CDriveSetup::loadFsModulList()
 {
 	DIR *mdir;
@@ -3557,8 +3564,10 @@ void CDriveSetup::loadDriveSettings()
 	char fstype_opt[27];
 	char write_cache_opt[20];
 	char partition_activ_opt[26];
+#ifdef ENABLE_NFSSERVER
 	char partition_nfs_opt[24];
 	char partition_nfs_host_ip_opt[32];
+#endif /*ENABLE_NFSSERVER*/
 	for(unsigned int i = 0; i < MAXCOUNT_DRIVE; i++) 
 	{
 		// d_settings.drive_spindown
@@ -3586,7 +3595,7 @@ void CDriveSetup::loadDriveSettings()
 			// d_settings.drive_partition_activ
 			sprintf(partition_activ_opt, "drive_%d_partition_%d_activ", i, ii);
 			d_settings.drive_partition_activ[i][ii] = configfile.getBool(partition_activ_opt, true);
-
+#ifdef ENABLE_NFSSERVER
 			// d_settings.drive_partition_nfs
 			sprintf(partition_nfs_opt, "drive_%d_partition_%d_nfs", i, ii);
 			d_settings.drive_partition_nfs[i][ii] = configfile.getBool(partition_nfs_opt, false);
@@ -3594,6 +3603,7 @@ void CDriveSetup::loadDriveSettings()
 			// d_settings.drive_partition_nfs_host_ip
 			sprintf(partition_nfs_host_ip_opt, "drive_%d_partition_%d_nfs_host_ip", i, ii);
 			d_settings.drive_partition_nfs_host_ip[i][ii] = (string)configfile.getString(partition_nfs_host_ip_opt, "");
+#endif /*ENABLE_NFSSERVER*/
 		}
 	}
 
@@ -3621,8 +3631,10 @@ bool CDriveSetup::writeDriveSettings()
 	char fstype_opt[27];
 	char write_cache_opt[20];
 	char partition_activ_opt[26];
+#ifdef ENABLE_NFSSERVER
 	char partition_nfs_opt[24];
 	char partition_nfs_host_ip_opt[32];
+#endif /*ENABLE_NFSSERVER*/
 	for(int i = 0; i < MAXCOUNT_DRIVE; i++) 
 	{
 		// d_settings.drive_spindown
@@ -3650,7 +3662,7 @@ bool CDriveSetup::writeDriveSettings()
 			// d_settings.drive_partition_activ
 			sprintf(partition_activ_opt, "drive_%d_partition_%d_activ", i, ii);
 			configfile.setBool(partition_activ_opt, d_settings.drive_partition_activ[i/*MASTER||SLAVE*/][ii]);
-
+#ifdef ENABLE_NFSSERVER
 			// d_settings.drive_partition_nfs
 			sprintf(partition_nfs_opt, "drive_%d_partition_%d_nfs", i, ii);
 			configfile.setBool(partition_nfs_opt, d_settings.drive_partition_nfs[i/*MASTER||SLAVE*/][ii]);
@@ -3658,6 +3670,7 @@ bool CDriveSetup::writeDriveSettings()
 			// d_settings.drive_partition_nfs_host_ip
 			sprintf(partition_nfs_host_ip_opt, "drive_%d_partition_%d_nfs_host_ip", i, ii);
 			configfile.setString( partition_nfs_host_ip_opt, d_settings.drive_partition_nfs_host_ip[i/*MASTER||SLAVE*/][ii]);
+#endif /*ENABLE_NFSSERVER*/
 		}
 	}
 	
@@ -3684,7 +3697,7 @@ string CDriveSetup::getTimeStamp()
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.10 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.11 $");
 }
 
 // returns text for initfile headers
@@ -3940,26 +3953,43 @@ string CDriveSetup::iToString(int int_val)
 
 
 // class CDriveSetupFsNotifier
-//enable disable entry for selecting mountpoint
 #ifdef ENABLE_NFSSERVER
-CDriveSetupFsNotifier::CDriveSetupFsNotifier( CMenuForwarder* f1, CMenuForwarder* f2, CMenuOptionChooser* o3)
-{
-	toDisable[0] = f1;
-	toDisable[1] = f2;
-	toDisableOj = o3;
-}
+#define FORWARDER_COUNT 3
 #else
-CDriveSetupFsNotifier::CDriveSetupFsNotifier( CMenuForwarder* f1, CMenuForwarder* f2)
+#define FORWARDER_COUNT 2
+#endif
+
+//enable disable entry for selecting mountpoint
+CDriveSetupFsNotifier::CDriveSetupFsNotifier	(	
+					#ifndef ENABLE_NFSSERVER
+						CMenuForwarder* f1, 
+						CMenuForwarder* f2
+					#else
+						
+						CMenuForwarder* f1, 
+						CMenuForwarder* f2,
+						CMenuOptionChooser* o3,
+						CMenuForwarder* f3 
+						
+					#endif
+						)
 {
+#ifndef ENABLE_NFSSERVER
 	toDisable[0] = f1;
 	toDisable[1] = f2;
-}
+#else
+	toDisable[0] = f1;
+	toDisable[1] = f2;
+	toDisable[2] = f3;
+	toDisableOj = o3;
 #endif
+}
+
 bool CDriveSetupFsNotifier::changeNotify(const neutrino_locale_t, void * Data)
 {
 	if (*((int *)Data) == 0x73776170 /*swap*/)
 	{
-		for (uint i = 0; i < 2; i++) 
+		for (uint i = 0; i < FORWARDER_COUNT; i++) 
 		{
 			toDisable[i]->setActive(false);
 		}
@@ -3969,12 +3999,13 @@ bool CDriveSetupFsNotifier::changeNotify(const neutrino_locale_t, void * Data)
 	}
 	else
 	{
-		for (uint i = 0; i < 2; i++) 
+		for (uint i = 0; i < FORWARDER_COUNT; i++) 
 		{
 			toDisable[i]->setActive(true);
 		}
 #ifdef ENABLE_NFSSERVER
 		toDisableOj->setActive(true);
+		toDisable[2]->setActive(false);
 #endif
 	}
 	return true;
