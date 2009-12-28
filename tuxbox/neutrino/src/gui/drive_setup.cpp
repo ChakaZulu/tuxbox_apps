@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.11 2009/12/27 16:41:40 dbt Exp $
+	$Id: drive_setup.cpp,v 1.12 2009/12/28 23:55:29 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -204,13 +204,6 @@ CDriveSetup::CDriveSetup():configfile('\t')
 	msg_timeout 	= g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR];
 	msg_icon 	= NEUTRINO_ICON_PARTITION;
 
-	//generate action key strings for device selection
-	for (int i = 0; i < MAXCOUNT_DRIVE; i++)
-	{
-		string s_i = iToString(i);
-		sel_device_num_actionkey[i] = "sel_device_" + s_i;
-	}
-
 	//generate action key strings for partition operations
 	for (int i = 0; i<MAXCOUNT_PARTS; i++)
 	{ 
@@ -222,8 +215,6 @@ CDriveSetup::CDriveSetup():configfile('\t')
 		
 		sprintf(part_num_actionkey[i], "edit_partition_%d", i);
 	}
-
-
 }
 
 CDriveSetup::~CDriveSetup()
@@ -580,7 +571,6 @@ void CDriveSetup::showHddSetupMain()
 		}
 	}
 
-
 	m->exec (NULL, "");
 	m->hide ();
 	delete m;
@@ -912,13 +902,19 @@ void CDriveSetup::showHddSetupSub()
 		input_part_size[i] = new CStringInput(LOCALE_DRIVE_SETUP_PARTITION_SIZE, d_settings.drive_partition_size[current_device][i], 8, LOCALE_DRIVE_SETUP_PARTITION_SIZE_HELP, LOCALE_DRIVE_SETUP_PARTITION_SIZE_STD, "0123456789 ");
 		input_size[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_SIZE, entry_activ[i], d_settings.drive_partition_size[current_device][i], input_part_size[i] );
 
+		//set mountstatus for enable/disable menue items
+		if (isMountedPartition(partname[i]) || isSwapPartition(partname[i]))
+			is_mounted[i] = true;
+		else
+			is_mounted[i] = false ;
+
 		//select filesystem
 #ifdef ENABLE_NFSSERVER
 		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i], input_size[i], nfs_chooser[i], nfs_host_ip_fw[i]);
 #else
 		fsNotifier[i] = new CDriveSetupFsNotifier(mp_chooser[i], input_size[i]);
 #endif
-	 	fs_chooser[i] = new CMenuOptionStringChooser(LOCALE_DRIVE_SETUP_PARTITION_FS, d_settings.drive_partition_fstype[current_device][i], entry_activ[i], fsNotifier[i]);
+	 	fs_chooser[i] = new CMenuOptionStringChooser(LOCALE_DRIVE_SETUP_PARTITION_FS, d_settings.drive_partition_fstype[current_device][i],(is_mounted[i] ? false:true), fsNotifier[i]);
 		for (uint n=0; n < v_fs_modules.size(); n++) 
 		{
 			if ((v_fs_modules[n] != "jbd") && (v_fs_modules[n] != "fat")) 
@@ -928,12 +924,6 @@ void CDriveSetup::showHddSetupSub()
 		//prepare make partition
 		ak_make_partition[i] = MAKE_PARTITION + iToString(i);
 		mkpart[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_HDD_FORMAT_PARTITION, true, NULL, this, ak_make_partition[i].c_str(), CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
-
-		//set mountstatus for enable/disable menue items
-		if (isMountedPartition(partname[i]) || isSwapPartition(partname[i]))
-			is_mounted[i] = true;
-		else
-			is_mounted[i] = false ;
 
 		//prepare mount partition
 		ak_mount_partition[i] = MOUNT_PARTITION + iToString(i);
@@ -1024,6 +1014,7 @@ void CDriveSetup::showHddSetupSub()
 	sub_add_swap->addItem(GenericMenuSeparatorLine);	//separator
 	//------------------------
 	sub_add_swap->addItem(activate[next_part_number]);	//enable/disable partition
+	sub_add_swap->addItem(fs_chooser[next_part_number]);	//filesystem
 	//------------------------
 	sub_add_swap->addItem(GenericMenuSeparatorLine);	//separator
 	//------------------------
@@ -1272,7 +1263,7 @@ bool CDriveSetup::unmountAll()
 	return ret;
 }
 
-// unmount all mounted partition or swaps from device
+// unmount all mounted partitions or swaps from device
 bool CDriveSetup::unmountDevice(const int& device_num)
 {
 	bool ret = true;
@@ -1328,7 +1319,6 @@ bool CDriveSetup::unmountPartition(const int& device_num /*MASTER||SLAVE||MMCARD
 	}
 
 	return true;
-
 }
 
 // returns mount stat of device, isMountedPartition("HDA1") = true=mounted, false=not mounted
@@ -1426,7 +1416,8 @@ bool CDriveSetup::initIdeDrivers(const bool irq6)
 	for (unsigned int i = 0; i < IDE_MODULES_COUNT; i++)
 	{
 		string modulname = ide_modules[i].modul;
-		string load_cmd = LOAD + modulname;
+		
+		string load_cmd = getInitModulLoadStr(modulname);
 
 		if (i != LOAD_DBOXIDE)
 			v_init_ide_L_cmds.push_back(load_cmd);
@@ -1498,10 +1489,10 @@ bool CDriveSetup::initFsDrivers(bool do_unload_first)
 		if (initModul(v_fs_modules[i], do_unload_first)) 
 		{
 			if (v_fs_modules[i]=="ext3") // loading depends modules first
-				v_init_fs_L_cmds.push_back(LOAD + depend_modules[0]);
+				v_init_fs_L_cmds.push_back(getInitModulLoadStr(depend_modules[0]));
 			if (v_fs_modules[i]=="vfat")
-				v_init_fs_L_cmds.push_back(LOAD + depend_modules[1]);
-			v_init_fs_L_cmds.push_back(LOAD + v_fs_modules[i]);
+				v_init_fs_L_cmds.push_back(getInitModulLoadStr(depend_modules[1]));
+			v_init_fs_L_cmds.push_back(getInitModulLoadStr(v_fs_modules[i]));
 		}
 		else
 			ret = false;
@@ -1535,6 +1526,8 @@ bool CDriveSetup::unloadMmcDrivers()
 		}
 		i++;
 	}
+
+	// set entry for init file
 	s_init_mmc_cmd = "";
 
 	return true;
@@ -1549,15 +1542,15 @@ bool CDriveSetup::initMmcDriver()
 
 	string modul_name = (string)d_settings.drive_mmc_module_name;
 
-	s_init_mmc_cmd = LOAD;
-	s_init_mmc_cmd += modul_name;
-
 	// exec command
 	if (!initModul(modul_name)) 
 	{
 		cerr<<"[drive setup] "<<__FUNCTION__ <<": loading "<<modul_name<< " failed..."<<endl;
 		return false;
 	}
+
+	// set entry for init file
+	s_init_mmc_cmd = getInitModulLoadStr(modul_name);
 
 	return true;
 }
@@ -1637,78 +1630,89 @@ bool CDriveSetup::unloadIdeDrivers()
 	return ret;
 }
 
-#define DEP_MODULES_COUNT 2
-typedef struct dep_modules_t
+//init required modules eg: jbd for ext3 or fat for vfat
+bool CDriveSetup::initModulDeps(const string& modulname)
 {
-	const string dep_moduls;
-	const string pre_moduls;
-} dep_modules_struct_t;
-
-const dep_modules_struct_t modules[DEP_MODULES_COUNT] =
-{
-	{"ext3", "jbd"},
-	{"vfat", "fat"},
-};
-
-// loads modules, returns true on success
-bool CDriveSetup::initModul(const string& modulname, bool do_unload_first)
-{
-	string load_cmd =  LOAD + modulname;
-
+	bool ret = true;
 	// loading depend modules
-	if ((modulname == modules[0].dep_moduls) || (modulname == modules[1].dep_moduls)) 
+	if (modulname == "ext3")
 	{
-		for (unsigned int i=0; i < DEP_MODULES_COUNT ; ++i) 
-		{
-			string load_pre_cmd = LOAD + modules[i].pre_moduls;
-
-			if (!isModulLoaded(modules[i].pre_moduls))
-			{
-				if (CNeutrinoApp::getInstance()->execute_sys_command(load_pre_cmd.c_str())!=0) 
-				{
-					cerr<<"[drive setup] "<<__FUNCTION__ <<": load depend modul "<< modules[i].pre_moduls<<" for "<< modules[i].dep_moduls<<"...failed"<<endl;
-				}
-			}
-
-			if (!isModulLoaded(modules[i].pre_moduls)) 
-			{ // check loaded modules
-				cerr<<"[drive setup] "<<__FUNCTION__ <<": depend modul "<< modules[i].pre_moduls<<" not loaded, loading "<< modules[i].dep_moduls<<"...failed"<<endl;
-				return false;
-			}
-		}
+		if (!initModul("jbd", false))
+			return false;	
 	}
+	else if (modulname == "vfat")
+	{
+		if (!initModul("fat", false))
+			return false;
+	}
+	else
+		return ret;
+
+	return ret;
+}
+
+//helper: get init string for any modulename depends of it's path in root or var
+string CDriveSetup::getInitModulLoadStr(const string& modul_name)
+{
+	string k_name;
+	struct utsname u;
+	if (!uname(&u))
+		k_name = u.release;
+
+	string modulname;
+	string modulname_var = "/var/lib/modules/" + modul_name + M_TYPE;
+	string modulname_misc = "lib/modules/" + k_name + "misc/" + modul_name + M_TYPE;
 	
+	if (access(modulname_var.c_str(), R_OK)==0)
+		modulname = modulname_var;
+	else if (access(modulname_misc.c_str(), R_OK)==0)
+		modulname = modulname_misc;
+	else
+		modulname = modul_name;
+
+	string 	load_str =  LOAD + modulname;
+	
+	return load_str;
+}
+
+// load module, returns true on success
+bool CDriveSetup::initModul(const string& modul_name, bool do_unload_first)
+{
+	if (!initModulDeps(modul_name))
+		return false;
+
+ 	string 	load_cmd =  getInitModulLoadStr(modul_name);
 
 	if (do_unload_first) 
 	{
-		if (unloadModul(modulname)) 
+		if (unloadModul(modul_name)) 
 		{// ensure that the module is currently unloaded
-			if (!isModulLoaded(modulname))
+			if (!isModulLoaded(modul_name))
 			{
 				if (CNeutrinoApp::getInstance()->execute_sys_command(load_cmd.c_str()) !=0) 
 				{
-					cerr<<"[drive setup] "<<__FUNCTION__ <<": load "<<modulname<< "...failed "<<strerror(errno)<<endl;
+					cerr<<"[drive setup] "<<__FUNCTION__ <<": load "<<modul_name<< "...failed "<<strerror(errno)<<endl;
 				}
 			}
-			if (!isModulLoaded(modulname)) 
+			if (!isModulLoaded(modul_name)) 
 			{ // check loaded modules
-				cerr<<"[drive setup] "<<__FUNCTION__ <<": modul "<<modulname<< "not loaded"<<endl;
+				cerr<<"[drive setup] "<<__FUNCTION__ <<": modul "<<modul_name<< " not loaded"<<endl;
 				return false;
 			}
 		}
 	}
 	else 
 	{
-		if (!isModulLoaded(modulname))
+		if (!isModulLoaded(modul_name))
 		{
 			if (CNeutrinoApp::getInstance()->execute_sys_command(load_cmd.c_str()) !=0) 
 			{
-				cerr<<"[drive setup] "<<__FUNCTION__ <<": load "<<modulname<< "...failed "<<strerror(errno)<<endl;
+				cerr<<"[drive setup] "<<__FUNCTION__ <<": load "<<modul_name<< "...failed "<<strerror(errno)<<endl;
 			}
 		}
-			if (!isModulLoaded(modulname)) 
+			if (!isModulLoaded(modul_name)) 
 			{ // check loaded modules
-				cerr<<"[drive setup] "<<__FUNCTION__ <<": modul "<<modulname<< "not loaded"<<endl;
+				cerr<<"[drive setup] "<<__FUNCTION__ <<": modul "<<modul_name<< "not loaded"<<endl;
 				return false;
 			}
 	}
@@ -1716,7 +1720,7 @@ bool CDriveSetup::initModul(const string& modulname, bool do_unload_first)
 	return true;
 }
 
-// unloads modules, returns true on success
+// unload module, returns true on success
 bool CDriveSetup::unloadModul(const string& modulname)
 {
 	string 	unload_cmd = UNLOAD + modulname;
@@ -2025,31 +2029,6 @@ string CDriveSetup::convertByteString(const unsigned long long& byte_size /*byte
 	return ret;
 }
 
-// void CDriveSetup::genDriveSizes()
-// // collects sizes of all devices to vector v_device_size
-// {
-// 	v_device_size.clear();
-// 
-// 	for (unsigned int i = 0; i < MAXCOUNT_DRIVE; i++){
-// 		v_device_size.push_back(getDeviceSize(i));
-// 	}
-// 
-// 	for (unsigned int i = 0; i < MAXCOUNT_DRIVE; i++){
-// 		cout<<v_device_size[i]<<endl;
-// 	}	
-// }
-
-
-// unsigned long CDriveSetup::getFreeDiskspace(const char *mountpoint)
-// // returns free disc space from mountpoint e.g "/hdd"
-// {
-// 	struct statfs s;
-// 	statfs(mountpoint, &s);
-// 	printf("[drive setup] getFreeDiskspace from mountpoint %s\n", mountpoint);
-// 	unsigned long free=s.f_bfree/1024*s.f_bsize/1024;
-// 	return free;
-// }
-
 // collects temperatures of all devices to vector v_device_temp
 void CDriveSetup::loadDriveTemps()
 {
@@ -2269,7 +2248,7 @@ void CDriveSetup::mkMounts()
 		mountAll();
 	}
 	else 
-	{ // or  mounting all hdd partitions if ide interface is not activ
+	{// or mounting all hdd partitions if ide interface is not activ
 		unmountAll();
 	}
 		
@@ -2294,7 +2273,6 @@ void CDriveSetup::mkMounts()
 				mount_entry += " " + mp;
 				v_mount_entries.push_back(mount_entry);
 			}
-
 		}
 	}
 	if (!mkFstab(true))
@@ -2304,126 +2282,119 @@ void CDriveSetup::mkMounts()
 // collects spported and available filsystem modules, writes to vector v_fs_modules
 void CDriveSetup::loadFsModulList()
 {
-	DIR *mdir;
-	struct dirent *entry;
 	struct utsname u;
-
 	string k_name;
 	if (!uname(&u))
 		k_name = u.release;
 
-	string modulpath = "/lib/modules/" + k_name + "/kernel/fs";
+	//possible paths of modules
+	string modulpath[] 	= {"/lib/modules/" + k_name + "/kernel/fs", "var/lib/modules"};
+	//possible filesystems
+	string mod[] 		= {"ext2", "ext3", "reiserfs", "xfs", "vfat"};
 
-	mdir = opendir(modulpath.c_str());
-	if (!mdir) 
-	{
-		cerr<<"[drive setup] "<<__FUNCTION__ <<": error open directory "<<modulpath<< " "<< strerror(errno)<<endl;
-		return ;
-	}
+	uint dir_count = sizeof(modulpath) / sizeof(modulpath[0]);
 
-	// cleanup  collection
+	DIR *mdir[dir_count];
+
+	//cleanup  collection
 	v_fs_modules.clear();
 
-	// scan module dir
-	if (mdir)
+	for (uint i = 0; i < dir_count; i++)
 	{
-		do
+		mdir[i] = opendir(modulpath[i].c_str());
+		if (!mdir[i]) 
 		{
-		entry = readdir(mdir);
-			if (entry)
+			cerr<<"[drive setup] "<<__FUNCTION__ <<": can't open directory "<<modulpath[i]<< " "<< strerror(errno)<<endl;
+		}
+		closedir(mdir[i]);
+		
+		for (uint ii = 0; ii < sizeof(mod) / sizeof(mod[0]); ii++)
+		{
+			//generating possible modules
+			string path_var = modulpath[i] + "/" + mod[ii] + M_TYPE;
+					
+			if (access(path_var.c_str(), R_OK)==0)
 			{
- 				string dir_x = entry->d_name;
-				if (	(dir_x == "ext3") 	||
-					(dir_x == "ext2") 	||
-					(dir_x == "reiserfs")	||
-					(dir_x == "xfs")  	||
-					(dir_x == "ntfs")  	||
-					(dir_x == "hpfs")  	||
-					(dir_x == "vfat"))  {
-					v_fs_modules.push_back(dir_x);
+				//found module in /var, are preferred
+				v_fs_modules.push_back(mod[ii]);
+			}
+			else
+			{
+				string path_root = modulpath[i] + "/" + mod[ii] + "/" + mod[ii] + M_TYPE;
+				if (access(path_root.c_str(), R_OK)==0) 
+				{
+					//found module in root
+					v_fs_modules.push_back(mod[ii]);
 				}
 			}
-		} while (entry);
+		}
 	}
-	closedir(mdir);
 
 	// last fs must be swap
-	v_fs_modules.push_back("swap");
-
-// 	// for log, show available filesystem moduls
-// 	unsigned int i = 0;
-// 	string modules = "[drive setup] available filesystem modules: ";
-// 	while (i < v_fs_modules.size()){
-// 		modules += v_fs_modules[i];
-// 		modules += char(32);
-// 		i++;
-// 	}
-// 	cout<<modules<<endl;
-
+	if (!haveSwap())
+		v_fs_modules.push_back("swap");
 }
 
 // collects spported and available mmc modules, writes to vector v_mmc_modules, return true on success
 void CDriveSetup::loadMmcModulList()
 {
-	DIR *mdir;
-	struct dirent *entry;
 	struct utsname u;
-
 	string k_name;
 	if (!uname(&u))
 		k_name = u.release;
 
-	string modulpath = "/lib/modules/" + k_name + "/misc";
+	//possible paths of modules
+	string modulpath[] 	= {"/lib/modules/" + k_name + "/misc", "var/lib/modules"};
+	//possible mmc modules
+	string mod[] 		= {M_MMC, M_MMC2, M_MMCCOMBO};
 
-	mdir = opendir(modulpath.c_str());
-	if (!mdir) 
-	{
-		cerr<<"[drive setup] "<<__FUNCTION__ <<": error while open "<<modulpath<< endl;
-		return ;
-	}
+	uint dir_count = sizeof(modulpath) / sizeof(modulpath[0]);
 
-	// cleanup  collection
+	DIR *mdir[dir_count];
+
+	//cleanup  collection
 	v_mmc_modules.clear();
 
-	// scan module dir
-	if (mdir)
+	for (uint i = 0; i < dir_count; i++)
 	{
-		do
+		mdir[i] = opendir(modulpath[i].c_str());
+		if (!mdir[i]) 
 		{
-		entry = readdir(mdir);
-			if (entry)
-			{
- 				string mod_x = entry->d_name;
-				if (	(mod_x == MF_MMC)  	||
-					(mod_x == MF_MMC2) 	||
-					(mod_x == MF_MMCCOMBO))  {
-					string::size_type pos = mod_x.find( ".", 0 );
-					mod_x.erase(pos);
-					v_mmc_modules.push_back(mod_x);
-				}
-			}
-		} while (entry);
-	}
-	closedir(mdir);
+			cerr<<"[drive setup] "<<__FUNCTION__ <<": can't open directory "<<modulpath[i]<< " "<< strerror(errno)<<endl;
+		}
+		closedir(mdir[i]);
 
+
+		// scan module dir 
+		for (uint ii = 0; ii < sizeof(mod) / sizeof(mod[0]); ii++)
+		{
+			//generating possible modules
+			string path_var = modulpath[i] + "/" + mod[ii] + M_TYPE;
+					
+			if (access(path_var.c_str(), R_OK)==0)
+			{
+				//found module in /var, are preferred
+				v_mmc_modules.push_back(mod[ii]);
+			}
+			else
+			{
+				string path_root = modulpath[i] + "/" + mod[ii] + "/" + mod[ii] + M_TYPE;
+				if (access(path_root.c_str(), R_OK)==0) 
+				{
+					//found module in root
+					v_mmc_modules.push_back(mod[ii]);
+				}
+			}			
+		}		
+	}
+
+	// add the off option to collection
 	string def_opt = g_Locale->getText(LOCALE_OPTIONS_OFF);
 	v_mmc_modules.push_back(def_opt);
 	
 	//set mmc modul name setting to off, if no modul available
 	if (v_mmc_modules.size() == 1) 
 		strcpy(d_settings.drive_mmc_module_name, def_opt.c_str()); 
-
-
-////	for debugging, show available filesystem moduls
-// 	unsigned int i = 0;
-// 	string modules = "[drive setup] available mmc modules: ";
-// 	while (i < v_mmc_modules.size()){
-// 		modules += v_mmc_modules[i];
-// 		modules += char(32);
-// 		i++;
-// 	}
-// 	cout<<modules<<endl;
-
 }
 
 // returns name of current used mmc modul
@@ -3409,70 +3380,87 @@ bool CDriveSetup::mountPartition(const int& device_num /*MASTER||SLAVE*/, const 
 		details += g_Locale->getText(mn_data[device_num].entry_locale);
 		details += "\nPartition: " + iToString(part_number+1);
 
-	// check user input for mountpoint and filesystem
-	if (isActivePartition(partname))
-	{
-
-		//invalid or no mountpoint definied
-		if (mountpoint.empty() || mountpoint == "/" || mountpoint == "/root")
-		{
-			string  msg = g_Locale->getText(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_NO_MOUNTPOINT);
-				msg += details;
-			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
-			return false;
-		}
-		//no filesystem definied
-		if (fs_name.empty())
-		{
-			string  msg = g_Locale->getText(LOCALE_DRIVE_SETUP_MSG_PARTITION_CREATE_FAILED_NO_FS_DEFINIED);
-				msg += details;
-			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
-			return false;
-		}
-	}
-
 	// exit if no available or not set to activ
 	if((access(partname.c_str(), R_OK) !=0) || (!d_settings.drive_partition_activ[device_num][part_number])) 	
 	{
 		cout<<"[drive setup] "<<__FUNCTION__ <<":  "<<partname<< " partition not activ, nothing to do...ok"<< endl;
  		return ret;
 	}
-	
-	// mounting
-	if (fs_name != "swap")
-	{ 
-		if (isMountedPartition(partname)) 
+
+	// check user input for mountpoint and filesystem
+	if (isActivePartition(partname))
+	{
+		//check mountpoint, if invalid or no mountpoint definied, show message
+		DIR   *mpCheck;
+		mpCheck = opendir(mountpoint.c_str());
+		if (mountpoint.empty() || mountpoint == "/" || mountpoint == "/root" || mpCheck == NULL)
 		{
-// 			cout<<"[drive setup] mount "<<partname<< " allready mounted...ok"<< endl;
-			ret = true;
-		}
-		else 
-		{ 
-			if (initModul(fs_name, false)) //load first the fs modul
-			{ 
-				if (mount(partname.c_str(),  mountpoint.c_str() , fs_name.c_str(), 16 , NULL)!=0) //mount partition
+			//no filesystem definied
+			if (fs_name.empty() || mountpoint.empty() || mpCheck == NULL)
+			{
+				// it could be a swap partition, do mount, if it fails, show message
+				ret_num = swapon(partname.c_str(), 0/*SWAPFLAGS=0*/);
+				if (ret_num!=0) 
 				{
-					cerr<<"[drive setup] "<<__FUNCTION__ <<":  error while mount: " << partname<<" "<<strerror(errno)<<endl;
+					cerr<<"[drive setup] "<<__FUNCTION__ <<":  swapon: "<<strerror(errno)<< " " << partname<<endl;
+					neutrino_locale_t l_msg = fs_name.empty() ? LOCALE_DRIVE_SETUP_MSG_PARTITION_CREATE_FAILED_NO_FS_DEFINIED : LOCALE_DRIVE_SETUP_PARTITION_MOUNT_NO_MOUNTPOINT;
+					string  msg = g_Locale->getText(l_msg);
+						msg += details;
+					ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
+					return false;
+				}
+				else
+				{
+					//swapon was successfully, set fsname to swap and commit to settings
+					strcpy(d_settings.drive_partition_fstype[device_num][part_number], "swap");
+					d_settings.drive_partition_mountpoint[device_num][part_number] = "none";
+					loadFsModulList(); 
+					return true;
+				}
+			}
+			
+			string  msg = g_Locale->getText(LOCALE_DRIVE_SETUP_PARTITION_MOUNT_NO_MOUNTPOINT) + details;
+			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str(), width, msg_timeout, NEUTRINO_ICON_ERROR);
+			return false;
+		}
+		closedir( mpCheck );
+				
+		// mounting
+		if (fs_name != "swap")
+		{ 
+			if (isMountedPartition(partname)) 
+			{
+	// 			cout<<"[drive setup] mount "<<partname<< " allready mounted...ok"<< endl;
+				ret = true;
+			}
+			else 
+			{ 
+				if (initModul(fs_name, false)) //load first the fs modul
+				{ 
+					if (mount(partname.c_str(),  mountpoint.c_str() , fs_name.c_str(), 16 , NULL)!=0) //mount partition
+					{
+						cerr<<"[drive setup] "<<__FUNCTION__ <<":  error while mount: " << partname<<" "<<strerror(errno)<<endl;
+						ret = false;
+					}
+				// TODO screen message on error
+				}
+			}
+	
+		}
+		else
+		{ // swapon
+			if (isSwapPartition(partname)) 
+			{
+				ret = true;
+			}
+			else 
+			{
+				ret_num = swapon(partname.c_str(), 0/*SWAPFLAGS=0*/);
+				if (ret_num!=0) 
+				{
+					cerr<<"[drive setup] "<<__FUNCTION__ <<":  swapon: "<<strerror(errno)<< " " << partname<<endl;
 					ret = false;
 				}
-			// TODO screen message on error
-			}
-		}
-
-	}
-	else
-	{ // swapon
-		if (isSwapPartition(partname)) 
-		{
-			ret = true;
-		}
-		else 
-		{
-			ret_num = swapon(partname.c_str(), 0/*SWAPFLAGS=0*/);
-			if (ret_num!=0) 
-			{
-				cerr<<"[drive setup] "<<__FUNCTION__ <<":  swapon: "<<strerror(errno)<< " " << partname<<endl;
-				ret = false;
 			}
 		}
 	}
@@ -3697,7 +3685,7 @@ string CDriveSetup::getTimeStamp()
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.11 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.12 $");
 }
 
 // returns text for initfile headers
@@ -3798,10 +3786,13 @@ string CDriveSetup::getInitFileModulEntries(bool with_unload_entries)
 	}
 
 	// add init commands to enable the ide interface
-	for (unsigned int i=0; i<(v_init_ide_L_cmds.size()) ; ++i) 
+	if (d_settings.drive_activate_ide != IDE_OFF)
 	{
-		load_entries += v_init_ide_L_cmds[i];
-		load_entries += "\n\t\t";
+		for (unsigned int i=0; i<(v_init_ide_L_cmds.size()) ; ++i) 
+		{
+			load_entries += v_init_ide_L_cmds[i];
+			load_entries += "\n\t\t";
+		}
 	}
 
 	//add commands to activate mmc

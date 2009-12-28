@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.h,v 1.7 2009/12/27 16:41:40 dbt Exp $
+	$Id: drive_setup.h,v 1.8 2009/12/28 23:55:29 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -249,7 +249,8 @@ class CDriveSetup : public CMenuTarget
 		bool initFsDrivers(bool do_unload_first = true);
 		bool loadHddParams(const bool do_reset = false);
 		bool initIdeDrivers(const bool irq6 = false);
-		bool initModul(const std::string& modulname, bool do_unload_first = true);
+		bool initModulDeps(const std::string& modulname);
+		bool initModul(const std::string& modul_name, bool do_unload_first = true);
 		bool mountPartition(const int& device_num /*MASTER || SLAVE || MMCARD*/, const int& part_number,  const std::string& fs_name, const std::string& mountpoint);
 		bool mountDevice(const int& device_num);
 		bool mountAll();
@@ -339,6 +340,7 @@ class CDriveSetup : public CMenuTarget
 		std::string getInitFileHeader(std::string & filename);
 		std::string getInitFileMountEntries();
 		std::string getInitFileModulEntries(bool with_unload_entries = false);
+		std::string getInitModulLoadStr(const std::string& modul_name);
 		std::string getPartEntryString(std::string& partname);
 
 		//helper
