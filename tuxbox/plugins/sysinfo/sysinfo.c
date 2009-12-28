@@ -1,5 +1,5 @@
 /*
- * $Id: sysinfo.c,v 1.3 2009/12/27 12:08:02 rhabarber1848 Exp $
+ * $Id: sysinfo.c,v 1.4 2009/12/28 12:35:44 dbluelle Exp $
  *
  * sysinfo - d-box2 linux project
  *
@@ -287,7 +287,11 @@ int init_fb (void)
 #else
 		desc.font.face_id = FONT;
 #endif
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
+		desc.image_type = ftc_image_mono;
+#else
 		desc.flags = FT_LOAD_MONOCHROME;
+#endif
 
 		if(!(lbb = malloc(var_screeninfo.xres*var_screeninfo.yres)))
 		{

@@ -1,5 +1,5 @@
 /*
- * $Id: sysinfo.h,v 1.3 2009/12/27 12:08:02 rhabarber1848 Exp $
+ * $Id: sysinfo.h,v 1.4 2009/12/28 12:35:44 dbluelle Exp $
  *
  * sysinfo - d-box2 linux project
  *
@@ -123,7 +123,11 @@ FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache		cache;
 FTC_SBit		sbit;
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
+FTC_Image_Desc		desc;
+#else
 FTC_ImageTypeRec	desc;
+#endif
 FT_Face			face;
 FT_UInt			prev_glyphindex;
 FT_Bool			use_kerning;

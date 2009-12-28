@@ -22,7 +22,11 @@ Pixel* ico_keybd_shifted = NULL;
 static	FT_Library		library = NULL;
 static	FTC_Manager		manager = NULL;
 static	FTC_SBitCache		cache;
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
+static	FTC_Image_Desc		desc;
+#else
 static	FTC_ImageTypeRec	desc;
+#endif
 static	FT_Face			face;
 
 #if (FREETYPE_MAJOR > 2 || (FREETYPE_MAJOR == 2 && (FREETYPE_MINOR > 1 || (FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 8))))
