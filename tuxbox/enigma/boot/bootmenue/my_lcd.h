@@ -13,7 +13,10 @@
 #include FT_CACHE_H
 #include FT_CACHE_SMALL_BITMAPS_H
 #define FONT "/share/fonts/pakenham.ttf"
-
+/* tested with freetype 2.3.9, and 2.1.4 */
+#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 3
+#define FT_NEW_CACHE_API
+#endif
 
 typedef unsigned char raw_display_t[LCD_ROWS*8][LCD_COLS];
 

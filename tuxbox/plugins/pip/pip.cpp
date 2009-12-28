@@ -16,6 +16,11 @@
 #include FT_CACHE_H
 #include FT_CACHE_SMALL_BITMAPS_H
 
+/* tested with freetype 2.3.9, and 2.1.4 */
+#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 3
+#define FT_NEW_CACHE_API
+#endif
+
 extern "C"
 {
     #include <mpeg2.h>
@@ -1250,7 +1255,11 @@ void RenderString(char *string, int sx, int sy, int maxwidth, int alignment, int
 
     // set size
 
+#ifdef FT_NEW_CACHE_API
+	desc.width = desc.height = 20;
+#else
 	desc.font.pix_width = desc.font.pix_height = 20;
+#endif
 
     // alignment
 
@@ -2856,7 +2865,11 @@ void plugin_exec(PluginParam *Parameter)
 	    return;
 	}
 
+#ifdef FT_NEW_CACHE_API
+	desc.face_id = (char*)FONT;
+#else
 	desc.font.face_id = (char*)FONT;
+#endif
 #if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 	desc.image_type = ftc_image_mono;
 #else

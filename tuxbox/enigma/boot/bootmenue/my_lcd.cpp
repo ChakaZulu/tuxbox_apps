@@ -78,7 +78,11 @@ CLCDDisplay::CLCDDisplay()
 
 	use_kerning = FT_HAS_KERNING(face);
 
+#ifdef FT_NEW_CACHE_API
+	desc.face_id = (char*)FONT;
+#else
 	desc.font.face_id = (char*)FONT;
+#endif
 #if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 	desc.type = ftc_image_mono;
 #else
@@ -340,7 +344,11 @@ void CLCDDisplay::RenderString(std::string word, int sx, int sy, int maxwidth, i
 	int stringlen, ex, charwidth;
 	unsigned char *string = ((unsigned char*)word.c_str());
 
+#ifdef FT_NEW_CACHE_API
+	desc.width = desc.height = size;
+#else
 	desc.font.pix_width = desc.font.pix_height = size;
+#endif
 
 	if(layout != LEFT)
 	{
