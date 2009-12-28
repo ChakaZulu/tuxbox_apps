@@ -364,6 +364,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 #else
 	err = FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size);
 #endif
+	if (err != 0)
 	{
 		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed! (0x%x)\n", err);
 		pthread_mutex_unlock(&renderer->render_mutex);
