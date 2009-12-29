@@ -301,7 +301,7 @@ drive_setup.hdd_temp Temperatur
 drive_setup.head IDE-Interface / HDD / MMC
 drive_setup.ide_activate IDE-Interface
 drive_setup.ide_activate_irq6 aktiv mit IRQ6
-drive_setup.ide_activate_on aktiv mit standard IRQ
+drive_setup.ide_activate_on aktiv mit Standard IRQ
 drive_setup.mmc MMC
 drive_setup.model_unknown Modell unbekannt
 drive_setup.mount_mtdblock_partitions mtd Partitionen einbeziehen
