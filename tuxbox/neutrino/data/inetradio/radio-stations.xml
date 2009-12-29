@@ -260,6 +260,11 @@
 		/>
 
 	<station
+		url="http://stream.srg-ssr.ch/rsc_de/mp3_128.m3u"
+		name="Radio Swiss Classic"
+		/>
+
+	<station
 		url="http://sc9.ams.llnw.net:80/stream/gffstream_w20a.m3u"
 		name="Nordwestradio"
 		/>
