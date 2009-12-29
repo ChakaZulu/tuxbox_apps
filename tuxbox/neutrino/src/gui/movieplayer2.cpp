@@ -539,7 +539,7 @@ CURLcode sendGetRequest (const std::string & url, std::string & response)
    returns a file descriptor to the stream or -1 */
 int box2box_request_stream(const char *fn)
 {
-	char tmpbuf[512];
+	char tmpbuf[1024];
 	char id_s[33]; // long long hex == 32 char's + \0
 	int fd = -1;
 	char *ip;
@@ -647,6 +647,7 @@ int box2box_request_stream(const char *fn)
 		g_currentapid = pida;
 		DBG("isstream == true, numpida: %d pida: %d, pidv: %d\n", g_numpida, pida, pidv);
 	}
+	fclose(fp);
 	return fd;
 
  nostream:
@@ -3453,7 +3454,7 @@ static void checkAspectRatio (int /*vdec*/, bool /*init*/)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.65 $");
+	return imageinfo.getModulVersion("Movieplayer2 ","$Revision: 1.66 $");
 }
 
 void CMoviePlayerGui::showFileInfoVLC()
