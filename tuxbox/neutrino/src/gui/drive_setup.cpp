@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.12 2009/12/28 23:55:29 dbt Exp $
+	$Id: drive_setup.cpp,v 1.13 2009/12/29 01:03:12 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -203,6 +203,13 @@ CDriveSetup::CDriveSetup():configfile('\t')
 
 	msg_timeout 	= g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR];
 	msg_icon 	= NEUTRINO_ICON_PARTITION;
+
+	//generate action key strings for device selection
+	for (int i = 0; i < MAXCOUNT_DRIVE; i++)
+	{
+		string s_i = iToString(i);
+		sel_device_num_actionkey[i] = "sel_device_" + s_i;
+	}
 
 	//generate action key strings for partition operations
 	for (int i = 0; i<MAXCOUNT_PARTS; i++)
@@ -3685,7 +3692,7 @@ string CDriveSetup::getTimeStamp()
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.12 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.13 $");
 }
 
 // returns text for initfile headers
