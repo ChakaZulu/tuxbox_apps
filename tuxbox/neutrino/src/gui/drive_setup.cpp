@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.13 2009/12/29 01:03:12 dbt Exp $
+	$Id: drive_setup.cpp,v 1.14 2009/12/29 22:48:13 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -118,7 +118,9 @@ TODO:
 #define SWAPOFF		"swapoff "
 #define MKSWAP		"mkswap "
 #define DISCTOOL	"fdisk "
-#define HDDTEMP		"hddtemp"
+#define HDDTEMP		"hddtemp "
+#define MOUNT		"mount "
+#define UMOUNT		"umount "
 
 #define DEVNULL 	" 2>/dev/null "
 
@@ -517,7 +519,7 @@ void CDriveSetup::showHddSetupMain()
 	m->addItem(m2); // show ide options on/off
 
 	// mmc settings
-	bool is_mmc_supported = (v_mmc_modules.size()>1) ? true : false;
+	bool is_mmc_supported = (v_mmc_modules.size()!=0) ? true : false;
 	if (is_mmc_supported)  //hide mmc item if no modul available
 	{
 		sprintf(d_settings.drive_mmc_module_name, "%s", getUsedMmcModulName().c_str());
@@ -526,6 +528,9 @@ void CDriveSetup::showHddSetupMain()
 		{
 			m7->addOption(v_mmc_modules[i].c_str());
 		}
+		//add option "off"
+		m7->addOption(g_Locale->getText(LOCALE_OPTIONS_OFF));
+
 		// show mmc options
 		m->addItem (m7);
 	}
@@ -535,16 +540,26 @@ void CDriveSetup::showHddSetupMain()
 	// extended settings
 	CMenuWidget 	*extsettings = new CMenuWidget(LOCALE_DRIVE_SETUP_HEAD, msg_icon, width);
 	m->addItem (new CMenuForwarder(LOCALE_DRIVE_SETUP_ADVANCED_SETTINGS, true, NULL, extsettings, NULL, CRCInput::RC_1));
-	extsettings->addItem (new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_DRIVE_SETUP_ADVANCED_SETTINGS));
 
-	// extended settings:intro entries
-	extsettings->addItem(GenericMenuSeparator);
-	extsettings->addItem(GenericMenuBack);
-	extsettings->addItem (new CMenuSeparator(CMenuSeparator::ALIGN_CENTER | CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_DRIVE_SETUP_FSTAB));
-
-	// extended settings:fstab mode
-	extsettings->addItem (new CMenuOptionChooser(LOCALE_DRIVE_SETUP_FSTAB_USE, &d_settings.drive_use_fstab, OPTIONS_ON_OFF_OPTIONS, OPTIONS_ON_OFF_OPTION_COUNT, true));
-	extsettings->addItem (new CMenuOptionChooser(LOCALE_DRIVE_SETUP_MOUNT_MTDBLOCK_PARTITIONS, &d_settings.drive_mount_mtdblock_partitions, OPTIONS_YES_NO_OPTIONS, OPTIONS_YES_NO_OPTION_COUNT, true));
+		extsettings->addItem (new CMenuSeparator(CMenuSeparator::ALIGN_LEFT | CMenuSeparator::SUB_HEAD | CMenuSeparator::STRING, LOCALE_DRIVE_SETUP_ADVANCED_SETTINGS));
+	
+		// extended settings:intro entries
+		extsettings->addItem(GenericMenuSeparator);
+		extsettings->addItem(GenericMenuBack);
+		extsettings->addItem (new CMenuSeparator(CMenuSeparator::ALIGN_CENTER | CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_DRIVE_SETUP_FSTAB));
+	
+		// extended settings:fstab settings
+		bool active_item = d_settings.drive_use_fstab;
+		CMenuOptionChooser *oj_auto_fs = new CMenuOptionChooser(LOCALE_DRIVE_SETUP_FSTAB_USE_AUTO_FS, &d_settings.drive_use_fstab_auto_fs, OPTIONS_ON_OFF_OPTIONS, OPTIONS_ON_OFF_OPTION_COUNT, active_item);
+		CMenuOptionChooser *oj_use_mtd = new CMenuOptionChooser(LOCALE_DRIVE_SETUP_MOUNT_MTDBLOCK_PARTITIONS, &d_settings.drive_mount_mtdblock_partitions, OPTIONS_YES_NO_OPTIONS, OPTIONS_YES_NO_OPTION_COUNT, active_item);
+		CDriveSetupFstabNotifier *fstabNotifier;
+		fstabNotifier = new CDriveSetupFstabNotifier(oj_auto_fs, oj_use_mtd);
+		CMenuOptionChooser *oj_fstab = new CMenuOptionChooser(LOCALE_DRIVE_SETUP_FSTAB_USE, &d_settings.drive_use_fstab, OPTIONS_ON_OFF_OPTIONS, OPTIONS_ON_OFF_OPTION_COUNT, true, fstabNotifier);
+	
+		extsettings->addItem (oj_fstab);	
+		extsettings->addItem (oj_auto_fs);
+		extsettings->addItem (oj_use_mtd);
+		// --------------------------------
 
 
 	// show select separator, only visible if any device activ
@@ -1804,14 +1819,16 @@ bool CDriveSetup::saveHddSetup()
 			res = false;
 	}
 
+	//mount all parts
+	mkMounts();
+
 	// fstab
 	if (d_settings.drive_use_fstab) 
 	{
 		if (!mkFstab())
 			res = false;
 	}
-	else
-		mkMounts();
+	
 
 #ifdef ENABLE_NFSSERVER
 	// exports
@@ -1898,27 +1915,12 @@ bool CDriveSetup::writeInitFile(const bool clear)
 		string md_txt = getInitFileModulEntries();
 		initfile[INIT_FILE_MODULES] << (md_txt)<<endl;
 
-		// prepare mount entries
-		if (d_settings.drive_use_fstab) 
-		{
-			string 	m_txt =  getInitFileMountEntries();
-			initfile[INIT_FILE_MOUNTS] <<(m_txt)<<endl; // using fstab
-		}
-		else 
-		{
-			//initfile <<("mount -a")<<endl; 
-			initfile[INIT_FILE_MOUNTS] <<(sys_mounts)<<endl;
-		}
+		// write mount entries
+		string 	m_txt =  getInitFileMountEntries();
+		initfile[INIT_FILE_MOUNTS] <<(m_txt)<<endl;
 
-		//don't using fstab, write mount entries to init file
-		if (!d_settings.drive_use_fstab) 
-		{ 
-			for (unsigned int m=0; m<(v_mount_entries.size()) ; ++m) 
-			{
-				initfile[INIT_FILE_MOUNTS] << v_mount_entries[m]<<endl;
-			}
-		}
-		
+		// write sys mount entries, if available (optional)
+		initfile[INIT_FILE_MOUNTS] <<(sys_mounts)<<endl;	
 	}
 
 
@@ -2214,9 +2216,10 @@ bool CDriveSetup::mkFstab(bool write_defaults_only)
 				else if (isMountedPartition(partname)) 
 				{
 					string mp = getMountInfo(partname, MOUNTPOINT);
+					string fs = (d_settings.drive_use_fstab_auto_fs ? "auto" : d_settings.drive_partition_fstype[i][ii]);
 					mount_entry = partname;
-					mount_entry += " ";
-					mount_entry += mp + " auto rw,sync 0 0"; // TODO setup for fstab mount options
+					mount_entry += char(32);
+					mount_entry += mp + char(32) + fs +" rw,sync 0 0"; // TODO setup for fstab mount options
 					v_fstab_entries.push_back(mount_entry);
 				}
 			}
@@ -2244,46 +2247,17 @@ bool CDriveSetup::mkFstab(bool write_defaults_only)
 	return true;
 }
 
-// generates mount entries for init file, returns true on success
+//mount all devices, if any device activated
 void CDriveSetup::mkMounts()
 {	
-	string cur_mmc = getUsedMmcModulName();
-	bool mmc_in_use = (!cur_mmc.empty()) ? true : false;
-
-	if ((d_settings.drive_activate_ide != IDE_OFF) || (mmc_in_use)) 
-	{// first mounting all hdd partitions if ide interface is activ
+	if (d_settings.drive_activate_ide != IDE_OFF || isMmcActive()) 
+	{//first mounting all hdd partitions if ide interface is activ or mount mmc if any device activated
 		mountAll();
 	}
 	else 
-	{// or mounting all hdd partitions if ide interface is not activ
+	{//or mounting all devices if nothing activated
 		unmountAll();
 	}
-		
-	// collecting mount entries
-	for (unsigned int i = 0; i < MAXCOUNT_DRIVE; i++) 
-	{
-		for (unsigned int ii = 0; ii < MAXCOUNT_PARTS; ii++) 
-		{
-			string partname = getPartName(i,ii);
-			string mount_entry;
-			if (isSwapPartition(partname)) 
-			{
-				mount_entry = "swapon ";
-				mount_entry += partname;
-				v_mount_entries.push_back(mount_entry);
-			}
-			else if (isMountedPartition(partname)) 
-			{
-				string mp = getMountInfo(partname, MOUNTPOINT);
-				mount_entry = "mount ";
-				mount_entry += partname;
-				mount_entry += " " + mp;
-				v_mount_entries.push_back(mount_entry);
-			}
-		}
-	}
-	if (!mkFstab(true))
-		cerr<<"[drive setup] "<<__FUNCTION__ <<": generating default mount entries in fstab failed..."<<endl;
 }
 
 // collects spported and available filsystem modules, writes to vector v_fs_modules
@@ -2319,24 +2293,20 @@ void CDriveSetup::loadFsModulList()
 		{
 			//generating possible modules
 			string path_var = modulpath[i] + "/" + mod[ii] + M_TYPE;
+			string path_root = modulpath[i] + "/" + mod[ii] + "/" + mod[ii] + M_TYPE;
 					
-			if (access(path_var.c_str(), R_OK)==0)
+			if (access(path_var.c_str(), R_OK)==0 || access(path_root.c_str(), R_OK)==0)
 			{
-				//found module in /var, are preferred
+				//add found module
 				v_fs_modules.push_back(mod[ii]);
-			}
-			else
-			{
-				string path_root = modulpath[i] + "/" + mod[ii] + "/" + mod[ii] + M_TYPE;
-				if (access(path_root.c_str(), R_OK)==0) 
-				{
-					//found module in root
-					v_fs_modules.push_back(mod[ii]);
-				}
 			}
 		}
 	}
 
+	//sort modules and remove possible double entries
+	sort(v_fs_modules.begin(), v_fs_modules.end());
+	v_fs_modules.resize(unique(v_fs_modules.begin(), v_fs_modules.end()) - v_fs_modules.begin());
+	
 	// last fs must be swap
 	if (!haveSwap())
 		v_fs_modules.push_back("swap");
@@ -2377,31 +2347,19 @@ void CDriveSetup::loadMmcModulList()
 		{
 			//generating possible modules
 			string path_var = modulpath[i] + "/" + mod[ii] + M_TYPE;
-					
-			if (access(path_var.c_str(), R_OK)==0)
+			string path_root = modulpath[i] + "/" + mod[ii] + "/" + mod[ii] + M_TYPE;
+		
+			if (access(path_var.c_str(), R_OK)==0 || access(path_root.c_str(), R_OK)==0)
 			{
-				//found module in /var, are preferred
+				//add found module
 				v_mmc_modules.push_back(mod[ii]);
 			}
-			else
-			{
-				string path_root = modulpath[i] + "/" + mod[ii] + "/" + mod[ii] + M_TYPE;
-				if (access(path_root.c_str(), R_OK)==0) 
-				{
-					//found module in root
-					v_mmc_modules.push_back(mod[ii]);
-				}
-			}			
 		}		
 	}
 
-	// add the off option to collection
-	string def_opt = g_Locale->getText(LOCALE_OPTIONS_OFF);
-	v_mmc_modules.push_back(def_opt);
-	
-	//set mmc modul name setting to off, if no modul available
-	if (v_mmc_modules.size() == 1) 
-		strcpy(d_settings.drive_mmc_module_name, def_opt.c_str()); 
+	//sort modules and remove possible double entries
+	sort(v_mmc_modules.begin(), v_mmc_modules.end());
+	v_mmc_modules.resize(unique(v_mmc_modules.begin(), v_mmc_modules.end()) - v_mmc_modules.begin()); 
 }
 
 // returns name of current used mmc modul
@@ -3406,7 +3364,9 @@ bool CDriveSetup::mountPartition(const int& device_num /*MASTER||SLAVE*/, const 
 			if (fs_name.empty() || mountpoint.empty() || mpCheck == NULL)
 			{
 				// it could be a swap partition, do mount, if it fails, show message
-				ret_num = swapon(partname.c_str(), 0/*SWAPFLAGS=0*/);
+				if (!isSwapPartition(partname))
+					ret_num = swapon(partname.c_str(), 0/*SWAPFLAGS=0*/);
+
 				if (ret_num!=0) 
 				{
 					cerr<<"[drive setup] "<<__FUNCTION__ <<":  swapon: "<<strerror(errno)<< " " << partname<<endl;
@@ -3551,6 +3511,7 @@ void CDriveSetup::loadDriveSettings()
 	d_settings.drive_activate_ide = configfile.getInt32("drive_activate_ide", IDE_OFF);
 	strcpy(d_settings.drive_mmc_module_name, configfile.getString("drive_mmc_module_name", "").c_str());
 	d_settings.drive_use_fstab = configfile.getInt32("drive_use_fstab", YES);
+	d_settings.drive_use_fstab_auto_fs = configfile.getInt32("drive_use_fstab_auto_fs", YES);
 	d_settings.drive_mount_mtdblock_partitions = configfile.getInt32("drive_mount_mtdblock_partitions", NO);
 
 	char mountpoint_opt[31];
@@ -3618,6 +3579,7 @@ bool CDriveSetup::writeDriveSettings()
 	configfile.setInt32	( "drive_activate_ide", d_settings.drive_activate_ide);
 	configfile.setString	( "drive_mmc_module_name", d_settings.drive_mmc_module_name );
 	configfile.setInt32	( "drive_use_fstab", d_settings.drive_use_fstab );
+	configfile.setInt32	( "drive_use_fstab_auto_fs", d_settings.drive_use_fstab_auto_fs );
 	configfile.setInt32	( "drive_mount_mtdblock_partitions", d_settings.drive_mount_mtdblock_partitions );
 
 	char mountpoint_opt[31];
@@ -3692,7 +3654,7 @@ string CDriveSetup::getTimeStamp()
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.13 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.14 $");
 }
 
 // returns text for initfile headers
@@ -3712,32 +3674,61 @@ string CDriveSetup::getInitFileHeader(string& filename)
 	return s_init;
 }
 
+
 // returns commands for mount init file
 string CDriveSetup::getInitFileMountEntries()
 {
 	string mount_entries;
+	string swapon_entries;
+	string umount_entries;
+	string swapoff_entries;
 
 	for(int i = 0; i < MAXCOUNT_DRIVE; i++)
 	{
 		for(int ii = 0; ii < MAXCOUNT_PARTS; ii++)
 		{
 			string partname = getPartName(i, ii);
+			string mp = getMountInfo(partname, MOUNTPOINT);
 			if (isMountedPartition(partname)) 
+			{		
+				string fs_opt = "-t " + (string)d_settings.drive_partition_fstype[i][ii] + " ";
+				if (!d_settings.drive_use_fstab)
+					mount_entries += "\t\t" MOUNT + fs_opt + partname + " " + mp +"\n";
+
+				umount_entries += "\t\t" UMOUNT + mp + "\n";
+			}
+			else if (isSwapPartition(partname))
 			{
-				mount_entries += "\t\tumount " + getMountInfo(partname, MOUNTPOINT) + "\n";
+				if (!d_settings.drive_use_fstab)
+				{
+					swapon_entries += "\t\t" SWAPON + partname + "\n";
+					swapoff_entries += "\t\t" SWAPOFF + partname + "\n";
+				}
 			}
 		}
+	}
 
+	if (d_settings.drive_use_fstab)
+	{
+		mount_entries = "\t\t"; 
+		mount_entries += MOUNT;
+		mount_entries += "-a\n";
+		swapon_entries = "\t\t";
+		swapon_entries += SWAPON;
+		swapon_entries += "-a\n";
+		swapoff_entries = "\t\t";
+		swapoff_entries += SWAPOFF;
+		swapoff_entries += "-a\n";		
 	}
 
 	string 	m_txt =  "case $1 in\n";
 		m_txt += "\tstart)\n";
-		m_txt += "\t\tmount -a\n";
-		m_txt += "\t\tswapon -a\n";
+		m_txt += mount_entries;
+		m_txt += swapon_entries;
 		m_txt += "\t\t;;\n";
 		m_txt += "\tstop)\n";
-		m_txt += mount_entries;
-		m_txt += "\t\tswapoff -a\n";
+		m_txt += umount_entries;
+		m_txt += swapoff_entries;
 		m_txt += "\t\t;;\n";
 		m_txt += "esac\n";
 		m_txt += "exit 0";
@@ -4026,5 +4017,26 @@ bool CDriveSetupNFSHostNotifier::changeNotify(const neutrino_locale_t, void * Da
 	return true;
 }
 #endif
+
+// class CDriveSetupFstabNotifier
+//enable disable entry for fstab options 
+CDriveSetupFstabNotifier::CDriveSetupFstabNotifier( CMenuOptionChooser* oj1, CMenuOptionChooser* oj2)
+{
+	toDisable[0] = oj1;
+	toDisable[1] = oj2;
+}
+bool CDriveSetupFstabNotifier::changeNotify(const neutrino_locale_t, void * Data)
+{
+	for (uint i = 0; i < 2; i++)
+	{
+		if (*((int *)Data) == 0)
+		 	toDisable[i]->setActive(false);
+		else
+			toDisable[i]->setActive(true);
+	}
+
+	return true;
+}
+
 
 

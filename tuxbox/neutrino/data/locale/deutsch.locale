@@ -279,7 +279,8 @@ date.Tue  Di
 date.Wed  Mi
 drive_setup.advanced_settings Erweiterte Einstellungen
 drive_setup.fstab fstab
-drive_setup.fstab_use verwende fstab
+drive_setup.fstab_use Verwende fstab
+drive_setup.fstab_use_auto_fs Dateisystem automatisch zuweisen
 drive_setup.hdd_add_partition Partition hinzufügen
 drive_setup.hdd_add_swap_partition Swap-Partition anlegen
 drive_setup.hdd_cache Schreib-Cache

@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.h,v 1.8 2009/12/28 23:55:29 dbt Exp $
+	$Id: drive_setup.h,v 1.9 2009/12/29 22:48:13 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -55,6 +55,7 @@ struct SDriveSettings
 	std::string 	drive_partition_mountpoint[MAXCOUNT_DRIVE][MAXCOUNT_PARTS];
 
 	int 	drive_use_fstab;
+	int	drive_use_fstab_auto_fs;
 	int	drive_mount_mtdblock_partitions;
 
 	int 	drive_activate_ide;
@@ -225,7 +226,7 @@ class CDriveSetup : public CMenuTarget
 		std::vector<std::string> v_init_fs_U_cmds; 	//collection of fs unload commands
  		std::vector<std::string> v_partname; 		//collection of all partition names, 4 per device
 		std::vector<std::string> v_device_temp;  	//collection of temperature of devices
-		std::vector<std::string> v_mount_entries;	//collection of available mount entries
+// 		std::vector<std::string> v_mount_entries;	//collection of available mount entries
 		std::vector<std::string> v_hdparm_cmds;		//collection of available hdparm commands
 
 // 		unsigned long long device_size[MAXCOUNT_DRIVE]; // contains sizes of all devices
@@ -419,5 +420,14 @@ class CDriveSetupNFSHostNotifier : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void * Data);
 };
 #endif /*ENABLE_NFSSERVER*/
+
+class CDriveSetupFstabNotifier : public CChangeObserver
+{
+	private:
+		CMenuOptionChooser* toDisable[2];
+	public:
+		CDriveSetupFstabNotifier( CMenuOptionChooser*, CMenuOptionChooser*);
+		bool changeNotify(const neutrino_locale_t, void * Data);
+};
 
 #endif

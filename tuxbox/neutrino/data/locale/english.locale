@@ -280,6 +280,7 @@ date.Wed  Wed
 drive_setup.advanced_settings Advanced settings
 drive_setup.fstab fstab
 drive_setup.fstab_use use fstab
+drive_setup.fstab_use_auto_fs Filesystem auto detect
 drive_setup.hdd_add_partition Add partition
 drive_setup.hdd_add_swap_partition Add swap partition
 drive_setup.hdd_cache Writecache
