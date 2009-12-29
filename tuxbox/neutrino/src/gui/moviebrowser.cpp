@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.37 2009/11/22 15:36:52 rhabarber1848 Exp $
+	$Id: moviebrowser.cpp,v 1.38 2009/12/29 18:44:08 striper Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -366,7 +366,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.37 2009/11/22 15:36:52 rhabarber1848 Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.38 2009/12/29 18:44:08 striper Exp $\r\n");
 	init();
 }
 
@@ -3891,7 +3891,7 @@ void CMovieBrowser::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP13));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_RIGHT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP15));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
-	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_HELP, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
 #endif
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP1));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));

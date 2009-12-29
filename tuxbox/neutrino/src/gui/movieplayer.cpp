@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.181 2009/11/07 09:51:30 rhabarber1848 Exp $
+  $Id: movieplayer.cpp,v 1.183 2009/12/29 18:44:08 striper Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -50,7 +50,6 @@
 #endif
 #include <gui/bookmarkmanager.h>
 #include <gui/timeosd.h>
-#include <gui/movieviewer.h>
 #include <gui/imageinfo.h>
 
 #include <gui/widget/buttons.h>
@@ -130,7 +129,7 @@
 bool g_ZapitsetStandbyState = false;
 
 
-//TODO: calculate offset for jumping 1 second forward/backwards in stream
+// default offset for jumping 1 second forward/backwards in file
 // needs to be a multiplier of 188
 // do a VERY shitty approximation here...
 //long long minuteoffset = 557892632/2;
@@ -145,7 +144,6 @@ static bool isMovieBrowser = false;
 static bool movieBrowserDelOnExit = false;
 #endif /* ENABLE_MOVIEBROWSER */
 
-int g_speed = 1;
 #ifndef __USE_FILE_OFFSET64
 #error not using 64 bit file offsets
 #endif /* __USE_FILE__OFFSET64 */
@@ -166,9 +164,8 @@ static CMoviePlayerGui::state g_playstate;
 
 static off_t g_startposition = 0L;
 static off_t g_fileposition  = 0L;
-static off_t g_fileposition_old = 0;
-static off_t g_filepos_per_sec = SECONDOFFSET;
-
+static off_t g_filesize      = 0L;
+static off_t g_secondsize    = SECONDOFFSET;
 static int   g_jumpseconds   = 0;
 
 unsigned short g_apids[10];
@@ -177,19 +174,16 @@ unsigned short g_numpida=0;
 unsigned int   g_currentapid = 0;
 unsigned int   g_currentac3  = 0;
 unsigned int   g_apidchanged = 0;
-unsigned int   g_has_ac3 = false;
-unsigned short g_prozent=0;
+int            g_reclength   = 0;
+int            g_percent     = 0;
 #if HAVE_DVB_API_VERSION >=3
 video_size_t   g_size;
 #endif // HAVE_DVB_API_VERSION >=3
 
-bool  g_showaudioselectdialog = false;
-short g_lcdSetting = -1;
-bool  g_lcdUpdateTsMode = false;
+bool g_showaudioselectdialog = false;
 
 CFileList filelist;
-
-bool g_show_movieviewer = true;
+int filelistIndex = -1;
 
 
 //------------------------------------------------------------------------
@@ -462,10 +456,12 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 	else if(actionKey=="dvdplayback")
 	{
+		CLCD::getInstance()->setMode (CLCD::MODE_MOVIE);
 		PlayStream (STREAMTYPE_DVD);
 	}
 	else if(actionKey=="vcdplayback")
 	{
+		CLCD::getInstance()->setMode (CLCD::MODE_MOVIE);
 		PlayStream (STREAMTYPE_SVCD);
 	}
 	else if(actionKey=="tsplayback")
@@ -1006,8 +1002,9 @@ void *
 PlayStreamThread (void *mrl)
 {
 	//-- lcd stuff --
-	int cPercent   = 0;
-	int lPercent   = -1;
+	int last_percent = -1;
+	g_percent = 0;
+
 	CURLcode httpres;
 	struct dmx_pes_filter_params p;
 	ssize_t wr;
@@ -1153,7 +1150,6 @@ PlayStreamThread (void *mrl)
 					}
 					// unpause VLC
 					httpres = sendGetRequest(unpauseurl, response);
-					g_speed = 1;
 					break;
 				case CMoviePlayerGui::SKIP:
 					{
@@ -1227,16 +1223,16 @@ PlayStreamThread (void *mrl)
 						
 						//-- lcd progress bar --
 						if (length == 0) {
-								length = VlcGetStreamLength();
+							length = VlcGetStreamLength();
 						}
-						if (g_lcdSetting != 1 && length != 0) {							
+						if (length != 0) {
 							if (counter == 0 || counter == 120) {
-    					  		cPercent = (VlcGetStreamTime() * 100) / length;
-    					  		if (lPercent != cPercent)	{
-    						  		lPercent = cPercent;
-    						  		CLCD::getInstance()->showPercentOver(lPercent, true, CLCD::MODE_MOVIE);
-    						  	}
-						  	   counter = 119;
+								g_percent = (VlcGetStreamTime() * 100) / length;
+								if (last_percent != g_percent) {
+									last_percent = g_percent;
+									CLCD::getInstance()->showPercentOver(last_percent, true, CLCD::MODE_MOVIE);
+								}
+								counter = 119;
 							} else {
 								counter--;
 							}
@@ -1266,7 +1262,6 @@ PlayStreamThread (void *mrl)
 					ioctl (dmxv, DMX_SET_PES_FILTER, &p);
 					ioctl (dmxv, DMX_START);
 					ioctl (dmxa, DMX_START);
-					g_speed = 1;
 					g_playstate = CMoviePlayerGui::PLAY;
 					break;
 				case CMoviePlayerGui::STOPPED:
@@ -1321,10 +1316,10 @@ PlayStreamThread (void *mrl)
 
 //== updateLcd ==
 //===============
-void updateLcd(const std::string & sel_filename)
+void updateLcd(const std::string & big, const std::string & small, const bool centered)
 {
 	static int   l_playstate = -1;
-	std::string  lcd = sel_filename;
+	std::string  lcd_small = small;
 	CLCD::AUDIOMODES playmode;
 
 	if(l_playstate == g_playstate) return;
@@ -1347,8 +1342,8 @@ void updateLcd(const std::string & sel_filename)
 			playmode = CLCD::AUDIO_MODE_PLAY;
 			break;
 	}
-	StrSearchReplace(lcd, "_", " ");
-	CLCD::getInstance()->setMovieInfo(playmode, "", lcd, false);
+	StrSearchReplace(lcd_small, "_", " ");
+	CLCD::getInstance()->setMovieInfo(playmode, big, lcd_small, centered);
 }
 
 // GMO snip start ...
@@ -1362,7 +1357,7 @@ void updateLcd(const std::string & sel_filename)
 #define PF_EMPTY      0
 #define PF_READY      1
 #define PF_LST_ITEMS  30
-#define PF_SKPOS_OFFS SECONDOFFSET*60
+#define PF_SKPOS_OFFS (g_secondsize*60)
 #define PF_JMP_END    0x7FFFFFFF
 
 #define SIZE_LINE_MAX 2047
@@ -2090,14 +2085,14 @@ void mp_bufferReset(MP_CTX *ctx, int jumpReq, bool abs)
 
     if(abs == false)
     {
-        ctx->jmp = ctx->pos + (jumpReq * SECONDOFFSET);
+        ctx->jmp = ctx->pos + (jumpReq * g_secondsize);
     }
     else
     {
         if(jumpReq == PF_JMP_END)
             ctx->jmp = ctx->fileSize - PF_SKPOS_OFFS;
         else
-            ctx->jmp = jumpReq * SECONDOFFSET;
+            ctx->jmp = jumpReq * g_secondsize;
     }
 
 	//-- check limits --
@@ -2346,6 +2341,7 @@ static void mp_checkEvent(MP_CTX *ctx)
             g_playstate = CMoviePlayerGui::PLAY;
             mp_bufferReset(ctx, g_jumpseconds, 1);
             break;
+
 		//-- jump forward/back --
 		//-----------------------
 		case CMoviePlayerGui::JF:
@@ -2357,8 +2353,12 @@ static void mp_checkEvent(MP_CTX *ctx)
 		//-- soft reset --
 		//----------------
 		case CMoviePlayerGui::SOFTRESET:
-			g_playstate = CMoviePlayerGui::PLAY;
-			mp_bufferReset(ctx);
+			g_playstate = CMoviePlayerGui::AUDIOSELECT;
+
+			//-- (live) stream can't be analyzed --
+			if(ctx->isStream)	break;
+
+			mp_analyze(ctx);
  			break;
 
 		//-- resync A/V --
@@ -2366,8 +2366,8 @@ static void mp_checkEvent(MP_CTX *ctx)
 		case CMoviePlayerGui::RESYNC:
 			g_playstate = CMoviePlayerGui::PLAY;
 			//mp_resync(ctx);
+			mp_bufferReset(ctx);
 			break;
-
 
 		//-- select audio track --
 		//------------------------
@@ -2376,18 +2376,14 @@ static void mp_checkEvent(MP_CTX *ctx)
 
 			//-- (live) stream should have 1 atrack only --
 			if(ctx->isStream)	break;
-			if(g_lcdSetting != -1)
-			{
-				g_lcdUpdateTsMode=true;
-			}
+
 if(g_settings.streaming_use_buffer)
 {
 			mp_selectAudio(ctx); // includes bufferReset request now !
 }
 else
 {
-			mp_analyze(ctx);
-        	mp_selectAudio(ctx);
+			mp_selectAudio(ctx);
 			mp_bufferReset(ctx);
 }
 			CLCD::getInstance()->setMovieAudio(ctx->ac3);
@@ -2582,6 +2578,7 @@ if(g_settings.streaming_use_buffer)
 		
 	//-- get file size --
 	ctx->fileSize = lseek (ctx->inFd, 0L, SEEK_END);
+	g_filesize = ctx->fileSize;
 		
 	//-- read 4 TS packets starting on synced pos --
 	mp_seekSync(ctx->inFd, 0);
@@ -2838,6 +2835,8 @@ void *mp_playFileMain(void *filename)
 				{
 					ctx->readSize = PF_BUF_SIZE/2;
 				}
+				ctx->fileSize = 0;
+				g_filesize    = 0;
 			}
 			else
 			{
@@ -2884,6 +2883,7 @@ void *mp_playFileMain(void *filename)
 
 				//-- get file size --
 				ctx->fileSize = lseek (ctx->inFd, 0L, SEEK_END);
+				g_filesize = ctx->fileSize;
 
 				//-- set bookmark position --
 				ctx->pos = g_startposition;
@@ -2892,6 +2892,15 @@ void *mp_playFileMain(void *filename)
 				g_startposition = 0;
 			}
 		}
+
+		//-- calculate offset for jumping 1 second forward/backwards in file --
+		if(g_settings.streaming_use_reclength)
+		{
+			while(g_reclength == -1) usleep(50000);
+			g_secondsize = (g_reclength) ? ((ctx->fileSize / g_reclength) / SIZE_TS_PKT) * SIZE_TS_PKT : SECONDOFFSET;
+		}
+		else
+			g_secondsize = SECONDOFFSET;
 
 		//-- lcd audio type --
 		CLCD::getInstance()->setMovieAudio(ctx->ac3);
@@ -2920,9 +2929,9 @@ void *mp_playFileMain(void *filename)
 if(g_settings.streaming_use_buffer)
 {
 		//-- lcd stuff --
-		int cPercent   = 0;
-		int lPercent   = -1;
-		
+		int last_percent = -1;
+		g_percent = 0;
+
 		//== (II) player loop: consists of "writer" in this thread and   ==
 		//== "reader" in an extra thread encapsulated by a queue object, ==
 		//== which also connects the reader with the  writer ... :-)     ==
@@ -2941,27 +2950,22 @@ if(g_settings.streaming_use_buffer)
 					//-- detect/process events --
 					mp_checkEvent(ctx);
 
-					if ( ctx->fileSize > 0 )
+					//-- lcd progress bar --
+					if (ctx->fileSize > 0)
 					{
-				  		cPercent = (ctx->pos*100)/ctx->fileSize;
-						// set percent for MovieViewer
-						g_prozent = cPercent;
-						//-- lcd progress bar --
-						if ( g_lcdSetting != 1 )
+						g_percent = (ctx->pos * 100) / ctx->fileSize;
+						if (last_percent != g_percent)
 						{
-				  			if (lPercent != cPercent)
-				  			{
-					  			lPercent = cPercent;
-					  			CLCD::getInstance()->showPercentOver(lPercent, true, CLCD::MODE_MOVIE);
-							}
+							last_percent = g_percent;
+							CLCD::getInstance()->showPercentOver(last_percent, true, CLCD::MODE_MOVIE);
 						}
 					}
+
 					//-- write queue-segment to dvr-device --
 					if (!q->writerRun()) break;
 
 					//-- update file position --
 					g_fileposition = ctx->pos;
-
 				} 
 				//== end of player loop (II) == 
 
@@ -2980,9 +2984,11 @@ else
 		//-- reader loop --
 		//-----------------
 		fprintf(stderr,"[mp] entering player loop\n");
-		//lcd
-		short last_prozent=1;
-		g_prozent = 0;
+
+		//-- lcd stuff --
+		int last_percent = -1;
+		g_percent = 0;
+
 		while( (ctx->itChanged == false) &&
 				 (g_playstate >= CMoviePlayerGui::PLAY) )
 		{
@@ -3010,14 +3016,18 @@ else
 			//-- after device reset, DMX devices --
 			//-- has to be started here ...      --
 			mp_startDMX(ctx);	// starts only if stopped !
-			//lcd
-			g_prozent=(ctx->pos*100)/ctx->fileSize;
-			if((last_prozent !=g_prozent && g_lcdSetting!=1) || g_lcdUpdateTsMode)
+
+			//-- lcd progress bar --
+			if(ctx->fileSize > 0)
 			{
-				last_prozent = g_prozent;
-				g_lcdUpdateTsMode = false;
-				CLCD::getInstance()->showPercentOver(last_prozent, true, CLCD::MODE_MOVIE);
+				g_percent = (ctx->pos * 100) / ctx->fileSize;
+				if(last_percent != g_percent)
+				{
+					last_percent = g_percent;
+					CLCD::getInstance()->showPercentOver(last_percent, true, CLCD::MODE_MOVIE);
+				}
 			}
+
 			//-- write stream data now --
 			write(ctx->dvr, ctx->tmpBuf, rd);
 		}
@@ -3066,10 +3076,11 @@ else
 			ctx->itChanged = false;
 			g_playstate    = CMoviePlayerGui::PLAY;
 
-            if (filename == NULL) {
-               updateLcd(filelist[ctx->it].getFileName());
-            }
-        }
+			if (filename == NULL) {
+				g_reclength   = -1;
+				filelistIndex = ctx->it;
+			}
+		}
 		else
 			break; // normal loop exit
 
@@ -3113,34 +3124,6 @@ void CMoviePlayerGui::ParentalEntrance(void)
 		PlayFile(1);
 	}
 }
-//=======================================
-//== CMoviePlayerGui::showMovieViewer      ==
-//=======================================
-void CMoviePlayerGui::showMovieViewer(void)
-{
-	uint aspect = 0;
-	CMovieViewer mv;
-	g_has_ac3 = 0;
-	for( unsigned int count = 0; count < g_numpida; count++ )
-	{
-			if(g_ac3flags[count] == 1)
-				g_has_ac3 = 1;
-	}
-#if HAVE_DVB_API_VERSION >=3
-	aspect = (g_size.aspect_ratio == VIDEO_FORMAT_4_3)? 0:1;
-#endif // HAVE_DVB_API_VERSION >=3
-
-	mv.setData(	aspect, 
-			g_playstate, 
-			g_currentac3, 
-			g_has_ac3, 
-			g_numpida, 
-			g_prozent, 
-			filename);
-	mv.exec();
-}
-
-
 
 //===============================
 //== CMoviePlayerGui::PlayFile ==
@@ -3153,12 +3136,16 @@ void CMoviePlayerGui::PlayFile (int parental)
 	neutrino_msg_data_t data;
 
 	std::string sel_filename;
+	std::string title;
+	std::string subtitle;
 	std::string hlpstr;
+
+	CMovieInfo cMovieInfo;	// functions to save and load movie info
+	MI_MOVIE_INFO movie_info;
+	MI_MOVIE_INFO* p_movie_info = NULL;
 
 #ifdef ENABLE_MOVIEBROWSER
 	timeval current_time;
-	CMovieInfo cMovieInfo;				// funktions to save and load movie info
-	MI_MOVIE_INFO* p_movie_info = NULL;	// movie info handle which comes from the MovieBrowser, if not NULL MoviePlayer is able to save new bookmarks
 	CBox position(200,480,280,65);	// window position for the hint boxes 
 
 	CTextBox endHintBox(g_Locale->getText(LOCALE_MOVIEBROWSER_HINT_MOVIEEND), NULL, CTextBox::CENTER/*CTextBox::AUTO_WIDTH | CTextBox::AUTO_HIGH*/, &position);
@@ -3179,7 +3166,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 	#define BOOKMARK_START_MENU_MAX_ITEMS 6
 	CSelectedMenu cSelectedMenuBookStart[BOOKMARK_START_MENU_MAX_ITEMS];
 
-	CMenuWidget bookStartMenu(LOCALE_MOVIEBROWSER_BOOK_NEW, "streaming.raw");
+	CMenuWidget bookStartMenu(LOCALE_MOVIEBROWSER_BOOK_NEW, NEUTRINO_ICON_STREAMING);
 	bookStartMenu.addItem(GenericMenuSeparator);
 	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEPLAYER_HEAD, 	true,NULL,&cSelectedMenuBookStart[0]));
 	bookStartMenu.addItem(GenericMenuSeparatorLine);
@@ -3191,11 +3178,11 @@ void CMoviePlayerGui::PlayFile (int parental)
 #endif /* ENABLE_MOVIEBROWSER */
 
 	CTimeOSD    FileTime;
+	bool        update_mi        = false;
 	bool        update_lcd       = true;
 	bool        open_filebrowser = true;
 	bool        start_play       = false;
 	bool        requestStop      = false;
-	bool        rc_blocked       = false;
 
 	g_playstate = CMoviePlayerGui::STOPPED;
 
@@ -3219,8 +3206,8 @@ void CMoviePlayerGui::PlayFile (int parental)
 		{
 			open_filebrowser = false;
 			filename         = startfilename.c_str();
-			sel_filename     = startfilename;
-			update_lcd       = true;
+			sel_filename     = startfilename.substr(startfilename.rfind("/") + 1);
+			update_mi        = true;
 			start_play       = true;
 		}
 
@@ -3230,13 +3217,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			// do all moviebrowser stuff here ( like commercial jump ect.)
 			if(g_playstate == CMoviePlayerGui::PLAY)
 			{
-				int play_sec = g_fileposition / SECONDOFFSET;  // get current seconds from moviestart 
-				
-				g_filepos_per_sec = g_fileposition - g_fileposition_old;
-				g_fileposition_old = g_fileposition;
-				//static int seconds = 0;
-				//TRACE(" %6ds=%9lld (delta %9lld) / %5d\r\n",seconds++,g_fileposition,g_filepos_per_sec,play_sec);
-				g_fileposition_old = g_fileposition;
+				int play_sec = g_fileposition / g_secondsize;  // get current seconds from moviestart
 
 				if(play_sec + 10 < jump_not_until || play_sec  > jump_not_until +10) jump_not_until = 0; // check if !jump is stale (e.g. if user jumped forward or backward)
 				
@@ -3386,17 +3367,23 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 						filename     = file->Name.c_str();
 						sel_filename = file->getFileName();
-						// get the start position for the movie
-						g_startposition = (off_t)moviebrowser->getCurrentStartPos()*(off_t)(SECONDOFFSET); 
-						TRACE("[mp] start pos %llu, %d s Name: %s\r\n",g_startposition,moviebrowser->getCurrentStartPos(),filename);
+						update_lcd   = true;
+						start_play   = true;
+
 						// get the movie info handle (to be used for e.g. bookmark handling)
 						p_movie_info = moviebrowser->getCurrentMovieInfo();
 
+						title       = p_movie_info->epgTitle;
+						subtitle    = p_movie_info->epgInfo1;
+						g_reclength = p_movie_info->rec_length;
+
+						// get the start position for the movie
+						off_t secondSize = (g_settings.streaming_use_reclength && p_movie_info->rec_length) ? ((file->Size / p_movie_info->rec_length) / SIZE_TS_PKT) * SIZE_TS_PKT : SECONDOFFSET;
+						g_startposition  = moviebrowser->getCurrentStartPos() * secondSize;
+						TRACE("[mp] start pos %llu, %d s Name: %s\r\n", g_startposition, moviebrowser->getCurrentStartPos(), filename);
+
 						if(FileTime.IsVisible()) // update time if visible
-							FileTime.show(g_startposition / SECONDOFFSET);
-	
-						update_lcd   = true;
-						start_play   = true;
+							FileTime.show(g_startposition / secondSize);
 					}
 				}
 			}
@@ -3425,15 +3412,8 @@ void CMoviePlayerGui::PlayFile (int parental)
 							g_ZapitsetStandbyState = true;
 						}
 
-						filename     = filelist[0].Name.c_str();
-						sel_filename = filelist[0].getFileName();
-	
-						update_lcd   = true;
-						start_play   = true;
-						p_movie_info = NULL; // ew might get the movie info here some time
-
-						if(FileTime.IsVisible()) // update time if visible
-							FileTime.show(0);
+						filelistIndex = 0;
+						start_play    = true;
 					}
 				}
 			}// MOVIEBROWSER added
@@ -3445,7 +3425,38 @@ void CMoviePlayerGui::PlayFile (int parental)
 			}
 
 			CLCD::getInstance()->setMode (CLCD::MODE_MOVIE);
+		}
+
+		//-- (new) item in filelist selected --
+		//-------------------------------------
+		if(filelistIndex > -1)
+		{
+			filename      = filelist[filelistIndex].Name.c_str();
+			sel_filename  = filelist[filelistIndex].getFileName();
+			filelistIndex = -1;
+			update_mi     = true;
+
+			if(FileTime.IsVisible()) // update time if visible
+				FileTime.show(0);
+		}
+
+		//-- movie info --
+		//----------------
+		if(update_mi)
+		{
+			update_mi  = false;
 			update_lcd = true;
+
+			cMovieInfo.clearMovieInfo(&movie_info);
+			movie_info.file.Name = filename;
+			if(cMovieInfo.loadMovieInfo(&movie_info))
+				p_movie_info = &movie_info;
+			else
+				p_movie_info = NULL;
+
+			title       = movie_info.epgTitle;
+			subtitle    = movie_info.epgInfo1;
+			g_reclength = movie_info.rec_length;
 		}
 
 		//-- LCD display --
@@ -3453,7 +3464,10 @@ void CMoviePlayerGui::PlayFile (int parental)
 		if(update_lcd)
 		{
 			update_lcd = false;
-			updateLcd(sel_filename);
+			if(title == "not available" || title.empty())
+				updateLcd("", sel_filename, false);
+			else
+				updateLcd(title, subtitle, true);
 		}
 
 		//-- start threaded playback --
@@ -3489,18 +3503,18 @@ void CMoviePlayerGui::PlayFile (int parental)
 			}
 		}
 
-		//-- audio track selector                  --
+		//-- audio track selector                    --
 		// input:  g_numpida                         --
-		//         g_ac3flags[g_numpida]               --
+		//         g_ac3flags[g_numpida]             --
 		//         g_currentapid = 0                 --
 		// ouptut: g_currentapid (may be remain 0,   --
-		//           if nothing happened)          --
+		//           if nothing happened)            --
 		//         g_currentac3                      --
 		//         g_apidchanged (0/1, but not used) --
-		//-------------------------------------------
+		//---------------------------------------------
 		if(g_showaudioselectdialog)
 		{
-			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
+			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, NEUTRINO_ICON_AUDIO, 400);
 			APIDSelector.addItem(GenericMenuSeparator);
 			g_apidchanged = 0;
 			pidt=0;
@@ -3519,7 +3533,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				if(g_ac3flags[count] == 0)
 				{
 					get_movie_info_apid_name(g_apids[count],p_movie_info,&apidtitle);
-					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)), (count == 0));
+					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)), g_apids[count] == g_currentapid);
 				}
 			}
 
@@ -3533,33 +3547,31 @@ void CMoviePlayerGui::PlayFile (int parental)
 				std::string apidtitle = "Stream ";
 				apidtitle.append(show_pid_number);
 
-    				if(g_ac3flags[count] == 2)
-	    			{
-    					apidtitle.append(" (Teletext)");
-    					pidt=g_apids[count];
-					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), false, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)), (count == 0));
-	    			}
+				if(g_ac3flags[count] == 2)
+				{
+					apidtitle.append(" (Teletext)");
+					pidt=g_apids[count];
+					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), false, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)), g_apids[count] == g_currentapid);
+				}
 
-    				if(g_ac3flags[count] == 1)
-	    			{
+				if(g_ac3flags[count] == 1)
+				{
 					get_movie_info_apid_name(g_apids[count],p_movie_info,&apidtitle);
 					if((int)apidtitle.find("AC3") < 0) //std::nopos)
 						apidtitle.append(" (AC3)");
-					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)),
-                                               (count == 0));
-    				}
+					APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)), g_apids[count] == g_currentapid);
+				}
 			}
+
 			APIDSelector.exec(NULL, ""); // otherwise use Dialog
 			delete APIDChanger;
+			FileTime.hide();
 			g_showaudioselectdialog = false;
-
-			if(g_show_movieviewer)
-				showMovieViewer();
 		}
 
 		//-- filetime display --
 		//----------------------
-		if(FileTime.IsVisible())
+		if(FileTime.IsVisible() && g_playstate == CMoviePlayerGui::PLAY)
 		{
 			FileTime.update();
 		}
@@ -3569,8 +3581,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 		g_RCInput->getMsg (&msg, &data, 10);  // 1 secs..
 		switch(msg)
 		{
-
-			//-- terminate player --
+				//-- show plugin --
 			case CRCInput::RC_red:
 				g_PluginList->start_plugin_by_name(g_settings.movieplayer_plugin.c_str(),pidt);
 				break;
@@ -3584,7 +3595,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 					gettimeofday(&current_time, NULL);
 					p_movie_info->dateOfLastPlay = current_time.tv_sec;
 					current_time.tv_sec = time( NULL );
-					p_movie_info->bookmarks.lastPlayStop = g_fileposition / SECONDOFFSET;
+					p_movie_info->bookmarks.lastPlayStop = g_fileposition / g_secondsize;
 					
 					cMovieInfo.saveMovieInfo(*p_movie_info);
 					//p_movie_info->fileInfoStale(); //TODO: we might to tell the Moviebrowser that the movie info has changed, but this could cause long reload times  when reentering the Moviebrowser
@@ -3597,19 +3608,16 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- pause / play --
 			case CRCInput::RC_yellow:
-				if(rc_blocked == false)	// prevent to fast repeats
+				update_lcd = true;
+				if(g_playstate == CMoviePlayerGui::PAUSE)
 				{
-					update_lcd  = true;
-					g_playstate = (g_playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::PLAY : CMoviePlayerGui::PAUSE;
-					if(g_show_movieviewer)
-					{
-						updateLcd(sel_filename);
-						showMovieViewer();
-					}
-					else
-						rc_blocked  = true;
+					g_playstate = CMoviePlayerGui::PLAY;
+					if(FileTime.IsVisible())
+						FileTime.show(g_fileposition / g_secondsize);
 				}
-
+				else
+					g_playstate = CMoviePlayerGui::PAUSE;
+				g_RCInput->postMsg(NeutrinoMessages::SHOW_INFOBAR, data);
 				break;
 
 				//-- invoke bookmark manager --
@@ -3637,7 +3645,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				}
 				else
 				{
-					int pos_sec = g_fileposition / SECONDOFFSET;
+					int pos_sec = g_fileposition / g_secondsize;
 					if (newComHintBox.isPainted() == true)
 					{
 						// yes, let's get the end pos of the jump forward
@@ -3756,7 +3764,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 					DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
 				}
 #endif /* ENABLE_MOVIEBROWSER */
-
 				break;
 
 				//-- request for audio selector --
@@ -3764,20 +3771,37 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_playstate = CMoviePlayerGui::AUDIOSELECT;
 				break;
 
-				//-- Help --
+				//-- show infobar --
 			case CRCInput::RC_help:
-				if(g_show_movieviewer)
-					showMovieViewer();
-				else
-					showHelpTS();
-				
+			case NeutrinoMessages::SHOW_INFOBAR:
+				{
+					std::string infobar_title = (title == "not available" || title.empty()) ? sel_filename : title;
+
+					int ac3state = CInfoViewer::NO_AC3;
+					if(g_currentac3)
+						ac3state = CInfoViewer::AC3_ACTIVE;
+					else
+						for(unsigned int count = 0; count < g_numpida; count++)
+							if(g_ac3flags[count] == 1)
+							{
+								ac3state = CInfoViewer::AC3_AVAILABLE;
+								break;
+							}
+
+					g_InfoViewer->showMovieTitle(g_playstate, infobar_title, subtitle,
+							g_percent, g_fileposition / g_secondsize, (g_filesize - g_fileposition) / g_secondsize,
+							ac3state, g_numpida > 1,
+							g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES),
+							g_Locale->getText(LOCALE_TIMERLIST_PLUGIN));
+				}
 				break;
+
 				//-- filetime on/off --
 			case CRCInput::RC_setup:
 				if(FileTime.IsVisible())
 					FileTime.hide();
 				else
-					FileTime.show(g_fileposition / SECONDOFFSET);
+					FileTime.show(g_fileposition / g_secondsize);
 				break;
 
 				//-- jump 1/4 minute back --
@@ -3796,9 +3820,8 @@ void CMoviePlayerGui::PlayFile (int parental)
 				update_lcd = true;
 				break;
 
-				//-- Resync A/V --
+				//-- resync A/V or soft reset --
 			case CRCInput::RC_0:
-
 #ifdef ENABLE_MOVIEBROWSER
 				if(isMovieBrowser == true)
 				{
@@ -3809,12 +3832,17 @@ void CMoviePlayerGui::PlayFile (int parental)
 						newComHintBox.hide();
 						break;
 					}
-					jump_not_until = (g_fileposition / SECONDOFFSET) + 10;  // avoid bookmark jumping for the next 10 seconds, , TODO:  might be moved to another key
+					jump_not_until = (g_fileposition / g_secondsize) + 10;  // avoid bookmark jumping for the next 10 seconds, , TODO:  might be moved to another key
 				}	
 #endif /* ENABLE_MOVIEBROWSER */
 				if(g_playstate != CMoviePlayerGui::PAUSE)
-					//g_playstate = CMoviePlayerGui::RESYNC;
+					g_playstate = CMoviePlayerGui::RESYNC;
+				else
+				{
 					g_playstate = CMoviePlayerGui::SOFTRESET;
+					FileTime.hide();
+					update_lcd = true;
+				}
 				break;
 
 				//-- jump 1 minute back --
@@ -3883,6 +3911,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				}
 				update_lcd = true;
 				break;
+
 				//-- jump 5 minutes forward --
 			case CRCInput::RC_6:
 				g_jumpseconds = 5 * 60;
@@ -3907,7 +3936,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				update_lcd = true;
 				break;
 
-				//-- jump 10 minutes back --
+				//-- jump 10 minutes forward --
 			case CRCInput::RC_9:
 				g_jumpseconds = 10 * 60;
 				g_playstate   = CMoviePlayerGui::JF;
@@ -3919,7 +3948,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_up:
 				if(isMovieBrowser == true)
 				{
-					int new_pos_sec = get_next_movie_info_bookmark_pos_sec(p_movie_info, g_fileposition / SECONDOFFSET, true);
+					int new_pos_sec = get_next_movie_info_bookmark_pos_sec(p_movie_info, g_fileposition / g_secondsize, true);
 					if(new_pos_sec >= 0)
 					{
 						g_jumpseconds = new_pos_sec;
@@ -3937,7 +3966,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_down:
 				if(isMovieBrowser == true)
 				{
-					int new_pos_sec = get_next_movie_info_bookmark_pos_sec(p_movie_info,g_fileposition /SECONDOFFSET , false);
+					int new_pos_sec = get_next_movie_info_bookmark_pos_sec(p_movie_info, g_fileposition / g_secondsize, false);
 					if(new_pos_sec >= 0)
 					{
 						g_jumpseconds = new_pos_sec ;
@@ -3953,13 +3982,18 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- stop navigation action in progress (not used) --
 				//-- or start filebrowser while playing ...        --
+				//-- or show help while pausing                    --
 			case CRCInput::RC_ok:
 				if(g_playstate > CMoviePlayerGui::PLAY)
-				{
-					g_playstate = CMoviePlayerGui::SOFTRESET;
-				}
+					showHelpTS();
 				else
 					open_filebrowser = true;
+				break;
+
+				//-- show movie info --
+			case NeutrinoMessages::SHOW_EPG:
+				if(p_movie_info != NULL)
+					cMovieInfo.showMovieInfo(*p_movie_info);
 				break;
 
 				//-- urgent exit for Record/Zapto Timers --
@@ -3980,8 +4014,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 					fprintf(stderr, "[mp] terminating due to cancel_all request\n");
 					requestStop = true;
 				}
-
-				rc_blocked = false;
 				break;
 		}
 	}
@@ -4012,7 +4044,8 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
-	std::string sel_filename;
+	std::string sel_filename = "";
+	std::string title = "";
 	bool update_info = true;
 	bool start_play = false;
 	bool exit = false; 
@@ -4030,7 +4063,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		strcat (mrl, g_settings.streaming_server_cddrive);
 		strcat (mrl, "@1");
 		printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
-		sel_filename = "DVD";
+		title = "DVD";
 		open_filebrowser = false;
 		start_play = true;
 		cdDvd = true;
@@ -4040,7 +4073,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		strcpy (mrl, "vcd:");
 		strcat (mrl, g_settings.streaming_server_cddrive);
 		printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
-		sel_filename = "(S)VCD";
+		title = "(S)VCD";
 		open_filebrowser = false;
 		start_play = true;
 		cdDvd = true;
@@ -4162,7 +4195,10 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		if(update_info)
 		{
 			update_info = false;
-			updateLcd(sel_filename);
+			if(title.empty())
+				updateLcd("", sel_filename, false);
+			else
+				updateLcd(title, "", true);
 		}
 
 		if(start_play)
@@ -4194,7 +4230,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		}
 
 		g_RCInput->getMsg (&msg, &data, 10);	// 1 secs..
-		if(StreamTime.IsVisible())
+		if(StreamTime.IsVisible() && g_playstate == CMoviePlayerGui::PLAY)
 		{
 			StreamTime.update();
 		}
@@ -4219,6 +4255,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			update_info = true;
 			g_playstate = (g_playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::SOFTRESET : CMoviePlayerGui::PAUSE;
 			StreamTime.hide();
+			g_RCInput->postMsg(NeutrinoMessages::SHOW_INFOBAR, data);
 		}
 		else if(msg == CRCInput::RC_green)
 		{
@@ -4330,14 +4367,25 @@ CMoviePlayerGui::PlayStream (int streamtype)
 				}
 			}
 		}
-		else if(msg == CRCInput::RC_help)
+		else if(msg == CRCInput::RC_help || msg == NeutrinoMessages::SHOW_INFOBAR)
 		{
-			static CMovieBrowser mb;
-			mb.showHelpVLC();
+			std::string infobar_title = (title.empty()) ? sel_filename : title;
+
+			int stream_length = VlcGetStreamLength();
+			int stream_time = VlcGetStreamTime();
+
+			int ac3state = (ac3) ? CInfoViewer::AC3_ACTIVE : CInfoViewer::NO_AC3;
+
+			g_InfoViewer->showMovieTitle(g_playstate, infobar_title, "",
+					g_percent, stream_time - buffer_time, stream_length - stream_time + buffer_time,
+					ac3state, true,
+					g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP2),
+					g_Locale->getText(LOCALE_AUDIOPLAYER_STOP));
 		}
 		else if(msg == CRCInput::RC_ok)
 		{
-			showFileInfoVLC();
+			static CMovieBrowser mb;
+			mb.showHelpVLC();
 		}
 		else if(msg == CRCInput::RC_left)
 		{
@@ -4374,6 +4422,10 @@ CMoviePlayerGui::PlayStream (int streamtype)
 				update_info = true;
 				start_play = true;
 			}
+		}
+		else if(msg == NeutrinoMessages::SHOW_EPG)
+		{
+			showFileInfoVLC();
 		}
 		else if(msg == NeutrinoMessages::RECORD_START
 				|| msg == NeutrinoMessages::ZAPTO
@@ -4461,7 +4513,7 @@ void checkAspectRatio (int vdec, bool init)
 std::string CMoviePlayerGui::getMoviePlayerVersion(void)
 {	
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("Movieplayer1 ","$Revision: 1.181 $");
+	return imageinfo.getModulVersion("Movieplayer1 ","$Revision: 1.183 $");
 }
 
 void CMoviePlayerGui::showHelpTS()

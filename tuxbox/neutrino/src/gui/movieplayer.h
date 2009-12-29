@@ -37,11 +37,11 @@
 #include "driver/framebuffer.h"
 #include "gui/filebrowser.h"
 #include "gui/bookmarkmanager.h"
+#include "gui/movieinfo.h"
 #include "gui/widget/menue.h"
 
 #ifdef ENABLE_MOVIEBROWSER
 #include "gui/moviebrowser.h"
-#include "gui/movieinfo.h"
 #endif /* ENABLE_MOVIEBROWSER */
 
 extern "C" {
@@ -101,7 +101,6 @@ class CMoviePlayerGui : public CMenuTarget
     CFileFilter vlcfilefilter;
     void showHelpTS(void);
     void showFileInfoVLC(void);
-    void showMovieViewer(void);
 
  public:
     CMoviePlayerGui();

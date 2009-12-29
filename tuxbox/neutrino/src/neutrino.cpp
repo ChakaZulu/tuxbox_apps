@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.1010 2009/11/27 19:15:44 dbt Exp $
+	$Id: neutrino.cpp,v 1.1011 2009/12/29 18:44:08 striper Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -637,6 +637,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.streaming_stopsectionsd = configfile.getInt32("streaming_stopsectionsd", 1);
 	g_settings.streaming_show_tv_in_browser = configfile.getInt32("streaming_show_tv_in_browser", 0);
 	g_settings.streaming_allow_multiselect = configfile.getBool("streaming_allow_multiselect", false);
+	g_settings.streaming_use_reclength = configfile.getBool("streaming_use_reclength", false);
 	g_settings.streaming_moviedir = configfile.getString( "streaming_moviedir", "" );
 
 	// default plugin for movieplayer
@@ -1170,6 +1171,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "streaming_stopsectionsd", g_settings.streaming_stopsectionsd);
 	configfile.setInt32 ( "streaming_show_tv_in_browser", g_settings.streaming_show_tv_in_browser);
 	configfile.setBool ("streaming_allow_multiselect", g_settings.streaming_allow_multiselect);
+	configfile.setBool ("streaming_use_reclength", g_settings.streaming_use_reclength);
 	configfile.setString( "streaming_moviedir", g_settings.streaming_moviedir);
 
 	// default plugin for movieplayer

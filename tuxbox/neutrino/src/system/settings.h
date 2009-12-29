@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.220 2009/12/05 19:34:54 rhabarber1848 Exp $
+  $Id: settings.h,v 1.221 2009/12/29 18:44:07 striper Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -286,6 +286,7 @@ struct SNeutrinoSettings
 	int streaming_stopsectionsd;
 	int streaming_show_tv_in_browser;
 	int streaming_allow_multiselect;
+	int streaming_use_reclength;
 	std::string streaming_moviedir;
 
 	int filesystem_is_utf8;
