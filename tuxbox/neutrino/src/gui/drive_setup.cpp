@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.14 2009/12/29 22:48:13 dbt Exp $
+	$Id: drive_setup.cpp,v 1.15 2009/12/30 12:30:40 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -134,11 +134,6 @@ TODO:
 #define M_MMC		"mmc"
 #define M_MMC2		"mmc2"
 #define M_MMCCOMBO	"mmccombo"
-
-// mmc modul files
-#define MF_MMC		M_MMC M_TYPE
-#define MF_MMC2		M_MMC2 M_TYPE
-#define MF_MMCCOMBO	M_MMCCOMBO M_TYPE
 
 // proc devices
 #define IDE0HDA		"/proc/ide/ide0/hda"
@@ -3654,7 +3649,7 @@ string CDriveSetup::getTimeStamp()
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.14 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.15 $");
 }
 
 // returns text for initfile headers
