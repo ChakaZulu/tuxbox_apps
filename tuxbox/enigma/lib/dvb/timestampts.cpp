@@ -1,5 +1,5 @@
 /*
- * $Id: timestampts.cpp,v 1.8 2009/06/09 19:28:41 dbluelle Exp $
+ * $Id: timestampts.cpp,v 1.9 2009/12/30 10:51:32 dbluelle Exp $
  *
  * (C) 2008 by Dr. Best  <dr.best@dreambox-tools.info>
  *
@@ -216,13 +216,16 @@ int eTimeStampParserTS::processPacket(const unsigned char *pkt, int type)
 		}
 		if (MovieBeginTime && MovieEndTime && !MovieDuration )
 		{
-			MovieDuration = 1;
 			tm tt = movie_end;
 			if (movie_begin.tm_hour > tt.tm_hour) // Korrektur
 				tt.tm_mday = 2;
 			time_t t1 = mktime(&tt);
 			time_t t2 = mktime(&movie_begin);
 			sec_duration = t1 - t2; 
+			if (getAverageBitrate() > 10*1024*1024) // more than 10 mbit Bitrate => invalid timestamp
+			  sec_duration = -1;
+			else
+			  MovieDuration = 1;
 		}
 	}
 	return 0;
