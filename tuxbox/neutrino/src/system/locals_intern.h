@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.156 2009/12/29 22:48:14 dbt Exp $
+ * $Id: locals_intern.h,v 1.157 2009/12/30 13:38:16 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -354,9 +354,9 @@ const char * locale_real_names[] =
 	"drive_setup.partition_activate_yes",
 	"drive_setup.partition_check",
 	"drive_setup.partition_create",
+	"drive_setup.partition_current_cylinders",
 	"drive_setup.partition_current_size",
 	"drive_setup.partition_delete",
-	"drive_setup.partition_end_cylinder",
 	"drive_setup.partition_free_size",
 	"drive_setup.partition_fs",
 	"drive_setup.partition_mount_error",

@@ -327,9 +327,9 @@ drive_setup.partition_activate_no no
 drive_setup.partition_activate_yes yes
 drive_setup.partition_check Check
 drive_setup.partition_create Partition create and format
+drive_setup.partition_current_cylinders Start/End-Cylinder
 drive_setup.partition_current_size Current size of partition
 drive_setup.partition_delete delete!
-drive_setup.partition_end_cylinder End cylinder
 drive_setup.partition_free_size Still available disk space 
 drive_setup.partition_fs Filesystem
 drive_setup.partition_mount_error Errors occurred during the mount/unmount operations!

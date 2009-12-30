@@ -1,5 +1,5 @@
 /*
-	$Id: drive_setup.cpp,v 1.15 2009/12/30 12:30:40 dbt Exp $
+	$Id: drive_setup.cpp,v 1.16 2009/12/30 13:38:15 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -790,11 +790,11 @@ void CDriveSetup::showHddSetupSub()
 
 	// start cylinder
 	unsigned long long start_cyl[MAXCOUNT_PARTS];
-	CMenuForwarder *fw_start_cyl[MAXCOUNT_PARTS];
-
 	// end cylinder
 	unsigned long long end_cyl[MAXCOUNT_PARTS];
-	CMenuForwarder *fw_end_cyl[MAXCOUNT_PARTS];
+
+	// cylinders
+	CMenuForwarder *fw_cylinders[MAXCOUNT_PARTS];
 
 	//choose aktivate/deactivate partition
 	CMenuOptionChooser *activate[MAXCOUNT_PARTS];
@@ -854,8 +854,7 @@ void CDriveSetup::showHddSetupSub()
 	string ak_check_partition[MAXCOUNT_PARTS];
 
 	//count of cylinders in edit view
- 	string ed_start_cyl[MAXCOUNT_PARTS];
-	string ed_end_cyl[MAXCOUNT_PARTS];
+	string ed_cylinders[MAXCOUNT_PARTS];
 
 	//stat of partition
 	bool is_mounted[MAXCOUNT_PARTS];
@@ -875,15 +874,11 @@ void CDriveSetup::showHddSetupSub()
 		p_size[i] = convertByteString(ll_cur_part_size[i]);
 		partsize[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_CURRENT_SIZE, false, p_size[i].c_str());
 
-		//prepare start cylinders
+		//prepare cylinders
 		start_cyl[i] = getPartData(current_device, i, START_CYL, NO_REFRESH);
-		ed_start_cyl[i] = iToString(start_cyl[i]);
-		fw_start_cyl[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_START_CYLINDER, false, ed_start_cyl[i].c_str()/*c_start_cyl[i]*/);
-
-		//prepare end cylinders
 		end_cyl[i] = getPartData(current_device, i, END_CYL, NO_REFRESH);
-		ed_end_cyl[i] = iToString(end_cyl[i]);
-		fw_end_cyl[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_END_CYLINDER, false, ed_end_cyl[i].c_str());
+		ed_cylinders[i] = iToString(start_cyl[i]) + " <-> " + iToString(end_cyl[i]);
+		fw_cylinders[i] = new CMenuForwarder(LOCALE_DRIVE_SETUP_PARTITION_CURRENT_CYLINDERS, false, ed_cylinders[i].c_str());
 
 		//enable/disable partition
 		activate[i] = new CMenuOptionChooser(LOCALE_DRIVE_SETUP_PARTITION_ACTIVATE, &d_settings.drive_partition_activ[current_device][i], OPTIONS_YES_NO_OPTIONS, OPTIONS_YES_NO_OPTION_COUNT, true );
@@ -967,8 +962,7 @@ void CDriveSetup::showHddSetupSub()
 		//------------------------
 		part[i]->addItem(freesize);			//freesize
 		part[i]->addItem(partsize[i]);			//partsize
-		part[i]->addItem(fw_start_cyl[i]);		//start cylinder
-		part[i]->addItem(fw_end_cyl[i]);		//end cylinder
+		part[i]->addItem(fw_cylinders[i]);		//cylinders
 		//------------------------
 		part[i]->addItem(GenericMenuSeparatorLine);	//separator
 		//------------------------
@@ -1031,7 +1025,6 @@ void CDriveSetup::showHddSetupSub()
 	sub_add_swap->addItem(GenericMenuSeparatorLine);	//separator
 	//------------------------
 	sub_add_swap->addItem(activate[next_part_number]);	//enable/disable partition
-	sub_add_swap->addItem(fs_chooser[next_part_number]);	//filesystem
 	//------------------------
 	sub_add_swap->addItem(GenericMenuSeparatorLine);	//separator
 	//------------------------
@@ -3649,7 +3642,7 @@ string CDriveSetup::getTimeStamp()
 string CDriveSetup::getDriveSetupVersion()
 {
 	static CImageInfo imageinfo;
-	return imageinfo.getModulVersion("BETA! ","$Revision: 1.15 $");
+	return imageinfo.getModulVersion("BETA! ","$Revision: 1.16 $");
 }
 
 // returns text for initfile headers
